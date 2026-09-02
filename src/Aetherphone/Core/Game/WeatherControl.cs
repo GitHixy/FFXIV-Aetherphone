@@ -60,6 +60,11 @@ internal sealed class WeatherControl : IDisposable
 
     public unsafe void ClearWeather()
     {
+        if (!GameMemory.Attached)
+        {
+            return;
+        }
+
         if (weatherOverride == NoWeather)
         {
             return;
@@ -77,7 +82,7 @@ internal sealed class WeatherControl : IDisposable
 
     public unsafe void ClearTime()
     {
-        if (timeOverride == NoTime)
+        if (!GameMemory.Attached || timeOverride == NoTime)
         {
             return;
         }
@@ -116,6 +121,11 @@ internal sealed class WeatherControl : IDisposable
 
     private unsafe void OnUpdate(IFramework _)
     {
+        if (!GameMemory.Attached)
+        {
+            return;
+        }
+
         if (!strayOffsetSwept)
         {
             SweepStrayOffset();
