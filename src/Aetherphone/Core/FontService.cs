@@ -262,6 +262,17 @@ internal sealed class FontService : IDisposable
         return new FontToken(dalamudIconHandle.Push());
     }
 
+    public FontToken PushDalamudIcon() => new(dalamudIconHandle.Push());
+
+    public ImFontPtr DalamudIconFont
+    {
+        get
+        {
+            using var locked = dalamudIconHandle.Lock();
+            return locked.ImFont;
+        }
+    }
+
     private static void MeasureCrests(IFontAtlasBuildToolkit toolkit)
     {
         if (toolkit.BuildStep == FontAtlasBuildStep.PostBuild)

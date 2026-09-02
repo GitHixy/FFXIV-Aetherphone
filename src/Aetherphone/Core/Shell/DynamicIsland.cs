@@ -807,7 +807,7 @@ internal sealed partial class DynamicIsland
         var hovered = active && UiInteract.Hover(center - extent, center + extent);
         var color = hovered ? Palette.Mix(fill, Ink, 0.14f) : fill;
         drawList.AddCircleFilled(center, radius, ImGui.GetColorU32(Palette.WithAlpha(color, alpha * color.W)), 28);
-        using (ImRaii.PushFont(UiBuilder.IconFont))
+        using (Plugin.Fonts.PushDalamudIcon())
         {
             var glyph = IconGlyph.Of(icon);
             var size = ImGui.CalcTextSize(glyph);
