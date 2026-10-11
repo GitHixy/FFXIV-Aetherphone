@@ -46,6 +46,7 @@ internal sealed class BlackjackTableLayout
     public const float CapsulePuckRadius = 16f;
     public const float CapsuleBottomInset = 4f;
     public const float SideSpotOffset = 70f;
+    public const float SideCaptionHalf = 32f;
     public const float GhostBottomInset = 12f;
     public const float HeroSlotWidthCap = 150f;
     public const float HeroSlotPad = 8f;
@@ -145,6 +146,8 @@ internal sealed class BlackjackTableLayout
     public float RaisePixels => RaiseReserve * GapFit * Scale;
 
     public float MainPlateMaxWidth => (SideSpotOffset * Scale - BetSpotPixels - SpotGap * Scale) * 2f;
+
+    public float SideCaptionWidth => SideCaptionHalf * 2f * Scale;
 
     public float HeroCardPixels(int handCount) => HeroCardWidth(handCount) * Fit * Scale;
 

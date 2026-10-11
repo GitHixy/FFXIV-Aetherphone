@@ -25,6 +25,7 @@ internal sealed partial class BlackjackTable
     private const float HeroColumnSink = 3f;
     private const float StateLineShare = 0.84f;
     private const string StateMarquee = "casino.blackjack.state";
+    private const string EvenDelta = "±0";
 
     private static readonly Vector4 PillFill = new(0f, 0f, 0f, 0.35f);
 
@@ -333,22 +334,19 @@ internal sealed partial class BlackjackTable
             var fanCenter = new Vector2(puck.X + (handIndex - (count - 1) * 0.5f) * handWidth, fanY);
             DrawHandFan(drawList, seatIndex, handIndex, hand, fanCenter, cardWidth, handWidth - 3f * scale, shoe,
                 scale);
-            var outcomeText = OutcomeLabel(hand);
+            var outcomeText = RailOutcomeLabel(hand);
             var badgeEntrance = BadgeEntrance(seatIndex);
-            var badgeShown = hand.Outcome != BlackjackOutcomes.Pending && outcomeText.Length > 0
-                && badgeEntrance > 0f;
+            var badgeShown = outcomeText.Length > 0 && badgeEntrance > 0f;
             if (badgeShown)
             {
-                var won = hand.Delta > 0;
-                BlackjackTableArt.DrawOutcomeBadge(drawList,
-                    fanCenter, outcomeText,
-                    won ? CasinoColors.Money : ui.TitleInk, won ? CasinoColors.Money : ui.BodyInk, badgeEntrance,
+                var tint = hand.Delta > 0 ? CasinoColors.Money : hand.Delta < 0 ? StageText.Body : StageText.Strong;
+                BlackjackTableArt.DrawOutcomeBadge(drawList, fanCenter, outcomeText, tint, tint, badgeEntrance,
                     handWidth, scale);
             }
             else if (hand.Total > 0)
             {
                 var ink = hand.Outcome == BlackjackOutcomes.Bust
-                    ? ui.MutedInk
+                    ? StageText.Body
                     : handIndex == activeHand ? ui.Accent : ui.TitleInk;
                 BlackjackTableArt.DrawTotalPill(drawList, fanCenter, GameNumber.Label(hand.Total), PillFill, ink,
                     scale);
@@ -434,7 +432,7 @@ internal sealed partial class BlackjackTable
             {
                 var fill = active ? Palette.WithAlpha(ui.Accent, 0.30f) : PillFill;
                 var ink = hand.Outcome == BlackjackOutcomes.Bust
-                    ? ui.MutedInk
+                    ? StageText.Body
                     : hand.Total == BlackjackRules.TargetTotal ? CasinoColors.Money : ui.TitleInk;
                 BlackjackTableArt.DrawTotalCapsule(drawList, new Vector2(fanCenter.X, layout.HeroTotalY),
                     TotalLabel(hand.Total, hand.Soft, live && hand.Outcome == BlackjackOutcomes.Pending), fill, ink,
@@ -612,5 +610,20 @@ internal sealed partial class BlackjackTable
         }
 
         return hand.Delta > 0 ? NumberText.Signed(hand.Delta) : string.Empty;
+    }
+
+    private string RailOutcomeLabel(CasinoBlackjackHandDto hand)
+    {
+        if (hand.Outcome == BlackjackOutcomes.Pending)
+        {
+            return string.Empty;
+        }
+
+        if (hand.Delta > 0)
+        {
+            return text.Compact(L.Stage.Plus, hand.Delta);
+        }
+
+        return hand.Delta < 0 ? NumberText.Compact(hand.Delta) : EvenDelta;
     }
 }

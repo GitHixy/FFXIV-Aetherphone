@@ -12,6 +12,7 @@ namespace Aetherphone.Apps.Casino.Tables;
 internal sealed partial class BlackjackTable
 {
     private const int MainTarget = -1;
+    private const float SideCaptionGap = 3f;
 
     private static readonly int[] MainActions =
     {
@@ -107,14 +108,24 @@ internal sealed partial class BlackjackTable
         var ink = paid ? CasinoColors.Money : targeted ? CasinoColors.LightB : StageText.Strong;
         drawList.AddCircle(center, radius, ImGui.GetColorU32(ink with { W = 0.5f + 0.5f * lit }), 32,
             MathF.Max(1.2f, (targeted ? 2.2f : 1.4f) * scale));
-        var label = amount > 0
-            ? NumberText.Compact(amount)
-            : Loc.T(bet == BlackjackSideBet.PerfectPairs ? L.Blackjack.SidePairs : L.Blackjack.SideThree);
         var style = TextStyles.FootnoteEmphasized;
-        var inner = radius * 1.8f;
-        var fit = StageText.FitScale(label, inner, style, StageTextRole.Label);
-        Typography.DrawCentered(drawList, center, Typography.FitText(label, inner, fit, style.Weight),
-            amount > 0 ? CasinoColors.Money : StageText.Strong, fit, style.Weight);
+        if (amount > 0)
+        {
+            var stake = NumberText.Compact(amount);
+            var inner = radius * 1.8f;
+            var fit = StageText.FitScale(stake, inner, style, StageTextRole.Label);
+            Typography.DrawCentered(drawList, center, Typography.FitText(stake, inner, fit, style.Weight),
+                CasinoColors.Money, fit, style.Weight);
+        }
+        else if (interactive)
+        {
+            var name = Loc.T(bet == BlackjackSideBet.PerfectPairs ? L.Blackjack.SidePairs : L.Blackjack.SideThree);
+            var captionHeight = Typography.LineHeight(style);
+            var captionCenter = new Vector2(center.X, center.Y - radius - SideCaptionGap * scale - captionHeight * 0.5f);
+            Typography.DrawCentered(drawList, captionCenter,
+                Typography.FitText(name, layout.SideCaptionWidth, style), StageText.Strong, style);
+        }
+
         if (hovered)
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
