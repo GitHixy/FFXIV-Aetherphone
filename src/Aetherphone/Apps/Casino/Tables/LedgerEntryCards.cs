@@ -23,6 +23,11 @@ internal readonly record struct LedgerEntryAction(LedgerEntryPress Press, string
 
 internal sealed class LedgerEntryCards
 {
+    private const float TagPadX = 8f;
+    private const float TagPadY = 2f;
+    private const float TagGap = 6f;
+    private const float TagFillAlpha = 0.18f;
+
     private CasinoLedgerEntryDto[]? source;
     private LanguageInfo? language;
     private string me = string.Empty;
@@ -55,7 +60,8 @@ internal sealed class LedgerEntryCards
                 Loc.T(L.Tables.EntryParties, entry.PayerName, entry.PayeeName),
                 TableLedger.AmountText(entry.Amount, currency), TableLedger.StateText(entry),
                 TableLedger.ToneOf(entry), CasinoGilLedger.CanConfirm(entry, myUserId), confirmLabel,
-                CasinoGilLedger.CanDispute(entry, myUserId), disputeLabel);
+                CasinoGilLedger.CanDispute(entry, myUserId), disputeLabel,
+                entry.Guest ? Loc.T(L.Book.GuestTag) : string.Empty);
         }
     }
 
@@ -97,9 +103,20 @@ internal sealed class LedgerEntryCards
             Typography.Draw(drawList, new Vector2(max.X - pad - amountSize.X, top), view.Amount,
                 TableRow.CurrencyTint(CasinoCurrencies.Gil, ui.Accent), TextStyles.SubheadlineEmphasized);
             var textWidth = MathF.Max(1f, width - pad * 3f - amountSize.X);
-            Typography.Draw(drawList, new Vector2(origin.X + pad, top),
-                Typography.FitText(view.Title, textWidth, TextStyles.SubheadlineEmphasized), ui.TitleInk,
+            var tagWidth = view.Tag.Length > 0
+                ? Typography.Measure(view.Tag, TextStyles.FootnoteEmphasized).X + TagPadX * 2f * scale
+                : 0f;
+            var titleWidth = tagWidth > 0f ? MathF.Max(1f, textWidth - tagWidth - TagGap * scale) : textWidth;
+            var title = Typography.FitText(view.Title, titleWidth, TextStyles.SubheadlineEmphasized);
+            Typography.Draw(drawList, new Vector2(origin.X + pad, top), title, ui.TitleInk,
                 TextStyles.SubheadlineEmphasized);
+            if (tagWidth > 0f)
+            {
+                var tagLeft = origin.X + pad + Typography.Measure(title, TextStyles.SubheadlineEmphasized).X
+                    + TagGap * scale;
+                DrawTag(drawList, ui, view.Tag, new Vector2(tagLeft, top + titleLine * 0.5f), tagWidth, scale);
+            }
+
             Typography.Draw(drawList, new Vector2(origin.X + pad, top + titleLine + LedgerEntryLayout.LineGap * scale),
                 Typography.FitText(view.Parties, width - pad * 2f, TextStyles.Footnote), ui.BodyInk,
                 TextStyles.Footnote);
@@ -118,6 +135,17 @@ internal sealed class LedgerEntryCards
         }
 
         return action;
+    }
+
+    private static void DrawTag(ImDrawListPtr drawList, AppSkin ui, string tag, Vector2 leftCenter, float width,
+        float scale)
+    {
+        var height = Typography.LineHeight(TextStyles.FootnoteEmphasized) + TagPadY * 2f * scale;
+        var min = new Vector2(leftCenter.X, leftCenter.Y - height * 0.5f);
+        var max = new Vector2(leftCenter.X + width, leftCenter.Y + height * 0.5f);
+        Squircle.Fill(drawList, min, max, height * 0.5f,
+            ImGui.GetColorU32(Palette.WithAlpha(ui.MutedInk, TagFillAlpha)));
+        Typography.DrawCentered(drawList, (min + max) * 0.5f, tag, ui.BodyInk, TextStyles.FootnoteEmphasized);
     }
 
     private static LedgerEntryPress DrawButtons(ImDrawListPtr drawList, AppSkin ui, in LedgerEntryView view,

@@ -411,7 +411,7 @@ internal static class CasinoGilLedger
 
     public static bool CanConfirm(CasinoLedgerEntryDto entry, string userId)
     {
-        if (entry.Settled)
+        if (entry.Settled || entry.Guest)
         {
             return false;
         }
@@ -426,7 +426,7 @@ internal static class CasinoGilLedger
 
     public static bool CanDispute(CasinoLedgerEntryDto entry, string userId)
     {
-        return !entry.Settled && !entry.Disputed && SideOf(entry, userId) == LedgerSide.Payee;
+        return !entry.Settled && !entry.Guest && !entry.Disputed && SideOf(entry, userId) == LedgerSide.Payee;
     }
 
     public static bool WaitsOnOtherSide(CasinoLedgerEntryDto entry, string userId)
