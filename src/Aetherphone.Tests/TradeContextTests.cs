@@ -162,5 +162,10 @@ public sealed class TradeContextTests
         var prize = TradeLedgerMatcher.Match(new TradeCompletion(new[] { "Xeldar" }, 0, 45_000), context);
         Assert.Equal(TradeProposalKind.Propose, prize.Kind);
         Assert.Equal(CasinoLedgerKinds.Payout, prize.LedgerKind);
+
+        var part = TradeLedgerMatcher.Match(new TradeCompletion(new[] { "Xeldar" }, 10_000, 0), context);
+        Assert.Equal(TradeProposalKind.Propose, part.Kind);
+        Assert.Equal(CasinoLedgerKinds.BuyIn, part.LedgerKind);
+        Assert.Equal(10_000, part.Amount);
     }
 }
