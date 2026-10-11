@@ -34,7 +34,6 @@ internal sealed class TableLedger
         { L.Tables.ColumnBuyIns, L.Tables.ColumnStack, L.Tables.ColumnNet };
 
     private const float Pad = 14f;
-    private const float EntryHeight = 74f;
     private const float FieldHeight = 38f;
     private const int AmountDigits = 11;
 
@@ -381,8 +380,15 @@ internal sealed class TableLedger
             using var entryId = ImRaii.PushId(index);
             var view = entries[index];
             var origin = ImGui.GetCursorScreenPos();
-            var height = EntryHeight * scale;
+            var titleLine = Typography.LineHeight(TextStyles.SubheadlineEmphasized);
+            var partiesLine = Typography.LineHeight(TextStyles.Footnote);
+            var stateLine = Typography.LineHeight(TextStyles.FootnoteEmphasized);
+            var confirmWidth = view.CanConfirm ? Button.WidthFor(view.ConfirmLabel, ButtonSize.Large) : 0f;
+            var disputeWidth = view.CanDispute ? Button.WidthFor(view.DisputeLabel, ButtonSize.Large) : 0f;
+            var buttonRows = LedgerEntryLayout.ButtonRows(width - pad * 2f, confirmWidth, disputeWidth, scale);
+            var height = LedgerEntryLayout.Height(titleLine, partiesLine, stateLine, buttonRows, scale);
             var max = new Vector2(origin.X + width, origin.Y + height);
+            var card = new Rect(origin, max);
             var tone = view.Tone switch
             {
                 LedgerTone.Waiting => Amber,
@@ -396,55 +402,63 @@ internal sealed class TableLedger
                     ImGui.GetColorU32(Palette.WithAlpha(tone, 0.65f)), 1.2f * scale);
             }
 
+            var top = origin.Y + pad;
             var amountSize = Typography.Measure(view.Amount, TextStyles.SubheadlineEmphasized);
-            Typography.Draw(drawList, new Vector2(max.X - pad - amountSize.X, origin.Y + 10f * scale), view.Amount,
+            Typography.Draw(drawList, new Vector2(max.X - pad - amountSize.X, top), view.Amount,
                 TableRow.CurrencyTint(CasinoCurrencies.Gil, ui.Accent), TextStyles.SubheadlineEmphasized);
-            var textWidth = width - pad * 3f - amountSize.X;
-            Typography.Draw(drawList, new Vector2(origin.X + pad, origin.Y + 10f * scale),
+            var textWidth = MathF.Max(1f, width - pad * 3f - amountSize.X);
+            Typography.Draw(drawList, new Vector2(origin.X + pad, top),
                 Typography.FitText(view.Title, textWidth, TextStyles.SubheadlineEmphasized), ui.TitleInk,
                 TextStyles.SubheadlineEmphasized);
-            Typography.Draw(drawList, new Vector2(origin.X + pad, origin.Y + 30f * scale),
+            Typography.Draw(drawList, new Vector2(origin.X + pad, top + titleLine + LedgerEntryLayout.LineGap * scale),
                 Typography.FitText(view.Parties, width - pad * 2f, TextStyles.Footnote), ui.BodyInk,
                 TextStyles.Footnote);
-
-            var buttonHeight = Button.SmallHeight * scale;
-            var buttonTop = max.Y - pad * 0.7f - buttonHeight;
-            var right = max.X - pad;
-            if (view.CanDispute)
-            {
-                var disputeWidth = Button.WidthFor(view.DisputeLabel, ButtonSize.Small);
-                var rect = new Rect(new Vector2(right - disputeWidth, buttonTop),
-                    new Vector2(right, buttonTop + buttonHeight));
-                if (Button.Draw(drawList, rect, view.DisputeLabel, ui.Ink, ButtonStyle.Gray, ButtonRole.Destructive,
-                        !tables.IntentInFlight, id: "ledger.dispute"))
-                {
-                    AskDispute(view);
-                }
-
-                right = rect.Min.X - Metrics.Space.Sm * scale;
-            }
-
-            if (view.CanConfirm)
-            {
-                var confirmWidth = Button.WidthFor(view.ConfirmLabel, ButtonSize.Small);
-                var rect = new Rect(new Vector2(right - confirmWidth, buttonTop),
-                    new Vector2(right, buttonTop + buttonHeight));
-                if (Button.Draw(drawList, rect, view.ConfirmLabel, ui.Ink, ButtonStyle.Prominent,
-                        enabled: !tables.IntentInFlight, id: "ledger.confirm"))
-                {
-                    tables.ConfirmLedgerEntry(roomId, view.EntryId);
-                }
-
-                right = rect.Min.X - Metrics.Space.Sm * scale;
-            }
-
-            var stateWidth = right - origin.X - pad;
-            var stateHeight = Typography.LineHeight(TextStyles.FootnoteEmphasized);
-            Typography.Draw(drawList, new Vector2(origin.X + pad, buttonTop + (buttonHeight - stateHeight) * 0.5f),
-                Typography.FitText(view.State, MathF.Max(1f, stateWidth), TextStyles.FootnoteEmphasized), tone,
+            Typography.Draw(drawList,
+                new Vector2(origin.X + pad, LedgerEntryLayout.StateTop(origin.Y, titleLine, partiesLine, scale)),
+                Typography.FitText(view.State, width - pad * 2f, TextStyles.FootnoteEmphasized), tone,
                 TextStyles.FootnoteEmphasized);
+            DrawEntryButtons(drawList, ui, view, card, buttonRows, confirmWidth, disputeWidth, scale);
             ImGui.SetCursorScreenPos(origin);
             ImGui.Dummy(new Vector2(width, height + Metrics.Space.Sm * scale));
+        }
+    }
+
+    private void DrawEntryButtons(ImDrawListPtr drawList, AppSkin ui, in LedgerEntryView view, in Rect card,
+        int buttonRows, float confirmWidth, float disputeWidth, float scale)
+    {
+        if (buttonRows == 0)
+        {
+            return;
+        }
+
+        var stacked = buttonRows > 1;
+        var right = card.Max.X - LedgerEntryLayout.Pad * scale;
+        if (view.CanDispute)
+        {
+            var rect = stacked
+                ? LedgerEntryLayout.StackedButton(card, 1, buttonRows, scale)
+                : LedgerEntryLayout.RowButton(card, right, disputeWidth, scale);
+            if (Button.Draw(drawList, rect, view.DisputeLabel, ui.Ink, ButtonStyle.Gray, ButtonRole.Destructive,
+                    !tables.IntentInFlight, id: "ledger.dispute"))
+            {
+                AskDispute(view);
+            }
+
+            right = rect.Min.X - LedgerEntryLayout.ButtonGap * scale;
+        }
+
+        if (!view.CanConfirm)
+        {
+            return;
+        }
+
+        var confirmRect = stacked
+            ? LedgerEntryLayout.StackedButton(card, 0, buttonRows, scale)
+            : LedgerEntryLayout.RowButton(card, right, confirmWidth, scale);
+        if (Button.Draw(drawList, confirmRect, view.ConfirmLabel, ui.Ink, ButtonStyle.Prominent,
+                enabled: !tables.IntentInFlight, id: "ledger.confirm"))
+        {
+            tables.ConfirmLedgerEntry(roomId, view.EntryId);
         }
     }
 
