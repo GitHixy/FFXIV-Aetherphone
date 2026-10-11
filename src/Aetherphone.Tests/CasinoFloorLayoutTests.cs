@@ -125,6 +125,29 @@ public sealed class CasinoFloorLayoutTests
         Assert.True(MissionsCard.Height(2, 20f, one + two, scale) > one + two);
     }
 
+    [Fact]
+    public void TheMissionsCapsuleSaysReadyOnlyWhenAClaimWaits()
+    {
+        var none = MissionsCapsule.Tally(null);
+        Assert.Equal(new MissionsTally(0, 0, 0), none);
+        Assert.False(MissionsCapsule.ShowsReady(none));
+        Assert.Equal(0f, MissionsCapsule.Fraction(none));
+
+        var running = new CasinoMissionsDto(7, 0,
+            new[] { Mission("a", false, false), Mission("b", true, true), Mission("c", false, false) });
+        var tally = MissionsCapsule.Tally(running);
+        Assert.Equal(new MissionsTally(1, 3, 0), tally);
+        Assert.False(MissionsCapsule.ShowsReady(tally));
+        Assert.Equal(1f / 3f, MissionsCapsule.Fraction(tally), 3);
+
+        var waiting = new CasinoMissionsDto(7, 0,
+            new[] { Mission("a", true, false), Mission("b", true, true), Mission("c", false, false) });
+        var ready = MissionsCapsule.Tally(waiting);
+        Assert.Equal(new MissionsTally(2, 3, 1), ready);
+        Assert.True(MissionsCapsule.ShowsReady(ready));
+        Assert.Equal(ClubCapsule.Height, MissionsCapsule.Height);
+    }
+
     [Theory]
     [InlineData(0.75f)]
     [InlineData(1f)]

@@ -133,6 +133,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         this.confirm = confirm;
         this.conduct = conduct;
         bonusShelf = new CashierBonusShelf(casino);
+        missionsSheet = new Strip.MissionsSheet(bonusShelf);
         cashier = new CashierDrawer(casino, coins, confirm);
         chipsDesk = new ChipsDesk(casino, coins) { Cashier = cashier.Panel };
         stage.Chips = chipsDesk;
@@ -238,6 +239,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         historyLoadFailed = false;
         ResetLaunch();
         clubSheet.Close();
+        missionsSheet.Close();
         heroCards.Reset();
         shelves.Reset();
         winsTicker.Reset();
@@ -380,6 +382,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         ConsumeFloorNotes();
         ConsumeMissionNotes();
         clubSheet.Gate();
+        missionsSheet.Gate();
         var introShowing = IntroShowing;
         if (introShowing)
         {
@@ -417,6 +420,9 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         rulesSheet.Draw(screenArea, ui);
         fameConsent.Draw(screenArea, ui);
         clubSheet.Draw(screenArea, ui);
+        missionsSheet.Draw(screenArea, ui, floor.Missions, floor.ClaimingMission,
+            DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        HandleMissionsSheet();
         cashier.Draw(screenArea, ui, openLimits);
         tradePrompt.Draw(screenArea, ui);
         if (introShowing && intro.Draw(screenArea, ui, casino.Rate,

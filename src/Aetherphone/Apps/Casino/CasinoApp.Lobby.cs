@@ -75,7 +75,7 @@ internal sealed partial class CasinoApp
             cursorY = DrawFloorTail(drawList, new Vector2(origin.X, shelvesBottom + FloorSectionGap * scale), width,
                 scale);
             cursorY = DrawRecordsRow(drawList, new Vector2(origin.X, cursorY), width, scale);
-            if (!cashier.IsOpen)
+            if (!cashier.IsOpen && !missionsSheet.IsOpen)
             {
                 bonusShelf.DrawShower(drawList, scale);
             }
