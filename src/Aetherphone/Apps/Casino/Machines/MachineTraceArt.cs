@@ -28,12 +28,13 @@ internal static class MachineTraceArt
     private const float WashAlpha = 0.10f;
     private const float PlateDrop = 0.3f;
 
-    private static readonly Vector4 LineInk = new(1f, 0.80f, 0.30f, 1f);
+    public static readonly Vector4 LineInk = new(1f, 0.80f, 0.30f, 1f);
+
     private static readonly Vector4 BadgePlate = new(0.05f, 0.03f, 0.08f, 0.9f);
     private static readonly Vector4 BadgeDigit = new(0.10f, 0.06f, 0.02f, 1f);
 
     public static void Line(ImDrawListPtr drawList, Rect window, float cellWidth, float cellHeight,
-        CasinoSlotsWinDto win, float alpha, float reveal, bool badge, float scale)
+        CasinoSlotsWinDto win, Vector4 tone, Vector4 amountInk, float alpha, float reveal, bool badge, float scale)
     {
         var rows = SlotsRules.Paylines[win.Line];
         var winning = Math.Clamp(win.Count, 2, SlotsRules.ReelCount);
@@ -50,9 +51,9 @@ internal static class MachineTraceArt
         }
 
         var remaining = total * Math.Clamp(reveal, 0f, 1f);
-        var glow = ImGui.GetColorU32(LineInk with { W = 0.28f * alpha });
-        var core = ImGui.GetColorU32(LineInk with { W = alpha });
-        var rest = ImGui.GetColorU32(LineInk with { W = RestAlpha * alpha });
+        var glow = ImGui.GetColorU32(tone with { W = 0.28f * alpha });
+        var core = ImGui.GetColorU32(tone with { W = alpha });
+        var rest = ImGui.GetColorU32(tone with { W = RestAlpha * alpha });
         for (var segment = 0; segment < SlotsRules.ReelCount - 1 && remaining > 0f; segment++)
         {
             var from = points[segment];
@@ -82,12 +83,12 @@ internal static class MachineTraceArt
 
         var badgeAlpha = alpha * Math.Clamp(reveal / RevealShare, 0f, 1f);
         Badge(drawList, new Vector2(window.Min.X + BadgeInset * scale, points[0].Y), GameNumber.Label(win.Line + 1),
-            NumberText.Compact(win.Pay), LineInk, badgeAlpha, scale);
+            NumberText.Compact(win.Pay), tone, amountInk, badgeAlpha, scale);
     }
 
     public static void Cells(ImDrawListPtr drawList, MachineCellOutline outline, Rect window, float cellWidth,
-        float cellHeight, int reels, int rows, CasinoSlotsWinDto win, Vector4 tone, float alpha, float reveal,
-        float scale)
+        float cellHeight, int reels, int rows, CasinoSlotsWinDto win, Vector4 tone, Vector4 amountInk, float alpha,
+        float reveal, float scale)
     {
         if (outline.Build(win.Cells, reels, rows) == 0)
         {
@@ -132,11 +133,11 @@ internal static class MachineTraceArt
 
         var center = new Vector2(window.Min.X + (anchor / rows + 0.5f) * cellWidth,
             window.Min.Y + (anchor % rows + 0.5f + PlateDrop) * cellHeight);
-        Plate(drawList, center, NumberText.Compact(win.Pay), tone, shown, scale);
+        Plate(drawList, center, NumberText.Compact(win.Pay), tone, amountInk, shown, scale);
     }
 
-    public static void Plate(ImDrawListPtr drawList, Vector2 center, string amount, Vector4 tone, float alpha,
-        float scale)
+    public static void Plate(ImDrawListPtr drawList, Vector2 center, string amount, Vector4 tone, Vector4 amountInk,
+        float alpha, float scale)
     {
         if (alpha <= 0.01f)
         {
@@ -150,11 +151,11 @@ internal static class MachineTraceArt
             ImGui.GetColorU32(BadgePlate with { W = BadgePlate.W * alpha }));
         Squircle.Stroke(drawList, center - half, center + half, half.Y, ImGui.GetColorU32(tone with { W = 0.8f * alpha }),
             BadgeStroke * scale);
-        Typography.Draw(drawList, center - size * 0.5f, amount, CasinoColors.Money with { W = alpha }, style);
+        Typography.Draw(drawList, center - size * 0.5f, amount, amountInk with { W = alpha }, style);
     }
 
     public static void Badge(ImDrawListPtr drawList, Vector2 leftCenter, string number, string amount, Vector4 tone,
-        float alpha, float scale)
+        Vector4 amountInk, float alpha, float scale)
     {
         if (alpha <= 0.01f)
         {
@@ -175,6 +176,6 @@ internal static class MachineTraceArt
         Typography.DrawCentered(drawList, discCenter, number, BadgeDigit with { W = alpha },
             TextStyles.FootnoteEmphasized);
         Typography.Draw(drawList, new Vector2(discCenter.X + radius + BadgeGap * scale, leftCenter.Y - amountSize.Y * 0.5f),
-            amount, CasinoColors.Money with { W = alpha }, amountStyle);
+            amount, amountInk with { W = alpha }, amountStyle);
     }
 }

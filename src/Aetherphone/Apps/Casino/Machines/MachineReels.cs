@@ -123,7 +123,7 @@ internal sealed class MachineReels
 
         if (Presenting(playback) && current is not null)
         {
-            DrawTraces(drawList, window, current, info, cellWidth, cellHeight, scale);
+            DrawTraces(drawList, window, playback, current, info, cellWidth, cellHeight, scale);
             DrawGiant(drawList, window, playback, current, info, cellWidth, cellHeight, phase);
         }
         else if (current is not null && SlotsRules.MoogleId == info.Id && playback.Beat != MachineBeat.Spin)
@@ -231,7 +231,7 @@ internal sealed class MachineReels
         float phase)
     {
         var anyWin = Presenting(playback) && HasAny(winning, info.CellCount);
-        var settledLoss = playback.Finished && playback.TotalWin + playback.Jackpot <= playback.Cost;
+        var settledLoss = playback.HasRound && playback.TotalWin + playback.Jackpot <= playback.Cost;
         for (var row = 0; row < info.Rows; row++)
         {
             var cell = reel * info.Rows + row;
@@ -439,14 +439,15 @@ internal sealed class MachineReels
         }
     }
 
-    private void DrawTraces(ImDrawListPtr drawList, Rect window, CasinoSlotsStepDto step, SlotsMachineInfo info,
-        float cellWidth, float cellHeight, float scale)
+    private void DrawTraces(ImDrawListPtr drawList, Rect window, MachineRoundPlayback playback, CasinoSlotsStepDto step,
+        SlotsMachineInfo info, float cellWidth, float cellHeight, float scale)
     {
         if (step.Wins is not { } wins || traces.Count == 0)
         {
             return;
         }
 
+        var muted = playback.TotalWin + playback.Jackpot <= playback.Cost;
         if (traces.Overview)
         {
             var reveal = traces.OverviewProgress / MachineTraceArt.RevealShare;
@@ -455,7 +456,7 @@ internal sealed class MachineReels
                 var index = traces.WinAt(slot);
                 if (index < wins.Length)
                 {
-                    DrawTrace(drawList, window, wins[index], info, cellWidth, cellHeight,
+                    DrawTrace(drawList, window, wins[index], info, muted, cellWidth, cellHeight,
                         MachineTraceArt.OverviewAlpha, reveal, true, scale);
                 }
             }
@@ -465,22 +466,24 @@ internal sealed class MachineReels
 
         if (traces.TryActive(wins, out var active))
         {
-            DrawTrace(drawList, window, wins[active], info, cellWidth, cellHeight, 1f,
+            DrawTrace(drawList, window, wins[active], info, muted, cellWidth, cellHeight, 1f,
                 traces.ActiveProgress / MachineTraceArt.RevealShare, false, scale);
         }
     }
 
     private void DrawTrace(ImDrawListPtr drawList, Rect window, CasinoSlotsWinDto win, SlotsMachineInfo info,
-        float cellWidth, float cellHeight, float alpha, float reveal, bool overview, float scale)
+        bool muted, float cellWidth, float cellHeight, float alpha, float reveal, bool overview, float scale)
     {
+        var amountInk = muted ? CasinoColors.InkMuted : CasinoColors.Money;
         if (MachineTraceCycle.IsLine(win) && info.Layout != SlotsLayout.Cluster)
         {
-            MachineTraceArt.Line(drawList, window, cellWidth, cellHeight, win, alpha, reveal, !overview, scale);
+            MachineTraceArt.Line(drawList, window, cellWidth, cellHeight, win,
+                muted ? CasinoColors.InkMuted : MachineTraceArt.LineInk, amountInk, alpha, reveal, !overview, scale);
             return;
         }
 
         MachineTraceArt.Cells(drawList, outline, window, cellWidth, cellHeight, info.Reels, info.Rows, win,
-            MachineArt.NeonOf(info.Id), alpha, reveal, scale);
+            muted ? CasinoColors.InkMuted : MachineArt.NeonOf(info.Id), amountInk, alpha, reveal, scale);
     }
 
     private static void DrawCoinLabel(ImDrawListPtr drawList, CasinoSlotsStepDto? step, int cell, Vector2 center,
