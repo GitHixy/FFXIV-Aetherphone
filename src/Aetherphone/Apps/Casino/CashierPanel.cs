@@ -154,7 +154,8 @@ internal sealed class CashierPanel
         DrawColumn(drawList, ui, layout.WalletColumn, CurrencyKind.Coins, Loc.T(L.Casino.WalletRow),
             NumberText.Group(WalletCoins), ui.TitleInk, string.Empty, scale);
         DrawColumn(drawList, ui, layout.ChipsColumn, CurrencyKind.Chips, Loc.T(L.Casino.ChipsRow),
-            NumberText.Group(stack), stack > 0 ? CasinoColors.Money : ui.MutedInk, worth.Full(stack, rate), scale);
+            NumberText.Group(stack), stack > 0 ? CasinoColors.Money : ui.MutedInk, CoinValue(stack, rate,
+                layout.ChipsColumn.Width), scale);
         var arrow = layout.ArrowSlot;
         drawList.AddCircleFilled(arrow.Center, arrow.Width * 0.5f,
             ImGui.GetColorU32(Palette.WithAlpha(ui.TitleInk, ArrowAlpha)), 28);
@@ -185,11 +186,16 @@ internal sealed class CashierPanel
         }
 
         var worthTop = amountTop + amountHeight;
-        var worthScale = Typography.FitScale(coinValue, column.Width, TextStyles.Footnote.Scale,
-            TextStyles.Caption2.Scale, TextStyles.Footnote.Weight);
-        var worthSize = Typography.Measure(coinValue, worthScale, TextStyles.Footnote.Weight);
-        Typography.Draw(drawList, new Vector2(column.Center.X - worthSize.X * 0.5f, worthTop), coinValue,
-            ui.MutedInk, worthScale, TextStyles.Footnote.Weight);
+        var shown = Typography.FitText(coinValue, column.Width, TextStyles.Footnote);
+        var worthSize = Typography.Measure(shown, TextStyles.Footnote);
+        Typography.Draw(drawList, new Vector2(column.Center.X - worthSize.X * 0.5f, worthTop), shown, ui.BodyInk,
+            TextStyles.Footnote);
+    }
+
+    private string CoinValue(long stack, long rate, float width)
+    {
+        var full = worth.Full(stack, rate);
+        return Typography.Measure(full, TextStyles.Footnote).X <= width ? full : worth.Compact(stack, rate);
     }
 
     private static void DrawRate(ImDrawListPtr drawList, AppSkin ui, Rect line, long rate)

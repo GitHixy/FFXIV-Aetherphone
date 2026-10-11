@@ -38,8 +38,10 @@ internal static class ReconnectVeil
         var dotCenter = new Vector2(min.X + pad, min.Y + pad + titleSize.Y * 0.5f);
         drawList.AddCircleFilled(dotCenter, 3.2f * scale,
             ImGui.GetColorU32(Palette.WithAlpha(ui.Accent, 0.35f + 0.45f * Pulse.Wave(Pulse.Breath))), 12);
-        Typography.Draw(drawList, new Vector2(dotCenter.X + 10f * scale, min.Y + pad), title, ui.TitleInk,
-            TextStyles.SubheadlineEmphasized);
+        var titleLeft = dotCenter.X + 10f * scale;
+        Typography.Draw(drawList, new Vector2(titleLeft, min.Y + pad),
+            Typography.FitText(title, MathF.Max(1f, max.X - pad - titleLeft), TextStyles.SubheadlineEmphasized),
+            ui.TitleInk, TextStyles.SubheadlineEmphasized);
         Typography.DrawWrappedLeft(new Vector2(min.X + pad, min.Y + pad + titleSize.Y + 8f * scale), body,
             ui.BodyInk, TextStyles.Subheadline, width - pad * 2f);
     }

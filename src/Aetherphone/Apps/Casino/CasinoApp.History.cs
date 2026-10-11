@@ -17,6 +17,7 @@ internal sealed partial class CasinoApp
     private const float HistoryRowHeight = 62f;
     private const float HistoryTile = 36f;
     private const float FactRowHeight = 46f;
+    private const float FactLabelShare = 0.5f;
     private const float ReferencePad = 16f;
     private const float ReferenceGap = 10f;
     private const float StepBadge = 28f;
@@ -561,9 +562,11 @@ internal sealed partial class CasinoApp
         }
 
         var lineHeight = Typography.LineHeight(TextStyles.Body);
-        var labelWidth = Typography.Measure(label, TextStyles.Body).X;
-        Typography.Draw(drawList, new Vector2(row.Min.X + pad, row.Center.Y - lineHeight * 0.5f), label, ui.BodyInk,
+        var shownLabel = Typography.FitText(label, MathF.Max(1f, (row.Width - pad * 2f) * FactLabelShare),
             TextStyles.Body);
+        var labelWidth = Typography.Measure(shownLabel, TextStyles.Body).X;
+        Typography.Draw(drawList, new Vector2(row.Min.X + pad, row.Center.Y - lineHeight * 0.5f), shownLabel,
+            ui.BodyInk, TextStyles.Body);
         var available = MathF.Max(1f, row.Width - pad * 2f - labelWidth - CoinArt.ValueGap * scale);
         if (withGlyph)
         {
