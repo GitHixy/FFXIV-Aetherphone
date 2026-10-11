@@ -8956,6 +8956,7 @@
   "casino.tables.dealerHost": "我来发牌",
   "casino.tables.autoDeal": "我不在时按计时发牌",
   "casino.tables.coDealersNote": "玩家入座后，可在门口提拔最多 3 名副荷官，他们拥有相同的发牌和暂停权限。",
+  "casino.tables.dealerChipNote": "筹码桌由赌场按计时发牌。选择练习或金币即可亲自发牌并提拔协理荷官。",
   "casino.tables.rulesPays": "黑杰克赔率",
   "casino.tables.pays32": "3:2",
   "casino.tables.pays21": "2:1",

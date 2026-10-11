@@ -8956,6 +8956,7 @@
   "casino.tables.dealerHost": "I deal",
   "casino.tables.autoDeal": "Deal on the clock when I am away",
   "casino.tables.coDealersNote": "Once players sit, promote up to 3 co-dealers from the table door. They get the same Deal and Pause controls.",
+  "casino.tables.dealerChipNote": "Chip tables are dealt by the house on the clock. Play for practice or gil to deal yourself and add co-dealers.",
   "casino.tables.rulesPays": "Blackjack pays",
   "casino.tables.pays32": "3:2",
   "casino.tables.pays21": "2:1",

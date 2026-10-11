@@ -409,6 +409,8 @@ internal sealed class HostSheet
                     ref draft.MinBet, ref draft.MaxBet, width, scale);
                 Gap(HostFlowLayout.CardGap, scale);
                 DrawSeats(ui, width, scale);
+                Gap(HostFlowLayout.CardGap, scale);
+                DrawDealerCard(ui, scale);
                 break;
             case HostGame.Holdem:
                 LadderSingle(ui, "##hostBlinds", Loc.T(L.Holdem.HostBlinds),
@@ -710,7 +712,6 @@ internal sealed class HostSheet
         switch (draft.Game)
         {
             case HostGame.Blackjack when draft.SeatBanked:
-                DrawDealerCard(ui, scale);
                 DrawRulesCard(ui, scale);
                 break;
             case HostGame.Holdem:
@@ -724,6 +725,16 @@ internal sealed class HostSheet
 
     private void DrawDealerCard(AppSkin ui, float scale)
     {
+        if (!draft.SeatBanked)
+        {
+            var fixedCard = GroupCard.Begin(ui, RowUnits);
+            Venue.VenueFields.ValueRow(ui, fixedCard.NextRow(RowUnits), Loc.T(L.Tables.DealerMode),
+                dealerOptions[CasinoDealerModes.House], scale);
+            fixedCard.End();
+            Venue.VenueFields.Hint(ui, Loc.T(L.Tables.DealerChipNote), scale);
+            return;
+        }
+
         var hostDeals = draft.DealerMode == CasinoDealerModes.Host;
         var card = GroupCard.Begin(ui, SegmentRowUnits + (hostDeals ? RowUnits : 0f));
         draft.DealerMode = Segment(ui, card.NextRow(SegmentRowUnits), "##hostDealerMode",
@@ -736,7 +747,6 @@ internal sealed class HostSheet
 
         card.End();
         Venue.VenueFields.Hint(ui, Loc.T(L.Tables.CoDealersNote), scale);
-        Gap(HostFlowLayout.CardGap, scale);
     }
 
     private void DrawRulesCard(AppSkin ui, float scale)

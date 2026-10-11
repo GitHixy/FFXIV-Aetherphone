@@ -82,6 +82,29 @@ public sealed class CasinoHostSheetTests
     }
 
     [Fact]
+    public void TheDealerSeatTravelsToGilButAChipTableAlwaysDealsOnTheClock()
+    {
+        var draft = new HostDraft();
+        draft.SelectCurrency(CasinoCurrencies.Practice, true);
+        draft.DealerMode = CasinoDealerModes.Host;
+        draft.AutoDeal = false;
+
+        draft.SelectCurrency(CasinoCurrencies.Gil, true);
+        draft.Normalize(true);
+        var gil = draft.Build(null);
+        Assert.Equal(CasinoDealerModes.Host, gil.DealerMode);
+        Assert.False(gil.AutoDeal);
+        Assert.Equal(string.Empty, CasinoHostingRules.Check(gil));
+
+        draft.SelectCurrency(CasinoCurrencies.Chips, true);
+        draft.Normalize(true);
+        var chips = draft.Build(null);
+        Assert.Equal(CasinoDealerModes.House, chips.DealerMode);
+        Assert.True(chips.AutoDeal);
+        Assert.Equal(string.Empty, CasinoHostingRules.Check(chips));
+    }
+
+    [Fact]
     public void PracticeBetsNeverOutgrowTheStartingStack()
     {
         var draft = new HostDraft();
