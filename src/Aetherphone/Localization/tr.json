@@ -8890,6 +8890,7 @@
   "casino.tables.reasonConfigInvalid": "Masa ayarlarından bazıları birbirine uymuyor. Bahisleri ve sınırları kontrol edip tekrar dene.",
   "casino.tables.reasonPracticeOnly": "Bu seçenek yalnızca alıştırma ve gil masalarında var, evin fiş masalarında yok.",
   "casino.tables.reasonNotDealer": "Bunu yalnızca ev sahibi ya da yardımcı krupiye yapabilir.",
+  "casino.tables.reasonDealerCannotSit": "Bu masada sen dağıtıyorsun, bu yüzden ayrıca masaya oturamazsın.",
   "casino.tables.reasonRebuyOff": "Ev sahibi bu masada yeniden alımı kapattı.",
   "casino.tables.reasonTournamentLive": "Bir turnuva sürüyor. Önce bitmesini bekle.",
   "casino.tables.reasonNoTournament": "Bu masada süren bir turnuva yok.",

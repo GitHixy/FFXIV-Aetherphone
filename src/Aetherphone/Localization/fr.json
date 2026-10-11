@@ -8890,6 +8890,7 @@
   "casino.tables.reasonConfigInvalid": "Certains réglages de la table ne vont pas ensemble. Vérifie les mises et les limites, puis réessaie.",
   "casino.tables.reasonPracticeOnly": "Cette option n'existe que pour les tables d'entraînement et de gils, pas pour les tables à jetons de la maison.",
   "casino.tables.reasonNotDealer": "Seul l'hôte ou un co-croupier peut faire ça.",
+  "casino.tables.reasonDealerCannotSit": "Tu distribues à cette table, tu ne peux donc pas aussi t'y asseoir.",
   "casino.tables.reasonRebuyOff": "L'hôte a désactivé les recaves à cette table.",
   "casino.tables.reasonTournamentLive": "Un tournoi est en cours. Attends qu'il se termine.",
   "casino.tables.reasonNoTournament": "Aucun tournoi n'est en cours à cette table.",

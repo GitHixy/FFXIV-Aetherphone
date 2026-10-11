@@ -8890,6 +8890,7 @@
   "casino.tables.reasonConfigInvalid": "Некоторые настройки стола несовместимы. Проверьте ставки и пределы и попробуйте снова.",
   "casino.tables.reasonPracticeOnly": "Эта опция есть только у тренировочных и гиловых столов, а не у столов с фишками казино.",
   "casino.tables.reasonNotDealer": "Это может сделать только хозяин стола или содилер.",
+  "casino.tables.reasonDealerCannotSit": "Вы раздаёте за этим столом, поэтому не можете ещё и занять за ним место.",
   "casino.tables.reasonRebuyOff": "Хозяин отключил докупку за этим столом.",
   "casino.tables.reasonTournamentLive": "Идёт турнир. Дождитесь его окончания.",
   "casino.tables.reasonNoTournament": "За этим столом сейчас нет турнира.",

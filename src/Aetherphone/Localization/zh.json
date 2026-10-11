@@ -8890,6 +8890,7 @@
   "casino.tables.reasonConfigInvalid": "部分牌桌设置相互冲突。请检查下注额和上限后重试。",
   "casino.tables.reasonPracticeOnly": "该选项仅适用于练习桌和金币桌，不适用于赌场筹码桌。",
   "casino.tables.reasonNotDealer": "只有桌主或副荷官可以这样做。",
+  "casino.tables.reasonDealerCannotSit": "你在这张桌负责发牌，因此不能同时入座。",
   "casino.tables.reasonRebuyOff": "桌主已关闭本桌的补码。",
   "casino.tables.reasonTournamentLive": "锦标赛正在进行，请等它结束。",
   "casino.tables.reasonNoTournament": "本桌没有正在进行的锦标赛。",

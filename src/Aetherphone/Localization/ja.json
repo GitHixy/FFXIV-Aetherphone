@@ -8890,6 +8890,7 @@
   "casino.tables.reasonConfigInvalid": "テーブル設定の一部が両立しません。ベット額と上限を確認してもう一度お試しください。",
   "casino.tables.reasonPracticeOnly": "このオプションは練習テーブルとギルテーブル専用で、ハウスのチップテーブルでは使えません。",
   "casino.tables.reasonNotDealer": "それができるのはホストかサブディーラーだけです。",
+  "casino.tables.reasonDealerCannotSit": "このテーブルではあなたが配るので、席に着くことはできません。",
   "casino.tables.reasonRebuyOff": "このテーブルではホストがリバイを無効にしています。",
   "casino.tables.reasonTournamentLive": "トーナメントが進行中です。終わるまでお待ちください。",
   "casino.tables.reasonNoTournament": "このテーブルでは開催中のトーナメントがありません。",

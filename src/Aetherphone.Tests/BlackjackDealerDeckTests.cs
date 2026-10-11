@@ -79,6 +79,14 @@ public sealed class BlackjackDealerDeckTests
         Assert.Equal(BlackjackDeck.Wait, BlackjackDeckFlow.Pick(Facts(onBoard: false, canAct: true)));
     }
 
+    [Fact]
+    public void AnOlderFlowThatStillTriesToSeatTheDealerIsToldWhy()
+    {
+        Assert.Contains(CasinoReasons.DealerCannotSit, CasinoReasons.All);
+        Assert.True(CasinoReasons.TryMessage(CasinoReasons.DealerCannotSit, out var message));
+        Assert.Equal("casino.tables.reasonDealerCannotSit", message.Key);
+    }
+
     private static BlackjackDeckFacts Facts(bool dealing = false, bool bought = true, bool onBoard = true,
         bool holdsSeat = true, bool canRebuy = false, bool gilBroke = false, bool insurance = false,
         bool canBet = false, bool committed = false, bool canAct = false) =>

@@ -8890,6 +8890,7 @@
   "casino.tables.reasonConfigInvalid": "Some of those table settings do not work together. Check the stakes and limits, then try again.",
   "casino.tables.reasonPracticeOnly": "That option is only for practice and gil tables, not house chip tables.",
   "casino.tables.reasonNotDealer": "Only the host or a co-dealer can do that.",
+  "casino.tables.reasonDealerCannotSit": "You deal at this table, so you cannot also take a seat at it.",
   "casino.tables.reasonRebuyOff": "The host turned rebuys off at this table.",
   "casino.tables.reasonTournamentLive": "A tournament is running. Wait for it to finish first.",
   "casino.tables.reasonNoTournament": "There is no tournament running at this table.",

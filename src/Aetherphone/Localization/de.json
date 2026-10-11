@@ -8890,6 +8890,7 @@
   "casino.tables.reasonConfigInvalid": "Einige dieser Tischeinstellungen passen nicht zusammen. Prüf Einsätze und Grenzen und versuch es erneut.",
   "casino.tables.reasonPracticeOnly": "Diese Option gibt es nur an Übungs- und Gil-Tischen, nicht an Chip-Tischen des Hauses.",
   "casino.tables.reasonNotDealer": "Das kann nur der Gastgeber oder ein Co-Dealer.",
+  "casino.tables.reasonDealerCannotSit": "Du gibst an diesem Tisch und kannst dich deshalb nicht selbst hinsetzen.",
   "casino.tables.reasonRebuyOff": "Der Gastgeber hat Nachkäufe an diesem Tisch abgeschaltet.",
   "casino.tables.reasonTournamentLive": "Ein Turnier läuft. Warte, bis es vorbei ist.",
   "casino.tables.reasonNoTournament": "An diesem Tisch läuft kein Turnier.",

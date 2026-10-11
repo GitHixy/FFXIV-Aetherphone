@@ -11299,6 +11299,7 @@ internal static class L
         public static readonly LocString ReasonConfigInvalid = new("casino.tables.reasonConfigInvalid", "Some of those table settings do not work together. Check the stakes and limits, then try again.");
         public static readonly LocString ReasonPracticeOnly = new("casino.tables.reasonPracticeOnly", "That option is only for practice and gil tables, not house chip tables.");
         public static readonly LocString ReasonNotDealer = new("casino.tables.reasonNotDealer", "Only the host or a co-dealer can do that.");
+        public static readonly LocString ReasonDealerCannotSit = new("casino.tables.reasonDealerCannotSit", "You deal at this table, so you cannot also take a seat at it.");
         public static readonly LocString ReasonRebuyOff = new("casino.tables.reasonRebuyOff", "The host turned rebuys off at this table.");
         public static readonly LocString ReasonTournamentLive = new("casino.tables.reasonTournamentLive", "A tournament is running. Wait for it to finish first.");
         public static readonly LocString ReasonNoTournament = new("casino.tables.reasonNoTournament", "There is no tournament running at this table.");

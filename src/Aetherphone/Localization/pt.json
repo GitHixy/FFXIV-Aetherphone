@@ -8890,6 +8890,7 @@
   "casino.tables.reasonConfigInvalid": "Algumas configurações da mesa não combinam. Confira as apostas e os limites e tente de novo.",
   "casino.tables.reasonPracticeOnly": "Essa opção é só para mesas de treino e de gil, não para mesas de fichas da casa.",
   "casino.tables.reasonNotDealer": "Só o anfitrião ou um co-dealer pode fazer isso.",
+  "casino.tables.reasonDealerCannotSit": "Você dá as cartas nesta mesa, então não pode também se sentar nela.",
   "casino.tables.reasonRebuyOff": "O anfitrião desligou as recompras nesta mesa.",
   "casino.tables.reasonTournamentLive": "Há um torneio em andamento. Espere ele terminar.",
   "casino.tables.reasonNoTournament": "Não há torneio em andamento nesta mesa.",
