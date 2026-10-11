@@ -2351,6 +2351,8 @@ internal static class L
                 "Fixed Linkpearl's filters and the photo editor's aspect ratios cutting their labels short"),
             new("changelog.r1300.76",
                 "Fixed the handle hint saying letters when only lowercase letters are accepted"),
+            new("changelog.r1300.84",
+                "Fixed the mini phone sticking to the short date after a plugin reload, contributed by t3sco"),
         };
 
         public static readonly LocString[] Release1300ChirperAethergramVelvet =

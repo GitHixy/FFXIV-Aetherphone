@@ -7751,6 +7751,7 @@
   "changelog.r1300.78": "Modification des résultats de recherche Lodestone : les correspondances exactes de nom arrivent en premier",
   "changelog.r1300.79": "Correction des recherches Lodestone qui attendaient derrière les téléchargements de portraits, ce qui pouvait laisser la recherche bloquée jusqu'à une minute",
   "changelog.r1300.80": "Correction de la puce Lodestone de Personnes qui passait sur deux lignes aux grandes échelles d'interface",
+  "changelog.r1300.84": "Correction du mini téléphone qui gardait la date courte après un rechargement du plugin, contribution de t3sco",
   "changelog.r1300.70": "Ajout des règles de la communauté à ChocoChat, ainsi qu'au chat des stations et aux sessions Jam de Musique",
   "changelog.r1300.71": "Ajout des règles de la communauté de chaque app dans Réglages, section Modération et sécurité",
   "changelog.r1300.72": "Refonte des règles de la communauté de chaque app : chacune montre désormais ce qui est autorisé, ce qui est voilé, ce qui est retiré et ce qui entraîne la suspension d'un compte",

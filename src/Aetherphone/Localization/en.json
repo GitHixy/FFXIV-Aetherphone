@@ -7751,6 +7751,7 @@
   "changelog.r1300.78": "Changed Lodestone search results to put exact name matches first",
   "changelog.r1300.79": "Fixed Lodestone searches waiting behind portrait downloads, which could leave Searching up for a minute",
   "changelog.r1300.80": "Fixed the Lodestone chip in People wrapping onto two lines at larger UI scales",
+  "changelog.r1300.84": "Fixed the mini phone sticking to the short date after a plugin reload, contributed by t3sco",
   "changelog.r1300.70": "Added community guidelines to ChocoChat, and to station chat and Jam sessions in Music",
   "changelog.r1300.71": "Added every app's community guidelines to Settings, under Moderation and safety",
   "changelog.r1300.72": "Overhauled the community guidelines in every app: each one now shows what's allowed, what gets veiled, what's removed and what gets an account suspended",
