@@ -30,9 +30,9 @@ internal sealed class FameView
         this.floor = floor;
     }
 
-    public void Enter()
+    public void Enter(string boardKey)
     {
-        board = 0;
+        board = Math.Max(0, Array.IndexOf(CasinoFameBoards.All, boardKey));
         span = 0;
     }
 
@@ -149,7 +149,7 @@ internal sealed class FameView
         {
             Typography.Draw(drawList,
                 new Vector2(max.X - pad - valueWidth, origin.Y + (height - Typography.LineHeight(TextStyles.Headline)) * 0.5f),
-                value, CasinoColors.Money, TextStyles.Headline);
+                value, me.Value < 0 ? CasinoColors.Loss : CasinoColors.Money, TextStyles.Headline);
         }
 
         return max.Y;
