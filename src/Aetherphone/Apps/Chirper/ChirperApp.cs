@@ -263,6 +263,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     private bool composePicking;
     private string[] composePickerPaths = Array.Empty<string>();
     private string? pendingComposePickedPath;
+    private readonly ImageIntake composeIntake = new();
+    private bool composeFieldActive;
     private string? pendingSharedPhoto;
     private readonly FeedVirtualizer hashtagVirtualizer = new(400f);
     private string hashtagTitle = string.Empty;
@@ -552,6 +554,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         quoteTarget = null;
         quoteTargetId = null;
         composeAttachments.Clear();
+        composeIntake.Discard();
         composePicking = false;
         composeSensitive = false;
         composeFocus = true;
@@ -2342,6 +2345,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         draft = string.Empty;
         composeStatus = string.Empty;
         composeAttachments.Clear();
+        composeIntake.Discard();
         composePicking = false;
         composeSensitive = false;
         composeFocus = true;
@@ -2435,6 +2439,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         draft = string.Empty;
         composeStatus = string.Empty;
         composeAttachments.Clear();
+        composeIntake.Discard();
         composePicking = false;
         composeSensitive = false;
         AddComposeAttachment(path);

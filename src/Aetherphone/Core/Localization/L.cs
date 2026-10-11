@@ -54,6 +54,8 @@ internal static class L
         public static readonly LocString SavedToGallery = new("common.savedToGallery", "Saved to gallery");
         public static readonly LocString NoPhotos = new("common.noPhotos", "No photos in your gallery yet");
         public static readonly LocString AddPhoto = new("common.addPhoto", "Add a photo");
+        public static readonly LocString PasteImage = new("common.pasteImage", "Paste image");
+        public static readonly LocString PasteFailed = new("common.pasteFailed", "That image can't be pasted");
         public static readonly LocString GifTooLarge = new("common.gifTooLarge", "GIF is too large (max 4 MB)");
         public static readonly LocString GifRidesAlone = new("common.gifRidesAlone", "A GIF has to be posted on its own, without other photos.");
         public static readonly LocString FileKindImages = new("common.fileKindImages", "Images");
@@ -2341,16 +2343,30 @@ internal static class L
         {
             new("changelog.r1300.58",
                 "Added a Show in cutscenes setting that keeps the phone on screen while a cutscene plays, for a second monitor"),
+            new("changelog.r1300.81",
+                "Added an FPS counter to the mini phone, off by default under Settings > Minimized phone, contributed by t3sco"),
             new("changelog.r1300.51",
                 "Fixed the scrollbar moving the wrong way and too slowly when dragged while the phone position is locked, contributed by jambalong"),
             new("changelog.r1300.57",
                 "Fixed Linkpearl's filters and the photo editor's aspect ratios cutting their labels short"),
             new("changelog.r1300.76",
                 "Fixed the handle hint saying letters when only lowercase letters are accepted"),
+            new("changelog.r1300.84",
+                "Fixed the mini phone sticking to the short date after a plugin reload, contributed by t3sco"),
+            new("changelog.r1300.85",
+                "Fixed tooltips near the edge of the screen being cut off by the rounded corners and the frame, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1300ChirperAethergramVelvet =
+        {
+            new("changelog.r1300.82",
+                "Added pasting and dragging images into chirps, replies, posts and stories: press Ctrl+V, tap Paste image, or drag a file in from File Explorer, contributed by t3sco"),
         };
 
         public static readonly LocString[] Release1300Messaging =
         {
+            new("changelog.r1300.83",
+                "Added pasting and dragging images into chats: the image waits above the message box and sends with whatever you type as its caption, contributed by t3sco"),
             new("changelog.r1300.52",
                 "Fixed chats at the newest message snapping back to the bottom when you drag to scroll up, contributed by jambalong"),
         };
@@ -9905,6 +9921,8 @@ internal static class L
         public static readonly LocString ShapeHint = new("minimized.shapeHint", "Choose what the phone collapses into. The minimap draws the zone map around you, so it can sit where the game minimap does.");
         public static readonly LocString Wallpaper = new("minimized.wallpaper", "Show wallpaper");
         public static readonly LocString WallpaperHint = new("minimized.wallpaperHint", "Paints your home wallpaper behind the mini phone, dimmed so the clock stays readable.");
+        public static readonly LocString Fps = new("minimized.fps", "FPS");
+        public static readonly LocString FpsValue = new("minimized.fpsValue", "{0} FPS");
         public static readonly LocString MinimapHint = new("minimized.minimapHint", "The map faces north and shows your heading, the zone name and your coordinates. Tap it to open the phone.");
         public static readonly LocString MinimapZoomHint = new("minimized.minimapZoomHint", "Scroll the wheel over the map to zoom, or use the plus and minus buttons that fade in when you hover it.");
         public static readonly LocString NoMap = new("minimized.noMap", "No map here");
