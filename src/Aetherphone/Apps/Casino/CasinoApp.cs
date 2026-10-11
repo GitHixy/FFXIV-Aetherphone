@@ -136,7 +136,8 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         cashier = new CashierDrawer(casino, coins, confirm);
         chipsDesk = new ChipsDesk(casino, coins) { Cashier = cashier.Panel };
         stage.Chips = chipsDesk;
-        preferences = new Core.Casino.CasinoPreferences(configuration);
+        preferences = new Core.Casino.CasinoPreferences(configuration, () => session.ActiveContentId,
+            configuration.Save);
         stage.Preferences = preferences;
         machines = new Machines.MachineCabinet(casino, casinoPlay, confirm, preferences);
         scratch = new Cabinets.ScratchCabinet(casino, casinoPlay);
@@ -171,7 +172,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         tableHands = new Tables.TableHandsCard(history);
         pit = new Tables.BlackjackPit(casinoTables, casino, openTable, openDoorFromRow, EnterHouseBlackjack, OpenTables,
             OpenHostSheet);
-        hostSheet = new Tables.HostSheet(casinoTables, casino, new Venue.VenueHostOptions(casinoVenue));
+        hostSheet = new Tables.HostSheet(casinoTables, casino, new Venue.VenueHostOptions(casinoVenue), preferences);
         tableDoor = new Tables.TableDoor(casinoTables, confirm, openTable,
             new Venue.TournamentDoorCard(casinoVenue), tradeSync);
         router = new ViewRouter<CasinoRoute>(CasinoRoute.Floor);
@@ -1427,6 +1428,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         {
             if (router.Current.Screen == CasinoScreen.HostTable)
             {
+                hostSheet.RememberDraft();
                 router.Pop();
             }
 

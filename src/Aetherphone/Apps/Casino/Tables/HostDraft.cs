@@ -177,6 +177,85 @@ internal sealed class HostDraft
         return HostGames.IsVenue(Game) ? BuildVenue(location) : BuildBlackjack(location);
     }
 
+    public CasinoHostDraftMemory Snapshot(bool pinLocation) => new()
+    {
+        Game = (int)Game,
+        Currency = Currency,
+        Seats = Seats,
+        Listing = Listing,
+        Spectators = Spectators,
+        FaceUp = FaceUp,
+        Name = Name,
+        MinBet = MinBet,
+        MaxBet = MaxBet,
+        BigBlind = BigBlind,
+        Ante = Ante,
+        Stack = Stack,
+        PracticeRebuy = PracticeRebuy,
+        Bank = Bank,
+        MaxPayout = MaxPayout,
+        PayoutCapped = PayoutCapped,
+        TurnSeconds = TurnSeconds,
+        TimeBank = TimeBank,
+        DealerMode = DealerMode,
+        AutoDeal = AutoDeal,
+        Pays = Pays,
+        HitsSoft17 = HitsSoft17,
+        Decks = Decks,
+        Splits = Splits,
+        Doubles = Doubles,
+        Charlie = Charlie,
+        Peek = Peek,
+        Sides = Sides,
+        HighestWins = HighestWins,
+        RoundSeconds = RoundSeconds,
+        StartAt = StartAt,
+        Stake = Stake,
+        PinLocation = pinLocation,
+    };
+
+    public static HostGame GameOf(CasinoHostDraftMemory memory) =>
+        (HostGame)Math.Clamp(memory.Game, 0, HostGames.All.Length - 1);
+
+    public void Restore(CasinoHostDraftMemory memory)
+    {
+        Reset(GameOf(memory));
+        Currency = Math.Clamp(memory.Currency, CasinoCurrencies.Chips, CasinoCurrencies.Gil);
+        Seats = memory.Seats;
+        Listing = Math.Clamp(memory.Listing, 0, CasinoListings.All.Length - 1);
+        Spectators = memory.Spectators;
+        FaceUp = memory.FaceUp;
+        Name = memory.Name;
+        var rungs = BetRungs;
+        MinBet = LastIndexAtMost(memory.MinBet, rungs.Length);
+        MaxBet = LastIndexAtMost(memory.MaxBet, rungs.Length);
+        BigBlind = LastIndexAtMost(memory.BigBlind, HostLadders.Bets.Length);
+        Ante = LastIndexAtMost(memory.Ante, HostLadders.AnteTenths.Length);
+        Stack = LastIndexAtMost(memory.Stack, HostLadders.PracticeStacks.Length);
+        PracticeRebuy = memory.PracticeRebuy;
+        Bank = LastIndexAtMost(memory.Bank, HostLadders.Gil.Length);
+        MaxPayout = LastIndexAtMost(memory.MaxPayout, HostLadders.Gil.Length);
+        PayoutCapped = memory.PayoutCapped;
+        TurnSeconds = memory.TurnSeconds;
+        TimeBank = memory.TimeBank;
+        DealerMode = Math.Clamp(memory.DealerMode, CasinoDealerModes.House, CasinoDealerModes.Host);
+        AutoDeal = memory.AutoDeal;
+        Pays = Math.Clamp(memory.Pays, CasinoRuleSheet.PaysThreeToTwo, CasinoRuleSheet.PaysEven);
+        HitsSoft17 = memory.HitsSoft17;
+        Decks = memory.Decks;
+        Splits = Math.Clamp(memory.Splits, CasinoRuleSheet.SplitsOff, CasinoRuleSheet.SplitsToFour);
+        Doubles = Math.Clamp(memory.Doubles, CasinoRuleSheet.DoublesAny, CasinoRuleSheet.DoublesOff);
+        Charlie = memory.Charlie;
+        Peek = memory.Peek;
+        Sides = LastIndexAtMost(memory.Sides, HostLadders.DiceSides.Length);
+        HighestWins = memory.HighestWins;
+        RoundSeconds = LastIndexAtMost(memory.RoundSeconds, HostLadders.RoundSeconds.Length);
+        StartAt = LastIndexAtMost(memory.StartAt, HostLadders.StartNumbers.Length);
+        Stake = LastIndexAtMost(memory.Stake, rungs.Length);
+    }
+
+    private static int LastIndexAtMost(int index, int length) => Math.Clamp(index, 0, length - 1);
+
     private void ResetStakes()
     {
         var rungs = BetRungs;

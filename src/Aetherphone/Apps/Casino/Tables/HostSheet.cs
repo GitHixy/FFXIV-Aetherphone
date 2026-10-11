@@ -73,9 +73,12 @@ internal sealed class HostSheet
     private static readonly LocString[] DoubleLabels =
         { L.Tables.DoublesAny, L.Tables.DoublesNineEleven, L.Tables.OptionOff };
 
+    private const int SettleToEndFrames = 2;
+
     private readonly CasinoTablesStore tables;
     private readonly CasinoStore chips;
     private readonly Venue.VenueHostOptions venueOptions;
+    private readonly CasinoPreferences preferences;
     private readonly HostDraft draft = new();
     private readonly CasinoTextCache texts = new();
     private readonly TileRail rail = new();
@@ -94,12 +97,15 @@ internal sealed class HostSheet
     private string inlineReason = string.Empty;
     private bool moreOpen;
     private bool revealGame;
+    private int settleFrames;
 
-    public HostSheet(CasinoTablesStore tables, CasinoStore chips, Venue.VenueHostOptions venueOptions)
+    public HostSheet(CasinoTablesStore tables, CasinoStore chips, Venue.VenueHostOptions venueOptions,
+        CasinoPreferences preferences)
     {
         this.tables = tables;
         this.chips = chips;
         this.venueOptions = venueOptions;
+        this.preferences = preferences;
     }
 
     public void Enter() => Begin(HostGame.Blackjack);
@@ -107,6 +113,28 @@ internal sealed class HostSheet
     public void Enter(string gameKind) => Begin(HostGames.FromKind(gameKind));
 
     public void EnterVenue(VenueRoomKind kind) => Begin(HostGames.FromVenue(kind));
+
+    public void EnterGame(HostGame game, bool preferGil)
+    {
+        Begin(game);
+        revealGame = true;
+        if (preferGil)
+        {
+            draft.SelectCurrency(CasinoCurrencies.Gil, chips.HasFeature(CasinoFeatures.GilTables));
+        }
+    }
+
+    public void EnterDraft(CasinoHostDraftMemory saved)
+    {
+        Begin(HostDraft.GameOf(saved));
+        draft.Restore(saved);
+        venueOptions.PinLocation = saved.PinLocation;
+        revealGame = true;
+        moreOpen = true;
+        settleFrames = SettleToEndFrames;
+    }
+
+    public void RememberDraft() => preferences.RememberHostDraft(draft.Snapshot(venueOptions.PinLocation));
 
     public void Draw(Rect body, AppSkin ui)
     {
@@ -125,6 +153,7 @@ internal sealed class HostSheet
             using (AppSurface.Begin(scroll))
             {
                 DrawSteps(ui, gilOpen, scale);
+                SettleToEnd();
             }
 
             DrawFooter(ui, new Rect(new Vector2(body.Min.X, scroll.Max.Y), body.Max), line, summaryHeight, scale);
@@ -137,8 +166,20 @@ internal sealed class HostSheet
         venueOptions.Reset();
         inlineReason = string.Empty;
         moreOpen = false;
+        settleFrames = 0;
         rail.Reset();
         revealGame = game != HostGame.Blackjack;
+    }
+
+    private void SettleToEnd()
+    {
+        if (settleFrames <= 0)
+        {
+            return;
+        }
+
+        settleFrames--;
+        ImGui.SetScrollY(ImGui.GetScrollMaxY());
     }
 
     private void DrawSteps(AppSkin ui, bool gilOpen, float scale)
