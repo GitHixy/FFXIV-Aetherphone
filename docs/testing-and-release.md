@@ -8,6 +8,8 @@ This page explains how Aetherphone code gets validated and shipped: the unit tes
 | --- | --- |
 | src/Aetherphone.Tests/Aetherphone.Tests.csproj | xUnit test project, references the plugin and the Dalamud assembly |
 | .github/workflows/ci.yml | Validation on master and dev: guard checks, build, tests, artifacts |
+| .github/workflows/label-pull-request.yml | Checks every pull request title and sets its labels from the title and the changed paths; run it by hand from the Actions tab to label an older pull request |
+| .github/release.yml | Groups the auto-generated GitHub release notes by label and drops Dependabot's bumps |
 | .github/workflows/auto-tag.yml | Tags master automatically when Directory.Build.props gets a new version |
 | .github/workflows/release.yml | Builds latest.zip, publishes the GitHub release, announces it, updates repo.json |
 | .github/scripts/Get-ChangelogNotes.ps1 | Turns a version's changelog entry into the Discord release post text |
@@ -125,7 +127,7 @@ Three details worth knowing:
 .github/workflows/release.yml fires on `v*.*.*` tag pushes (with a `workflow_dispatch` fallback that accepts a `tag` input). It:
 
 1. Checks out the tag, downloads Dalamud, restores in locked mode, and builds Release.
-2. Stages `src/Aetherphone/bin/Release/Aetherphone/latest.zip` and publishes it as a GitHub release with auto-generated release notes.
+2. Stages `src/Aetherphone/bin/Release/Aetherphone/latest.zip` and publishes it as a GitHub release with auto-generated release notes, grouped by label through .github/release.yml.
 3. Announces the release on Discord (see below).
 4. Rewrites repo.json on master: `AssemblyVersion`, `TestingAssemblyVersion`, a refreshed `DownloadCount` summed across all releases, and a new `LastUpdate` timestamp, then commits it with a rebase-and-retry loop.
 5. If the `HUB_REPO_PAT` secret is set, sends a `repository_dispatch` to the XeldarAlz/DalamudPlugins hub repo so the multi-plugin manifest regenerates immediately.
