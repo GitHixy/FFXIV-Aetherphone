@@ -20,7 +20,7 @@ public sealed class RaceStatusLayoutTests
         new(390f, 844f), new(360f, 740f), new(430f, 932f), new(844f, 390f), new(740f, 360f),
     };
 
-    private static readonly LocString[] Labels = { L.Race.StatusOpen, L.Race.StatusNext };
+    private static readonly LocString[] Labels = { L.Race.StatusOpen, L.Race.StatusOpens };
 
     private static CasinoStageLayout Stage(Vector2 phone, float scale) =>
         RaceScreenLayoutTests.Stage(RaceScreenLayoutTests.Phone(phone, scale), RaceCabinet.DeckHeight, scale);

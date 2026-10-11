@@ -9816,7 +9816,7 @@
   "casino.race.noWin": "В этом забеге без выигрыша",
   "casino.race.allDividends": "Все выплаты",
   "casino.race.statusOpen": "Ставки открыты",
-  "casino.race.statusNext": "Следующий забег",
+  "casino.race.statusOpens": "Ставки откроются",
   "casino.dealerholdem.game": "Холдем против дилера",
   "casino.dealerholdem.pitch": "Холдем один на один с дилером. Ставьте крупно, когда нравятся карты; дилеру для квалификации нужна пара.",
   "casino.dealerholdem.rulesStep1": "Поставьте Ante; Blind всегда равен ему. По желанию добавьте побочную ставку Trips.",

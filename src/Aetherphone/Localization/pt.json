@@ -9816,7 +9816,7 @@
   "casino.race.noWin": "Sem prêmio nesta corrida",
   "casino.race.allDividends": "Todos os dividendos",
   "casino.race.statusOpen": "Apostas abertas",
-  "casino.race.statusNext": "Próxima corrida",
+  "casino.race.statusOpens": "Apostas abrem",
   "casino.dealerholdem.game": "Hold'em contra o dealer",
   "casino.dealerholdem.pitch": "Hold'em cara a cara contra o dealer. Aposte alto quando gostar das suas cartas; o dealer precisa de um par para se qualificar.",
   "casino.dealerholdem.rulesStep1": "Coloque um Ante; o Blind sempre o iguala. Se quiser, adicione a aposta lateral Trips.",

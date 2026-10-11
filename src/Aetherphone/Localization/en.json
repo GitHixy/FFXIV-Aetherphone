@@ -9816,7 +9816,7 @@
   "casino.race.noWin": "No win this race",
   "casino.race.allDividends": "All dividends",
   "casino.race.statusOpen": "Betting open",
-  "casino.race.statusNext": "Next race",
+  "casino.race.statusOpens": "Betting opens",
   "casino.dealerholdem.game": "Dealer Hold'em",
   "casino.dealerholdem.pitch": "Hold'em heads up against the dealer. Bet big when you like your cards; the dealer needs a pair to qualify.",
   "casino.dealerholdem.rulesStep1": "Put down an Ante; the Blind matches it. Add the Trips side bet if you like.",

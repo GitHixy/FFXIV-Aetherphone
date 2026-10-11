@@ -9816,7 +9816,7 @@
   "casino.race.noWin": "Kein Gewinn in diesem Rennen",
   "casino.race.allDividends": "Alle Auszahlungen",
   "casino.race.statusOpen": "Wetten offen",
-  "casino.race.statusNext": "Nächstes Rennen",
+  "casino.race.statusOpens": "Wetten öffnen",
   "casino.dealerholdem.game": "Dealer Hold'em",
   "casino.dealerholdem.pitch": "Hold'em im Duell gegen den Dealer. Setz groß, wenn dir deine Karten gefallen; der Dealer braucht ein Paar, um sich zu qualifizieren.",
   "casino.dealerholdem.rulesStep1": "Setz einen Ante; der Blind ist immer gleich hoch. Wenn du magst, setz zusätzlich auf Trips.",

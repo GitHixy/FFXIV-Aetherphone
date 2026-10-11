@@ -9816,7 +9816,7 @@
   "casino.race.noWin": "本场未中奖",
   "casino.race.allDividends": "全部派彩",
   "casino.race.statusOpen": "开放下注",
-  "casino.race.statusNext": "下一场",
+  "casino.race.statusOpens": "距开放下注",
   "casino.dealerholdem.game": "庄家德州扑克",
   "casino.dealerholdem.pitch": "与庄家一对一的德州扑克。牌好就下重注；庄家至少要有一对才算合格。",
   "casino.dealerholdem.rulesStep1": "下一注底注（Ante），盲注（Blind）始终与之相同。可以另加三条边注（Trips）。",

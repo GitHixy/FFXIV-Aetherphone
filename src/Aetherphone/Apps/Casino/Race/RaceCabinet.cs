@@ -430,7 +430,7 @@ internal sealed class RaceCabinet : ICabinetIdle
     {
         var seconds = RaceStatusLine.SecondsLeft(remainingMs);
         var open = phase == CasinoRoomPhases.Open;
-        var label = Loc.T(open ? L.Race.StatusOpen : L.Race.StatusNext);
+        var label = Loc.T(open ? L.Race.StatusOpen : L.Race.StatusOpens);
         RaceStatusLine.Draw(drawList, frame.Layout, label, seconds, attached,
             open && seconds <= RaceStatusLine.UrgentSeconds, scale);
     }
