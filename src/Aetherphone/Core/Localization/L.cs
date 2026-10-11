@@ -10728,6 +10728,12 @@ internal static class L
         public static readonly LocString SeatHeldFor = new("casino.reconnect.seatHeld", "Your seat is held for {0}. Auto-stand is looking after your hand.");
         public static readonly LocString NotifyTurnTitle = new("casino.notify.turnTitle", "Your turn");
         public static readonly LocString NotifyTurnBody = new("casino.notify.turnBody", "The table is waiting on your hand.");
+        public static readonly LocString NotifyKnockTitle = new("casino.notify.knockTitle", "Someone is asking to join");
+        public static readonly LocString NotifyKnockBody = new("casino.notify.knockBody", "{0} is asking to join your table.");
+        public static readonly LocString NotifyAdmittedTitle = new("casino.notify.admittedTitle", "You are in");
+        public static readonly LocString NotifyAdmittedBody = new("casino.notify.admittedBody", "The host let you in. Open the table to join.");
+        public static readonly LocString NotifyDeniedTitle = new("casino.notify.deniedTitle", "Request declined");
+        public static readonly LocString NotifyDeniedBody = new("casino.notify.deniedBody", "The host did not let you in this time.");
         public static readonly LocString ReasonFull = new("casino.reasonFull", "Every seat at that table is taken. Another one will have room.");
         public static readonly LocString ReasonInviteOnly = new("casino.reasonInviteOnly", "That table is invite only. Ask the host to let you in.");
         public static readonly LocString ReasonDenied = new("casino.reasonDenied", "The host has not opened the door this time.");

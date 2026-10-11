@@ -537,6 +537,13 @@ internal sealed partial class CasinoClient : ITradeMatchSource
             onFailure);
     }
 
+    public Task<CasinoTableKnocksDto?> TableKnocksAsync(string roomId, CancellationToken token,
+        Action<AepFailure>? onFailure = null)
+    {
+        return net.GetAsync(TablePath(roomId, "knocks"), AethernetJsonContext.Default.CasinoTableKnocksDto, token,
+            null, onFailure);
+    }
+
     public Task<CasinoTableActionDto?> KnockAsync(string roomId, CancellationToken token,
         Action<AepFailure>? onFailure = null)
     {

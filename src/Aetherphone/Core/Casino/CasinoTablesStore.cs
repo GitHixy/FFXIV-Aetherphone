@@ -18,6 +18,8 @@ internal sealed class CasinoTablesStore : IDisposable
     private const long LedgerRefreshMilliseconds = 10_000;
     private const long DoorRefreshMilliseconds = 5_000;
     private const long KnockRefreshMilliseconds = 3_000;
+    private const long AwayKnockRefreshMilliseconds = 15_000;
+    private const long AttentionMilliseconds = 1_500;
     private const int NotFoundStatus = 404;
 
     private readonly AethernetSession session;
@@ -44,6 +46,9 @@ internal sealed class CasinoTablesStore : IDisposable
     private int fetchingKnock;
     private int knockMissing;
     private long knockReadAtTick;
+    private long knockWatchedAtTick;
+    private long doorWatchedAtTick;
+    private volatile string doorWatchedRoomId = string.Empty;
     private volatile string ledgerRoomId = string.Empty;
     private CasinoTableConfigDto? createIntentConfig;
     private string ledgerIntentId = string.Empty;
@@ -804,12 +809,55 @@ internal sealed class CasinoTablesStore : IDisposable
         return seeded;
     }
 
+    public CasinoKnockStatus HeldKnock => knock;
+
+    public bool KnockAttended(long nowTick) => Attended(Interlocked.Read(ref knockWatchedAtTick), nowTick);
+
+    public bool DoorAttended(string roomId, long nowTick) =>
+        string.Equals(doorWatchedRoomId, roomId, StringComparison.Ordinal)
+        && Attended(Interlocked.Read(ref doorWatchedAtTick), nowTick);
+
+    internal static bool Attended(long watchedAtTick, long nowTick)
+    {
+        return watchedAtTick != 0 && nowTick - watchedAtTick <= AttentionMilliseconds;
+    }
+
+    public string HostedTableId()
+    {
+        var rows = listed;
+        for (var index = 0; index < rows.Length; index++)
+        {
+            if (rows[index].Kind == CasinoTableKinds.Private && Owns(rows[index]))
+            {
+                return rows[index].TableId;
+            }
+        }
+
+        var held = card;
+        return held is not null && held.Kind == CasinoTableKinds.Private && Owns(held) ? held.TableId : string.Empty;
+    }
+
     public void EnsureKnockFresh(string roomId)
+    {
+        Interlocked.Exchange(ref knockWatchedAtTick, Environment.TickCount64);
+        RefreshKnock(roomId, KnockRefreshMilliseconds);
+    }
+
+    public void PollWaitingKnock()
+    {
+        var held = knock;
+        if (held.Stage == KnockStage.Waiting)
+        {
+            RefreshKnock(held.RoomId, AwayKnockRefreshMilliseconds);
+        }
+    }
+
+    private void RefreshKnock(string roomId, long intervalMilliseconds)
     {
         var held = knock;
         if (held.Stage != KnockStage.Waiting || !string.Equals(held.RoomId, roomId, StringComparison.Ordinal)
             || !session.IsSignedIn
-            || Environment.TickCount64 - Interlocked.Read(ref knockReadAtTick) < KnockRefreshMilliseconds
+            || Environment.TickCount64 - Interlocked.Read(ref knockReadAtTick) < intervalMilliseconds
             || Interlocked.Exchange(ref fetchingKnock, 1) != 0)
         {
             return;
@@ -865,6 +913,11 @@ internal sealed class CasinoTablesStore : IDisposable
 
     public void ForgetKnock()
     {
+        if (knock.Stage == KnockStage.Waiting)
+        {
+            return;
+        }
+
         knock = CasinoKnockStatus.Idle;
     }
 
@@ -1013,6 +1066,8 @@ internal sealed class CasinoTablesStore : IDisposable
             return;
         }
 
+        doorWatchedRoomId = roomId;
+        Interlocked.Exchange(ref doorWatchedAtTick, Environment.TickCount64);
         if (!string.Equals(doorRoomId, roomId, StringComparison.Ordinal))
         {
             RefreshDoorNow(roomId);

@@ -45,6 +45,29 @@ public sealed class CasinoKnockFlowTests
     }
 
     [Fact]
+    public void OnlyAnAnswerIsWorthANotificationAndOnlyWhileTheCardIsOffScreen()
+    {
+        Assert.True(CasinoKnockNotifier.AnswerWorthTelling(KnockStage.Admitted));
+        Assert.True(CasinoKnockNotifier.AnswerWorthTelling(KnockStage.Denied));
+        Assert.False(CasinoKnockNotifier.AnswerWorthTelling(KnockStage.Waiting));
+        Assert.False(CasinoKnockNotifier.AnswerWorthTelling(KnockStage.Refused));
+        Assert.False(CasinoKnockNotifier.AnswerWorthTelling(KnockStage.None));
+
+        Assert.False(CasinoTablesStore.Attended(0, 10_000));
+        Assert.True(CasinoTablesStore.Attended(9_000, 10_000));
+        Assert.False(CasinoTablesStore.Attended(5_000, 10_000));
+    }
+
+    [Fact]
+    public void AKnockerIsHeardOncePerKnock()
+    {
+        var first = new CasinoTableKnockDto("u1", "Mira", 1_750_000_000_000);
+        var again = new CasinoTableKnockDto("u1", "Mira", 1_750_000_090_000);
+        Assert.Equal(CasinoKnockNotifier.KnockKey(first), CasinoKnockNotifier.KnockKey(first with { DisplayName = "M" }));
+        Assert.NotEqual(CasinoKnockNotifier.KnockKey(first), CasinoKnockNotifier.KnockKey(again));
+    }
+
+    [Fact]
     public void AKnockWaitsWalksStraightInOrIsTurnedAway()
     {
         Assert.Equal(KnockStage.Waiting,

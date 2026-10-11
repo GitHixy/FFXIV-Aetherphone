@@ -874,6 +874,10 @@ internal sealed record CasinoTableSeatedDto(
     int SeatIndex = -1,
     bool Leaving = false);
 
+internal sealed record CasinoTableKnocksDto(
+    CasinoTableKnockDto[]? Knocks = null,
+    long ServerNowUnixMs = 0);
+
 internal sealed record CasinoTablePresentDto(
     string UserId = "",
     string DisplayName = "",
