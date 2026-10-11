@@ -13,7 +13,10 @@ internal static class VenuePosters
         HostGame.DiceTable,
         HostGame.Deathroll,
         HostGame.Raffle,
+        HostGame.Book,
     };
+
+    public static int Count(bool bookOpen) => bookOpen ? Games.Length : Games.Length - 1;
 
     public static bool PrefersGil(HostGame game, bool gilOpen) =>
         HostGames.Accepts(game, CasinoCurrencies.Gil, gilOpen);
@@ -22,6 +25,11 @@ internal static class VenuePosters
 
     public static LocString MetaOf(HostGame game, bool gilOpen)
     {
+        if (HostGames.IsBook(game))
+        {
+            return L.Book.Plays;
+        }
+
         var gil = HostGames.Accepts(game, CasinoCurrencies.Gil, gilOpen);
         var chips = HostGames.Accepts(game, CasinoCurrencies.Chips, gilOpen);
         if (game == HostGame.Raffle)

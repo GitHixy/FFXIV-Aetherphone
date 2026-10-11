@@ -23,6 +23,7 @@ internal static class HostDraftSummary
         switch (draft.Game)
         {
             case HostGame.Blackjack when draft.Gil:
+            case HostGame.Book:
                 return Loc.T(L.VenueHub.DraftSummaryGil, game, currency, NumberText.Compact(draft.BankValue));
             case HostGame.Blackjack:
                 return Loc.T(L.VenueHub.DraftSummaryBets, game, currency, NumberText.Compact(draft.MinBetValue),

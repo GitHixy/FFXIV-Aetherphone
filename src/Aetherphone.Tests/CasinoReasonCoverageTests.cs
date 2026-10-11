@@ -72,7 +72,7 @@ public sealed class CasinoReasonCoverageTests
             "bonus_not_ready", "club_insufficient", "config_invalid", "practice_only", "not_dealer", "rebuy_off",
             "tournament_live", "no_tournament", "nothing_to_deal", "no_spectators", "duel_live", "no_duel",
             "raffle_live", "no_raffle", "ticket_limit", "round_live", "bank_limit", "host_frozen", "not_party",
-            "already_confirmed", "settled", "gil_only", "not_owner",
+            "already_confirmed", "settled", "gil_only", "not_owner", "guest_entry",
         };
         for (var index = 0; index < reasons.Length; index++)
         {
@@ -101,7 +101,7 @@ public sealed class CasinoReasonCoverageTests
             "host_ticket",
             "round_live", "bank_limit", "host_frozen", "not_party", "already_confirmed", "settled", "gil_only",
             "ended", "restarting", "full", "private", "denied", "knock_pending", "banned_from_table", "blocked",
-            "not_member", "already_hosting", "not_owner", "kicked",
+            "not_member", "already_hosting", "not_owner", "kicked", "guest_entry",
         };
         for (var index = 0; index < serverReasons.Length; index++)
         {

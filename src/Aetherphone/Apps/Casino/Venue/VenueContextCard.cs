@@ -36,6 +36,7 @@ internal sealed class VenueContextCard
     private readonly string[] letters = new string[CasinoRoomCodes.Length];
 
     private CasinoTableRowDto? ownRow;
+    private CasinoTableLedgerDto? ownLedger;
     private TableRowView ownView;
     private string ownCurrencyLine = string.Empty;
     private LanguageInfo? ownLanguage;
@@ -155,6 +156,12 @@ internal sealed class VenueContextCard
 
     private void DrawArt(ImDrawListPtr drawList, in Rect art)
     {
+        if (ownView.Book)
+        {
+            TableRow.BookTile(drawList, art.Center, art.Width);
+            return;
+        }
+
         if (ownView.Room != VenueRoomKind.None)
         {
             CasinoArt.IconTileAt(drawList, art.Center, art.Width, HostGames.Of(HostGames.FromVenue(ownView.Room)).Tint,
@@ -206,14 +213,17 @@ internal sealed class VenueContextCard
 
     private void RefreshOwn(CasinoTableRowDto row)
     {
-        if (ReferenceEquals(row, ownRow) && ReferenceEquals(ownLanguage, Loc.Current))
+        var ledger = tables.HeldLedger;
+        if (ReferenceEquals(row, ownRow) && ReferenceEquals(ledger, ownLedger)
+            && ReferenceEquals(ownLanguage, Loc.Current))
         {
             return;
         }
 
         ownRow = row;
+        ownLedger = ledger;
         ownLanguage = Loc.Current;
-        ownView = TableBrowser.ViewOf(row, tables.AccountId);
+        ownView = TableBrowser.ViewOf(row, tables.AccountId, TableBrowser.BookEntriesOf(row, ledger));
         var bank = row.Config?.Bank ?? 0;
         var payout = row.Config?.MaxPayout ?? 0;
         ownCurrencyLine = ownView.Currency == CasinoCurrencies.Gil && bank > 0

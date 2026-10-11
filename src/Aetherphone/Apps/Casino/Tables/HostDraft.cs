@@ -81,12 +81,12 @@ internal sealed class HostDraft
         _ => HostLadders.CoinBets,
     };
 
-    public LadderSpan PayoutSpan => new(MaxBet, Bank);
+    public LadderSpan PayoutSpan => new(Game == HostGame.Book ? 0 : MaxBet, Bank);
 
     public void Reset(HostGame game)
     {
         Game = game;
-        Currency = HostGames.IsVenue(game) ? CasinoCurrencies.Practice : CasinoCurrencies.Chips;
+        Currency = HostGames.DefaultCurrency(game);
         Seats = CasinoHostingRules.DefaultSeats;
         Listing = CasinoListings.Private;
         Spectators = true;
@@ -172,6 +172,11 @@ internal sealed class HostDraft
         if (Game == HostGame.Holdem)
         {
             return BuildHoldem(location);
+        }
+
+        if (Game == HostGame.Book)
+        {
+            return BuildBook(location);
         }
 
         return HostGames.IsVenue(Game) ? BuildVenue(location) : BuildBlackjack(location);
@@ -326,6 +331,30 @@ internal sealed class HostDraft
             Location: location,
             Poker: new CasinoPokerTableOptionsDto(bigBlind / 2, bigBlind * HostLadders.AnteTenths[Ante] / 10),
             Currency: Practice ? CasinoCurrencies.Practice : CasinoCurrencies.Chips);
+    }
+
+    private CasinoTableConfigDto BuildBook(CasinoTableLocationDto? location)
+    {
+        return new CasinoTableConfigDto(
+            GameKind: CasinoWire.BookKind,
+            Name: Name.Trim(),
+            Seats: 0,
+            Practice: false,
+            PracticeStack: CasinoHostingRules.DefaultPracticeStack,
+            PracticeRebuy: false,
+            TurnSeconds: CasinoHostingRules.DefaultTurnSeconds,
+            TimeBankUses: CasinoHostingRules.TimeBankUses,
+            Listing: Listing,
+            Spectators: false,
+            FaceUp: false,
+            DealerMode: CasinoDealerModes.House,
+            CoDealers: null,
+            AutoDeal: false,
+            HouseRules: null,
+            Location: location,
+            Currency: CasinoCurrencies.Gil,
+            Bank: BankValue,
+            MaxPayout: PayoutValue);
     }
 
     private CasinoTableConfigDto BuildVenue(CasinoTableLocationDto? location)

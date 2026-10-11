@@ -1,3 +1,4 @@
+using Aetherphone.Apps.Casino;
 using Aetherphone.Apps.Casino.Tables;
 using Aetherphone.Core.Aethernet.Clients;
 using Aetherphone.Core.Aethernet.Contracts;
@@ -123,6 +124,55 @@ public sealed class CasinoTableBrowserTests
         var practice = TableBrowser.ViewOf(Row(currency: CasinoCurrencies.Practice), Me);
         Assert.Equal(CasinoCurrencies.Practice, practice.Currency);
         Assert.Equal(string.Empty, practice.Reputation);
+    }
+
+    [Fact]
+    public void ABookRowNamesItsEntriesWhenTheLedgerIsKnownAndItsHostOtherwise()
+    {
+        var book = Row(seatsTaken: 0, seatCount: 0, owner: true, gameKind: CasinoWire.BookKind,
+            currency: CasinoCurrencies.Gil) with
+        {
+            TableId = "table-book",
+            Name = "Mist Lounge",
+            Config = new CasinoTableConfigDto(GameKind: CasinoWire.BookKind, Currency: CasinoCurrencies.Gil,
+                Bank: 5_000_000),
+        };
+
+        var counted = TableBrowser.ViewOf(book, Me, 12);
+        Assert.True(counted.Book);
+        Assert.Equal("Mist Lounge", counted.Name);
+        Assert.Equal(Loc.T(L.Book.RowLine, "12"), counted.Stakes);
+        Assert.Equal(Loc.T(L.Tables.HostedBy, "Emerald"), counted.Seats);
+        Assert.False(counted.Full);
+        Assert.True(counted.Mine);
+        Assert.Equal(CasinoGames.Book, counted.GameId);
+        Assert.Equal(CasinoCurrencies.Gil, counted.Currency);
+        Assert.True(TableRow.Live(counted));
+
+        var unknown = TableBrowser.ViewOf(book, Me);
+        Assert.Equal(Loc.T(L.Tables.HostedBy, "Emerald"), unknown.Stakes);
+        Assert.Equal(string.Empty, unknown.Seats);
+
+        var ledger = new CasinoTableLedgerDto("table-book", true, Currency: CasinoCurrencies.Gil,
+            Entries: new[] { new CasinoLedgerEntryDto("g1"), new CasinoLedgerEntryDto("g2") });
+        Assert.Equal(2, TableBrowser.BookEntriesOf(book, ledger));
+        Assert.Equal(-1, TableBrowser.BookEntriesOf(book, ledger with { TableId = "other" }));
+        Assert.Equal(-1, TableBrowser.BookEntriesOf(book, null));
+        Assert.Equal(-1, TableBrowser.BookEntriesOf(Row(), ledger with { TableId = "blackjack-pit" }));
+        Assert.Equal(Loc.T(L.Book.Plays), TableBrowser.BookLine(-1, string.Empty));
+    }
+
+    [Fact]
+    public void ABookIsListedUnderAllGilAndMineButNeverUnderRooms()
+    {
+        var book = Row(owner: true, gameKind: CasinoWire.BookKind, currency: CasinoCurrencies.Gil);
+        Assert.True(CasinoTableFilters.Shown(book));
+        Assert.True(CasinoTableFilters.Matches(CasinoTableFilter.All, book, Me));
+        Assert.True(CasinoTableFilters.Matches(CasinoTableFilter.Gil, book, Me));
+        Assert.True(CasinoTableFilters.Matches(CasinoTableFilter.Mine, book, Me));
+        Assert.False(CasinoTableFilters.Matches(CasinoTableFilter.Rooms, book, Me));
+        Assert.False(CasinoTableFilters.Matches(CasinoTableFilter.Blackjack, book, Me));
+        Assert.False(CasinoTableFilters.Matches(CasinoTableFilter.Practice, book, Me));
     }
 
     [Fact]

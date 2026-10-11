@@ -138,10 +138,10 @@ public sealed class CasinoHostDraftMemoryTests
         restored.Normalize(true);
         var config = restored.Build(null);
 
-        Assert.Equal(HostGame.Raffle, restored.Game);
+        Assert.Equal(HostGame.Book, restored.Game);
         Assert.Equal(CasinoListings.Open, restored.Listing);
         Assert.Equal(CasinoRuleSheet.PaysEven, restored.Pays);
         Assert.Equal(HostLadders.Gil[^1], HostLadders.Gil[restored.Bank]);
-        Assert.Equal(string.Empty, VenueRules.Check(config));
+        Assert.Equal(string.Empty, CasinoHostingRules.Check(config));
     }
 }

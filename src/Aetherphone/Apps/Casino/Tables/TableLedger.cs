@@ -21,7 +21,8 @@ internal readonly record struct LedgerRowView(string Name, string BuyIns, string
     long NetValue, bool Seated);
 
 internal readonly record struct LedgerEntryView(string EntryId, string Title, string Parties, string Amount,
-    string State, LedgerTone Tone, bool CanConfirm, string ConfirmLabel, bool CanDispute, string DisputeLabel);
+    string State, LedgerTone Tone, bool CanConfirm, string ConfirmLabel, bool CanDispute, string DisputeLabel,
+    string Tag = "");
 
 internal sealed class TableLedger
 {
@@ -48,6 +49,7 @@ internal sealed class TableLedger
     private TradeMiss? missSource;
     private LanguageInfo? missLanguage;
     private string missText = string.Empty;
+    private string totalsText = string.Empty;
     private string viewMe = string.Empty;
     private LedgerRowView[] rows = Array.Empty<LedgerRowView>();
     private string[] playerNames = Array.Empty<string>();
@@ -107,8 +109,13 @@ internal sealed class TableLedger
         }
 
         Refresh(ledger, myUserId);
-        DrawHeading(ui, ledger, scale);
-        DrawRows(ui, ledger.Currency, scale);
+        var book = CasinoBookRules.IsBook(tables.CardFor(roomId)?.GameKind);
+        DrawHeading(ui, ledger, book, scale);
+        if (!book)
+        {
+            DrawRows(ui, ledger.Currency, scale);
+        }
+
         if (ledger.Currency != CasinoCurrencies.Gil)
         {
             return;
@@ -207,12 +214,33 @@ internal sealed class TableLedger
         var gil = ledger.Entries ?? Array.Empty<CasinoLedgerEntryDto>();
         for (var index = 0; index < gil.Length; index++)
         {
-            var entry = gil[index];
-            builder.Append(Loc.T(L.Tables.CopyEntry, Loc.T(KindLabel(entry.Kind)), entry.PayerName, entry.PayeeName,
-                AmountText(entry.Amount, ledger.Currency), StateText(entry))).Append('\n');
+            builder.Append(EntryLine(gil[index], ledger.Currency)).Append('\n');
+        }
+
+        var totals = GilLedgerTotals.Of(gil, viewMe);
+        if (totals.Settled > 0)
+        {
+            builder.Append(TotalsText(totals)).Append('\n');
         }
 
         return builder.ToString();
+    }
+
+    internal static string EntryLine(CasinoLedgerEntryDto entry, int currency)
+    {
+        return Loc.T(L.Tables.CopyEntry, Loc.T(KindLabel(entry.Kind)), SideName(entry, entry.PayerUserId,
+            entry.PayerName), SideName(entry, entry.PayeeUserId, entry.PayeeName), AmountText(entry.Amount, currency),
+            StateText(entry));
+    }
+
+    internal static string SideName(CasinoLedgerEntryDto entry, string userId, string name)
+    {
+        return entry.Guest && userId.Length == 0 ? Loc.T(L.Book.GuestNamed, name) : name;
+    }
+
+    internal static string TotalsText(in GilLedgerTotals totals)
+    {
+        return Loc.T(L.Book.NightTotals, NumberText.Group(totals.In), NumberText.Group(totals.Out));
     }
 
     private void Refresh(CasinoTableLedgerDto ledger, string myUserId)
@@ -262,6 +290,8 @@ internal sealed class TableLedger
         cards.Refresh(gil, myUserId, ledger.Currency);
         var unsettled = CasinoGilLedger.UnsettledCount(gil);
         waitingNote = unsettled > 0 ? Loc.T(L.Tables.EntriesWaiting, unsettled.ToString(Loc.Culture)) : string.Empty;
+        var totals = GilLedgerTotals.Of(gil, myUserId);
+        totalsText = totals.Settled > 0 ? TotalsText(totals) : string.Empty;
     }
 
     private void DrawMiss(AppSkin ui, float scale)
@@ -282,7 +312,12 @@ internal sealed class TableLedger
         Note(ui, missText, Amber, scale);
     }
 
-    private void DrawHeading(AppSkin ui, CasinoTableLedgerDto ledger, float scale)
+    internal static bool CanCopy(CasinoTableLedgerDto ledger, bool book)
+    {
+        return (ledger.Rows?.Length ?? 0) > 0 || (book && (ledger.Entries?.Length ?? 0) > 0);
+    }
+
+    private void DrawHeading(AppSkin ui, CasinoTableLedgerDto ledger, bool book, float scale)
     {
         var width = ScrollLayout.StableContentWidth();
         var origin = ImGui.GetCursorScreenPos();
@@ -299,7 +334,7 @@ internal sealed class TableLedger
         var buttonTop = top + (height - buttonHeight) * 0.5f;
         var rect = new Rect(new Vector2(origin.X + width - buttonWidth, buttonTop),
             new Vector2(origin.X + width, buttonTop + buttonHeight));
-        if (Button.Draw(drawList, rect, copyLabel, ui.Ink, ButtonStyle.Tinted, enabled: (ledger.Rows?.Length ?? 0) > 0,
+        if (Button.Draw(drawList, rect, copyLabel, ui.Ink, ButtonStyle.Tinted, enabled: CanCopy(ledger, book),
                 id: "ledger.copy"))
         {
             ImGui.SetClipboardText(CopyText());
@@ -399,6 +434,11 @@ internal sealed class TableLedger
         }
 
         var action = cards.Draw(ui, !tables.IntentInFlight, scale);
+        if (totalsText.Length > 0)
+        {
+            Note(ui, totalsText, ui.BodyInk, scale);
+        }
+
         if (action.Press == LedgerEntryPress.Confirm)
         {
             tables.ConfirmLedgerEntry(roomId, action.EntryId);

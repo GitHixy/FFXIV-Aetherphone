@@ -3,6 +3,7 @@ using Aetherphone.Apps.Casino.Tables;
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
+using Aetherphone.Core.Localization;
 using Xunit;
 
 namespace Aetherphone.Tests;
@@ -146,6 +147,36 @@ public sealed class CasinoDoorLayoutTests
         Assert.Equal(DoorControl.Pause, controls[0]);
         Assert.Equal(DoorControl.Rename, controls[1]);
         Assert.Equal(DoorControl.Close, controls[2]);
+    }
+
+    [Fact]
+    public void ABookDoorOffersRenameAndCloseWithItsOwnNoteAndNoSeats()
+    {
+        var book = new CasinoTableRowDto(TableId: "t1", GameKind: CasinoWire.BookKind, Currency: CasinoCurrencies.Gil,
+            Config: new CasinoTableConfigDto(GameKind: CasinoWire.BookKind, Currency: CasinoCurrencies.Gil,
+                DealerMode: CasinoDealerModes.Host));
+        var controls = new DoorControl[5];
+        Assert.Equal(2, TableDoor.ControlsFor(book, controls));
+        Assert.Equal(DoorControl.Rename, controls[0]);
+        Assert.Equal(DoorControl.Close, controls[1]);
+        Assert.Equal(L.Book.DoorNote.Key, TableDoor.NoteFor(book)!.Value.Key);
+        Assert.False(TableDoor.HasSeats(book));
+        Assert.False(TableDoor.TakesCoDealers(book));
+        Assert.False(TableDoor.ExplainsHostLimits(book));
+
+        var chips = new CasinoTableRowDto(TableId: "t2", GameKind: CasinoWire.BlackjackKind);
+        Assert.Equal(2, TableDoor.ControlsFor(chips, controls));
+        Assert.Equal(L.Tables.ChipHostNote.Key, TableDoor.NoteFor(chips)!.Value.Key);
+
+        var holdem = new CasinoTableRowDto(TableId: "t3", GameKind: HoldemRules.Kind, Practice: true);
+        Assert.Equal(3, TableDoor.ControlsFor(holdem, controls));
+        Assert.Equal(L.Tables.CoDealersHoldemNote.Key, TableDoor.NoteFor(holdem)!.Value.Key);
+
+        var gil = new CasinoTableRowDto(TableId: "t4", GameKind: CasinoWire.BlackjackKind,
+            Currency: CasinoCurrencies.Gil,
+            Config: new CasinoTableConfigDto(Currency: CasinoCurrencies.Gil, DealerMode: CasinoDealerModes.Host));
+        Assert.Equal(5, TableDoor.ControlsFor(gil, controls));
+        Assert.Null(TableDoor.NoteFor(gil));
     }
 
     [Fact]

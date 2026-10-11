@@ -52,7 +52,8 @@ internal sealed class VenueSection
         var tileWidth = PosterTile.Width(width, gap, scale);
         var tileHeight = PosterTile.Height(tileWidth, PosterTile.TextBlock(scale));
         var games = VenuePosters.Games;
-        var contentWidth = StripShelves.RowWidth(games.Length, tileWidth, gap);
+        var count = VenuePosters.Count(chips.HasFeature(CasinoFeatures.VenueBook));
+        var contentWidth = StripShelves.RowWidth(count, tileWidth, gap);
         var pad = StripShelves.RailPad * scale;
         var row = new Rect(new Vector2(origin.X - pad, origin.Y - pad),
             new Vector2(origin.X + width + pad, origin.Y + tileHeight + pad));
@@ -61,7 +62,7 @@ internal sealed class VenueSection
         var phase = (float)ImGui.GetTime();
         var features = chips.Features;
         var tapped = -1;
-        for (var index = 0; index < games.Length; index++)
+        for (var index = 0; index < count; index++)
         {
             var left = origin.X + index * (tileWidth + gap) - rail.Offset;
             if (left > row.Max.X || left + tileWidth < row.Min.X)

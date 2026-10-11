@@ -31,7 +31,8 @@ internal readonly record struct TableRowView(
     int SeatCount = 0,
     VenueRoomKind Room = VenueRoomKind.None,
     string PhaseLabel = "",
-    bool PhaseLive = false);
+    bool PhaseLive = false,
+    bool Book = false);
 
 internal static class TableRow
 {
@@ -67,6 +68,12 @@ internal static class TableRow
         CasinoCurrencies.Gil => GilTint,
         _ => accent,
     };
+
+    public static void BookTile(ImDrawListPtr drawList, Vector2 center, float size)
+    {
+        ref readonly var book = ref Tables.HostGames.Of(Tables.HostGame.Book);
+        CasinoArt.IconTileAt(drawList, center, size, book.Tint, book.Icon);
+    }
 
     public static FontAwesomeIcon IconOf(VenueRoomKind room) => room switch
     {
@@ -223,7 +230,11 @@ internal static class TableRow
         float scale)
     {
         var art = layout.Art;
-        if (view.Room != VenueRoomKind.None)
+        if (view.Book)
+        {
+            BookTile(drawList, art.Center, art.Width);
+        }
+        else if (view.Room != VenueRoomKind.None)
         {
             CasinoArt.IconTileAt(drawList, art.Center, art.Width,
                 Tables.HostGames.Of(Tables.HostGames.FromVenue(view.Room)).Tint, IconOf(view.Room));

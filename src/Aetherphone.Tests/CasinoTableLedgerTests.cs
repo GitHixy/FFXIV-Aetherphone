@@ -65,6 +65,69 @@ public sealed class CasinoTableLedgerTests
     }
 
     [Fact]
+    public void AGuestEntryIsCopiedWithItsNameMarkedAsAGuest()
+    {
+        var buyIn = new CasinoLedgerEntryDto("g1", "t1", CasinoLedgerKinds.BuyIn, 50_000, string.Empty, "Chea Thorne",
+            "h", "Ciri", "host", CasinoLedgerKinds.Trade, true, true, true, Guest: true, GuestName: "Chea Thorne");
+        var payout = buyIn with
+        {
+            Kind = CasinoLedgerKinds.Payout, PayerUserId = "h", PayerName = "Ciri", PayeeUserId = string.Empty,
+            PayeeName = "Chea Thorne",
+        };
+        var registered = new CasinoLedgerEntryDto("e1", "t1", CasinoLedgerKinds.BuyIn, 50_000, "p", "Mira", "h",
+            "Ciri", Settled: true, PayerConfirmed: true, PayeeConfirmed: true);
+
+        Assert.Equal(Loc.T(L.Tables.CopyEntry, Loc.T(L.Tables.KindBuyIn), "Chea Thorne (guest)", "Ciri",
+            TableLedger.AmountText(50_000, CasinoCurrencies.Gil), Loc.T(L.Tables.EntrySettled)),
+            TableLedger.EntryLine(buyIn, CasinoCurrencies.Gil));
+        Assert.Contains("Ciri to Chea Thorne (guest)", TableLedger.EntryLine(payout, CasinoCurrencies.Gil),
+            StringComparison.Ordinal);
+        Assert.DoesNotContain("(guest)", TableLedger.EntryLine(registered, CasinoCurrencies.Gil),
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AGuestEntryTakesNoConfirmationAndNoDispute()
+    {
+        var guest = new CasinoLedgerEntryDto("g1", "t1", CasinoLedgerKinds.Payout, 50_000, "h", "Ciri", string.Empty,
+            "Chea Thorne", Guest: true, GuestName: "Chea Thorne");
+
+        Assert.False(CasinoGilLedger.CanConfirm(guest, "h"));
+        Assert.False(CasinoGilLedger.CanDispute(guest, "h"));
+        Assert.False(CasinoGilLedger.CanConfirm(guest with { Settled = true }, "h"));
+        Assert.True(CasinoGilLedger.CanConfirm(guest with { Guest = false, PayeeUserId = "p" }, "h"));
+        Assert.True(CasinoGilLedger.CanDispute(guest with { Guest = false, PayeeUserId = "p" }, "p"));
+    }
+
+    [Fact]
+    public void NightTotalsCountSettledEntriesOnBothSidesIncludingGuests()
+    {
+        var entries = new[]
+        {
+            new CasinoLedgerEntryDto("g1", "t1", CasinoLedgerKinds.BuyIn, 50_000, string.Empty, "Chea Thorne", "h",
+                "Ciri", Settled: true, Guest: true, GuestName: "Chea Thorne"),
+            new CasinoLedgerEntryDto("g2", "t1", CasinoLedgerKinds.Payout, 20_000, "h", "Ciri", string.Empty,
+                "Chea Thorne", Settled: true, Guest: true, GuestName: "Chea Thorne"),
+            new CasinoLedgerEntryDto("e1", "t1", CasinoLedgerKinds.BuyIn, 100_000, "p", "Mira", "h", "Ciri",
+                Settled: true),
+            new CasinoLedgerEntryDto("e2", "t1", CasinoLedgerKinds.Payout, 70_000, "h", "Ciri", "p", "Mira"),
+        };
+
+        var host = GilLedgerTotals.Of(entries, "h");
+        Assert.Equal(150_000, host.In);
+        Assert.Equal(20_000, host.Out);
+        Assert.Equal(3, host.Settled);
+
+        var player = GilLedgerTotals.Of(entries, "p");
+        Assert.Equal(0, player.In);
+        Assert.Equal(100_000, player.Out);
+        Assert.Equal(GilLedgerTotals.Empty, GilLedgerTotals.Of(entries, string.Empty));
+        Assert.Equal(GilLedgerTotals.Empty, GilLedgerTotals.Of(null, "h"));
+        Assert.Equal(Loc.T(L.Book.NightTotals, NumberText.Group(150_000), NumberText.Group(20_000)),
+            TableLedger.TotalsText(host));
+    }
+
+    [Fact]
     public void CoDealersToggleInAndOut()
     {
         var config = new CasinoTableConfigDto(CoDealers: new[] { "u2" });
