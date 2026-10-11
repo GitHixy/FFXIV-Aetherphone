@@ -49,6 +49,7 @@ internal sealed class TableBrowser
     private readonly Action openHostSheet;
     private readonly Action openGilLedger;
     private readonly Venue.NearbyTablesCard nearby;
+    private readonly Venue.VenueContextCard context;
     private readonly Action<CasinoTableRowDto> openNearby;
     private readonly ChipRail rail = new();
     private readonly string[] filterLabels = new string[FilterLabels.Length];
@@ -69,9 +70,10 @@ internal sealed class TableBrowser
 
     public TableBrowser(CasinoTablesStore tables, HoldemStore holdemTables, CasinoStore chips,
         Action<string> openTable, Action<string> openDoor, Action enterHouse, Action openHostSheet,
-        Action openGilLedger, Venue.NearbyTablesCard nearby)
+        Action openGilLedger, Venue.NearbyTablesCard nearby, Venue.VenueContextCard context)
     {
         this.nearby = nearby;
+        this.context = context;
         openNearby = row => openTable(row.TableId);
         this.tables = tables;
         this.holdemTables = holdemTables;
@@ -114,6 +116,8 @@ internal sealed class TableBrowser
         RefreshViews();
         using var surface = AppSurface.Begin(body);
         var width = ScrollLayout.StableContentWidth();
+        DrawContext(ui, width, scale);
+        Gap(SectionGap, scale);
         DrawJoinByCode(ui, width, scale);
         if (inlineReason.Length > 0)
         {
@@ -121,10 +125,12 @@ internal sealed class TableBrowser
         }
 
         Gap(SectionGap, scale);
-        DrawHostCta(ui, width, scale);
         DrawGilLedgerCta(ui, width, scale);
-        Gap(SectionGap, scale);
-        DrawNearby(ui, width, scale);
+        if (!context.ShowsNearby)
+        {
+            DrawNearby(ui, width, scale);
+        }
+
         DrawFilters(ui);
         Gap(Metrics.Space.Sm, scale);
         DrawRows(ui, width, scale);
@@ -374,12 +380,12 @@ internal sealed class TableBrowser
         ImGui.Dummy(new Vector2(width, max.Y - origin.Y));
     }
 
-    private void DrawHostCta(AppSkin ui, float width, float scale)
+    private void DrawContext(AppSkin ui, float width, float scale)
     {
-        if (DrawCta(ui, width, scale, FontAwesomeIcon.Plus, Loc.T(L.Tables.HostCta), Loc.T(L.Tables.HostCtaLine), true))
-        {
-            OpenHost();
-        }
+        var origin = ImGui.GetCursorScreenPos();
+        var bottom = context.Draw(ImGui.GetWindowDrawList(), ui, origin, width, scale);
+        ImGui.SetCursorScreenPos(origin);
+        ImGui.Dummy(new Vector2(width, MathF.Max(0f, bottom - origin.Y)));
     }
 
     private void DrawGilLedgerCta(AppSkin ui, float width, float scale)
@@ -389,12 +395,13 @@ internal sealed class TableBrowser
             return;
         }
 
-        Gap(RowGap, scale);
         if (DrawCta(ui, width, scale, FontAwesomeIcon.Book, Loc.T(L.Tables.MyLedgerTitle), Loc.T(L.Tables.MyLedgerLine),
                 false))
         {
             openGilLedger();
         }
+
+        Gap(SectionGap, scale);
     }
 
     private static bool DrawCta(AppSkin ui, float width, float scale, FontAwesomeIcon glyph, string title,

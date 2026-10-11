@@ -48,7 +48,7 @@ internal sealed partial class CasinoApp
         navTabs[0] = new TabItem(Loc.T(L.Strip.TabFloor), IconGlyph.Of(FontAwesomeIcon.DiceD20));
         navTabs[1] = new TabItem(Loc.T(L.Casino.TabLive), IconGlyph.Of(FontAwesomeIcon.BroadcastTower),
             Badge: LiveHeadcount(), AnchorKey: "casino.tab.live");
-        navTabs[2] = new TabItem(Loc.T(L.Casino.TablesTitle), IconGlyph.Of(FontAwesomeIcon.Couch),
+        navTabs[2] = new TabItem(Loc.T(L.VenueHub.Tab), IconGlyph.Of(FontAwesomeIcon.Store),
             AnchorKey: "casino.tab.tables");
         navTabs[3] = new TabItem(Loc.T(L.Casino.TabCashier), IconGlyph.Of(FontAwesomeIcon.CashRegister));
         var current = (int)routes.Tab;
