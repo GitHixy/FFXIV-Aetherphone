@@ -2311,6 +2311,12 @@ internal static class L
                 "Fixed chats at the newest message snapping back to the bottom when you drag to scroll up, contributed by jambalong"),
         };
 
+        public static readonly LocString[] Release1300Housing =
+        {
+            new("changelog.r1300.53",
+                "Fixed the lottery countdown and its widget showing an ended lottery instead of the unavailable period running now, contributed by YozoraCho"),
+        };
+
         public static readonly LocString[] Release1200Chirper =
         {
             new("changelog.r1200.73",

@@ -7877,6 +7877,7 @@
   "changelog.r1300.50": "Se cambió cada saldo de fichas para mostrar su valor en monedas",
   "changelog.r1300.51": "Corregida la barra de desplazamiento, que al arrastrarla con la posición del teléfono bloqueada se movía al revés y demasiado despacio, contribuido por jambalong",
   "changelog.r1300.52": "Corregidos los chats en el mensaje más reciente, que volvían de golpe al final al arrastrarlos hacia arriba, contribuido por jambalong",
+  "changelog.r1300.53": "Corregida la cuenta atrás de la lotería y su widget, que mostraban una lotería ya terminada en lugar del periodo no disponible en curso, contribuido por YozoraCho",
   "changelog.r1200.70": "Se renovó Juegos en torno a cuatro pestañas, Inicio, Juntos, Biblioteca y Perfil, con el juego del día en vivo arriba en Inicio, sobre Seguir jugando, Recién llegados y Lo mejor de la semana",
   "changelog.r1200.71": "Se añadió Biblioteca: todos los juegos en una cuadrícula con búsqueda, filtros por género y orden",
   "changelog.r1200.72": "Se añadió un icono pintado para cada juego, y cada juego se abre con un zoom desde su icono",
