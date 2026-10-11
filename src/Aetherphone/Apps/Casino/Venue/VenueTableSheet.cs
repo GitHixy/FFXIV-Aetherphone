@@ -13,6 +13,7 @@ internal enum VenueSheetRequest : byte
 {
     None,
     Broadcast,
+    GilLedger,
 }
 
 internal readonly record struct VenueSheetTarget(string TableId, bool Gil, bool CanBroadcast);
@@ -155,6 +156,13 @@ internal sealed class VenueTableSheet
             var host = string.Equals(venue.Tables.CardFor(target.TableId)?.OwnerUserId, venue.AccountId,
                 StringComparison.Ordinal);
             Tables.TradeSyncCard.Draw(ui, trade, scale, true, host);
+            ActionRow(ui, Loc.T(L.Tables.MyLedgerTitle), Loc.T(L.Tables.MyLedgerLine), ButtonStyle.Tinted,
+                ButtonRole.Normal, "venue.sheet.gilLedger", out var ledgerPressed, scale);
+            if (ledgerPressed)
+            {
+                request = VenueSheetRequest.GilLedger;
+                sheet.Close();
+            }
         }
 
         if (target.CanBroadcast)

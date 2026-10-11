@@ -529,7 +529,7 @@ internal sealed class TableLedger
         });
     }
 
-    private static void Note(AppSkin ui, string text, Vector4 ink, float scale)
+    internal static void Note(AppSkin ui, string text, Vector4 ink, float scale)
     {
         var width = ScrollLayout.StableContentWidth();
         var origin = ImGui.GetCursorScreenPos();

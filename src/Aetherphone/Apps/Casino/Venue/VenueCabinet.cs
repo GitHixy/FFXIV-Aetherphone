@@ -15,6 +15,7 @@ internal sealed class VenueCabinet : ICabinetIdle
 
     private readonly CasinoVenueStore venue;
     private readonly Action leaveRoom;
+    private readonly Action openGilLedger;
     private readonly CasinoTextCache texts = new();
     private readonly DiceTableRoom dice;
     private readonly DeathrollRoom deathroll;
@@ -27,10 +28,11 @@ internal sealed class VenueCabinet : ICabinetIdle
     private bool entered;
     private float idleClock;
 
-    public VenueCabinet(CasinoVenueStore venue, Action leaveRoom)
+    public VenueCabinet(CasinoVenueStore venue, Action leaveRoom, Action openGilLedger)
     {
         this.venue = venue;
         this.leaveRoom = leaveRoom;
+        this.openGilLedger = openGilLedger;
         Action<VenueActDraft> act = Act;
         dice = new DiceTableRoom(texts, act);
         deathroll = new DeathrollRoom(texts, act);
@@ -254,10 +256,16 @@ internal sealed class VenueCabinet : ICabinetIdle
         var knock = venue.Tables.KnockFor(roomId, reason);
         venue.Tables.EnsureKnockFresh(roomId);
         var action = Tables.TableDoorCard.Draw(drawList, ui, reason, knock, L.Venue.RoomClosedTitle,
-            L.Venue.RoomClosedHint, safe, scale);
+            L.Venue.RoomClosedHint, safe, scale, Currency == CasinoCurrencies.Gil);
         if (action == Tables.TableDoorAction.Knock)
         {
             venue.Tables.Knock(roomId);
+            return;
+        }
+
+        if (action == Tables.TableDoorAction.GilLedger)
+        {
+            openGilLedger();
             return;
         }
 

@@ -11389,6 +11389,9 @@ internal static class L
         public static readonly LocString CopyEntry = new("casino.tables.copyEntry", "{0}: {1} to {2}, {3}, {4}");
         public static readonly LocString GilLedgerHeading = new("casino.tables.gilLedgerHeading", "Gil ledger");
         public static readonly LocString LedgerUpdated = new("casino.tables.ledgerUpdated", "Gil ledger updated");
+        public static readonly LocString MyLedgerTitle = new("casino.tables.myLedgerTitle", "My gil ledger");
+        public static readonly LocString MyLedgerLine = new("casino.tables.myLedgerLine", "Every gil entry you are a side of from the last 30 days, at open and closed tables.");
+        public static readonly LocString MyLedgerEmpty = new("casino.tables.myLedgerEmpty", "No gil entries from the last 30 days.");
         public static readonly LocString GilAmount = new("casino.tables.gilAmount", "{0} gil");
         public static readonly LocString KindBuyIn = new("casino.tables.kindBuyIn", "Buy-in");
         public static readonly LocString KindRebuy = new("casino.tables.kindRebuy", "Rebuy");

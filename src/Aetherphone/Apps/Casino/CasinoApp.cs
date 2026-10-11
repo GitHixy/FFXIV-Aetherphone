@@ -70,6 +70,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private readonly Tables.TableHandsCard tableHands;
     private readonly Tables.HostSheet hostSheet;
     private readonly Tables.TableLedger playerLedger;
+    private readonly Tables.GilLedgerView gilLedger;
     private readonly Tables.TableDoor tableDoor;
     private readonly Core.Casino.CasinoVenueStore casinoVenue;
     private readonly Venue.VenueCabinet venueRoom;
@@ -148,12 +149,13 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         plinko = new Plinko.PlinkoCabinet(casino, casinoPlay.Plinko, preferences);
         dealerHoldem = new DealerHoldem.DealerHoldemCabinet(casino, casinoPlay.DealerHoldem);
         blackjack = new Tables.BlackjackTable(casino, casinoRooms, casinoTables, history, casinoTurns, remoteImages,
-            lodestone, PopRoute, OpenLedger);
+            lodestone, PopRoute, OpenLedger, OpenGilLedger);
         playerLedger = new Tables.TableLedger(casinoTables, confirm, tradeSync);
+        gilLedger = new Tables.GilLedgerView(casinoTables, confirm);
         openTable = OpenTable;
         openDoorFromRow = OpenDoor;
         this.casinoVenue = casinoVenue;
-        venueRoom = new Venue.VenueCabinet(casinoVenue, PopRoute);
+        venueRoom = new Venue.VenueCabinet(casinoVenue, PopRoute, OpenGilLedger);
         broadcast = new Venue.BroadcastView(casinoRooms);
         venueSheet = new Venue.VenueTableSheet(casinoVenue, tradeSync, report, JoinCodeOf);
         tradePrompt = new Venue.TradeSyncPrompt(tradeSync);
@@ -165,7 +167,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         holdemPit = new Tables.HoldemPit(holdemStore, casino, openTable, openDoorFromRow, OpenHoldemHostSheet);
         holdemPit.Lead = DrawDealerHoldemLead;
         browser = new Tables.TableBrowser(casinoTables, holdemStore, casino, openTable, openDoorFromRow,
-            EnterHouseBlackjack, OpenHostSheet, nearbyTables);
+            EnterHouseBlackjack, OpenHostSheet, OpenGilLedger, nearbyTables);
         tableHands = new Tables.TableHandsCard(history);
         pit = new Tables.BlackjackPit(casinoTables, casino, openTable, openDoorFromRow, EnterHouseBlackjack, OpenTables,
             OpenHostSheet);
@@ -746,6 +748,9 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             case CasinoScreen.TableLedger:
                 DrawPlayerLedger(navBar.Body, route.TableId);
                 break;
+            case CasinoScreen.GilLedger:
+                gilLedger.Draw(navBar.Body, ui);
+                break;
             case CasinoScreen.Limits:
                 DrawLimits(navBar.Body);
                 break;
@@ -817,6 +822,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         CasinoScreen.TableDoor => Loc.T(L.Casino.DoorTitle),
         CasinoScreen.HostTable => Loc.T(L.Tables.HostTitle),
         CasinoScreen.TableLedger => Loc.T(L.Tables.LedgerHeading),
+        CasinoScreen.GilLedger => Loc.T(L.Tables.MyLedgerTitle),
         CasinoScreen.Table => Loc.T(L.Casino.GameBlackjack),
         CasinoScreen.VenueRoom => Loc.T(Venue.VenueCabinet.NameOf(venueRoom.Kind)),
         CasinoScreen.Broadcast => Loc.T(L.Venue.BroadcastTitle),
@@ -1084,6 +1090,17 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         router.Push(new CasinoRoute(CasinoScreen.TableLedger, CasinoGames.Blackjack, string.Empty, tableId));
     }
 
+    private void OpenGilLedger()
+    {
+        if (router.Current.Screen == CasinoScreen.GilLedger)
+        {
+            return;
+        }
+
+        gilLedger.Enter();
+        routes.Push(new CasinoRoute(CasinoScreen.GilLedger));
+    }
+
     private void DrawPlayerLedger(Rect body, string tableId)
     {
         var scale = UiScale.Current;
@@ -1276,7 +1293,14 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
 
     private void HandleVenueSheet()
     {
-        if (venueSheet.TakeRequest() != Venue.VenueSheetRequest.Broadcast)
+        var request = venueSheet.TakeRequest();
+        if (request == Venue.VenueSheetRequest.GilLedger)
+        {
+            OpenGilLedger();
+            return;
+        }
+
+        if (request != Venue.VenueSheetRequest.Broadcast)
         {
             return;
         }
