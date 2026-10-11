@@ -28,9 +28,13 @@ internal sealed class NearbyTablesCard
 
     public bool HasTables => venue.Nearby.Length > 0;
 
+    public int Count => Math.Min(venue.Nearby.Length, MaxRows);
+
+    public void Poll() => venue.EnsureNearby();
+
     public float Draw(ImDrawListPtr drawList, AppSkin ui, Vector2 origin, float width, Action<CasinoTableRowDto> open)
     {
-        venue.EnsureNearby();
+        Poll();
         Refresh();
         if (count == 0)
         {
