@@ -72,6 +72,18 @@ public sealed class VenueWireContractTests
             "{\"raffle\":{\"seq\":2,\"title\":\"Bar tab\",\"ticketsPerPerson\":3,\"entrants\":[{\"userId\":\"u1\",\"tickets\":2}]}}");
         Assert.Equal("Bar tab", raffle.Raffle!.Raffle!.Title);
         Assert.Equal(CasinoCurrencies.Practice, raffle.Currency);
+        Assert.False(raffle.Paused);
+    }
+
+    [Fact]
+    public void EachVenueRoomReadsTheHostsPauseAndNameFromItsState()
+    {
+        Assert.True(ViewOf(VenueKinds.DiceTable, "{\"name\":\"Lucky\",\"sides\":20,\"paused\":true}").Paused);
+        var duel = ViewOf(VenueKinds.Deathroll, "{\"name\":\"Renamed\",\"startAt\":1000,\"paused\":true}");
+        Assert.True(duel.Paused);
+        Assert.Equal("Renamed", duel.Name);
+        Assert.True(ViewOf(VenueKinds.Raffle, "{\"paused\":true}").Paused);
+        Assert.False(ViewOf(VenueKinds.Raffle, "{\"name\":\"Bar\"}").Paused);
     }
 
     [Fact]

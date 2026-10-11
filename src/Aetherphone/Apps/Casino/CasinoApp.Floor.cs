@@ -300,7 +300,7 @@ internal sealed partial class CasinoApp
         for (var index = 0; index < rows.Length && count < LiveNowCapacity; index++)
         {
             var row = rows[index];
-            if (row.SeatedCount <= 0 || row.Paused || !CasinoGameGate.RoomOpen(features, row.GameKind)
+            if (CasinoTableFilters.PlayersOf(row) <= 0 || row.Paused || !CasinoGameGate.RoomOpen(features, row.GameKind)
                 || ContainsTable(count, row.TableId))
             {
                 continue;
@@ -344,7 +344,7 @@ internal sealed partial class CasinoApp
         var tile = LiveNowTile * scale;
         var tileCenter = new Vector2(pressed.Min.X + pad + tile * 0.5f, pressed.Min.Y + pad + tile * 0.5f);
         CasinoArt.GameTile(drawList, item.GameId, tileCenter, tile);
-        var crowd = item.Row is { } row ? row.SeatedCount : casinoRooms.OccupancyOf(item.RoomId);
+        var crowd = item.Row is { } row ? CasinoTableFilters.PlayersOf(row) : casinoRooms.OccupancyOf(item.RoomId);
         var crowdText = texts.Count(L.Casino.LivePlayers, crowd);
         var crowdStyle = TextStyles.FootnoteEmphasized;
         var crowdLeft = tileCenter.X + tile * 0.5f + Metrics.Space.Sm * scale;

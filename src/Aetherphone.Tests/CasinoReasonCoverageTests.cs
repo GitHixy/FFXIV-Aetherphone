@@ -98,6 +98,7 @@ public sealed class CasinoReasonCoverageTests
             "pvp_loss_cap", "pvp_win_cap", "in_hand", "title_required", "time_bank_empty", "holdem_closed",
             "config_invalid", "practice_only", "not_dealer", "rebuy_off", "tournament_live", "no_tournament",
             "nothing_to_deal", "no_spectators", "duel_live", "no_duel", "raffle_live", "no_raffle", "ticket_limit",
+            "host_ticket",
             "round_live", "bank_limit", "host_frozen", "not_party", "already_confirmed", "settled", "gil_only",
             "ended", "restarting", "full", "private", "denied", "knock_pending", "banned_from_table", "blocked",
             "not_member", "already_hosting", "not_owner", "kicked",

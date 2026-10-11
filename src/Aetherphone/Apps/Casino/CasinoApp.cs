@@ -900,6 +900,12 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             return;
         }
 
+        if (CasinoRoute.KeepsSeat(route, RouteBelow()))
+        {
+            tournament.Reset();
+            return;
+        }
+
         if (route.Screen == CasinoScreen.Table && IsHoldem(route))
         {
             holdem.Exit();
@@ -934,6 +940,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         if (route.Screen == CasinoScreen.TableDoor)
         {
             tableDoor.Reset();
+            LeaveTableKeptAtDoor(route);
             return;
         }
 
@@ -982,6 +989,41 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         {
             race.Reset();
         }
+    }
+
+    private CasinoRoute RouteBelow()
+    {
+        return router.TryGetView(router.Depth - 2, out var below) ? below : CasinoRoute.Floor;
+    }
+
+    private void LeaveTableKeptAtDoor(CasinoRoute door)
+    {
+        var tableId = door.TableId;
+        if (tableId.Length == 0 || CasinoRoute.ReturnsToTable(door, RouteBelow()))
+        {
+            return;
+        }
+
+        if (string.Equals(holdem.RoomId, tableId, StringComparison.Ordinal))
+        {
+            holdem.Exit();
+        }
+
+        if (string.Equals(blackjack.RoomId, tableId, StringComparison.Ordinal))
+        {
+            blackjack.Exit();
+        }
+    }
+
+    private void OpenHostControls(string tableId)
+    {
+        if (RouteBelow().Is(CasinoScreen.TableDoor, tableId))
+        {
+            PopRoute();
+            return;
+        }
+
+        OpenDoor(tableId);
     }
 
     private bool RaceLandscape() => AppLandscape.Held(Id) && screenArea.IsLandscape();
@@ -1218,6 +1260,12 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             return;
         }
 
+        if (router.Current.Is(CasinoScreen.TableDoor, tableId) && CasinoRoute.ReturnsToTable(router.Current, RouteBelow()))
+        {
+            PopRoute();
+            return;
+        }
+
         if (IsHoldemTable(tableId))
         {
             OpenHoldemTable(tableId);
@@ -1267,7 +1315,8 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         var spectating = holdemTable ? holdem.HeroStack < 0 : !SeatedAtTable(tableId);
         var canBroadcast = current.Screen == CasinoScreen.Table && spectating
             && (card?.Config?.Spectators ?? true);
-        venueSheet.Open(new Venue.VenueSheetTarget(tableId, gil, canBroadcast));
+        var hosting = card is not null && casinoTables.Owns(card);
+        venueSheet.Open(new Venue.VenueSheetTarget(tableId, gil, canBroadcast, hosting));
     }
 
     private bool SeatedAtTable(string tableId)
@@ -1297,6 +1346,12 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         if (request == Venue.VenueSheetRequest.GilLedger)
         {
             OpenGilLedger();
+            return;
+        }
+
+        if (request == Venue.VenueSheetRequest.HostControls)
+        {
+            OpenHostControls(router.Current.TableId);
             return;
         }
 

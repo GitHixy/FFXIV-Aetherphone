@@ -14,9 +14,10 @@ internal enum VenueSheetRequest : byte
     None,
     Broadcast,
     GilLedger,
+    HostControls,
 }
 
-internal readonly record struct VenueSheetTarget(string TableId, bool Gil, bool CanBroadcast);
+internal readonly record struct VenueSheetTarget(string TableId, bool Gil, bool CanBroadcast, bool Hosting = false);
 
 internal sealed class VenueTableSheet
 {
@@ -143,6 +144,17 @@ internal sealed class VenueTableSheet
         {
             code.Draw(ui, joinCode, string.Empty, ScrollLayout.StableContentWidth(), scale, overlay: true);
             ImGui.Dummy(new Vector2(0f, Metrics.Space.Md * scale));
+        }
+
+        if (target.Hosting)
+        {
+            ActionRow(ui, Loc.T(L.Tables.HostPanelHeading), Loc.T(L.Venue.HostControlsHint), ButtonStyle.Tinted,
+                ButtonRole.Normal, "venue.sheet.host", out var hostPressed, scale);
+            if (hostPressed)
+            {
+                request = VenueSheetRequest.HostControls;
+                sheet.Close();
+            }
         }
 
         var view = venue.ViewFor(target.TableId);

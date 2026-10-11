@@ -133,6 +133,35 @@ public sealed class CasinoDoorLayoutTests
     }
 
     [Fact]
+    public void APokerDoorHidesCoDealersAndKeepsTheRest()
+    {
+        var holdem = new CasinoTableRowDto(TableId: "t1", GameKind: HoldemRules.Kind, Practice: true);
+        var blackjack = new CasinoTableRowDto(TableId: "t2", GameKind: CasinoWire.BlackjackKind, Practice: true);
+        Assert.False(TableDoor.TakesCoDealers(holdem));
+        Assert.True(TableDoor.TakesCoDealers(blackjack));
+
+        var controls = new DoorControl[5];
+        var count = TableDoor.WithoutCoDealers(controls, TableDoor.Controls(true, false, controls));
+        Assert.Equal(3, count);
+        Assert.Equal(DoorControl.Pause, controls[0]);
+        Assert.Equal(DoorControl.Rename, controls[1]);
+        Assert.Equal(DoorControl.Close, controls[2]);
+    }
+
+    [Fact]
+    public void AVenueDoorListsTheRoomInsteadOfSeatsAndTheHostIsNeverRemovable()
+    {
+        Assert.False(TableDoor.HasSeats(new CasinoTableRowDto(TableId: "t1", GameKind: VenueKinds.Raffle)));
+        Assert.False(TableDoor.HasSeats(new CasinoTableRowDto(TableId: "t1", GameKind: VenueKinds.DiceTable)));
+        Assert.True(TableDoor.HasSeats(new CasinoTableRowDto(TableId: "t1", GameKind: CasinoWire.BlackjackKind)));
+        Assert.True(TableDoor.HasSeats(null));
+
+        var card = new CasinoTableRowDto(TableId: "t1", OwnerUserId: "host");
+        Assert.False(TableDoor.Removable("host", card));
+        Assert.True(TableDoor.Removable("guest", card));
+    }
+
+    [Fact]
     public void TheDoorPrefersItsOwnCodeOverTheCard()
     {
         var door = new CasinoTableDoorDto(RoomId: "t1", JoinCode: "ABCDEF");
@@ -162,12 +191,25 @@ public sealed class CasinoDoorLayoutTests
     {
         var hosted = new CasinoTableRowDto(TableId: "t1", JoinCode: "ABCDEF");
         var nothingListed = Array.Empty<CasinoTableRowDto>();
-        var card = CasinoTablesStore.CardIn(nothingListed, hosted, "t1");
+        var card = CasinoTablesStore.CardIn(nothingListed, 0, hosted, 1, "t1");
         Assert.Same(hosted, card);
         Assert.Equal("ABCDEF", TableDoor.JoinCode(null, card));
-        Assert.Null(CasinoTablesStore.CardIn(nothingListed, hosted, "t2"));
-        Assert.Null(CasinoTablesStore.CardIn(nothingListed, hosted, string.Empty));
+        Assert.Null(CasinoTablesStore.CardIn(nothingListed, 0, hosted, 1, "t2"));
+        Assert.Null(CasinoTablesStore.CardIn(nothingListed, 0, hosted, 1, string.Empty));
         var listed = new[] { new CasinoTableRowDto(TableId: "t1", SeatedCount: 1, JoinCode: "ABCDEF") };
-        Assert.Same(listed[0], CasinoTablesStore.CardIn(listed, hosted, "t1"));
+        Assert.Same(listed[0], CasinoTablesStore.CardIn(listed, 2, hosted, 1, "t1"));
+    }
+
+    [Fact]
+    public void TheFresherOfTheCardAndTheListingWins()
+    {
+        var fetched = new CasinoTableRowDto(TableId: "t1", Name: "Renamed", Paused: true);
+        var listed = new[] { new CasinoTableRowDto(TableId: "t1", Name: "Old name") };
+
+        Assert.Same(fetched, CasinoTablesStore.CardIn(listed, 1_000, fetched, 5_000, "t1"));
+        Assert.Same(listed[0], CasinoTablesStore.CardIn(listed, 9_000, fetched, 5_000, "t1"));
+        Assert.Same(fetched, CasinoTablesStore.CardIn(listed, 5_000, fetched, 5_000, "t1"));
+        Assert.Same(listed[0], CasinoTablesStore.CardIn(listed, 1_000, null, 0, "t1"));
+        Assert.Same(listed[0], CasinoTablesStore.CardIn(listed, 1_000, fetched with { TableId = "t2" }, 5_000, "t1"));
     }
 }

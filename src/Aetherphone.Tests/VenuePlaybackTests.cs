@@ -119,11 +119,24 @@ public sealed class VenuePlaybackTests
             with { LoserUserId = "u2" };
         var board = new CasinoDeathrollStateDto(Recent: new[] { finished });
         playback.Update(board, 0.016f, false);
+        Assert.True(playback.Rolling);
         Assert.False(playback.TakeFinish(out _));
         playback.Update(board, DeathrollPlayback.RollSeconds, false);
+        Assert.Equal(1, playback.Shown);
         Assert.True(playback.TakeFinish(out var loser));
         Assert.Equal("u2", loser);
         Assert.False(playback.TakeFinish(out _));
+    }
+
+    [Fact]
+    public void APracticeDuellistSeesTheirOwnStackOrTheStartingOne()
+    {
+        var board = new CasinoDeathrollStateDto(PracticeStack: 100_000,
+            Stacks: new[] { new CasinoVenueStackDto("u1", "Mira", 95_000), new CasinoVenueStackDto("u2", "Rhan", 105_000) });
+        Assert.Equal(95_000, DeathrollRoom.StackOf(board, "u1"));
+        Assert.Equal(105_000, DeathrollRoom.StackOf(board, "u2"));
+        Assert.Equal(100_000, DeathrollRoom.StackOf(board, "u3"));
+        Assert.Equal(100_000, DeathrollRoom.StackOf(board, string.Empty));
     }
 
     private static CasinoRaffleDto Drawn(string seed) =>
