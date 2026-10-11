@@ -11141,6 +11141,7 @@ internal static class L
         public static readonly LocString MissionsTitle = new("casino.floor.missionsTitle", "Missions");
         public static readonly LocString MissionsProgress = new("casino.floor.missionsProgress", "{0} of {1} done");
         public static readonly LocString MissionsReady = new("casino.floor.missionsReady", "{0} ready to claim");
+        public static readonly LocString FreeSpin = new("casino.floor.freeSpin", "Free spin");
     }
 
     internal static class Chips

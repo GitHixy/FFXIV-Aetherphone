@@ -9795,6 +9795,7 @@
   "casino.floor.missionsTitle": "Missions",
   "casino.floor.missionsProgress": "{0} sur {1} terminées",
   "casino.floor.missionsReady": "{0} à récupérer",
+  "casino.floor.freeSpin": "Tour gratuit",
   "conduct.casino.title": "Règles de la maison de Gamba",
   "conduct.casino.intro": "Gamba, c'est pour s'amuser. Les jetons et les Aether Coins sont de l'argent fictif, et les tables en gils sont tenues par des joueurs.",
   "conduct.casino.money.title": "Comment fonctionne l'argent",

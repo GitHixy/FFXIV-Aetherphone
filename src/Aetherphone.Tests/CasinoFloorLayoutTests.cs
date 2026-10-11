@@ -80,20 +80,40 @@ public sealed class CasinoFloorLayoutTests
         Assert.True(art.Y + glyphHalf <= tile.Max.Y - block + 0.01f);
     }
 
+    [Fact]
+    public void TheHeroOffersEachClaimOnlyWhenItIsThere()
+    {
+        var bonus = new CasinoBonusDto(Kind: CasinoBonusKinds.Timed, Ready: true, Amount: 5_000, Eligible: true);
+        Assert.Equal(StripHeroClaims.None, StripHero.ClaimsOf(Hero(null, null, false)));
+        Assert.Equal(StripHeroClaims.Timed, StripHero.ClaimsOf(Hero(bonus, null, false)));
+        Assert.Equal(StripHeroClaims.Streak, StripHero.ClaimsOf(Hero(null, bonus, false)));
+        Assert.Equal(StripHeroClaims.Spin, StripHero.ClaimsOf(Hero(null, null, true)));
+        Assert.Equal(StripHeroClaims.Timed | StripHeroClaims.Streak | StripHeroClaims.Spin,
+            StripHero.ClaimsOf(Hero(bonus, bonus, true)));
+        Assert.Equal(1, StripHero.RowPills(StripHeroClaims.None));
+        Assert.Equal(1, StripHero.RowPills(StripHeroClaims.Streak));
+        Assert.Equal(2, StripHero.RowPills(StripHeroClaims.Timed));
+        Assert.Equal(2, StripHero.RowPills(StripHeroClaims.Spin));
+        Assert.Equal(3, StripHero.RowPills(StripHeroClaims.Timed | StripHeroClaims.Streak | StripHeroClaims.Spin));
+    }
+
     [Theory]
     [InlineData(0.75f)]
     [InlineData(1f)]
     [InlineData(1.5f)]
-    public void HeroButtonsSitSideBySideOnlyWhenBothLabelsFitWhole(float scale)
+    public void HeroPillsSitInlineStackInPairsAndRailInThrees(float scale)
     {
         var row = (PhoneWidth - StripHero.Pad * 2f) * scale;
         var gap = 8f * scale;
         var button = 44f * scale;
-        Assert.False(StripHero.StacksButtons(row, 120f * scale, 110f * scale, gap));
-        Assert.True(StripHero.StacksButtons(row, 200f * scale, 150f * scale, gap));
-        Assert.Equal(button, StripHero.ButtonsHeight(true, false, button, gap));
-        Assert.Equal(button * 2f + gap, StripHero.ButtonsHeight(true, true, button, gap));
-        Assert.Equal(button, StripHero.ButtonsHeight(false, true, button, gap));
+        Assert.Equal(StripHeroRow.Inline, StripHero.RowLayout(1, row, row * 2f));
+        Assert.Equal(StripHeroRow.Inline, StripHero.RowLayout(2, row, 120f * scale + gap + 110f * scale));
+        Assert.Equal(StripHeroRow.Stacked, StripHero.RowLayout(2, row, 200f * scale + gap + 150f * scale));
+        Assert.Equal(StripHeroRow.Inline, StripHero.RowLayout(3, row, row));
+        Assert.Equal(StripHeroRow.Rail, StripHero.RowLayout(3, row, row + 1f));
+        Assert.Equal(button, StripHero.ButtonsHeight(StripHeroRow.Inline, button, gap));
+        Assert.Equal(button * 2f + gap, StripHero.ButtonsHeight(StripHeroRow.Stacked, button, gap));
+        Assert.Equal(button, StripHero.ButtonsHeight(StripHeroRow.Rail, button, gap));
     }
 
     [Fact]
@@ -450,6 +470,9 @@ public sealed class CasinoFloorLayoutTests
     private static int CasinoAppReturns(string gameId) => CasinoApp.ReturnTenthsOf(gameId);
 
     private static CasinoRoundHistoryDto Played(string kind) => new(RoundId: kind, GameKind: kind);
+
+    private static StripHeroModel Hero(CasinoBonusDto? timed, CasinoBonusDto? streak, bool spinReady) =>
+        new(0, false, 1, 0f, 0, false, timed, streak, spinReady, false, 0);
 
     private static int Occurrences(string gameId)
     {

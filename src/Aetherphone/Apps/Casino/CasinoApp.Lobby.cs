@@ -25,6 +25,7 @@ internal sealed partial class CasinoApp
     private void ResetLobby()
     {
         stripHero.Snap(FloorBalance());
+        stripHero.Reset();
         lobbyHistoryFailed = false;
     }
 
@@ -111,10 +112,11 @@ internal sealed partial class CasinoApp
         }
 
         var bonuses = casino.HasFeature(CasinoFeatures.Bonus);
+        var spinReady = DailySpinStatus.OffersWheel(DailySpinStatus.Of(casinoSpin.Answer));
         var model = new Strip.StripHeroModel(FloorBalance(), state?.Sitting is not null, progress?.Level ?? 1,
             levelFraction, casino.Ceiling.LevelCap, progress is not null,
             bonuses ? casino.BonusFor(CasinoBonusKinds.Timed) : null,
-            bonuses ? casino.BonusFor(CasinoBonusKinds.Streak) : null, casino.ClaimingBonus.Length > 0,
+            bonuses ? casino.BonusFor(CasinoBonusKinds.Streak) : null, spinReady, casino.ClaimingBonus.Length > 0,
             DateTimeOffset.UtcNow.ToUnixTimeSeconds(), casino.Rate);
         var action = stripHero.Draw(drawList, ui, model, origin, width, delta, scale, out var bottom);
         switch (action)
@@ -128,6 +130,9 @@ internal sealed partial class CasinoApp
                 break;
             case Strip.StripHeroAction.ClaimStreak:
                 bonusShelf.Claim(CasinoBonusKinds.Streak, stripHero.StreakCenter);
+                break;
+            case Strip.StripHeroAction.FreeSpin:
+                OpenGame(CasinoGames.DailySpin, stripHero.SpinSource);
                 break;
         }
 
