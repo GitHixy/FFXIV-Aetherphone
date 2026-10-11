@@ -230,6 +230,8 @@ internal static class L
         public static readonly LocString RetentionHint = new("safety.retentionHint", "Notices stay here for 180 days, whether or not you have read them.");
         public static readonly LocString LoadOlder = new("safety.loadOlder", "Load older notices");
         public static readonly LocString PostedOn = new("safety.postedOn", "You posted it {0}");
+        public static readonly LocString GuidelinesTitle = new("safety.guidelinesTitle", "Community guidelines");
+        public static readonly LocString GuidelinesHint = new("safety.guidelinesHint", "Read any app's rules at any time.");
     }
 
     internal static class Moderation
@@ -259,7 +261,7 @@ internal static class L
         public static readonly LocString RemovedCommentSelfHarm = new("moderation.removedCommentSelfHarm", "A moderator removed your comment because it references self-harm.");
         public static readonly LocString RemovedCommentPolicy = new("moderation.removedCommentPolicy", "Your comment was removed for violating the community guidelines.");
         public static readonly LocString WarningTitle = new("moderation.warningTitle", "Warning from moderators");
-        public static readonly LocString WarningBody = new("moderation.warningBody", "A moderator reviewed your activity. Please follow the community guidelines. Repeated violations can lead to a ban.");
+        public static readonly LocString WarningBody = new("moderation.warningBody", "A moderator reviewed your activity. Please follow the community guidelines. A second removal within 90 days brings a 3-day suspension, and a third a longer one.");
         public static readonly LocString ReportUpdateTitle = new("moderation.reportUpdateTitle", "Report update");
         public static readonly LocString ReportResolvedBody = new("moderation.reportResolvedBody", "Thanks for your report. We reviewed it and took action.");
         public static readonly LocString ReportDismissedBody = new("moderation.reportDismissedBody", "Thanks for your report. A moderator reviewed it.");
@@ -289,7 +291,7 @@ internal static class L
         public static readonly LocString NoticePhotoCount = new("moderation.notice.photoCount", "{0} photo(s)");
         public static readonly LocString NoticeModeratorNote = new("moderation.notice.moderatorNote", "From the moderator: {0}");
         public static readonly LocString NoticeModeratorNoteLabel = new("moderation.notice.moderatorNoteLabel", "Moderator note");
-        public static readonly LocString NoticeWarningConsequence = new("moderation.notice.warningConsequence", "Please follow the community guidelines. Repeated breaks of the same rule can lead to a temporary suspension.");
+        public static readonly LocString NoticeWarningConsequence = new("moderation.notice.warningConsequence", "Please follow the community guidelines. A second removal within 90 days brings a 3-day suspension, and a third a longer one.");
         public static readonly LocString NoticeCoinTitle = new("moderation.notice.coinTitle", "Your Aether Coin balance changed");
         public static readonly LocString NoticeCoinBody = new("moderation.notice.coinBody", "A staff member adjusted your Aether Coin balance.");
         public static readonly LocString NoticeThanksTitle = new("moderation.notice.thanksTitle", "Your report was reviewed");
@@ -2189,6 +2191,7 @@ internal static class L
     {
         public static readonly LocString SectionMessaging = new("changelog.sectionMessaging", "Messaging");
         public static readonly LocString SectionPhone = new("changelog.sectionPhone", "Phone");
+        public static readonly LocString SectionGuidelines = new("changelog.sectionGuidelines", "Community guidelines");
         public static readonly LocString SectionSocial = new("changelog.sectionSocial", "Chirper and Aethergram");
         public static readonly LocString SectionAethergramVelvet = new("changelog.sectionAethergramVelvet", "Aethergram and Velvet");
         public static readonly LocString SectionChirperAethergramVelvet = new("changelog.sectionChirperAethergramVelvet", "Chirper, Aethergram and Velvet");
@@ -2310,6 +2313,22 @@ internal static class L
                 "Changed the People filters to sit at the top, so they no longer move when search opens"),
         };
 
+        public static readonly LocString[] Release1300Guidelines =
+        {
+            new("changelog.r1300.70",
+                "Added community guidelines to ChocoChat, and to station chat and Jam sessions in Music"),
+            new("changelog.r1300.71",
+                "Added every app's community guidelines to Settings, under Moderation and safety"),
+            new("changelog.r1300.72",
+                "Overhauled the community guidelines in every app: each one now shows what's allowed, what gets veiled, what's removed and what gets an account suspended"),
+            new("changelog.r1300.73",
+                "Changed the community guidelines to show once more to everyone, since every app's rules were rewritten"),
+            new("changelog.r1300.74",
+                "Changed the suspension screen and the frozen wallet notice to point to a ticket on the Discord"),
+            new("changelog.r1300.75",
+                "Changed moderation warnings to say what a second and a third removal lead to"),
+        };
+
         public static readonly LocString[] Release1300Phone =
         {
             new("changelog.r1300.58",
@@ -2318,6 +2337,8 @@ internal static class L
                 "Fixed the scrollbar moving the wrong way and too slowly when dragged while the phone position is locked, contributed by jambalong"),
             new("changelog.r1300.57",
                 "Fixed Linkpearl's filters and the photo editor's aspect ratios cutting their labels short"),
+            new("changelog.r1300.76",
+                "Fixed the handle hint saying letters when only lowercase letters are accepted"),
         };
 
         public static readonly LocString[] Release1300Messaging =
@@ -5244,7 +5265,7 @@ internal static class L
         public static readonly LocString NameHint = new("account.nameHint", "This is how you appear in Aethernet apps where you have not set a separate profile name. Profiles do not show your character name or home world. A muster host sees them when you RSVP, and players who say they are going see the host's. Until you set a display name, ChocoChat shows your character name to your contacts.");
         public static readonly LocString DisplayNameLabel = new("account.displayNameLabel", "Display name");
         public static readonly LocString HandleLabel = new("account.handleLabel", "Username");
-        public static readonly LocString HandleRules = new("account.handleRules", "3-15 characters: letters, numbers, or _");
+        public static readonly LocString HandleRules = new("account.handleRules", "3-15 characters: lowercase letters, numbers, or _");
         public static readonly LocString HandleTaken = new("account.handleTaken", "That username is taken");
         public static readonly LocString Save = new("account.save", "Save");
         public static readonly LocString SignIn = new("account.signIn", "Sign in with Lodestone");
@@ -5324,7 +5345,7 @@ internal static class L
         public static readonly LocString BanScreenReason = new("account.ban.reason", "Reason");
         public static readonly LocString BanScreenTimeoutTitle = new("account.ban.timeoutTitle", "Account suspended");
         public static readonly LocString BanScreenLifts = new("account.ban.lifts", "Your social apps are temporarily locked. You can sign in again after {0}.");
-        public static readonly LocString BanScreenContact = new("account.ban.contact", "If you believe this is a mistake, contact support.");
+        public static readonly LocString BanScreenContact = new("account.ban.contact", "If you believe this is a mistake, open a ticket on the Discord. You can also email contact@aetherphone.net.");
         public static readonly LocString BanScreenSocialLocked = new("account.ban.socialLocked", "Nothing you posted was deleted by this suspension, and the rest of Aetherphone remains available.");
         public static readonly LocString FailRateLimitedTitle = new("account.fail.rateLimited.title", "Too many attempts");
         public static readonly LocString FailRateLimitedBody = new("account.fail.rateLimited.body", "You've tried a few times in a row. Wait a minute, then try again.");
@@ -6548,7 +6569,7 @@ internal static class L
         public static readonly LocString Save = new("chirper.save", "Save");
         public static readonly LocString Saving = new("chirper.saving", "Saving…");
         public static readonly LocString HandleTaken = new("chirper.handleTaken", "That username is taken");
-        public static readonly LocString HandleRules = new("chirper.handleRules", "3-15 characters: letters, numbers, or _");
+        public static readonly LocString HandleRules = new("chirper.handleRules", "3-15 characters: lowercase letters, numbers, or _");
         public static readonly LocString ProfileError = new("chirper.profileError", "Couldn't load this profile");
         public static readonly LocString React = new("chirper.react", "React");
         public static readonly LocString ReactLike = new("chirper.reactLike", "Like");
@@ -6677,7 +6698,7 @@ internal static class L
         public static readonly LocString DisplayNameLabel = new("aethergram.displayNameLabel", "Display name");
         public static readonly LocString HandleLabel = new("aethergram.handleLabel", "Username");
         public static readonly LocString BioLabel = new("aethergram.bioLabel", "Bio");
-        public static readonly LocString HandleRules = new("aethergram.handleRules", "3-15 characters: letters, numbers, or _");
+        public static readonly LocString HandleRules = new("aethergram.handleRules", "3-15 characters: lowercase letters, numbers, or _");
         public static readonly LocString HandleTaken = new("aethergram.handleTaken", "That username is taken");
         public static readonly LocString Save = new("aethergram.save", "Save");
         public static readonly LocString SearchByName = new("aethergram.searchByName", "Search by name, @username, or world");
@@ -7037,7 +7058,7 @@ internal static class L
             new("velvet.obSubReady", "A couple of last touches, then step inside.");
         public static readonly LocString Continue = new("velvet.continue", "Continue");
         public static readonly LocString ObHandleRules =
-            new("velvet.obHandleRules", "3 to 15 characters: letters, numbers, or _");
+            new("velvet.obHandleRules", "3 to 15 characters: lowercase letters, numbers, or _");
         public static readonly LocString AddPhoto = new("velvet.addPhoto", "Add a photo");
     }
 
@@ -10197,7 +10218,7 @@ internal static class L
         public static readonly LocString FrozenTitle = new("coin.frozenTitle", "Your wallet is frozen");
         public static readonly LocString FrozenHint = new("coin.frozenHint", "Earning and spending are on hold. Check the Safety page for the reason.");
         public static readonly LocString FrozenAlertTitle = new("coin.frozenAlertTitle", "Wallet frozen");
-        public static readonly LocString FrozenAlertBody = new("coin.frozenAlertBody", "Your wallet has been temporarily frozen. Please contact support to restore access.");
+        public static readonly LocString FrozenAlertBody = new("coin.frozenAlertBody", "Your wallet has been temporarily frozen. Open a ticket on the Discord to restore access.");
         public static readonly LocString RollupTitle = new("coin.rollupTitle", "+{0} Aether Coin");
         public static readonly LocString RollupBody = new("coin.rollupBody", "Today: {0}");
         public static readonly LocString RollupMore = new("coin.rollupMore", "and {0} more");
@@ -12581,441 +12602,300 @@ internal static class L
         public static readonly LocString WaitAction = new("conduct.waitAction", "Please read the rules… {0}");
         public static readonly LocString ReadToEndAction = new("conduct.readToEndAction", "Scroll to the end to continue");
 
-        public static readonly LocString ChirperTitle = new("conduct.chirper.title", "Chirper Community Rules");
-        public static readonly LocString ChirperIntro = new("conduct.chirper.intro", "Before you start posting, please read the rules of the community.");
-        public static readonly LocString ChirperAllowedTitle = new("conduct.chirper.allowed.title", "What Is Allowed");
-        public static readonly LocString ChirperAllowedLead = new("conduct.chirper.allowed.lead", "Examples of acceptable content include:");
+        public static readonly LocString PillFine = new("conduct.pill.fine", "Fine");
+        public static readonly LocString PillVeiled = new("conduct.pill.veiled", "Veiled");
+        public static readonly LocString PillRemoved = new("conduct.pill.removed", "Removed + warning");
+        public static readonly LocString PillSuspended = new("conduct.pill.suspended", "Removed + suspended");
+
+        public static readonly LocString AllowedTitle = new("conduct.allowed.title", "What's allowed");
+        public static readonly LocString VeiledTitle = new("conduct.veiled.title", "What gets veiled");
+        public static readonly LocString VeiledLead = new("conduct.veiled.lead", "Allowed, but only behind the veil. Mark the post as sensitive when you share it, or a moderator will.");
+        public static readonly LocString[] VeiledItems =
+        {
+            new("conduct.veiled.1", "Implied or artistic nudity where nothing is visible"),
+            new("conduct.veiled.2", "Presenting poses: arched toward the camera, bent over, on all fours, legs spread"),
+            new("conduct.veiled.3", "The camera framed on a covered chest, crotch or buttocks"),
+            new("conduct.veiled.4", "Micro bikinis, sheer or wet-look outfits, and lingerie in a bedroom scene"),
+            new("conduct.veiled.5", "Sexual hashtags or a suggestive caption on a covered image"),
+            new("conduct.veiled.6", "Mild wounds, blood and horror scenes"),
+        };
+        public static readonly LocString RemovedTitle = new("conduct.removed.title", "What's not allowed");
+        public static readonly LocString RemovedNudity = new("conduct.removed.nudity", "Nudity or sexual acts: a female-presenting nipple, genitals, nude buttocks as the focus, or nude body mods");
+        public static readonly LocString RemovedErp = new("conduct.removed.erp", "Asking for or offering ERP, or describing sex acts or arousal");
+        public static readonly LocString RemovedFetish = new("conduct.removed.fetish", "Fetish content shown sexually, and bodies beyond the game's sliders");
+        public static readonly LocString RemovedGore = new("conduct.removed.gore", "Gore: dismemberment, mutilation, torture or real-world gore");
+        public static readonly LocString RemovedAi = new("conduct.removed.ai", "Images made or changed by generative AI. Upscaling, color, crops and clipping fixes are fine");
+        public static readonly LocString RemovedCreators = new("conduct.removed.creators", "Reposting someone's art or screenshots without permission, or removing a watermark");
+        public static readonly LocString RemovedPolitics = new("conduct.removed.politics", "Real-world politics: elections, parties, campaigns and policy debates. Eorzean politics is fine");
+        public static readonly LocString RemovedHarassment = new("conduct.removed.harassment", "Harassment, callouts that name or tag a player, slurs and hate speech");
+        public static readonly LocString RemovedHarassmentStalking = new("conduct.removed.harassmentStalking", "Harassment, stalking, slurs and hate speech");
+        public static readonly LocString RemovedPrivateChat = new("conduct.removed.privateChat", "Screenshots of tells, party, FC, linkshell, DMs or Discord");
+        public static readonly LocString RemovedImpersonation = new("conduct.removed.impersonation", "Pretending to be another player, a venue or staff");
+        public static readonly LocString ZeroTitle = new("conduct.zero.title", "Zero tolerance");
+        public static readonly LocString ZeroLead = new("conduct.zero.lead", "Removed and the account suspended at once, whatever the history. Roleplay, lore or a joke is never an excuse.");
+        public static readonly LocString ZeroChildSafety = new("conduct.zero.childSafety", "Sexualizing minors or child-like characters, including Kitten mods, a stated or implied minor, child-like body sliders, or a Lalafell in swimwear, lingerie or a presenting pose");
+        public static readonly LocString[] ZeroItems =
+        {
+            new("conduct.zero.1", "Child sexual abuse material, revenge porn, explicit deepfakes of real people, blackmail or sextortion"),
+            new("conduct.zero.2", "Encouraging or glorifying self-harm, suicide or eating disorders"),
+            new("conduct.zero.3", "Threatening or wishing real harm on a person or group"),
+            new("conduct.zero.4", "Sharing anyone's real name, face, address, workplace, phone or socials, your own included"),
+            new("conduct.zero.5", "Buying or selling gil, accounts, boosts or mods for real money, crypto or gift cards"),
+            new("conduct.zero.6", "Scams, phishing, fake giveaways and malware links"),
+            new("conduct.zero.7", "Sharing paid or private mods, or linking to leak sites"),
+            new("conduct.zero.8", "A new account or alt after a suspension or block, harassing staff, or organizing mass reports"),
+        };
+        public static readonly LocString LadderTitle = new("conduct.ladder.title", "How moderation works");
+        public static readonly LocString LadderLead = new("conduct.ladder.lead", "Moderators follow this ladder:");
+        public static readonly LocString LadderVeil = new("conduct.ladder.veil", "Forgot to mark a post as sensitive? A moderator marks it for you and locks it. Three of those in 30 days count as a removal.");
+        public static readonly LocString[] LadderItems =
+        {
+            new("conduct.ladder.1", "First removal: the post comes down and you get a warning that names the rule."),
+            new("conduct.ladder.2", "Second removal within 90 days: a 3-day suspension."),
+            new("conduct.ladder.3", "Third removal within 90 days: a longer suspension, up to permanent."),
+            new("conduct.ladder.4", "Zero tolerance: removed and suspended right away, whatever your history."),
+            new("conduct.ladder.5", "A suspension signs you out of every Aethernet app, hides your profile and posts, and freezes your Aether Coins until 7 days after it ends."),
+            new("conduct.ladder.6", "Think a call was wrong? Open a ticket on the Discord. Removed posts are kept for 7 days, so a successful appeal brings yours back and the removal stops counting."),
+            new("conduct.ladder.7", "See something that breaks these rules? Use Report instead of calling someone out in a post."),
+        };
+
+        public static readonly LocString ChirperTitle = new("conduct.chirper.title", "Chirper Community Guidelines");
+        public static readonly LocString ChirperIntro = new("conduct.chirper.intro", "Chirper is a public feed for the whole community. It doesn't have to be formal, but everyone should be able to scroll it.");
         public static readonly LocString[] ChirperAllowedItems =
         {
-            new("conduct.chirper.allowed.1", "Daily adventures and stories"),
-            new("conduct.chirper.allowed.2", "Roleplay updates and creative writing"),
-            new("conduct.chirper.allowed.3", "Community discussions, questions, and guides"),
-            new("conduct.chirper.allowed.4", "Glamour, screenshots, and achievements"),
-            new("conduct.chirper.allowed.5", "Humor and memes"),
+            new("conduct.chirper.allowed.1", "Adventures, stories and roleplay updates"),
+            new("conduct.chirper.allowed.2", "Guides, questions and community talk"),
+            new("conduct.chirper.allowed.3", "Glamour, screenshots, GPose and hand-drawn art"),
+            new("conduct.chirper.allowed.4", "Humor, memes, romance and adult jokes that don't describe sex"),
+            new("conduct.chirper.allowed.5", "Real-life photos you took, like fanfest or your setup, with no real face or name in them"),
+            new("conduct.chirper.allowed.6", "One post a day promoting your venue, service or Discord, priced in gil"),
+            new("conduct.chirper.allowed.7", "Saying you're on Velvet, with nothing explicit attached"),
         };
-        public static readonly LocString ChirperSfwTitle = new("conduct.chirper.sfw.title", "Keep It SFW");
-        public static readonly LocString ChirperSfwLead = new("conduct.chirper.sfw.lead", "Chirper is a safe-for-work platform. Anything that could be considered more than that should be veiled. What is veiled?");
-        public static readonly LocString[] ChirperSfwItems =
-        {
-            new("conduct.chirper.sfw.1", "Sexually suggestive content"),
-            new("conduct.chirper.sfw.2", "Implied nudity"),
-            new("conduct.chirper.sfw.3", "Presenting or suggestive poses"),
-            new("conduct.chirper.sfw.4", "Pictures with the focus on private/sensitive areas"),
-            new("conduct.chirper.sfw.5", "Lingerie, micro bikinis, etc."),
-            new("conduct.chirper.sfw.6", "Sexual hashtags, innuendos"),
-            new("conduct.chirper.sfw.7", "Visible areola"),
-        };
-        public static readonly LocString ChirperNotAllowedTitle = new("conduct.chirper.notAllowed.title", "What Is Not Allowed");
-        public static readonly LocString[] ChirperNotAllowedItems =
-        {
-            new("conduct.chirper.notAllowed.1", "Nudity"),
-            new("conduct.chirper.notAllowed.2", "ERP or sexual solicitation"),
-            new("conduct.chirper.notAllowed.3", "Fetish content, such as BDSM"),
-            new("conduct.chirper.notAllowed.4", "Graphic violence or gore"),
-            new("conduct.chirper.notAllowed.5", "Genitalia or femme-presenting nipples"),
-            new("conduct.chirper.notAllowed.6", "Content that would ordinarily be on Velvet"),
-        };
-        public static readonly LocString ChirperAiTitle = new("conduct.chirper.ai.title", "AI Usage");
-        public static readonly LocString ChirperAiBody = new("conduct.chirper.ai.body", "We do not allow any content made by generative AI.");
-        public static readonly LocString ChirperRemovalAppeal = new("conduct.chirper.removalAppeal", "If you believe your content was wrongfully removed, please contact support through a ticket on the Discord.");
-        public static readonly LocString ChirperPoliticsTitle = new("conduct.chirper.politics.title", "No Real-World Politics");
-        public static readonly LocString ChirperPoliticsBody = new("conduct.chirper.politics.body", "Do not post real-world political content, such as elections, parties, politicians, governments, political campaigns, or debate on real-world political issues. Eorzean politics and lore are welcome.");
-        public static readonly LocString ChirperRespectTitle = new("conduct.chirper.respect.title", "Be Respectful");
-        public static readonly LocString ChirperRespectLead = new("conduct.chirper.respect.lead", "Treat others with respect. Do not engage in:");
-        public static readonly LocString[] ChirperRespectItems =
-        {
-            new("conduct.chirper.respect.1", "Harassment or bullying"),
-            new("conduct.chirper.respect.2", "Hate speech or slurs"),
-            new("conduct.chirper.respect.3", "Threats or targeted abuse"),
-            new("conduct.chirper.respect.4", "Impersonation of real people or misinformation intended to deceive"),
-        };
-        public static readonly LocString ChirperSpamTitle = new("conduct.chirper.spam.title", "No Spam or Advertising");
-        public static readonly LocString ChirperSpamLead = new("conduct.chirper.spam.lead", "Keep the feed worth browsing. Do not post:");
-        public static readonly LocString[] ChirperSpamItems =
-        {
-            new("conduct.chirper.spam.1", "Repetitive posts or feed flooding"),
-            new("conduct.chirper.spam.2", "Venue, business, or service advertisements: use Yellow Pages instead"),
-            new("conduct.chirper.spam.3", "Engagement manipulation or automated accounts"),
-            new("conduct.chirper.spam.4", "Malicious links, scams, or phishing"),
-        };
-        public static readonly LocString ChirperPrivacyTitle = new("conduct.chirper.privacy.title", "Protect Privacy");
-        public static readonly LocString ChirperPrivacyBody = new("conduct.chirper.privacy.body", "Do not share another person's personal information, private conversations, or confidential content without their permission.");
-        public static readonly LocString ChirperCreatorsTitle = new("conduct.chirper.creators.title", "Respect Creators");
-        public static readonly LocString ChirperCreatorsLead = new("conduct.chirper.creators.lead", "Only upload content you have the right to share. Do not:");
-        public static readonly LocString[] ChirperCreatorsItems =
-        {
-            new("conduct.chirper.creators.1", "Post stolen or leaked content"),
-            new("conduct.chirper.creators.2", "Remove watermarks or repost commissioned work without permission"),
-            new("conduct.chirper.creators.3", "Claim someone else's creations as your own"),
-        };
-        public static readonly LocString ChirperChildSafetyTitle = new("conduct.chirper.childSafety.title", "Child Safety");
-        public static readonly LocString ChirperChildSafetyBody = new("conduct.chirper.childSafety.body", "Any content involving or sexualizing child-like characters or minors is strictly prohibited, regardless of lore or stated age.");
-        public static readonly LocString ChirperDiscretionTitle = new("conduct.chirper.discretion.title", "Moderator Discretion");
-        public static readonly LocString ChirperDiscretionBody = new("conduct.chirper.discretion.body", "Posts that are excessively suggestive, disruptive, or otherwise inappropriate for a public community may be removed at moderator discretion.");
+        public static readonly LocString ChirperVeiledNote = new("conduct.chirper.veiledNote", "The sensitive option appears once your post has a photo.");
+        public static readonly LocString ChirperSpam = new("conduct.chirper.spam", "Spam: three near-identical posts in an hour, follow-for-follow, promo comments, or anything priced in real money");
 
-        public static readonly LocString AethergramTitle = new("conduct.aethergram.title", "Aethergram Community Rules");
-        public static readonly LocString AethergramIntro = new("conduct.aethergram.intro", "Before you start sharing photos, please read the rules of the community.");
-        public static readonly LocString AethergramAllowedTitle = new("conduct.aethergram.allowed.title", "What Is Allowed");
-        public static readonly LocString AethergramAllowedLead = new("conduct.aethergram.allowed.lead", "Examples of acceptable content include:");
+        public static readonly LocString AethergramTitle = new("conduct.aethergram.title", "Aethergram Community Guidelines");
+        public static readonly LocString AethergramIntro = new("conduct.aethergram.intro", "Aethergram is for photos of your adventures. It's safe for work and in-game only.");
         public static readonly LocString[] AethergramAllowedItems =
         {
             new("conduct.aethergram.allowed.1", "Glamour and fashion showcases"),
-            new("conduct.aethergram.allowed.2", "Character portraits and GPose photography"),
-            new("conduct.aethergram.allowed.3", "Casual roleplay and screenshots"),
-            new("conduct.aethergram.allowed.4", "Wedding and event photos"),
-            new("conduct.aethergram.allowed.5", "Combat, emotes, and social activities"),
-            new("conduct.aethergram.allowed.6", "Romantic content that is not sexual in nature"),
-            new("conduct.aethergram.allowed.7", "Memes"),
+            new("conduct.aethergram.allowed.2", "GPose, portraits and screenshots"),
+            new("conduct.aethergram.allowed.3", "Roleplay, weddings, events and housing"),
+            new("conduct.aethergram.allowed.4", "Combat, emotes and time with friends"),
+            new("conduct.aethergram.allowed.5", "Romance that isn't sexual"),
+            new("conduct.aethergram.allowed.6", "Meme templates, and a photo of your monitor showing the game"),
+            new("conduct.aethergram.allowed.7", "One post a day promoting your venue, service or Discord, priced in gil, with an in-game image"),
         };
-        public static readonly LocString AethergramSfwTitle = new("conduct.aethergram.sfw.title", "Keep It SFW");
-        public static readonly LocString AethergramSfwLead = new("conduct.aethergram.sfw.lead", "Aethergram is a safe-for-work platform. Anything that could be considered more than that should be veiled. What is veiled?");
-        public static readonly LocString[] AethergramSfwItems =
+        public static readonly LocString AethergramInGameTitle = new("conduct.aethergram.inGame.title", "In-game only");
+        public static readonly LocString AethergramInGameLead = new("conduct.aethergram.inGame.lead", "Aethergram only shows the game. These are removed:");
+        public static readonly LocString[] AethergramInGameItems =
         {
-            new("conduct.aethergram.sfw.1", "Sexually suggestive content"),
-            new("conduct.aethergram.sfw.2", "Implied nudity"),
-            new("conduct.aethergram.sfw.3", "Presenting or suggestive poses"),
-            new("conduct.aethergram.sfw.4", "Pictures with the focus on private/sensitive areas"),
-            new("conduct.aethergram.sfw.5", "Lingerie, micro bikinis, etc."),
-            new("conduct.aethergram.sfw.6", "Sexual hashtags, innuendos"),
-            new("conduct.aethergram.sfw.7", "Visible areola"),
+            new("conduct.aethergram.inGame.1", "Real-life photos of any kind: cosplay, fanfest, merch, pets, food"),
+            new("conduct.aethergram.inGame.2", "Hand-drawn art (it's welcome on Chirper)"),
+            new("conduct.aethergram.inGame.3", "Real-world ads and off-topic text posts"),
+            new("conduct.aethergram.inGame.4", "Kitten-modded characters, in any pose"),
         };
-        public static readonly LocString AethergramNotAllowedTitle = new("conduct.aethergram.notAllowed.title", "What Is Not Allowed");
-        public static readonly LocString[] AethergramNotAllowedItems =
-        {
-            new("conduct.aethergram.notAllowed.1", "Nudity"),
-            new("conduct.aethergram.notAllowed.2", "ERP or sexual solicitation"),
-            new("conduct.aethergram.notAllowed.3", "Fetish content, such as BDSM"),
-            new("conduct.aethergram.notAllowed.4", "Graphic violence or gore"),
-            new("conduct.aethergram.notAllowed.5", "Genitalia or femme-presenting nipples"),
-            new("conduct.aethergram.notAllowed.6", "Content that would ordinarily be on Velvet"),
-        };
-        public static readonly LocString AethergramAiTitle = new("conduct.aethergram.ai.title", "AI Usage");
-        public static readonly LocString AethergramAiBody = new("conduct.aethergram.ai.body", "We do not allow any content made by generative AI.");
-        public static readonly LocString AethergramRemovalAppeal = new("conduct.aethergram.removalAppeal", "If you believe your content was wrongfully removed, please contact support through a ticket on the Discord.");
-        public static readonly LocString AethergramIrlTitle = new("conduct.aethergram.irl.title", "In-Game Content Only");
-        public static readonly LocString AethergramIrlBody = new("conduct.aethergram.irl.body", "Aethergram is a place for in-game moments. Do not post real-life photographs or other real-world content. Memes are the exception.");
-        public static readonly LocString AethergramPoliticsTitle = new("conduct.aethergram.politics.title", "No Real-World Politics");
-        public static readonly LocString AethergramPoliticsBody = new("conduct.aethergram.politics.body", "Do not post real-world political content, such as elections, parties, politicians, governments, political campaigns, or debate on real-world political issues. Eorzean politics and lore are welcome.");
-        public static readonly LocString AethergramRespectTitle = new("conduct.aethergram.respect.title", "Be Respectful");
-        public static readonly LocString AethergramRespectLead = new("conduct.aethergram.respect.lead", "Treat others with respect. Do not engage in:");
-        public static readonly LocString[] AethergramRespectItems =
-        {
-            new("conduct.aethergram.respect.1", "Harassment or bullying"),
-            new("conduct.aethergram.respect.2", "Hate speech or slurs"),
-            new("conduct.aethergram.respect.3", "Threats or targeted abuse"),
-            new("conduct.aethergram.respect.4", "Harassment through edited or manipulated images"),
-            new("conduct.aethergram.respect.5", "Impersonation of real people or misinformation intended to deceive"),
-        };
-        public static readonly LocString AethergramSpamTitle = new("conduct.aethergram.spam.title", "No Spam or Advertising");
-        public static readonly LocString AethergramSpamLead = new("conduct.aethergram.spam.lead", "Keep the feed worth browsing. Do not post:");
-        public static readonly LocString[] AethergramSpamItems =
-        {
-            new("conduct.aethergram.spam.1", "Repetitive posts or feed flooding"),
-            new("conduct.aethergram.spam.2", "Venue, business, or service advertisements: use Yellow Pages instead"),
-            new("conduct.aethergram.spam.3", "Engagement manipulation or automated accounts"),
-            new("conduct.aethergram.spam.4", "Excessive watermarks or promotional overlays"),
-            new("conduct.aethergram.spam.5", "Malicious links, scams, or phishing"),
-        };
-        public static readonly LocString AethergramPrivacyTitle = new("conduct.aethergram.privacy.title", "Protect Privacy");
-        public static readonly LocString AethergramPrivacyBody = new("conduct.aethergram.privacy.body", "Do not share another person's personal information, private conversations, or confidential content without their permission.");
-        public static readonly LocString AethergramCreatorsTitle = new("conduct.aethergram.creators.title", "Respect Creators");
-        public static readonly LocString AethergramCreatorsLead = new("conduct.aethergram.creators.lead", "Only upload content you have the right to share. Do not:");
-        public static readonly LocString[] AethergramCreatorsItems =
-        {
-            new("conduct.aethergram.creators.1", "Post stolen or leaked content"),
-            new("conduct.aethergram.creators.2", "Remove watermarks or repost commissioned work without permission"),
-            new("conduct.aethergram.creators.3", "Claim someone else's creations as your own"),
-        };
-        public static readonly LocString AethergramChildlikeTitle = new("conduct.aethergram.childlike.title", "Child-like Characters");
-        public static readonly LocString AethergramChildlikeBody = new("conduct.aethergram.childlike.body", "Any content that sexualizes characters with child-like appearances or proportions is strictly prohibited, regardless of lore or stated age. Kitten Modded characters are not allowed.");
-        public static readonly LocString AethergramDiscretionTitle = new("conduct.aethergram.discretion.title", "Moderator Discretion");
-        public static readonly LocString AethergramDiscretionBody = new("conduct.aethergram.discretion.body", "Moderators will consider the overall context and intent. Content that appears intended to be sexually suggestive or otherwise inappropriate for a safe-for-work platform may be removed at moderator discretion.");
+        public static readonly LocString AethergramSpam = new("conduct.aethergram.spam", "Spam: the same image again within 7 days, follow-for-follow, promo comments, or anything priced in real money");
 
-        public static readonly LocString VelvetTitle = new("conduct.velvet.title", "Velvet Community Rules");
-        public static readonly LocString VelvetIntro = new("conduct.velvet.intro", "Velvet is an 18+ space. Before you continue, please read the rules of the community.");
-        public static readonly LocString VelvetAdultsTitle = new("conduct.velvet.adults.title", "Adults Only (18+)");
-        public static readonly LocString VelvetAdultsBody = new("conduct.velvet.adults.body", "Velvet is for adults aged 18 and above. Any content involving minors, child-like characters (including Lalafell and Kitten Mods), or underage roleplay is strictly prohibited. It is removed, and the account is suspended, up to and including a permanent ban.");
-        public static readonly LocString VelvetAllowedTitle = new("conduct.velvet.allowed.title", "What Is Allowed");
-        public static readonly LocString VelvetAllowedLead = new("conduct.velvet.allowed.lead", "Examples of acceptable content include:");
+        public static readonly LocString VelvetTitle = new("conduct.velvet.title", "Velvet Community Guidelines");
+        public static readonly LocString VelvetIntro = new("conduct.velvet.intro", "Velvet is an 18+ space. Nudity, NSFW GPose and consensual ERP are welcome here, inside these lines.");
+        public static readonly LocString VelvetAdultsTitle = new("conduct.velvet.adults.title", "Adults only");
+        public static readonly LocString[] VelvetAdultsItems =
+        {
+            new("conduct.velvet.adults.1", "You must be 18 or older"),
+            new("conduct.velvet.adults.2", "Lalafell can't use Velvet. Your character's race is checked on the Lodestone and rechecked every week"),
+            new("conduct.velvet.adults.3", "Kitten mods and any mod that makes a character look like a child are banned outright"),
+        };
         public static readonly LocString[] VelvetAllowedItems =
         {
-            new("conduct.velvet.allowed.1", "Personal ads looking for mature roleplay"),
-            new("conduct.velvet.allowed.2", "Suggestive screenshots (nudity is allowed)"),
-            new("conduct.velvet.allowed.3", "Adult-oriented discussions"),
-            new("conduct.velvet.allowed.4", "Relationship communities"),
-            new("conduct.velvet.allowed.5", "Character storytelling"),
+            new("conduct.velvet.allowed.1", "Personal ads for mature roleplay"),
+            new("conduct.velvet.allowed.2", "NSFW screenshots and GPose, nudity included"),
+            new("conduct.velvet.allowed.3", "ERP and kinks between consenting adults, including restraint and impact play without injury"),
+            new("conduct.velvet.allowed.4", "Venue ERP and adult services priced in gil"),
+            new("conduct.velvet.allowed.5", "College settings, and teacher-student or caregiver dynamics between adults"),
+            new("conduct.velvet.allowed.6", "Character stories and relationship communities"),
         };
-        public static readonly LocString VelvetLimitsTitle = new("conduct.velvet.limits.title", "Content Limits");
-        public static readonly LocString VelvetLimitsLead = new("conduct.velvet.limits.lead", "Velvet is an adult space, but some content is still off-limits:");
-        public static readonly LocString[] VelvetLimitsItems =
-        {
-            new("conduct.velvet.limits.1", "Animal genitalia, including animal genitals on humanoid or beast-race characters"),
-        };
-        public static readonly LocString VelvetConsentTitle = new("conduct.velvet.consent.title", "Consent First");
-        public static readonly LocString VelvetConsentLead = new("conduct.velvet.consent.lead", "Respect other users. Do not engage in:");
+        public static readonly LocString VelvetConsentTitle = new("conduct.velvet.consent.title", "Consent and connections");
         public static readonly LocString[] VelvetConsentItems =
         {
-            new("conduct.velvet.consent.1", "Unsolicited explicit content"),
-            new("conduct.velvet.consent.2", "Coercion or pressure into ERP"),
-            new("conduct.velvet.consent.3", "Contacting users who have declined or blocked you"),
+            new("conduct.velvet.consent.1", "Wait for a reply before sending anything explicit, in text or media"),
+            new("conduct.velvet.consent.2", "No explicit media before you've connected"),
+            new("conduct.velvet.consent.3", "Stop at no or stop, and respect stated limits"),
+            new("conduct.velvet.consent.4", "Reach people through mutual connections only: no alts around a block, no passing messages through friends"),
         };
-        public static readonly LocString VelvetBoundariesTitle = new("conduct.velvet.boundaries.title", "Respect Boundaries");
-        public static readonly LocString VelvetBoundariesLead = new("conduct.velvet.boundaries.lead", "Only interact through intended platform features. Do not:");
-        public static readonly LocString[] VelvetBoundariesItems =
+        public static readonly LocString VelvetAdultCommerce = new("conduct.velvet.adultCommerce", "Links to paid adult sites or real-world sex work");
+        public static readonly LocString[] VelvetZeroItems =
         {
-            new("conduct.velvet.boundaries.1", "Bypass mutual connections"),
-            new("conduct.velvet.boundaries.2", "Use alternate accounts to evade blocks"),
-            new("conduct.velvet.boundaries.3", "Ask others to contact someone on your behalf"),
+            new("conduct.velvet.zero.underage", "Underage roleplay: school settings, a stated age under 18, loli, shota, or ageplay as a minor"),
+            new("conduct.velvet.zero.fetish", "Incest, bestiality with real animals, minions, mounts or feral forms, necrophilia or snuff"),
+            new("conduct.velvet.zero.animal", "Animal genitalia, including on beast-race characters"),
+            new("conduct.velvet.zero.violence", "Sexual violence with injury, blood, weapons or strangulation marks, extreme gore, bodily waste or abuse"),
+            new("conduct.velvet.zero.nonConsent", "Non-consent shown in a public post. Keep CNC roleplay in private threads between adults"),
+            new("conduct.velvet.zero.aiRealPerson", "Explicit AI images of a real person"),
         };
-        public static readonly LocString VelvetIllegalTitle = new("conduct.velvet.illegal.title", "Illegal and Prohibited Content");
-        public static readonly LocString VelvetIllegalLead = new("conduct.velvet.illegal.lead", "Zero tolerance, and fantasy or roleplay is no exemption. Any of the following is removed, and the account is suspended, up to and including a permanent ban:");
-        public static readonly LocString[] VelvetIllegalItems =
-        {
-            new("conduct.velvet.illegal.1", "Child sexual abuse material (CSAM)"),
-            new("conduct.velvet.illegal.2", "Sexual exploitation"),
-            new("conduct.velvet.illegal.3", "Non-consensual intimate imagery or revenge porn"),
-            new("conduct.velvet.illegal.4", "Deepfake or AI-generated explicit images of real people"),
-            new("conduct.velvet.illegal.5", "Blackmail or sextortion"),
-            new("conduct.velvet.illegal.6", "Incest, bestiality, or necrophilia"),
-            new("conduct.velvet.illegal.7", "Sexualized violence, snuff, or extreme gore"),
-        };
-        public static readonly LocString VelvetPrivacyTitle = new("conduct.velvet.privacy.title", "Protect Privacy");
-        public static readonly LocString VelvetPrivacyLead = new("conduct.velvet.privacy.lead", "Doxxing is removed, and the account is suspended, up to and including a permanent ban. Never share another person's personal information without permission, including:");
-        public static readonly LocString[] VelvetPrivacyItems =
-        {
-            new("conduct.velvet.privacy.1", "Real names"),
-            new("conduct.velvet.privacy.2", "Addresses or phone numbers"),
-            new("conduct.velvet.privacy.3", "Government IDs"),
-            new("conduct.velvet.privacy.4", "Workplace information"),
-            new("conduct.velvet.privacy.5", "Private conversations"),
-        };
-        public static readonly LocString VelvetCreatorsTitle = new("conduct.velvet.creators.title", "Respect Creators");
-        public static readonly LocString VelvetCreatorsLead = new("conduct.velvet.creators.lead", "Only upload content you have the right to share. Do not:");
-        public static readonly LocString[] VelvetCreatorsItems =
-        {
-            new("conduct.velvet.creators.1", "Post stolen or leaked content"),
-            new("conduct.velvet.creators.2", "Remove watermarks or repost commissioned work without permission"),
-            new("conduct.velvet.creators.3", "Claim someone else's creations as your own"),
-        };
-        public static readonly LocString VelvetAiTitle = new("conduct.velvet.ai.title", "AI Usage");
-        public static readonly LocString VelvetAiBody = new("conduct.velvet.ai.body", "We do not allow any content made by generative AI.");
-        public static readonly LocString VelvetRemovalAppeal = new("conduct.velvet.removalAppeal", "If you believe your content was wrongfully removed, please contact support through a ticket on the Discord.");
-        public static readonly LocString VelvetSpamTitle = new("conduct.velvet.spam.title", "No Spam or Scams");
-        public static readonly LocString VelvetSpamLead = new("conduct.velvet.spam.lead", "Keep the feed worth browsing. Do not post:");
-        public static readonly LocString[] VelvetSpamItems =
-        {
-            new("conduct.velvet.spam.1", "Repetitive posts or feed flooding"),
-            new("conduct.velvet.spam.2", "Venue, business, or service advertisements: use Yellow Pages instead"),
-            new("conduct.velvet.spam.3", "Engagement manipulation or automated accounts"),
-            new("conduct.velvet.spam.4", "Malicious links, scams, or phishing"),
-            new("conduct.velvet.spam.5", "Sale or promotion of illegal services"),
-        };
-        public static readonly LocString VelvetRespectTitle = new("conduct.velvet.respect.title", "Be Respectful");
-        public static readonly LocString VelvetRespectLead = new("conduct.velvet.respect.lead", "Treat others with respect. Do not engage in:");
-        public static readonly LocString[] VelvetRespectItems =
-        {
-            new("conduct.velvet.respect.1", "Harassment or bullying"),
-            new("conduct.velvet.respect.2", "Hate speech or slurs"),
-            new("conduct.velvet.respect.3", "Threats or targeted abuse"),
-            new("conduct.velvet.respect.4", "Stalking or repeated unwanted contact"),
-            new("conduct.velvet.respect.5", "Impersonation of real people or misinformation intended to deceive"),
-        };
-        public static readonly LocString VelvetModerationTitle = new("conduct.velvet.moderation.title", "Respect Moderation");
-        public static readonly LocString VelvetModerationBody = new("conduct.velvet.moderation.body", "Do not evade bans, create alternate accounts to avoid enforcement, or harass moderators. Appeals are welcome if made respectfully.");
 
-        public static readonly LocString MusterTitle = new("conduct.muster.title", "Muster Community Rules");
-        public static readonly LocString MusterIntro = new("conduct.muster.intro", "Before you host or join a meetup, please read the rules of the community.");
-        public static readonly LocString MusterAllowedTitle = new("conduct.muster.allowed.title", "What Is Allowed");
-        public static readonly LocString MusterAllowedLead = new("conduct.muster.allowed.lead", "Examples of acceptable musters include:");
+        public static readonly LocString MusterTitle = new("conduct.muster.title", "Muster Community Guidelines");
+        public static readonly LocString MusterIntro = new("conduct.muster.intro", "Muster is a public list of meetups inside the game. Keep listings honest and safe for work.");
         public static readonly LocString[] MusterAllowedItems =
         {
-            new("conduct.muster.allowed.1", "Spontaneous meetups and hangouts"),
-            new("conduct.muster.allowed.2", "Hunt trains, map parties, and duty groups"),
+            new("conduct.muster.allowed.1", "Hangouts and spontaneous meetups"),
+            new("conduct.muster.allowed.2", "Hunt trains, map parties and duty groups"),
             new("conduct.muster.allowed.3", "Roleplay scenes and social gatherings"),
-            new("conduct.muster.allowed.4", "Screenshot sessions, fishing trips, and Gold Saucer nights"),
-            new("conduct.muster.allowed.5", "Community events open to anyone who shows up"),
+            new("conduct.muster.allowed.4", "Screenshot sessions, fishing trips and Gold Saucer nights"),
+            new("conduct.muster.allowed.5", "Events open to anyone who shows up"),
         };
-        public static readonly LocString MusterHostingTitle = new("conduct.muster.hosting.title", "Host in Good Faith");
-        public static readonly LocString MusterHostingLead = new("conduct.muster.hosting.lead", "Your listing is a promise to everyone who shows up. Do not:");
+        public static readonly LocString MusterHostingTitle = new("conduct.muster.hosting.title", "Hosting");
         public static readonly LocString[] MusterHostingItems =
         {
-            new("conduct.muster.hosting.1", "Fake locations or misleading listings"),
-            new("conduct.muster.hosting.2", "List a muster you do not intend to host"),
-            new("conduct.muster.hosting.3", "Leave a finished muster live in the directory"),
-            new("conduct.muster.hosting.4", "Disappear on attendees instead of ending the muster"),
+            new("conduct.muster.hosting.1", "List the real place and time, and only what you'll host"),
+            new("conduct.muster.hosting.2", "One live muster at a time; end it when it's over"),
+            new("conduct.muster.hosting.3", "Meet in the game only: no real-life meetups, and don't collect contact details"),
+            new("conduct.muster.hosting.4", "No paid services, in gil or real money. Ads go in Yellow Pages"),
         };
-        public static readonly LocString MusterAppropriateTitle = new("conduct.muster.appropriate.title", "Keep It Appropriate");
-        public static readonly LocString MusterAppropriateLead = new("conduct.muster.appropriate.lead", "The directory is public and safe for work. Do not post:");
-        public static readonly LocString[] MusterAppropriateItems =
+        public static readonly LocString[] MusterRemovedItems =
         {
-            new("conduct.muster.appropriate.1", "Explicit sexual content or nudity"),
-            new("conduct.muster.appropriate.2", "ERP meetups or sexual solicitation"),
-            new("conduct.muster.appropriate.3", "Fetish gatherings"),
-            new("conduct.muster.appropriate.4", "NSFW descriptions or meeting spots"),
+            new("conduct.muster.removed.1", "Nudity, sexual content or NSFW descriptions and meeting spots"),
+            new("conduct.muster.removed.2", "ERP meetups, sexual solicitation or fetish gatherings"),
+            new("conduct.muster.removed.3", "Duplicate musters"),
+            new("conduct.muster.removed.4", "Musters aimed at singling out or harassing a player"),
+            new("conduct.muster.removed.5", "Slurs, hate speech and hateful symbols"),
         };
-        public static readonly LocString MusterChildSafetyTitle = new("conduct.muster.childSafety.title", "Child Safety");
-        public static readonly LocString MusterChildSafetyBody = new("conduct.muster.childSafety.body", "Any content involving or sexualizing child-like characters or minors is strictly prohibited, regardless of lore or stated age.");
-        public static readonly LocString MusterInGameTitle = new("conduct.muster.inGame.title", "In-Game Meetups Only");
-        public static readonly LocString MusterInGameBody = new("conduct.muster.inGame.body", "Musters are for meeting inside the game. Do not use them to arrange real-life meetings or to collect personal contact details from attendees.");
-        public static readonly LocString MusterRespectTitle = new("conduct.muster.respect.title", "Be Respectful");
-        public static readonly LocString MusterRespectLead = new("conduct.muster.respect.lead", "Treat others with respect. Do not engage in:");
-        public static readonly LocString[] MusterRespectItems =
-        {
-            new("conduct.muster.respect.1", "Harassment or bullying"),
-            new("conduct.muster.respect.2", "Hate speech or slurs"),
-            new("conduct.muster.respect.3", "Threats or targeted abuse"),
-            new("conduct.muster.respect.4", "Musters aimed at singling out or harassing a player"),
-            new("conduct.muster.respect.5", "Impersonation of real people or misinformation intended to deceive"),
-        };
-        public static readonly LocString MusterSpamTitle = new("conduct.muster.spam.title", "No Spam or Advertising");
-        public static readonly LocString MusterSpamLead = new("conduct.muster.spam.lead", "Keep the directory worth browsing. Do not post:");
-        public static readonly LocString[] MusterSpamItems =
-        {
-            new("conduct.muster.spam.1", "Repeated or duplicate musters"),
-            new("conduct.muster.spam.2", "Venue, business, or service advertisements: use Yellow Pages instead"),
-            new("conduct.muster.spam.3", "Paid services of any kind, whether gil or real money"),
-            new("conduct.muster.spam.4", "Malicious links, scams, or phishing"),
-        };
-        public static readonly LocString MusterPrivacyTitle = new("conduct.muster.privacy.title", "Protect Privacy");
-        public static readonly LocString MusterPrivacyBody = new("conduct.muster.privacy.body", "Do not share another person's personal information, private conversations, or confidential content without their permission.");
-        public static readonly LocString MusterDiscretionTitle = new("conduct.muster.discretion.title", "Moderator Discretion");
-        public static readonly LocString MusterDiscretionBody = new("conduct.muster.discretion.body", "Musters that are misleading, disruptive, or otherwise inappropriate for a public directory may be removed at moderator discretion.");
 
-        public static readonly LocString YellowPagesTitle = new("conduct.yellowpages.title", "Yellow Pages Community Rules");
-        public static readonly LocString YellowPagesIntro = new("conduct.yellowpages.intro", "Before you post an ad, please read the rules of the community.");
-        public static readonly LocString YellowPagesAllowedTitle = new("conduct.yellowpages.allowed.title", "What Is Allowed");
-        public static readonly LocString YellowPagesAllowedLead = new("conduct.yellowpages.allowed.lead", "Examples of acceptable ads include:");
+        public static readonly LocString YellowPagesTitle = new("conduct.yellowpages.title", "Yellow Pages Community Guidelines");
+        public static readonly LocString YellowPagesIntro = new("conduct.yellowpages.intro", "Yellow Pages is the board for in-game services, venues and recruiting. Everything is priced in gil.");
         public static readonly LocString[] YellowPagesAllowedItems =
         {
-            new("conduct.yellowpages.allowed.1", "Venue nights, game nights, and housing tours with honest schedules"),
-            new("conduct.yellowpages.allowed.2", "Crafting, gathering, portraits, glamour, and performance work for gil"),
-            new("conduct.yellowpages.allowed.3", "Recruiting for free companies, statics, and venue staff"),
-            new("conduct.yellowpages.allowed.4", "Clear prices and clear expectations"),
-            new("conduct.yellowpages.allowed.5", "Mod ads that show the work and link to the mod page: SFW mods only, no NSFW mods"),
-            new("conduct.yellowpages.allowed.6", "Plugin ads only for modding and GPose plugins: QoL, UI, and automation are excluded"),
+            new("conduct.yellowpages.allowed.1", "Venue nights, game nights and housing tours"),
+            new("conduct.yellowpages.allowed.2", "Crafting, gathering, portraits, glamour and performances for gil"),
+            new("conduct.yellowpages.allowed.3", "Recruiting for free companies, statics and venue staff"),
+            new("conduct.yellowpages.allowed.4", "Mod ads that show the work and link to XIV Mod Archive, Heliosphere, Glamour Dresser or GitHub (SFW mods only)"),
+            new("conduct.yellowpages.allowed.5", "Plugin ads for modding and GPose plugins"),
+            new("conduct.yellowpages.allowed.6", "The After Dark tag for mature venues and late-night events"),
         };
-        public static readonly LocString YellowPagesGilTitle = new("conduct.yellowpages.gil.title", "Gil Only");
-        public static readonly LocString YellowPagesGilLead = new("conduct.yellowpages.gil.lead", "Ads may only ask for gil. The following are never allowed:");
-        public static readonly LocString[] YellowPagesGilItems =
+        public static readonly LocString YellowPagesPostingTitle = new("conduct.yellowpages.posting.title", "Posting ads");
+        public static readonly LocString[] YellowPagesPostingItems =
         {
-            new("conduct.yellowpages.gil.1", "Real money, gift cards, or payments taken outside the game"),
-            new("conduct.yellowpages.gil.2", "RMT, gil selling, account services, or third-party boosting shops"),
-            new("conduct.yellowpages.gil.3", "Selling mods, plugins, or commissions for them: those ads link out and carry no price"),
-            new("conduct.yellowpages.gil.4", "Trading account access or characters"),
+            new("conduct.yellowpages.posting.1", "Prices in gil only. No real money, gift cards or payment outside the game"),
+            new("conduct.yellowpages.posting.2", "Up to 3 live ads. Each runs 7 days and can be renewed in its last 3 days"),
+            new("conduct.yellowpages.posting.3", "Pick the category and tags that fit"),
+            new("conduct.yellowpages.posting.4", "List only what you can deliver, at the price and time you post"),
+            new("conduct.yellowpages.posting.5", "Take an ad down once the work or event is over, and don't repost it to dodge expiry"),
+            new("conduct.yellowpages.posting.6", "Mod and plugin ads link out and carry no price"),
         };
-        public static readonly LocString YellowPagesHonestTitle = new("conduct.yellowpages.honest.title", "Honest Listings");
-        public static readonly LocString YellowPagesHonestLead = new("conduct.yellowpages.honest.lead", "An ad is a promise to whoever answers it. Do not post:");
-        public static readonly LocString[] YellowPagesHonestItems =
+        public static readonly LocString YellowPagesPostingNote = new("conduct.yellowpages.posting.note", "An ad with three open reports is hidden until a moderator reviews it, and you're told.");
+        public static readonly LocString[] YellowPagesRemovedItems =
         {
-            new("conduct.yellowpages.honest.1", "Fake listings or services you cannot deliver"),
-            new("conduct.yellowpages.honest.2", "Prices, schedules, or turnaround times you cannot honor"),
-            new("conduct.yellowpages.honest.3", "Impersonating another venue, crafter, or free company"),
-            new("conduct.yellowpages.honest.4", "Reposting the same ad to dodge the expiry cycle"),
-            new("conduct.yellowpages.honest.5", "Ads left live once the work or event is over"),
+            new("conduct.yellowpages.removed.1", "Nudity or explicit content in titles, photos or text"),
+            new("conduct.yellowpages.removed.2", "ERP, escort or fetish services, After Dark included"),
+            new("conduct.yellowpages.removed.3", "Fake listings, or posing as another venue, crafter or free company"),
+            new("conduct.yellowpages.removed.4", "Selling mods, plugins or commissions for them"),
+            new("conduct.yellowpages.removed.5", "Images made or changed by generative AI"),
+            new("conduct.yellowpages.removed.6", "Someone else's work without permission"),
+            new("conduct.yellowpages.removed.7", "Badgering people through inquiries, slurs and hate speech"),
         };
-        public static readonly LocString YellowPagesAppropriateTitle = new("conduct.yellowpages.appropriate.title", "Keep It Appropriate");
-        public static readonly LocString YellowPagesAppropriateLead = new("conduct.yellowpages.appropriate.lead", "The After Dark tag marks mature venues and late-night events. It is not permission to post:");
-        public static readonly LocString[] YellowPagesAppropriateItems =
-        {
-            new("conduct.yellowpages.appropriate.1", "Nudity or explicit sexual content"),
-            new("conduct.yellowpages.appropriate.2", "ERP, escort, or sexual solicitation services"),
-            new("conduct.yellowpages.appropriate.3", "Fetish services"),
-            new("conduct.yellowpages.appropriate.4", "Explicit language in titles, photos, or ad text"),
-        };
-        public static readonly LocString YellowPagesChildSafetyTitle = new("conduct.yellowpages.childSafety.title", "Child Safety");
-        public static readonly LocString YellowPagesChildSafetyBody = new("conduct.yellowpages.childSafety.body", "Any content involving or sexualizing child-like characters or minors is strictly prohibited, regardless of lore or stated age.");
-        public static readonly LocString YellowPagesRespectTitle = new("conduct.yellowpages.respect.title", "Be Respectful");
-        public static readonly LocString YellowPagesRespectLead = new("conduct.yellowpages.respect.lead", "Treat others with respect. Do not engage in:");
-        public static readonly LocString[] YellowPagesRespectItems =
-        {
-            new("conduct.yellowpages.respect.1", "Harassment or bullying"),
-            new("conduct.yellowpages.respect.2", "Hate speech or slurs"),
-            new("conduct.yellowpages.respect.3", "Threats or targeted abuse"),
-            new("conduct.yellowpages.respect.4", "Pressuring or badgering someone through inquiries"),
-            new("conduct.yellowpages.respect.5", "Impersonation of real people or misinformation intended to deceive"),
-        };
-        public static readonly LocString YellowPagesSpamTitle = new("conduct.yellowpages.spam.title", "No Spam");
-        public static readonly LocString YellowPagesSpamLead = new("conduct.yellowpages.spam.lead", "Keep the board worth browsing. Do not post:");
-        public static readonly LocString[] YellowPagesSpamItems =
-        {
-            new("conduct.yellowpages.spam.1", "Repetitive or duplicate ads"),
-            new("conduct.yellowpages.spam.2", "Ads filed under unrelated categories or tags"),
-            new("conduct.yellowpages.spam.3", "Engagement manipulation or automated accounts"),
-            new("conduct.yellowpages.spam.4", "Malicious links, scams, or phishing"),
-        };
-        public static readonly LocString YellowPagesPrivacyTitle = new("conduct.yellowpages.privacy.title", "Protect Privacy");
-        public static readonly LocString YellowPagesPrivacyBody = new("conduct.yellowpages.privacy.body", "Do not share another person's personal information, private conversations, or confidential content without their permission.");
-        public static readonly LocString YellowPagesCreatorsTitle = new("conduct.yellowpages.creators.title", "Respect Creators");
-        public static readonly LocString YellowPagesCreatorsLead = new("conduct.yellowpages.creators.lead", "Only upload content you have the right to share. Do not:");
-        public static readonly LocString[] YellowPagesCreatorsItems =
-        {
-            new("conduct.yellowpages.creators.1", "Post stolen or leaked content"),
-            new("conduct.yellowpages.creators.2", "Remove watermarks or repost commissioned work without permission"),
-            new("conduct.yellowpages.creators.3", "Claim someone else's creations as your own"),
-            new("conduct.yellowpages.creators.4", "Post AI-generated content"),
-        };
-        public static readonly LocString YellowPagesDiscretionTitle = new("conduct.yellowpages.discretion.title", "Moderator Discretion");
-        public static readonly LocString YellowPagesDiscretionBody = new("conduct.yellowpages.discretion.body", "Ads that are misleading, off-topic, or otherwise inappropriate for a public board may be removed at moderator discretion.");
 
         public static readonly LocString CasinoTitle = new("conduct.casino.title", "Gamba House Rules");
-        public static readonly LocString CasinoIntro = new("conduct.casino.intro", "Before you sit down at a table, please read the house rules.");
-        public static readonly LocString CasinoPlayMoneyTitle = new("conduct.casino.playMoney.title", "Play Money Only");
-        public static readonly LocString CasinoPlayMoneyBody = new("conduct.casino.playMoney.body", "Aether Coin is a cosmetic currency with no real-world value. Gamba is entertainment, the odds favor the house, and nothing here can be turned into anything real.");
-        public static readonly LocString CasinoRmtTitle = new("conduct.casino.rmt.title", "No Real-Money Trading");
-        public static readonly LocString CasinoRmtLead = new("conduct.casino.rmt.lead", "Trading play money for anything real is enforced with clawbacks and account suspensions, up to and including a permanent ban. Do not:");
-        public static readonly LocString[] CasinoRmtItems =
+        public static readonly LocString CasinoIntro = new("conduct.casino.intro", "Gamba is for fun. Chips and Aether Coins are play money, and gil tables are run by players.");
+        public static readonly LocString CasinoMoneyTitle = new("conduct.casino.money.title", "How the money works");
+        public static readonly LocString[] CasinoMoneyItems =
         {
-            new("conduct.casino.rmt.1", "Buy or sell coins, chips, or seats for anything of value, gil included"),
-            new("conduct.casino.rmt.2", "Lose on purpose to move coins to another player"),
-            new("conduct.casino.rmt.3", "Advertise or broker any trade of coins or chips"),
+            new("conduct.casino.money.1", "Chips and Aether Coins have no real-world value and can't be cashed out for anything real"),
+            new("conduct.casino.money.2", "The house has the edge. Play for fun, not to earn"),
+            new("conduct.casino.money.3", "Gil tables are hosted and banked by a player. Aetherphone keeps the ledger and never holds your gil"),
+            new("conduct.casino.money.4", "Practice tables use practice chips that never touch your bankroll"),
         };
-        public static readonly LocString CasinoOneSeatTitle = new("conduct.casino.oneSeat.title", "One Player, One Seat");
-        public static readonly LocString CasinoOneSeatLead = new("conduct.casino.oneSeat.lead", "Every seat is one person playing their own hand. Do not:");
-        public static readonly LocString[] CasinoOneSeatItems =
-        {
-            new("conduct.casino.oneSeat.1", "Share a seat or play someone else's hand"),
-            new("conduct.casino.oneSeat.2", "Sit more than one of your characters at the same table"),
-            new("conduct.casino.oneSeat.3", "Collude or soft-play with friends or alts; suspicious tables are logged and reviewed"),
-        };
-        public static readonly LocString CasinoMannersTitle = new("conduct.casino.manners.title", "Table Manners");
-        public static readonly LocString CasinoMannersLead = new("conduct.casino.manners.lead", "A good table is a friendly one:");
+        public static readonly LocString CasinoMannersTitle = new("conduct.casino.manners.title", "Table manners");
         public static readonly LocString[] CasinoMannersItems =
         {
             new("conduct.casino.manners.1", "Be patient with new players"),
             new("conduct.casino.manners.2", "Nobody owes you a fast turn"),
             new("conduct.casino.manners.3", "Never needle someone over a loss"),
         };
-        public static readonly LocString CasinoSelfCareTitle = new("conduct.casino.selfCare.title", "Look After Yourself");
-        public static readonly LocString CasinoSelfCareBody = new("conduct.casino.selfCare.body", "Limits and the session timer exist for you. Take breaks, set your own pace, and remember the felt will be here tomorrow.");
+        public static readonly LocString CasinoFairPlayTitle = new("conduct.casino.fairPlay.title", "Fair play");
+        public static readonly LocString[] CasinoFairPlayItems =
+        {
+            new("conduct.casino.fairPlay.1", "One person per seat, playing their own hand"),
+            new("conduct.casino.fairPlay.2", "Never seat two of your characters at one table"),
+            new("conduct.casino.fairPlay.3", "No collusion, soft play or losing on purpose to pass chips. Hold'em hands are kept 14 days for review"),
+        };
+        public static readonly LocString CasinoFairPlayNote = new("conduct.casino.fairPlay.note", "Breaks lead to clawbacks, a freeze or a suspension.");
+        public static readonly LocString CasinoGilTablesTitle = new("conduct.casino.gilTables.title", "Gil tables");
+        public static readonly LocString[] CasinoGilTablesItems =
+        {
+            new("conduct.casino.gilTables.1", "Hosts pay out what the ledger says"),
+            new("conduct.casino.gilTables.2", "Three unresolved payout disputes in 30 days freeze a host's gil tables until a moderator clears them"),
+            new("conduct.casino.gilTables.3", "Hosts can remove a player from their table"),
+        };
+        public static readonly LocString[] CasinoZeroItems =
+        {
+            new("conduct.casino.zero.1", "Buying or selling coins or chips for gil, real money or anything else"),
+            new("conduct.casino.zero.2", "Advertising or brokering any such trade"),
+        };
+        public static readonly LocString CasinoSelfCareTitle = new("conduct.casino.selfCare.title", "Look after yourself");
+        public static readonly LocString[] CasinoSelfCareItems =
+        {
+            new("conduct.casino.selfCare.1", "Set your own loss limit in the cashier"),
+            new("conduct.casino.selfCare.2", "The check-in every 100 rounds or 30 minutes shows how your session is going"),
+            new("conduct.casino.selfCare.3", "Take breaks. The felt will be here tomorrow"),
+        };
 
         public static readonly LocString CoinTitle = new("conduct.coin.title", "Aether Coin Rules");
-        public static readonly LocString CoinIntro = new("conduct.coin.intro", "Before you start earning and spending, please read the rules of the coin economy.");
-        public static readonly LocString CoinPlayMoneyTitle = new("conduct.coin.playMoney.title", "Play Money Only");
-        public static readonly LocString CoinPlayMoneyBody = new("conduct.coin.playMoney.body", "Aether Coins are a cosmetic currency with no real-world value. You earn them by playing, you spend them on looks, and nothing in this wallet can ever be cashed out.");
-        public static readonly LocString CoinRmtTitle = new("conduct.coin.rmt.title", "No Real-Money Trading");
-        public static readonly LocString CoinRmtLead = new("conduct.coin.rmt.lead", "Trading coins for anything real is enforced with clawbacks and account suspensions, up to and including a permanent ban. Do not:");
-        public static readonly LocString[] CoinRmtItems =
+        public static readonly LocString CoinIntro = new("conduct.coin.intro", "Aether Coins are earned by playing and spent on looks. They have no real-world value.");
+        public static readonly LocString CoinHowTitle = new("conduct.coin.how.title", "How coins work");
+        public static readonly LocString[] CoinHowItems =
         {
-            new("conduct.coin.rmt.1", "Buy or sell coins, cosmetics, or accounts for anything of value, gil included"),
-            new("conduct.coin.rmt.2", "Funnel coins to another player through staged games or thrown bets"),
-            new("conduct.coin.rmt.3", "Advertise or broker any trade of coins or cosmetics"),
+            new("conduct.coin.how.1", "Coins are a cosmetic currency and can never be cashed out"),
+            new("conduct.coin.how.2", "Coins can't be sent between players, so any trade offer is a scam"),
         };
-        public static readonly LocString CoinFairPlayTitle = new("conduct.coin.fairPlay.title", "Earn It Fairly");
-        public static readonly LocString CoinFairPlayLead = new("conduct.coin.fairPlay.lead", "Every coin should come from real play. Do not:");
+        public static readonly LocString CoinFairPlayTitle = new("conduct.coin.fairPlay.title", "Earn it fairly");
         public static readonly LocString[] CoinFairPlayItems =
         {
-            new("conduct.coin.fairPlay.1", "Automate games or dailies with bots, macros, or scripts"),
-            new("conduct.coin.fairPlay.2", "Abuse bugs or exploits to mint coins; report them instead"),
-            new("conduct.coin.fairPlay.3", "Multiply rewards through alt or shared accounts"),
+            new("conduct.coin.fairPlay.1", "No bots, macros or scripts on games or dailies"),
+            new("conduct.coin.fairPlay.2", "Report bugs instead of using them to mint coins"),
+            new("conduct.coin.fairPlay.3", "No alts or shared accounts to multiply rewards"),
         };
-        public static readonly LocString CoinScamsTitle = new("conduct.coin.scams.title", "Watch for Scams");
-        public static readonly LocString CoinScamsLead = new("conduct.coin.scams.lead", "Coins never leave your account, so any trade offer is a scam. Stay clear of:");
+        public static readonly LocString CoinFairPlayNote = new("conduct.coin.fairPlay.note", "Breaks lead to a clawback of the coins and what they bought, a freeze of up to 90 days, or an erased wallet.");
+        public static readonly LocString CoinScamsTitle = new("conduct.coin.scams.title", "Watch for scams");
         public static readonly LocString[] CoinScamsItems =
         {
-            new("conduct.coin.scams.1", "Anyone selling coins, top-ups, or balance doubling services"),
+            new("conduct.coin.scams.1", "Anyone selling coins, top-ups or balance doubling"),
             new("conduct.coin.scams.2", "Links or tells asking you to sign in somewhere or share a code"),
             new("conduct.coin.scams.3", "Giveaways that ask for gil or items up front"),
         };
+        public static readonly LocString[] CoinZeroItems =
+        {
+            new("conduct.coin.zero.1", "Buying or selling coins, cosmetics or accounts for gil or real money"),
+            new("conduct.coin.zero.2", "Moving coins to someone through staged games or thrown bets"),
+        };
+
+        public static readonly LocString MessageTitle = new("conduct.message.title", "ChocoChat Community Guidelines");
+        public static readonly LocString MessageIntro = new("conduct.message.intro", "ChocoChat is for chats and calls with your contacts and groups. Keep it friendly, and report anything that crosses these lines.");
+        public static readonly LocString[] MessageAllowedItems =
+        {
+            new("conduct.message.allowed.1", "Chats, calls and voice notes with your contacts"),
+            new("conduct.message.allowed.2", "Group chats for your FC, static, venue or friends"),
+            new("conduct.message.allowed.3", "Photos, stickers and plans for runs, events and nights out"),
+            new("conduct.message.allowed.4", "Roleplay and banter with people who are up for it"),
+        };
+        public static readonly LocString MessageContactTitle = new("conduct.message.contact.title", "Contact and consent");
+        public static readonly LocString[] MessageContactItems =
+        {
+            new("conduct.message.contact.1", "Stop messaging or calling someone who asks you to"),
+            new("conduct.message.contact.2", "No sexual messages or images to anyone who hasn't asked for them"),
+            new("conduct.message.contact.3", "Don't use groups or other accounts to reach someone who blocked you"),
+        };
+        public static readonly LocString MessageSpam = new("conduct.message.spam", "Spam: chain messages, mass invites or unwanted ads");
+
+        public static readonly LocString MusicTitle = new("conduct.music.title", "Music Community Guidelines");
+        public static readonly LocString MusicIntro = new("conduct.music.intro", "Station chat, Jam sessions and watch parties are shared with other players. Keep them friendly and safe for work.");
+        public static readonly LocString[] MusicAllowedItems =
+        {
+            new("conduct.music.allowed.1", "Talking about what's playing, and sharing songs you love"),
+            new("conduct.music.allowed.2", "Requests, reactions and shout-outs on community stations"),
+            new("conduct.music.allowed.3", "Jam sessions and watch parties with friends"),
+        };
+        public static readonly LocString MusicExplicit = new("conduct.music.explicit", "Sexual or explicit messages, names or requests");
+        public static readonly LocString MusicSpam = new("conduct.music.spam", "Spam: flooding the chat, repeated requests or ads");
     }
 
     internal static class Health

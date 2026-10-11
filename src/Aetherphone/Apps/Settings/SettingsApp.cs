@@ -119,7 +119,7 @@ internal sealed class SettingsApp : IResumableApp, ISettingsNavigator, ISpotligh
                 configuration.Save();
             });
         var sounds = new SoundsPage(configuration, sound, this, ringtonePage, notificationSoundPage);
-        safetyPage = new SafetyPage(aethernetSession, services.ModerationArchive, this);
+        safetyPage = new SafetyPage(aethernetSession, services.ModerationArchive, services.Conduct, this);
         safetyLauncher = services.SafetyLauncher;
         encryptionSetupLauncher = services.EncryptionSetup;
         settingsLauncher = services.SettingsLauncher;
