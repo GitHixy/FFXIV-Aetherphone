@@ -150,7 +150,7 @@ internal sealed class OriginalsCabinet
             new Vector2(safe.Max.X, MathF.Max(ladderBottom + SectionGap * scale, safe.Max.Y - statusHeight)));
         var interactive = !blocked && !Composer.Auto.Running && sitting is not null;
         skin.DrawWorld(drawList, new OriginalsFrame(stage, originals, world, frame.DeltaSeconds, frame.Phase,
-            frame.Instant, interactive, Composer.AutoTabSelected), ui);
+            frame.Instant, interactive, Composer.AutoArmed), ui);
         DrawStatus(drawList, ui, state, new Rect(new Vector2(safe.Min.X, world.Max.Y), safe.Max), scale);
         if (skin.Live)
         {

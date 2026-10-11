@@ -20,6 +20,14 @@ internal enum AutoStop : byte
     Refused,
 }
 
+internal enum AutoStartRoute : byte
+{
+    Ignore,
+    Start,
+    TopUp,
+    GetChips,
+}
+
 internal sealed class AutoBetPlan
 {
     public const int DefaultRounds = 10;
@@ -55,6 +63,27 @@ internal sealed class AutoBetPlan
     public AutoStop Stopped { get; private set; }
 
     public int Remaining => Rounds <= 0 ? -1 : Math.Max(0, Rounds - Played);
+
+    public static AutoStartRoute RouteStart(bool ready, long need, long stack, bool hasDesk, bool rack,
+        bool canAutoCover)
+    {
+        if (!ready)
+        {
+            return AutoStartRoute.Ignore;
+        }
+
+        if (need <= stack)
+        {
+            return AutoStartRoute.Start;
+        }
+
+        if (!hasDesk || rack)
+        {
+            return AutoStartRoute.Ignore;
+        }
+
+        return canAutoCover ? AutoStartRoute.TopUp : AutoStartRoute.GetChips;
+    }
 
     public void Start(long amount)
     {

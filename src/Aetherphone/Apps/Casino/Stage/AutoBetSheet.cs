@@ -32,12 +32,15 @@ internal sealed class AutoBetSheet
     private readonly string winId;
     private readonly string lossId;
     private readonly string bonusId;
+    private readonly string startId;
     private readonly Action<Rect> drawSheetBody;
     private readonly string[] buffers = new string[FieldCount];
     private readonly string[] adjustLabels = new string[2];
 
     private AppSkin skin = null!;
     private bool bonusAvailable;
+    private bool startable;
+    private bool startRequested;
     private string suffix = string.Empty;
     private LanguageInfo? suffixLanguage;
 
@@ -49,6 +52,7 @@ internal sealed class AutoBetSheet
         winId = id + ".win";
         lossId = id + ".loss";
         bonusId = id + ".bonus";
+        startId = id + ".start";
         sheet = new SheetSurface(id);
         drawSheetBody = DrawSheetBody;
         for (var index = 0; index < FieldCount; index++)
@@ -61,6 +65,7 @@ internal sealed class AutoBetSheet
 
     public void Open()
     {
+        startRequested = false;
         buffers[RoundsField] = Digits(plan.Rounds);
         buffers[WinField] = Digits(plan.OnWinPercent);
         buffers[LossField] = Digits(plan.OnLossPercent);
@@ -77,20 +82,43 @@ internal sealed class AutoBetSheet
         }
     }
 
-    public void Draw(Rect screen, AppSkin ui, bool bonus)
+    public void Draw(Rect screen, AppSkin ui, bool bonus, bool canStart)
     {
         skin = ui;
         bonusAvailable = bonus;
+        startable = canStart;
         sheet.Draw(screen, CasinoArt.Sheet(ui), Loc.T(L.Strip.AutoTitle), PanelHeightShare, drawSheetBody);
+    }
+
+    public bool TakeStart()
+    {
+        var requested = startRequested;
+        startRequested = false;
+        return requested;
     }
 
     private void DrawSheetBody(Rect content)
     {
-        ImGui.SetCursorScreenPos(content.Min);
-        using (ImRaii.Child(childId, content.Size, false, ImGuiWindowFlags.NoBackground))
+        var scale = UiScale.Current;
+        var startHeight = DeckActions.PrimaryHeight * scale;
+        var listBottom = MathF.Max(content.Min.Y, content.Max.Y - startHeight - Metrics.Space.Md * scale);
+        var list = new Rect(content.Min, new Vector2(content.Max.X, listBottom));
+        ImGui.SetCursorScreenPos(list.Min);
+        using (ImRaii.Child(childId, list.Size, false, ImGuiWindowFlags.NoBackground))
         {
-            DrawBody(UiScale.Current);
+            DrawBody(scale);
         }
+
+        var start = new Rect(new Vector2(content.Min.X, MathF.Max(content.Min.Y, content.Max.Y - startHeight)),
+            content.Max);
+        if (!Button.Draw(start, Loc.T(L.Strip.AutoStart), skin.Ink, ButtonStyle.Prominent,
+                enabled: startable && sheet.IsOpen, overlay: true, id: startId))
+        {
+            return;
+        }
+
+        startRequested = true;
+        sheet.Close();
     }
 
     private void DrawBody(float scale)

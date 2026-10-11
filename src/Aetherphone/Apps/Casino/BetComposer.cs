@@ -7,7 +7,6 @@ using Aetherphone.Core.Notifications;
 using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 
 namespace Aetherphone.Apps.Casino;
@@ -44,13 +43,14 @@ internal sealed class BetComposer
 
     private const int BufferLength = 16;
     private const float FlashSeconds = 0.5f;
-    private const int ManualTab = 0;
-    private const int AutoTab = 1;
     private const string ActionId = "casino.deck.action";
+    private const string AutoId = "casino.deck.auto";
+    private const double AutoSweepMilliseconds = 1100.0;
+    private const float AutoSweepArc = MathF.PI * 0.9f;
+    private const float AutoSweepRadius = 0.78f;
+    private const float AutoSweepThickness = 2f;
 
     private readonly string fieldId;
-    private readonly string modeId;
-    private readonly string[] modeLabels = new string[2];
     private readonly AutoBetSheet autoSheet;
 
     private string buffer = string.Empty;
@@ -58,7 +58,10 @@ internal sealed class BetComposer
     private bool focusPending;
     private long amount;
     private float flash;
-    private int tab;
+    private bool armed;
+    private bool startQueued;
+    private bool pendingAuto;
+    private bool startReady;
     private string actionLabel = string.Empty;
     private long actionAmount = -1;
     private string actionKey = string.Empty;
@@ -70,7 +73,6 @@ internal sealed class BetComposer
     public BetComposer(string fieldId)
     {
         this.fieldId = fieldId;
-        modeId = fieldId + ".mode";
         autoSheet = new AutoBetSheet(fieldId + ".auto", Auto);
     }
 
@@ -78,7 +80,7 @@ internal sealed class BetComposer
 
     public long Amount => amount;
 
-    public bool AutoTabSelected => tab == AutoTab;
+    public bool AutoArmed => armed;
 
     public Rect KnobRect { get; private set; }
 
@@ -111,7 +113,11 @@ internal sealed class BetComposer
 
     public void DrawOverlay(Rect screen, AppSkin ui, bool bonusAvailable)
     {
-        autoSheet.Draw(screen, ui, bonusAvailable);
+        autoSheet.Draw(screen, ui, bonusAvailable, startReady && !Auto.Running);
+        if (autoSheet.TakeStart())
+        {
+            startQueued = true;
+        }
     }
 
     public BetComposerAction Draw(CasinoStage stage, AppSkin ui, Rect deck, in BetComposerModel model,
@@ -141,7 +147,11 @@ internal sealed class BetComposer
         var quick = model.FixedAmount
             ? default
             : DeckAmountRow.Measure(BetDeckLayout.AmountHeight * scale);
-        var layout = BetDeckLayout.Compute(deck, model.Knob, model.FixedAmount, model.AutoAvailable, quick, scale);
+        var autoLabel = model.AutoAvailable
+            ? Typography.Measure(Loc.T(L.Strip.Auto), Button.LabelStyle(BetDeckLayout.ActionHeight * scale)).X
+            : 0f;
+        var layout = BetDeckLayout.Compute(deck, model.Knob, model.FixedAmount, model.AutoAvailable, quick,
+            autoLabel, scale);
         KnobRect = layout.Knob;
         if (layout.HasAmount)
         {
@@ -278,78 +288,123 @@ internal sealed class BetComposer
     private BetComposerAction DrawActionRow(ImDrawListPtr drawList, AppSkin ui, in BetDeckLayout layout,
         in BetComposerModel model, ChipsDesk? desk)
     {
-        if (layout.HasMode)
+        var running = Auto.Running;
+        if (layout.HasAuto && DrawAutoPill(drawList, ui, layout, running))
         {
-            DrawModeCluster(drawList, ui, layout, model);
+            armed = true;
+            autoSheet.Open();
         }
 
         var actionRect = layout.Action;
-        if (Auto.Running)
+        var need = model.Cost > 0 ? model.Cost : amount;
+        var ready = model.Enabled && !model.Busy && amount > 0 && amount >= model.MinimumBet;
+        startReady = ready && model.AutoAvailable;
+        if (running)
         {
+            startQueued = false;
+            pendingAuto = false;
             var stopLabel = Auto.Remaining < 0
                 ? Loc.T(L.Strip.AutoStop)
                 : ActionLabel(L.Strip.AutoStopLeft, amount, Auto.Remaining);
-            return Button.Draw(actionRect, stopLabel, ui.Ink, ButtonStyle.Tinted)
+            return Button.Draw(actionRect, stopLabel, ui.Ink, ButtonStyle.Tinted, id: ActionId)
                 ? StopAuto()
                 : BetComposerAction.None;
         }
 
-        var need = model.Cost > 0 ? model.Cost : amount;
-        var ready = model.Enabled && !model.Busy && amount > 0 && amount >= model.MinimumBet;
+        var queued = startQueued ? StartQueued(model, desk, need, ready) : BetComposerAction.None;
+        startQueued = false;
         var canBet = ready && need <= model.Stack;
-        var label = tab == AutoTab
-            ? ActionLabel(L.Strip.AutoFor, amount, int.MinValue)
-            : ActionLabel(model.Action, amount, int.MinValue);
+        var label = ActionLabel(model.Action, amount, int.MinValue);
         var pressed = desk is null || model.Rack
             ? Button.Draw(actionRect, label, ui.Ink, ButtonStyle.Prominent, enabled: canBet, id: ActionId)
             : desk.Primary(actionRect, label, need, model.Stack, ready, ui.Ink, ActionId, ref pending)
               == ChipsPress.Place;
-        if (!pressed && !(model.Repeat && canBet && tab == ManualTab))
+        if (queued != BetComposerAction.None)
+        {
+            return queued;
+        }
+
+        if (pressed && pendingAuto)
+        {
+            pendingAuto = false;
+            Auto.Start(amount);
+            return BetComposerAction.StartAuto;
+        }
+
+        if (!pending.Active)
+        {
+            pendingAuto = false;
+        }
+
+        if (!pressed && !(model.Repeat && canBet))
         {
             return BetComposerAction.None;
         }
 
-        if (tab == AutoTab)
+        armed = false;
+        return BetComposerAction.Confirm;
+    }
+
+    private BetComposerAction StartQueued(in BetComposerModel model, ChipsDesk? desk, long need, bool ready)
+    {
+        var route = AutoBetPlan.RouteStart(ready && model.AutoAvailable, need, model.Stack, desk is not null,
+            model.Rack, desk is not null && desk.CanAutoCover(need, model.Stack));
+        if (route == AutoStartRoute.Start)
         {
             Auto.Start(amount);
             return BetComposerAction.StartAuto;
         }
 
-        return BetComposerAction.Confirm;
+        if (route == AutoStartRoute.Ignore || desk is null)
+        {
+            return BetComposerAction.None;
+        }
+
+        if (route == AutoStartRoute.TopUp && desk.TryAutoBuy(need, model.Stack))
+        {
+            pending = new ChipsPending(need, Environment.TickCount64);
+            pendingAuto = true;
+            return BetComposerAction.None;
+        }
+
+        desk.Request(need, ChipsNeedKind.Bet);
+        return BetComposerAction.None;
     }
 
-    private void DrawModeCluster(ImDrawListPtr drawList, AppSkin ui, in BetDeckLayout layout,
-        in BetComposerModel model)
+    private bool DrawAutoPill(ImDrawListPtr drawList, AppSkin ui, in BetDeckLayout layout, bool running)
     {
-        modeLabels[ManualTab] = Loc.T(L.Strip.Manual);
-        modeLabels[AutoTab] = Loc.T(L.Strip.Auto);
-        var picked = SegmentStrip.Draw(modeId, layout.Mode, modeLabels, tab,
-            Surfaces.Fill(ui.TitleInk, FillLevel.Tertiary), ui.Accent, ui.MutedInk, CasinoColors.InkTitle,
-            layout.Mode.Height / UiScale.Current);
-        var changeable = !Auto.Running && model.Enabled;
-        if (changeable)
+        var scale = UiScale.Current;
+        var rect = layout.Auto;
+        var hovered = !running && UiInteract.Hover(rect.Min, rect.Max);
+        var style = running || armed ? ButtonStyle.Tinted : ButtonStyle.Gray;
+        var face = Button.Surface(drawList, rect, ui.Ink, style, ButtonRole.Normal, true, hovered,
+            ImGui.GetID(AutoId));
+        var label = Loc.T(L.Strip.Auto);
+        var labelStyle = Button.LabelStyle(rect.Height);
+        var icon = BetDeckLayout.AutoIconSize * scale;
+        var labelSize = Typography.Measure(label, labelStyle);
+        var content = layout.AutoCompact ? icon : icon + BetDeckLayout.AutoIconGap * scale + labelSize.X;
+        var center = face.Face.Center;
+        var iconCenter = new Vector2(center.X - content * 0.5f + icon * 0.5f, center.Y);
+        PhoneIcon.Draw(drawList, iconCenter, PhoneIcons.Repeat, face.LabelInk, icon);
+        if (running)
         {
-            tab = picked;
+            ProgressRing.Sweep(iconCenter, icon * AutoSweepRadius, AutoSweepThickness * scale, face.LabelInk,
+                AutoSweepMilliseconds, AutoSweepArc, 1f, drawList);
         }
 
-        var gear = layout.Gear;
-        if (gear.Width <= 0f)
+        if (!layout.AutoCompact)
         {
-            return;
+            Typography.Draw(drawList,
+                new Vector2(iconCenter.X + icon * 0.5f + BetDeckLayout.AutoIconGap * scale,
+                    center.Y - labelSize.Y * 0.5f), label, face.LabelInk, labelStyle);
+        }
+        else if (hovered)
+        {
+            HoverTooltip.Show(rect, label, HoverLabelSide.Above);
         }
 
-        if (!RoundButton.Icon(drawList, gear.Center, gear.Height * 0.5f, IconGlyph.Of(FontAwesomeIcon.SlidersH),
-                ui.Ink, ButtonStyle.Gray, enabled: !Auto.Running))
-        {
-            return;
-        }
-
-        if (changeable)
-        {
-            tab = AutoTab;
-        }
-
-        autoSheet.Open();
+        return !running && UiInteract.Click(rect.Min, rect.Max, hovered);
     }
 
     private BetComposerAction StopAuto()
