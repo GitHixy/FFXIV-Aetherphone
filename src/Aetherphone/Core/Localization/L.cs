@@ -10656,7 +10656,6 @@ internal static class L
         public static readonly LocString BingoNextRoomSoon = new("casino.bingo.nextRoomSoon", "Next room soon");
         public static readonly LocString BingoSaleNextRoom = new("casino.bingo.saleNextRoom", "Sale opens next room");
         public static readonly LocString BingoWatchedRoom = new("casino.bingo.watchedRoom", "You watched this one from the rail.");
-        public static readonly LocString SpinReadyBadge = new("casino.spin.readyBadge", "Free");
         public static readonly LocString SpinTagline = new("casino.spin.tagline", "Free once a day, paid in coins");
         public static readonly LocString SpinAction = new("casino.spin.action", "Spin");
         public static readonly LocString SpinTurning = new("casino.spin.turning", "The wheel is turning");
