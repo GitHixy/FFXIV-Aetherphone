@@ -26,6 +26,10 @@ internal readonly record struct TableCardLayout(
     public const float PhaseGap = 8f;
     public const float MinHeight = 84f;
 
+    public static float TextColumn(in Rect card, float scale) =>
+        MathF.Max(0f, card.Max.X - Pad * scale - ChevronUnits * scale - PhaseGap * scale
+            - (card.Min.X + Pad * scale + ArtSize * scale + AvatarOverhang * scale + TextGap * scale));
+
     public static float Height(float scale, float headline, float footnote, float rowHeight, float reputation) =>
         MathF.Max(MinHeight * scale,
             Pad * 2f * scale + headline + footnote + rowHeight + LineGap * 2f * scale + reputation);

@@ -11413,7 +11413,6 @@ internal static class L
         public static readonly LocString EmptyFiltered = new("casino.tables.emptyFiltered", "Nothing matches this filter right now.");
         public static readonly LocString HostCta = new("casino.tables.hostCta", "Host a table");
         public static readonly LocString HostCtaLine = new("casino.tables.hostCtaLine", "Pick a game, set the stakes, share the code.");
-        public static readonly LocString PhaseOpen = new("casino.tables.phaseOpen", "Seats open");
         public static readonly LocString HostedBy = new("casino.tables.hostedBy", "Hosted by {0}");
         public static readonly LocString ControlCoDealers = new("casino.tables.controlCoDealers", "Co-dealers");
         public static readonly LocString KnockLine = new("casino.tables.knockLine", "Wants a seat");
