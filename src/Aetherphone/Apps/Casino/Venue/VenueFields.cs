@@ -69,14 +69,16 @@ internal static class VenueFields
         ImGui.SetCursorScreenPos(cursor);
     }
 
-    public static bool ToggleRow(AppSkin ui, in Rect row, string id, string label, bool value, float scale)
+    public static bool ToggleRow(AppSkin ui, in Rect row, string id, string label, bool value, float scale,
+        bool overlay = false)
     {
         var width = Metrics.Size.ToggleWidth * scale;
         var height = Metrics.Size.ToggleHeight * scale;
         DrawLabel(ImGui.GetWindowDrawList(), row.Min.X, row.Center.Y, label,
             row.Width - width - Metrics.Space.Md * scale, ui.TitleInk);
         var toggleMin = new Vector2(row.Max.X - width, row.Center.Y - height * 0.5f);
-        return Toggle.Draw(id, new Rect(toggleMin, toggleMin + new Vector2(width, height)), value, ui.Theme);
+        return Toggle.Draw(id, new Rect(toggleMin, toggleMin + new Vector2(width, height)), value, ui.Theme,
+            overlay: overlay);
     }
 
     public static int Segment(AppSkin ui, in Rect row, string id, string label, string[] options, int selected,

@@ -140,7 +140,7 @@ internal sealed class VenueTableSheet
         var joinCode = codeOf(target.TableId);
         if (joinCode.Length > 0)
         {
-            code.Draw(ui, joinCode, string.Empty, ScrollLayout.StableContentWidth(), scale);
+            code.Draw(ui, joinCode, string.Empty, ScrollLayout.StableContentWidth(), scale, overlay: true);
             ImGui.Dummy(new Vector2(0f, Metrics.Space.Md * scale));
         }
 
@@ -216,14 +216,14 @@ internal sealed class VenueTableSheet
         ui.SectionHeading(Loc.T(L.Venue.TradeSync), Metrics.Space.Sm);
         var card = GroupCard.Begin(ui, 2, VenueFields.RowUnits);
         var enabled = VenueFields.ToggleRow(ui, card.NextRow(VenueFields.RowUnits), "venue.trade.sync",
-            Loc.T(L.Venue.TradeSyncToggle), trade.Enabled, scale);
+            Loc.T(L.Venue.TradeSyncToggle), trade.Enabled, scale, overlay: true);
         if (enabled != trade.Enabled)
         {
             trade.Enabled = enabled;
         }
 
         var auto = VenueFields.ToggleRow(ui, card.NextRow(VenueFields.RowUnits), "venue.trade.auto",
-            Loc.T(L.Venue.TradeAutoConfirm), trade.AutoConfirm, scale);
+            Loc.T(L.Venue.TradeAutoConfirm), trade.AutoConfirm, scale, overlay: true);
         if (auto != trade.AutoConfirm)
         {
             trade.AutoConfirm = auto;
@@ -239,7 +239,7 @@ internal sealed class VenueTableSheet
         var width = ScrollLayout.NativeScrollContentWidth();
         var origin = ImGui.GetCursorScreenPos();
         var rect = new Rect(origin, new Vector2(origin.X + width, origin.Y + Button.LargeHeight * scale));
-        pressed = Button.Draw(rect, label, ui.Ink, style, role, id: id);
+        pressed = Button.Draw(rect, label, ui.Ink, style, role, overlay: true, id: id);
         ImGui.SetCursorScreenPos(origin);
         ImGui.Dummy(new Vector2(width, Button.LargeHeight * scale));
         var hintOrigin = ImGui.GetCursorScreenPos();
