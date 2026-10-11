@@ -17,7 +17,8 @@ internal readonly record struct TradeTableView(
     CasinoTableDoorDto? Door,
     CasinoTableRowDto[] Listed,
     Func<string, CasinoTableRowDto?> CardFor,
-    Func<string, CasinoTableLedgerDto?> LedgerFor);
+    Func<string, CasinoTableLedgerDto?> LedgerFor,
+    string LedgerRoomId = "");
 
 internal static class TradeContexts
 {
@@ -40,6 +41,12 @@ internal static class TradeContexts
             return Table(view, venue.RoomId, true);
         }
 
+        var door = Door(view);
+        return door.Located ? door : Book(view);
+    }
+
+    private static TradeTableRef Door(in TradeTableView view)
+    {
         var door = view.Door;
         if (door is null || !door.Owner || string.IsNullOrEmpty(door.RoomId))
         {
@@ -54,6 +61,23 @@ internal static class TradeContexts
 
         return new TradeTableRef(door.RoomId, view.MyUserId, card.OwnerName ?? string.Empty,
             VenueKinds.IsVenue(card.GameKind ?? string.Empty));
+    }
+
+    private static TradeTableRef Book(in TradeTableView view)
+    {
+        var tableId = view.LedgerRoomId;
+        if (string.IsNullOrEmpty(tableId))
+        {
+            return default;
+        }
+
+        var card = view.CardFor(tableId);
+        if (card is null || !CasinoBookRules.IsBook(card.GameKind) || CasinoCurrencies.Of(card) != CasinoCurrencies.Gil)
+        {
+            return default;
+        }
+
+        return Table(view, tableId, false);
     }
 
     public static TradeTableRef Hosted(in TradeTableView view)

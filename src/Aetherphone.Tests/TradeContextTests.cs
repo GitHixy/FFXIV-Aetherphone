@@ -17,6 +17,11 @@ public sealed class TradeContextTests
     private static readonly CasinoTableRowDto RaffleCard = new(TableId: Raffle, GameKind: VenueKinds.Raffle,
         OwnerUserId: Host, OwnerName: "Ciri", Currency: CasinoCurrencies.Gil);
 
+    private const string Book = "table-book";
+
+    private static readonly CasinoTableRowDto BookCard = new(TableId: Book, GameKind: CasinoWire.BookKind,
+        Kind: CasinoTableKinds.Private, OwnerUserId: Host, OwnerName: "Ciri", Currency: CasinoCurrencies.Gil);
+
     private static readonly CasinoBlackjackRoomStateDto GilBoard = new(Seats: new[]
     {
         new CasinoBlackjackSeatDto(0, Player, "Xeldar"),
@@ -24,14 +29,14 @@ public sealed class TradeContextTests
 
     private static TradeTableView View(string me, string roomId = "", CasinoBlackjackRoomStateDto? board = null,
         VenueRoomView? venue = null, CasinoTableDoorDto? door = null, CasinoTableRowDto[]? listed = null,
-        CasinoTableLedgerDto? ledger = null)
+        CasinoTableLedgerDto? ledger = null, string ledgerRoomId = "")
     {
-        var rows = listed ?? new[] { GilCard, RaffleCard };
+        var rows = listed ?? new[] { GilCard, RaffleCard, BookCard };
         return new TradeTableView(me, roomId, board, venue, door, rows,
             tableId => CasinoTablesStore.CardIn(rows, 0, null, 0, tableId),
             tableId => ledger is not null && string.Equals(ledger.TableId, tableId, StringComparison.Ordinal)
                 ? ledger
-                : null);
+                : null, ledgerRoomId);
     }
 
     private static VenueRoomView RaffleRoom(int currency) =>
@@ -143,6 +148,54 @@ public sealed class TradeContextTests
         Assert.True(table.Known);
         Assert.Equal(Table, table.TableId);
         Assert.False(memory.Resolve(View(Player, listed: new[] { GilCard }), 0).Located);
+    }
+
+    [Fact]
+    public void TheLedgerPageOfABookIsTheTradeTableForTheHostAndThePatron()
+    {
+        var ledger = new CasinoTableLedgerDto(Book, false, Currency: CasinoCurrencies.Gil, Entries: new[]
+        {
+            new CasinoLedgerEntryDto("b1", Book, CasinoLedgerKinds.BuyIn, 50_000, Player, "Xeldar", Host, "Ciri"),
+            new CasinoLedgerEntryDto("g1", Book, CasinoLedgerKinds.BuyIn, 20_000, string.Empty, "Chea Thorne", Host,
+                "Ciri", Settled: true, Guest: true, GuestName: "Chea Thorne"),
+        });
+        var patron = View(Player, ledger: ledger, ledgerRoomId: Book);
+        var table = TradeContexts.Locate(patron);
+        Assert.True(table.Known);
+        Assert.Equal(Book, table.TableId);
+        Assert.Equal(Host, table.HostUserId);
+        Assert.False(table.Venue);
+
+        var context = TradeContexts.Build(table, patron);
+        Assert.False(context.Hosting);
+        Assert.False(context.Venue);
+        Assert.Contains(context.Seats, seat => seat.UserId == Player);
+        Assert.DoesNotContain(context.Seats, seat => seat.UserId.Length == 0);
+        Assert.Equal(2, context.Entries.Length);
+
+        var host = TradeContexts.Locate(View(Host, ledger: ledger with { Owner = true }, ledgerRoomId: Book));
+        Assert.True(host.Known);
+        Assert.Equal(Host, host.HostUserId);
+
+        Assert.False(TradeContexts.Locate(View(Player, ledgerRoomId: Table)).Located);
+        Assert.False(TradeContexts.Locate(View(Player, ledgerRoomId: "table-unknown")).Located);
+    }
+
+    [Fact]
+    public void ABookIsRememberedLikeAGilRoomAndAHostFallsBackToTheirOwnBook()
+    {
+        var memory = new TradeTableMemory();
+        Assert.Equal(Book, memory.Resolve(View(Player, ledgerRoomId: Book), 1_000).TableId);
+
+        var away = memory.Resolve(View(Player), 60_000);
+        Assert.True(away.Known);
+        Assert.Equal(Book, away.TableId);
+        Assert.False(memory.Resolve(View(Player), 2_000 + TradeTableMemory.KeepMilliseconds).Located);
+
+        var hosted = new TradeTableMemory().Resolve(View(Host, listed: new[] { BookCard }), 0);
+        Assert.True(hosted.Known);
+        Assert.Equal(Book, hosted.TableId);
+        Assert.False(hosted.Venue);
     }
 
     [Fact]

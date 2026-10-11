@@ -53,4 +53,22 @@ public sealed class ScratchStatusLayoutTests
         Assert.False(ScratchCabinet.ShowsRun(ScratchStatusLine.Reason, true));
         Assert.False(ScratchCabinet.ShowsRun(ScratchStatusLine.None, false));
     }
+
+    [Theory]
+    [MemberData(nameof(Scales))]
+    public void TheKioskLightsStayAboveTheStatusArea(float scale)
+    {
+        var kiosk = 12f * scale;
+        var gap = 10f * scale;
+        var bottom = 520f * scale;
+        var safe = new Aetherphone.Core.Rect(new System.Numerics.Vector2(0f, 60f * scale),
+            new System.Numerics.Vector2(330f * scale, 700f * scale));
+        var ticket = ScratchCabinet.TicketRect(safe, bottom, kiosk, 360f * scale, 0.25f);
+        Assert.True(ticket.Width > 0f);
+        Assert.True(ticket.Min.Y - kiosk >= safe.Min.Y - 0.001f);
+        Assert.True(ticket.Max.Y + kiosk <= bottom + 0.001f);
+        Assert.True(ticket.Min.X - kiosk >= safe.Min.X - 0.001f);
+        Assert.True(ticket.Max.X + kiosk <= safe.Max.X + 0.001f);
+        Assert.True(ScratchCabinet.StatusTop(ticket, kiosk, gap) >= ticket.Max.Y + kiosk + gap - 0.001f);
+    }
 }

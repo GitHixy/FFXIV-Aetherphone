@@ -1,8 +1,10 @@
+using System.Reflection;
 using Aetherphone.Apps.Casino;
 using Aetherphone.Apps.Casino.Strip;
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
+using Aetherphone.Core.Localization;
 using Xunit;
 
 namespace Aetherphone.Tests;
@@ -78,20 +80,54 @@ public sealed class CasinoFloorLayoutTests
         Assert.True(art.Y + glyphHalf <= tile.Max.Y - block + 0.01f);
     }
 
+    [Fact]
+    public void TheHeroOffersEachClaimOnlyWhenItIsThere()
+    {
+        var bonus = new CasinoBonusDto(Kind: CasinoBonusKinds.Timed, Ready: true, Amount: 5_000, Eligible: true);
+        Assert.Equal(StripHeroClaims.None, StripHero.ClaimsOf(Hero(null, null, false)));
+        Assert.Equal(StripHeroClaims.Timed, StripHero.ClaimsOf(Hero(bonus, null, false)));
+        Assert.Equal(StripHeroClaims.Streak, StripHero.ClaimsOf(Hero(null, bonus, false)));
+        Assert.Equal(StripHeroClaims.Spin, StripHero.ClaimsOf(Hero(null, null, true)));
+        Assert.Equal(StripHeroClaims.Timed | StripHeroClaims.Streak | StripHeroClaims.Spin,
+            StripHero.ClaimsOf(Hero(bonus, bonus, true)));
+        Assert.Equal(1, StripHero.RowPills(StripHeroClaims.None));
+        Assert.Equal(1, StripHero.RowPills(StripHeroClaims.Streak));
+        Assert.Equal(2, StripHero.RowPills(StripHeroClaims.Timed));
+        Assert.Equal(2, StripHero.RowPills(StripHeroClaims.Spin));
+        Assert.Equal(3, StripHero.RowPills(StripHeroClaims.Timed | StripHeroClaims.Streak | StripHeroClaims.Spin));
+    }
+
     [Theory]
     [InlineData(0.75f)]
     [InlineData(1f)]
     [InlineData(1.5f)]
-    public void HeroButtonsSitSideBySideOnlyWhenBothLabelsFitWhole(float scale)
+    public void HeroPillsSitInlineThenGiveGetChipsItsOwnRow(float scale)
     {
         var row = (PhoneWidth - StripHero.Pad * 2f) * scale;
         var gap = 8f * scale;
         var button = 44f * scale;
-        Assert.False(StripHero.StacksButtons(row, 120f * scale, 110f * scale, gap));
-        Assert.True(StripHero.StacksButtons(row, 200f * scale, 150f * scale, gap));
-        Assert.Equal(button, StripHero.ButtonsHeight(true, false, button, gap));
-        Assert.Equal(button * 2f + gap, StripHero.ButtonsHeight(true, true, button, gap));
-        Assert.Equal(button, StripHero.ButtonsHeight(false, true, button, gap));
+        Assert.Equal(StripHeroRow.Inline, StripHero.RowLayout(1, row, row * 2f, 0f));
+        Assert.Equal(StripHeroRow.Inline, StripHero.RowLayout(2, row, 120f * scale + gap + 110f * scale, 110f * scale));
+        Assert.Equal(StripHeroRow.Stacked, StripHero.RowLayout(2, row, 200f * scale + gap + 150f * scale, 150f * scale));
+        Assert.Equal(StripHeroRow.Inline, StripHero.RowLayout(3, row, row, row * 0.6f));
+        Assert.Equal(StripHeroRow.Stacked, StripHero.RowLayout(3, row, row + 1f, row * 0.6f));
+        Assert.Equal(StripHeroRow.Tall, StripHero.RowLayout(3, row, row * 2f, row + 1f));
+        Assert.Equal(button, StripHero.ButtonsHeight(StripHeroRow.Inline, button, gap));
+        Assert.Equal(button * 2f + gap, StripHero.ButtonsHeight(StripHeroRow.Stacked, button, gap));
+        Assert.Equal(button * 3f + gap * 2f, StripHero.ButtonsHeight(StripHeroRow.Tall, button, gap));
+    }
+
+    [Theory]
+    [InlineData(300f, 120f, 100f, 8f, 146f)]
+    [InlineData(300f, 180f, 100f, 8f, 180f)]
+    [InlineData(300f, 100f, 170f, 8f, 100f)]
+    public void SharedClaimsSplitEvenlyUnlessOneNeedsMore(float row, float timed, float spin, float gap,
+        float expected)
+    {
+        var split = StripHero.SharedClaimSplit(row, timed, spin, gap);
+        Assert.Equal(expected, split, 3);
+        Assert.True(split >= timed - 0.001f);
+        Assert.True(row - gap - split >= spin - 0.001f);
     }
 
     [Fact]
@@ -121,6 +157,29 @@ public sealed class CasinoFloorLayoutTests
         Assert.True(MissionsCard.TextWidth(PhoneWidth * scale, 90f * scale, scale) > 100f * scale);
         Assert.Equal(0f, MissionsCard.Height(0, 20f, 100f, scale));
         Assert.True(MissionsCard.Height(2, 20f, one + two, scale) > one + two);
+    }
+
+    [Fact]
+    public void TheMissionsCapsuleSaysReadyOnlyWhenAClaimWaits()
+    {
+        var none = MissionsCapsule.Tally(null);
+        Assert.Equal(new MissionsTally(0, 0, 0), none);
+        Assert.False(MissionsCapsule.ShowsReady(none));
+        Assert.Equal(0f, MissionsCapsule.Fraction(none));
+
+        var running = new CasinoMissionsDto(7, 0,
+            new[] { Mission("a", false, false), Mission("b", true, true), Mission("c", false, false) });
+        var tally = MissionsCapsule.Tally(running);
+        Assert.Equal(new MissionsTally(1, 3, 0), tally);
+        Assert.False(MissionsCapsule.ShowsReady(tally));
+        Assert.Equal(1f / 3f, MissionsCapsule.Fraction(tally), 3);
+
+        var waiting = new CasinoMissionsDto(7, 0,
+            new[] { Mission("a", true, false), Mission("b", true, true), Mission("c", false, false) });
+        var ready = MissionsCapsule.Tally(waiting);
+        Assert.Equal(new MissionsTally(2, 3, 1), ready);
+        Assert.True(MissionsCapsule.ShowsReady(ready));
+        Assert.Equal(ClubCapsule.Height, MissionsCapsule.Height);
     }
 
     [Theory]
@@ -192,15 +251,21 @@ public sealed class CasinoFloorLayoutTests
     [InlineData(CasinoGames.Limbo)]
     [InlineData(CasinoGames.Keno)]
     [InlineData(CasinoGames.HiLo)]
-    [InlineData(CasinoGames.Race)]
-    [InlineData(CasinoGames.Wheel)]
-    [InlineData(CasinoGames.Bingo)]
     [InlineData(CasinoGames.Scratch)]
-    [InlineData(CasinoGames.DailySpin)]
     [InlineData(CasinoGames.Barkeep)]
-    public void EveryGameIsOneTapFromTheFloor(string gameId)
+    public void EveryShelfGameIsOneTapFromTheFloor(string gameId)
     {
         Assert.True(StripCatalog.Reaches(gameId));
+    }
+
+    [Fact]
+    public void TheClockedRoomsLiveInTheLiveRailInsteadOfAShelf()
+    {
+        Assert.Equal(new[] { CasinoGames.Race, CasinoGames.Wheel, CasinoGames.Bingo }, CasinoApp.LiveRooms);
+        for (var index = 0; index < CasinoApp.LiveRooms.Length; index++)
+        {
+            Assert.False(StripCatalog.Reaches(CasinoApp.LiveRooms[index]));
+        }
     }
 
     [Fact]
@@ -210,17 +275,79 @@ public sealed class CasinoFloorLayoutTests
     }
 
     [Fact]
+    public void TheDailySpinTileIsGone()
+    {
+        Assert.False(StripCatalog.Reaches(CasinoGames.DailySpin));
+    }
+
+    [Fact]
+    public void TheShelvesAndTheLiveRoomsReachEveryPlayableGameExactlyOnce()
+    {
+        string[] unlisted =
+        {
+            CasinoGames.DailySpin, CasinoGames.Slots, CasinoGames.SlotsGamble, CasinoGames.DiceTable,
+            CasinoGames.Deathroll, CasinoGames.Raffle, CasinoGames.Book,
+        };
+        var fields = typeof(CasinoGames).GetFields(BindingFlags.Public | BindingFlags.Static);
+        var shelved = 0;
+        for (var fieldIndex = 0; fieldIndex < fields.Length; fieldIndex++)
+        {
+            var gameId = (string)fields[fieldIndex].GetValue(null)!;
+            var listed = Array.IndexOf(unlisted, gameId) < 0;
+            var inLiveRail = Array.IndexOf(CasinoApp.LiveRooms, gameId) >= 0;
+            Assert.Equal(listed ? 1 : 0, Occurrences(gameId) + (inLiveRail ? 1 : 0));
+            shelved += listed && !inLiveRail ? 1 : 0;
+        }
+
+        Assert.Equal(shelved, StripCatalog.Playable.Length);
+        Assert.Equal(shelved, StripCatalog.PlayableIds.Length);
+        Assert.Equal(shelved, StripCatalog.EntryCount);
+    }
+
+    [Fact]
     public void ShelvesFollowTheStandardOrder()
     {
-        Assert.Equal(new[]
-        {
-            StripShelf.Tables, StripShelf.Machines, StripShelf.Originals, StripShelf.LiveFloor, StripShelf.Instant,
-            StripShelf.Skill, StripShelf.Venue,
-        }, StripCatalog.Shelves);
+        Assert.Equal(new[] { StripShelf.Cards, StripShelf.Machines, StripShelf.QuickBets }, StripCatalog.Shelves);
+        Assert.Equal(3, StripCatalog.EntriesOf(StripShelf.Cards).Length);
         Assert.Equal(3, StripCatalog.EntriesOf(StripShelf.Machines).Length);
-        Assert.Equal(6, StripCatalog.EntriesOf(StripShelf.Originals).Length);
-        Assert.Equal(4, StripCatalog.EntriesOf(StripShelf.Tables).Length);
-        Assert.Equal(22, StripCatalog.EntryCount);
+        Assert.Equal(8, StripCatalog.EntriesOf(StripShelf.QuickBets).Length);
+        Assert.Equal(14, StripCatalog.EntryCount);
+        Assert.Equal(CasinoGames.Blackjack, StripCatalog.EntriesOf(StripShelf.Cards)[0].GameId);
+        Assert.Equal(CasinoGames.Plinko, StripCatalog.EntriesOf(StripShelf.QuickBets)[0].GameId);
+        Assert.Equal(CasinoGames.Scratch, StripCatalog.EntriesOf(StripShelf.QuickBets)[6].GameId);
+        Assert.Equal(CasinoGames.Barkeep, StripCatalog.EntriesOf(StripShelf.QuickBets)[7].GameId);
+        Assert.Equal(L.Floor.ShelfCards.Key, StripCatalog.TitleOf(StripShelf.Cards).Key);
+        Assert.Equal(L.Strip.ShelfMachines.Key, StripCatalog.TitleOf(StripShelf.Machines).Key);
+        Assert.Equal(L.Floor.ShelfQuickBets.Key, StripCatalog.TitleOf(StripShelf.QuickBets).Key);
+    }
+
+    [Fact]
+    public void OnlyBarkeepWearsTheSkillBadge()
+    {
+        for (var index = 0; index < StripCatalog.PlayableIds.Length; index++)
+        {
+            var gameId = StripCatalog.PlayableIds[index];
+            Assert.Equal(gameId == CasinoGames.Barkeep, StripCatalog.WearsSkillBadge(gameId));
+        }
+    }
+
+    [Fact]
+    public void JumpBackInPicksShelfGamesNewestFirstAndStopsAtFour()
+    {
+        var rounds = new[]
+        {
+            Played("casino.plinko"), Played("casino.race"), Played("casino.plinko"), Played("casino.slots.bird"),
+            Played("casino.blackjack"), Played("casino.bartender"), Played("casino.keno"),
+        };
+        Span<int> picked = stackalloc int[CasinoApp.RecentGamesCap];
+        var count = CasinoRecentGames.Collect(rounds, StripCatalog.PlayableIds, picked);
+        Assert.Equal(4, CasinoApp.RecentGamesCap);
+        Assert.Equal(4, count);
+        Assert.Equal(CasinoGames.Plinko, StripCatalog.Playable[picked[0]].GameId);
+        Assert.Equal(CasinoGames.SlotsBird, StripCatalog.Playable[picked[1]].GameId);
+        Assert.Equal(CasinoGames.Blackjack, StripCatalog.Playable[picked[2]].GameId);
+        Assert.Equal(CasinoGames.Barkeep, StripCatalog.Playable[picked[3]].GameId);
+        Assert.Equal(0, CasinoRecentGames.Collect(Array.Empty<CasinoRoundHistoryDto>(), StripCatalog.PlayableIds, picked));
     }
 
     [Fact]
@@ -232,7 +359,7 @@ public sealed class CasinoFloorLayoutTests
             Assert.True(machines[index].LiveIdle);
         }
 
-        Assert.False(StripCatalog.EntriesOf(StripShelf.Tables)[0].LiveIdle);
+        Assert.False(StripCatalog.EntriesOf(StripShelf.Cards)[0].LiveIdle);
     }
 
     [Fact]
@@ -253,19 +380,9 @@ public sealed class CasinoFloorLayoutTests
     [Fact]
     public void EveryPaidGamePosterPrintsAMinimumBet()
     {
-        for (var shelfIndex = 0; shelfIndex < StripCatalog.Shelves.Length; shelfIndex++)
+        for (var index = 0; index < StripCatalog.PlayableIds.Length; index++)
         {
-            var entries = StripCatalog.EntriesOf(StripCatalog.Shelves[shelfIndex]);
-            for (var index = 0; index < entries.Length; index++)
-            {
-                var entry = entries[index];
-                if (entry.Action != StripAction.Game || entry.GameId == CasinoGames.DailySpin)
-                {
-                    continue;
-                }
-
-                Assert.True(CasinoApp.MinimumStakeOf(entry.GameId) > 0, entry.GameId);
-            }
+            Assert.True(CasinoApp.MinimumStakeOf(StripCatalog.PlayableIds[index]) > 0, StripCatalog.PlayableIds[index]);
         }
     }
 
@@ -362,9 +479,55 @@ public sealed class CasinoFloorLayoutTests
 
     private static int CasinoAppReturns(string gameId) => CasinoApp.ReturnTenthsOf(gameId);
 
+    private static CasinoRoundHistoryDto Played(string kind) => new(RoundId: kind, GameKind: kind);
+
+    private static StripHeroModel Hero(CasinoBonusDto? timed, CasinoBonusDto? streak, bool spinReady) =>
+        new(0, false, 1, 0f, 0, false, timed, streak, spinReady, false, 0);
+
+    private static int Occurrences(string gameId)
+    {
+        var count = 0;
+        for (var index = 0; index < StripCatalog.Playable.Length; index++)
+        {
+            count += StripCatalog.Playable[index].GameId == gameId ? 1 : 0;
+        }
+
+        return count;
+    }
+
     private static CasinoFloorTickDto Win(string roundId, int tenths) =>
         new(Kind: CasinoTickKinds.Win, RoundId: roundId, GameKind: "casino.plinko", MultiplierTenths: tenths,
             Stake: 100, Payout: tenths * 10L, AtUnixMs: 1);
+
+    [Fact]
+    public void SeatDotsGiveWayToTheSeatsLineWhenBothDoNotFit()
+    {
+        var dots = CasinoArt.SeatDotsWidth(6, 1f) + 8f;
+        Assert.True(CasinoArt.SeatDotsWidth(6, 1f) > 0f);
+        Assert.Equal(0f, CasinoArt.SeatDotsWidth(0, 1f));
+        Assert.True(TableRow.ShowsSeatDots(dots, 80f, dots + 80f));
+        Assert.False(TableRow.ShowsSeatDots(dots, 80f, dots + 79f));
+        Assert.True(TableRow.ShowsSeatDots(dots, 0f, 10f));
+        Assert.False(TableRow.ShowsSeatDots(0f, 80f, 500f));
+    }
+
+    [Fact]
+    public void AMissionReservesAButtonOnlyWhenItCanBeClaimed()
+    {
+        Assert.Equal(100f, MissionsCard.ActionColumn(true, 100f, 30f));
+        Assert.Equal(30f, MissionsCard.ActionColumn(false, 100f, 30f));
+        Assert.Equal(100f, MissionsCard.ActionColumn(false, 100f, 140f));
+    }
+
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.5f)]
+    public void TheSignScrimCoversTheWholeSignBand(float scale)
+    {
+        Assert.True(PosterTile.SignBandBottom(scale)
+                    >= PosterTile.SignBandTop(scale) + PosterTile.SignHeight * scale);
+    }
 
     private static CasinoMissionDto Mission(string id, bool complete, bool claimed) =>
         new(id, 0, CasinoMissionMetrics.Rounds, "casino.slots", 25, 0, 5000, complete ? 25 : 3, complete, claimed);

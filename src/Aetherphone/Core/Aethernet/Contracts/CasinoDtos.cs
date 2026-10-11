@@ -730,14 +730,17 @@ internal sealed record CasinoLedgerEntryDto(
     bool Disputed = false,
     bool DisputeResolved = false,
     long CreatedAtUnixMs = 0,
-    long SettledAtUnixMs = 0);
+    long SettledAtUnixMs = 0,
+    bool Guest = false,
+    string GuestName = "");
 
 internal sealed record CasinoLedgerProposeRequest(
     string ClientEntryId = "",
     string Kind = "buyin",
     string CounterpartyUserId = "",
     long Amount = 0,
-    string Source = "manual");
+    string Source = "manual",
+    string GuestName = "");
 
 internal sealed record CasinoLedgerResultDto(bool Granted = false, string Reason = "",
     CasinoLedgerEntryDto? Entry = null);

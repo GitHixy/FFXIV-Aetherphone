@@ -81,7 +81,8 @@ internal sealed class TradeProposalQueue
     }
 }
 
-internal sealed record TradeMiss(string TableId, long Amount, long AtTick)
+internal sealed record TradeMiss(string TableId, long Amount, long AtTick, string PartnerName = "",
+    bool Incoming = false)
 {
     public const long ShownMilliseconds = 10 * 60 * 1000;
 

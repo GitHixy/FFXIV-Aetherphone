@@ -16,6 +16,7 @@ internal sealed class CasinoTradeSync : IDisposable
     private readonly CasinoRoomsStore rooms;
     private readonly CasinoTablesStore tables;
     private readonly CasinoVenueStore venue;
+    private readonly CasinoStore chips;
     private readonly NotificationService notifications;
     private readonly Vector4 accent;
     private readonly TradeSyncTracker tracker = new();
@@ -28,13 +29,14 @@ internal sealed class CasinoTradeSync : IDisposable
 
     private volatile TradeMatchHolder? serverAnswer;
     private volatile TradeMiss? lastMiss;
+    private volatile GuestOffer? pendingGuest;
     private int matching;
     private bool wasOpen;
     private long locatedAtTick;
 
     public CasinoTradeSync(Configuration configuration, AethernetSession session, ITradeWindowReader reader,
         ITradeMatchSource source, CasinoRoomsStore rooms, CasinoTablesStore tables, CasinoVenueStore venue,
-        NotificationService notifications, Vector4 accent)
+        CasinoStore chips, NotificationService notifications, Vector4 accent)
     {
         this.configuration = configuration;
         this.session = session;
@@ -43,6 +45,7 @@ internal sealed class CasinoTradeSync : IDisposable
         this.rooms = rooms;
         this.tables = tables;
         this.venue = venue;
+        this.chips = chips;
         this.notifications = notifications;
         this.accent = accent;
         cardFor = tables.CardFor;
@@ -85,11 +88,20 @@ internal sealed class CasinoTradeSync : IDisposable
 
     public TradeMiss? LastMiss => lastMiss;
 
+    public GuestOffer? PendingGuest => pendingGuest;
+
     public bool Busy => venue.HostInFlight;
+
+    public bool GuestBusy => tables.IntentInFlight;
 
     public CasinoStakeOutcome? TakeOutcome()
     {
         return venue.TakeTradeOutcome();
+    }
+
+    public CasinoStakeOutcome? TakeGuestOutcome()
+    {
+        return tables.TakeGuestOutcome();
     }
 
     public void Accept()
@@ -105,6 +117,25 @@ internal sealed class CasinoTradeSync : IDisposable
         queue.TryTake(out _);
     }
 
+    public void RecordGuest()
+    {
+        var offer = Interlocked.Exchange(ref pendingGuest, null);
+        if (offer is null)
+        {
+            return;
+        }
+
+        lastMiss = null;
+        AepLog.Info($"[TradeSync] Recording a guest {offer.LedgerKind} of {offer.Amount} gil at table {offer.TableId}");
+        tables.ProposeGuestEntry(offer.TableId, offer.LedgerKind, offer.GuestName, offer.Amount,
+            CasinoLedgerKinds.Trade);
+    }
+
+    public void DismissGuest()
+    {
+        pendingGuest = null;
+    }
+
     public TradeTableContext Context()
     {
         var view = View();
@@ -114,7 +145,8 @@ internal sealed class CasinoTradeSync : IDisposable
     private TradeTableView View()
     {
         return new TradeTableView(session.CurrentUser?.Id ?? string.Empty, rooms.Room.RoomId,
-            rooms.Room.State?.Blackjack, venue.View, tables.Door, tables.Listed, cardFor, ledgerFor);
+            rooms.Room.State?.Blackjack, venue.View, tables.Door, tables.Listed, cardFor, ledgerFor,
+            tables.LedgerRoomId);
     }
 
     private void OnFrameworkUpdate(IFramework framework)
@@ -169,10 +201,12 @@ internal sealed class CasinoTradeSync : IDisposable
             return;
         }
 
+        var partner = GuestLedger.PartnerNameOf(completion);
         if (Interlocked.Exchange(ref matching, 1) != 0)
         {
             AepLog.Info("[TradeSync] A server match is still in flight, this trade is left to the ledger");
-            lastMiss = new TradeMiss(context.TableId, Math.Abs(completion.Net), Environment.TickCount64);
+            Missed(new TradeMiss(context.TableId, Math.Abs(completion.Net), Environment.TickCount64, partner,
+                completion.Net > 0), context);
             return;
         }
 
@@ -181,7 +215,7 @@ internal sealed class CasinoTradeSync : IDisposable
         {
             var result = await TradeMatchFlow.ServerAsync(source, completion, context, token).ConfigureAwait(false);
             Interlocked.Exchange(ref serverAnswer,
-                new TradeMatchHolder(result, context.MyUserId, context.TableId, completion.Net));
+                new TradeMatchHolder(result, context.MyUserId, context.TableId, completion.Net, partner));
         }, () => Interlocked.Exchange(ref matching, 0));
     }
 
@@ -191,7 +225,8 @@ internal sealed class CasinoTradeSync : IDisposable
         if (result.Route != TradeMatchRoute.Server)
         {
             AepLog.Info(MissNote(result));
-            lastMiss = new TradeMiss(answered.TableId, Math.Abs(answered.Net), Environment.TickCount64);
+            Missed(new TradeMiss(answered.TableId, Math.Abs(answered.Net), Environment.TickCount64,
+                answered.PartnerName, answered.Net > 0), Context());
             return;
         }
 
@@ -216,9 +251,22 @@ internal sealed class CasinoTradeSync : IDisposable
         _ => "[TradeSync] Server found no counterparty for this trade",
     };
 
+    private void Missed(TradeMiss miss, in TradeTableContext context)
+    {
+        lastMiss = miss;
+        var offer = GuestLedger.Offer(miss, context.Hosting, chips.HasFeature(CasinoFeatures.VenueBook),
+            context.Entries);
+        pendingGuest = offer;
+        if (offer is not null)
+        {
+            AepLog.Info($"[TradeSync] Offering a guest {offer.LedgerKind} of {offer.Amount} gil to the host");
+        }
+    }
+
     private void Offer(in TradeProposal proposal)
     {
         lastMiss = null;
+        pendingGuest = null;
         var automatic = !proposal.HostSide && configuration.CasinoTradeAutoConfirm;
         AepLog.Info($"[TradeSync] {proposal.Kind} {proposal.LedgerKind} for {proposal.Amount} gil, "
             + $"host side {proposal.HostSide}, incoming {proposal.Incoming}, automatic {automatic}");
@@ -263,5 +311,6 @@ internal sealed class CasinoTradeSync : IDisposable
         reader.Dispose();
     }
 
-    private sealed record TradeMatchHolder(TradeMatchResult Result, string AccountId, string TableId, long Net);
+    private sealed record TradeMatchHolder(TradeMatchResult Result, string AccountId, string TableId, long Net,
+        string PartnerName);
 }

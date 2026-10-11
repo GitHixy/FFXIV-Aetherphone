@@ -17,7 +17,8 @@ internal sealed partial class CasinoApp
     private const float ChallengeBulbInset = 6f;
     private const string FloorFameBoard = CasinoFameBoards.Win;
 
-    private readonly MissionsCard missionsCard = new();
+    private readonly MissionsCapsule missionsCapsule = new();
+    private readonly MissionsSheet missionsSheet;
     private readonly ClubCapsule clubCapsule = new();
     private readonly ClubSheet clubSheet = new();
     private readonly FamePodium famePodium = new();
@@ -36,11 +37,9 @@ internal sealed partial class CasinoApp
         var missions = floor.Missions;
         if (casino.HasFeature(CasinoFeatures.Missions) && MissionsCard.Count(missions) > 0)
         {
-            var tapped = missionsCard.Draw(drawList, ui, missions!, new Vector2(origin.X, top), width,
-                floor.ClaimingMission, DateTimeOffset.UtcNow.ToUnixTimeSeconds(), scale, out var bottom);
-            if (tapped.Length > 0)
+            if (missionsCapsule.Draw(drawList, ui, missions!, new Vector2(origin.X, top), width, scale, out var bottom))
             {
-                floor.ClaimMission(tapped);
+                missionsSheet.Open();
             }
 
             top = bottom + CardGap * scale;
@@ -113,7 +112,17 @@ internal sealed partial class CasinoApp
     private bool FloorIdle() =>
         casino.State is not null && preferences.IntroSeen && routes.OnRoot && routes.Tab == CasinoTab.Floor
         && !router.IsTransitioning && !LaunchActive && !rulesSheet.IsOpen && !clubSheet.IsOpen && !cashier.IsOpen
-        && !venueSheet.IsOpen && !tradePrompt.Visible && conduct.Active is null && confirm.Active is null;
+        && !missionsSheet.IsOpen && !venueSheet.IsOpen && !tradePrompt.Visible && conduct.Active is null
+        && confirm.Active is null;
+
+    private void HandleMissionsSheet()
+    {
+        var claim = missionsSheet.TakeClaim();
+        if (claim.Length > 0)
+        {
+            floor.ClaimMission(claim);
+        }
+    }
 
     private void ConsumeMissionNotes()
     {
@@ -127,7 +136,7 @@ internal sealed partial class CasinoApp
         {
             if (claim.Granted)
             {
-                bonusShelf.Shower(missionsCard.ClaimCenter, UiScale.Current);
+                bonusShelf.Shower(missionsSheet.ClaimCenter, UiScale.Current);
                 ShellToast.Show(texts.Compact(L.Strip.BonusLanded, claim.Amount));
             }
             else

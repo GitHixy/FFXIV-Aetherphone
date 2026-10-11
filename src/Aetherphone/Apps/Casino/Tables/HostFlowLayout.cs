@@ -2,8 +2,41 @@ using Aetherphone.Core;
 
 namespace Aetherphone.Apps.Casino.Tables;
 
+[Flags]
+internal enum HostStep : byte
+{
+    None = 0,
+    Game = 1,
+    PlayFor = 2,
+    Table = 4,
+}
+
 internal static class HostFlowLayout
 {
+    public const HostStep EveryStep = HostStep.Game | HostStep.PlayFor | HostStep.Table;
+
+    public static HostStep Steps(HostGame game) =>
+        HostGames.IsBook(game) ? HostStep.Game | HostStep.Table : EveryStep;
+
+    public static int StepOrdinal(HostStep steps, HostStep step)
+    {
+        if ((steps & step) == 0)
+        {
+            return 0;
+        }
+
+        var ordinal = 0;
+        for (var bit = HostStep.Game; bit <= step; bit = (HostStep)((byte)bit << 1))
+        {
+            if ((steps & bit) != 0)
+            {
+                ordinal++;
+            }
+        }
+
+        return ordinal;
+    }
+
     public const float Touch = 44f;
     public const float SectionGap = 22f;
     public const float StepGap = 10f;

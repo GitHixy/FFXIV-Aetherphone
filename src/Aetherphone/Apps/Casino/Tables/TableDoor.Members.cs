@@ -13,12 +13,14 @@ internal sealed partial class TableDoor
 {
     internal static bool HasSeats(CasinoTableRowDto? card)
     {
-        return card is null || VenueKinds.Of(card.GameKind) == VenueRoomKind.None;
+        return card is null
+            || (VenueKinds.Of(card.GameKind) == VenueRoomKind.None && !CasinoBookRules.IsBook(card.GameKind));
     }
 
     internal static bool TakesCoDealers(CasinoTableRowDto card)
     {
-        return !string.Equals(card.GameKind, HoldemRules.Kind, StringComparison.Ordinal);
+        return !string.Equals(card.GameKind, HoldemRules.Kind, StringComparison.Ordinal)
+            && !CasinoBookRules.IsBook(card.GameKind);
     }
 
     internal static int WithoutCoDealers(DoorControl[] controls, int count)

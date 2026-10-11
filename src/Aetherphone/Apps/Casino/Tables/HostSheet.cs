@@ -73,9 +73,12 @@ internal sealed class HostSheet
     private static readonly LocString[] DoubleLabels =
         { L.Tables.DoublesAny, L.Tables.DoublesNineEleven, L.Tables.OptionOff };
 
+    private const int SettleToEndFrames = 2;
+
     private readonly CasinoTablesStore tables;
     private readonly CasinoStore chips;
     private readonly Venue.VenueHostOptions venueOptions;
+    private readonly CasinoPreferences preferences;
     private readonly HostDraft draft = new();
     private readonly CasinoTextCache texts = new();
     private readonly TileRail rail = new();
@@ -94,19 +97,42 @@ internal sealed class HostSheet
     private string inlineReason = string.Empty;
     private bool moreOpen;
     private bool revealGame;
+    private int settleFrames;
 
-    public HostSheet(CasinoTablesStore tables, CasinoStore chips, Venue.VenueHostOptions venueOptions)
+    public HostSheet(CasinoTablesStore tables, CasinoStore chips, Venue.VenueHostOptions venueOptions,
+        CasinoPreferences preferences)
     {
         this.tables = tables;
         this.chips = chips;
         this.venueOptions = venueOptions;
+        this.preferences = preferences;
     }
 
     public void Enter() => Begin(HostGame.Blackjack);
 
     public void Enter(string gameKind) => Begin(HostGames.FromKind(gameKind));
 
-    public void EnterVenue(VenueRoomKind kind) => Begin(HostGames.FromVenue(kind));
+    public void EnterGame(HostGame game, bool preferGil)
+    {
+        Begin(game);
+        revealGame = true;
+        if (preferGil)
+        {
+            draft.SelectCurrency(CasinoCurrencies.Gil, chips.HasFeature(CasinoFeatures.GilTables));
+        }
+    }
+
+    public void EnterDraft(CasinoHostDraftMemory saved)
+    {
+        Begin(HostDraft.GameOf(saved));
+        draft.Restore(saved);
+        venueOptions.PinLocation = saved.PinLocation;
+        revealGame = true;
+        moreOpen = true;
+        settleFrames = SettleToEndFrames;
+    }
+
+    public void RememberDraft() => preferences.RememberHostDraft(draft.Snapshot(venueOptions.PinLocation));
 
     public void Draw(Rect body, AppSkin ui)
     {
@@ -125,6 +151,7 @@ internal sealed class HostSheet
             using (AppSurface.Begin(scroll))
             {
                 DrawSteps(ui, gilOpen, scale);
+                SettleToEnd();
             }
 
             DrawFooter(ui, new Rect(new Vector2(body.Min.X, scroll.Max.Y), body.Max), line, summaryHeight, scale);
@@ -137,20 +164,38 @@ internal sealed class HostSheet
         venueOptions.Reset();
         inlineReason = string.Empty;
         moreOpen = false;
+        settleFrames = 0;
         rail.Reset();
         revealGame = game != HostGame.Blackjack;
+    }
+
+    private void SettleToEnd()
+    {
+        if (settleFrames <= 0)
+        {
+            return;
+        }
+
+        settleFrames--;
+        ImGui.SetScrollY(ImGui.GetScrollMaxY());
     }
 
     private void DrawSteps(AppSkin ui, bool gilOpen, float scale)
     {
         var width = ScrollLayout.StableContentWidth();
-        StepHeader(ui, 1, Loc.T(L.Tables.StepGame), width, scale);
+        var steps = HostFlowLayout.Steps(draft.Game);
+        StepHeader(ui, HostFlowLayout.StepOrdinal(steps, HostStep.Game), Loc.T(L.Tables.StepGame), width, scale);
         DrawGameRail(ui, gilOpen, width, scale);
         Gap(HostFlowLayout.SectionGap, scale);
-        StepHeader(ui, 2, Loc.T(L.Tables.StepPlayFor), width, scale);
-        DrawPlayFor(ui, gilOpen, width, scale);
-        Gap(HostFlowLayout.SectionGap, scale);
-        StepHeader(ui, 3, Loc.T(L.Tables.StepTable), width, scale);
+        if ((steps & HostStep.PlayFor) != 0)
+        {
+            StepHeader(ui, HostFlowLayout.StepOrdinal(steps, HostStep.PlayFor), Loc.T(L.Tables.StepPlayFor), width,
+                scale);
+            DrawPlayFor(ui, gilOpen, width, scale);
+            Gap(HostFlowLayout.SectionGap, scale);
+        }
+
+        StepHeader(ui, HostFlowLayout.StepOrdinal(steps, HostStep.Table), Loc.T(L.Tables.StepTable), width, scale);
         DrawEssentials(ui, width, scale);
         Gap(HostFlowLayout.SectionGap, scale);
         DrawMoreToggle(ui, width, scale);
@@ -201,8 +246,9 @@ internal sealed class HostSheet
         var drawList = ImGui.GetWindowDrawList();
         var tileWidth = HostFlowLayout.TileWidth(width, scale);
         var textWidth = HostFlowLayout.TileTextWidth(tileWidth, scale);
+        var count = HostGames.Count(chips.HasFeature(CasinoFeatures.VenueBook));
         var lineBlock = 0f;
-        for (var index = 0; index < HostGames.All.Length; index++)
+        for (var index = 0; index < count; index++)
         {
             lineBlock = MathF.Max(lineBlock,
                 Typography.MeasureWrappedBlock(Loc.T(HostGames.All[index].Line), TextStyles.Footnote, textWidth).Y);
@@ -211,9 +257,10 @@ internal sealed class HostSheet
         var headline = Typography.LineHeight(TextStyles.Headline);
         var tileHeight = HostFlowLayout.TileHeight(scale, headline, lineBlock);
         var pad = HostFlowLayout.RailPad * scale;
-        var contentWidth = HostFlowLayout.RailWidth(HostGames.All.Length, tileWidth, scale);
+        var contentWidth = HostFlowLayout.RailWidth(count, tileWidth, scale);
         var row = new Rect(new Vector2(origin.X - pad, origin.Y - pad),
             new Vector2(origin.X + width + pad, origin.Y + tileHeight + pad));
+        rail.Begin(drawList, RailId, row, row, contentWidth);
         if (revealGame)
         {
             revealGame = false;
@@ -221,11 +268,10 @@ internal sealed class HostSheet
             rail.SettleTo(MathF.Max(0f, MathF.Min(selected.Max.X - width, contentWidth - width)));
         }
 
-        rail.Begin(drawList, RailId, row, row, contentWidth);
         var interactive = rail.TapAllowed;
         var phase = (float)ImGui.GetTime();
         var tapped = -1;
-        for (var index = 0; index < HostGames.All.Length; index++)
+        for (var index = 0; index < count; index++)
         {
             var tile = HostFlowLayout.Tile(origin.X - rail.Offset, origin.Y, index, tileWidth, tileHeight, scale);
             if (tile.Min.X > row.Max.X || tile.Max.X < row.Min.X)
@@ -430,6 +476,11 @@ internal sealed class HostSheet
                 LadderSingle(ui, "##hostStake", Loc.T(L.Venue.Stake),
                     TableAmounts.Amount(texts, draft.StakeValue, draft.Currency), draft.BetSpan, ref draft.Stake,
                     width, scale);
+                break;
+            case HostGame.Book:
+                LadderSingle(ui, "##hostBank", Loc.T(L.Tables.Bank),
+                    TableAmounts.Amount(texts, draft.BankValue, draft.Currency), HostLadders.All(HostLadders.Gil),
+                    ref draft.Bank, width, scale);
                 break;
         }
 
@@ -698,7 +749,7 @@ internal sealed class HostSheet
             }
         }
 
-        if (draft.Gil && draft.Game == HostGame.Blackjack)
+        if (draft.Gil && draft.Game is HostGame.Blackjack or HostGame.Book)
         {
             var index = draft.PayoutCapped ? draft.MaxPayout : draft.Bank;
             LadderSingle(ui, "##hostPayout", Loc.T(L.Tables.MaxPayout),
@@ -823,6 +874,7 @@ internal sealed class HostSheet
             HostGame.Holdem => draft.BigBlindValue,
             HostGame.DiceTable => draft.SidesValue,
             HostGame.Deathroll => draft.StartAtValue,
+            HostGame.Book => draft.BankValue,
             _ => draft.MinBetValue,
         };
         var high = draft.Game == HostGame.Deathroll ? draft.StakeValue : draft.MaxBetValue;
@@ -845,6 +897,8 @@ internal sealed class HostSheet
             HostGame.DiceTable => Loc.T(L.Tables.SummaryDice, game, NumberText.Compact(draft.SidesValue), listing),
             HostGame.Deathroll => Loc.T(L.Tables.SummaryDeathroll, game, NumberText.Compact(draft.StartAtValue),
                 TableAmounts.Amount(texts, draft.StakeValue, draft.Currency), listing),
+            HostGame.Book => Loc.T(L.Book.Summary, game, TableAmounts.Amount(texts, draft.BankValue, draft.Currency),
+                listing),
             _ => Loc.T(L.Tables.SummaryRaffle, game, listing),
         };
         return summary;

@@ -273,6 +273,10 @@ The map is a JSON secret from community role name to one or more staff role name
 
 Invite the bot to the community server with Manage Roles and View Channels, move its role above the mapped roles, then add these secrets next to the pull request forum ones: `DISCORD_STAFF_GUILD_ID`, `DISCORD_COMMUNITY_GUILD_ID`, `DISCORD_ROLE_SYNC_MAP`, `DISCORD_ROLE_SYNC_REPORT_CHANNEL_ID` (optional but strongly recommended), and finally `DISCORD_ROLE_SYNC_ARMED` once a dry run looks right. The bot needs the Server Members Intent enabled in the Developer Portal to list members. The workflow skips cleanly while the guild ids or the map are unset.
 
+## Staff post
+
+.github/workflows/staff-post.yml posts a note written by a maintainer, such as what changed in a beta build and the QA checklist for it, to a channel on the staff server as the same bot. Dispatch it with a `title` and a markdown `body`; .github/scripts/staff-post.mjs splits a long body into numbered embeds and never pings anyone. The channel id lives in the `DISCORD_STAFF_POST_CHANNEL_ID` secret, and the public log only says how many messages were posted. From a shell, `gh workflow run staff-post.yml --json` with `{"title": "...", "body": "..."}` on stdin keeps the line breaks.
+
 ## Uptime workflow
 
 .github/workflows/uptime.yml probes the backend's public health endpoint every five minutes and posts failures to an alert webhook; it lives in this repo only because public repositories get free Actions minutes, and it monitors the backend, not the plugin.

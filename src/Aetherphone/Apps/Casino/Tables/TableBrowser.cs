@@ -49,6 +49,7 @@ internal sealed class TableBrowser
     private readonly Action openHostSheet;
     private readonly Action openGilLedger;
     private readonly Venue.NearbyTablesCard nearby;
+    private readonly Venue.VenueContextCard context;
     private readonly Action<CasinoTableRowDto> openNearby;
     private readonly ChipRail rail = new();
     private readonly string[] filterLabels = new string[FilterLabels.Length];
@@ -56,6 +57,7 @@ internal sealed class TableBrowser
 
     private CasinoTableRowDto[]? viewListed;
     private CasinoTableRowDto[]? viewHoldem;
+    private CasinoTableLedgerDto? viewLedger;
     private CasinoTableRowDto[] viewSource = Array.Empty<CasinoTableRowDto>();
     private TableRowView[] views = Array.Empty<TableRowView>();
     private LanguageInfo? viewLanguage;
@@ -69,9 +71,10 @@ internal sealed class TableBrowser
 
     public TableBrowser(CasinoTablesStore tables, HoldemStore holdemTables, CasinoStore chips,
         Action<string> openTable, Action<string> openDoor, Action enterHouse, Action openHostSheet,
-        Action openGilLedger, Venue.NearbyTablesCard nearby)
+        Action openGilLedger, Venue.NearbyTablesCard nearby, Venue.VenueContextCard context)
     {
         this.nearby = nearby;
+        this.context = context;
         openNearby = row => openTable(row.TableId);
         this.tables = tables;
         this.holdemTables = holdemTables;
@@ -114,6 +117,8 @@ internal sealed class TableBrowser
         RefreshViews();
         using var surface = AppSurface.Begin(body);
         var width = ScrollLayout.StableContentWidth();
+        DrawContext(ui, width, scale);
+        Gap(SectionGap, scale);
         DrawJoinByCode(ui, width, scale);
         if (inlineReason.Length > 0)
         {
@@ -121,23 +126,26 @@ internal sealed class TableBrowser
         }
 
         Gap(SectionGap, scale);
-        DrawHostCta(ui, width, scale);
         DrawGilLedgerCta(ui, width, scale);
-        Gap(SectionGap, scale);
-        DrawNearby(ui, width, scale);
+        if (!context.ShowsNearby)
+        {
+            DrawNearby(ui, width, scale);
+        }
+
         DrawFilters(ui);
         Gap(Metrics.Space.Sm, scale);
         DrawRows(ui, width, scale);
         Gap(Metrics.Space.Xl, scale);
     }
 
-    internal static TableRowView ViewOf(CasinoTableRowDto row, string myUserId)
+    internal static TableRowView ViewOf(CasinoTableRowDto row, string myUserId, int bookEntries = -1)
     {
         var currency = CasinoCurrencies.Of(row);
         var hosted = CasinoTableFilters.IsPrivate(row);
         var mine = myUserId.Length > 0 && string.Equals(row.OwnerUserId, myUserId, StringComparison.Ordinal);
         var hostNamed = hosted && row.OwnerName.Length > 0;
         var holdem = string.Equals(row.GameKind, HoldemRules.Kind, StringComparison.Ordinal);
+        var book = CasinoBookRules.IsBook(row.GameKind);
         var blindsNamed = holdem && row.Name.Length == 0 && !hostNamed;
         var name = row.Name.Length > 0
             ? row.Name
@@ -147,11 +155,15 @@ internal sealed class TableBrowser
                     ? Loc.T(L.Holdem.TableName, NumberText.Compact(row.MinBet), NumberText.Compact(row.MaxBet))
                     : Loc.T(L.Casino.TableUnnamed);
         var room = VenueKinds.Of(row.GameKind);
-        var stakes = StakesOf(row, room, currency, holdem, blindsNamed);
-        var seats = room != VenueRoomKind.None
-            ? Loc.T(L.Venue.InRoom, row.Occupancy.ToString(Loc.Culture))
-            : Loc.T(L.Casino.TableSeats, row.SeatedCount.ToString(Loc.Culture), row.MaxSeats.ToString(Loc.Culture));
-        var watching = room != VenueRoomKind.None ? 0 : CasinoTableFilters.SpectatorsOf(row);
+        var hostLine = hosted && row.OwnerName.Length > 0 ? Loc.T(L.Tables.HostedBy, row.OwnerName) : string.Empty;
+        var stakes = book ? BookLine(bookEntries, hostLine) : StakesOf(row, room, currency, holdem, blindsNamed);
+        var seats = book
+            ? bookEntries >= 0 ? hostLine : string.Empty
+            : room != VenueRoomKind.None
+                ? Loc.T(L.Venue.InRoom, row.Occupancy.ToString(Loc.Culture))
+                : Loc.T(L.Casino.TableSeats, row.SeatedCount.ToString(Loc.Culture),
+                    row.MaxSeats.ToString(Loc.Culture));
+        var watching = room != VenueRoomKind.None || book ? 0 : CasinoTableFilters.SpectatorsOf(row);
         var spectators = watching > 0
             ? Loc.T(L.Casino.TableSpectators, watching.ToString(Loc.Culture))
             : string.Empty;
@@ -159,13 +171,33 @@ internal sealed class TableBrowser
         var draining = string.Equals(row.Reason, CasinoReasons.Draining, StringComparison.Ordinal)
             || string.Equals(row.Reason, CasinoReasons.TableClosed, StringComparison.Ordinal);
         var inviteOnly = hosted && !mine && row.Listing == CasinoListings.Private;
-        var hostLine = hosted && row.OwnerName.Length > 0 ? Loc.T(L.Tables.HostedBy, row.OwnerName) : string.Empty;
         var monogram = hosted && row.OwnerName.Length > 0 ? Initials.Of(row.OwnerName) : string.Empty;
         return new TableRowView(name, stakes, seats, spectators,
-            room == VenueRoomKind.None && !CasinoTableFilters.HasOpenSeat(row), inviteOnly,
+            room == VenueRoomKind.None && !book && !CasinoTableFilters.HasOpenSeat(row), inviteOnly,
             mine, draining, currency, Loc.T(CurrencyNames[currency]), reputation, warns, row.Paused,
             GameIdOf(row.GameKind), hostLine, monogram, room == VenueRoomKind.None ? row.SeatedCount : row.Occupancy,
-            row.MaxSeats, room);
+            row.MaxSeats, room, Book: book);
+    }
+
+    internal static string BookLine(int entries, string hostLine)
+    {
+        if (entries >= 0)
+        {
+            return Loc.T(L.Book.RowLine, entries.ToString(Loc.Culture));
+        }
+
+        return hostLine.Length > 0 ? hostLine : Loc.T(L.Book.Plays);
+    }
+
+    internal static int BookEntriesOf(CasinoTableRowDto row, CasinoTableLedgerDto? ledger)
+    {
+        if (ledger is null || !CasinoBookRules.IsBook(row.GameKind)
+            || !string.Equals(ledger.TableId, row.TableId, StringComparison.Ordinal))
+        {
+            return -1;
+        }
+
+        return ledger.Entries?.Length ?? 0;
     }
 
     internal static TableRowView HouseView(in HouseBlackjackFloor floor, long playerMaxBet)
@@ -206,6 +238,11 @@ internal sealed class TableBrowser
         if (string.Equals(gameKind, HoldemRules.Kind, StringComparison.Ordinal))
         {
             return CasinoGames.Holdem;
+        }
+
+        if (CasinoBookRules.IsBook(gameKind))
+        {
+            return CasinoGames.Book;
         }
 
         return VenueKinds.Of(gameKind) switch
@@ -251,7 +288,9 @@ internal sealed class TableBrowser
         var holdem = holdemTables.Tables;
         var account = tables.AccountId;
         var ceiling = chips.Ceiling.MaxBet;
+        var ledger = tables.HeldLedger;
         if (ReferenceEquals(listed, viewListed) && ReferenceEquals(holdem, viewHoldem)
+            && ReferenceEquals(ledger, viewLedger)
             && ReferenceEquals(viewLanguage, Loc.Current) && ceiling == viewCeiling
             && string.Equals(account, viewAccount, StringComparison.Ordinal))
         {
@@ -260,6 +299,7 @@ internal sealed class TableBrowser
 
         viewListed = listed;
         viewHoldem = holdem;
+        viewLedger = ledger;
         viewLanguage = Loc.Current;
         viewAccount = account;
         viewCeiling = ceiling;
@@ -270,7 +310,7 @@ internal sealed class TableBrowser
         {
             views[index] = HouseBlackjack.Is(viewSource[index])
                 ? HouseView(floor, ceiling)
-                : ViewOf(viewSource[index], account);
+                : ViewOf(viewSource[index], account, BookEntriesOf(viewSource[index], ledger));
         }
     }
 
@@ -374,12 +414,12 @@ internal sealed class TableBrowser
         ImGui.Dummy(new Vector2(width, max.Y - origin.Y));
     }
 
-    private void DrawHostCta(AppSkin ui, float width, float scale)
+    private void DrawContext(AppSkin ui, float width, float scale)
     {
-        if (DrawCta(ui, width, scale, FontAwesomeIcon.Plus, Loc.T(L.Tables.HostCta), Loc.T(L.Tables.HostCtaLine), true))
-        {
-            OpenHost();
-        }
+        var origin = ImGui.GetCursorScreenPos();
+        var bottom = context.Draw(ImGui.GetWindowDrawList(), ui, origin, width, scale);
+        ImGui.SetCursorScreenPos(origin);
+        ImGui.Dummy(new Vector2(width, MathF.Max(0f, bottom - origin.Y)));
     }
 
     private void DrawGilLedgerCta(AppSkin ui, float width, float scale)
@@ -389,12 +429,13 @@ internal sealed class TableBrowser
             return;
         }
 
-        Gap(RowGap, scale);
         if (DrawCta(ui, width, scale, FontAwesomeIcon.Book, Loc.T(L.Tables.MyLedgerTitle), Loc.T(L.Tables.MyLedgerLine),
                 false))
         {
             openGilLedger();
         }
+
+        Gap(SectionGap, scale);
     }
 
     private static bool DrawCta(AppSkin ui, float width, float scale, FontAwesomeIcon glyph, string title,
@@ -547,7 +588,7 @@ internal sealed class TableBrowser
 
         if (!string.Equals(row.GameKind, CasinoWire.BlackjackKind, StringComparison.Ordinal)
             && !string.Equals(row.GameKind, HoldemRules.Kind, StringComparison.Ordinal)
-            && !VenueKinds.IsVenue(row.GameKind))
+            && !VenueKinds.IsVenue(row.GameKind) && !CasinoBookRules.IsBook(row.GameKind))
         {
             inlineReason = CasinoReasons.Unavailable;
             return;

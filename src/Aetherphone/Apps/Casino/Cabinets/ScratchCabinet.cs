@@ -148,7 +148,8 @@ internal sealed class ScratchCabinet : ICabinetIdle
         LayoutTicket(safe, safe.Max.Y - statusHeight, scale);
         DrawKiosk(drawList, stage, frame, scale);
         DrawTicket(drawList, stage, ui, frame, scale);
-        var status = new Rect(new Vector2(safe.Min.X, ticketArea.Max.Y + StatusGap * scale), safe.Max);
+        var status = new Rect(
+            new Vector2(safe.Min.X, StatusTop(ticketArea, KioskInset * scale, StatusGap * scale)), safe.Max);
         DrawStatus(drawList, stage, ui, line, showRun, status, scale);
         DrawDeck(stage, frame, ui, state, sitting ?? CasinoWire.NoBankroll, scale);
     }
@@ -267,15 +268,21 @@ internal sealed class ScratchCabinet : ICabinetIdle
 
     private void LayoutTicket(Rect safe, float bottom, float scale)
     {
-        var available = MathF.Max(0f, bottom - safe.Min.Y);
-        var width = MathF.Min(MathF.Min(safe.Width - KioskInset * 2f * scale, TicketMaxWidth * scale),
-            available / (1f + ScratchTicketArt.HeaderShare) - KioskInset * scale);
-        width = MathF.Max(0f, width);
-        var height = width * (1f + ScratchTicketArt.HeaderShare);
-        var left = safe.Center.X - width * 0.5f;
-        var top = safe.Min.Y + MathF.Max(0f, (available - height) * 0.5f);
-        ticketArea = new Rect(new Vector2(left, top), new Vector2(left + width, top + height));
+        ticketArea = TicketRect(safe, bottom, KioskInset * scale, TicketMaxWidth * scale, ScratchTicketArt.HeaderShare);
     }
+
+    internal static Rect TicketRect(Rect safe, float bottom, float kioskInset, float maxWidth, float headerShare)
+    {
+        var available = MathF.Max(0f, bottom - safe.Min.Y - kioskInset * 2f);
+        var width = MathF.Min(MathF.Min(safe.Width - kioskInset * 2f, maxWidth), available / (1f + headerShare));
+        width = MathF.Max(0f, width);
+        var height = width * (1f + headerShare);
+        var left = safe.Center.X - width * 0.5f;
+        var top = safe.Min.Y + kioskInset + MathF.Max(0f, (available - height) * 0.5f);
+        return new Rect(new Vector2(left, top), new Vector2(left + width, top + height));
+    }
+
+    internal static float StatusTop(Rect ticket, float kioskInset, float gap) => ticket.Max.Y + kioskInset + gap;
 
     private int DisplayTier => playback.Phase == ScratchPhase.Idle ? tierIndex : playback.Tier;
 

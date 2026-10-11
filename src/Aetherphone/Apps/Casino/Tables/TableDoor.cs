@@ -46,14 +46,14 @@ internal sealed partial class TableDoor
     private bool renaming;
     private bool coDealerMode;
 
-    public TableDoor(CasinoTablesStore tables, ConfirmService confirm, Action<string> openTable,
+    public TableDoor(CasinoTablesStore tables, CasinoStore chips, ConfirmService confirm, Action<string> openTable,
         Venue.TournamentDoorCard tournament, CasinoTradeSync trade)
     {
         this.tournament = tournament;
         this.tables = tables;
         this.confirm = confirm;
         this.openTable = openTable;
-        ledger = new TableLedger(tables, confirm, trade);
+        ledger = new TableLedger(tables, chips, confirm, trade);
     }
 
     public string RoomId => roomId;
@@ -99,7 +99,7 @@ internal sealed partial class TableDoor
         SeedName(card);
         code.Draw(ui, JoinCode(door, card), Token(door), width, scale);
         Gap(Metrics.Space.Md, scale);
-        DrawOpenTable(ui, width, scale);
+        DrawOpenTable(ui, OpenLabelFor(card), width, scale);
         if (inlineReason.Length > 0)
         {
             Gap(Metrics.Space.Md, scale);
@@ -111,15 +111,10 @@ internal sealed partial class TableDoor
             Gap(SectionGap, scale);
             ui.SectionHeading(Loc.T(L.Tables.HostPanelHeading), 0f);
             DrawControls(ui, card, width, scale);
-            if (ExplainsHostLimits(card))
+            if (NoteFor(card) is { } note)
             {
                 Gap(Metrics.Space.Sm, scale);
-                DrawNote(ui, width, Loc.T(L.Tables.ChipHostNote), scale);
-            }
-            else if (!TakesCoDealers(card))
-            {
-                Gap(Metrics.Space.Sm, scale);
-                DrawNote(ui, width, Loc.T(L.Tables.CoDealersHoldemNote), scale);
+                DrawNote(ui, width, Loc.T(note), scale);
             }
 
             if (renaming)
@@ -200,6 +195,34 @@ internal sealed partial class TableDoor
         into[count++] = DoorControl.Rename;
         into[count++] = DoorControl.Close;
         return count;
+    }
+
+    internal static int ControlsFor(CasinoTableRowDto card, DoorControl[] into)
+    {
+        if (CasinoBookRules.IsBook(card.GameKind))
+        {
+            return Controls(false, false, into);
+        }
+
+        var banked = CasinoCurrencies.SeatBanked(CasinoCurrencies.Of(card));
+        var hostDeals = card.Config is not null && card.Config.DealerMode == CasinoDealerModes.Host;
+        var count = Controls(banked, hostDeals, into);
+        return TakesCoDealers(card) ? count : WithoutCoDealers(into, count);
+    }
+
+    internal static LocString? NoteFor(CasinoTableRowDto card)
+    {
+        if (CasinoBookRules.IsBook(card.GameKind))
+        {
+            return L.Book.DoorNote;
+        }
+
+        if (ExplainsHostLimits(card))
+        {
+            return L.Tables.ChipHostNote;
+        }
+
+        return TakesCoDealers(card) ? null : L.Tables.CoDealersHoldemNote;
     }
 
     internal static bool ControlEnabled(DoorControl control, bool busy, bool paused)
@@ -309,11 +332,17 @@ internal sealed partial class TableDoor
         }
     }
 
-    private void DrawOpenTable(AppSkin ui, float width, float scale)
+    internal static LocString OpenLabelFor(CasinoTableRowDto? card) =>
+        card is not null && CasinoBookRules.IsBook(card.GameKind) ? L.Book.OpenLedger : L.Casino.DoorOpenTable;
+
+    internal static LocString TitleFor(CasinoTableRowDto? card) =>
+        card is not null && CasinoBookRules.IsBook(card.GameKind) ? L.Book.DoorTitle : L.Casino.DoorTitle;
+
+    private void DrawOpenTable(AppSkin ui, LocString label, float width, float scale)
     {
         var origin = ImGui.GetCursorScreenPos();
         var rect = new Rect(origin, new Vector2(origin.X + width, origin.Y + Button.LargeHeight * scale));
-        if (Button.Draw(ImGui.GetWindowDrawList(), rect, Loc.T(L.Casino.DoorOpenTable), ui.Ink, ButtonStyle.Tinted,
+        if (Button.Draw(ImGui.GetWindowDrawList(), rect, Loc.T(label), ui.Ink, ButtonStyle.Tinted,
                 enabled: roomId.Length > 0, id: "casino.door.open"))
         {
             openTable(roomId);
@@ -327,13 +356,7 @@ internal sealed partial class TableDoor
     {
         var origin = ImGui.GetCursorScreenPos();
         var drawList = ImGui.GetWindowDrawList();
-        var banked = CasinoCurrencies.SeatBanked(CasinoCurrencies.Of(card));
-        var hostDeals = card.Config is not null && card.Config.DealerMode == CasinoDealerModes.Host;
-        var count = Controls(banked, hostDeals, controls);
-        if (!TakesCoDealers(card))
-        {
-            count = WithoutCoDealers(controls, count);
-        }
+        var count = ControlsFor(card, controls);
         var columns = DoorLayout.ControlColumns(width, count, scale);
         var cellWidth = DoorLayout.ControlCellWidth(width, columns, scale);
         var labelBlock = 0f;
@@ -360,11 +383,14 @@ internal sealed partial class TableDoor
             var destructive = control == DoorControl.Close;
             var style = active || control == DoorControl.Deal ? ButtonStyle.Prominent : ButtonStyle.Tinted;
             var enabled = ControlEnabled(control, busy, card.Paused);
-            if (RoundButton.FontIcon(drawList, ImGui.GetID($"door.control.{index}"), center, radius,
-                    ControlIcon(control, card), radius * 0.78f, ui.Ink, destructive ? ButtonStyle.Gray : style,
-                    enabled: enabled, glyphInk: destructive ? ui.Theme.Danger : null))
+            using (ImRaii.PushId(index))
             {
-                Press(control, card);
+                if (RoundButton.FontIcon(drawList, ImGui.GetID("door.control"), center, radius,
+                        ControlIcon(control, card), radius * 0.78f, ui.Ink, destructive ? ButtonStyle.Gray : style,
+                        enabled: enabled, glyphInk: destructive ? ui.Theme.Danger : null))
+                {
+                    Press(control, card);
+                }
             }
 
             var labelTop = cell.Min.Y + DoorLayout.ControlButton * scale + DoorLayout.LabelGap * scale;
@@ -448,13 +474,20 @@ internal sealed partial class TableDoor
         ImGui.Dummy(new Vector2(width, height));
     }
 
+    internal static LocString CloseTitleFor(CasinoTableRowDto? card) =>
+        card is not null && CasinoBookRules.IsBook(card.GameKind) ? L.Book.CloseTitle : L.Tables.CloseConfirmTitle;
+
+    internal static LocString CloseBodyFor(CasinoTableRowDto? card) =>
+        card is not null && CasinoBookRules.IsBook(card.GameKind) ? L.Book.CloseBody : L.Tables.CloseConfirmBody;
+
     private void AskClose()
     {
         var target = roomId;
+        var card = tables.CardFor(target);
         confirm.Ask(new ConfirmRequest
         {
-            Title = Loc.T(L.Tables.CloseConfirmTitle),
-            Message = Loc.T(L.Tables.CloseConfirmBody),
+            Title = Loc.T(CloseTitleFor(card)),
+            Message = Loc.T(CloseBodyFor(card)),
             ConfirmLabel = Loc.T(L.Tables.CloseTable),
             CancelLabel = Loc.T(L.Common.Cancel),
             Sheet = true,

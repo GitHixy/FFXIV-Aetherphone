@@ -31,7 +31,8 @@ internal readonly record struct TableRowView(
     int SeatCount = 0,
     VenueRoomKind Room = VenueRoomKind.None,
     string PhaseLabel = "",
-    bool PhaseLive = false);
+    bool PhaseLive = false,
+    bool Book = false);
 
 internal static class TableRow
 {
@@ -67,6 +68,12 @@ internal static class TableRow
         CasinoCurrencies.Gil => GilTint,
         _ => accent,
     };
+
+    public static void BookTile(ImDrawListPtr drawList, Vector2 center, float size)
+    {
+        ref readonly var book = ref Tables.HostGames.Of(Tables.HostGame.Book);
+        CasinoArt.IconTileAt(drawList, center, size, book.Tint, book.Icon);
+    }
 
     public static FontAwesomeIcon IconOf(VenueRoomKind room) => room switch
     {
@@ -223,7 +230,11 @@ internal static class TableRow
         float scale)
     {
         var art = layout.Art;
-        if (view.Room != VenueRoomKind.None)
+        if (view.Book)
+        {
+            BookTile(drawList, art.Center, art.Width);
+        }
+        else if (view.Room != VenueRoomKind.None)
         {
             CasinoArt.IconTileAt(drawList, art.Center, art.Width,
                 Tables.HostGames.Of(Tables.HostGames.FromVenue(view.Room)).Tint, IconOf(view.Room));
@@ -260,17 +271,18 @@ internal static class TableRow
             right = chipMin.X - ChipGap * scale;
         }
 
-        if (view.Room == VenueRoomKind.None && view.SeatCount > 0)
-        {
-            var seatInk = view.Seated > 0 ? CasinoColors.Money : ui.MutedInk;
-            var dotsWidth = CasinoArt.SeatDots(drawList, new Vector2(left, centerY), view.Seated,
-                Math.Min(view.SeatCount, SeatDotLimit), seatInk, Palette.WithAlpha(ui.TitleInk, EmptySeatAlpha),
-                scale);
-            left += dotsWidth + Metrics.Space.Sm * scale;
-        }
-
         var text = view.Spectators.Length > 0 ? view.Spectators : view.Room == VenueRoomKind.None ? view.Seats
             : view.HostLine;
+        var dots = view.Room == VenueRoomKind.None ? Math.Min(view.SeatCount, SeatDotLimit) : 0;
+        var dotsSpan = dots > 0 ? CasinoArt.SeatDotsWidth(dots, scale) + Metrics.Space.Sm * scale : 0f;
+        if (ShowsSeatDots(dotsSpan, Typography.Measure(text, TextStyles.Footnote).X, right - left))
+        {
+            var seatInk = view.Seated > 0 ? CasinoColors.Money : ui.MutedInk;
+            CasinoArt.SeatDots(drawList, new Vector2(left, centerY), view.Seated, dots, seatInk,
+                Palette.WithAlpha(ui.TitleInk, EmptySeatAlpha), scale);
+            left += dotsSpan;
+        }
+
         if (text.Length == 0 || right - left <= 0f)
         {
             return;
@@ -279,6 +291,9 @@ internal static class TableRow
         Typography.Draw(drawList, new Vector2(left, centerY - Typography.LineHeight(TextStyles.Footnote) * 0.5f),
             Typography.FitText(text, right - left, TextStyles.Footnote), ui.BodyInk, TextStyles.Footnote);
     }
+
+    public static bool ShowsSeatDots(float dotsSpan, float textWidth, float available) =>
+        dotsSpan > 0f && (textWidth <= 0f || dotsSpan + textWidth <= available);
 
     private static float ChipHeight(float scale) =>
         Typography.LineHeight(TextStyles.FootnoteEmphasized) + PillPadY * 2f * scale;
