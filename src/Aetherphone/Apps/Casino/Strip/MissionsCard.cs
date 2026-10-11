@@ -172,7 +172,7 @@ internal sealed class MissionsCard
         }
 
         var pressed = Button.Draw(drawList, button, actionLabel, ui.Ink, ButtonStyle.Prominent,
-            enabled: claiming.Length == 0, id: "casino.mission.claim");
+            enabled: claiming.Length == 0, overlay: true, id: "casino.mission.claim");
         if (pressed)
         {
             claimCenter = button.Center;
