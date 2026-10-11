@@ -10391,13 +10391,8 @@ internal static class L
         public static readonly LocString Dealing = new("casino.dealerholdem.dealing", "Dealing");
         public static readonly LocString PlaceAnte = new("casino.dealerholdem.placeAnte", "Place your ante");
         public static readonly LocString Showdown = new("casino.dealerholdem.showdown", "Showdown");
-        public static readonly LocString DecidePreFlop = new("casino.dealerholdem.decidePreFlop", "Check, or bet 3x or 4x");
-        public static readonly LocString DecideFlop = new("casino.dealerholdem.decideFlop", "Check, or bet 2x");
-        public static readonly LocString DecideRiver = new("casino.dealerholdem.decideRiver", "Bet 1x, or fold");
-        public static readonly LocString Voided = new("casino.dealerholdem.voided", "Hand voided, stakes returned");
+        public static readonly LocString Voided = new("casino.dealerholdem.voided", "Hand voided");
         public static readonly LocString YouWin = new("casino.dealerholdem.youWin", "You win {0}");
-        public static readonly LocString YouWinCapped = new("casino.dealerholdem.youWinCapped", "You win {0}, max win reached");
-        public static readonly LocString PushLine = new("casino.dealerholdem.pushLine", "Push, stakes back");
         public static readonly LocString Folded = new("casino.dealerholdem.folded", "You folded");
         public static readonly LocString DealerWins = new("casino.dealerholdem.dealerWins", "Dealer wins");
         public static readonly LocString DealFor = new("casino.dealerholdem.dealFor", "Deal, ante {0}");
@@ -10406,9 +10401,6 @@ internal static class L
         public static readonly LocString Fold = new("casino.dealerholdem.fold", "Fold");
         public static readonly LocString Check = new("casino.dealerholdem.check", "Check");
         public static readonly LocString BetFor = new("casino.dealerholdem.betFor", "Bet {0}x {1}");
-        public static readonly LocString HintPreFlop = new("casino.dealerholdem.hintPreFlop", "Like your cards? Bet big now.");
-        public static readonly LocString HintFlop = new("casino.dealerholdem.hintFlop", "Bet 2x now, or check to see the river.");
-        public static readonly LocString HintRiver = new("casino.dealerholdem.hintRiver", "Last call: bet 1x to see the dealer, or fold.");
         public static readonly LocString PaysIntro = new("casino.dealerholdem.paysIntro", "Ante and Blind always match. The dealer needs a pair or better to qualify; when they do not, your Ante pushes.");
         public static readonly LocString BlindPushNote = new("casino.dealerholdem.blindPushNote", "A win below a straight pushes the Blind.");
         public static readonly LocString TripsNote = new("casino.dealerholdem.tripsNote", "Trips pays on your final hand whatever the dealer holds, even after a fold.");

@@ -125,4 +125,46 @@ public sealed class DealerHoldemLayoutTests
             }
         }
     }
+
+    private static Rect DeckAt(float scale)
+    {
+        var full = new Rect(Vector2.Zero, new Vector2(PhoneWidth * scale, PhoneHeight * scale));
+        return CasinoStageLayout.Compute(full, false, false, DealerHoldemCabinet.DeckHeight, scale).Deck;
+    }
+
+    [Theory]
+    [MemberData(nameof(Scales))]
+    public void TheDecisionRowsStackInsideTheDeckWithOneHeightEach(float scale)
+    {
+        var deck = DeckAt(scale);
+        var primary = DealerHoldemDecisions.Primary(deck, scale);
+        var row = DealerHoldemDecisions.SecondaryRow(deck, scale);
+
+        Assert.True(Inside(primary, deck));
+        Assert.True(Inside(row, deck));
+        Assert.Equal(DealerHoldemDecisions.PrimaryHeight * scale, primary.Height, 2);
+        Assert.Equal(DealerHoldemDecisions.SecondaryHeight * scale, row.Height, 2);
+        Assert.True(row.Max.Y <= primary.Min.Y - DealerHoldemDecisions.Gap * scale + Tolerance);
+    }
+
+    [Theory]
+    [MemberData(nameof(Scales))]
+    public void TheDecisionPillsAreSizedToTheirLabelsAndNeverOverlap(float scale)
+    {
+        var row = DealerHoldemDecisions.SecondaryRow(DeckAt(scale), scale);
+        ReadOnlySpan<float> labels = stackalloc float[] { 44f * scale, 132f * scale };
+        Span<Rect> rects = stackalloc Rect[2];
+
+        Assert.True(DealerHoldemDecisions.Secondaries(row, labels, scale, rects));
+
+        for (var index = 0; index < labels.Length; index++)
+        {
+            Assert.True(Inside(rects[index], row));
+            Assert.True(rects[index].Width - rects[index].Height >= labels[index] - Tolerance);
+            Assert.True(rects[index].Width >= CasinoStageLayout.TouchTarget * scale - Tolerance);
+        }
+
+        Assert.True(rects[1].Width > rects[0].Width);
+        Assert.True(rects[0].Max.X <= rects[1].Min.X - DealerHoldemDecisions.Gap * scale + Tolerance);
+    }
 }

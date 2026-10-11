@@ -241,3 +241,61 @@ internal readonly struct DealerHoldemLayout
         new Vector2(CircleLeft + CircleStep * (DealerHoldemRules.SpotCount - 1) + CircleRadius,
             CircleLabelY + CircleLabelRow * Scale * 0.5f));
 }
+
+internal static class DealerHoldemDecisions
+{
+    public const float SecondaryHeight = 44f;
+    public const float PrimaryHeight = 56f;
+    public const float Pad = 12f;
+    public const float Gap = 8f;
+    public const float FitSlack = 0.5f;
+    public const int MaxSecondary = 2;
+
+    public static Rect Primary(Rect deck, float scale)
+    {
+        var pad = Pad * scale;
+        var bottom = deck.Max.Y - pad;
+        var top = MathF.Max(deck.Min.Y + pad, bottom - PrimaryHeight * scale);
+        return new Rect(new Vector2(deck.Min.X + pad, top), new Vector2(deck.Max.X - pad, bottom));
+    }
+
+    public static Rect SecondaryRow(Rect deck, float scale)
+    {
+        var primary = Primary(deck, scale);
+        var bottom = primary.Min.Y - Gap * scale;
+        var top = MathF.Max(deck.Min.Y + Pad * scale, bottom - SecondaryHeight * scale);
+        return new Rect(new Vector2(primary.Min.X, top), new Vector2(primary.Max.X, MathF.Max(top, bottom)));
+    }
+
+    public static float Natural(float labelWidth, float rowHeight) => MathF.Max(rowHeight, labelWidth + rowHeight);
+
+    public static bool Secondaries(Rect row, ReadOnlySpan<float> labelWidths, float scale, Span<Rect> rects)
+    {
+        var count = Math.Min(labelWidths.Length, MaxSecondary);
+        if (count == 0)
+        {
+            return true;
+        }
+
+        var gap = Gap * scale;
+        var room = MathF.Max(0f, row.Width - gap * (count - 1));
+        var total = 0f;
+        for (var index = 0; index < count; index++)
+        {
+            total += Natural(labelWidths[index], row.Height);
+        }
+
+        var fits = total <= room + FitSlack;
+        var slack = fits ? (room - total) / count : 0f;
+        var shrink = fits || total <= 0f ? 1f : room / total;
+        var left = row.Min.X;
+        for (var index = 0; index < count; index++)
+        {
+            var width = Natural(labelWidths[index], row.Height) * shrink + slack;
+            rects[index] = new Rect(new Vector2(left, row.Min.Y), new Vector2(left + width, row.Max.Y));
+            left += width + gap;
+        }
+
+        return fits;
+    }
+}

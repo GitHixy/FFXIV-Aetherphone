@@ -16,8 +16,14 @@ internal sealed partial class DealerHoldemCabinet
     private const int TripsOff = 0;
     private const int TripsOn = 1;
     private const int MaxBetButtons = 2;
+    private const int PassiveSlot = 0;
+    private const string TripsKnobId = "casino.dealerholdem.trips";
+    private const string WaitId = "casino.dealerholdem.wait";
+    private const string BetId = "casino.dealerholdem.bet";
 
     private readonly int[] legalMultiples = new int[MaxBetButtons];
+    private readonly string[] secondaryLabels = new string[DealerHoldemDecisions.MaxSecondary];
+    private readonly int[] secondaryMultiples = new int[DealerHoldemDecisions.MaxSecondary];
 
     private void DrawComposer(CasinoStage stage, AppSkin ui, in CasinoStageFrame frame, long stack, bool blocked)
     {
@@ -60,8 +66,8 @@ internal sealed partial class DealerHoldemCabinet
         tripsOptions[TripsOff] = Loc.T(L.DealerHoldem.NoTrips);
         tripsOptions[TripsOn] = tripsLabel.Get(L.DealerHoldem.TripsFor,
             NumberText.Compact(DealerHoldemRules.TripsFor(composer.Amount)));
-        var picked = SegmentStrip.Draw("##dealerHoldemTrips", rect, tripsOptions, trips ? TripsOn : TripsOff,
-            Surfaces.Fill(ui.TitleInk, FillLevel.Tertiary), ui.Accent, ui.MutedInk, CasinoColors.InkTitle);
+        var picked = KnobSegments.Draw(ImGui.GetWindowDrawList(), TripsKnobId, rect, tripsOptions,
+            trips ? TripsOn : TripsOff, ui, enabled);
         if (!enabled)
         {
             return;
@@ -79,48 +85,89 @@ internal sealed partial class DealerHoldemCabinet
 
     private void DrawDecisions(AppSkin ui, Rect deck, long stack, bool blocked, float scale)
     {
-        var row = DeckActions.Row(deck, scale);
+        var primary = DealerHoldemDecisions.Primary(deck, scale);
         var round = playback.Round;
         var ready = round is not null && playback.Deciding && !dealerStore.InFlight && !blocked && !cards.Busy
                     && !dealing;
         if (round is null || !DealerHoldemRules.IsDecision(round.Phase) || playback.Finishing)
         {
-            DeckActions.DrawPrimary(row, row.Min.X, StateText(), false, ui.Ink, id: "casino.dealerholdem.wait");
+            Button.Draw(primary, StateText(), ui.Ink, ButtonStyle.Prominent, enabled: false, id: WaitId);
             return;
         }
 
-        DrawStakeSummary(deck, row, round, scale);
         var multiples = LegalMultiples(round);
-        var cursor = row.Min.X;
-        var secondaries = 0;
         var folds = Has(round.Actions, DealerHoldemRules.Fold);
         var passive = folds ? DealerHoldemRules.Fold : DealerHoldemRules.Check;
-        if (Has(round.Actions, passive) && DeckActions.DrawSecondary(row, ref cursor, ref secondaries,
-                Loc.T(folds ? L.DealerHoldem.Fold : L.DealerHoldem.Check), ready, ui.Ink, scale))
+        var passiveLabel = Loc.T(folds ? L.DealerHoldem.Fold : L.DealerHoldem.Check);
+        var canPass = Has(round.Actions, passive);
+        if (!Has(round.Actions, DealerHoldemRules.Bet) || multiples == 0)
         {
-            dealerStore.Decide(round.RoundId, round.Step, passive, 0);
+            if (canPass && Button.Draw(primary, passiveLabel, ui.Ink, ButtonStyle.Prominent, enabled: ready, id: BetId))
+            {
+                dealerStore.Decide(round.RoundId, round.Step, passive, 0);
+            }
+
+            return;
         }
 
-        if (!Has(round.Actions, DealerHoldemRules.Bet) || multiples == 0)
+        var count = 0;
+        if (canPass)
+        {
+            secondaryLabels[count] = passiveLabel;
+            secondaryMultiples[count] = PassiveSlot;
+            count++;
+        }
+
+        for (var index = 0; index < multiples - 1 && count < DealerHoldemDecisions.MaxSecondary; index++)
+        {
+            secondaryLabels[count] = BetLabel(index, legalMultiples[index], round.Ante);
+            secondaryMultiples[count] = legalMultiples[index];
+            count++;
+        }
+
+        DrawSecondaries(ui, deck, round, passive, count, stack, ready, scale);
+        var top = legalMultiples[multiples - 1];
+        if (Button.Draw(primary, BetLabel(MaxBetButtons, top, round.Ante), ui.Ink, ButtonStyle.Prominent,
+                enabled: ready && stack >= round.Ante * top, id: BetId))
+        {
+            Bet(round, top);
+        }
+    }
+
+    private void DrawSecondaries(AppSkin ui, Rect deck, CasinoDealerHoldemDto round, string passive, int count,
+        long stack, bool ready, float scale)
+    {
+        if (count == 0)
         {
             return;
         }
 
-        for (var index = 0; index < multiples - 1; index++)
+        var row = DealerHoldemDecisions.SecondaryRow(deck, scale);
+        var style = Button.LabelStyle(row.Height);
+        Span<float> widths = stackalloc float[DealerHoldemDecisions.MaxSecondary];
+        Span<Rect> rects = stackalloc Rect[DealerHoldemDecisions.MaxSecondary];
+        for (var index = 0; index < count; index++)
         {
-            var multiple = legalMultiples[index];
-            if (DeckActions.DrawSecondary(row, ref cursor, ref secondaries, BetLabel(index, multiple, round.Ante),
-                    ready && stack >= round.Ante * multiple, ui.Ink, scale))
-            {
-                Bet(round, multiple);
-            }
+            widths[index] = Typography.Measure(secondaryLabels[index], style).X;
         }
 
-        var top = legalMultiples[multiples - 1];
-        if (DeckActions.DrawPrimary(row, cursor, BetLabel(MaxBetButtons, top, round.Ante),
-                ready && stack >= round.Ante * top, ui.Ink, id: "casino.dealerholdem.bet"))
+        DealerHoldemDecisions.Secondaries(row, widths[..count], scale, rects);
+        for (var index = 0; index < count; index++)
         {
-            Bet(round, top);
+            var multiple = secondaryMultiples[index];
+            var enabled = ready && (multiple == PassiveSlot || stack >= round.Ante * multiple);
+            if (!Button.Draw(rects[index], secondaryLabels[index], ui.Ink, ButtonStyle.Gray, enabled: enabled))
+            {
+                continue;
+            }
+
+            if (multiple == PassiveSlot)
+            {
+                dealerStore.Decide(round.RoundId, round.Step, passive, 0);
+                continue;
+            }
+
+            Bet(round, multiple);
         }
     }
 
@@ -178,25 +225,5 @@ internal sealed partial class DealerHoldemCabinet
         }
 
         return false;
-    }
-
-    private void DrawStakeSummary(Rect deck, Rect row, CasinoDealerHoldemDto round, float scale)
-    {
-        var top = deck.Min.Y + BetComposer.Pad * scale;
-        var bottom = row.Min.Y - BetComposer.Gap * scale;
-        if (bottom - top < Typography.LineHeight(TextStyles.Subheadline))
-        {
-            return;
-        }
-
-        var text = Loc.T(round.Phase switch
-        {
-            DealerHoldemRules.PhasePreFlop => L.DealerHoldem.HintPreFlop,
-            DealerHoldemRules.PhaseFlop => L.DealerHoldem.HintFlop,
-            _ => L.DealerHoldem.HintRiver,
-        });
-        var drawList = ImGui.GetWindowDrawList();
-        Typography.DrawWrappedCentered(drawList, text, TextStyles.Subheadline, CasinoColors.InkBody,
-            new Vector2(deck.Center.X, top), deck.Width - BetComposer.Pad * 2f * scale);
     }
 }
