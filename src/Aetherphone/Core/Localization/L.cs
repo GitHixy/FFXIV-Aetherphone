@@ -2313,6 +2313,12 @@ internal static class L
                 "Changed the Lodestone search in People to pick a world or data center from a list instead of typing one"),
             new("changelog.r1300.56",
                 "Changed the People filters to sit at the top, so they no longer move when search opens"),
+            new("changelog.r1300.78",
+                "Changed Lodestone search results to put exact name matches first"),
+            new("changelog.r1300.79",
+                "Fixed Lodestone searches waiting behind portrait downloads, which could leave Searching up for a minute"),
+            new("changelog.r1300.80",
+                "Fixed the Lodestone chip in People wrapping onto two lines at larger UI scales"),
         };
 
         public static readonly LocString[] Release1300Guidelines =
