@@ -27,6 +27,9 @@ internal readonly struct PlinkoStageLayout
         Stats = stats;
     }
 
+    public static long PaidAtMost(long payout, long stake, long maxWinPerBet) =>
+        maxWinPerBet > 0 ? Math.Min(payout, stake + maxWinPerBet) : payout;
+
     public static void SplitKnob(Rect knob, float firstNatural, float secondNatural, float gap, out Rect first,
         out Rect second)
     {

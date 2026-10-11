@@ -285,23 +285,24 @@ internal sealed class PlinkoCabinet : ICabinetIdle
     {
         plinko.Land(drop.Payout);
         var onBoard = drop.Rows == rows && drop.Risk == risk;
+        var tier = WinLadder.TierFor(drop.Stake, drop.Payout);
+        var bigEdge = drop.Edge && tier >= WinTier.Big;
         if (onBoard)
         {
-            fx.Land(drop.Slot, drop.Won, drop.Edge);
+            fx.Land(drop.Slot, drop.Won, bigEdge);
         }
 
         rail.Push(new PlinkoResult(drop.Tenths, drop.Rows, drop.Risk, drop.Edge));
         stage.Settle(new CasinoBetRecord(L.Plinko.Game, drop.Stake, drop.Payout, drop.RoundId,
             DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), drop.Capped));
         var origin = onBoard ? layout.SlotCenter(drop.Slot) : layout.Bounds.Center;
-        var tier = WinLadder.TierFor(drop.Stake, drop.Payout);
         var celebration = stage.Celebration;
-        if (tier != WinTier.None && (!celebration.Active || tier >= celebration.Tier))
+        if (tier != WinTier.None && (!celebration.Active || tier > celebration.Tier))
         {
             celebration.Celebrate(drop.Stake, drop.Payout, origin, instant);
         }
 
-        if (drop.Edge && !instant)
+        if (bigEdge && !instant)
         {
             CasinoSfx.Play(UiSound.Fanfare);
             stage.Particles.Emit(CasinoLights.Shard(scale), origin, EdgeShards);
@@ -441,7 +442,8 @@ internal sealed class PlinkoCabinet : ICabinetIdle
         var edgeTenths = PlinkoRules.EdgeTenths(rows, risk);
         var ceiling = store.Ceiling.MaxBet;
         var maxWin = ceiling > 0
-            ? NumberText.Compact(PlinkoRules.Payout(ceiling, edgeTenths))
+            ? NumberText.Compact(PlinkoStageLayout.PaidAtMost(PlinkoRules.Payout(ceiling, edgeTenths), ceiling,
+                store.MaxWinPerBet))
             : CasinoMultiples.Label(edgeTenths * PlinkoRules.TenthsPerMultiple);
         var odds = edgeLabel.Get(L.Plinko.EdgeOdds, NumberText.Group(PlinkoRules.EdgeOneIn(rows)));
         OriginalsControls.StatRow(drawList, area, Loc.T(L.Plinko.MaxWin), maxWin, CasinoColors.Money,

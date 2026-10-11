@@ -51,6 +51,15 @@ public sealed class PlinkoStageLayoutTests
     }
 
     [Theory]
+    [InlineData(5_000_000L, 1000, 50_000_000L, 55_000_000L)]
+    [InlineData(1_000L, 1000, 50_000_000L, 1_000_000L)]
+    [InlineData(5_000_000L, 1000, 0L, 5_000_000_000L)]
+    public void TheMaxWinNeverPromisesMoreThanTheServerPays(long stake, int multiple, long maxWinPerBet, long shown)
+    {
+        Assert.Equal(shown, PlinkoStageLayout.PaidAtMost(stake * multiple, stake, maxWinPerBet));
+    }
+
+    [Theory]
     [InlineData(0.75f)]
     [InlineData(1.5f)]
     public void PickersThatCannotFitShareTheKnobWithoutLeavingIt(float scale)
