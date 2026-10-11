@@ -31,7 +31,8 @@ internal sealed class ScratchCabinet : ICabinetIdle
     private const float TicketMaxWidth = 360f;
     private const float KioskInset = 12f;
     private const float CellGap = 6f;
-    private const float AutoPauseSeconds = 0.8f;
+    private const float AutoPauseSeconds = 1.6f;
+    private const float AutoRevealStepSeconds = 0.09f;
     private const float RubTickSeconds = 0.06f;
     private const float StatusGap = 10f;
     private const float IdleThemeSeconds = 3f;
@@ -47,7 +48,8 @@ internal sealed class ScratchCabinet : ICabinetIdle
     private readonly BetComposer composer = new("##scratchBuy");
 
     private int tierIndex;
-    private ScratchPhase seenPhase;
+    private string settledRoundId = string.Empty;
+    private float autoRevealClock;
     private string inlineReason = string.Empty;
     private string roundId = string.Empty;
     private bool roundCapped;
@@ -114,7 +116,7 @@ internal sealed class ScratchCabinet : ICabinetIdle
         composer.Auto.Acknowledge();
         inlineReason = string.Empty;
         roundId = string.Empty;
-        seenPhase = ScratchPhase.Idle;
+        settledRoundId = string.Empty;
         autoPause = 0f;
         stampSeconds = -1f;
         stroked = false;
@@ -187,7 +189,8 @@ internal sealed class ScratchCabinet : ICabinetIdle
                 stroked = false;
                 stampSeconds = -1f;
                 stage.Celebration.Clear();
-                if (frame.Instant || composer.Auto.Running)
+                autoRevealClock = 0f;
+                if (frame.Instant)
                 {
                     playback.RevealAll();
                 }
@@ -216,6 +219,8 @@ internal sealed class ScratchCabinet : ICabinetIdle
             stampSeconds += frame.DeltaSeconds;
         }
 
+        RevealOnAuto(frame.DeltaSeconds);
+
         if (playback.TakeWinCelebration(out var prize))
         {
             var price = ScratchRules.Prices[playback.Tier];
@@ -225,12 +230,13 @@ internal sealed class ScratchCabinet : ICabinetIdle
             stampSeconds = 0f;
         }
 
-        var settledNow = seenPhase == ScratchPhase.Scratching && playback.Phase == ScratchPhase.Settled;
-        seenPhase = playback.Phase;
-        if (!settledNow)
+        if (playback.Phase != ScratchPhase.Settled || roundId.Length == 0
+            || string.Equals(roundId, settledRoundId, StringComparison.Ordinal))
         {
             return;
         }
+
+        settledRoundId = roundId;
 
         var stake = ScratchRules.Prices[playback.Tier];
         var payout = playback.PrizeOnceRevealed;
@@ -241,6 +247,21 @@ internal sealed class ScratchCabinet : ICabinetIdle
         {
             composer.Auto.Settle(stake, payout, false, stake, stake, stack);
             autoPause = AutoPauseSeconds;
+        }
+    }
+
+    private void RevealOnAuto(float deltaSeconds)
+    {
+        if (!composer.Auto.Running || playback.Phase != ScratchPhase.Scratching)
+        {
+            return;
+        }
+
+        autoRevealClock += deltaSeconds;
+        while (autoRevealClock >= AutoRevealStepSeconds && playback.Phase == ScratchPhase.Scratching)
+        {
+            autoRevealClock -= AutoRevealStepSeconds;
+            playback.RevealNext();
         }
     }
 
@@ -545,7 +566,6 @@ internal sealed class ScratchCabinet : ICabinetIdle
         inlineReason = string.Empty;
         stage.Celebration.Clear();
         playback.Clear();
-        seenPhase = ScratchPhase.Idle;
         stampSeconds = -1f;
         play.BuyScratch(tierIndex);
         CasinoSfx.Play(UiSound.ChipSlide);
@@ -577,7 +597,6 @@ internal sealed class ScratchCabinet : ICabinetIdle
             {
                 tierIndex = tier;
                 playback.Clear();
-                seenPhase = ScratchPhase.Idle;
                 stampSeconds = -1f;
                 CasinoSfx.Play(UiSound.ChipSlide);
             }
