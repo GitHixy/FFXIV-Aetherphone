@@ -12679,7 +12679,7 @@ internal static class L
         public static readonly LocString[] AethergramAllowedItems =
         {
             new("conduct.aethergram.allowed.1", "Glamour and fashion showcases"),
-            new("conduct.aethergram.allowed.2", "GPose, portraits and screenshots"),
+            new("conduct.aethergram.allowed.2", "GPose, portraits, screenshots and hand-drawn art"),
             new("conduct.aethergram.allowed.3", "Roleplay, weddings, events and housing"),
             new("conduct.aethergram.allowed.4", "Combat, emotes and time with friends"),
             new("conduct.aethergram.allowed.5", "Romance that isn't sexual"),
@@ -12690,8 +12690,7 @@ internal static class L
         public static readonly LocString AethergramInGameLead = new("conduct.aethergram.inGame.lead", "Aethergram only shows the game. These are removed:");
         public static readonly LocString[] AethergramInGameItems =
         {
-            new("conduct.aethergram.inGame.1", "Real-life photos of any kind: cosplay, fanfest, merch, pets, food"),
-            new("conduct.aethergram.inGame.2", "Hand-drawn art (it's welcome on Chirper)"),
+            new("conduct.aethergram.inGame.1", "Real-life photos of any kind: cosplay, fanfest, merch, pets, food (they're welcome on Chirper)"),
             new("conduct.aethergram.inGame.3", "Real-world ads and off-topic text posts"),
             new("conduct.aethergram.inGame.4", "Kitten-modded characters, in any pose"),
         };
