@@ -2287,7 +2287,7 @@ internal static class L
             new("changelog.r1300.41",
                 "Overhauled scratch cards: five tiers with their own art, a foil to rub away and Reveal all"),
             new("changelog.r1300.42",
-                "Overhauled the wheel: a bigger lit wheel, the new bet controls and each spot's return printed"),
+                "Overhauled the wheel: a bigger lit wheel, the new bet controls and a strip of the last spins"),
             new("changelog.r1300.43",
                 "Overhauled the daily spin with a lit wheel and spotlights"),
             new("changelog.r1300.44",
