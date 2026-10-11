@@ -177,8 +177,8 @@ public sealed class BetDeckLayoutTests
                 Assert.True(layout.HasAuto);
                 Assert.False(layout.AutoCompact);
                 Assert.Equal(BetDeckLayout.AutoWidth(label, scale), layout.Auto.Width, 2);
-                Assert.True(layout.Auto.Width >= label + (DeckActions.PillPadX * 2f + BetDeckLayout.AutoIconSize
-                    + BetDeckLayout.AutoIconGap) * scale - Tolerance);
+                Assert.True(layout.Auto.Width >= label + (DeckActions.PillPadX * 2f + DeckActions.IconSize
+                    + DeckActions.IconGap) * scale - Tolerance);
                 Assert.Equal(deck.Min.X + BetDeckLayout.Pad * scale, layout.Auto.Min.X, 2);
                 Assert.Equal(layout.Auto.Max.X + BetDeckLayout.Gap * scale, layout.Action.Min.X, 2);
                 Assert.True(layout.Action.Width >= BetDeckLayout.PrimaryMinWidth * scale - Tolerance);

@@ -41,7 +41,7 @@ public sealed class RaceDeckLayoutTests
             var quick = BetDeckLayoutTests.Quick(DeckLabelMeasure.Widest(L.Casino.BetMax, scale), scale);
             for (var widthIndex = 0; widthIndex < widths.Length; widthIndex++)
             {
-                var layout = RaceDeckLayout.Compute(Deck(widths[widthIndex] * scale, scale), quick, 0f, scale);
+                var layout = RaceDeckLayout.Compute(Deck(widths[widthIndex] * scale, scale), quick, 0f, 0f, scale);
                 var amount = layout.Amount;
                 Assert.True(amount.HasHalf && amount.HasDouble && amount.HasMax);
                 AssertHolds(amount.Half, quick.Half, scale);
@@ -64,7 +64,7 @@ public sealed class RaceDeckLayoutTests
                 var full = new Rect(Vector2.Zero, LandscapePhones[phone] * scale);
                 var stage = CasinoStageLayout.Compute(full, false, false, 0f, scale);
                 var open = RaceOpenLayout.Compute(stage.Safe, stage.Deck, true, 0, false, 0f, scale);
-                var layout = RaceDeckLayout.Compute(open.Deck, quick, 0f, scale);
+                var layout = RaceDeckLayout.Compute(open.Deck, quick, 0f, 0f, scale);
                 var amount = layout.Amount;
                 Assert.True(amount.HasMax);
                 AssertHolds(amount.Max, quick.Max, scale);
@@ -94,8 +94,10 @@ public sealed class RaceDeckLayoutTests
         var rides = new[] { 0f, DeckActions.PillWidth(90f * scale, scale) };
         for (var index = 0; index < rides.Length; index++)
         {
-            var layout = RaceDeckLayout.Compute(deck, BetDeckLayoutTests.Quick("Max", scale), rides[index], scale);
+            var layout = RaceDeckLayout.Compute(deck, BetDeckLayoutTests.Quick("Max", scale), rides[index],
+                RaceDeckLayout.ActionHeight * scale, scale);
             var amount = layout.Amount;
+            Assert.False(layout.RideCompact);
             Assert.Equal(RaceDeckLayout.CaptionHeight * scale, layout.Caption.Height, 2);
             Assert.Equal(deck.Width - RaceDeckLayout.Pad * 2f * scale, layout.Caption.Width, 2);
             Assert.True(layout.Caption.Min.Y >= amount.Field.Max.Y + RaceDeckLayout.Gap * scale - Tolerance);
@@ -113,6 +115,25 @@ public sealed class RaceDeckLayoutTests
             RaceScreenLayoutTests.AssertAllApart(layout.Segment, amount.Field, amount.Half, amount.Double,
                 amount.Max, layout.Caption, layout.Ride, layout.Primary);
         }
+    }
+
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.5f)]
+    public void ALetItRideLabelTooLongForTheRowFoldsToItsIconAndAmount(float scale)
+    {
+        var deck = Deck(BetDeckLayoutTests.ScreenWidth(PhoneCaseKind.Art) * scale, scale);
+        var widest = DeckLabelMeasure.Widest(L.Race.LetItRide, scale).Replace("{0}", "12.5K");
+        var full = DeckActions.PillWidth(DeckLabelMeasure.Width(widest, scale), scale);
+        var compact = DeckActions.IconPillWidth(DeckLabelMeasure.Width("12.5K", scale),
+            RaceDeckLayout.ActionHeight * scale, scale);
+        var layout = RaceDeckLayout.Compute(deck, BetDeckLayoutTests.Quick("Max", scale), full, compact, scale);
+        Assert.True(layout.HasRide);
+        Assert.True(layout.RideCompact);
+        Assert.Equal(compact, layout.Ride.Width, 2);
+        Assert.True(layout.Primary.Width >= RaceDeckLayout.PrimaryMinWidth * scale - Tolerance);
+        RaceScreenLayoutTests.AssertAllApart(layout.Ride, layout.Primary, layout.Caption);
     }
 
     private static Rect Deck(float width, float scale) =>

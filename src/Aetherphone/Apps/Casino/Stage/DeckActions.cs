@@ -4,6 +4,8 @@ using Dalamud.Bindings.ImGui;
 
 namespace Aetherphone.Apps.Casino.Stage;
 
+internal readonly record struct IconPillResult(bool Pressed, Vector2 IconCenter, Vector4 Ink);
+
 internal static class DeckActions
 {
     public const float Pad = 12f;
@@ -14,6 +16,8 @@ internal static class DeckActions
     public const float PillMinWidth = 44f;
     public const float PrimaryMinWidth = 140f;
     public const float PrimaryFloorWidth = 88f;
+    public const float IconSize = 18f;
+    public const float IconGap = 6f;
     public const int MaxSecondary = 2;
 
     private const string PrimaryId = "casino.deck.primary";
@@ -111,6 +115,39 @@ internal static class DeckActions
         var room = MathF.Max(1f, rest.Width - PillPadX * 2f * UiScale.Current);
         Typography.DrawCentered(drawList, face.Face.Center, Typography.FitText(label, room, style), face.LabelInk,
             style);
+    }
+
+    public static float IconPillWidth(float labelWidth, float rowHeight, float scale) =>
+        labelWidth > 0f ? (PillPadX * 2f + IconSize + IconGap) * scale + labelWidth : rowHeight;
+
+    public static IconPillResult DrawIconPill(Rect rect, string glyph, string label, in ControlInk ink,
+        ButtonStyle style, bool enabled, bool interactive, string id, string tooltip)
+    {
+        var drawList = ImGui.GetWindowDrawList();
+        var scale = UiScale.Current;
+        var hovered = interactive && enabled && UiInteract.Hover(rect.Min, rect.Max);
+        var face = Button.Surface(drawList, rect, ink, style, ButtonRole.Normal, enabled, hovered, ImGui.GetID(id));
+        var labelStyle = Button.LabelStyle(rect.Height);
+        var icon = IconSize * scale;
+        var labelSize = label.Length > 0 ? Typography.Measure(label, labelStyle) : Vector2.Zero;
+        var content = label.Length > 0 ? icon + IconGap * scale + labelSize.X : icon;
+        var center = face.Face.Center;
+        var iconCenter = new Vector2(center.X - content * 0.5f + icon * 0.5f, center.Y);
+        PhoneIcon.Draw(drawList, iconCenter, glyph, face.LabelInk, icon);
+        if (label.Length > 0)
+        {
+            Typography.Draw(drawList,
+                new Vector2(iconCenter.X + icon * 0.5f + IconGap * scale, center.Y - labelSize.Y * 0.5f), label,
+                face.LabelInk, labelStyle);
+        }
+
+        if (hovered && tooltip.Length > 0)
+        {
+            HoverTooltip.Show(rect, tooltip, HoverLabelSide.Above);
+        }
+
+        var pressed = interactive && enabled && UiInteract.Click(rect.Min, rect.Max, hovered);
+        return new IconPillResult(pressed, iconCenter, face.LabelInk);
     }
 
     public static int Rail(ChipRail rail, Rect row, AppSkin ui, ReadOnlySpan<string> labels,

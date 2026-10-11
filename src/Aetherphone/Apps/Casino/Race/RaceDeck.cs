@@ -27,13 +27,15 @@ internal readonly record struct RaceDeckModel(
     bool Ready,
     bool Enabled,
     string Ride,
-    bool Repeat);
+    bool Repeat,
+    long RideAmount = 0);
 
 internal sealed class RaceDeck
 {
     private const float FlashSeconds = 0.5f;
     private const string PrimaryId = "casino.race.bet";
     private const string CaptionId = "casino.race.caption";
+    private const string RideId = "casino.race.ride";
 
     private long amount = RaceRules.MinBet;
     private float flash;
@@ -96,12 +98,18 @@ internal sealed class RaceDeck
             amount = snapped;
         }
 
+        var actionHeight = RaceDeckLayout.ActionHeight * scale;
+        var rideStyle = Button.LabelStyle(actionHeight);
+        var rideAmount = model.RideAmount > 0 ? RaceAmounts.Text(model.RideAmount) : string.Empty;
         var rideWidth = model.Ride.Length == 0
             ? 0f
-            : DeckActions.PillWidth(Typography.Measure(model.Ride, Button.LabelStyle(RaceDeckLayout.ActionHeight * scale)).X,
-                scale);
+            : DeckActions.PillWidth(Typography.Measure(model.Ride, rideStyle).X, scale);
+        var rideCompactWidth = model.Ride.Length == 0
+            ? 0f
+            : DeckActions.IconPillWidth(rideAmount.Length > 0 ? Typography.Measure(rideAmount, rideStyle).X : 0f,
+                actionHeight, scale);
         var layout = RaceDeckLayout.Compute(deck, DeckAmountRow.Measure(RaceDeckLayout.AmountHeight * scale),
-            rideWidth, scale);
+            rideWidth, rideCompactWidth, scale);
         var result = RaceDeckAction.None;
         PickedKind = model.Kind;
         var picked = SegmentStrip.Draw("##raceKind", layout.Segment, kindLabels, model.Kind,
@@ -115,8 +123,7 @@ internal sealed class RaceDeck
 
         DrawAmount(drawList, ui, layout, model, scale);
         DrawCaption(drawList, layout.Caption, model.Caption, model.Ready);
-        if (layout.HasRide && DeckActions.DrawPill(layout.Ride, model.Ride, ui.Ink, ButtonStyle.Gray,
-                model.Enabled && model.Ready))
+        if (layout.HasRide && DrawRide(ui, layout, model, rideAmount))
         {
             result = RaceDeckAction.Ride;
         }
@@ -134,6 +141,18 @@ internal sealed class RaceDeck
         }
 
         return result;
+    }
+
+    private static bool DrawRide(AppSkin ui, in RaceDeckLayout layout, in RaceDeckModel model, string rideAmount)
+    {
+        var enabled = model.Enabled && model.Ready;
+        if (!layout.RideCompact)
+        {
+            return DeckActions.DrawPill(layout.Ride, model.Ride, ui.Ink, ButtonStyle.Gray, enabled, RideId);
+        }
+
+        return DeckActions.DrawIconPill(layout.Ride, PhoneIcons.Repeat, rideAmount, ui.Ink, ButtonStyle.Gray, enabled,
+            true, RideId, model.Ride).Pressed;
     }
 
     private string BetLabel()

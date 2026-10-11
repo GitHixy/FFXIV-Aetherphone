@@ -12,8 +12,6 @@ internal readonly struct BetDeckLayout
     public const float ActionHeight = DeckActions.PrimaryHeight;
     public const float FieldMinWidth = DeckAmountRow.FieldMinWidth;
     public const float PrimaryMinWidth = 120f;
-    public const float AutoIconSize = 18f;
-    public const float AutoIconGap = 6f;
 
     public readonly Rect Knob;
     public readonly DeckAmountRow Amount;
@@ -62,7 +60,7 @@ internal readonly struct BetDeckLayout
     }
 
     public static float AutoWidth(float labelWidth, float scale) =>
-        (DeckActions.PillPadX * 2f + AutoIconSize + AutoIconGap) * scale + labelWidth;
+        (DeckActions.PillPadX * 2f + DeckActions.IconSize + DeckActions.IconGap) * scale + labelWidth;
 
     public static BetDeckLayout Compute(Rect deck, bool knob, bool fixedAmount, bool auto, in DeckQuickLabels quick,
         float autoLabelWidth, float scale)

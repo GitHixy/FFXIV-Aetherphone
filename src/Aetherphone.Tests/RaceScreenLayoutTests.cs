@@ -113,7 +113,8 @@ public sealed class RaceScreenLayoutTests
         var rides = new[] { 0f, 90f * scale, 400f * scale };
         for (var index = 0; index < rides.Length; index++)
         {
-            var layout = RaceDeckLayout.Compute(deck, BetDeckLayoutTests.Quick("Max", scale), rides[index], scale);
+            var layout = RaceDeckLayout.Compute(deck, BetDeckLayoutTests.Quick("Max", scale), rides[index],
+                RaceDeckLayout.ActionHeight * scale, scale);
             var amount = layout.Amount;
             AssertAllApart(layout.Segment, amount.Field, amount.Half, amount.Double, amount.Max, layout.Ride,
                 layout.Primary);

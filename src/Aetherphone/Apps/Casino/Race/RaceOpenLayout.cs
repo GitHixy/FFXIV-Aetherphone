@@ -139,21 +139,25 @@ internal readonly struct RaceDeckLayout
     public readonly Rect Caption;
     public readonly Rect Ride;
     public readonly Rect Primary;
+    public readonly bool RideCompact;
 
-    private RaceDeckLayout(Rect segment, in DeckAmountRow amount, Rect caption, Rect ride, Rect primary)
+    private RaceDeckLayout(Rect segment, in DeckAmountRow amount, Rect caption, Rect ride, Rect primary,
+        bool rideCompact)
     {
         Segment = segment;
         Amount = amount;
         Caption = caption;
         Ride = ride;
         Primary = primary;
+        RideCompact = rideCompact;
     }
 
     public bool HasRide => Ride.Width > 0f;
 
     public Rect Field => Amount.Field;
 
-    public static RaceDeckLayout Compute(Rect deck, in DeckQuickLabels quick, float rideWidth, float scale)
+    public static RaceDeckLayout Compute(Rect deck, in DeckQuickLabels quick, float rideWidth, float rideCompactWidth,
+        float scale)
     {
         var pad = Pad * scale;
         var gap = Gap * scale;
@@ -171,16 +175,18 @@ internal readonly struct RaceDeckLayout
         var caption = new Rect(new Vector2(left, actionTop - (CaptionGap + CaptionHeight) * scale),
             new Vector2(right, actionTop - CaptionGap * scale));
         var rideRight = left;
+        var rideCompact = false;
         if (rideWidth > 0f)
         {
-            var limit = right - PrimaryMinWidth * scale - gap;
-            rideRight = Math.Clamp(left + rideWidth, left, MathF.Max(left, limit));
+            var limit = MathF.Max(left, right - PrimaryMinWidth * scale - gap);
+            rideCompact = left + rideWidth > limit && rideCompactWidth > 0f;
+            rideRight = MathF.Min(left + (rideCompact ? rideCompactWidth : rideWidth), limit);
         }
 
         var ride = new Rect(new Vector2(left, actionTop), new Vector2(rideRight, actionBottom));
         var primaryLeft = ride.Width > 0f ? ride.Max.X + gap : left;
         var primary = new Rect(new Vector2(primaryLeft, actionTop), new Vector2(right, actionBottom));
-        return new RaceDeckLayout(segment, amount, caption, ride, primary);
+        return new RaceDeckLayout(segment, amount, caption, ride, primary, rideCompact && ride.Width > 0f);
     }
 }
 

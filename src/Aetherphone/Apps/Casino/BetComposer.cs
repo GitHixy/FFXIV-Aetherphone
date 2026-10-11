@@ -374,37 +374,17 @@ internal sealed class BetComposer
     private bool DrawAutoPill(ImDrawListPtr drawList, AppSkin ui, in BetDeckLayout layout, bool running)
     {
         var scale = UiScale.Current;
-        var rect = layout.Auto;
-        var hovered = !running && UiInteract.Hover(rect.Min, rect.Max);
-        var style = running || armed ? ButtonStyle.Tinted : ButtonStyle.Gray;
-        var face = Button.Surface(drawList, rect, ui.Ink, style, ButtonRole.Normal, true, hovered,
-            ImGui.GetID(AutoId));
         var label = Loc.T(L.Strip.Auto);
-        var labelStyle = Button.LabelStyle(rect.Height);
-        var icon = BetDeckLayout.AutoIconSize * scale;
-        var labelSize = Typography.Measure(label, labelStyle);
-        var content = layout.AutoCompact ? icon : icon + BetDeckLayout.AutoIconGap * scale + labelSize.X;
-        var center = face.Face.Center;
-        var iconCenter = new Vector2(center.X - content * 0.5f + icon * 0.5f, center.Y);
-        PhoneIcon.Draw(drawList, iconCenter, PhoneIcons.Repeat, face.LabelInk, icon);
+        var style = running || armed ? ButtonStyle.Tinted : ButtonStyle.Gray;
+        var pill = DeckActions.DrawIconPill(layout.Auto, PhoneIcons.Repeat, layout.AutoCompact ? string.Empty : label,
+            ui.Ink, style, true, !running, AutoId, layout.AutoCompact ? label : string.Empty);
         if (running)
         {
-            ProgressRing.Sweep(iconCenter, icon * AutoSweepRadius, AutoSweepThickness * scale, face.LabelInk,
-                AutoSweepMilliseconds, AutoSweepArc, 1f, drawList);
+            ProgressRing.Sweep(pill.IconCenter, DeckActions.IconSize * AutoSweepRadius * scale,
+                AutoSweepThickness * scale, pill.Ink, AutoSweepMilliseconds, AutoSweepArc, 1f, drawList);
         }
 
-        if (!layout.AutoCompact)
-        {
-            Typography.Draw(drawList,
-                new Vector2(iconCenter.X + icon * 0.5f + BetDeckLayout.AutoIconGap * scale,
-                    center.Y - labelSize.Y * 0.5f), label, face.LabelInk, labelStyle);
-        }
-        else if (hovered)
-        {
-            HoverTooltip.Show(rect, label, HoverLabelSide.Above);
-        }
-
-        return !running && UiInteract.Click(rect.Min, rect.Max, hovered);
+        return pill.Pressed;
     }
 
     private BetComposerAction StopAuto()
