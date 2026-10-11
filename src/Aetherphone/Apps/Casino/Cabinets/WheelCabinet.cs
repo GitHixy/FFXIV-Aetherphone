@@ -24,8 +24,6 @@ internal sealed class WheelCabinet : ICabinetIdle
     private const float BannerRadius = 18f;
     private const float BannerTextShare = 0.92f;
     private const float BannerMinFit = 0.7f;
-    private const float RailHeight = 26f;
-    private const float RailChipGap = 4f;
     private const float RimInset = 16f;
     private const float LockFlashSeconds = 0.45f;
     private const float IdleTurnRate = 0.25f;
@@ -37,7 +35,6 @@ internal sealed class WheelCabinet : ICabinetIdle
     private readonly WheelRoundPlayback playback = new();
     private readonly BetComposer composer = new("##wheelBet");
     private readonly long[] spotStakes = new long[WheelRules.SpotCount];
-    private readonly LabelSlot[] multipliers = new LabelSlot[WheelRules.SpotCount];
     private readonly LabelSlot[] bettors = new LabelSlot[WheelRules.SpotCount];
     private readonly WheelRecentRail recent = new();
     private readonly string[] returns = new string[WheelRules.SpotCount];
@@ -151,9 +148,9 @@ internal sealed class WheelCabinet : ICabinetIdle
             remaining);
         statusLine.Draw(drawList, frame.Layout.Ribbon, status, snapshot.Occupancy, scale);
         var podiumTop = safe.Max.Y - WheelPodiumLayout.Height(scale);
-        var railTop = safe.Min.Y;
-        DrawRecentRail(drawList, safe.Min.X, railTop, safe.Width, scale);
-        var wheelArea = new Rect(new Vector2(safe.Min.X, railTop + (RailHeight + RailChipGap) * scale),
+        var history = WheelHistoryLayout.StripOf(safe, scale);
+        WheelHistoryStrip.Draw(drawList, history, recent, HistoryPop(), scale);
+        var wheelArea = new Rect(new Vector2(safe.Min.X, history.Max.Y + WheelHistoryLayout.BelowGap * scale),
             new Vector2(safe.Max.X, podiumTop - PodiumGap * scale));
         DrawWheel(drawList, wheelArea, frame.Phase, delta, scale);
         var sitting = state.Sitting;
@@ -334,51 +331,11 @@ internal sealed class WheelCabinet : ICabinetIdle
             ImGui.GetColorU32(CasinoColors.Money with { W = 0.55f }), 24);
     }
 
-    private string MultiplierLabel(int spot) => multipliers[spot].Get(L.Casino.WheelMultiplier,
-        WheelRules.Multipliers[spot]);
+    private static string MultiplierLabel(int spot) => WheelRingArt.SpotLabel(spot);
 
-    private void DrawRecentRail(ImDrawListPtr drawList, float left, float top, float width, float scale)
-    {
-        var count = recent.Count;
-        if (count == 0)
-        {
-            return;
-        }
-
-        var height = RailHeight * scale;
-        var x = left;
-        for (var index = 0; index < count; index++)
-        {
-            var spot = recent.SpotAt(index);
-            var text = MultiplierLabel(spot);
-            var chipWidth = Typography.Measure(text, TextStyles.FootnoteEmphasized).X + height * 0.6f;
-            if (x + chipWidth > left + width)
-            {
-                break;
-            }
-
-            var min = new Vector2(x, top);
-            var max = new Vector2(x + chipWidth, top + height);
-            var color = WheelRingArt.SpotColors[spot];
-            var newest = index == 0;
-            var pop = newest && recent.HasLanded && playback.StageSeconds < RailPopSeconds
-                ? GameJuice.PopIn(playback.StageSeconds / RailPopSeconds)
-                : 1f;
-            var chipCenter = (min + max) * 0.5f;
-            var half = (max - min) * 0.5f * pop;
-            Squircle.Fill(drawList, chipCenter - half, chipCenter + half, half.Y,
-                ImGui.GetColorU32(Palette.WithAlpha(color, newest ? 0.32f : 0.14f)));
-            if (newest)
-            {
-                Squircle.Stroke(drawList, chipCenter - half, chipCenter + half, half.Y, ImGui.GetColorU32(color),
-                    MathF.Max(1f, scale));
-            }
-
-            Typography.DrawCentered(drawList, chipCenter, text, WheelRingArt.SpotTextInks[spot],
-                TextStyles.FootnoteEmphasized);
-            x = max.X + RailChipGap * scale;
-        }
-    }
+    private float HistoryPop() => recent.HasLanded && playback.StageSeconds < RailPopSeconds
+        ? GameJuice.PopIn(playback.StageSeconds / RailPopSeconds)
+        : 1f;
 
     private void DrawPodiums(ImDrawListPtr drawList, AppSkin ui, CasinoWheelRoomStateDto? board, Rect row,
         bool selectable, float scale)

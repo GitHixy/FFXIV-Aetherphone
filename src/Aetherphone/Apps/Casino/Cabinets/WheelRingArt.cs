@@ -119,6 +119,12 @@ internal static class WheelRingArt
         }
     }
 
+    public static string SpotLabel(int spot)
+    {
+        RefreshSpotLabels();
+        return SpotLabels[spot];
+    }
+
     private static void RefreshSpotLabels()
     {
         if (ReferenceEquals(spotLabelLanguage, Loc.Current))

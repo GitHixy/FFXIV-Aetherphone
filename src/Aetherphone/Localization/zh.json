@@ -8675,6 +8675,7 @@
   "casino.wheel.placeBets": "请下注",
   "casino.wheel.nextSpin": "下一次旋转",
   "casino.wheel.atTheWheel": "{0} 人在场",
+  "casino.wheel.lastSpins": "历史",
   "casino.reasonClaimed": "今天的转动已经用过了。下一个硬币日会重新装满。",
   "casino.reasonPaused": "硬币获取暂时暂停了，转盘也跟着歇一歇。",
   "casino.reasonDailyCap": "你已经拿到今天能给的所有硬币了。转盘明天再来。",
