@@ -20,7 +20,6 @@ internal sealed class WheelCabinet : ICabinetIdle
     private const float BannerPad = 12f;
     private const float BannerRadius = 18f;
     private const float BannerTextShare = 0.92f;
-    private const float BannerMinFit = 0.7f;
     private const float RimInset = 16f;
     private const float LockFlashSeconds = 0.45f;
     private const float IdleTurnRate = 0.25f;
@@ -404,17 +403,10 @@ internal sealed class WheelCabinet : ICabinetIdle
         var returned = ReturnOn(playback.Segment);
         var text = ResultText(WheelRoundPlayback.RoundKeyOf(snapshot), staked, returned);
         var won = returned > staked;
-        var style = won ? TextStyles.Title2 : TextStyles.Headline;
         var pad = BannerPad * scale;
         var maxWidth = MathF.Max(1f, area.Width * BannerTextShare - pad * 2f);
-        var measured = Typography.Measure(text, style).X;
-        if (measured > maxWidth)
-        {
-            style = style with { Scale = style.Scale * MathF.Max(BannerMinFit, maxWidth / measured) };
-        }
-
-        var fitted = Typography.FitText(text, maxWidth, style);
-        var size = Typography.Measure(fitted, style);
+        var style = BannerStyle(text, won, maxWidth);
+        var size = Typography.MeasureWrappedBlock(text, style, maxWidth);
         var half = new Vector2(size.X * 0.5f + pad, size.Y * 0.5f + pad * 0.75f);
         var center = new Vector2(area.Center.X, area.Max.Y - half.Y);
         var min = center - half;
@@ -431,7 +423,15 @@ internal sealed class WheelCabinet : ICabinetIdle
             }
         }
 
-        Typography.DrawCentered(drawList, center, fitted, won ? CasinoColors.Money : StageInks.Strong, style);
+        Typography.DrawWrappedCentered(drawList, center, text, won ? CasinoColors.Money : StageInks.Strong, style,
+            maxWidth);
+    }
+
+    private static TextStyle BannerStyle(string text, bool won, float maxWidth)
+    {
+        var style = won ? TextStyles.Title2 : TextStyles.Headline;
+        var floor = won ? TextStyles.Title3.Scale : TextStyles.Footnote.Scale;
+        return style with { Scale = Typography.FitScale(text, maxWidth, style.Scale, floor, style.Weight) };
     }
 
     private string ResultText(string roundKey, long staked, long returned)
