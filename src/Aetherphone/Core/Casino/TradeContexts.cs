@@ -301,11 +301,4 @@ internal sealed class TradeTableMemory
             && string.Equals(heldFor, myUserId, StringComparison.Ordinal)
             && nowTick - heldAtTick <= KeepMilliseconds;
     }
-
-    public void Forget()
-    {
-        held = default;
-        heldFor = string.Empty;
-        heldAtTick = 0;
-    }
 }
