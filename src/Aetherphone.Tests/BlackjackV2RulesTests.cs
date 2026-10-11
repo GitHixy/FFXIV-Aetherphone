@@ -18,7 +18,6 @@ public sealed class BlackjackV2RulesTests
         Assert.Equal(6, BlackjackOutcomes.Surrender);
         Assert.Equal(8, BlackjackRules.InsuranceSeconds);
         Assert.Equal(100, BlackjackSideBets.SideBetMin);
-        Assert.Equal(4, BlackjackRules.HouseTierCount);
     }
 
     [Fact]
@@ -107,17 +106,6 @@ public sealed class BlackjackV2RulesTests
     public void ASideBetIsNoneOrBetweenTheMinimumAndTheMainBet(long amount, long mainBet, bool valid)
     {
         Assert.Equal(valid, BlackjackSideBets.IsValidSideBet(amount, mainBet));
-    }
-
-    [Theory]
-    [InlineData(9_999, 0)]
-    [InlineData(10_000, 1)]
-    [InlineData(250_000, 2)]
-    [InlineData(999_999, 2)]
-    [InlineData(1_000_000, 3)]
-    public void QuickSeatPicksTheHighestTierTheCeilingCovers(long ceiling, int tier)
-    {
-        Assert.Equal(tier, BlackjackRules.QuickTierFor(ceiling));
     }
 
     [Fact]

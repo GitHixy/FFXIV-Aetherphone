@@ -24,6 +24,10 @@ internal sealed partial class CasinoApp
     private readonly ChipRail liveFilterRail = new();
     private readonly CasinoFriendNames friends = new();
     private LanguageInfo? liveViewLanguage;
+    private CasinoTableRowDto[]? houseViewSource;
+    private LanguageInfo? houseViewLanguage;
+    private long houseViewCeiling;
+    private TableRowView houseView;
     private LiveFilter liveFilter;
 
     private void DrawLiveTab(Rect body)
@@ -140,6 +144,11 @@ internal sealed partial class CasinoApp
                 Loc.T(open ? L.Strip.LiveJoin : L.Strip.LiveWatch), open);
         }
 
+        if (HouseBlackjack.Is(item.Table!))
+        {
+            return HouseLiveView();
+        }
+
         if (!ReferenceEquals(liveViewLanguage, Loc.Current))
         {
             liveViewLanguage = Loc.Current;
@@ -149,11 +158,27 @@ internal sealed partial class CasinoApp
         if (!ReferenceEquals(liveViewSources[slot], item.Table))
         {
             liveViewSources[slot] = item.Table;
-            var view = Tables.TableBrowser.ViewOf(item.Table!, casinoTables.AccountId);
-            liveViews[slot] = view with { Name = LiveTitle(item) };
+            liveViews[slot] = Tables.TableBrowser.ViewOf(item.Table!, casinoTables.AccountId);
         }
 
         return liveViews[slot];
+    }
+
+    private TableRowView HouseLiveView()
+    {
+        var source = casinoTables.Tables;
+        var ceiling = casino.Ceiling.MaxBet;
+        if (ReferenceEquals(source, houseViewSource) && ReferenceEquals(houseViewLanguage, Loc.Current)
+            && ceiling == houseViewCeiling)
+        {
+            return houseView;
+        }
+
+        houseViewSource = source;
+        houseViewLanguage = Loc.Current;
+        houseViewCeiling = ceiling;
+        houseView = Tables.TableBrowser.HouseView(HouseBlackjack.Of(source), ceiling);
+        return houseView;
     }
 
     private string JoinCodeOf(string tableId) => casinoTables.CardFor(tableId)?.JoinCode ?? string.Empty;
@@ -171,20 +196,6 @@ internal sealed partial class CasinoApp
         return rect.Max.Y;
     }
 
-    private string LiveTitle(in LiveRow item)
-    {
-        if (item.Kind == LiveRowKind.Room)
-        {
-            return Loc.T(CasinoGameNames.Of(item.GameId));
-        }
-
-        var table = item.Table!;
-        return table.Kind == CasinoTableKinds.House && table.Name.Length == 0
-            && !string.Equals(table.GameKind, HoldemRules.Kind, StringComparison.Ordinal)
-            ? Loc.T(TierLabel(table.StakeTier))
-            : TableName(table);
-    }
-
     private void EnterLiveRow(in LiveRow item)
     {
         if (item.Kind == LiveRowKind.Room)
@@ -194,6 +205,12 @@ internal sealed partial class CasinoApp
         }
 
         var table = item.Table!;
+        if (HouseBlackjack.Is(table))
+        {
+            EnterHouseBlackjack();
+            return;
+        }
+
         if (table.Kind == CasinoTableKinds.Private && !table.Admitted && !casinoTables.Owns(table))
         {
             OpenDoor(table.TableId);
@@ -201,6 +218,18 @@ internal sealed partial class CasinoApp
         }
 
         OpenTable(table.TableId);
+    }
+
+    private void EnterHouseBlackjack()
+    {
+        var sitting = CasinoWire.SittingFor(casino.State, CasinoWire.BlackjackKind);
+        if (sitting is not null && CasinoRoomIds.IsBlackjackHouse(sitting.TableId))
+        {
+            OpenTable(sitting.TableId);
+            return;
+        }
+
+        casinoTables.QuickSeat(CasinoStakeTiers.Any);
     }
 
     private float DrawTablesLink(ImDrawListPtr drawList, Vector2 origin, float width, float scale)
@@ -216,12 +245,4 @@ internal sealed partial class CasinoApp
 
         return max.Y;
     }
-
-    private static LocString TierLabel(int tier) => tier switch
-    {
-        CasinoHouseTiers.Parlour => L.Casino.TierParlour,
-        CasinoHouseTiers.Salon => L.Casino.TierSalon,
-        CasinoHouseTiers.Vault => L.Blackjack.TierVault,
-        _ => L.Casino.TierPit,
-    };
 }

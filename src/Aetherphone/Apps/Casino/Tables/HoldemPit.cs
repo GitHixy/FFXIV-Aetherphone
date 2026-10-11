@@ -13,7 +13,6 @@ namespace Aetherphone.Apps.Casino.Tables;
 internal readonly record struct HoldemRoomView(
     string RoomId,
     string Name,
-    string Blinds,
     string BuyIn,
     string Seats,
     int Seated,
@@ -29,14 +28,6 @@ internal sealed class HoldemPit
     private const float SignHeight = 38f;
     private const float BadgeHeight = 20f;
     private const float DotsRow = 10f;
-
-    private static readonly LocString[] RoomNames =
-    {
-        L.Holdem.RoomLow,
-        L.Holdem.RoomMid,
-        L.Holdem.RoomHigh,
-        L.Holdem.RoomRoyal,
-    };
 
     private static readonly string LockGlyph = IconGlyph.Of(FontAwesomeIcon.Lock);
     private static readonly string HostGlyph = IconGlyph.Of(FontAwesomeIcon.UserFriends);
@@ -173,7 +164,7 @@ internal sealed class HoldemPit
         var maxBuyIn = row is { MaxBuyIn: > 0 } ? row.MaxBuyIn : HoldemRules.MaxBuyInFor(tier);
         var maxSeats = row is { MaxSeats: > 0 } ? row.MaxSeats : HoldemRules.HouseSeats;
         var seated = row?.SeatedCount ?? 0;
-        return new HoldemRoomView(HoldemRules.HouseRooms[tier], Loc.T(RoomNames[tier]),
+        return new HoldemRoomView(HoldemRules.HouseRooms[tier],
             Loc.T(L.Holdem.BlindsValue, NumberText.Compact(small), NumberText.Compact(big)),
             Loc.T(L.Holdem.BuyInValue, NumberText.Compact(minBuyIn), NumberText.Compact(maxBuyIn)),
             Loc.T(L.Holdem.SeatedLine, Games.Framework.GameNumber.Label(seated),
@@ -218,12 +209,13 @@ internal sealed class HoldemPit
         var badge = view.Locked ? Loc.T(L.Strip.TitleWhale) : string.Empty;
         var badgeWidth = badge.Length > 0 ? Typography.Measure(badge, TextStyles.Footnote).X + 30f * scale : 0f;
         var nameWidth = textWidth - (badgeWidth > 0f ? badgeWidth + Metrics.Space.Sm * scale : 0f);
-        var detail = view.Locked ? Loc.T(L.Holdem.RoyalLocked) : view.BuyIn;
+        var detail = view.Locked ? Loc.T(L.Holdem.RoyalLocked) : string.Empty;
         var nameHeight = MathF.Max(PitText.Height(view.Name, TextStyles.SubheadlineEmphasized, nameWidth),
             badgeWidth > 0f ? BadgeHeight * scale : 0f);
         var height = pad * 2f + nameHeight + 2f * scale
-            + PitText.Height(view.Blinds, TextStyles.SubheadlineEmphasized, textWidth)
-            + PitText.Height(detail, TextStyles.Footnote, textWidth) + (3f + DotsRow) * scale;
+            + PitText.Height(view.BuyIn, TextStyles.SubheadlineEmphasized, textWidth)
+            + (detail.Length > 0 ? PitText.Height(detail, TextStyles.Footnote, textWidth) : 0f)
+            + (3f + DotsRow) * scale;
         var rect = new Rect(origin, new Vector2(origin.X + width, origin.Y + MathF.Max(RoomHeight * scale, height)));
         var rounding = Metrics.Radius.Grouped * scale;
         var hovered = UiInteract.Hover(rect.Min, rect.Max);
@@ -257,9 +249,12 @@ internal sealed class HoldemPit
 
         PitText.Draw(drawList, view.Name, TextStyles.SubheadlineEmphasized, ui.TitleInk, left, y, nameWidth, false);
         y += nameHeight + 2f * scale;
-        y = PitText.Draw(drawList, view.Blinds, TextStyles.SubheadlineEmphasized, CasinoColors.Money, left, y,
+        y = PitText.Draw(drawList, view.BuyIn, TextStyles.SubheadlineEmphasized, CasinoColors.Money, left, y,
             textWidth, false);
-        y = PitText.Draw(drawList, detail, TextStyles.Footnote, ui.BodyInk, left, y, textWidth, false);
+        if (detail.Length > 0)
+        {
+            y = PitText.Draw(drawList, detail, TextStyles.Footnote, ui.BodyInk, left, y, textWidth, false);
+        }
         y += 3f * scale;
         var dotsY = y + DotsRow * 0.5f * scale;
         var dotsWidth = CasinoArt.SeatDots(drawList, new Vector2(left, dotsY), view.Seated, view.MaxSeats,
