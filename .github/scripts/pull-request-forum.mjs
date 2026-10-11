@@ -17,7 +17,10 @@ const CommentBodyLimit = 900;
 const CommitLineLimit = 6;
 const BotLogins = new Set(["dependabot[bot]", "github-actions[bot]"]);
 
-const ThreadMarkerPattern = /<!-- aetherphone-discord-thread:(\d+) -->/;
+const ArchivedThreadPageLimit = 100;
+const ArchivedThreadPageCap = 30;
+const SnowflakePattern = /\d{15,}/g;
+const MentionTokenPattern = /<@&?\d+>/g;
 const MentionPattern = /(?:^|[^\w`/@])@([A-Za-z0-9](?:[A-Za-z0-9-]{0,38}))/g;
 const DashPattern = new RegExp(`[${String.fromCharCode(0x2013)}${String.fromCharCode(0x2014)}]`, "g");
 const HtmlCommentPattern = /<!--[\s\S]*?-->/g;
@@ -92,8 +95,14 @@ function parseUserMap(raw) {
     return map;
 }
 
+// Workflow logs of a public repository are public, so nothing that identifies the staff server
+// (snowflake ids, mention tokens) may reach stdout.
+function redact(text) {
+    return text.replace(MentionTokenPattern, "@...").replace(SnowflakePattern, "<id>");
+}
+
 function warn(message) {
-    console.log(`::warning::${message}`);
+    console.log(`::warning::${redact(message)}`);
 }
 
 function sleep(milliseconds) {
@@ -367,22 +376,60 @@ function plural(count, word) {
     return `${count} ${word}${count === 1 ? "" : "s"}`;
 }
 
-function markerCommentBody(context, threadId) {
-    return `Discussion thread on Discord: https://discord.com/channels/${context.forum.guildId}/${threadId}\n<!-- aetherphone-discord-thread:${threadId} -->`;
+function threadPrefix(pullRequest) {
+    return `#${pullRequest.number} ·`;
 }
 
-async function findMarker(context) {
-    const comments = await githubPaginate(context.config, `/repos/${context.config.repository}/issues/${context.pullRequest.number}/comments`);
-    for (const comment of comments) {
-        if (comment.user?.login !== "github-actions[bot]") {
-            continue;
-        }
-        const match = ThreadMarkerPattern.exec(comment.body ?? "");
-        if (match !== null) {
-            return { threadId: match[1], commentId: comment.id };
+function matchesPullRequest(thread, forumChannelId, prefix) {
+    return thread.parent_id === forumChannelId && typeof thread.name === "string" && thread.name.startsWith(prefix);
+}
+
+function earliestThread(threads) {
+    let earliest = null;
+    for (const thread of threads) {
+        if (earliest === null || BigInt(thread.id) < BigInt(earliest.id)) {
+            earliest = thread;
         }
     }
-    return null;
+    return earliest;
+}
+
+// Posts are found by name on the Discord side so that nothing about the staff server (no link,
+// no id, no comment) is ever written to the public pull request.
+async function findThreads(context) {
+    const prefix = threadPrefix(context.pullRequest);
+    const forumChannelId = context.config.forumChannelId;
+    const found = [];
+    const active = await discordRequest(context.config, "GET", `/guilds/${context.forum.guildId}/threads/active`);
+    for (const thread of active.threads ?? []) {
+        if (matchesPullRequest(thread, forumChannelId, prefix)) {
+            found.push(thread);
+        }
+    }
+    if (found.length > 0) {
+        return found;
+    }
+    let before = "";
+    for (let page = 0; page < ArchivedThreadPageCap; page++) {
+        const query = before.length === 0
+            ? `?limit=${ArchivedThreadPageLimit}`
+            : `?limit=${ArchivedThreadPageLimit}&before=${encodeURIComponent(before)}`;
+        const archived = await discordRequest(context.config, "GET", `/channels/${forumChannelId}/threads/archived/public${query}`);
+        const threads = archived.threads ?? [];
+        for (const thread of threads) {
+            if (matchesPullRequest(thread, forumChannelId, prefix)) {
+                found.push(thread);
+            }
+        }
+        if (found.length > 0 || !archived.has_more || threads.length === 0) {
+            break;
+        }
+        before = threads[threads.length - 1].thread_metadata?.archive_timestamp ?? "";
+        if (before.length === 0) {
+            break;
+        }
+    }
+    return found;
 }
 
 async function createThread(context, mentions) {
@@ -402,25 +449,21 @@ async function createThread(context, mentions) {
 
 // Two runs for the same pull request can race (an opened event and a review request fire together),
 // and GitHub's concurrency groups drop queued runs instead of serializing them. Both runs create a
-// thread, then the one whose marker comment is not the earliest deletes its own thread and comment.
+// post, then the one whose post is not the oldest deletes its own again.
 async function ensureThread(context, starterMentions) {
-    const existing = await findMarker(context);
+    const existing = earliestThread(await findThreads(context));
     if (existing !== null) {
-        return existing.threadId;
+        return existing.id;
     }
-    const thread = await createThread(context, starterMentions);
-    const comment = await githubRequest(context.config, "POST", `/repos/${context.config.repository}/issues/${context.pullRequest.number}/comments`, {
-        body: markerCommentBody(context, thread.id),
-    });
-    const earliest = await findMarker(context);
-    if (earliest === null || earliest.threadId === thread.id) {
-        console.log(`Created forum post ${thread.id} for #${context.pullRequest.number}.`);
-        return thread.id;
+    const created = await createThread(context, starterMentions);
+    const winner = earliestThread(await findThreads(context)) ?? created;
+    if (winner.id === created.id) {
+        console.log(`Created the forum post for #${context.pullRequest.number}.`);
+        return created.id;
     }
-    console.log(`Another run already created forum post ${earliest.threadId}; removing the duplicate ${thread.id}.`);
-    await discordRequest(context.config, "DELETE", `/channels/${thread.id}`);
-    await githubRequest(context.config, "DELETE", `/repos/${context.config.repository}/issues/comments/${comment.id}`);
-    return earliest.threadId;
+    console.log(`Another run already created the forum post for #${context.pullRequest.number}; removing this run's duplicate.`);
+    await discordRequest(context.config, "DELETE", `/channels/${created.id}`);
+    return winner.id;
 }
 
 async function postThreadMessage(context, threadId, message) {
@@ -470,7 +513,7 @@ async function applyThreadState(context, threadId) {
     if (archived !== shouldClose || locked !== shouldClose) {
         await discordRequest(context.config, "PATCH", `/channels/${threadId}`, { archived: shouldClose, locked: shouldClose });
     }
-    console.log(`Forum post ${threadId} is tagged ${StatusTags[context.status].name}${shouldClose ? ", locked and archived" : ""}.`);
+    console.log(`The forum post for #${context.pullRequest.number} is tagged ${StatusTags[context.status].name}${shouldClose ? ", locked and archived" : ""}.`);
 }
 
 function resolvePullRequestNumber(eventName, event) {
@@ -689,7 +732,7 @@ async function mirrorEvent(config, forum, eventName, event) {
     const message = await describeEvent(context, eventName, event);
     if (message !== null) {
         await postThreadMessage(context, threadId, message);
-        console.log(`Posted to forum post ${threadId}: ${message.content.split("\n").pop()}`);
+        console.log(`Posted to the forum post for #${context.pullRequest.number}: ${redact(message.content.split("\n").pop())}`);
     }
     await applyThreadState(context, threadId);
 }
@@ -701,17 +744,16 @@ async function syncPullRequest(config, forum, pullRequestNumber) {
 }
 
 async function checkConnection(config, forum) {
-    const me = await discordRequest(config, "GET", "/users/@me");
-    console.log(`Bot: ${me.username} (${me.id})`);
-    console.log(`Forum: #${forum.channel.name} (${forum.channel.id}) in guild ${forum.guildId}`);
+    await discordRequest(config, "GET", "/users/@me");
+    console.log("Bot token: ok");
+    console.log(`Forum channel: ok (${forum.channel.type === ForumChannelType ? "forum" : "not a forum"})`);
     for (const [status, tag] of Object.entries(StatusTags)) {
-        const tagId = forum.tagIds[status];
-        console.log(`Tag ${tag.name}: ${tagId === undefined ? "MISSING" : tagId}`);
+        console.log(`Tag ${tag.name}: ${forum.tagIds[status] === undefined ? "MISSING" : "ok"}`);
     }
     if (config.maintainersRoleId.length > 0) {
         const roles = await discordRequest(config, "GET", `/guilds/${forum.guildId}/roles`);
         const role = roles.find(candidate => candidate.id === config.maintainersRoleId);
-        console.log(`Maintainers role: ${role === undefined ? `MISSING (${config.maintainersRoleId} is not a role in this guild)` : `@${role.name}`}`);
+        console.log(`Maintainers role: ${role === undefined ? "MISSING (DISCORD_MAINTAINERS_ROLE_ID is not a role in this server)" : "ok"}`);
     } else {
         console.log("Maintainers role: not configured (new pull requests ping nobody unless a reviewer is requested).");
     }
@@ -720,10 +762,10 @@ async function checkConnection(config, forum) {
     }
     for (const [login, discordId] of config.userMap) {
         try {
-            const member = await discordRequest(config, "GET", `/guilds/${forum.guildId}/members/${discordId}`);
-            console.log(`User ${login}: ${member.user.username} (${discordId})`);
-        } catch (error) {
-            warn(`User ${login}: ${discordId} is not a member of the guild (${error.message}).`);
+            await discordRequest(config, "GET", `/guilds/${forum.guildId}/members/${discordId}`);
+            console.log(`User ${login}: member`);
+        } catch {
+            warn(`User ${login}: not a member of the server, or the id is wrong.`);
         }
     }
 }
@@ -750,6 +792,6 @@ async function main() {
 }
 
 main().catch(error => {
-    console.log(`::error::${error.message}`);
+    console.log(`::error::${redact(error.message)}`);
     process.exitCode = 1;
 });
