@@ -12683,7 +12683,7 @@ internal static class L
             new("conduct.aethergram.allowed.3", "Roleplay, weddings, events and housing"),
             new("conduct.aethergram.allowed.4", "Combat, emotes and time with friends"),
             new("conduct.aethergram.allowed.5", "Romance that isn't sexual"),
-            new("conduct.aethergram.allowed.6", "Meme templates, and a photo of your monitor showing the game"),
+            new("conduct.aethergram.allowed.6", "Memes made from in-game images"),
             new("conduct.aethergram.allowed.7", "One post a day promoting your venue, service or Discord, priced in gil, with an in-game image"),
         };
         public static readonly LocString AethergramInGameTitle = new("conduct.aethergram.inGame.title", "In-game only");
