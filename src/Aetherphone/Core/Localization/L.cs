@@ -2005,6 +2005,8 @@ internal static class L
         public static readonly LocString ScrollWhileIdleHint = new("settings.scrollWhileIdleHint", "When you open your phone and stand still, your character scrolls through it (Tomescroll emote). Move or cancel the emote and it stays off until you open the phone again. Does nothing if you haven't unlocked the emote.");
         public static readonly LocString ShowInGpose = new("settings.showInGpose", "Show in Group Pose");
         public static readonly LocString ShowInGposeHint = new("settings.showInGposeHint", "Keep the phone available while you're in Group Pose, so you can open it during photo shoots. Turn it off to keep your screen clear for screenshots.");
+        public static readonly LocString ShowInCutscenes = new("settings.showInCutscenes", "Show in cutscenes");
+        public static readonly LocString ShowInCutscenesHint = new("settings.showInCutscenesHint", "Keep the phone on screen while a cutscene plays, so you can use it on a second monitor. Turn it off to watch cutscenes without the phone over them.");
         public static readonly LocString ImportScreenshots = new("settings.importScreenshots", "Import screenshots");
         public static readonly LocString ImportScreenshotsHint = new("settings.importScreenshotsHint", "Copy screenshots you take into the Photos gallery, including ones from ReShade and GShade. Only shots taken while the phone is running are copied, and the originals stay where they are.");
         public static readonly LocString MonthlyAlbums = new("settings.monthlyAlbums", "Monthly albums in Photos");
@@ -2310,6 +2312,8 @@ internal static class L
 
         public static readonly LocString[] Release1300Phone =
         {
+            new("changelog.r1300.58",
+                "Added a Show in cutscenes setting that keeps the phone on screen while a cutscene plays, for a second monitor"),
             new("changelog.r1300.51",
                 "Fixed the scrollbar moving the wrong way and too slowly when dragged while the phone position is locked, contributed by jambalong"),
             new("changelog.r1300.57",
