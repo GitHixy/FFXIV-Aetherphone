@@ -383,6 +383,8 @@ namespace Aetherphone.Core.Aethernet;
 [JsonSerializable(typeof(CasinoLedgerProposeRequest))]
 [JsonSerializable(typeof(CasinoLedgerResultDto))]
 [JsonSerializable(typeof(CasinoLedgerListDto))]
+[JsonSerializable(typeof(CasinoLedgerTradeMatchRequest))]
+[JsonSerializable(typeof(CasinoLedgerTradeMatchDto))]
 [JsonSerializable(typeof(CasinoVenueActRequest))]
 [JsonSerializable(typeof(CasinoVenueActDto))]
 [JsonSerializable(typeof(CasinoVenueRollDto))]

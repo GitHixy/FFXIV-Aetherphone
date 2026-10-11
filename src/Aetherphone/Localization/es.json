@@ -9537,7 +9537,7 @@
   "casino.venue.broadcastBet": "Apuesta {0}",
   "casino.venue.tradeSync": "Sincronizar intercambios",
   "casino.venue.tradeAutoConfirm": "Confirmar mi parte automáticamente",
-  "casino.venue.tradeSyncHint": "Solo lee la ventana de intercambio para sugerir la entrada del registro. No se pulsa nada en el juego por ti.",
+  "casino.venue.tradeSyncHint": "Solo lee la ventana de intercambio para sugerir la entrada del registro. El nombre de la otra persona se comprueba con esta mesa en el servidor y nunca se muestra a nadie. No se pulsa nada en el juego por ti.",
   "casino.venue.tradeNotifyTitle": "¿Registrar este intercambio?",
   "casino.venue.tradeReceivedFrom": "Recibiste {1} guiles de {0}",
   "casino.venue.tradeSentTo": "Enviaste {1} guiles a {0}",

@@ -170,6 +170,38 @@ internal static class TradeLedgerMatcher
         return context.Hosting ? MatchHost(completion, context, net) : MatchPlayer(completion, context, net);
     }
 
+    public static TradeMatchResult FromServer(in TradeCompletion completion, in TradeTableContext context,
+        CasinoLedgerTradeMatchDto? answer)
+    {
+        if (answer is null)
+        {
+            return TradeMatchResult.Of(TradeMatchRoute.Unreachable);
+        }
+
+        if (!answer.Granted)
+        {
+            return new TradeMatchResult(TradeProposal.None, TradeMatchRoute.Refused, answer.Reason ?? string.Empty);
+        }
+
+        if (!answer.Matched || string.IsNullOrEmpty(answer.CounterpartyUserId))
+        {
+            return TradeMatchResult.Of(TradeMatchRoute.NoMatch);
+        }
+
+        var net = completion.Net;
+        if (!context.Known || net == 0 || answer.HostSide != context.Hosting
+            || string.Equals(answer.CounterpartyUserId, context.MyUserId, StringComparison.Ordinal))
+        {
+            return TradeMatchResult.Of(TradeMatchRoute.Mismatch);
+        }
+
+        var counterparty = new TradeSeat(answer.CounterpartyUserId, answer.CounterpartyName ?? string.Empty);
+        var proposal = Resolve(context, counterparty, net, answer.HostSide);
+        return proposal.Kind == TradeProposalKind.None
+            ? TradeMatchResult.Of(TradeMatchRoute.Unrecordable)
+            : new TradeMatchResult(proposal, TradeMatchRoute.Server, string.Empty);
+    }
+
     private static TradeProposal MatchHost(in TradeCompletion completion, in TradeTableContext context, long net)
     {
         var seat = SeatNamed(context.Seats, completion.NameCandidates, context.MyUserId);
@@ -202,6 +234,11 @@ internal static class TradeLedgerMatcher
         {
             return new TradeProposal(TradeProposalKind.Confirm, context.TableId, entry.Kind, counterparty.UserId,
                 counterparty.DisplayName, amount, entry.EntryId, hostSide, incoming);
+        }
+
+        if (!hostSide && !string.Equals(counterparty.UserId, context.HostUserId, StringComparison.Ordinal))
+        {
+            return TradeProposal.None;
         }
 
         var kind = incoming == hostSide ? CasinoLedgerKinds.BuyIn : CasinoLedgerKinds.Payout;
@@ -282,7 +319,13 @@ internal static class TradeNames
     private const char PrivateUseLast = '\uF8FF';
     private const char NoBreakSpace = '\u00A0';
     private const char NarrowNoBreakSpace = '\u202F';
+    private const char LeftSingleQuote = '\u2018';
+    private const char RightSingleQuote = '\u2019';
     private const int MaxAmountDigits = 12;
+
+    public const int MaxServerNames = 16;
+
+    public const int MaxServerNameLength = 96;
 
     public static string Normalize(string raw)
     {
@@ -302,6 +345,11 @@ internal static class TradeNames
                 continue;
             }
 
+            if (character is LeftSingleQuote or RightSingleQuote)
+            {
+                character = '\'';
+            }
+
             if (!char.IsLetter(character) && character != '\'' && character != '-')
             {
                 continue;
@@ -317,6 +365,34 @@ internal static class TradeNames
         }
 
         return builder.ToString();
+    }
+
+    public static string[] ForServer(string[] candidates)
+    {
+        var count = 0;
+        for (var index = 0; index < candidates.Length && count < MaxServerNames; index++)
+        {
+            if (!string.IsNullOrWhiteSpace(candidates[index]))
+            {
+                count++;
+            }
+        }
+
+        var names = new string[count];
+        var next = 0;
+        for (var index = 0; index < candidates.Length && next < count; index++)
+        {
+            var candidate = candidates[index];
+            if (string.IsNullOrWhiteSpace(candidate))
+            {
+                continue;
+            }
+
+            names[next] = candidate.Length > MaxServerNameLength ? candidate[..MaxServerNameLength] : candidate;
+            next++;
+        }
+
+        return names;
     }
 
     public static bool TryAmount(string text, out long amount)

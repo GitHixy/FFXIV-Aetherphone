@@ -9537,7 +9537,7 @@
   "casino.venue.broadcastBet": "Einsatz {0}",
   "casino.venue.tradeSync": "Handelsabgleich",
   "casino.venue.tradeAutoConfirm": "Meine Seite automatisch bestätigen",
-  "casino.venue.tradeSyncHint": "Liest das Handelsfenster nur, um den passenden Kassenbucheintrag vorzuschlagen. Im Spiel wird nichts für dich geklickt.",
+  "casino.venue.tradeSyncHint": "Liest das Handelsfenster nur, um den passenden Kassenbucheintrag vorzuschlagen. Der Name des Handelspartners wird auf dem Server mit diesem Tisch abgeglichen und niemandem angezeigt. Im Spiel wird nichts für dich geklickt.",
   "casino.venue.tradeNotifyTitle": "Diesen Handel eintragen?",
   "casino.venue.tradeReceivedFrom": "Du hast {1} Gil von {0} erhalten",
   "casino.venue.tradeSentTo": "Du hast {0} {1} Gil gegeben",

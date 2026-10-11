@@ -9537,7 +9537,7 @@
   "casino.venue.broadcastBet": "Bet {0}",
   "casino.venue.tradeSync": "Trade sync",
   "casino.venue.tradeAutoConfirm": "Confirm my side automatically",
-  "casino.venue.tradeSyncHint": "Reads the in-game trade window only to suggest the matching ledger entry. Nothing in the game is clicked for you.",
+  "casino.venue.tradeSyncHint": "Reads the in-game trade window only to suggest the matching ledger entry. The trade partner's name is checked against this table on the server and is never shown to anyone. Nothing in the game is clicked for you.",
   "casino.venue.tradeNotifyTitle": "Record this trade?",
   "casino.venue.tradeReceivedFrom": "You received {1} gil from {0}",
   "casino.venue.tradeSentTo": "You sent {1} gil to {0}",

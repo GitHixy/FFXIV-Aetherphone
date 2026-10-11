@@ -9537,7 +9537,7 @@
   "casino.venue.broadcastBet": "Mise {0}",
   "casino.venue.tradeSync": "Synchro des échanges",
   "casino.venue.tradeAutoConfirm": "Confirmer ma part automatiquement",
-  "casino.venue.tradeSyncHint": "Lit la fenêtre d'échange uniquement pour proposer l'écriture correspondante. Rien n'est cliqué dans le jeu à votre place.",
+  "casino.venue.tradeSyncHint": "Lit la fenêtre d'échange uniquement pour proposer l'écriture correspondante. Le nom du partenaire d'échange est vérifié sur le serveur auprès de cette table et n'est jamais montré à personne. Rien n'est cliqué dans le jeu à votre place.",
   "casino.venue.tradeNotifyTitle": "Enregistrer cet échange ?",
   "casino.venue.tradeReceivedFrom": "Vous avez reçu {1} gils de {0}",
   "casino.venue.tradeSentTo": "Vous avez envoyé {1} gils à {0}",
