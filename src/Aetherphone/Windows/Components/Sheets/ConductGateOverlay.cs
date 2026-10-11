@@ -21,6 +21,7 @@ internal sealed class ConductGateOverlay
     private const float PanelRounding = 28f;
     private const float PanelTopGap = 8f;
     private const float ContentClipInset = 6f;
+    private const float AntiAliasFringe = 1f;
     private const float BarHeight = 56f;
     private const float EdgeFade = 20f;
     private const float BottomFadeSpan = 1.5f;
@@ -244,7 +245,10 @@ internal sealed class ConductGateOverlay
             TrackReading();
 
             var collapseStart = titleBottom - origin.Y + (ContentClipInset - BarHeight) * scale;
-            var cover = new Rect(new Vector2(left, listRect.Min.Y), new Vector2(left + width, listRect.Max.Y));
+            var windowMin = ImGui.GetWindowPos();
+            var windowMax = windowMin + ImGui.GetWindowSize();
+            var cover = new Rect(new Vector2(left - AntiAliasFringe, windowMin.Y),
+                new Vector2(left + width + AntiAliasFringe, windowMax.Y));
             DrawScrollEdges(drawList, cover, panel, gate, theme, accent, surface, collapseStart);
             if (!shownIsReview)
             {
