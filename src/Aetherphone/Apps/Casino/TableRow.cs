@@ -110,34 +110,36 @@ internal static class TableRow
         return view.Full ? Loc.T(L.Casino.TableFullBadge) : string.Empty;
     }
 
-    public static FontAwesomeIcon BadgeIcon(in TableRowView view)
+    public static bool TryBadgeIcon(in TableRowView view, out FontAwesomeIcon icon)
     {
+        icon = default;
         if (view.PhaseLabel.Length > 0 || view.Room != VenueRoomKind.None)
         {
-            return FontAwesomeIcon.None;
+            return false;
         }
 
         if (view.Draining)
         {
-            return FontAwesomeIcon.HourglassEnd;
+            icon = FontAwesomeIcon.Clock;
         }
-
-        if (view.Paused)
+        else if (view.Paused)
         {
-            return FontAwesomeIcon.Pause;
+            icon = FontAwesomeIcon.Pause;
         }
-
-        if (view.Mine)
+        else if (view.Mine)
         {
-            return FontAwesomeIcon.Star;
+            icon = FontAwesomeIcon.Star;
         }
-
-        if (view.InviteOnly)
+        else if (view.InviteOnly)
         {
-            return FontAwesomeIcon.Lock;
+            icon = FontAwesomeIcon.Lock;
+        }
+        else if (view.Full)
+        {
+            icon = FontAwesomeIcon.Ban;
         }
 
-        return view.Full ? FontAwesomeIcon.Ban : FontAwesomeIcon.None;
+        return icon != default;
     }
 
     public static float PhaseCap(float textColumn) => textColumn * PhaseShare;
@@ -176,8 +178,8 @@ internal static class TableRow
         var rowHeight = MathF.Max(footnote, ChipHeight(scale));
         var cap = PhaseCap(TableCardLayout.TextColumn(row, scale));
         var pillWidth = phase.Length > 0 ? PillWidth(phase, live, scale) : 0f;
-        var icon = pillWidth > cap ? BadgeIcon(view) : FontAwesomeIcon.None;
-        if (icon != FontAwesomeIcon.None)
+        var iconBadge = TryBadgeIcon(view, out var icon) && pillWidth > cap;
+        if (iconBadge)
         {
             pillWidth = ChipHeight(scale);
         }
@@ -189,7 +191,7 @@ internal static class TableRow
         var layout = TableCardLayout.Compute(row, scale, headline, footnote, rowHeight, pillWidth, ChipHeight(scale));
         DrawArt(drawList, ui, view, layout, scale);
         var pillInk = live ? ui.Accent : ui.BodyInk;
-        if (icon != FontAwesomeIcon.None)
+        if (iconBadge)
         {
             DrawIconPill(drawList, layout.Phase, icon, pillInk);
         }
