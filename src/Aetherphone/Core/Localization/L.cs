@@ -11215,13 +11215,13 @@ internal static class L
         public static readonly LocString MoogleRuleGames = new("casino.slots.moogle.ruleGames", "Three wings on reels 2 to 4 start 6 free games. In each, one giant symbol covers the middle reels; a giant coin is nine coins and always starts hold and spin. Mini and Minor grow with every spin at your bet and must hit before they reach their ceiling.");
         public static readonly LocString JackpotRule = new("casino.slots.machine.jackpotRule", "Floor jackpot: every paid spin on any machine also draws for the floor jackpot, and every chip staked is a ticket. It has nothing to do with the reels.");
         public static readonly LocString Turbo = new("casino.slots.machine.turbo", "Turbo");
-        public static readonly LocString AnteCost = new("casino.slots.cascade.anteCost", "Ante {0}");
+        public static readonly LocString AnteBoost = new("casino.slots.cascade.anteBoost", "2× bonus");
+        public static readonly LocString AnteHint = new("casino.slots.cascade.anteHint", "Ante Bet: each spin costs a quarter more and the bonus comes about twice as often.");
         public static readonly LocString BuyBonus = new("casino.slots.cascade.buyBonus", "Buy {0}");
         public static readonly LocString BuyConfirmTitle = new("casino.slots.cascade.buyConfirmTitle", "Buy the bonus?");
         public static readonly LocString BuyConfirmBody = new("casino.slots.cascade.buyConfirmBody", "{0} chips start 10 free spins straight away.");
         public static readonly LocString BuyConfirm = new("casino.slots.cascade.buyConfirm", "Buy");
         public static readonly LocString LinesInfo = new("casino.slots.machine.linesInfo", "10 lines");
-        public static readonly LocString MoogleKnobInfo = new("casino.slots.moogle.knobInfo", "6 coins start hold and spin");
         public static readonly LocString CostLine = new("casino.slots.machine.costLine", "Spin costs {0}");
         public static readonly LocString Win = new("casino.slots.machine.win", "WIN");
         public static readonly LocString FreeSpinsCounter = new("casino.slots.machine.freeSpinsCounter", "Free spin {0} of {1}");

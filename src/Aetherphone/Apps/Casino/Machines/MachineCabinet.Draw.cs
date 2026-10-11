@@ -25,8 +25,6 @@ internal sealed partial class MachineCabinet
     private const float IntroCaptionShare = 0.2f;
     private const float IntroTileSpan = 1.3f;
     private const float NotePad = 8f;
-    private const string SkipId = "casino.machines.skip";
-    private const string GambleId = "casino.machines.gamble";
     private const string ReasonMarquee = "casino.machines.reason";
 
     private static readonly Vector4 GlassTop = new(0.10f, 0.06f, 0.16f, 0.92f);
@@ -38,7 +36,6 @@ internal sealed partial class MachineCabinet
     private static readonly CasinoSlotsCoinDto NoCoin = new();
 
     private AmountSlot betLabel;
-    private AmountSlot anteLabel;
     private AmountSlot buyLabel;
     private AmountSlot meterHit;
     private AmountSlot gambleStake;
@@ -406,30 +403,6 @@ internal sealed partial class MachineCabinet
             return;
         }
 
-        var buttonHeight = MathF.Min(area.Height, Button.LargeHeight * scale);
-        var buttonRect = new Rect(new Vector2(area.Min.X, area.Center.Y - buttonHeight * 0.5f),
-            new Vector2(area.Max.X, area.Center.Y + buttonHeight * 0.5f));
-        if (playback.Active && playback.InFeature && !frame.Blocked)
-        {
-            if (Button.Draw(drawList, buttonRect, Loc.T(L.Machines.Skip), ui.Ink, ButtonStyle.Gray, id: SkipId))
-            {
-                playback.Skip();
-            }
-
-            return;
-        }
-
-        if (gamble.Offered && !Composer.Auto.Running && !frame.Blocked)
-        {
-            if (Button.Draw(drawList, buttonRect, Loc.T(L.Machines.Gamble), ui.Ink, ButtonStyle.Tinted, id: GambleId))
-            {
-                gamble.Choose();
-                CasinoSfx.Play(UiSound.CardSnap);
-            }
-
-            return;
-        }
-
         string text;
         var style = TextStyles.Title3;
         if (playback.HasRound && playback.InHold)
@@ -593,55 +566,5 @@ internal sealed partial class MachineCabinet
         Squircle.Fill(drawList, plateCenter - plate, plateCenter + plate, plate.Y, ImGui.GetColorU32(Veil));
         Typography.DrawCentered(drawList, plateCenter, text, gamble.Won ? CasinoColors.Money : StageInks.Strong,
             TextStyles.Headline);
-    }
-
-    private void DrawKnob(AppSkin ui, Rect rect, CasinoSittingDto sitting, bool changeable, float scale)
-    {
-        if (rect.Width <= 0f)
-        {
-            return;
-        }
-
-        var drawList = ImGui.GetWindowDrawList();
-        var bonusRow = MachineBonusRow.Compute(rect, Metrics.Space.Sm * scale);
-        var turboRect = bonusRow.Turbo;
-        var turboHover = UiInteract.Hover(turboRect.Min, turboRect.Max);
-        ChipRail.PaintChip(drawList, turboRect, Loc.T(L.Machines.Turbo), turbo, turboHover, ui.Ink);
-        if (UiInteract.Click(turboRect.Min, turboRect.Max, turboHover))
-        {
-            turbo = !turbo;
-            UiFeedback.Play(turbo ? UiSound.ToggleOn : UiSound.ToggleOff);
-        }
-
-        if (machineIndex != 1)
-        {
-            var infoRect = bonusRow.Info;
-            var info = Typography.FitText(Loc.T(machineIndex == 2 ? L.Machines.MoogleKnobInfo : L.Machines.LinesInfo),
-                infoRect.Width, TextStyles.Footnote);
-            var size = Typography.Measure(info, TextStyles.Footnote);
-            Typography.Draw(drawList, new Vector2(infoRect.Min.X, infoRect.Center.Y - size.Y * 0.5f), info,
-                StageInks.Strong, TextStyles.Footnote);
-            return;
-        }
-
-        var bet = Composer.Amount;
-        var anteRect = bonusRow.Ante;
-        var anteHover = changeable && UiInteract.Hover(anteRect.Min, anteRect.Max);
-        ChipRail.PaintChip(drawList, anteRect, anteLabel.Get(L.Machines.AnteCost,
-            SlotsRules.CostOf(SlotsRules.AnteMode, bet)), ante, anteHover, ui.Ink);
-        if (UiInteract.Click(anteRect.Min, anteRect.Max, anteHover))
-        {
-            ante = !ante;
-            UiFeedback.Play(ante ? UiSound.ToggleOn : UiSound.ToggleOff);
-        }
-
-        var buyRect = bonusRow.Buy;
-        var cost = SlotsRules.CostOf(SlotsRules.BuyMode, bet);
-        var canBuy = changeable && cost <= sitting.Stack && !Composer.Auto.Running;
-        if (Button.Draw(drawList, buyRect, buyLabel.Get(L.Machines.BuyBonus, cost), ui.Ink, ButtonStyle.Tinted,
-                enabled: canBuy, id: "casino.machines.buy"))
-        {
-            AskBuy(bet);
-        }
     }
 }

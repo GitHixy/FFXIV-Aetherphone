@@ -573,7 +573,7 @@ internal sealed partial class MachineCabinet
             L.Machines.SpinFor, enabled, AutoAvailable: true, Knob: true, Repeat: stage.RepeatPressed(), Busy: busy,
             Cost: cost);
         var action = Composer.Draw(stage, ui, frame.Deck, model, frame.DeltaSeconds);
-        DrawKnob(ui, Composer.KnobRect, sitting, !busy && !Composer.Auto.Running && !blocked, scale);
+        DrawExtras(ui, Composer.KnobRect, sitting, !busy && !Composer.Auto.Running && !blocked, blocked, scale);
         if (blocked && Composer.Auto.Running)
         {
             Composer.Auto.Stop(AutoStop.Manual);
