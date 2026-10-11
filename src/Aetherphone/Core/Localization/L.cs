@@ -12668,7 +12668,7 @@ internal static class L
             new("conduct.chirper.allowed.3", "Glamour, screenshots, GPose and hand-drawn art"),
             new("conduct.chirper.allowed.4", "Humor, memes, romance and adult jokes"),
             new("conduct.chirper.allowed.5", "Real-life photos you took, like fanfest or your setup, with no real face or name in them"),
-            new("conduct.chirper.allowed.6", "One post a day promoting your venue, service or Discord, priced in gil"),
+            new("conduct.chirper.allowed.6", "One post a day promoting your venue"),
             new("conduct.chirper.allowed.7", "Saying you're on Velvet, with nothing explicit attached"),
         };
         public static readonly LocString ChirperVeiledNote = new("conduct.chirper.veiledNote", "The sensitive option appears once your post has a photo.");
@@ -12684,7 +12684,7 @@ internal static class L
             new("conduct.aethergram.allowed.4", "Combat, emotes and time with friends"),
             new("conduct.aethergram.allowed.5", "Romance that isn't sexual"),
             new("conduct.aethergram.allowed.6", "Memes made from in-game images"),
-            new("conduct.aethergram.allowed.7", "One post a day promoting your venue, service or Discord, priced in gil, with an in-game image"),
+            new("conduct.aethergram.allowed.7", "One post a day promoting your venue"),
         };
         public static readonly LocString AethergramInGameTitle = new("conduct.aethergram.inGame.title", "In-game only");
         public static readonly LocString AethergramInGameLead = new("conduct.aethergram.inGame.lead", "Aethergram only shows the game. These are removed:");
