@@ -1,4 +1,5 @@
 using Aetherphone.Apps.Casino.Tables;
+using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
 using Aetherphone.Core.Localization;
 using Xunit;
@@ -17,6 +18,30 @@ public sealed class CasinoKnockFlowTests
         Assert.Equal(KnockStage.Refused, CasinoKnocks.FromDecline(CasinoReasons.Kicked));
         Assert.Equal(KnockStage.Refused, CasinoKnocks.FromDecline(CasinoReasons.BannedFromTable));
         Assert.Equal(KnockStage.None, CasinoKnocks.FromDecline(CasinoReasons.Ended));
+    }
+
+    [Fact]
+    public void ANotFoundRoomReadAsksTheCardWhyBeforeEndingTheRoom()
+    {
+        Assert.Equal(CasinoReasons.InviteOnly, CasinoRoomsStore.DoorReason(
+            new CasinoTableRowDto(TableId: "t1", Admitted: false, Reason: CasinoReasons.InviteOnly), false));
+        Assert.Equal(CasinoReasons.KnockPending, CasinoRoomsStore.DoorReason(
+            new CasinoTableRowDto(TableId: "t1", Admitted: false, Reason: CasinoReasons.KnockPending), false));
+        Assert.Equal(CasinoReasons.BannedFromTable, CasinoRoomsStore.DoorReason(
+            new CasinoTableRowDto(TableId: "t1", Admitted: false, Reason: CasinoReasons.BannedFromTable), false));
+        Assert.Equal(CasinoReasons.NoSpectators, CasinoRoomsStore.DoorReason(
+            new CasinoTableRowDto(TableId: "t1", Admitted: false, Reason: CasinoReasons.NoSpectators), false));
+        Assert.Equal(CasinoReasons.Ended, CasinoRoomsStore.DoorReason(
+            new CasinoTableRowDto(TableId: "t1", Admitted: false), false));
+        Assert.Equal(string.Empty, CasinoRoomsStore.DoorReason(
+            new CasinoTableRowDto(TableId: "t1", Admitted: true), false));
+        Assert.Equal(CasinoReasons.Ended, CasinoRoomsStore.DoorReason(null, true));
+        Assert.Equal(string.Empty, CasinoRoomsStore.DoorReason(null, false));
+
+        var asking = TableDoorCard.ContentFor(CasinoRoomsStore.DoorReason(
+                new CasinoTableRowDto(TableId: "t1", Reason: CasinoReasons.InviteOnly), false),
+            CasinoKnockStatus.Idle, L.Casino.BlackjackClosedTitle, L.Casino.BlackjackClosedHint);
+        Assert.Equal(TableDoorAction.Knock, asking.Pressed);
     }
 
     [Fact]
