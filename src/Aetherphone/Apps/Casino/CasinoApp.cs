@@ -658,6 +658,11 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         }
 
         var stack = state?.Sitting?.Stack ?? 0;
+        if (route.Screen == CasinoScreen.Cabinet && Originals.OriginalsCabinet.Owns(route.GameId))
+        {
+            return originals.DisplayStack(stack);
+        }
+
         return route.Screen == CasinoScreen.Cabinet && Machines.MachineCabinet.Owns(route.GameId)
             ? machines.DisplayStack(stack)
             : stack;
