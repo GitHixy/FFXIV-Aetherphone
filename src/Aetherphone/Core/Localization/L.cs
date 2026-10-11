@@ -10300,6 +10300,7 @@ internal static class L
         public static readonly LocString DiceHint = new("casino.originals.diceHint", "Drag the slider or type a chance.");
         public static readonly LocString Target = new("casino.originals.target", "Target");
         public static readonly LocString LimboHint = new("casino.originals.limboHint", "Type a target multiplier, then play.");
+        public static readonly LocString Risk = new("casino.originals.risk", "Risk");
         public static readonly LocString RiskClassic = new("casino.originals.riskClassic", "Classic");
         public static readonly LocString RiskLow = new("casino.originals.riskLow", "Low");
         public static readonly LocString RiskMedium = new("casino.originals.riskMedium", "Medium");
@@ -10345,7 +10346,6 @@ internal static class L
         public static readonly LocString RulesStep3 = new("casino.plinko.rulesStep3", "The slot it lands in multiplies your bet. The middle pays least; the edges pay the most and land the least.");
         public static readonly LocString RulesStep4 = new("casino.plinko.rulesStep4", "Drop as often as you like: up to ten balls fall at once. Every board pays back about 99%.");
         public static readonly LocString DropFor = new("casino.plinko.dropFor", "Drop {0}");
-        public static readonly LocString RowsOption = new("casino.plinko.rowsOption", "{0} rows");
         public static readonly LocString MaxWin = new("casino.plinko.maxWin", "Max win");
         public static readonly LocString Edge = new("casino.plinko.edge", "Edge");
         public static readonly LocString EdgeOdds = new("casino.plinko.edgeOdds", "1 in {0}");

@@ -27,6 +27,19 @@ internal readonly struct PlinkoStageLayout
         Stats = stats;
     }
 
+    public static void SplitKnob(Rect knob, float firstNatural, float secondNatural, float gap, out Rect first,
+        out Rect second)
+    {
+        var room = MathF.Max(0f, knob.Width - gap);
+        var natural = firstNatural + secondNatural;
+        var firstWidth = natural <= room
+            ? firstNatural + (room - natural) * 0.5f
+            : room * (natural > 0f ? firstNatural / natural : 0.5f);
+        var split = knob.Min.X + firstWidth;
+        first = new Rect(knob.Min, new Vector2(split, knob.Max.Y));
+        second = new Rect(new Vector2(MathF.Min(knob.Max.X, split + gap), knob.Min.Y), knob.Max);
+    }
+
     public static float PlateHeight(float scale) =>
         (PlatePad * 2f + RailHeight + PlateGap + OriginalsControls.StatHeight) * scale;
 

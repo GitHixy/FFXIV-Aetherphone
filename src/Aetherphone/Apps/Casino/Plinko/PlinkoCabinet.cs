@@ -18,7 +18,6 @@ internal sealed class PlinkoCabinet : ICabinetIdle
     private const float RailChipWidth = 52f;
     private const float RailGap = 4f;
     private const string HintMarquee = "casino.plinko.hint";
-    private const float RowsShare = 0.42f;
     private const float AutoSpacingSeconds = 0.3f;
     private const float SpotlightAlpha = 0.07f;
     private const float SpotlightSpread = 0.42f;
@@ -45,7 +44,8 @@ internal sealed class PlinkoCabinet : ICabinetIdle
     private readonly int[] idlePath = new int[IdleRows];
     private readonly string[] rowLabels = new string[PlinkoRules.RowCounts.Length];
     private readonly string[] riskLabels = new string[PlinkoRules.RiskCount];
-    private readonly LabelSlot[] rowSlots = new LabelSlot[PlinkoRules.RowCounts.Length];
+    private readonly OriginalsChoice rowsChoice = new("casino.plinko.rows", PlinkoRules.RowCounts.Length);
+    private readonly OriginalsChoice riskChoice = new("casino.plinko.risk", PlinkoRules.RiskCount);
 
     private GameRandom idleRandom = GameRandom.FromSeed(IdleSeed);
     private OriginalsLabel edgeLabel;
@@ -99,6 +99,8 @@ internal sealed class PlinkoCabinet : ICabinetIdle
     public void Reset()
     {
         preferences.RememberPlinko(rows, risk);
+        rowsChoice.Close();
+        riskChoice.Close();
         flight.Clear();
         fx.Clear();
         for (var index = 0; index < trails.Length; index++)
@@ -117,11 +119,15 @@ internal sealed class PlinkoCabinet : ICabinetIdle
     public void Gate()
     {
         composer.Gate();
+        rowsChoice.Gate();
+        riskChoice.Gate();
     }
 
     public void DrawOverlay(Rect screen, AppSkin ui)
     {
         composer.DrawOverlay(screen, ui, false);
+        rowsChoice.DrawOverlay(screen, ui);
+        riskChoice.DrawOverlay(screen, ui);
     }
 
     public void Draw(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui)
@@ -538,23 +544,24 @@ internal sealed class PlinkoCabinet : ICabinetIdle
             return;
         }
 
-        var gap = BetComposer.Gap * UiScale.Current;
-        var split = rect.Min.X + (rect.Width - gap) * RowsShare;
-        var rowsRect = new Rect(rect.Min, new Vector2(split, rect.Max.Y));
-        var riskRect = new Rect(new Vector2(split + gap, rect.Min.Y), rect.Max);
+        var scale = UiScale.Current;
+        var drawList = ImGui.GetWindowDrawList();
         for (var index = 0; index < rowLabels.Length; index++)
         {
-            rowLabels[index] = rowSlots[index].Get(L.Plinko.RowsOption, PlinkoRules.RowCounts[index]);
+            rowLabels[index] = GameNumber.Label(PlinkoRules.RowCounts[index]);
         }
 
         riskLabels[PlinkoRules.Low] = Loc.T(L.Originals.RiskLow);
         riskLabels[PlinkoRules.Medium] = Loc.T(L.Originals.RiskMedium);
         riskLabels[PlinkoRules.High] = Loc.T(L.Originals.RiskHigh);
-        var track = Surfaces.Fill(ui.TitleInk, FillLevel.Tertiary);
-        var pickedRows = SegmentStrip.Draw("casino.plinko.rows", rowsRect, rowLabels,
-            PlinkoRules.RowsIndex(rows), track, ui.Accent, ui.MutedInk, CasinoColors.InkTitle);
-        var pickedRisk = SegmentStrip.Draw("casino.plinko.risk", riskRect, riskLabels, risk, track, ui.Accent,
-            ui.MutedInk, CasinoColors.InkTitle);
+        var rowsCaption = Loc.T(L.Plinko.FactRows);
+        var riskCaption = Loc.T(L.Originals.Risk);
+        PlinkoStageLayout.SplitKnob(rect, OriginalsChoice.PickerWidth(rowsCaption, rowLabels, rect.Height, scale),
+            OriginalsChoice.PickerWidth(riskCaption, riskLabels, rect.Height, scale), BetComposer.Gap * scale,
+            out var rowsRect, out var riskRect);
+        var pickedRows = rowsChoice.DrawPicker(drawList, rowsRect, rowsCaption, rowLabels,
+            PlinkoRules.RowsIndex(rows), ui, changeable);
+        var pickedRisk = riskChoice.DrawPicker(drawList, riskRect, riskCaption, riskLabels, risk, ui, changeable);
         if (!changeable)
         {
             return;

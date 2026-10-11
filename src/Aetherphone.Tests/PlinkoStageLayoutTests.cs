@@ -26,4 +26,41 @@ public sealed class PlinkoStageLayoutTests
         Assert.True(layout.Rail.Min.Y > layout.Sign.Max.Y);
         Assert.True(layout.Plate.Max.Y <= stage.Deck.Min.Y);
     }
+
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.25f)]
+    [InlineData(1.5f)]
+    public void TheRowsAndRiskPickersFillTheKnobWithoutOverlapAndKeepTheirNaturalWidth(float scale)
+    {
+        var knob = new Rect(new Vector2(12f * scale, 400f * scale), new Vector2(348f * scale, 436f * scale));
+        var gap = 8f * scale;
+        var rowsNatural = 123f * scale;
+        var riskNatural = 158f * scale;
+
+        PlinkoStageLayout.SplitKnob(knob, rowsNatural, riskNatural, gap, out var rows, out var risk);
+
+        Assert.True(rows.Width >= rowsNatural - 0.01f);
+        Assert.True(risk.Width >= riskNatural - 0.01f);
+        Assert.True(rows.Max.X + gap <= risk.Min.X + 0.01f);
+        Assert.Equal(knob.Min.X, rows.Min.X, 2);
+        Assert.Equal(knob.Max.X, risk.Max.X, 2);
+        Assert.Equal(knob.Height, rows.Height, 2);
+        Assert.Equal(knob.Height, risk.Height, 2);
+    }
+
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1.5f)]
+    public void PickersThatCannotFitShareTheKnobWithoutLeavingIt(float scale)
+    {
+        var knob = new Rect(Vector2.Zero, new Vector2(200f * scale, 36f * scale));
+
+        PlinkoStageLayout.SplitKnob(knob, 160f * scale, 180f * scale, 8f * scale, out var rows, out var risk);
+
+        Assert.True(rows.Max.X <= risk.Min.X);
+        Assert.True(risk.Max.X <= knob.Max.X + 0.01f);
+        Assert.True(rows.Width > 0f && risk.Width > 0f);
+    }
 }
