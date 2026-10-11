@@ -73,10 +73,12 @@ internal static class CasinoReasons
     public const string ConfigInvalid = "config_invalid";
     public const string PracticeOnly = "practice_only";
     public const string NotDealer = "not_dealer";
+    public const string DealerCannotSit = "dealer_cannot_sit";
     public const string RebuyOff = "rebuy_off";
     public const string TournamentLive = "tournament_live";
     public const string NoTournament = "no_tournament";
     public const string NothingToDeal = "nothing_to_deal";
+    public const string TablePaused = "table_paused";
     public const string NoSpectators = "no_spectators";
     public const string DuelLive = "duel_live";
     public const string NoDuel = "no_duel";
@@ -107,10 +109,12 @@ internal static class CasinoReasons
         ConfigInvalid,
         PracticeOnly,
         NotDealer,
+        DealerCannotSit,
         RebuyOff,
         TournamentLive,
         NoTournament,
         NothingToDeal,
+        TablePaused,
         NoSpectators,
         DuelLive,
         NoDuel,
@@ -197,10 +201,12 @@ internal static class CasinoReasons
         [ConfigInvalid] = L.Tables.ReasonConfigInvalid,
         [PracticeOnly] = L.Tables.ReasonPracticeOnly,
         [NotDealer] = L.Tables.ReasonNotDealer,
+        [DealerCannotSit] = L.Tables.ReasonDealerCannotSit,
         [RebuyOff] = L.Tables.ReasonRebuyOff,
         [TournamentLive] = L.Tables.ReasonTournamentLive,
         [NoTournament] = L.Tables.ReasonNoTournament,
         [NothingToDeal] = L.Tables.ReasonNothingToDeal,
+        [TablePaused] = L.Tables.ReasonTablePaused,
         [NoSpectators] = L.Tables.ReasonNoSpectators,
         [DuelLive] = L.Tables.ReasonDuelLive,
         [NoDuel] = L.Tables.ReasonNoDuel,

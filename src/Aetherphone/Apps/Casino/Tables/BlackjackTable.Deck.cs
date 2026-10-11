@@ -13,6 +13,7 @@ internal sealed partial class BlackjackTable
 {
     private const int MainTarget = -1;
     private const float SideCaptionGap = 3f;
+    private const string WaitMarquee = "casino.blackjack.deck.wait";
 
     private static readonly int[] MainActions =
     {
@@ -160,62 +161,97 @@ internal sealed partial class BlackjackTable
         CasinoBlackjackRoomStateDto board, CasinoRoomSnapshotDto snapshot, long deadlineRemaining, bool veiled)
     {
         var scale = UiScale.Current;
-        var deck = frame.Deck;
-        var row = DeckActions.Row(deck, scale);
+        var row = DeckActions.Row(frame.Deck, scale);
         var draining = snapshot.State != CasinoRoomStates.Live;
         var banked = BlackjackHosting.SeatBanked(board);
         var sitting = CasinoWire.SittingFor(state, CasinoWire.BlackjackKind);
         var bought = banked || sitting is not null;
         var onBoard = BlackjackRules.IsSeat(mySeat);
-        if (!bought || (!onBoard && !CasinoSeatMachine.Holds(seatFlow.Stage)))
-        {
-            DrawSitAction(stage, ui, state, board, bought, row);
-            return;
-        }
-
-        var stakeBlocked = draining || (!banked && (state.Draining || state.StakesPaused));
-        var seatStack = banked ? projection.SeatAt(mySeat)?.Chips ?? 0 : SeatStackOf(sitting!);
-        if (onBoard && banked && DrawSeatBankedAction(ui, board, seatStack, row))
-        {
-            return;
-        }
-
-        var mask = projection.ActionsMask;
-        if (onBoard && BlackjackRecap.InsuranceOffered(board, mask))
-        {
-            DrawInsurance(ui, row, scale);
-            return;
-        }
-
         var seat = projection.SeatAt(mySeat);
+        var seatStack = banked ? seat?.Chips ?? 0 : sitting is null ? 0 : SeatStackOf(sitting);
+        var mask = projection.ActionsMask;
         var floorPaused = banked ? board.Paused : state.StakesPaused || state.Draining;
         var canBet = onBoard && CasinoJoinGate.CanPlaceBet(board.Phase, true, seatFlow.Waiting, draining, floorPaused);
-        if (canBet && (seat?.Committed ?? 0) == 0)
+        var facts = new BlackjackDeckFacts(
+            dealing,
+            bought,
+            onBoard,
+            CasinoSeatMachine.Holds(seatFlow.Stage),
+            banked && BlackjackHosting.CanRebuy(board, seatStack, seat?.Committed ?? 0),
+            banked && GilBroke(board, seatStack),
+            banked && board.Paused,
+            BlackjackRecap.InsuranceOffered(board, mask),
+            canBet,
+            (seat?.Committed ?? 0) > 0,
+            CasinoJoinGate.CanAct(true, seatFlow.Waiting, mask != 0));
+        switch (BlackjackDeckFlow.Pick(facts))
         {
-            DrawComposer(stage, frame, ui, board, seatStack, veiled);
-            return;
+            case BlackjackDeck.Sit:
+                DrawSitAction(stage, ui, state, board, bought, row);
+                return;
+            case BlackjackDeck.Dealer:
+                DrawDealerDeck(ui, board, row, scale);
+                return;
+            case BlackjackDeck.Rebuy:
+                DrawStand(stage, ui, state, draining, banked);
+                DrawRebuy(stage, ui, board);
+                return;
+            case BlackjackDeck.Ledger:
+                DrawStand(stage, ui, state, draining, banked);
+                DrawLedgerAction(stage, ui);
+                return;
+            case BlackjackDeck.Paused:
+                StageText.Status(ImGui.GetWindowDrawList(), BlackjackDeckLayout.UpperRow(row, scale).Center,
+                    Loc.T(L.Tables.PausedByHost), row.Width, scale);
+                DrawStand(stage, ui, state, draining, banked);
+                return;
+            case BlackjackDeck.Insurance:
+                DrawInsurance(ui, row, scale);
+                return;
+            case BlackjackDeck.Bet:
+                DrawComposer(stage, frame, ui, board, seatStack, veiled);
+                return;
+            case BlackjackDeck.Act:
+                DrawActionBar(ui, seatStack, row, scale);
+                return;
+            default:
+                DrawWait(stage, ui, state, board, seat, draining, banked, canBet, row, scale);
+                return;
+        }
+    }
+
+    private void DrawWait(CasinoStage stage, AppSkin ui, CasinoStateDto state, CasinoBlackjackRoomStateDto board,
+        CasinoBlackjackSeatDto? seat, bool draining, bool banked, bool canBet, Rect row, float scale)
+    {
+        if (canBet || (BlackjackRules.IsSeat(mySeat) && board.InsuranceOpen))
+        {
+            StageText.Status(ImGui.GetWindowDrawList(), BlackjackDeckLayout.UpperRow(row, scale).Center,
+                WaitStatus(board, seat), row.Width, WaitMarquee);
         }
 
-        if (onBoard && CasinoJoinGate.CanAct(true, seatFlow.Waiting, mask != 0))
-        {
-            DrawActionBar(ui, seatStack, row, scale);
-            return;
-        }
+        DrawStand(stage, ui, state, draining, banked);
+    }
 
-        if (canBet || (onBoard && board.InsuranceOpen))
+    private string WaitStatus(CasinoBlackjackRoomStateDto board, CasinoBlackjackSeatDto? seat)
+    {
+        if (board.InsuranceOpen)
         {
-            var status = board.InsuranceOpen && seat is { Insurance: > 0 }
+            return seat is { Insurance: > 0 }
                 ? text.Compact(L.Blackjack.Insured, seat.Insurance)
-                : Loc.T(board.InsuranceOpen ? L.Blackjack.InsuranceWaiting : L.Blackjack.BetIn);
-            StageText.Status(ImGui.GetWindowDrawList(), BlackjackDeckLayout.UpperRow(row, scale).Center, status,
-                row.Width, scale);
+                : Loc.T(L.Blackjack.InsuranceWaiting);
         }
 
+        return BlackjackHosting.AwaitsDeal(board) ? hostedText.WaitingDeal(board.DealerName) : Loc.T(L.Blackjack.BetIn);
+    }
+
+    private void DrawStand(CasinoStage stage, AppSkin ui, CasinoStateDto state, bool draining, bool banked)
+    {
         if (seatFlow.StandQueued)
         {
             return;
         }
 
+        var stakeBlocked = draining || (!banked && (state.Draining || state.StakesPaused));
         var standLabel = stakeBlocked ? Loc.T(L.Casino.CashOut) : Loc.T(L.Casino.StandAction);
         if (stage.SecondaryAction(standLabel, !seatFlow.Busy, ui.Ink))
         {
@@ -223,6 +259,40 @@ internal sealed partial class BlackjackTable
             seatFlow.Stand(roomId);
         }
     }
+
+    private void DrawDealerDeck(AppSkin ui, CasinoBlackjackRoomStateDto board, Rect row, float scale)
+    {
+        var deck = BlackjackHosting.DealerDeckOf(board);
+        var drawList = ImGui.GetWindowDrawList();
+        if (deck is not (DealerDeck.Deal or DealerDeck.WaitingBets))
+        {
+            StageText.Status(drawList, row.Center, Loc.T(DealerCaption(deck)), row.Width, scale);
+            return;
+        }
+
+        if (deck == DealerDeck.WaitingBets)
+        {
+            StageText.Status(drawList, BlackjackDeckLayout.UpperRow(row, scale).Center,
+                Loc.T(L.Tables.DealerWaitingBets), row.Width, scale);
+        }
+
+        var enabled = deck == DealerDeck.Deal && !tables.IntentInFlight;
+        if (!DeckActions.DrawPrimary(row, Loc.T(L.Tables.Deal), ui.Ink, enabled, "blackjack.deal"))
+        {
+            return;
+        }
+
+        inlineReason = string.Empty;
+        tables.Deal(roomId);
+        CasinoSfx.Play(UiSound.CardSnap);
+    }
+
+    private static LocString DealerCaption(DealerDeck deck) => deck switch
+    {
+        DealerDeck.Paused => L.Tables.DealerPaused,
+        DealerDeck.HandOver => L.Casino.BlackjackHandOver,
+        _ => L.Tables.DealerHandLive,
+    };
 
     private void DrawInsurance(AppSkin ui, Rect row, float scale)
     {
@@ -329,32 +399,29 @@ internal sealed partial class BlackjackTable
         }
     }
 
-    private bool DrawSeatBankedAction(AppSkin ui, CasinoBlackjackRoomStateDto board, long seatStack, Rect row)
+    private static bool GilBroke(CasinoBlackjackRoomStateDto board, long seatStack)
     {
-        if (BlackjackHosting.CanRebuy(board, seatStack))
-        {
-            if (DeckActions.DrawPrimary(row, hostedText.Rebuy(board.PracticeStack), ui.Ink, !tables.IntentInFlight,
-                    "blackjack.rebuy"))
-            {
-                inlineReason = string.Empty;
-                tables.Rebuy(roomId);
-            }
+        return CasinoCurrencies.Of(board) == CasinoCurrencies.Gil && seatStack <= 0
+               && board.Phase == BlackjackPhases.Betting;
+    }
 
-            return true;
+    private void DrawRebuy(CasinoStage stage, AppSkin ui, CasinoBlackjackRoomStateDto board)
+    {
+        if (!stage.PrimaryAction(hostedText.Rebuy(board.PracticeStack), !tables.IntentInFlight, ui.Ink))
+        {
+            return;
         }
 
-        if (CasinoCurrencies.Of(board) != CasinoCurrencies.Gil || seatStack > 0
-            || board.Phase != BlackjackPhases.Betting)
-        {
-            return false;
-        }
+        inlineReason = string.Empty;
+        tables.Rebuy(roomId);
+    }
 
-        if (DeckActions.DrawPrimary(row, Loc.T(L.Tables.OpenLedger), ui.Ink, true, "blackjack.ledger"))
+    private void DrawLedgerAction(CasinoStage stage, AppSkin ui)
+    {
+        if (stage.PrimaryAction(Loc.T(L.Tables.OpenLedger), true, ui.Ink))
         {
             openLedger(roomId);
         }
-
-        return true;
     }
 
     private long SeatStackOf(CasinoSittingDto sitting)

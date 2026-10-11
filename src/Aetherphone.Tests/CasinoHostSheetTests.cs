@@ -82,6 +82,29 @@ public sealed class CasinoHostSheetTests
     }
 
     [Fact]
+    public void AHostDealtDraftWaitsForTheDealersTapUntilAutoDealIsTurnedOn()
+    {
+        var draft = new HostDraft();
+        draft.SelectCurrency(CasinoCurrencies.Practice, false);
+        draft.DealerMode = CasinoDealerModes.Host;
+        draft.Normalize(false);
+
+        Assert.False(draft.AutoDeal);
+        Assert.False(draft.Build(null).AutoDeal);
+
+        draft.AutoDeal = true;
+        Assert.True(draft.Build(null).AutoDeal);
+
+        draft.AutoDeal = false;
+        draft.DealerMode = CasinoDealerModes.House;
+        Assert.True(draft.Build(null).AutoDeal);
+
+        draft.AutoDeal = true;
+        draft.Reset(HostGame.Blackjack);
+        Assert.False(draft.AutoDeal);
+    }
+
+    [Fact]
     public void TheDealerSeatTravelsToGilButAChipTableAlwaysDealsOnTheClock()
     {
         var draft = new HostDraft();
