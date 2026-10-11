@@ -170,22 +170,17 @@ internal sealed class RaceResultCard
             return;
         }
 
-        var style = TextStyles.Footnote;
-        var top = row.Center.Y - Typography.LineHeight(style) * 0.5f;
         var photoWidth = 0f;
         if (board.PhotoFinish)
         {
-            var photo = Loc.T(L.Race.PhotoFinish);
             var photoStyle = TextStyles.FootnoteEmphasized;
-            var shown = Typography.FitText(photo, row.Width * 0.5f, photoStyle);
-            photoWidth = Typography.Measure(shown, photoStyle).X + ColumnGap * scale;
-            Typography.Draw(drawList, new Vector2(row.Max.X - photoWidth + ColumnGap * scale, top), shown,
-                CasinoColors.LightB with { W = alpha }, photoStyle);
+            photoWidth = RaceLine.DrawRight(drawList, row.Max.X, row.Center.Y, Loc.T(L.Race.PhotoFinish),
+                row.Width * 0.5f, photoStyle, photoStyle, CasinoColors.LightB with { W = alpha }) + ColumnGap * scale;
         }
 
-        Typography.Draw(drawList, new Vector2(row.Min.X, top),
-            Typography.FitText(texts.RaceNumber(board.RoundIndex), MathF.Max(1f, row.Width - photoWidth), style),
-            CasinoColors.InkBody with { W = alpha }, style);
+        var style = TextStyles.Footnote;
+        RaceLine.DrawLeft(drawList, row.Min.X, row.Center.Y, texts.RaceNumber(board.RoundIndex),
+            row.Width - photoWidth, style, style, CasinoColors.InkBody with { W = alpha });
     }
 
     private static void DrawWinner(ImDrawListPtr drawList, Rect row, CasinoRaceRunnerDto runner, RaceTexts texts,
@@ -227,10 +222,8 @@ internal sealed class RaceResultCard
         RaceFieldList.DrawSilkBadge(drawList, silkMin, silk, runner, runner.Slot, alpha, scale);
         var left = row.Min.X + 2f * scale + WinnerSilk * scale + ColumnGap * scale;
         var labelStyle = TextStyles.FootnoteEmphasized;
-        var label = texts.Place(place);
-        var labelWidth = MathF.Min(row.Width * 0.3f, Typography.Measure(label, labelStyle).X);
-        Typography.Draw(drawList, new Vector2(left, row.Center.Y - Typography.LineHeight(labelStyle) * 0.5f),
-            Typography.FitText(label, labelWidth, labelStyle), CasinoColors.InkBody with { W = alpha }, labelStyle);
+        var labelWidth = RaceLine.DrawLeft(drawList, left, row.Center.Y, texts.Place(place), row.Width * 0.3f,
+            labelStyle, labelStyle, CasinoColors.InkBody with { W = alpha });
         var nameLeft = left + labelWidth + ColumnGap * scale;
         var nameStyle = TextStyles.Headline;
         Typography.Draw(drawList, new Vector2(nameLeft, row.Center.Y - Typography.LineHeight(nameStyle) * 0.5f),
@@ -246,8 +239,8 @@ internal sealed class RaceResultCard
         }
 
         var style = TextStyles.FootnoteEmphasized;
-        Typography.Draw(drawList, new Vector2(row.Min.X, row.Center.Y - Typography.LineHeight(style) * 0.5f),
-            Typography.FitText(title, row.Width, style), CasinoColors.InkBody with { W = alpha }, style);
+        RaceLine.DrawLeft(drawList, row.Min.X, row.Center.Y, title, row.Width, style, style,
+            CasinoColors.InkBody with { W = alpha });
     }
 
     private static void DrawPaidRow(ImDrawListPtr drawList, Rect row, string label, long payout, float alpha,
@@ -264,10 +257,8 @@ internal sealed class RaceResultCard
         var amountWidth = RaceAmounts.Measure(amount, amountStyle).X;
         RaceAmounts.DrawRight(drawList, row.Max.X, row.Center.Y, amount, CasinoColors.Money with { W = alpha },
             amountStyle, alpha);
-        var labelStyle = TextStyles.Subheadline;
-        Typography.Draw(drawList, new Vector2(row.Min.X, row.Center.Y - Typography.LineHeight(labelStyle) * 0.5f),
-            Typography.FitText(label, MathF.Max(1f, row.Width - amountWidth - ColumnGap * scale), labelStyle),
-            CasinoColors.InkTitle with { W = alpha }, labelStyle);
+        RaceLine.DrawLeft(drawList, row.Min.X, row.Center.Y, label, row.Width - amountWidth - ColumnGap * scale,
+            TextStyles.Subheadline, TextStyles.Footnote, CasinoColors.InkTitle with { W = alpha });
     }
 
     private void DrawToggle(ImDrawListPtr drawList, Rect row, float alpha, float scale)
@@ -297,10 +288,8 @@ internal sealed class RaceResultCard
         var thickness = MathF.Max(1f, 1.6f * scale);
         drawList.AddLine(chevronCenter + new Vector2(-chevron, -chevron * 0.5f * direction), tip, color, thickness);
         drawList.AddLine(tip, chevronCenter + new Vector2(chevron, -chevron * 0.5f * direction), color, thickness);
-        var style = TextStyles.SubheadlineEmphasized;
-        Typography.Draw(drawList, new Vector2(row.Min.X, row.Center.Y - Typography.LineHeight(style) * 0.5f),
-            Typography.FitText(Loc.T(L.Race.AllDividends), MathF.Max(1f, row.Width - chevron * 4f), style),
-            CasinoColors.InkTitle with { W = alpha }, style);
+        RaceLine.DrawLeft(drawList, row.Min.X, row.Center.Y, Loc.T(L.Race.AllDividends), row.Width - chevron * 4f,
+            TextStyles.SubheadlineEmphasized, TextStyles.FootnoteEmphasized, CasinoColors.InkTitle with { W = alpha });
     }
 
     private static void DrawDividendRow(ImDrawListPtr drawList, Rect row, string label, long payHundredths,
@@ -312,9 +301,7 @@ internal sealed class RaceResultCard
         Typography.Draw(drawList,
             new Vector2(row.Max.X - multipleWidth, row.Center.Y - Typography.LineHeight(multipleStyle) * 0.5f),
             multiple, CasinoColors.Money, multipleStyle);
-        var labelStyle = TextStyles.Subheadline;
-        Typography.Draw(drawList, new Vector2(row.Min.X, row.Center.Y - Typography.LineHeight(labelStyle) * 0.5f),
-            Typography.FitText(label, MathF.Max(1f, row.Width - multipleWidth - ColumnGap * scale), labelStyle),
-            CasinoColors.InkBody, labelStyle);
+        RaceLine.DrawLeft(drawList, row.Min.X, row.Center.Y, label, row.Width - multipleWidth - ColumnGap * scale,
+            TextStyles.Subheadline, TextStyles.Footnote, CasinoColors.InkBody);
     }
 }

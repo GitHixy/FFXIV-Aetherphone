@@ -583,13 +583,13 @@ internal sealed class RaceCabinet : ICabinetIdle
     {
         var height = PillHeight * scale;
         var style = TextStyles.SubheadlineEmphasized;
-        var maxWidth = area.Width * 0.86f;
-        var fitted = Typography.FitText(text, maxWidth - height, style);
-        var width = Typography.Measure(fitted, style).X + height;
+        var floor = TextStyles.FootnoteEmphasized;
+        var room = area.Width * 0.86f - height;
+        var width = RaceLine.Measure(text, room, style, floor).X + height;
         var center = area.Center;
         var min = new Vector2(center.X - width * 0.5f, center.Y - height * 0.5f);
         Material.FrostedGlass(drawList, min, min + new Vector2(width, height), height * 0.5f, scale, alpha);
-        Typography.DrawCentered(drawList, center, fitted, CasinoColors.InkTitle with { W = alpha }, style);
+        RaceLine.DrawCentered(drawList, center, text, room, style, floor, CasinoColors.InkTitle with { W = alpha });
     }
 
     private void DrawClosed(ImDrawListPtr drawList, AppSkin ui, string reason, Rect safe, float scale)

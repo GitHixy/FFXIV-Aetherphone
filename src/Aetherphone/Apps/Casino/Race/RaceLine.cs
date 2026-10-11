@@ -24,6 +24,20 @@ internal static class RaceLine
         return size.X;
     }
 
+    public static Vector2 DrawCentered(ImDrawListPtr drawList, Vector2 center, string text, float maxWidth,
+        in TextStyle style, in TextStyle floor, Vector4 ink)
+    {
+        var shown = Fit(text, maxWidth, style, floor, out var fontScale, out var size);
+        Typography.Draw(drawList, center - size * 0.5f, shown, ink, fontScale, style.Weight);
+        return size;
+    }
+
+    public static Vector2 Measure(string text, float maxWidth, in TextStyle style, in TextStyle floor)
+    {
+        Fit(text, maxWidth, style, floor, out _, out var size);
+        return size;
+    }
+
     private static string Fit(string text, float maxWidth, in TextStyle style, in TextStyle floor,
         out float fontScale, out Vector2 size)
     {

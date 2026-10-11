@@ -11,14 +11,9 @@ internal sealed class RaceTexts
 {
     private const char NoRun = '-';
 
-    private static readonly LocString[] ShortKinds =
+    private static readonly LocString[] Kinds =
     {
         L.Race.KindWin, L.Race.KindPlace, L.Race.KindForecast, L.Race.KindReverse,
-    };
-
-    private static readonly LocString[] LongKinds =
-    {
-        L.Race.KindWin, L.Race.KindPlace, L.Race.KindForecast, L.Race.KindReverseLong,
     };
 
     private static readonly LocString[] Places = { L.Race.PlaceFirst, L.Race.PlaceSecond, L.Race.PlaceThird };
@@ -68,7 +63,7 @@ internal sealed class RaceTexts
         language = Loc.Current;
         for (var kind = 0; kind < RaceRules.KindCount; kind++)
         {
-            kindLabels[kind] = Loc.T(ShortKinds[kind]);
+            kindLabels[kind] = Loc.T(Kinds[kind]);
         }
 
         for (var place = 0; place < Places.Length; place++)
@@ -87,8 +82,6 @@ internal sealed class RaceTexts
     }
 
     public string Place(int place) => place >= 0 && place < places.Length ? places[place] : string.Empty;
-
-    public string KindLong(int kind) => RaceRules.IsKind(kind) ? Loc.T(LongKinds[kind]) : string.Empty;
 
     public string Form(CasinoRaceRunnerDto[] runners, int slot)
     {
@@ -241,7 +234,7 @@ internal sealed class RaceTexts
 
     private string TicketLabel(int kind, int runner, int runnerB)
     {
-        var name = KindLong(kind);
+        var name = RaceRules.IsKind(kind) ? kindLabels[kind] : string.Empty;
         var first = GameNumber.Label(runner + 1);
         return RaceRules.IsPair(kind) && RaceRules.IsRunner(runnerB)
             ? Loc.T(L.Race.TicketPair, name, first, GameNumber.Label(runnerB + 1))

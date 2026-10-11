@@ -11452,7 +11452,6 @@ internal static class L
         public static readonly LocString KindPlace = new("casino.race.kindPlace", "Place");
         public static readonly LocString KindForecast = new("casino.race.kindForecast", "Forecast");
         public static readonly LocString KindReverse = new("casino.race.kindReverse", "Reverse");
-        public static readonly LocString KindReverseLong = new("casino.race.kindReverseLong", "Reverse forecast");
         public static readonly LocString PlaceFirst = new("casino.race.placeFirst", "1st");
         public static readonly LocString PlaceSecond = new("casino.race.placeSecond", "2nd");
         public static readonly LocString PlaceThird = new("casino.race.placeThird", "3rd");
