@@ -7,9 +7,17 @@
 
 name: Staff role sync
 
+# GitHub runs this repository's schedules only every few hours whatever the cron says (uptime.yml's
+# five-minute cron fires four to five times a day), so the sync also runs on every push to dev and
+# on a repository_dispatch poke, which an external timer can send at a real cadence. The script treats
+# all three like a schedule: it applies only while DISCORD_ROLE_SYNC_ARMED is true.
 on:
   schedule:
     - cron: "*/10 * * * *"
+  push:
+    branches: [dev]
+  repository_dispatch:
+    types: [staff-role-sync]
   workflow_dispatch:
     inputs:
       apply:
