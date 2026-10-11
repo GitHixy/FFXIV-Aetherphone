@@ -11361,6 +11361,7 @@ internal static class L
         public static readonly LocString ReputationFrozen = new("casino.tables.reputationFrozen", "Host's gil tables are on hold while disputes are reviewed");
         public static readonly LocString PausedBadge = new("casino.tables.pausedBadge", "Paused");
         public static readonly LocString HostPanelHeading = new("casino.tables.hostPanelHeading", "Host controls");
+        public static readonly LocString ChipHostNote = new("casino.tables.chipHostNote", "Pause, Deal and co-dealers are for practice and gil tables. A chip table deals on the house clock so every seat can always play its chips out.");
         public static readonly LocString Rename = new("casino.tables.rename", "Rename");
         public static readonly LocString Deal = new("casino.tables.deal", "Deal");
         public static readonly LocString CloseTable = new("casino.tables.closeTable", "Close");

@@ -8982,6 +8982,7 @@
   "casino.tables.reputationFrozen": "争议审核中，该桌主的金币桌已暂停",
   "casino.tables.pausedBadge": "已暂停",
   "casino.tables.hostPanelHeading": "桌主操作",
+  "casino.tables.chipHostNote": "暂停、发牌和协理荷官仅适用于练习桌和金币桌。筹码桌按赌场计时发牌，确保每个座位都能随时打完自己的筹码。",
   "casino.tables.rename": "重命名",
   "casino.tables.deal": "发牌",
   "casino.tables.closeTable": "关闭",

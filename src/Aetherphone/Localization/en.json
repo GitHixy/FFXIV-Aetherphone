@@ -8982,6 +8982,7 @@
   "casino.tables.reputationFrozen": "Host's gil tables are on hold while disputes are reviewed",
   "casino.tables.pausedBadge": "Paused",
   "casino.tables.hostPanelHeading": "Host controls",
+  "casino.tables.chipHostNote": "Pause, Deal and co-dealers are for practice and gil tables. A chip table deals on the house clock so every seat can always play its chips out.",
   "casino.tables.rename": "Rename",
   "casino.tables.deal": "Deal",
   "casino.tables.closeTable": "Close",

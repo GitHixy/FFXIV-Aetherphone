@@ -8982,6 +8982,7 @@
   "casino.tables.reputationFrozen": "Les tables de gils de l'hôte sont suspendues pendant l'examen des litiges",
   "casino.tables.pausedBadge": "En pause",
   "casino.tables.hostPanelHeading": "Commandes de l'hôte",
+  "casino.tables.chipHostNote": "Pause, Distribuer et les co-croupiers sont réservés aux tables d'entraînement et de gils. Une table à jetons distribue à l'horloge de la maison pour que chaque place puisse toujours jouer ses jetons.",
   "casino.tables.rename": "Renommer",
   "casino.tables.deal": "Distribuer",
   "casino.tables.closeTable": "Fermer",

@@ -8982,6 +8982,7 @@
   "casino.tables.reputationFrozen": "Gil-Tische dieses Gastgebers ruhen, bis Einsprüche geprüft sind",
   "casino.tables.pausedBadge": "Pausiert",
   "casino.tables.hostPanelHeading": "Gastgeber-Steuerung",
+  "casino.tables.chipHostNote": "Pause, Geben und Co-Dealer gibt es nur an Übungs- und Gil-Tischen. Ein Chip-Tisch gibt nach der Uhr des Hauses, damit jeder Platz seine Chips immer ausspielen kann.",
   "casino.tables.rename": "Umbenennen",
   "casino.tables.deal": "Geben",
   "casino.tables.closeTable": "Schließen",

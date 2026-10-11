@@ -8982,6 +8982,7 @@
   "casino.tables.reputationFrozen": "Гиловые столы хозяина приостановлены до разбора споров",
   "casino.tables.pausedBadge": "Пауза",
   "casino.tables.hostPanelHeading": "Управление столом",
+  "casino.tables.chipHostNote": "Пауза, раздача и содилеры есть только у тренировочных и гиловых столов. Стол с фишками раздаёт по таймеру казино, чтобы каждое место всегда могло отыграть свои фишки.",
   "casino.tables.rename": "Переименовать",
   "casino.tables.deal": "Раздать",
   "casino.tables.closeTable": "Закрыть",

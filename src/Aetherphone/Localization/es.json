@@ -8982,6 +8982,7 @@
   "casino.tables.reputationFrozen": "Las mesas de gil del anfitrión están en pausa mientras se revisan disputas",
   "casino.tables.pausedBadge": "En pausa",
   "casino.tables.hostPanelHeading": "Controles del anfitrión",
+  "casino.tables.chipHostNote": "Pausa, Repartir y los co-crupieres son para mesas de práctica y de gil. Una mesa de fichas reparte con el reloj de la casa para que cada asiento pueda jugar siempre sus fichas.",
   "casino.tables.rename": "Renombrar",
   "casino.tables.deal": "Repartir",
   "casino.tables.closeTable": "Cerrar",

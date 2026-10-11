@@ -113,6 +113,15 @@ public sealed class CasinoDoorLayoutTests
     }
 
     [Fact]
+    public void OnlyChipTablesExplainWhyPauseDealAndCoDealersAreMissing()
+    {
+        Assert.True(TableDoor.ExplainsHostLimits(new CasinoTableRowDto(TableId: "t1")));
+        Assert.False(TableDoor.ExplainsHostLimits(new CasinoTableRowDto(TableId: "t1", Practice: true)));
+        Assert.False(TableDoor.ExplainsHostLimits(
+            new CasinoTableRowDto(TableId: "t1", Currency: CasinoCurrencies.Gil)));
+    }
+
+    [Fact]
     public void HostDealtTablesOfferEveryControl()
     {
         var controls = new DoorControl[5];

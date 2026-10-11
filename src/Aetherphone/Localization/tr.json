@@ -8982,6 +8982,7 @@
   "casino.tables.reputationFrozen": "İtirazlar incelenirken ev sahibinin gil masaları askıda",
   "casino.tables.pausedBadge": "Duraklatıldı",
   "casino.tables.hostPanelHeading": "Ev sahibi kontrolleri",
+  "casino.tables.chipHostNote": "Duraklat, Dağıt ve yardımcı krupiyeler alıştırma ve gil masaları içindir. Fiş masası evin saatiyle dağıtır, böylece her koltuk fişlerini her zaman oynayabilir.",
   "casino.tables.rename": "Yeniden adlandır",
   "casino.tables.deal": "Dağıt",
   "casino.tables.closeTable": "Kapat",

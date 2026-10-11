@@ -8982,6 +8982,7 @@
   "casino.tables.reputationFrozen": "As mesas de gil do anfitrião estão suspensas enquanto disputas são analisadas",
   "casino.tables.pausedBadge": "Pausada",
   "casino.tables.hostPanelHeading": "Controles do anfitrião",
+  "casino.tables.chipHostNote": "Pausar, Dar cartas e co-crupiês são para mesas de treino e de gil. Uma mesa de fichas dá as cartas no relógio da casa para que cada lugar sempre possa jogar suas fichas.",
   "casino.tables.rename": "Renomear",
   "casino.tables.deal": "Dar cartas",
   "casino.tables.closeTable": "Fechar",

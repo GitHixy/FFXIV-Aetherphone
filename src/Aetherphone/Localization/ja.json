@@ -8982,6 +8982,7 @@
   "casino.tables.reputationFrozen": "異議確認中のため、このホストのギルテーブルは停止中です",
   "casino.tables.pausedBadge": "一時停止中",
   "casino.tables.hostPanelHeading": "ホスト操作",
+  "casino.tables.chipHostNote": "一時停止・配る・共同ディーラーは練習テーブルとギルテーブル専用です。チップテーブルはハウスの時計で配るので、どの席もいつでも自分のチップを使い切れます。",
   "casino.tables.rename": "名前を変更",
   "casino.tables.deal": "配る",
   "casino.tables.closeTable": "閉じる",

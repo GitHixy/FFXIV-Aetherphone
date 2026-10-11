@@ -113,6 +113,12 @@ internal sealed class TableDoor
             Gap(SectionGap, scale);
             ui.SectionHeading(Loc.T(L.Tables.HostPanelHeading), 0f);
             DrawControls(ui, card, width, scale);
+            if (ExplainsHostLimits(card))
+            {
+                Gap(Metrics.Space.Sm, scale);
+                DrawNote(ui, width, Loc.T(L.Tables.ChipHostNote), scale);
+            }
+
             if (renaming)
             {
                 Gap(Metrics.Space.Md, scale);
@@ -203,6 +209,11 @@ internal sealed class TableDoor
         into[count++] = DoorControl.Rename;
         into[count++] = DoorControl.Close;
         return count;
+    }
+
+    internal static bool ExplainsHostLimits(CasinoTableRowDto card)
+    {
+        return !CasinoCurrencies.SeatBanked(CasinoCurrencies.Of(card));
     }
 
     internal static bool IsCoDealer(CasinoTableConfigDto config, string userId)
