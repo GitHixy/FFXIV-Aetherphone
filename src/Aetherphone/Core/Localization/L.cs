@@ -11311,6 +11311,9 @@ internal static class L
         public static readonly LocString ReasonGilOnly = new("casino.tables.reasonGilOnly", "That only works at gil tables.");
         public static readonly LocString ReasonNotOwner = new("casino.tables.reasonNotOwner", "Only the host of this table can do that.");
         public static readonly LocString RemovedTitle = new("casino.tables.removedTitle", "Removed from this table");
+        public static readonly LocString KnockWaitingTitle = new("casino.tables.knockWaitingTitle", "Waiting for the host");
+        public static readonly LocString KnockDeniedTitle = new("casino.tables.knockDeniedTitle", "Request declined");
+        public static readonly LocString KnockAgain = new("casino.tables.knockAgain", "Ask again");
         public static readonly LocString HostTitle = new("casino.tables.hostTitle", "Host a table");
         public static readonly LocString SectionRules = new("casino.tables.sectionRules", "House rules");
         public static readonly LocString HostName = new("casino.tables.hostName", "Name");

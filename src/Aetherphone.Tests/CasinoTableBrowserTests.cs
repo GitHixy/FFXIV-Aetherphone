@@ -179,12 +179,12 @@ public sealed class CasinoTableBrowserTests
     [Fact]
     public void OnlyADoorRefusalOffersTheKnock()
     {
-        Assert.True(TableDoorCard.AsksToJoin(CasinoReasons.InviteOnly));
-        Assert.True(TableDoorCard.AsksToJoin(CasinoReasons.NotMember));
-        Assert.True(TableDoorCard.AsksToJoin(CasinoReasons.Denied));
-        Assert.False(TableDoorCard.AsksToJoin(CasinoReasons.BannedFromTable));
-        Assert.False(TableDoorCard.AsksToJoin(CasinoReasons.Ended));
-        Assert.False(TableDoorCard.AsksToJoin(CasinoReasons.Full));
+        Assert.True(CasinoKnocks.AsksToJoin(CasinoReasons.InviteOnly));
+        Assert.True(CasinoKnocks.AsksToJoin(CasinoReasons.NotMember));
+        Assert.True(CasinoKnocks.AsksToJoin(CasinoReasons.Denied));
+        Assert.False(CasinoKnocks.AsksToJoin(CasinoReasons.BannedFromTable));
+        Assert.False(CasinoKnocks.AsksToJoin(CasinoReasons.Ended));
+        Assert.False(CasinoKnocks.AsksToJoin(CasinoReasons.Full));
     }
 
     [Fact]

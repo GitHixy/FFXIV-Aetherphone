@@ -145,6 +145,7 @@ internal sealed partial class HoldemTable : ICabinetIdle
         {
             rooms.Leave();
             seatFlow.Left();
+            tables.ForgetKnock();
         }
 
         entered = false;
@@ -715,8 +716,17 @@ internal sealed partial class HoldemTable : ICabinetIdle
 
     private void DrawClosed(ImDrawListPtr drawList, AppSkin ui, string reason, Rect safe, float scale)
     {
-        var action = TableDoorCard.Draw(drawList, ui, reason, L.Holdem.ClosedTitle, L.Holdem.ClosedHint, safe,
-            scale);
+        if (tables.TakeKnockAdmitted(roomId))
+        {
+            rooms.Enter(roomId);
+            tables.RefreshCard(roomId);
+            return;
+        }
+
+        var knock = tables.KnockFor(roomId, reason);
+        tables.EnsureKnockFresh(roomId);
+        var action = TableDoorCard.Draw(drawList, ui, reason, knock, L.Holdem.ClosedTitle, L.Holdem.ClosedHint,
+            safe, scale);
         if (action == TableDoorAction.Knock)
         {
             tables.Knock(roomId);

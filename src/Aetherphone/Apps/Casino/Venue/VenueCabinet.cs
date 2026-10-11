@@ -94,6 +94,7 @@ internal sealed class VenueCabinet : ICabinetIdle
         if (entered)
         {
             venue.Rooms.Leave();
+            venue.Tables.ForgetKnock();
         }
 
         entered = false;
@@ -243,8 +244,17 @@ internal sealed class VenueCabinet : ICabinetIdle
 
     private void DrawClosed(ImDrawListPtr drawList, AppSkin ui, string reason, Rect safe, float scale)
     {
-        var action = Tables.TableDoorCard.Draw(drawList, ui, reason, L.Venue.RoomClosedTitle, L.Venue.RoomClosedHint,
-            safe, scale);
+        if (venue.Tables.TakeKnockAdmitted(roomId))
+        {
+            venue.Rooms.Enter(roomId);
+            venue.Tables.RefreshCard(roomId);
+            return;
+        }
+
+        var knock = venue.Tables.KnockFor(roomId, reason);
+        venue.Tables.EnsureKnockFresh(roomId);
+        var action = Tables.TableDoorCard.Draw(drawList, ui, reason, knock, L.Venue.RoomClosedTitle,
+            L.Venue.RoomClosedHint, safe, scale);
         if (action == Tables.TableDoorAction.Knock)
         {
             venue.Tables.Knock(roomId);

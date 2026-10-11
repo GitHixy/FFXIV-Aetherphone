@@ -14,30 +14,41 @@ internal enum TableDoorAction : byte
     Leave,
 }
 
+internal readonly record struct TableDoorContent(LocString Title, LocString Hint, LocString Action,
+    TableDoorAction Pressed);
+
 internal static class TableDoorCard
 {
-    public static TableDoorAction Draw(ImDrawListPtr drawList, AppSkin ui, string reason, LocString closedTitle,
-        LocString closedHint, Rect safe, float scale)
+    public static TableDoorAction Draw(ImDrawListPtr drawList, AppSkin ui, string reason, CasinoKnockStatus knock,
+        LocString closedTitle, LocString closedHint, Rect safe, float scale)
     {
-        var asks = AsksToJoin(reason);
-        var title = Loc.T(TitleFor(reason, closedTitle));
-        var hint = Loc.T(CasinoReasons.TryMessage(reason, out var known) ? known : closedHint);
-        var action = Loc.T(asks ? L.Casino.BlackjackAskToJoin : L.Casino.WheelBackToFloor);
-        CasinoNotice.DrawWithAction(drawList, ui, CasinoNoticeKind.Card, title, hint, action, safe.Min.X,
-            safe.Min.Y + Metrics.Space.Lg * scale, safe.Width, scale, out var pressed);
-        if (!pressed)
-        {
-            return TableDoorAction.None;
-        }
-
-        return asks ? TableDoorAction.Knock : TableDoorAction.Leave;
+        var content = ContentFor(reason, knock, closedTitle, closedHint);
+        CasinoNotice.DrawWithAction(drawList, ui, CasinoNoticeKind.Card, Loc.T(content.Title), Loc.T(content.Hint),
+            Loc.T(content.Action), safe.Min.X, safe.Min.Y + Metrics.Space.Lg * scale, safe.Width, scale,
+            out var pressed);
+        return pressed ? content.Pressed : TableDoorAction.None;
     }
 
-    internal static bool AsksToJoin(string reason)
+    internal static TableDoorContent ContentFor(string reason, CasinoKnockStatus knock, LocString closedTitle,
+        LocString closedHint)
     {
-        return string.Equals(reason, CasinoReasons.InviteOnly, StringComparison.Ordinal)
-            || string.Equals(reason, CasinoReasons.NotMember, StringComparison.Ordinal)
-            || string.Equals(reason, CasinoReasons.Denied, StringComparison.Ordinal);
+        switch (knock.Stage)
+        {
+            case KnockStage.Waiting or KnockStage.Admitted:
+                return new TableDoorContent(L.Tables.KnockWaitingTitle, L.Casino.ReasonKnockPending,
+                    L.Casino.WheelBackToFloor, TableDoorAction.Leave);
+            case KnockStage.Denied:
+                return new TableDoorContent(L.Tables.KnockDeniedTitle, L.Casino.ReasonDenied, L.Tables.KnockAgain,
+                    TableDoorAction.Knock);
+            case KnockStage.Refused:
+                return new TableDoorContent(TitleFor(knock.Reason, closedTitle), HintFor(knock.Reason, closedHint),
+                    L.Casino.WheelBackToFloor, TableDoorAction.Leave);
+        }
+
+        var asks = CasinoKnocks.AsksToJoin(reason);
+        return new TableDoorContent(TitleFor(reason, closedTitle), HintFor(reason, closedHint),
+            asks ? L.Casino.BlackjackAskToJoin : L.Casino.WheelBackToFloor,
+            asks ? TableDoorAction.Knock : TableDoorAction.Leave);
     }
 
     internal static bool Removed(string reason)
@@ -53,6 +64,11 @@ internal static class TableDoorCard
             return L.Tables.RemovedTitle;
         }
 
-        return AsksToJoin(reason) ? L.Casino.BlackjackDoorTitle : closedTitle;
+        return CasinoKnocks.AsksToJoin(reason) ? L.Casino.BlackjackDoorTitle : closedTitle;
+    }
+
+    private static LocString HintFor(string reason, LocString closedHint)
+    {
+        return CasinoReasons.TryMessage(reason, out var known) ? known : closedHint;
     }
 }

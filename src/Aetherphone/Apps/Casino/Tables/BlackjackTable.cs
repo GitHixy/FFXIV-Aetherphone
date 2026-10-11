@@ -166,6 +166,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         {
             rooms.Leave();
             seatFlow.Left();
+            tables.ForgetKnock();
         }
 
         entered = false;
@@ -313,7 +314,16 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
     private void DrawClosed(ImDrawListPtr drawList, AppSkin ui, string closedReason, Rect safe, float scale)
     {
-        var action = TableDoorCard.Draw(drawList, ui, closedReason, L.Casino.BlackjackClosedTitle,
+        if (tables.TakeKnockAdmitted(roomId))
+        {
+            rooms.Enter(roomId);
+            tables.RefreshCard(roomId);
+            return;
+        }
+
+        var knock = tables.KnockFor(roomId, closedReason);
+        tables.EnsureKnockFresh(roomId);
+        var action = TableDoorCard.Draw(drawList, ui, closedReason, knock, L.Casino.BlackjackClosedTitle,
             L.Casino.BlackjackClosedHint, safe, scale);
         if (action == TableDoorAction.Knock)
         {
