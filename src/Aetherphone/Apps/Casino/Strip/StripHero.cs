@@ -46,7 +46,7 @@ internal sealed class StripHero
     public const long TimedPeriodSeconds = 3 * 3600;
     public const float StreakLabelGap = 6f;
 
-    private const float SurfaceLuminance = 0.22f;
+    private const float SurfaceLuminance = 0.07f;
     private const float GlassOpacity = 0.94f;
     private const float SubAlpha = 0.86f;
     private const float IdleAlpha = 0.6f;
@@ -252,8 +252,9 @@ internal sealed class StripHero
             ? texts.Compact(L.Strip.BonusClaim, timed.Amount)
             : texts.Duration(L.Strip.BonusReadyIn, (int)Math.Min(remaining, int.MaxValue));
         var hovered = ready && !claiming && UiInteract.Hover(rect.Min, rect.Max);
-        var face = Button.Surface(drawList, rect, ui.Ink, ready ? ButtonStyle.Tinted : ButtonStyle.Gray,
-            ButtonRole.Normal, ready && !claiming, hovered, ImGui.GetID("casino.hero.timed"));
+        var face = Button.Surface(drawList, rect, ui.Ink.WithAccent(CasinoColors.Money),
+            ready ? ButtonStyle.Tinted : ButtonStyle.Gray, ButtonRole.Normal, ready && !claiming, hovered,
+            ImGui.GetID("casino.hero.timed"));
         var ringRadius = BonusRing * 0.5f * scale;
         var ringCenter = new Vector2(rect.Min.X + rect.Height * 0.5f, rect.Center.Y);
         var thickness = RingThickness * scale;
@@ -277,7 +278,7 @@ internal sealed class StripHero
         var shown = Typography.FitText(label, MathF.Max(1f, rect.Max.X - Metrics.Space.Sm * scale - textLeft), style);
         var size = Typography.Measure(shown, style);
         Typography.Draw(drawList, new Vector2(textLeft, rect.Center.Y - size.Y * 0.5f), shown,
-            ready ? face.LabelInk : CasinoColors.InkBody, style);
+            ready ? CasinoColors.MoneyHighlight with { W = face.LabelInk.W } : CasinoColors.InkBody, style);
         if (hovered)
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
@@ -310,7 +311,7 @@ internal sealed class StripHero
             if (day < paid)
             {
                 drawList.AddCircleFilled(center, radius, ImGui.GetColorU32(CasinoColors.Money), 20);
-                Typography.DrawCentered(drawList, center, dayLabel, CasinoColors.FeltBottom, TextStyles.FootnoteEmphasized);
+                Typography.DrawCentered(drawList, center, dayLabel, CasinoColors.InkOnLight, TextStyles.FootnoteEmphasized);
                 continue;
             }
 
@@ -318,7 +319,7 @@ internal sealed class StripHero
             {
                 var glow = 0.55f + 0.45f * Pulse.Wave(Pulse.Breath);
                 drawList.AddCircleFilled(center, radius, ImGui.GetColorU32(CasinoColors.Money with { W = glow }), 20);
-                Typography.DrawCentered(drawList, center, dayLabel, CasinoColors.FeltBottom, TextStyles.FootnoteEmphasized);
+                Typography.DrawCentered(drawList, center, dayLabel, CasinoColors.InkOnLight, TextStyles.FootnoteEmphasized);
                 continue;
             }
 

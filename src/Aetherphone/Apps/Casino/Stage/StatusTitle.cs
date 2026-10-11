@@ -90,10 +90,9 @@ internal static class StatusTitle
         var half = new Vector2(width, Height * scale) * 0.5f;
         var min = center - half;
         var max = center + half;
-        Squircle.Fill(drawList, min, max, half.Y, ImGui.GetColorU32(tint with { W = 0.18f }));
-        Squircle.Stroke(drawList, min, max, half.Y, ImGui.GetColorU32(tint with { W = 0.75f }), MathF.Max(1f, scale));
+        Squircle.Fill(drawList, min, max, half.Y, ImGui.GetColorU32(tint));
         var text = Typography.FitText(Loc.T(Label(title)), width - PaddingX * 2f * scale, TextStyles.FootnoteEmphasized);
-        Typography.DrawCentered(drawList, center, text, tint, TextStyles.FootnoteEmphasized);
+        Typography.DrawCentered(drawList, center, text, CasinoColors.InkOnLight, TextStyles.FootnoteEmphasized);
         return width;
     }
 }
