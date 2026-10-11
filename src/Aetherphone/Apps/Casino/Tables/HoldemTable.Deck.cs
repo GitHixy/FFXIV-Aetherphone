@@ -19,8 +19,9 @@ internal sealed partial class HoldemTable
     private const float TouchRow = Metrics.Size.Pill;
     private const float IconRadius = 22f;
     private const float IconGap = 14f;
-    private const float FoldShare = 0.28f;
+    private const float LockReserve = 22f;
     private const string StatusMarquee = "holdem.deck.status";
+    private const string PostToggleId = "holdem.buyin.post";
 
     private static readonly string HistoryGlyph = IconGlyph.Of(FontAwesomeIcon.History);
     private static readonly string ReactGlyph = IconGlyph.Of(FontAwesomeIcon.Smile);
@@ -38,9 +39,6 @@ internal sealed partial class HoldemTable
         "holdem.step.min", "holdem.step.max",
     };
 
-    private readonly string[] postOptions = new string[2];
-    private LanguageInfo? postLanguage;
-
     private void BeginBuyIn(int seat)
     {
         pickedSeat = seat;
@@ -52,7 +50,7 @@ internal sealed partial class HoldemTable
     }
 
     private void DrawDeck(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui, CasinoHoldemRoomStateDto board,
-        CasinoHoldemYouDto? mine, CasinoHoldemSeatDto? hero, long remaining, float scale)
+        CasinoHoldemYouDto? mine, CasinoHoldemSeatDto? hero, float scale)
     {
         if (!frame.Layout.HasDeck)
         {
@@ -95,7 +93,7 @@ internal sealed partial class HoldemTable
                 return;
             }
 
-            DrawActionBar(ui, deck, board, prompt, model, remaining, scale);
+            DrawActionBar(ui, deck, board, prompt, model, scale);
             return;
         }
 
@@ -142,6 +140,16 @@ internal sealed partial class HoldemTable
             new Vector2(deck.Max.X - DeckPad * scale, bottom));
     }
 
+    private static bool DrawBack(ImDrawListPtr drawList, Rect action, AppSkin ui, string id, out Rect confirm)
+    {
+        var scale = UiScale.Current;
+        var label = Loc.T(L.Holdem.Back);
+        var back = HoldemRaiseComposer.BackRect(action, Typography.Measure(label, Button.LabelStyle(action.Height)).X,
+            scale);
+        confirm = HoldemRaiseComposer.ConfirmRect(action, back, scale);
+        return Button.Draw(drawList, back, label, ui.Ink, ButtonStyle.Gray, id: id);
+    }
+
     private static void DeckStatus(Rect deck, string text, float scale) =>
         StatusLine(StatusRect(deck, scale), text, 0f, scale);
 
@@ -164,10 +172,8 @@ internal sealed partial class HoldemTable
         {
             var lockCenter = new Vector2(status.Min.X + 8f * scale, status.Center.Y);
             PhoneIcon.Draw(drawList, lockCenter, LockGlyph, CasinoColors.Money, 14f * scale);
-            var text = Typography.FitText(Loc.T(L.Holdem.RoyalLocked), status.Width - 22f * scale, TextStyles.Footnote);
-            Typography.Draw(drawList, new Vector2(status.Min.X + 22f * scale,
-                    status.Center.Y - Typography.LineHeight(TextStyles.Footnote) * 0.5f), text, ui.BodyInk,
-                TextStyles.Footnote);
+            var note = new Rect(new Vector2(status.Min.X + LockReserve * scale, status.Min.Y), status.Max);
+            DrawRowNote(drawList, note, Loc.T(L.Holdem.RoyalLocked), TextStyles.Footnote, CasinoColors.InkBody);
             Button.Draw(drawList, action, Loc.T(L.Holdem.TableLocked), ui.Ink, ButtonStyle.Gray, enabled: false,
                 id: "holdem.watch.locked");
             return;
@@ -236,7 +242,6 @@ internal sealed partial class HoldemTable
         }
 
         buyIn = practice ? board.PracticeStack : HoldemRules.SnapBuyIn(buyIn, bigBlind, minimum, top);
-        var gap = DeckGap * scale;
         var first = DeckRowRect(deck, 0, scale);
         if (practice)
         {
@@ -248,16 +253,13 @@ internal sealed partial class HoldemTable
         }
 
         var penalty = store.RejoinPenalty(roomId, Environment.TickCount64);
-        DrawPostRow(ui, DeckRowRect(deck, 1, scale), board, penalty);
-        var action = ActionRect(deck, scale);
-        var cancel = new Rect(action.Min, new Vector2(action.Min.X + action.Width * FoldShare, action.Max.Y));
-        if (Button.Draw(drawList, cancel, Loc.T(L.Holdem.Back), ui.Ink, ButtonStyle.Gray, id: "holdem.buyin.back"))
+        DrawPostRow(ui, DeckRowRect(deck, 1, scale), board, penalty, scale);
+        if (DrawBack(drawList, ActionRect(deck, scale), ui, "holdem.buyin.back", out var confirm))
         {
             deckMode = HoldemDeckMode.Status;
             return;
         }
 
-        var confirm = new Rect(new Vector2(cancel.Max.X + gap, action.Min.Y), action.Max);
         var canSit = practice || (buyIn >= minimum && buyIn <= top);
         var label = practice ? Loc.T(L.Holdem.SitDown) : texts.Number(L.Holdem.SitFor, buyIn);
         if (!TableButton.Draw(drawList, confirm, label, string.Empty, ui.Ink, ButtonStyle.Prominent,
@@ -372,7 +374,7 @@ internal sealed partial class HoldemTable
             new Vector2(row.Center.X, row.Center.Y - block.Y * 0.5f), row.Width);
     }
 
-    private void DrawPostRow(AppSkin ui, Rect row, CasinoHoldemRoomStateDto board, bool penalty)
+    private void DrawPostRow(AppSkin ui, Rect row, CasinoHoldemRoomStateDto board, bool penalty, float scale)
     {
         var drawList = ImGui.GetWindowDrawList();
         if (penalty)
@@ -387,14 +389,51 @@ internal sealed partial class HoldemTable
             return;
         }
 
-        if (!ReferenceEquals(postLanguage, Loc.Current) || postOptions[0] is null)
+        var toggle = PostToggleRect(row, scale);
+        var label = new Rect(row.Min, new Vector2(toggle.Min.X - DeckGap * scale, row.Max.Y));
+        DrawLeftNote(drawList, label, Loc.T(L.Holdem.PostBigBlindNow));
+        var hovered = UiInteract.Hover(row.Min, row.Max);
+        if (hovered)
         {
-            postLanguage = Loc.Current;
-            postOptions[0] = Loc.T(L.Holdem.WaitForBigBlind);
-            postOptions[1] = Loc.T(L.Holdem.PostNow);
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
         }
 
-        postNow = SegmentStrip.Draw("##holdemPost", row, postOptions, postNow ? 1 : 0, ui.Palette, TouchRow) == 1;
+        if (UiInteract.Click(row.Min, row.Max, hovered, false))
+        {
+            postNow = !postNow;
+            UiFeedback.Play(postNow ? UiSound.ToggleOn : UiSound.ToggleOff);
+        }
+
+        Toggle.Draw(PostToggleId, toggle, postNow, ui.Theme, 1f, false);
+    }
+
+    internal static Rect PostToggleRect(Rect row, float scale)
+    {
+        var width = Metrics.Size.ToggleWidth * scale;
+        var height = Metrics.Size.ToggleHeight * scale;
+        return new Rect(new Vector2(row.Max.X - width, row.Center.Y - height * 0.5f),
+            new Vector2(row.Max.X, row.Center.Y + height * 0.5f));
+    }
+
+    private static void DrawLeftNote(ImDrawListPtr drawList, Rect row, string text)
+    {
+        var style = TextStyles.Subheadline;
+        if (Typography.Measure(text, style).X > row.Width)
+        {
+            style = TextStyles.Footnote;
+        }
+
+        var block = Typography.MeasureWrappedBlock(text, style, row.Width);
+        if (block.Y > row.Height)
+        {
+            var fitted = Typography.FitText(text, row.Width, style);
+            Typography.Draw(drawList, new Vector2(row.Min.X, row.Center.Y - Typography.LineHeight(style) * 0.5f),
+                fitted, CasinoColors.InkTitle, style);
+            return;
+        }
+
+        Typography.DrawWrappedLeft(new Vector2(row.Min.X, row.Center.Y - block.Y * 0.5f), text, CasinoColors.InkTitle,
+            style, row.Width);
     }
 
     private void DrawRaiseDeck(AppSkin ui, Rect deck, CasinoHoldemRoomStateDto board, in HoldemRaiseModel model)
@@ -427,7 +466,7 @@ internal sealed partial class HoldemTable
     }
 
     private void DrawActionBar(AppSkin ui, Rect deck, CasinoHoldemRoomStateDto board, CasinoHoldemPromptDto prompt,
-        in HoldemRaiseModel model, long remaining, float scale)
+        in HoldemRaiseModel model, float scale)
     {
         var drawList = ImGui.GetWindowDrawList();
         var status = StatusRect(deck, scale);
@@ -447,11 +486,10 @@ internal sealed partial class HoldemTable
             HoverTooltip.Show(rect, texts.Count(L.Holdem.TimeBankLeft, prompt.TimeBankLeft), HoverLabelSide.Above);
         }
 
-        var seconds = (int)((Math.Max(0, remaining) + 999) / 1000);
-        var line = prompt.ToCall > 0
-            ? texts.Numbers(L.Holdem.ToCallLine, prompt.ToCall, seconds)
-            : texts.Count(L.Holdem.YourMoveLine, seconds);
-        StatusLine(status, line, timeBankWidth, scale);
+        if (prompt.ToCall > 0)
+        {
+            StatusLine(status, texts.Number(L.Holdem.ToCall, prompt.ToCall), timeBankWidth, scale);
+        }
 
         var action = ActionRect(deck, scale);
         var gap = DeckGap * scale * 0.75f;
@@ -539,15 +577,15 @@ internal sealed partial class HoldemTable
         var show = new Rect(new Vector2(muck.Max.X + gap, action.Min.Y), action.Max);
         var enabled = !store.ActInFlight;
         if (HoldemActions.Allows(prompt.Actions, HoldemActions.Muck)
-            && Button.Draw(drawList, muck, Loc.T(L.Holdem.ActionMuck), ui.Ink, ButtonStyle.Gray, enabled: enabled,
-                id: "holdem.act.muck"))
+            && TableButton.Draw(drawList, muck, Loc.T(L.Holdem.ActionMuck), string.Empty, ui.Ink, ButtonStyle.Gray,
+                enabled, "holdem.act.muck"))
         {
             Act(board, HoldemActions.Muck, 0);
         }
 
         if (HoldemActions.Allows(prompt.Actions, HoldemActions.Show)
-            && Button.Draw(drawList, show, Loc.T(L.Holdem.ActionShow), ui.Ink, ButtonStyle.Prominent,
-                enabled: enabled, id: "holdem.act.show"))
+            && TableButton.Draw(drawList, show, Loc.T(L.Holdem.ActionShow), string.Empty, ui.Ink,
+                ButtonStyle.Prominent, enabled, "holdem.act.show"))
         {
             Act(board, HoldemActions.Show, 0);
             CasinoSfx.Play(UiSound.CardSnap);
@@ -560,8 +598,7 @@ internal sealed partial class HoldemTable
         var drawList = ImGui.GetWindowDrawList();
         var status = StatusRect(deck, scale);
         var waiting = hero.State == HoldemSeatStates.Waiting;
-        var message = seatFlow.StandQueued || hero.Leaving ? Loc.T(L.Holdem.LeavingAtHandEnd)
-            : Loc.T(StatusOf(board, hero));
+        var message = seatFlow.StandQueued || hero.Leaving ? L.Holdem.LeavingAtHandEnd : StatusOf(hero);
         var postWidth = 0f;
         if (waiting && !store.IntentInFlight)
         {
@@ -574,7 +611,10 @@ internal sealed partial class HoldemTable
             }
         }
 
-        StatusLine(status, message, postWidth, scale);
+        if (message.Key is not null)
+        {
+            StatusLine(status, Loc.T(message), postWidth, scale);
+        }
 
         var action = ActionRect(deck, scale);
         var radius = IconRadius * scale;
@@ -640,7 +680,6 @@ internal sealed partial class HoldemTable
         }
 
         buyIn = practice ? board.PracticeStack : HoldemRules.SnapBuyIn(buyIn, bigBlind, Math.Min(bigBlind, top), top);
-        var gap = DeckGap * scale;
         var first = DeckRowRect(deck, 0, scale);
         if (practice)
         {
@@ -652,15 +691,12 @@ internal sealed partial class HoldemTable
         }
 
         DrawRowNote(drawList, DeckRowRect(deck, 1, scale), L.Holdem.TopUpHint);
-        var action = ActionRect(deck, scale);
-        var cancel = new Rect(action.Min, new Vector2(action.Min.X + action.Width * FoldShare, action.Max.Y));
-        if (Button.Draw(drawList, cancel, Loc.T(L.Holdem.Back), ui.Ink, ButtonStyle.Gray, id: "holdem.topup.back"))
+        if (DrawBack(drawList, ActionRect(deck, scale), ui, "holdem.topup.back", out var confirm))
         {
             deckMode = HoldemDeckMode.Status;
             return;
         }
 
-        var confirm = new Rect(new Vector2(cancel.Max.X + gap, action.Min.Y), action.Max);
         var label = practice ? Loc.T(L.Holdem.Rebuy) : texts.Number(L.Holdem.TopUpFor, buyIn);
         if (!TableButton.Draw(drawList, confirm, label, string.Empty, ui.Ink, ButtonStyle.Prominent,
                 !blocked && buyIn > 0 && !store.IntentInFlight, "holdem.topup.confirm"))

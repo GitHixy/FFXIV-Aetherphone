@@ -10840,6 +10840,7 @@ internal static class L
         public static readonly LocString PitHint = new("casino.holdem.pitHint", "No-limit Texas Hold'em against other players. Pick a room and take a seat.");
         public static readonly LocString Pitch = new("casino.holdem.pitch", "No-limit Texas Hold'em against other players at the same table.");
         public static readonly LocString PlayHere = new("casino.holdem.playHere", "Play here");
+        public static readonly LocString PostBigBlindNow = new("casino.holdem.postBigBlindNow", "Post the big blind now");
         public static readonly LocString PostNow = new("casino.holdem.postNow", "Post now");
         public static readonly LocString PotTotal = new("casino.holdem.potTotal", "Pot {0}");
         public static readonly LocString PracticeNoChips = new("casino.holdem.practiceNoChips", "Practice chips: nothing leaves your bankroll.");
@@ -10871,9 +10872,9 @@ internal static class L
         public static readonly LocString ReplayTitle = new("casino.holdem.replayTitle", "Replay");
         public static readonly LocString RibbonDealing = new("casino.holdem.ribbonDealing", "{0}: dealing");
         public static readonly LocString RibbonNextHand = new("casino.holdem.ribbonNextHand", "Next hand soon");
-        public static readonly LocString RibbonNextIn = new("casino.holdem.ribbonNextIn", "Next hand in {0}");
         public static readonly LocString RibbonShowdown = new("casino.holdem.ribbonShowdown", "Showdown");
         public static readonly LocString RibbonToAct = new("casino.holdem.ribbonToAct", "{0}: {1} to act");
+        public static readonly LocString RibbonVoided = new("casino.holdem.ribbonVoided", "Hand voided");
         public static readonly LocString RibbonWaiting = new("casino.holdem.ribbonWaiting", "Waiting for players");
         public static readonly LocString RibbonYourTurn = new("casino.holdem.ribbonYourTurn", "{0}: your turn");
         public static readonly LocString RoyalLocked = new("casino.holdem.royalLocked", "Opens at the Whale title: a balance of 1B chips.");
@@ -10896,7 +10897,7 @@ internal static class L
         public static readonly LocString SitOut = new("casino.holdem.sitOut", "Sit out");
         public static readonly LocString SittingOut = new("casino.holdem.sittingOut", "Sitting out");
         public static readonly LocString SmallBlindShort = new("casino.holdem.smallBlindShort", "SB");
-        public static readonly LocString StatePickSeat = new("casino.holdem.statePickSeat", "Pick a seat to play");
+        public static readonly LocString StatePickSeat = new("casino.holdem.statePickSeat", "Pick a seat");
         public static readonly LocString StateYourTurn = new("casino.holdem.stateYourTurn", "Your turn");
         public static readonly LocString StatusAllIn = new("casino.holdem.statusAllIn", "You're all in");
         public static readonly LocString StatusFolded = new("casino.holdem.statusFolded", "Folded. Next hand soon.");
@@ -10913,16 +10914,13 @@ internal static class L
         public static readonly LocString TableLocked = new("casino.holdem.tableLocked", "Locked");
         public static readonly LocString TimeBankButton = new("casino.holdem.timeBankButton", "+{0}s");
         public static readonly LocString TimeBankLeft = new("casino.holdem.timeBankLeft", "{0} time banks left");
-        public static readonly LocString ToCallLine = new("casino.holdem.toCallLine", "{0} to call, {1}s");
+        public static readonly LocString ToCall = new("casino.holdem.toCall", "{0} to call");
         public static readonly LocString TopUp = new("casino.holdem.topUp", "Top up");
         public static readonly LocString TopUpFor = new("casino.holdem.topUpFor", "Top up {0}");
         public static readonly LocString TopUpHint = new("casino.holdem.topUpHint", "Top up between hands, up to the table maximum.");
-        public static readonly LocString WaitForBigBlind = new("casino.holdem.waitForBigBlind", "Wait for big blind");
         public static readonly LocString WaitingShort = new("casino.holdem.waitingShort", "Waiting");
-        public static readonly LocString WatchingHint = new("casino.holdem.watchingHint", "You're watching. Tap a Sit spot to play.");
         public static readonly LocString WinChance = new("casino.holdem.winChance", "Win chance");
         public static readonly LocString You = new("casino.holdem.you", "You");
-        public static readonly LocString YourMoveLine = new("casino.holdem.yourMoveLine", "Your move, {0}s");
     }
 
     internal static class Strip

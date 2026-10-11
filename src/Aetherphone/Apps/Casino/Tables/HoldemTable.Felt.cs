@@ -112,7 +112,8 @@ internal sealed partial class HoldemTable
         }
 
         var chipCenter = new Vector2(center.X + halfWidth + 14f * scale, center.Y);
-        HoldemArt.DrawTag(drawList, chipCenter, Loc.T(L.Holdem.SidePotShort), CasinoColors.LightB, scale);
+        HoldemArt.DrawTag(drawList, chipCenter, Loc.T(L.Holdem.SidePotShort), CasinoColors.LightB, layout.Felt.Width,
+            scale);
         var hitMin = new Vector2(center.X - halfWidth, center.Y - 12f * scale);
         var hitMax = new Vector2(chipCenter.X + 18f * scale, center.Y + 12f * scale);
         var hovered = UiInteract.Hover(hitMin, hitMax);
@@ -307,7 +308,7 @@ internal sealed partial class HoldemTable
         if (action.Key is not null && HoldemPhases.Betting(board.Phase) && dto.LastAction.Length > 0)
         {
             var tint = dto.State == HoldemSeatStates.Folded ? CasinoColors.InkBody : CasinoColors.InkTitle;
-            HoldemArt.DrawTag(drawList, top, Loc.T(action), tint, scale);
+            HoldemArt.DrawTag(drawList, top, Loc.T(action), tint, layout.PodWidth, scale);
             return;
         }
 
@@ -389,8 +390,9 @@ internal sealed partial class HoldemTable
         var first = FirstLine(board, dto, hero, out var firstInk);
         Typography.DrawCentered(drawList, new Vector2(centerX, top + nameHeight * 0.5f),
             Typography.FitText(first, inner, nameStyle), firstInk, nameStyle);
-        var second = SecondLine(board, dto, out var ink);
-        var fit = StageText.FitScale(second, inner, stackStyle, StageTextRole.Amount);
+        var second = SecondLine(board, dto, hero, out var ink);
+        var floor = hero ? stackStyle.Scale : TextStyles.Headline.Scale;
+        var fit = Typography.FitScale(second, inner, stackStyle.Scale, floor, stackStyle.Weight);
         Typography.DrawCentered(drawList, new Vector2(centerX, top + nameHeight + stackHeight * 0.5f),
             Typography.FitText(second, inner, fit, stackStyle.Weight), ink, fit, stackStyle.Weight);
         DrawTimeBankPips(drawList, dto, rect, acting, scale);
@@ -413,7 +415,7 @@ internal sealed partial class HoldemTable
         return hero ? Loc.T(L.Holdem.You) : dto.DisplayName;
     }
 
-    private string SecondLine(CasinoHoldemRoomStateDto board, CasinoHoldemSeatDto dto, out Vector4 ink)
+    private string SecondLine(CasinoHoldemRoomStateDto board, CasinoHoldemSeatDto dto, bool hero, out Vector4 ink)
     {
         if (Paying(board, dto.SeatIndex))
         {
@@ -421,7 +423,7 @@ internal sealed partial class HoldemTable
             return texts.Signed(payoutAmounts[dto.SeatIndex]);
         }
 
-        switch (dto.State)
+        switch (hero ? HoldemSeatStates.InHand : dto.State)
         {
             case HoldemSeatStates.AllIn:
                 ink = CasinoColors.Money;
@@ -594,17 +596,15 @@ internal sealed partial class HoldemTable
             return;
         }
 
-        Material.LiquidGlass(drawList, shelf.Min, shelf.Max, shelf.Height * 0.5f, scale, GlassTone.Dark, 0f);
-        var pad = Metrics.Space.Md * scale;
-        var inner = new Rect(new Vector2(shelf.Min.X + pad, shelf.Min.Y), new Vector2(shelf.Max.X - pad, shelf.Max.Y));
         var cards = hero is null ? null : HeroHole(mine, hero);
         if (hero is null || cards is null || !HoldemSeatStates.Live(hero.State))
         {
-            var message = Loc.T(hero is null ? L.Holdem.WatchingHint : StatusOf(board, hero));
-            DrawRowNote(drawList, inner, message, TextStyles.Subheadline, CasinoColors.InkTitle);
             return;
         }
 
+        Material.LiquidGlass(drawList, shelf.Min, shelf.Max, shelf.Height * 0.5f, scale, GlassTone.Dark, 0f);
+        var pad = Metrics.Space.Md * scale;
+        var inner = new Rect(new Vector2(shelf.Min.X + pad, shelf.Min.Y), new Vector2(shelf.Max.X - pad, shelf.Max.Y));
         var strength = StrengthOf(cards, board.Board);
         var label = HoldemHandNames.Describe(strength);
         var half = inner.Width * 0.5f;
@@ -695,13 +695,14 @@ internal sealed partial class HoldemTable
         }
     }
 
-    private static LocString StatusOf(CasinoHoldemRoomStateDto board, CasinoHoldemSeatDto hero) => hero.State switch
+    internal static LocString StatusOf(CasinoHoldemSeatDto hero) => hero.State switch
     {
         HoldemSeatStates.Folded => L.Holdem.StatusFolded,
         HoldemSeatStates.SittingOut => L.Holdem.StatusSittingOut,
         HoldemSeatStates.Waiting => L.Holdem.StatusWaitingBigBlind,
         HoldemSeatStates.AllIn => L.Holdem.StatusAllIn,
-        _ => board.Phase == HoldemPhases.Waiting ? L.Holdem.RibbonWaiting : L.Holdem.StatusNextHand,
+        HoldemSeatStates.InHand => default,
+        _ => L.Holdem.StatusNextHand,
     };
 
     private void DrawChipFlights(ImDrawListPtr drawList, CasinoHoldemRoomStateDto board, float scale)

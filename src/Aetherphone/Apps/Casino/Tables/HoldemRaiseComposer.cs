@@ -36,7 +36,9 @@ internal sealed class HoldemRaiseComposer
     public const float QuickChipHeight = Metrics.Size.Pill;
     public const float QuickLabelPadding = ChipRail.DefaultLabelPadding;
     public const float StepperRadius = Metrics.Size.Pill * 0.5f;
-    public const float BackShare = 0.30f;
+    public const float ActionHeight = Button.LargeHeight;
+    public const float BackMaxShare = 0.4f;
+    public const float TouchTarget = 44f;
 
     private const int QuickCount = 5;
     private const string SliderId = "holdem.raise.slider";
@@ -67,7 +69,7 @@ internal sealed class HoldemRaiseComposer
 
     public long Amount => amount;
 
-    public static float DeckHeight => Pad * 2f + RowHeight * 2f + Gap * 2f + Button.LargeHeight;
+    public static float DeckHeight => Pad * 2f + RowHeight * 2f + Gap * 2f + ActionHeight;
 
     public static HoldemRaiseRows RowsFor(Rect deck, float scale)
     {
@@ -80,9 +82,18 @@ internal sealed class HoldemRaiseComposer
         top += row + gap;
         var slider = new Rect(new Vector2(left, top), new Vector2(right, top + row));
         top += row + gap;
-        var action = new Rect(new Vector2(left, top), new Vector2(right, top + Button.LargeHeight * scale));
+        var action = new Rect(new Vector2(left, top), new Vector2(right, top + ActionHeight * scale));
         return new HoldemRaiseRows(quick, slider, action);
     }
+
+    public static Rect BackRect(Rect action, float labelWidth, float scale)
+    {
+        var width = Math.Clamp(labelWidth + action.Height, TouchTarget * scale, action.Width * BackMaxShare);
+        return new Rect(action.Min, new Vector2(action.Min.X + width, action.Max.Y));
+    }
+
+    public static Rect ConfirmRect(Rect action, Rect back, float scale) =>
+        new(new Vector2(MathF.Min(action.Max.X, back.Max.X + Gap * scale), action.Min.Y), action.Max);
 
     public void Open(in HoldemRaiseModel model)
     {
@@ -124,15 +135,16 @@ internal sealed class HoldemRaiseComposer
         DrawQuickRow(ui, rows.Quick, model, minimum);
         DrawSliderRow(ui, drawList, rows.Slider, model, minimum, scale);
         var actionRect = rows.Action;
-        var backWidth = actionRect.Width * BackShare;
-        var backRect = new Rect(actionRect.Min, new Vector2(actionRect.Min.X + backWidth, actionRect.Max.Y));
-        if (Button.Draw(drawList, backRect, Loc.T(L.Holdem.Back), ui.Ink, ButtonStyle.Gray, id: "holdem.raise.back"))
+        var backLabel = Loc.T(L.Holdem.Back);
+        var backRect = BackRect(actionRect, Typography.Measure(backLabel, Button.LabelStyle(actionRect.Height)).X,
+            scale);
+        if (Button.Draw(drawList, backRect, backLabel, ui.Ink, ButtonStyle.Gray, id: "holdem.raise.back"))
         {
             primed = false;
             return HoldemComposerAction.Cancel;
         }
 
-        var confirmRect = new Rect(new Vector2(backRect.Max.X + gap, actionRect.Min.Y), actionRect.Max);
+        var confirmRect = ConfirmRect(actionRect, backRect, scale);
         var enabled = model.Enabled && amount > 0;
         if (!TableButton.Draw(drawList, confirmRect, ConfirmLabel(model), string.Empty, ui.Ink,
                 ButtonStyle.Prominent, enabled, "holdem.raise.confirm"))

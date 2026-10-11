@@ -66,7 +66,6 @@ internal sealed partial class HoldemTable : ICabinetIdle
     private string ribbonHand = string.Empty;
     private int ribbonPhase = -1;
     private int ribbonCursor = int.MinValue;
-    private int ribbonSeconds = -1;
     private LanguageInfo? ribbonLanguage;
     private HoldemDeckMode deckMode;
     private int mySeat = -1;
@@ -286,7 +285,7 @@ internal sealed partial class HoldemTable : ICabinetIdle
         }
 
         TrackTurn(board, mine, remaining);
-        DrawDeck(stage, frame, ui, board, mine, hero, remaining, scale);
+        DrawDeck(stage, frame, ui, board, mine, hero, scale);
         if (veiled)
         {
             ReconnectVeil.Draw(drawList, frame.Body, ui, 0, scale);
@@ -315,8 +314,15 @@ internal sealed partial class HoldemTable : ICabinetIdle
         }
 
         var band = layout.StateBand;
+        var line = Loc.T(text);
+        var style = StageText.Resolve(StageTextRole.State, TextStyles.Title2);
+        if (!StageText.Fits(Typography.Measure(line, style).X, band.Width))
+        {
+            return;
+        }
+
         var ink = text.Key == L.Holdem.StateYourTurn.Key ? CasinoColors.MoneyHighlight : CasinoColors.InkTitle;
-        StageText.StateLine(drawList, band.Center, Loc.T(text), band.Width, ink);
+        StageText.StateLine(drawList, band.Center, line, band.Width, ink);
     }
 
     internal static LocString StateText(CasinoHoldemRoomStateDto board, CasinoHoldemYouDto? mine,
@@ -330,10 +336,7 @@ internal sealed partial class HoldemTable : ICabinetIdle
         return board.Phase switch
         {
             HoldemPhases.Waiting when hero is null => L.Holdem.StatePickSeat,
-            HoldemPhases.Waiting => Seated(board) < HoldemRules.MinSeats ? L.Holdem.RibbonWaiting
-                : L.Holdem.RibbonNextHand,
             HoldemPhases.Showdown => L.Holdem.RibbonShowdown,
-            HoldemPhases.Voided => L.Holdem.HandVoided,
             _ => default,
         };
     }
@@ -521,7 +524,7 @@ internal sealed partial class HoldemTable : ICabinetIdle
             payoutClock = -PayoutDelaySeconds;
         }
 
-        SettleHero(stage, frame, board, live, scale);
+        SettleHero(stage, frame, board, live);
     }
 
     private void CollectPayouts(CasinoHoldemRoomStateDto board)
@@ -570,8 +573,7 @@ internal sealed partial class HoldemTable : ICabinetIdle
         return total;
     }
 
-    private void SettleHero(CasinoStage stage, in CasinoStageFrame frame, CasinoHoldemRoomStateDto board, bool live,
-        float scale)
+    private void SettleHero(CasinoStage stage, in CasinoStageFrame frame, CasinoHoldemRoomStateDto board, bool live)
     {
         if (mySeat < 0 || string.Equals(settledHand, board.HandId, StringComparison.Ordinal))
         {
@@ -599,10 +601,6 @@ internal sealed partial class HoldemTable : ICabinetIdle
         }
 
         stage.Celebration.Celebrate(hero.Committed, won, layout.HeroCardsCenter, frame.Instant);
-        if (won > hero.Committed)
-        {
-            stage.Particles.Emit(CasinoLights.Sparkle(scale), layout.SeatCenter(mySeat), 14);
-        }
     }
 
     private void AdvanceClocks(float delta)
@@ -643,11 +641,9 @@ internal sealed partial class HoldemTable : ICabinetIdle
         CasinoSfx.Play(UiSound.TimerLow);
     }
 
-    private string RibbonLabel(CasinoHoldemRoomStateDto board, long remaining)
+    private string RibbonLabel(CasinoHoldemRoomStateDto board)
     {
-        var seconds = (int)((Math.Max(0, remaining) + 999) / 1000);
-        var shownSeconds = board.Phase is HoldemPhases.Intermission or HoldemPhases.Settled ? seconds : -1;
-        if (board.Phase == ribbonPhase && board.CursorSeat == ribbonCursor && shownSeconds == ribbonSeconds
+        if (board.Phase == ribbonPhase && board.CursorSeat == ribbonCursor
             && ReferenceEquals(ribbonLanguage, Loc.Current)
             && string.Equals(ribbonHand, board.HandId, StringComparison.Ordinal))
         {
@@ -656,14 +652,13 @@ internal sealed partial class HoldemTable : ICabinetIdle
 
         ribbonPhase = board.Phase;
         ribbonCursor = board.CursorSeat;
-        ribbonSeconds = shownSeconds;
         ribbonLanguage = Loc.Current;
         ribbonHand = board.HandId;
-        ribbonText = BuildRibbon(board, shownSeconds);
+        ribbonText = BuildRibbon(board);
         return ribbonText;
     }
 
-    private string BuildRibbon(CasinoHoldemRoomStateDto board, int seconds)
+    private string BuildRibbon(CasinoHoldemRoomStateDto board)
     {
         switch (board.Phase)
         {
@@ -672,9 +667,9 @@ internal sealed partial class HoldemTable : ICabinetIdle
             case HoldemPhases.Showdown:
                 return Loc.T(L.Holdem.RibbonShowdown);
             case HoldemPhases.Intermission or HoldemPhases.Settled:
-                return Loc.T(L.Holdem.RibbonNextIn, TimeText.Duration(Math.Max(0, seconds)));
+                return Loc.T(L.Holdem.RibbonNextHand);
             case HoldemPhases.Voided:
-                return Loc.T(L.Holdem.HandVoided);
+                return Loc.T(L.Holdem.RibbonVoided);
         }
 
         var street = Loc.T(StreetName(board.Phase));
@@ -711,7 +706,7 @@ internal sealed partial class HoldemTable : ICabinetIdle
             _ => 0,
         };
         var watching = Math.Max(0, snapshot.Occupancy - Seated(board));
-        PhaseRibbon.Draw(drawList, frame.Layout.Ribbon, RibbonLabel(board, remaining), window > 0 ? remaining : 0,
+        PhaseRibbon.Draw(drawList, frame.Layout.Ribbon, RibbonLabel(board), window > 0 ? remaining : 0,
             window, watching, attached ? CasinoColors.LightA : CasinoColors.InkMuted, scale);
     }
 
