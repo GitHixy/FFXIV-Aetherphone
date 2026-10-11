@@ -32,6 +32,7 @@ internal sealed class DailySpinCabinet : ICabinetIdle
 
     private static readonly MarqueeId BannerMarquee = new("casino.spin.banner", 0L);
     private static readonly MarqueeId NoteMarquee = new("casino.spin.note", 0L);
+    private static readonly MarqueeId TaglineMarquee = new("casino.spin.tagline", 0L);
 
     private readonly CasinoSpinStore spin;
     private readonly DailySpinPlayback playback = new();
@@ -100,13 +101,14 @@ internal sealed class DailySpinCabinet : ICabinetIdle
         var claim = DailySpinStatus.Of(answer);
         var signHeight = Math.Clamp(safe.Height * SignShare, SignMin * scale, SignMax * scale);
         var footerTop = safe.Max.Y - FooterHeight * scale;
-        var intro = Loc.T(L.Casino.SpinIntro);
-        var introTop = safe.Min.Y + signHeight;
-        var introHeight = Typography.DrawWrappedLeft(new Vector2(safe.Min.X, introTop), intro, CasinoColors.InkTitle,
-            TextStyles.Subheadline, safe.Width);
-        var wheelTop = introTop + introHeight;
+        var taglineTop = safe.Min.Y + signHeight;
+        var taglineCenter = new Vector2(safe.Center.X, taglineTop + StageText.MinimumCapsuleHeight * scale * 0.5f);
+        var tagline = StageText.Status(drawList, taglineCenter, Loc.T(L.Casino.SpinTagline), safe.Width,
+            TaglineMarquee);
+        var wheelTop = taglineCenter.Y + tagline.Y * 0.5f + Metrics.Space.Sm * scale;
+        var wheelBottom = footerTop - ReasonReserve(safe.Width, scale);
         var wheelArea = new Rect(new Vector2(safe.Min.X, wheelTop),
-            new Vector2(safe.Max.X, MathF.Max(wheelTop, footerTop)));
+            new Vector2(safe.Max.X, MathF.Max(wheelTop, wheelBottom)));
         DrawSpotlights(drawList, frame.Full, wheelArea.Center, frame.Phase);
         DrawSign(drawList, safe, signHeight, frame.Phase);
         DrawWheel(drawList, wheelArea, frame.Phase, scale);
@@ -223,6 +225,18 @@ internal sealed class DailySpinCabinet : ICabinetIdle
         SpinRingArt.DrawPointer(drawList, ringCenter, radius, playback.PointerDeflection, scale);
     }
 
+    private float ReasonReserve(float width, float scale)
+    {
+        if (inlineReason.Length == 0)
+        {
+            return 0f;
+        }
+
+        var message = Loc.T(CasinoReasons.MessageFor(inlineReason));
+        return CasinoNotice.Height(CasinoNoticeKind.Reason, string.Empty, message, width, scale)
+            + Metrics.Space.Sm * scale;
+    }
+
     private void DrawFooter(ImDrawListPtr drawList, AppSkin ui, CasinoStage stage, in CasinoStageFrame frame,
         CasinoDailySpinDto? answer, DailySpinClaim claim, Rect footer, float delta, float scale)
     {
@@ -277,7 +291,7 @@ internal sealed class DailySpinCabinet : ICabinetIdle
 
         if (claim != DailySpinClaim.Claimed)
         {
-            var note = topLabel.Get(L.Casino.SpinTopNote, (int)DailySpinRules.TopAward);
+            var note = topLabel.Get(L.Casino.SpinTopPrize, (int)DailySpinRules.TopAward);
             StageText.Status(drawList, center, note, width, NoteMarquee);
             return;
         }

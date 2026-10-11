@@ -10611,13 +10611,13 @@ internal static class L
         public static readonly LocString BingoSaleNextRoom = new("casino.bingo.saleNextRoom", "Sale opens next room");
         public static readonly LocString BingoWatchedRoom = new("casino.bingo.watchedRoom", "You watched this one from the rail.");
         public static readonly LocString SpinReadyBadge = new("casino.spin.readyBadge", "Free");
-        public static readonly LocString SpinIntro = new("casino.spin.intro", "One free spin a day, no chips involved. Whatever it lands on goes straight into your wallet as coins.");
+        public static readonly LocString SpinTagline = new("casino.spin.tagline", "Free once a day, paid in coins");
         public static readonly LocString SpinAction = new("casino.spin.action", "Spin");
         public static readonly LocString SpinTurning = new("casino.spin.turning", "The wheel is turning");
         public static readonly LocString SpinWonBanner = new("casino.spin.wonBanner", "You won {0} coins");
         public static readonly LocString SpinNextAt = new("casino.spin.nextAt", "Next spin {0}");
         public static readonly LocString SpinNextSoon = new("casino.spin.nextSoon", "Your next spin opens with the coin day");
-        public static readonly LocString SpinTopNote = new("casino.spin.topNote", "Sixteen segments, and the best of them pays {0} coins.");
+        public static readonly LocString SpinTopPrize = new("casino.spin.topPrize", "Top prize {0} coins");
         public static readonly LocString SpinClaimedTitle = new("casino.spin.claimedTitle", "Today's spin is spent");
         public static readonly LocString SeatOpen = new("casino.seat.open", "Open");
         public static readonly LocString BetMin = new("casino.bet.min", "Min");
