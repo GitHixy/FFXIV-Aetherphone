@@ -10744,7 +10744,7 @@ internal static class L
         public static readonly LocString TonightResultDown = new("casino.tonight.down", "{0} down");
         public static readonly LocString TonightResultEven = new("casino.tonight.even", "Even so far");
         public static readonly LocString TonightNoLimit = new("casino.tonight.noLimit", "No daily limit set");
-        public static readonly LocString LimitLeftCaption = new("casino.limits.leftCaption", "left tonight");
+        public static readonly LocString LimitLeftOf = new("casino.limits.leftOf", "{0} left of {1}");
         public static readonly LocString LimitCoinEquivalent = new("casino.limits.coinEquivalent", "Worth {0} coins");
         public static readonly LocString LimitStartsNow = new("casino.limits.startsNow", "Takes effect right away");
         public static readonly LocString LimitNextDay = new("casino.limits.nextDay", "Takes effect when the next day starts");

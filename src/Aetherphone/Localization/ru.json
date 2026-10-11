@@ -8850,7 +8850,7 @@
   "casino.tonight.down": "{0} в минусе",
   "casino.tonight.even": "Пока в ноль",
   "casino.tonight.noLimit": "Дневной лимит не задан",
-  "casino.limits.leftCaption": "осталось на сегодня",
+  "casino.limits.leftOf": "Осталось {0} из {1}",
   "casino.limits.coinEquivalent": "Это {0} монет",
   "casino.limits.startsNow": "Вступит в силу сразу",
   "casino.limits.nextDay": "Вступит в силу с началом следующего дня",

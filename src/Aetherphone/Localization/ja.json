@@ -8850,7 +8850,7 @@
   "casino.tonight.down": "{0}のマイナス",
   "casino.tonight.even": "今のところ収支ゼロ",
   "casino.tonight.noLimit": "1日の上限は未設定",
-  "casino.limits.leftCaption": "今夜の残り",
+  "casino.limits.leftOf": "{1}のうち残り{0}",
   "casino.limits.coinEquivalent": "{0}コイン相当",
   "casino.limits.startsNow": "すぐに適用されます",
   "casino.limits.nextDay": "翌日の開始時に適用されます",

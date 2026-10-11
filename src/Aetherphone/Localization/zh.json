@@ -8850,7 +8850,7 @@
   "casino.tonight.down": "输 {0}",
   "casino.tonight.even": "目前持平",
   "casino.tonight.noLimit": "未设置每日上限",
-  "casino.limits.leftCaption": "今晚剩余",
+  "casino.limits.leftOf": "剩余 {0}/{1}",
   "casino.limits.coinEquivalent": "价值 {0} 枚硬币",
   "casino.limits.startsNow": "立即生效",
   "casino.limits.nextDay": "从下一天开始生效",

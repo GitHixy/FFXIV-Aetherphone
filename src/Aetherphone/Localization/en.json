@@ -8850,7 +8850,7 @@
   "casino.tonight.down": "{0} down",
   "casino.tonight.even": "Even so far",
   "casino.tonight.noLimit": "No daily limit set",
-  "casino.limits.leftCaption": "left tonight",
+  "casino.limits.leftOf": "{0} left of {1}",
   "casino.limits.coinEquivalent": "Worth {0} coins",
   "casino.limits.startsNow": "Takes effect right away",
   "casino.limits.nextDay": "Takes effect when the next day starts",

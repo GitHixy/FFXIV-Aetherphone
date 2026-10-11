@@ -8850,7 +8850,7 @@
   "casino.tonight.down": "{0} ekside",
   "casino.tonight.even": "Şimdilik başabaş",
   "casino.tonight.noLimit": "Günlük limit yok",
-  "casino.limits.leftCaption": "bu gece kalan",
+  "casino.limits.leftOf": "{1} içinden {0} kaldı",
   "casino.limits.coinEquivalent": "{0} Coin değerinde",
   "casino.limits.startsNow": "Hemen geçerli olur",
   "casino.limits.nextDay": "Ertesi gün başladığında geçerli olur",

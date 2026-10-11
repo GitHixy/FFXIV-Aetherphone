@@ -140,6 +140,13 @@ public sealed class CasinoFloorLayoutTests
     }
 
     [Fact]
+    public void TheLimitSaveButtonStacksAboveRemoveWhenBothCannotSitWhole()
+    {
+        Assert.False(CasinoApp.LimitButtonsStack(290f, 150f, 100f, 12f));
+        Assert.True(CasinoApp.LimitButtonsStack(290f, 210f, 110f, 12f));
+    }
+
+    [Fact]
     public void HeroCardsScaleWithTheWidthAndClamp()
     {
         Assert.Equal(196f, StripCarousel.CardHeight(200f, 1f));
