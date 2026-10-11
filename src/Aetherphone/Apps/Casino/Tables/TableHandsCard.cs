@@ -61,8 +61,11 @@ internal sealed class TableHandsCard
             CoinArt.Hairline(drawList, ui, row.Min.X + pad, row.Max.X, row.Min.Y);
         }
 
-        var buttonWidth = VerifyWidth * scale;
-        var buttonHeight = Button.SmallHeight * scale;
+        var verified = history.TryGetVerified(hand.Key, out var verdict);
+        var settled = verified && verdict.Verdict != CasinoRoundVerdict.Unrevealed;
+        var action = Loc.T(verified ? L.Blackjack.VerdictPending : L.Blackjack.VerifyHand);
+        var buttonWidth = settled ? VerifyWidth * scale : Button.WidthFor(action, ButtonSize.Large);
+        var buttonHeight = Button.LargeHeight * scale;
         var button = new Rect(new Vector2(row.Max.X - pad - buttonWidth, row.Center.Y - buttonHeight * 0.5f),
             new Vector2(row.Max.X - pad, row.Center.Y + buttonHeight * 0.5f));
         var textWidth = MathF.Max(1f, button.Min.X - row.Min.X - pad * 2f);
@@ -73,9 +76,9 @@ internal sealed class TableHandsCard
         var detail = text.Number(L.Blackjack.TableHandLine, hand.HandIndex);
         Typography.Draw(drawList, new Vector2(row.Min.X + pad, lineTop + titleHeight),
             Typography.FitText(detail, textWidth, TextStyles.Footnote), ui.MutedInk, TextStyles.Footnote);
-        if (history.TryGetVerified(hand.Key, out var verified) && verified.Verdict != CasinoRoundVerdict.Unrevealed)
+        if (settled)
         {
-            var match = verified.Verdict == CasinoRoundVerdict.Match;
+            var match = verdict.Verdict == CasinoRoundVerdict.Match;
             var label = Loc.T(match ? L.Blackjack.VerdictMatch : L.Blackjack.VerdictMismatch);
             var fitted = Typography.FitText(label, buttonWidth, TextStyles.FootnoteEmphasized);
             var size = Typography.Measure(fitted, TextStyles.FootnoteEmphasized);
@@ -84,8 +87,6 @@ internal sealed class TableHandsCard
             return;
         }
 
-        var pending = history.TryGetVerified(hand.Key, out _);
-        var action = Loc.T(pending ? L.Blackjack.VerdictPending : L.Blackjack.VerifyHand);
         if (Button.Draw(drawList, button, action, ui.Ink, ButtonStyle.Tinted, enabled: !history.Verifying,
                 id: "casino.tablehand.verify"))
         {

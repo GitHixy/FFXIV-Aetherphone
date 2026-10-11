@@ -481,7 +481,12 @@ internal sealed class TableDoor
         var drawList = ImGui.GetWindowDrawList();
         var nameHeight = Typography.LineHeight(TextStyles.Headline);
         var lineHeight = Typography.LineHeight(TextStyles.Subheadline);
-        var height = DoorLayout.KnockHeight(scale, nameHeight, lineHeight);
+        var approve = Loc.T(L.Casino.DoorApprove);
+        var deny = Loc.T(L.Casino.DoorDeny);
+        var buttonStyle = Button.LabelStyle(DoorLayout.Touch * scale);
+        var sideBySide = DoorLayout.KnockSideBySide(width, Typography.Measure(approve, buttonStyle).X,
+            Typography.Measure(deny, buttonStyle).X, scale);
+        var height = DoorLayout.KnockHeight(scale, nameHeight, lineHeight, sideBySide);
         var card = new Rect(origin, new Vector2(origin.X + width, origin.Y + height));
         ui.Card(drawList, card.Min, card.Max, Metrics.Radius.Grouped * scale);
         var avatar = DoorLayout.KnockAvatar(card, scale);
@@ -495,14 +500,14 @@ internal sealed class TableDoor
             Typography.FitText(Loc.T(L.Tables.KnockLine), textWidth, TextStyles.Subheadline), ui.BodyInk,
             TextStyles.Subheadline);
         var enabled = !tables.IntentInFlight;
-        if (Button.Draw(drawList, DoorLayout.KnockButton(card, 0, scale), Loc.T(L.Casino.DoorApprove), ui.Ink,
+        if (Button.Draw(drawList, DoorLayout.KnockButton(card, 0, sideBySide, scale), approve, ui.Ink,
                 ButtonStyle.Prominent, enabled: enabled, id: "casino.door.approve"))
         {
             inlineReason = string.Empty;
             tables.AnswerKnock(roomId, knocker.UserId, true);
         }
 
-        if (Button.Draw(drawList, DoorLayout.KnockButton(card, 1, scale), Loc.T(L.Casino.DoorDeny), ui.Ink,
+        if (Button.Draw(drawList, DoorLayout.KnockButton(card, 1, sideBySide, scale), deny, ui.Ink,
                 ButtonStyle.Gray, enabled: enabled, id: "casino.door.deny"))
         {
             inlineReason = string.Empty;
