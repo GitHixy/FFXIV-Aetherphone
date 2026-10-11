@@ -260,6 +260,7 @@ internal sealed class HostSheet
         var contentWidth = HostFlowLayout.RailWidth(count, tileWidth, scale);
         var row = new Rect(new Vector2(origin.X - pad, origin.Y - pad),
             new Vector2(origin.X + width + pad, origin.Y + tileHeight + pad));
+        rail.Begin(drawList, RailId, row, row, contentWidth);
         if (revealGame)
         {
             revealGame = false;
@@ -267,7 +268,6 @@ internal sealed class HostSheet
             rail.SettleTo(MathF.Max(0f, MathF.Min(selected.Max.X - width, contentWidth - width)));
         }
 
-        rail.Begin(drawList, RailId, row, row, contentWidth);
         var interactive = rail.TapAllowed;
         var phase = (float)ImGui.GetTime();
         var tapped = -1;
