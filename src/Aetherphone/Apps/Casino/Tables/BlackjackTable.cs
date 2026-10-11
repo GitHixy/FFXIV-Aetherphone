@@ -418,14 +418,24 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         }
 
         var dealerPowers = BlackjackHosting.DealerPowers(board, rooms.AccountId, OwnerId());
+        var showsDeal = dealerPowers && BlackjackHosting.HostDeals(board) && board.Phase == BlackjackPhases.Betting
+                        && !dealing;
         var gil = CasinoCurrencies.Of(board) == CasinoCurrencies.Gil;
         var height = Button.LargeHeight * scale;
+        var buttonGap = Metrics.Space.Sm * scale;
+        var pauseLabel = board.Paused ? Loc.T(L.Tables.Resume) : Loc.T(L.Tables.Pause);
+        var dealLabel = Loc.T(L.Tables.Deal);
+        var ledgerLabel = Loc.T(L.Tables.OpenLedger);
+        var pauseWidth = dealerPowers ? Button.WidthFor(pauseLabel, ButtonSize.Large) : 0f;
+        var dealWidth = showsDeal ? Button.WidthFor(dealLabel, ButtonSize.Large) : 0f;
+        var ledgerWidth = gil ? Button.WidthFor(ledgerLabel, ButtonSize.Large) : 0f;
+        var buttons = (dealerPowers ? 1 : 0) + (showsDeal ? 1 : 0) + (gil ? 1 : 0);
+        var squeeze = HostedInfoLayout.ButtonSqueeze(pauseWidth + dealWidth + ledgerWidth, buttons, width,
+            buttonGap);
         var right = left + width;
         if (dealerPowers)
         {
-            var pauseLabel = board.Paused ? Loc.T(L.Tables.Resume) : Loc.T(L.Tables.Pause);
-            var pauseWidth = Button.WidthFor(pauseLabel, ButtonSize.Large);
-            var pauseRect = new Rect(new Vector2(right - pauseWidth, y), new Vector2(right, y + height));
+            var pauseRect = new Rect(new Vector2(right - pauseWidth * squeeze, y), new Vector2(right, y + height));
             if (Button.Draw(drawList, pauseRect, pauseLabel, ui.Ink, ButtonStyle.Gray,
                     enabled: !tables.IntentInFlight, id: "table.pause"))
             {
@@ -433,35 +443,32 @@ internal sealed partial class BlackjackTable : ICabinetIdle
                 tables.Pause(roomId, !board.Paused);
             }
 
-            right = pauseRect.Min.X - Metrics.Space.Sm * scale;
-            if (BlackjackHosting.HostDeals(board) && board.Phase == BlackjackPhases.Betting && !dealing)
-            {
-                var dealLabel = Loc.T(L.Tables.Deal);
-                var dealWidth = Button.WidthFor(dealLabel, ButtonSize.Large);
-                var dealRect = new Rect(new Vector2(right - dealWidth, y), new Vector2(right, y + height));
-                if (Button.Draw(drawList, dealRect, dealLabel, ui.Ink, ButtonStyle.Prominent,
-                        enabled: !tables.IntentInFlight && !board.Paused, id: "table.deal"))
-                {
-                    inlineReason = string.Empty;
-                    tables.Deal(roomId);
-                    CasinoSfx.Play(UiSound.CardSnap);
-                }
+            right = pauseRect.Min.X - buttonGap;
+        }
 
-                right = dealRect.Min.X - Metrics.Space.Sm * scale;
+        if (showsDeal)
+        {
+            var dealRect = new Rect(new Vector2(right - dealWidth * squeeze, y), new Vector2(right, y + height));
+            if (Button.Draw(drawList, dealRect, dealLabel, ui.Ink, ButtonStyle.Prominent,
+                    enabled: !tables.IntentInFlight && !board.Paused, id: "table.deal"))
+            {
+                inlineReason = string.Empty;
+                tables.Deal(roomId);
+                CasinoSfx.Play(UiSound.CardSnap);
             }
+
+            right = dealRect.Min.X - buttonGap;
         }
 
         if (gil)
         {
-            var ledgerLabel = Loc.T(L.Tables.OpenLedger);
-            var ledgerWidth = Button.WidthFor(ledgerLabel, ButtonSize.Large);
-            var ledgerRect = new Rect(new Vector2(right - ledgerWidth, y), new Vector2(right, y + height));
+            var ledgerRect = new Rect(new Vector2(right - ledgerWidth * squeeze, y), new Vector2(right, y + height));
             if (Button.Draw(drawList, ledgerRect, ledgerLabel, ui.Ink, ButtonStyle.Tinted, id: "table.ledger"))
             {
                 openLedger(roomId);
             }
 
-            right = ledgerRect.Min.X - Metrics.Space.Sm * scale;
+            right = ledgerRect.Min.X - buttonGap;
         }
 
         var info = gil ? hostedText.GilLimits(board) : hostedText.Rules(board);

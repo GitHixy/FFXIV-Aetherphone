@@ -11,4 +11,15 @@ internal static class HostedInfoLayout
 
     public static float BlockHeight(float lineHeight, int lines, float scale) =>
         MathF.Max(StageText.MinimumCapsuleHeight * scale, lineHeight * lines + StageText.CapsulePadY * 2f * scale);
+
+    public static float ButtonSqueeze(float naturalWidth, int buttons, float rowWidth, float gap)
+    {
+        var available = rowWidth - gap * MathF.Max(0, buttons - 1);
+        if (naturalWidth <= 0f || naturalWidth <= available)
+        {
+            return 1f;
+        }
+
+        return MathF.Max(0f, available) / naturalWidth;
+    }
 }
