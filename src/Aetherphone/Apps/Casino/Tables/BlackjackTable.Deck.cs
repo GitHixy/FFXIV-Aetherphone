@@ -177,7 +177,7 @@ internal sealed partial class BlackjackTable
             bought,
             onBoard,
             CasinoSeatMachine.Holds(seatFlow.Stage),
-            banked && BlackjackHosting.CanRebuy(board, seatStack),
+            banked && BlackjackHosting.CanRebuy(board, seatStack, seat?.Committed ?? 0),
             banked && GilBroke(board, seatStack),
             banked && board.Paused,
             BlackjackRecap.InsuranceOffered(board, mask),
@@ -193,10 +193,12 @@ internal sealed partial class BlackjackTable
                 DrawDealerDeck(ui, board, row, scale);
                 return;
             case BlackjackDeck.Rebuy:
-                DrawRebuy(ui, board, row);
+                DrawStand(stage, ui, state, draining, banked);
+                DrawRebuy(stage, ui, board);
                 return;
             case BlackjackDeck.Ledger:
-                DrawLedgerAction(ui, row);
+                DrawStand(stage, ui, state, draining, banked);
+                DrawLedgerAction(stage, ui);
                 return;
             case BlackjackDeck.Paused:
                 StageText.Status(ImGui.GetWindowDrawList(), BlackjackDeckLayout.UpperRow(row, scale).Center,
@@ -403,10 +405,9 @@ internal sealed partial class BlackjackTable
                && board.Phase == BlackjackPhases.Betting;
     }
 
-    private void DrawRebuy(AppSkin ui, CasinoBlackjackRoomStateDto board, Rect row)
+    private void DrawRebuy(CasinoStage stage, AppSkin ui, CasinoBlackjackRoomStateDto board)
     {
-        if (!DeckActions.DrawPrimary(row, hostedText.Rebuy(board.PracticeStack), ui.Ink, !tables.IntentInFlight,
-                "blackjack.rebuy"))
+        if (!stage.PrimaryAction(hostedText.Rebuy(board.PracticeStack), !tables.IntentInFlight, ui.Ink))
         {
             return;
         }
@@ -415,9 +416,9 @@ internal sealed partial class BlackjackTable
         tables.Rebuy(roomId);
     }
 
-    private void DrawLedgerAction(AppSkin ui, Rect row)
+    private void DrawLedgerAction(CasinoStage stage, AppSkin ui)
     {
-        if (DeckActions.DrawPrimary(row, Loc.T(L.Tables.OpenLedger), ui.Ink, true, "blackjack.ledger"))
+        if (stage.PrimaryAction(Loc.T(L.Tables.OpenLedger), true, ui.Ink))
         {
             openLedger(roomId);
         }

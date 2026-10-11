@@ -116,15 +116,16 @@ internal static class BlackjackHosting
         return false;
     }
 
-    public static bool CanRebuy(CasinoBlackjackRoomStateDto board, long seatChips)
+    public static bool CanRebuy(CasinoBlackjackRoomStateDto board, long seatChips, long committed)
     {
-        if (CasinoCurrencies.Of(board) != CasinoCurrencies.Practice || !board.PracticeRebuy)
+        if (CasinoCurrencies.Of(board) != CasinoCurrencies.Practice || !board.PracticeRebuy
+            || board.Tournament is { Live: true })
         {
             return false;
         }
 
         var floor = Math.Max(1, board.MinBet);
-        return seatChips < floor && (board.Phase == BlackjackPhases.Betting || BlackjackPhases.Over(board.Phase));
+        return seatChips < floor && committed == 0 && board.Phase == BlackjackPhases.Betting;
     }
 
     public static long NaturalPayout(CasinoBlackjackRoomStateDto board, long bet)
