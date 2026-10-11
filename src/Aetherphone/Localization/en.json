@@ -7763,6 +7763,8 @@
   "changelog.r1300.77": "Changed the floor jackpot draw: a spin counts at most 10 coins of tickets, so every spin from 10 coins up has the same chance",
   "changelog.r1300.58": "Added a Show in cutscenes setting that keeps the phone on screen while a cutscene plays, for a second monitor",
   "changelog.r1300.81": "Added an FPS counter to the mini phone, off by default under Settings > Minimized phone, contributed by t3sco",
+  "changelog.r1300.82": "Added pasting and dragging images into chirps, replies, posts and stories: press Ctrl+V, tap Paste image, or drag a file in from File Explorer, contributed by t3sco",
+  "changelog.r1300.83": "Added pasting and dragging images into chats: the image waits above the message box and sends with whatever you type as its caption, contributed by t3sco",
   "changelog.r1300.51": "Fixed the scrollbar moving the wrong way and too slowly when dragged while the phone position is locked, contributed by jambalong",
   "changelog.r1300.57": "Fixed Linkpearl's filters and the photo editor's aspect ratios cutting their labels short",
   "changelog.r1300.76": "Fixed the handle hint saying letters when only lowercase letters are accepted",

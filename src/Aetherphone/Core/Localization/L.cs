@@ -2353,8 +2353,16 @@ internal static class L
                 "Fixed the handle hint saying letters when only lowercase letters are accepted"),
         };
 
+        public static readonly LocString[] Release1300ChirperAethergramVelvet =
+        {
+            new("changelog.r1300.82",
+                "Added pasting and dragging images into chirps, replies, posts and stories: press Ctrl+V, tap Paste image, or drag a file in from File Explorer, contributed by t3sco"),
+        };
+
         public static readonly LocString[] Release1300Messaging =
         {
+            new("changelog.r1300.83",
+                "Added pasting and dragging images into chats: the image waits above the message box and sends with whatever you type as its caption, contributed by t3sco"),
             new("changelog.r1300.52",
                 "Fixed chats at the newest message snapping back to the bottom when you drag to scroll up, contributed by jambalong"),
         };
