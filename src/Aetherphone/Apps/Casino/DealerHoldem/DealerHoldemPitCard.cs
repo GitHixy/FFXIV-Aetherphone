@@ -15,11 +15,18 @@ internal sealed class DealerHoldemPitCard
 
     private const float PuckRadius = 20f;
     private const float PadX = 16f;
+    private const float PadY = 14f;
     private const float TextGap = 14f;
     private const float ChevronReserve = 24f;
     private const float BulbAlpha = 0.55f;
 
     private float phase;
+
+    public static float TextWidth(float width, float scale) =>
+        MathF.Max(1f, width - PadX * scale - PuckRadius * 2f * scale - TextGap * scale - ChevronReserve * scale);
+
+    public static float HeightFor(float titleHeight, float hintHeight, float scale) =>
+        MathF.Max(Height * scale, PadY * 2f * scale + titleHeight + hintHeight);
 
     public bool Draw(AppSkin ui, float scale)
     {
@@ -27,7 +34,13 @@ internal sealed class DealerHoldemPitCard
         var width = ScrollLayout.StableContentWidth();
         var origin = ImGui.GetCursorScreenPos();
         var drawList = ImGui.GetWindowDrawList();
-        var rect = new Rect(origin, new Vector2(origin.X + width, origin.Y + Height * scale));
+        var textWidth = TextWidth(width, scale);
+        var title = Loc.T(L.DealerHoldem.PlayAlone);
+        var hint = Loc.T(L.DealerHoldem.PlayAloneHint);
+        var titleBlock = Typography.MeasureWrappedBlock(title, TextStyles.Headline, textWidth);
+        var hintBlock = Typography.MeasureWrappedBlock(hint, TextStyles.Footnote, textWidth);
+        var height = HeightFor(titleBlock.Y, hintBlock.Y, scale);
+        var rect = new Rect(origin, new Vector2(origin.X + width, origin.Y + height));
         var rounding = Metrics.Radius.Grouped * scale;
         var hovered = UiInteract.Hover(rect.Min, rect.Max);
         Squircle.FillVerticalGradient(drawList, rect.Min, rect.Max, rounding,
@@ -44,19 +57,15 @@ internal sealed class DealerHoldemPitCard
         var puck = new Vector2(rect.Min.X + PadX * scale + radius, rect.Center.Y);
         BlackjackDealer.DrawPuck(drawList, puck, radius, phase, scale);
         var textLeft = puck.X + radius + TextGap * scale;
-        var textWidth = MathF.Max(1f, rect.Max.X - textLeft - ChevronReserve * scale);
-        var title = Typography.FitText(Loc.T(L.DealerHoldem.PlayAlone), textWidth, TextStyles.Headline);
-        var titleHeight = Typography.LineHeight(TextStyles.Headline);
-        var hint = Loc.T(L.DealerHoldem.PlayAloneHint);
-        var hintBlock = Typography.MeasureWrappedBlock(hint, TextStyles.Footnote, textWidth);
-        var top = rect.Center.Y - (titleHeight + hintBlock.Y) * 0.5f;
-        Typography.Draw(drawList, new Vector2(textLeft, top), title, CasinoColors.InkTitle, TextStyles.Headline);
-        Typography.DrawWrappedLeft(new Vector2(textLeft, top + titleHeight), hint, CasinoColors.InkBody,
+        var top = rect.Center.Y - (titleBlock.Y + hintBlock.Y) * 0.5f;
+        Typography.DrawWrappedLeft(new Vector2(textLeft, top), title, CasinoColors.InkTitle, TextStyles.Headline,
+            textWidth);
+        Typography.DrawWrappedLeft(new Vector2(textLeft, top + titleBlock.Y), hint, CasinoColors.InkBody,
             TextStyles.Footnote, textWidth);
         CasinoArt.Chevron(drawList, new Vector2(rect.Max.X - ChevronReserve * scale * 0.6f, rect.Center.Y),
             CasinoColors.InkTitle);
         ImGui.SetCursorScreenPos(origin);
-        ImGui.Dummy(new Vector2(width, (Height + Gap) * scale));
+        ImGui.Dummy(new Vector2(width, height + Gap * scale));
         return UiInteract.Click(rect.Min, rect.Max, hovered);
     }
 }
