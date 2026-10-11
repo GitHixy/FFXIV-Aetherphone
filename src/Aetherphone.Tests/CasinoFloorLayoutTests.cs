@@ -511,6 +511,14 @@ public sealed class CasinoFloorLayoutTests
         Assert.False(TableRow.ShowsSeatDots(0f, 80f, 500f));
     }
 
+    [Fact]
+    public void AMissionReservesAButtonOnlyWhenItCanBeClaimed()
+    {
+        Assert.Equal(100f, MissionsCard.ActionColumn(true, 100f, 30f));
+        Assert.Equal(30f, MissionsCard.ActionColumn(false, 100f, 30f));
+        Assert.Equal(100f, MissionsCard.ActionColumn(false, 100f, 140f));
+    }
+
     [Theory]
     [InlineData(0.75f)]
     [InlineData(1f)]
