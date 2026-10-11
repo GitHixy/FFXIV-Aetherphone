@@ -9617,8 +9617,6 @@
   "casino.strip.heroDealerEyebrow": "ВЫ ПРОТИВ КАЗИНО",
   "casino.strip.raceBetsClose": "Ставки закроются через {0}",
   "casino.strip.fromChips": "От {0}",
-  "casino.strip.hostMeta": "Ваш стол, ваши правила",
-  "casino.strip.venueMeta": "Для вашего заведения",
   "casino.strip.shelfMachines": "Автоматы",
   "casino.strip.tickerEyebrow": "КРУПНЫЕ ВЫИГРЫШИ",
   "casino.strip.tickWin": "{0}: {1} в игре {2}",

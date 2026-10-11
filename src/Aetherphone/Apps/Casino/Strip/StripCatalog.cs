@@ -1,4 +1,3 @@
-using Aetherphone.Core.Casino;
 using Aetherphone.Core.Localization;
 
 namespace Aetherphone.Apps.Casino.Strip;
@@ -10,21 +9,9 @@ internal enum StripShelf : byte
     QuickBets,
 }
 
-internal enum StripAction : byte
+internal readonly record struct StripEntry(string GameId, LocString Title, CasinoSign Sign)
 {
-    Game,
-    HostTable,
-    HostVenue,
-}
-
-internal readonly record struct StripEntry(
-    string GameId,
-    LocString Title,
-    CasinoSign Sign,
-    StripAction Action = StripAction.Game,
-    VenueRoomKind Venue = VenueRoomKind.None)
-{
-    public bool LiveIdle => Action == StripAction.Game && Machines.MachineCabinet.Owns(GameId);
+    public bool LiveIdle => Machines.MachineCabinet.Owns(GameId);
 }
 
 internal static class StripCatalog
@@ -112,30 +99,14 @@ internal static class StripCatalog
 
     private static StripEntry[] CollectPlayable()
     {
-        var count = 0;
-        for (var shelfIndex = 0; shelfIndex < Shelves.Length; shelfIndex++)
-        {
-            var entries = EntriesOf(Shelves[shelfIndex]);
-            for (var index = 0; index < entries.Length; index++)
-            {
-                if (entries[index].Action == StripAction.Game)
-                {
-                    count++;
-                }
-            }
-        }
-
-        var playable = new StripEntry[count];
+        var playable = new StripEntry[EntryCount];
         var next = 0;
         for (var shelfIndex = 0; shelfIndex < Shelves.Length; shelfIndex++)
         {
             var entries = EntriesOf(Shelves[shelfIndex]);
             for (var index = 0; index < entries.Length; index++)
             {
-                if (entries[index].Action == StripAction.Game)
-                {
-                    playable[next++] = entries[index];
-                }
+                playable[next++] = entries[index];
             }
         }
 

@@ -1179,17 +1179,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         router.Push(new CasinoRoute(CasinoScreen.HostTable, CasinoGames.Blackjack));
     }
 
-    private void OpenVenueHostSheet(Core.Casino.VenueRoomKind kind)
-    {
-        if (router.Current.Screen == CasinoScreen.HostTable)
-        {
-            return;
-        }
-
-        hostSheet.EnterVenue(kind);
-        routes.Push(new CasinoRoute(CasinoScreen.HostTable, Venue.VenueCabinet.GameIdOf(kind)));
-    }
-
     private void OpenHoldemHostSheet()
     {
         if (router.Current.Screen == CasinoScreen.HostTable)

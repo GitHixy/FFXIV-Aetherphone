@@ -112,8 +112,6 @@ internal sealed class HostSheet
 
     public void Enter(string gameKind) => Begin(HostGames.FromKind(gameKind));
 
-    public void EnterVenue(VenueRoomKind kind) => Begin(HostGames.FromVenue(kind));
-
     public void EnterGame(HostGame game, bool preferGil)
     {
         Begin(game);

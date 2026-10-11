@@ -264,10 +264,6 @@ public sealed class CasinoFloorLayoutTests
     public void TheDailySpinTileIsGone()
     {
         Assert.False(StripCatalog.Reaches(CasinoGames.DailySpin));
-        for (var index = 0; index < StripCatalog.Playable.Length; index++)
-        {
-            Assert.Equal(StripAction.Game, StripCatalog.Playable[index].Action);
-        }
     }
 
     [Fact]

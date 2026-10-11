@@ -210,17 +210,7 @@ internal sealed partial class CasinoApp
 
     public PosterInfo Describe(in StripEntry entry)
     {
-        var features = casino.Features;
-        switch (entry.Action)
-        {
-            case StripAction.HostTable:
-                return new PosterInfo(true, 0, Loc.T(L.Strip.HostMeta), string.Empty, string.Empty);
-            case StripAction.HostVenue:
-                return new PosterInfo(CasinoGameGate.IsOpen(features, entry.GameId), 0, Loc.T(L.Strip.VenueMeta),
-                    string.Empty, string.Empty);
-        }
-
-        var open = CasinoGameGate.IsOpen(features, entry.GameId);
+        var open = CasinoGameGate.IsOpen(casino.Features, entry.GameId);
         var room = RoomOf(entry.GameId);
         var meta = room.Length > 0 ? RoomPhaseLine(entry.GameId, room, out _) : string.Empty;
         if (meta.Length == 0)

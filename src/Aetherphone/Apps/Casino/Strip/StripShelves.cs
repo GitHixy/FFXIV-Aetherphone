@@ -2,12 +2,10 @@ using Aetherphone.Apps.Casino.Stage;
 using Aetherphone.Apps.Games;
 using Aetherphone.Core;
 using Aetherphone.Core.Animation;
-using Aetherphone.Core.Casino;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Onboarding;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 
 namespace Aetherphone.Apps.Casino.Strip;
@@ -163,13 +161,9 @@ internal sealed class StripShelves
             var art = new Rect(pressed.Min, new Vector2(pressed.Max.X, pressed.Max.Y - PosterTile.TextBlock(scale)));
             preview.Draw(drawList, art, Metrics.Radius.Widget * scale, tint, live, hovered, deltaSeconds, scale);
         }
-        else if (entry.Action == StripAction.Game && entry.Venue == VenueRoomKind.None)
-        {
-            PosterTile.DrawGlyph(drawList, pressed, entry.GameId, scale);
-        }
         else
         {
-            PosterTile.DrawIcon(drawList, pressed, IconOf(entry), scale);
+            PosterTile.DrawGlyph(drawList, pressed, entry.GameId, scale);
         }
 
         PosterTile.DrawSign(drawList, pressed, entry.Sign, phase, scale, PosterTile.SignBandTop(scale));
@@ -184,12 +178,4 @@ internal sealed class StripShelves
         PosterTile.DrawRim(drawList, pressed, tint, hovered, scale);
         return interactive && UiInteract.Click(tile.Min, tile.Max, hovered);
     }
-
-    private static FontAwesomeIcon IconOf(in StripEntry entry) => entry.Venue switch
-    {
-        VenueRoomKind.Dice => FontAwesomeIcon.Dice,
-        VenueRoomKind.Deathroll => FontAwesomeIcon.Skull,
-        VenueRoomKind.Raffle => FontAwesomeIcon.Ticket,
-        _ => FontAwesomeIcon.PlusCircle,
-    };
 }
