@@ -10,6 +10,7 @@ using Aetherphone.Core.Notifications;
 using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 
 namespace Aetherphone.Apps.Casino.Originals;
 
@@ -17,11 +18,17 @@ internal sealed class HiLoSkin : IOriginalsSkin
 {
     private const float MaxCardWidth = 120f;
     private const float CardShare = 0.34f;
-    private const float CallGap = 10f;
+    private const float CallPad = 12f;
+    private const float CallIcon = 14f;
+    private const float CallIconGap = 6f;
+    private const float SubAlpha = 0.8f;
     private const int CardTag = 1;
+
+    private static readonly TextStyle CallStyle = TextStyles.Headline;
 
     private readonly HiLoChain chain = new();
     private readonly CardFlight flight = new(4);
+    private readonly int[] callOrder = new int[HiLoCallLayout.MaxCalls];
 
     private OriginalsLabel cashedLabel;
     private int flownCount;
@@ -194,12 +201,17 @@ internal sealed class HiLoSkin : IOriginalsSkin
     {
         var scale = UiScale.Current;
         var stage = frame.World;
-        cardWidth = MathF.Min(MathF.Min(stage.Width * CardShare, MaxCardWidth * scale),
-            PlayingCards.WidthFor(stage.Height * 0.78f));
-        cardCenter = new Vector2(stage.Center.X, stage.Min.Y + PlayingCards.HeightFor(cardWidth) * 0.5f);
+        var callsHeight = CallsHeight(scale);
+        var cardRoom = MathF.Max(0f, stage.Height - callsHeight - HiLoCallLayout.Gap * scale);
+        cardWidth = MathF.Min(MathF.Min(stage.Width * CardShare, MaxCardWidth * scale), PlayingCards.WidthFor(cardRoom));
+        var cardHeight = PlayingCards.HeightFor(cardWidth);
+        var top = HiLoCallLayout.GroupTop(stage, HiLoCallLayout.GroupHeight(cardHeight, callsHeight, scale));
+        cardCenter = new Vector2(stage.Center.X, top + cardHeight * 0.5f);
         LaunchNewCards(scale);
         DrawCurrentCard(drawList, scale);
-        DrawCalls(drawList, frame, ui, stage, scale);
+        var callsTop = top + cardHeight + HiLoCallLayout.Gap * scale;
+        DrawCalls(drawList, frame, ui,
+            new Rect(new Vector2(stage.Min.X, callsTop), new Vector2(stage.Max.X, callsTop + callsHeight)), scale);
     }
 
     public void DrawKnob(ImDrawListPtr drawList, Rect rect, AppSkin ui, bool changeable)
@@ -345,22 +357,18 @@ internal sealed class HiLoSkin : IOriginalsSkin
             ImGui.GetColorU32(OriginalsArt.Boom with { W = pulse }));
     }
 
-    private void DrawCalls(ImDrawListPtr drawList, in OriginalsFrame frame, AppSkin ui, Rect stage, float scale)
+    private static float CallsHeight(float scale) =>
+        HiLoCallLayout.CallHeight * scale + Metrics.Space.Xs * scale
+        + Typography.LineHeight(TextStyles.FootnoteEmphasized) * 2f;
+
+    private void DrawCalls(ImDrawListPtr drawList, in OriginalsFrame frame, AppSkin ui, Rect row, float scale)
     {
-        var cardHeight = PlayingCards.HeightFor(cardWidth);
-        var gap = CallGap * scale;
-        var columnWidth = MathF.Max(1f, (stage.Width - cardWidth) * 0.5f - gap);
-        var buttonHeight = Button.LargeHeight * scale;
-        var top = cardCenter.Y - buttonHeight * 0.5f - Typography.LineHeight(TextStyles.Footnote) * 0.5f;
-        var leftRect = new Rect(new Vector2(stage.Min.X, top), new Vector2(stage.Min.X + columnWidth, top + buttonHeight));
-        var rightRect = new Rect(new Vector2(stage.Max.X - columnWidth, top), new Vector2(stage.Max.X, top + buttonHeight));
         if (!chain.Live)
         {
-            DrawOutcome(drawList, new Vector2(cardCenter.X, cardCenter.Y + cardHeight * 0.5f + gap), ui, stage.Width);
+            DrawOutcome(drawList, new Vector2(row.Center.X, row.Min.Y), ui, row.Width);
             return;
         }
 
-        var enabled = frame.Interactive && callStep < 0 && !frame.Originals.InFlight && !Busy;
         var left = PickOption(HiLoCall.Lower, HiLoCall.Below, HiLoCall.Same);
         var right = PickOption(HiLoCall.Higher, HiLoCall.Above, HiLoCall.Same);
         if (left == right)
@@ -368,52 +376,118 @@ internal sealed class HiLoSkin : IOriginalsSkin
             left = -1;
         }
 
-        DrawCall(drawList, frame.Originals, leftRect, left, ui, enabled, scale);
-        DrawCall(drawList, frame.Originals, rightRect, right, ui, enabled, scale);
         var same = Find(HiLoCall.Same);
-        if (same < 0 || same == left || same == right)
+        var count = 0;
+        if (left >= 0)
+        {
+            callOrder[count] = left;
+            count++;
+        }
+
+        if (same >= 0 && same != left && same != right)
+        {
+            callOrder[count] = same;
+            count++;
+        }
+
+        if (right >= 0)
+        {
+            callOrder[count] = right;
+            count++;
+        }
+
+        if (count == 0)
         {
             return;
         }
 
-        var sameWidth = Button.WidthFor(Loc.T(L.Originals.Same), ButtonSize.Small) + gap * 2f;
-        var sameTop = cardCenter.Y + cardHeight * 0.5f + gap;
-        var sameRect = new Rect(new Vector2(cardCenter.X - sameWidth * 0.5f, sameTop),
-            new Vector2(cardCenter.X + sameWidth * 0.5f, sameTop + Button.SmallHeight * scale));
-        DrawCall(drawList, frame.Originals, sameRect, same, ui, enabled, scale);
+        Span<float> naturals = stackalloc float[HiLoCallLayout.MaxCalls];
+        Span<float> widths = stackalloc float[HiLoCallLayout.MaxCalls];
+        for (var index = 0; index < count; index++)
+        {
+            naturals[index] = CallNatural(chain.Option(callOrder[index]), scale);
+        }
+
+        HiLoCallLayout.Distribute(naturals[..count], row.Width, scale, widths[..count]);
+        var enabled = frame.Interactive && callStep < 0 && !frame.Originals.InFlight && !Busy;
+        for (var index = 0; index < count; index++)
+        {
+            DrawCall(drawList, frame.Originals, HiLoCallLayout.Call(row, widths[..count], index, scale),
+                callOrder[index], ui, enabled, scale);
+        }
+    }
+
+    private static float CallNatural(in HiLoOption option, float scale)
+    {
+        var icon = HasIcon(option.Call) ? (CallIcon + CallIconGap) * scale : 0f;
+        var line = icon + Typography.Measure(Loc.T(LabelFor(option.Call)), CallStyle).X;
+        var sub = Inclusive(option.Call) ? Typography.Measure(Loc.T(L.Originals.OrSame), TextStyles.Footnote).X : 0f;
+        var chance = Typography.Measure(OriginalsText.Percent(option.ChanceBasisPoints), TextStyles.FootnoteEmphasized).X;
+        var multiplier = Typography.Measure(OriginalsText.Multiplier(option.MultiplierTenThousandths),
+            TextStyles.FootnoteEmphasized).X;
+        return MathF.Max(MathF.Max(line, sub), MathF.Max(chance, multiplier)) + CallPad * 2f * scale;
     }
 
     private void DrawCall(ImDrawListPtr drawList, CasinoOriginalsStore originals, Rect rect, int optionIndex,
         AppSkin ui, bool enabled, float scale)
     {
-        if (optionIndex < 0)
+        var option = chain.Option(optionIndex);
+        var call = option.Call;
+        var hovered = enabled && UiInteract.Hover(rect.Min, rect.Max);
+        var face = Button.Surface(drawList, rect, ui.Ink, ButtonStyle.Tinted, ButtonRole.Normal, enabled, hovered,
+            ImGui.GetID(CallId(call)));
+        var room = MathF.Max(1f, face.Face.Width - CallPad * 2f * scale);
+        var hasIcon = HasIcon(call);
+        var iconSize = CallIcon * scale;
+        var iconWidth = hasIcon ? iconSize + CallIconGap * scale : 0f;
+        var label = Typography.FitText(Loc.T(LabelFor(call)), MathF.Max(1f, room - iconWidth), CallStyle);
+        var labelSize = Typography.Measure(label, CallStyle);
+        var sub = Inclusive(call) ? Typography.FitText(Loc.T(L.Originals.OrSame), room, TextStyles.Footnote) : string.Empty;
+        var subSize = sub.Length > 0 ? Typography.Measure(sub, TextStyles.Footnote) : Vector2.Zero;
+        var top = face.Face.Center.Y - (labelSize.Y + subSize.Y) * 0.5f;
+        var left = face.Face.Center.X - (iconWidth + labelSize.X) * 0.5f;
+        if (hasIcon)
         {
-            return;
+            ProgressRing.CenterIcon(drawList, new Vector2(left + iconSize * 0.5f, top + labelSize.Y * 0.5f),
+                IconFor(call), face.LabelInk, iconSize);
         }
 
-        var option = chain.Option(optionIndex);
-        var label = Loc.T(LabelFor(option.Call));
-        if (Button.Draw(drawList, rect, Typography.FitText(label, rect.Width - rect.Height * 0.5f,
-                    Button.LabelStyle(rect.Height)), ui.Ink, ButtonStyle.Tinted, enabled: enabled,
-                id: CallId(option.Call)))
+        Typography.Draw(drawList, new Vector2(left + iconWidth, top), label, face.LabelInk, CallStyle);
+        if (sub.Length > 0)
+        {
+            Typography.Draw(drawList, new Vector2(face.Face.Center.X - subSize.X * 0.5f, top + labelSize.Y), sub,
+                face.LabelInk with { W = face.LabelInk.W * SubAlpha }, TextStyles.Footnote);
+        }
+
+        if (enabled && UiInteract.Click(rect.Min, rect.Max, hovered))
         {
             callStep = chain.Step;
-            originals.GuessHiLo(chain.RoundId, chain.Step, option.Call);
+            originals.GuessHiLo(chain.RoundId, chain.Step, call);
             CasinoSfx.Play(UiSound.ChipSlide);
         }
 
-        var chance = OriginalsText.Percent(option.ChanceBasisPoints);
-        var multiplier = OriginalsText.Multiplier(option.MultiplierTenThousandths);
-        var lineTop = rect.Max.Y + 4f * scale;
-        var chanceSize = Typography.Measure(chance, TextStyles.FootnoteEmphasized);
-        var multiplierSize = Typography.Measure(multiplier, TextStyles.FootnoteEmphasized);
-        var gap = Metrics.Space.Sm * scale;
-        var left = rect.Center.X - (chanceSize.X + gap + multiplierSize.X) * 0.5f;
-        Typography.Draw(drawList, new Vector2(left, lineTop), chance, CasinoColors.InkTitle,
-            TextStyles.FootnoteEmphasized);
-        Typography.Draw(drawList, new Vector2(left + chanceSize.X + gap, lineTop), multiplier, CasinoColors.Money,
-            TextStyles.FootnoteEmphasized);
+        var lineTop = rect.Max.Y + Metrics.Space.Xs * scale;
+        var lineHeight = Typography.LineHeight(TextStyles.FootnoteEmphasized);
+        DrawCentered(drawList, OriginalsText.Percent(option.ChanceBasisPoints), rect.Center.X, lineTop, rect.Width,
+            CasinoColors.InkTitle);
+        DrawCentered(drawList, OriginalsText.Multiplier(option.MultiplierTenThousandths), rect.Center.X,
+            lineTop + lineHeight, rect.Width, CasinoColors.Money);
     }
+
+    private static void DrawCentered(ImDrawListPtr drawList, string text, float centerX, float top, float width,
+        Vector4 ink)
+    {
+        var shown = Typography.FitText(text, width, TextStyles.FootnoteEmphasized);
+        var size = Typography.Measure(shown, TextStyles.FootnoteEmphasized);
+        Typography.Draw(drawList, new Vector2(centerX - size.X * 0.5f, top), shown, ink, TextStyles.FootnoteEmphasized);
+    }
+
+    private static bool Inclusive(HiLoCall call) => call is HiLoCall.Higher or HiLoCall.Lower;
+
+    private static bool HasIcon(HiLoCall call) => call != HiLoCall.Same;
+
+    private static FontAwesomeIcon IconFor(HiLoCall call) =>
+        call is HiLoCall.Higher or HiLoCall.Above ? FontAwesomeIcon.ArrowUp : FontAwesomeIcon.ArrowDown;
 
     private void DrawOutcome(ImDrawListPtr drawList, Vector2 topCenter, AppSkin ui, float width)
     {
@@ -465,10 +539,8 @@ internal sealed class HiLoSkin : IOriginalsSkin
 
     private static LocString LabelFor(HiLoCall call) => call switch
     {
-        HiLoCall.Higher => L.Originals.Higher,
-        HiLoCall.Lower => L.Originals.Lower,
-        HiLoCall.Above => L.Originals.Above,
-        HiLoCall.Below => L.Originals.Below,
+        HiLoCall.Higher or HiLoCall.Above => L.Originals.Above,
+        HiLoCall.Lower or HiLoCall.Below => L.Originals.Below,
         _ => L.Originals.Same,
     };
 

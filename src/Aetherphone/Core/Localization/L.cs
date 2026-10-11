@@ -10307,10 +10307,9 @@ internal static class L
         public static readonly LocString KenoPicked = new("casino.originals.kenoPicked", "{0} of 10 picked");
         public static readonly LocString KenoPickFirst = new("casino.originals.kenoPickFirst", "Pick at least one number before you draw.");
         public static readonly LocString StripHits = new("casino.originals.stripHits", "Hits");
-        public static readonly LocString Higher = new("casino.originals.higher", "Higher or same");
-        public static readonly LocString Lower = new("casino.originals.lower", "Lower or same");
         public static readonly LocString Above = new("casino.originals.above", "Higher");
         public static readonly LocString Below = new("casino.originals.below", "Lower");
+        public static readonly LocString OrSame = new("casino.originals.orSame", "or same");
         public static readonly LocString Same = new("casino.originals.same", "Same");
         public static readonly LocString Skip = new("casino.originals.skip", "Skip");
         public static readonly LocString StripChain = new("casino.originals.stripChain", "Chain");
