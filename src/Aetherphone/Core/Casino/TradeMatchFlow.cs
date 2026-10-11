@@ -29,6 +29,58 @@ internal readonly record struct TradeMatchResult(TradeProposal Proposal, TradeMa
     public static TradeMatchResult Of(TradeMatchRoute route) => new(TradeProposal.None, route, string.Empty);
 }
 
+internal sealed class TradeProposalQueue
+{
+    public const int Capacity = 8;
+
+    private readonly object gate = new();
+    private volatile TradeProposal[] held = Array.Empty<TradeProposal>();
+
+    public TradeProposal Head
+    {
+        get
+        {
+            var snapshot = held;
+            return snapshot.Length > 0 ? snapshot[0] : TradeProposal.None;
+        }
+    }
+
+    public int Count => held.Length;
+
+    public bool Add(in TradeProposal proposal)
+    {
+        lock (gate)
+        {
+            var snapshot = held;
+            var kept = Math.Min(snapshot.Length, Capacity - 1);
+            var next = new TradeProposal[kept + 1];
+            Array.Copy(snapshot, snapshot.Length - kept, next, 0, kept);
+            next[kept] = proposal;
+            held = next;
+            return kept == snapshot.Length;
+        }
+    }
+
+    public bool TryTake(out TradeProposal proposal)
+    {
+        lock (gate)
+        {
+            var snapshot = held;
+            if (snapshot.Length == 0)
+            {
+                proposal = TradeProposal.None;
+                return false;
+            }
+
+            proposal = snapshot[0];
+            var next = new TradeProposal[snapshot.Length - 1];
+            Array.Copy(snapshot, 1, next, 0, next.Length);
+            held = next;
+            return true;
+        }
+    }
+}
+
 internal sealed record TradeMiss(string TableId, long Amount, long AtTick)
 {
     public const long ShownMilliseconds = 10 * 60 * 1000;

@@ -20,12 +20,12 @@ internal sealed class CasinoTradeSync : IDisposable
     private readonly Vector4 accent;
     private readonly TradeSyncTracker tracker = new();
     private readonly TradeTableMemory memory = new();
+    private readonly TradeProposalQueue queue = new();
     private readonly ITradeMatchSource source;
     private readonly StoreWork work = new("CasinoTradeSync");
     private readonly Func<string, CasinoTableRowDto?> cardFor;
     private readonly Func<string, CasinoTableLedgerDto?> ledgerFor;
 
-    private volatile TradeProposalHolder? pending;
     private volatile TradeMatchHolder? serverAnswer;
     private volatile TradeMiss? lastMiss;
     private int matching;
@@ -81,7 +81,7 @@ internal sealed class CasinoTradeSync : IDisposable
         }
     }
 
-    public TradeProposal Pending => pending?.Proposal ?? TradeProposal.None;
+    public TradeProposal Pending => queue.Head;
 
     public TradeMiss? LastMiss => lastMiss;
 
@@ -89,16 +89,15 @@ internal sealed class CasinoTradeSync : IDisposable
 
     public void Accept()
     {
-        var held = Interlocked.Exchange(ref pending, null);
-        if (held is not null)
+        if (queue.TryTake(out var proposal))
         {
-            venue.ProposeTrade(held.Proposal);
+            venue.ProposeTrade(proposal);
         }
     }
 
     public void Dismiss()
     {
-        Interlocked.Exchange(ref pending, null);
+        queue.TryTake(out _);
     }
 
     public TradeTableContext Context()
@@ -218,13 +217,17 @@ internal sealed class CasinoTradeSync : IDisposable
         var automatic = !proposal.HostSide && configuration.CasinoTradeAutoConfirm;
         AepLog.Info($"[TradeSync] {proposal.Kind} {proposal.LedgerKind} for {proposal.Amount} gil, "
             + $"host side {proposal.HostSide}, incoming {proposal.Incoming}, automatic {automatic}");
-        if (automatic)
+        if (automatic && !venue.HostInFlight)
         {
             venue.ProposeTrade(proposal);
             return;
         }
 
-        pending = new TradeProposalHolder(proposal);
+        if (!queue.Add(proposal))
+        {
+            AepLog.Info("[TradeSync] Prompt queue full, the oldest unanswered prompt was dropped");
+        }
+
         notifications.Notify(new PhoneNotification(CasinoTurnNotifier.AppId, Loc.T(L.Venue.TradeNotifyTitle),
             Loc.T(proposal.Incoming ? L.Venue.TradeReceivedFrom : L.Venue.TradeSentTo, proposal.CounterpartyName,
                 NumberText.Group(proposal.Amount)), DateTime.Now, accent,
@@ -254,8 +257,6 @@ internal sealed class CasinoTradeSync : IDisposable
         work.Dispose();
         reader.Dispose();
     }
-
-    private sealed record TradeProposalHolder(TradeProposal Proposal);
 
     private sealed record TradeMatchHolder(TradeMatchResult Result, string AccountId, string TableId, long Net);
 }

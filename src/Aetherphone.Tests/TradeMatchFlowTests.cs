@@ -138,6 +138,34 @@ public sealed class TradeMatchFlowTests
     }
 
     [Fact]
+    public void ANewPromptWaitsBehindAnUnansweredOne()
+    {
+        var queue = new TradeProposalQueue();
+        var first = new TradeProposal(TradeProposalKind.Propose, Table, CasinoLedgerKinds.BuyIn, Player, "Xeldar",
+            50_000, string.Empty, true, true);
+        var second = first with { Amount = 70_000 };
+        Assert.True(queue.Add(first));
+        Assert.True(queue.Add(second));
+        Assert.Equal(2, queue.Count);
+        Assert.Equal(50_000, queue.Head.Amount);
+        Assert.True(queue.TryTake(out var taken));
+        Assert.Equal(50_000, taken.Amount);
+        Assert.Equal(70_000, queue.Head.Amount);
+        Assert.True(queue.TryTake(out _));
+        Assert.False(queue.TryTake(out _));
+        Assert.Equal(TradeProposalKind.None, queue.Head.Kind);
+
+        for (var index = 0; index < TradeProposalQueue.Capacity; index++)
+        {
+            Assert.True(queue.Add(first with { Amount = index + 1 }));
+        }
+
+        Assert.False(queue.Add(second));
+        Assert.Equal(TradeProposalQueue.Capacity, queue.Count);
+        Assert.Equal(2, queue.Head.Amount);
+    }
+
+    [Fact]
     public void AnUnmatchedTradeShowsInItsOwnTablesLedgerForAWhile()
     {
         var miss = new TradeMiss(Table, 50_000, 1_000);
