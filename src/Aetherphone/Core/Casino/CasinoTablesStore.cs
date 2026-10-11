@@ -173,14 +173,18 @@ internal sealed class CasinoTablesStore : IDisposable
 
     private void Vanished(string roomId)
     {
+        ForgetCard(roomId);
+        Interlocked.Exchange(ref vanishedTableId, roomId);
+        RefreshNow();
+    }
+
+    private void ForgetCard(string roomId)
+    {
         var held = card;
         if (held is not null && string.Equals(held.TableId, roomId, StringComparison.Ordinal))
         {
             card = null;
         }
-
-        Interlocked.Exchange(ref vanishedTableId, roomId);
-        RefreshNow();
     }
 
     public string AccountId => session.CurrentUser?.Id ?? string.Empty;
@@ -439,6 +443,7 @@ internal sealed class CasinoTablesStore : IDisposable
             Interlocked.Exchange(ref noticeOutcome, new CasinoStakeOutcome(answer.Granted, Named(answer.Reason)));
             if (answer.Granted)
             {
+                ForgetCard(roomId);
                 Interlocked.Exchange(ref closedTableId, roomId);
                 RefreshNow();
                 return;
