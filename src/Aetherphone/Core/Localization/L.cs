@@ -261,7 +261,7 @@ internal static class L
         public static readonly LocString RemovedCommentSelfHarm = new("moderation.removedCommentSelfHarm", "A moderator removed your comment because it references self-harm.");
         public static readonly LocString RemovedCommentPolicy = new("moderation.removedCommentPolicy", "Your comment was removed for violating the community guidelines.");
         public static readonly LocString WarningTitle = new("moderation.warningTitle", "Warning from moderators");
-        public static readonly LocString WarningBody = new("moderation.warningBody", "A moderator reviewed your activity. Please follow the community guidelines. A second removal within 90 days brings a 3-day suspension, and a third a longer one.");
+        public static readonly LocString WarningBody = new("moderation.warningBody", "A moderator reviewed your activity. Please follow the community guidelines. A second removal within 30 days brings a 3-day suspension, and a third a longer one.");
         public static readonly LocString ReportUpdateTitle = new("moderation.reportUpdateTitle", "Report update");
         public static readonly LocString ReportResolvedBody = new("moderation.reportResolvedBody", "Thanks for your report. We reviewed it and took action.");
         public static readonly LocString ReportDismissedBody = new("moderation.reportDismissedBody", "Thanks for your report. A moderator reviewed it.");
@@ -291,7 +291,7 @@ internal static class L
         public static readonly LocString NoticePhotoCount = new("moderation.notice.photoCount", "{0} photo(s)");
         public static readonly LocString NoticeModeratorNote = new("moderation.notice.moderatorNote", "From the moderator: {0}");
         public static readonly LocString NoticeModeratorNoteLabel = new("moderation.notice.moderatorNoteLabel", "Moderator note");
-        public static readonly LocString NoticeWarningConsequence = new("moderation.notice.warningConsequence", "Please follow the community guidelines. A second removal within 90 days brings a 3-day suspension, and a third a longer one.");
+        public static readonly LocString NoticeWarningConsequence = new("moderation.notice.warningConsequence", "Please follow the community guidelines. A second removal within 30 days brings a 3-day suspension, and a third a longer one.");
         public static readonly LocString NoticeCoinTitle = new("moderation.notice.coinTitle", "Your Aether Coin balance changed");
         public static readonly LocString NoticeCoinBody = new("moderation.notice.coinBody", "A staff member adjusted your Aether Coin balance.");
         public static readonly LocString NoticeThanksTitle = new("moderation.notice.thanksTitle", "Your report was reviewed");
@@ -12651,8 +12651,8 @@ internal static class L
         public static readonly LocString[] LadderItems =
         {
             new("conduct.ladder.1", "First removal: the post comes down and you get a warning that names the rule."),
-            new("conduct.ladder.2", "Second removal within 90 days: a 3-day suspension."),
-            new("conduct.ladder.3", "Third removal within 90 days: a longer suspension, up to permanent."),
+            new("conduct.ladder.2", "Second removal within 30 days: a 3-day suspension."),
+            new("conduct.ladder.3", "Third removal within 30 days: a longer suspension, up to permanent."),
             new("conduct.ladder.4", "Zero tolerance: removed and suspended right away, whatever your history."),
             new("conduct.ladder.5", "A suspension signs you out of every Aethernet app, hides your profile and posts, and freezes your Aether Coins until 7 days after it ends."),
             new("conduct.ladder.6", "Think a call was wrong? Open a ticket on the Discord. Removed posts are kept for 7 days, so a successful appeal brings yours back and the removal stops counting."),
