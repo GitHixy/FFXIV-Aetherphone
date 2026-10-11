@@ -220,7 +220,7 @@ Both scrub em and en dashes from the text they post (the changelog pages in rele
 
 "The reviewers" means the requested reviewers plus everyone who has already submitted a review on that pull request. The person who caused an event is never pinged for it. Pings only ever name people from the user map (below); everyone else appears in bold without a notification. Pull requests opened by Dependabot or other bots are not mirrored, and comments by bots are skipped.
 
-Each new post also leaves one comment on the pull request ("Discussion thread on Discord: ...") that carries a hidden marker with the thread id. Later events find the post through that marker, so a pull request never gets a second post, even when two events fire in the same second: both runs create a post, then the one whose marker comment is not the earliest deletes its own post and comment again.
+Posts are found again by name: every post is named `#N · title`, and later events look for the `#N ·` prefix among the forum's active and then archived posts. Nothing about the Discord server (no link, no id, no comment) is ever written to the public pull request, and the script never prints an id or a member name into the workflow log either, because a public repository's logs are public. Two events that fire in the same second may both create a post; the run whose post is not the oldest deletes its own again, so a pull request never keeps two.
 
 ### Setup
 
@@ -231,16 +231,16 @@ On Discord:
 3. Invite the bot with the `bot` scope and these permissions: View Channels, Send Messages, Send Messages in Threads, Create Public Threads (shown as "Create Posts" on a forum), Embed Links, Manage Threads, plus Manage Channels if the bot should create the tags itself. The invite URL is `https://discord.com/oauth2/authorize?client_id=<application id>&scope=bot&permissions=326417533968` (use `326417533952` to leave out Manage Channels). If the forum sits in a private category, also give the bot's role access to it.
 4. Turn on Developer Mode (User Settings, Advanced) and copy the ids you need: right-click the forum channel for its id, right-click the maintainers role under Server Settings, Roles, and right-click each member who should be pingable for their user id.
 
-On GitHub (repository Settings, Secrets and variables, Actions):
+On GitHub (repository Settings, Secrets and variables, Actions), all four as secrets. Repository variables would work technically, but GitHub prints variable values into the workflow log, and this repository's logs are public; secrets are masked.
 
-| Name | Kind | Value |
+| Name | Required | Value |
 | --- | --- | --- |
-| `DISCORD_BOT_TOKEN` | secret | The bot token |
-| `DISCORD_PULL_REQUEST_FORUM_ID` | variable | The forum channel id |
-| `DISCORD_MAINTAINERS_ROLE_ID` | variable, optional | The role pinged for new pull requests that nobody was asked to review |
-| `DISCORD_GITHUB_USERS` | variable, optional | A JSON object from GitHub login to Discord user id, for example `{"XeldarAlz": "123456789012345678", "t3sco": "234567890123456789"}` |
+| `DISCORD_BOT_TOKEN` | yes | The bot token |
+| `DISCORD_PULL_REQUEST_FORUM_ID` | yes | The forum channel id |
+| `DISCORD_MAINTAINERS_ROLE_ID` | optional | The role pinged for new pull requests that nobody was asked to review |
+| `DISCORD_GITHUB_USERS` | optional | A JSON object from GitHub login to Discord user id, for example `{"XeldarAlz": "123456789012345678", "t3sco": "234567890123456789"}` |
 
-Then run the workflow by hand (Actions, Pull request forum, Run workflow) with the pull request number left empty: the run prints the bot's name, the forum, every tag, the role, and checks that each mapped user is a member of the server. Run it again with a pull request number to create or resync that pull request's post. Pull requests that were already open when the workflow landed get their post the first time anything happens on them, or when you sync them this way. A new contributor joins the map by sending you their Discord user id; until then their events still post, in bold and without a ping.
+Then run the workflow by hand (Actions, Pull request forum, Run workflow) with the pull request number left empty: the run confirms the token, the forum, every tag, the role, and that each mapped user is a member of the server, without printing any of their ids. Run it again with a pull request number to create or resync that pull request's post. Pull requests that were already open when the workflow landed get their post the first time anything happens on them, or when you sync them this way. A new contributor joins the map by sending you their Discord user id; until then their events still post, in bold and without a ping.
 
 The workflow skips cleanly when the secret or the forum id is unset, so forks run green without any configuration.
 
@@ -287,7 +287,8 @@ A maintainer cutting version X.Y.Z.W:
 - **`[skip auto-tag]` in any commit message of a push** disables tagging for that entire push, including other commits in it.
 - **Tests need Dalamud on disk.** src/Aetherphone.Tests/Aetherphone.Tests.csproj references the Dalamud assembly from the per-OS dev-hooks default (XIVLauncher on Windows, XLCore on Linux, XIV on Mac on macOS) or `DALAMUD_HOME`; a bare CI-less machine without either cannot build the test project.
 - **The forum workflow runs the default branch's script, never the pull request's.** A change to .github/scripts/pull-request-forum.mjs takes effect only after it lands on dev; a pull request that edits it still mirrors itself with the old script. Test a change with the manual dispatch after it merges.
-- **The forum workflow has no `concurrency` block on purpose.** GitHub keeps one pending run per concurrency group and cancels older pending ones, which would drop a review that fired while another event was still posting. Simultaneous runs are reconciled through the marker comment instead; do not add a group to "fix" a duplicate you saw mid-run.
+- **The forum workflow has no `concurrency` block on purpose.** GitHub keeps one pending run per concurrency group and cancels older pending ones, which would drop a review that fired while another event was still posting. Simultaneous runs are reconciled by post name instead; do not add a group to "fix" a duplicate you saw mid-run.
+- **The forum workflow must stay silent about the staff server.** Its logs are public, so the script prints pull request numbers and GitHub logins only, redacts ids and mention tokens from error text, and keeps every Discord id in a secret rather than a variable. Never add a log line with a channel, thread, role, or member id, and never write a Discord link or id into a pull request.
 - **Pings only fire from message content, never from inside an embed.** The mention line sits above the embed on purpose, and `allowed_mentions` lists exactly who may be notified, so quoted text containing `@everyone` or a stray mention cannot ping anyone.
 
 ## Related docs

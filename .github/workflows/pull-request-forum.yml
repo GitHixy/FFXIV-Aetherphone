@@ -26,7 +26,7 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
+  pull-requests: read
 
 jobs:
   mirror:
@@ -44,12 +44,14 @@ jobs:
           sparse-checkout: .github/scripts
           persist-credentials: false
 
+      # All four are secrets, not variables: this repository is public, its workflow logs are
+      # public, and GitHub prints variable values into them while secrets are masked.
       - name: Mirror the event
         env:
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-          DISCORD_PULL_REQUEST_FORUM_ID: ${{ vars.DISCORD_PULL_REQUEST_FORUM_ID }}
-          DISCORD_MAINTAINERS_ROLE_ID: ${{ vars.DISCORD_MAINTAINERS_ROLE_ID }}
-          DISCORD_GITHUB_USERS: ${{ vars.DISCORD_GITHUB_USERS }}
+          DISCORD_PULL_REQUEST_FORUM_ID: ${{ secrets.DISCORD_PULL_REQUEST_FORUM_ID }}
+          DISCORD_MAINTAINERS_ROLE_ID: ${{ secrets.DISCORD_MAINTAINERS_ROLE_ID }}
+          DISCORD_GITHUB_USERS: ${{ secrets.DISCORD_GITHUB_USERS }}
           GITHUB_TOKEN: ${{ github.token }}
           PULL_REQUEST_NUMBER: ${{ inputs.pull_request_number }}
         run: node .github/scripts/pull-request-forum.mjs
