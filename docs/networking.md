@@ -198,7 +198,7 @@ A 429 with no `Retry-After` at all is an edge shed: the proxy in front of the AP
 
 The user sees this as the `RateLimitPill` (src/Aetherphone/Core/Shell/RateLimitPill.cs), a small pill under the status bar that reads "Too many requests. Retrying in {n}s" (`L.Common.RateLimited`). It polls `HttpService.PauseRemaining` for the API host every frame and animates in only while a pause is active. `PhoneShell` wires it into the shell overlay stack.
 
-Separately, `RequestThrottle` enforces polite pacing toward third parties, with a concurrency limit and minimum interval chosen by each service. `LodestoneService` runs at most one Lodestone request at a time with a 1200 ms minimum interval; the Universalis, radio-browser, housing, collections, and song search services set their own.
+Separately, `RequestThrottle` enforces polite pacing toward third parties, with a concurrency limit and minimum interval chosen by each service. `LodestoneService` runs at most one Lodestone request at a time with a 1200 ms minimum interval; the Universalis, radio-browser, housing, collections, and song search services set their own. The throttle also has a priority lane: `EnterAsync(token, priority: true)` steps ahead of every queued normal request (a normal waiter that wins the gate while a priority waiter is pending hands it back and retries), which `LookupService` uses so a People search or a character page never waits behind a screen of result portraits.
 
 ## End-to-end encryption
 
