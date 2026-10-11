@@ -12666,7 +12666,7 @@ internal static class L
             new("conduct.chirper.allowed.1", "Adventures, stories and roleplay updates"),
             new("conduct.chirper.allowed.2", "Guides, questions and community talk"),
             new("conduct.chirper.allowed.3", "Glamour, screenshots, GPose and hand-drawn art"),
-            new("conduct.chirper.allowed.4", "Humor, memes, romance and adult jokes that don't describe sex"),
+            new("conduct.chirper.allowed.4", "Humor, memes, romance and adult jokes"),
             new("conduct.chirper.allowed.5", "Real-life photos you took, like fanfest or your setup, with no real face or name in them"),
             new("conduct.chirper.allowed.6", "One post a day promoting your venue, service or Discord, priced in gil"),
             new("conduct.chirper.allowed.7", "Saying you're on Velvet, with nothing explicit attached"),
