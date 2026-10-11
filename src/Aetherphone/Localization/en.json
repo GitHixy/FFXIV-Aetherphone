@@ -8676,6 +8676,7 @@
   "casino.wheel.nextSpin": "Next spin",
   "casino.wheel.atTheWheel": "{0} at the wheel",
   "casino.wheel.lastSpins": "Last spins",
+  "casino.wheel.pickSpot": "Pick a spot",
   "casino.reasonClaimed": "Today's spin is already yours. The wheel fills up again with the next coin day.",
   "casino.reasonPaused": "Coin earning is paused right now, so the wheel is resting with it.",
   "casino.reasonDailyCap": "You have earned every coin today has to give. The wheel comes back around tomorrow.",

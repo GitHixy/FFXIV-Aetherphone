@@ -8676,6 +8676,7 @@
   "casino.wheel.nextSpin": "Próxima tirada",
   "casino.wheel.atTheWheel": "{0} en la rueda",
   "casino.wheel.lastSpins": "Recientes",
+  "casino.wheel.pickSpot": "Elige una casilla",
   "casino.reasonClaimed": "La tirada de hoy ya es tuya. La rueda vuelve a llenarse con el próximo día de monedas.",
   "casino.reasonPaused": "Ahora mismo las monedas están en pausa, así que la rueda descansa con ellas.",
   "casino.reasonDailyCap": "Ya has ganado todas las monedas que daba el día. La rueda vuelve mañana.",

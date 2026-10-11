@@ -8676,6 +8676,7 @@
   "casino.wheel.nextSpin": "Следующее вращение",
   "casino.wheel.atTheWheel": "{0} у колеса",
   "casino.wheel.lastSpins": "История",
+  "casino.wheel.pickSpot": "Выберите поле",
   "casino.reasonClaimed": "Сегодняшний спин уже ваш. Колесо снова наполнится с началом нового монетного дня.",
   "casino.reasonPaused": "Начисление монет сейчас на паузе, поэтому колесо отдыхает вместе с ним.",
   "casino.reasonDailyCap": "Вы уже получили все монеты, что мог дать этот день. Колесо вернётся завтра.",

@@ -10,6 +10,7 @@ namespace Aetherphone.Tests;
 internal static class WheelTextMeasure
 {
     public const float EmPixels = 17f;
+    public const float LineSpacing = 4f;
 
     private const float WideAdvance = 1f;
     private const float CapitalAdvance = 0.74f;

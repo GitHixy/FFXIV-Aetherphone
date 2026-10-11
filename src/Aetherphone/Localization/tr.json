@@ -8676,6 +8676,7 @@
   "casino.wheel.nextSpin": "Sonraki çevirme",
   "casino.wheel.atTheWheel": "Çarkta {0} kişi",
   "casino.wheel.lastSpins": "Son turlar",
+  "casino.wheel.pickSpot": "Bir slot seç",
   "casino.reasonClaimed": "Bugünün çevirmesi zaten senin. Çark bir sonraki coin gününde yeniden dolar.",
   "casino.reasonPaused": "Coin kazanımı şu an duraklatıldı, çark da onunla birlikte dinleniyor.",
   "casino.reasonDailyCap": "Bugünün verebileceği tüm coinleri kazandın. Çark yarın geri geliyor.",

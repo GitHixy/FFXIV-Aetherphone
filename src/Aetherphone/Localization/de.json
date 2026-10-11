@@ -8676,6 +8676,7 @@
   "casino.wheel.nextSpin": "Nächster Dreh",
   "casino.wheel.atTheWheel": "{0} am Rad",
   "casino.wheel.lastSpins": "Zuletzt",
+  "casino.wheel.pickSpot": "Wähle ein Feld",
   "casino.reasonClaimed": "Der heutige Dreh gehört schon dir. Das Rad füllt sich mit dem nächsten Münztag wieder auf.",
   "casino.reasonPaused": "Das Münzverdienen pausiert gerade, also ruht das Rad mit.",
   "casino.reasonDailyCap": "Du hast heute schon jede Münze geholt, die zu holen war. Das Rad kommt morgen wieder.",

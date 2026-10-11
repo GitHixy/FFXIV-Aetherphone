@@ -16,10 +16,7 @@ internal sealed class WheelCabinet : ICabinetIdle
 {
     public const float MaxRingRadius = 170f;
 
-    private const float PodiumGap = 6f;
-    private const float PodiumCap = 3f;
-    private const float BetDiscRadius = 8f;
-    private const float LosingDim = 0.55f;
+    private const float NoticeGap = 6f;
     private const float BannerPad = 12f;
     private const float BannerRadius = 18f;
     private const float BannerTextShare = 0.92f;
@@ -28,6 +25,7 @@ internal sealed class WheelCabinet : ICabinetIdle
     private const float LockFlashSeconds = 0.45f;
     private const float IdleTurnRate = 0.25f;
     private const float RailPopSeconds = 0.35f;
+    private const string RangeJoin = "-";
 
     private readonly CasinoStore chips;
     private readonly CasinoRoomsStore rooms;
@@ -37,7 +35,6 @@ internal sealed class WheelCabinet : ICabinetIdle
     private readonly long[] spotStakes = new long[WheelRules.SpotCount];
     private readonly LabelSlot[] bettors = new LabelSlot[WheelRules.SpotCount];
     private readonly WheelRecentRail recent = new();
-    private readonly string[] returns = new string[WheelRules.SpotCount];
     private readonly WheelStatusLine statusLine = new();
 
     private string inlineReason = string.Empty;
@@ -47,7 +44,10 @@ internal sealed class WheelCabinet : ICabinetIdle
     private long resultStaked;
     private long resultReturned;
     private string celebratedRoundId = string.Empty;
-    private LanguageInfo? returnsLanguage;
+    private string returnText = string.Empty;
+    private int returnLow = -1;
+    private int returnHigh = -1;
+    private LanguageInfo? returnLanguage;
     private int selectedSpot;
     private int lastTickSegment = int.MinValue;
     private WheelPointer pointer;
@@ -110,18 +110,18 @@ internal sealed class WheelCabinet : ICabinetIdle
         var room = rooms.Room;
         var held = room.State;
         var snapshot = held?.Snapshot;
-        var board = held?.Wheel;
+        var wheel = held?.Wheel;
         var remaining = snapshot is null
             ? 0
             : room.RemainingMilliseconds(snapshot.PhaseEndsAtUnixMs, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-        playback.Update(snapshot, board, remaining, frame.SnapToTruth ? WheelChoreography.SpinSeconds : delta);
+        playback.Update(snapshot, wheel, remaining, frame.SnapToTruth ? WheelChoreography.SpinSeconds : delta);
         if (frame.SnapToTruth)
         {
             pointer.Reset();
         }
 
         pointer.Step(delta);
-        recent.Sync(board?.Recent);
+        recent.Sync(wheel?.Recent);
         if (playback.Stage == WheelStage.Settling && WheelRules.IsSegment(playback.Segment))
         {
             recent.Land(WheelRules.SpotAt(playback.Segment));
@@ -147,25 +147,23 @@ internal sealed class WheelCabinet : ICabinetIdle
         var status = WheelStatus.Of(room.Unreachable(Environment.TickCount64), snapshot.Phase, playback.Stage,
             remaining);
         statusLine.Draw(drawList, frame.Layout.Ribbon, status, snapshot.Occupancy, scale);
-        var podiumTop = safe.Max.Y - WheelPodiumLayout.Height(scale);
-        var history = WheelHistoryLayout.StripOf(safe, scale);
-        WheelHistoryStrip.Draw(drawList, history, recent, HistoryPop(), scale);
-        var wheelArea = new Rect(new Vector2(safe.Min.X, history.Max.Y + WheelHistoryLayout.BelowGap * scale),
-            new Vector2(safe.Max.X, podiumTop - PodiumGap * scale));
-        DrawWheel(drawList, wheelArea, frame.Phase, delta, scale);
-        var sitting = state.Sitting;
-        var betting = snapshot.Phase == CasinoRoomPhases.Open && sitting is not null && !frame.Blocked;
-        DrawPodiums(drawList, ui, board, new Rect(new Vector2(safe.Min.X, podiumTop), safe.Max), betting, scale);
-        DrawResultBanner(drawList, stage, snapshot, wheelArea, frame.Phase, scale);
+        var board = WheelBoardLayout.Compute(safe, scale);
+        WheelHistoryStrip.Draw(drawList, board.History, recent, HistoryPop(), scale);
+        DrawWheel(drawList, board.Wheel, frame.Phase, delta, scale);
+        var choosing = snapshot.Phase == CasinoRoomPhases.Open && state.Sitting is not null && !frame.Blocked;
+        WheelSpotCaption.Draw(drawList, board.Caption, choosing ? Loc.T(L.Casino.WheelPickSpot) : string.Empty,
+            ReturnCaption(wheel), scale);
+        DrawCards(drawList, ui, wheel, board, choosing, scale);
+        DrawResultBanner(drawList, stage, snapshot, board.Wheel, frame.Phase, scale);
         if (inlineReason.Length > 0)
         {
             var message = CasinoReasons.Text(inlineReason, chips.Ceiling.MaxBet);
             var height = CasinoNotice.Height(CasinoNoticeKind.Reason, string.Empty, message, safe.Width, scale);
             CasinoNotice.Draw(drawList, ui, CasinoNoticeKind.Reason, string.Empty, message, safe.Min.X,
-                podiumTop - height - PodiumGap * scale, safe.Width, scale);
+                board.Caption.Min.Y - height - NoticeGap * scale, safe.Width, scale);
         }
 
-        DrawDeck(stage, frame, ui, state, sitting ?? CasinoWire.NoBankroll, snapshot);
+        DrawDeck(stage, frame, ui, state, state.Sitting ?? CasinoWire.NoBankroll, snapshot);
     }
 
     public void DrawIdle(ImDrawListPtr drawList, Rect rect, float deltaSeconds)
@@ -337,131 +335,47 @@ internal sealed class WheelCabinet : ICabinetIdle
         ? GameJuice.PopIn(playback.StageSeconds / RailPopSeconds)
         : 1f;
 
-    private void DrawPodiums(ImDrawListPtr drawList, AppSkin ui, CasinoWheelRoomStateDto? board, Rect row,
-        bool selectable, float scale)
+    private void DrawCards(ImDrawListPtr drawList, AppSkin ui, CasinoWheelRoomStateDto? wheel,
+        in WheelBoardLayout board, bool selectable, float scale)
     {
-        var gap = PodiumGap * scale;
-        var width = (row.Width - gap * (WheelRules.SpotCount - 1)) / WheelRules.SpotCount;
-        RefreshReturns(board);
+        var settled = playback.Stage == WheelStage.Settling && WheelRules.IsSegment(playback.Segment);
         for (var spot = 0; spot < WheelRules.SpotCount; spot++)
         {
-            var min = new Vector2(row.Min.X + spot * (width + gap), row.Min.Y);
-            DrawPodium(drawList, ui, board, spot, new Rect(min, new Vector2(min.X + width, row.Max.Y)), selectable,
-                scale);
+            var rect = board.Card(spot);
+            var hovered = selectable && UiInteract.Hover(rect.Min, rect.Max);
+            var row = SpotOf(wheel, spot);
+            var view = new WheelSpotView(spot, spotStakes[spot], row?.Bettors ?? 0, row?.Amount ?? 0L,
+                spot == selectedSpot, hovered, settled && WheelRules.Wins(playback.Segment, spot), settled,
+                selectable);
+            WheelSpotCard.Draw(drawList, ui, rect, view, scale);
+            ShowTableHint(rect, view, scale);
+            if (hovered)
+            {
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            }
+
+            if (UiInteract.Click(rect.Min, rect.Max, hovered))
+            {
+                selectedSpot = spot;
+                inlineReason = string.Empty;
+                CasinoSfx.Play(UiSound.ChipSlide);
+            }
         }
     }
 
-    private void DrawPodium(ImDrawListPtr drawList, AppSkin ui, CasinoWheelRoomStateDto? board, int spot, Rect rect,
-        bool selectable, float scale)
+    private void ShowTableHint(Rect rect, in WheelSpotView view, float scale)
     {
-        var rounding = Metrics.Radius.Md * scale;
-        var color = WheelRingArt.SpotColors[spot];
-        var selected = spot == selectedSpot;
-        var hovered = selectable && UiInteract.Hover(rect.Min, rect.Max);
-        var settling = playback.Stage == WheelStage.Settling && WheelRules.IsSegment(playback.Segment);
-        var winning = settling && WheelRules.Wins(playback.Segment, spot);
-        var mine = spotStakes[spot];
-        var losing = settling && !winning && mine > 0;
-        var lit = winning ? 1f : selected && !settling ? 0.6f : 0.25f;
-        drawList.AddCircleFilled(new Vector2(rect.Center.X, rect.Min.Y), rect.Width * 0.6f,
-            ImGui.GetColorU32(color with { W = 0.10f * lit }), 24);
-        Squircle.FillVerticalGradient(drawList, rect.Min, rect.Max, rounding,
-            ImGui.GetColorU32(Palette.Mix(ui.Palette.CardFill with { W = 1f }, color, 0.22f * lit + 0.08f)),
-            ImGui.GetColorU32(ui.Palette.CardFill with { W = 1f }));
-        Squircle.Fill(drawList, rect.Min, new Vector2(rect.Max.X, rect.Min.Y + PodiumCap * scale), rounding * 0.4f,
-            ImGui.GetColorU32(color));
-        if (hovered)
+        if (!view.ShowsTable)
         {
-            Squircle.Fill(drawList, rect.Min, rect.Max, rounding, ImGui.GetColorU32(ui.HoverTint));
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            return;
         }
 
         var rows = WheelPodiumLayout.Compute(rect, scale);
-        PodiumText(drawList, rows.Header, MultiplierLabel(spot), WheelRingArt.SpotTextInks[spot], TextStyles.Title3);
-        DrawPodiumBet(drawList, rows.Bet, mine, winning, scale);
-        DrawCrowd(drawList, board, spot, rows.Crowd, scale);
-        PodiumOptionalText(drawList, rows.Back, returns[spot], StageInks.Strong, TextStyles.Footnote);
-        if (losing)
+        var table = new Rect(rows.Crowd.Min, rows.Total.Max);
+        if (UiInteract.Hover(table.Min, table.Max))
         {
-            Squircle.Fill(drawList, rect.Min, rect.Max, rounding,
-                ImGui.GetColorU32(new Vector4(0f, 0f, 0f, LosingDim)));
+            HoverTooltip.Show(table, bettors[view.Spot].Get(L.Casino.WheelBettors, view.Bettors));
         }
-
-        if (winning || (selected && !settling))
-        {
-            Squircle.Stroke(drawList, rect.Min, rect.Max, rounding,
-                ImGui.GetColorU32(winning ? CasinoColors.Money : color), (winning ? 2f : 1.4f) * scale);
-        }
-
-        if (UiInteract.Click(rect.Min, rect.Max, hovered))
-        {
-            selectedSpot = spot;
-            inlineReason = string.Empty;
-            CasinoSfx.Play(UiSound.ChipSlide);
-        }
-    }
-
-    private static void DrawPodiumBet(ImDrawListPtr drawList, Rect row, long mine, bool winning, float scale)
-    {
-        if (mine <= 0)
-        {
-            return;
-        }
-
-        var radius = MathF.Min(BetDiscRadius * scale, row.Height * 0.5f);
-        var gap = Metrics.Space.Xxs * scale;
-        var style = FitStyle(TextStyles.FootnoteEmphasized, row.Height);
-        var available = MathF.Max(1f, row.Width - radius * 2f - gap);
-        var fitted = Typography.FitText(NumberText.Compact(mine), available, style);
-        var size = Typography.Measure(fitted, style);
-        var left = row.Center.X - (radius * 2f + gap + size.X) * 0.5f;
-        ChipStack.DrawDisc(drawList, new Vector2(left + radius, row.Center.Y), radius, TopDenomination(mine));
-        Typography.Draw(drawList, new Vector2(left + radius * 2f + gap, row.Center.Y - size.Y * 0.5f), fitted,
-            winning ? CasinoColors.MoneyHighlight : CasinoColors.Money, style);
-    }
-
-    private static long TopDenomination(long amount)
-    {
-        var denominations = ChipStack.Denominations;
-        for (var index = 0; index < denominations.Length; index++)
-        {
-            if (denominations[index] <= amount)
-            {
-                return denominations[index];
-            }
-        }
-
-        return denominations[denominations.Length - 1];
-    }
-
-    private static void PodiumText(ImDrawListPtr drawList, Rect row, string text, Vector4 ink, in TextStyle style)
-    {
-        var fittedStyle = FitStyle(style, row.Height);
-        var fitted = Typography.FitText(text, row.Width, fittedStyle);
-        Typography.DrawCentered(drawList, row.Center, fitted, ink, fittedStyle);
-    }
-
-    private static void PodiumOptionalText(ImDrawListPtr drawList, Rect row, string text, Vector4 ink,
-        in TextStyle style)
-    {
-        var fittedStyle = FitStyle(style, row.Height);
-        if (Typography.Measure(text, fittedStyle).X > row.Width)
-        {
-            return;
-        }
-
-        Typography.DrawCentered(drawList, row.Center, text, ink, fittedStyle);
-    }
-
-    private static TextStyle FitStyle(in TextStyle style, float height)
-    {
-        var lineHeight = Typography.LineHeight(style);
-        if (lineHeight <= height || lineHeight <= 0f)
-        {
-            return style;
-        }
-
-        return style with { Scale = style.Scale * height / lineHeight };
     }
 
     private void DrawResultBanner(ImDrawListPtr drawList, CasinoStage stage, CasinoRoomSnapshotDto snapshot,
@@ -540,28 +454,35 @@ internal sealed class WheelCabinet : ICabinetIdle
         return resultText;
     }
 
-    private void DrawCrowd(ImDrawListPtr drawList, CasinoWheelRoomStateDto? board, int spot, Rect row, float scale)
+    private string ReturnCaption(CasinoWheelRoomStateDto? wheel)
     {
-        var count = BettorsOf(board, spot);
-        WheelCrowdArt.Draw(drawList, row.Center, row.Width, spot, count, spotStakes[spot] > 0, scale);
-        if (count > 0 && UiInteract.Hover(row.Min, row.Max))
+        ReturnRange(wheel, out var low, out var high);
+        if (low == returnLow && high == returnHigh && ReferenceEquals(returnLanguage, Loc.Current))
         {
-            HoverTooltip.Show(row, bettors[spot].Get(L.Casino.WheelBettors, count));
+            return returnText;
         }
+
+        returnLow = low;
+        returnHigh = high;
+        returnLanguage = Loc.Current;
+        var percent = low == high
+            ? Percent(low)
+            : string.Concat(Percent(low), RangeJoin, Percent(high));
+        returnText = Loc.T(L.Strip.PaysBackShort, percent);
+        return returnText;
     }
 
-    private void RefreshReturns(CasinoWheelRoomStateDto? board)
-    {
-        if (ReferenceEquals(returnsLanguage, Loc.Current) && returns[0] is not null)
-        {
-            return;
-        }
+    private static string Percent(int tenths) => (tenths / 10m).ToString("0.#", Loc.Culture);
 
-        returnsLanguage = Loc.Current;
+    internal static void ReturnRange(CasinoWheelRoomStateDto? wheel, out int low, out int high)
+    {
+        low = int.MaxValue;
+        high = 0;
         for (var spot = 0; spot < WheelRules.SpotCount; spot++)
         {
-            var tenths = ReturnTenths(board, spot);
-            returns[spot] = Loc.T(L.Strip.PaysBackShort, (tenths / 10m).ToString("0.#", Loc.Culture));
+            var tenths = ReturnTenths(wheel, spot);
+            low = Math.Min(low, tenths);
+            high = Math.Max(high, tenths);
         }
     }
 
@@ -594,8 +515,6 @@ internal sealed class WheelCabinet : ICabinetIdle
 
         return null;
     }
-
-    private static int BettorsOf(CasinoWheelRoomStateDto? board, int spot) => SpotOf(board, spot)?.Bettors ?? 0;
 
     private void DrawDeck(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui, CasinoStateDto state,
         CasinoSittingDto sitting, CasinoRoomSnapshotDto snapshot)

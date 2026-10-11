@@ -8676,6 +8676,7 @@
   "casino.wheel.nextSpin": "次のスピン",
   "casino.wheel.atTheWheel": "{0}人が参加中",
   "casino.wheel.lastSpins": "履歴",
+  "casino.wheel.pickSpot": "スポットを選択",
   "casino.reasonClaimed": "今日のスピンはもう回しました。次のコインデーでまた回せます。",
   "casino.reasonPaused": "コイン獲得が一時停止中なので、ホイールも一緒に休んでいます。",
   "casino.reasonDailyCap": "今日もらえるコインはすべて受け取りました。ホイールは明日また戻ってきます。",
