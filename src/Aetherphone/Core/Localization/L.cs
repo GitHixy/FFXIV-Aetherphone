@@ -11674,6 +11674,7 @@ internal static class L
         public static readonly LocString TradeSync = new("casino.venue.tradeSync", "Trade sync");
         public static readonly LocString TradeAutoConfirm = new("casino.venue.tradeAutoConfirm", "Confirm my side automatically");
         public static readonly LocString TradeSyncHint = new("casino.venue.tradeSyncHint", "Reads the in-game trade window only to suggest the matching ledger entry. The trade partner's name is checked against this table on the server and is never shown to anyone. Nothing in the game is clicked for you.");
+        public static readonly LocString TradeUnmatched = new("casino.venue.tradeUnmatched", "Your last trade of {0} gil matched nobody at this table. Record it below if it belongs here.");
         public static readonly LocString TradeNotifyTitle = new("casino.venue.tradeNotifyTitle", "Record this trade?");
         public static readonly LocString TradeReceivedFrom = new("casino.venue.tradeReceivedFrom", "You received {1} gil from {0}");
         public static readonly LocString TradeSentTo = new("casino.venue.tradeSentTo", "You sent {1} gil to {0}");

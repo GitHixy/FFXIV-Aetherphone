@@ -27,6 +27,7 @@ internal sealed class CasinoTradeSync : IDisposable
 
     private volatile TradeProposalHolder? pending;
     private volatile TradeMatchHolder? serverAnswer;
+    private volatile TradeMiss? lastMiss;
     private int matching;
     private bool wasOpen;
     private long locatedAtTick;
@@ -81,6 +82,8 @@ internal sealed class CasinoTradeSync : IDisposable
     }
 
     public TradeProposal Pending => pending?.Proposal ?? TradeProposal.None;
+
+    public TradeMiss? LastMiss => lastMiss;
 
     public bool Busy => venue.HostInFlight;
 
@@ -165,6 +168,7 @@ internal sealed class CasinoTradeSync : IDisposable
         if (Interlocked.Exchange(ref matching, 1) != 0)
         {
             AepLog.Info("[TradeSync] A server match is still in flight, this trade is left to the ledger");
+            lastMiss = new TradeMiss(context.TableId, Math.Abs(completion.Net), Environment.TickCount64);
             return;
         }
 
@@ -172,48 +176,45 @@ internal sealed class CasinoTradeSync : IDisposable
         work.Run("trade match", async token =>
         {
             var result = await TradeMatchFlow.ServerAsync(source, completion, context, token).ConfigureAwait(false);
-            Interlocked.Exchange(ref serverAnswer, new TradeMatchHolder(result, context.MyUserId));
+            Interlocked.Exchange(ref serverAnswer,
+                new TradeMatchHolder(result, context.MyUserId, context.TableId, completion.Net));
         }, () => Interlocked.Exchange(ref matching, 0));
     }
 
     private void Answered(TradeMatchHolder answered)
     {
         var result = answered.Result;
-        switch (result.Route)
+        if (result.Route != TradeMatchRoute.Server)
         {
-            case TradeMatchRoute.Server:
-                if (!string.Equals(answered.AccountId, session.CurrentUser?.Id, StringComparison.Ordinal))
-                {
-                    AepLog.Info("[TradeSync] Server match arrived after the account changed, dropped");
-                    return;
-                }
-
-                AepLog.Info("[TradeSync] Matched by character name on the server");
-                Offer(result.Proposal);
-                return;
-            case TradeMatchRoute.Refused:
-                AepLog.Info($"[TradeSync] Server refused the match: {result.Reason}");
-                return;
-            case TradeMatchRoute.Unreachable:
-                AepLog.Info($"[TradeSync] Server match unavailable ({result.Reason}), treated as no match");
-                return;
-            case TradeMatchRoute.Mismatch:
-                AepLog.Info("[TradeSync] Server match does not fit this table's side, dropped");
-                return;
-            case TradeMatchRoute.Unrecordable:
-                AepLog.Info("[TradeSync] Server matched a counterparty, but no ledger entry can take this trade");
-                return;
-            case TradeMatchRoute.NoNames:
-                AepLog.Info("[TradeSync] No names were read from the trade window");
-                return;
-            default:
-                AepLog.Info("[TradeSync] Server found no counterparty for this trade");
-                return;
+            AepLog.Info(MissNote(result));
+            lastMiss = new TradeMiss(answered.TableId, Math.Abs(answered.Net), Environment.TickCount64);
+            return;
         }
+
+        if (!string.Equals(answered.AccountId, session.CurrentUser?.Id, StringComparison.Ordinal))
+        {
+            AepLog.Info("[TradeSync] Server match arrived after the account changed, dropped");
+            return;
+        }
+
+        AepLog.Info("[TradeSync] Matched by character name on the server");
+        Offer(result.Proposal);
     }
+
+    private static string MissNote(in TradeMatchResult result) => result.Route switch
+    {
+        TradeMatchRoute.Refused => $"[TradeSync] Server refused the match: {result.Reason}",
+        TradeMatchRoute.Unreachable => $"[TradeSync] Server match unavailable ({result.Reason}), treated as no match",
+        TradeMatchRoute.Mismatch => "[TradeSync] Server match does not fit this table's side, dropped",
+        TradeMatchRoute.Unrecordable =>
+            "[TradeSync] Server matched a counterparty, but no ledger entry can take this trade",
+        TradeMatchRoute.NoNames => "[TradeSync] No names were read from the trade window",
+        _ => "[TradeSync] Server found no counterparty for this trade",
+    };
 
     private void Offer(in TradeProposal proposal)
     {
+        lastMiss = null;
         var automatic = !proposal.HostSide && configuration.CasinoTradeAutoConfirm;
         AepLog.Info($"[TradeSync] {proposal.Kind} {proposal.LedgerKind} for {proposal.Amount} gil, "
             + $"host side {proposal.HostSide}, incoming {proposal.Incoming}, automatic {automatic}");
@@ -256,5 +257,5 @@ internal sealed class CasinoTradeSync : IDisposable
 
     private sealed record TradeProposalHolder(TradeProposal Proposal);
 
-    private sealed record TradeMatchHolder(TradeMatchResult Result, string AccountId);
+    private sealed record TradeMatchHolder(TradeMatchResult Result, string AccountId, string TableId, long Net);
 }

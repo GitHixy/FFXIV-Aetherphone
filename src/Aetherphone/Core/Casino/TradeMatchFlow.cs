@@ -29,6 +29,14 @@ internal readonly record struct TradeMatchResult(TradeProposal Proposal, TradeMa
     public static TradeMatchResult Of(TradeMatchRoute route) => new(TradeProposal.None, route, string.Empty);
 }
 
+internal sealed record TradeMiss(string TableId, long Amount, long AtTick)
+{
+    public const long ShownMilliseconds = 10 * 60 * 1000;
+
+    public bool ShownAt(string tableId, long nowTick) =>
+        string.Equals(TableId, tableId, StringComparison.Ordinal) && nowTick - AtTick <= ShownMilliseconds;
+}
+
 internal static class TradeMatchFlow
 {
     public static TradeMatchResult Local(in TradeCompletion completion, in TradeTableContext context)

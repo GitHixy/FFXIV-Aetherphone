@@ -9538,6 +9538,7 @@
   "casino.venue.tradeSync": "Takas eşitleme",
   "casino.venue.tradeAutoConfirm": "Kendi tarafımı otomatik onayla",
   "casino.venue.tradeSyncHint": "Takas penceresini yalnızca uygun defter kaydını önermek için okur. Takas ortağının adı sunucuda bu masayla karşılaştırılır ve kimseye gösterilmez. Oyunda senin yerine hiçbir şeye tıklanmaz.",
+  "casino.venue.tradeUnmatched": "{0} gil tutarındaki son takasın bu masadaki kimseyle eşleşmedi. Bu masaya aitse aşağıdan kaydet.",
   "casino.venue.tradeNotifyTitle": "Bu takas kaydedilsin mi?",
   "casino.venue.tradeReceivedFrom": "{0} kişisinden {1} gil aldın",
   "casino.venue.tradeSentTo": "{0} kişisine {1} gil gönderdin",

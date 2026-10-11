@@ -45,6 +45,9 @@ internal sealed class TableLedger
 
     private CasinoTableLedgerDto? viewSource;
     private LanguageInfo? viewLanguage;
+    private TradeMiss? missSource;
+    private LanguageInfo? missLanguage;
+    private string missText = string.Empty;
     private string viewMe = string.Empty;
     private LedgerRowView[] rows = Array.Empty<LedgerRowView>();
     private LedgerEntryView[] entries = Array.Empty<LedgerEntryView>();
@@ -108,6 +111,7 @@ internal sealed class TableLedger
 
         ui.SectionHeading(Loc.T(L.Tables.GilLedgerHeading), Metrics.Space.Md);
         TradeSyncCard.Draw(ui, trade, scale, false);
+        DrawMiss(ui, scale);
         if (waitingNote.Length > 0)
         {
             Note(ui, waitingNote, Amber, scale);
@@ -257,6 +261,24 @@ internal sealed class TableLedger
 
         var unsettled = CasinoGilLedger.UnsettledCount(gil);
         waitingNote = unsettled > 0 ? Loc.T(L.Tables.EntriesWaiting, unsettled.ToString(Loc.Culture)) : string.Empty;
+    }
+
+    private void DrawMiss(AppSkin ui, float scale)
+    {
+        var miss = trade.LastMiss;
+        if (miss is null || !trade.Enabled || !miss.ShownAt(roomId, Environment.TickCount64))
+        {
+            return;
+        }
+
+        if (!ReferenceEquals(miss, missSource) || !ReferenceEquals(missLanguage, Loc.Current))
+        {
+            missSource = miss;
+            missLanguage = Loc.Current;
+            missText = Loc.T(L.Venue.TradeUnmatched, NumberText.Group(miss.Amount));
+        }
+
+        Note(ui, missText, Amber, scale);
     }
 
     private void DrawHeading(AppSkin ui, CasinoTableLedgerDto ledger, float scale)

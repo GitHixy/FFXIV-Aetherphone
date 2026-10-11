@@ -138,6 +138,15 @@ public sealed class TradeMatchFlowTests
     }
 
     [Fact]
+    public void AnUnmatchedTradeShowsInItsOwnTablesLedgerForAWhile()
+    {
+        var miss = new TradeMiss(Table, 50_000, 1_000);
+        Assert.True(miss.ShownAt(Table, 1_000 + TradeMiss.ShownMilliseconds));
+        Assert.False(miss.ShownAt(Table, 1_001 + TradeMiss.ShownMilliseconds));
+        Assert.False(miss.ShownAt("table-b2", 1_000));
+    }
+
+    [Fact]
     public void TheMatchRouteAndBodyMatchTheWire()
     {
         Assert.Equal("/casino/tables/table-a1/ledger/match",

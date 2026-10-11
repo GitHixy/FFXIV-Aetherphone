@@ -9538,6 +9538,7 @@
   "casino.venue.tradeSync": "Sincronizar trocas",
   "casino.venue.tradeAutoConfirm": "Confirmar meu lado automaticamente",
   "casino.venue.tradeSyncHint": "Só lê a janela de troca para sugerir o lançamento no registro. O nome de quem troca com você é conferido com esta mesa no servidor e nunca é mostrado a ninguém. Nada no jogo é clicado por você.",
+  "casino.venue.tradeUnmatched": "Sua última troca de {0} gil não correspondeu a ninguém nesta mesa. Registre abaixo se ela for daqui.",
   "casino.venue.tradeNotifyTitle": "Registrar esta troca?",
   "casino.venue.tradeReceivedFrom": "Você recebeu {1} gil de {0}",
   "casino.venue.tradeSentTo": "Você enviou {1} gil para {0}",

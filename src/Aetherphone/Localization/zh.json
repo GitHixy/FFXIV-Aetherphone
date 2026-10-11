@@ -9538,6 +9538,7 @@
   "casino.venue.tradeSync": "交易同步",
   "casino.venue.tradeAutoConfirm": "自动确认我这一方",
   "casino.venue.tradeSyncHint": "仅读取游戏内交易窗口以建议对应的账本记录。交易对象的名字会在服务器上与本桌核对，不会展示给任何人。不会替你在游戏中点击任何内容。",
+  "casino.venue.tradeUnmatched": "你上一笔 {0} 金币的交易没有匹配到本桌任何人。如果属于本桌，请在下方手动记录。",
   "casino.venue.tradeNotifyTitle": "记录这笔交易？",
   "casino.venue.tradeReceivedFrom": "你从 {0} 收到 {1} 金币",
   "casino.venue.tradeSentTo": "你向 {0} 支付了 {1} 金币",
