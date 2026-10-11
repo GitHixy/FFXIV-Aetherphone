@@ -8,6 +8,8 @@ namespace Aetherphone.Core.Casino;
 
 internal sealed class CasinoTradeSync : IDisposable
 {
+    private const long LocateEveryMilliseconds = 1_000;
+
     private readonly Configuration configuration;
     private readonly AethernetSession session;
     private readonly ITradeWindowReader reader;
@@ -17,9 +19,13 @@ internal sealed class CasinoTradeSync : IDisposable
     private readonly NotificationService notifications;
     private readonly Vector4 accent;
     private readonly TradeSyncTracker tracker = new();
+    private readonly TradeTableMemory memory = new();
+    private readonly Func<string, CasinoTableRowDto?> cardFor;
+    private readonly Func<string, CasinoTableLedgerDto?> ledgerFor;
 
     private volatile TradeProposalHolder? pending;
     private bool wasOpen;
+    private long locatedAtTick;
 
     public CasinoTradeSync(Configuration configuration, AethernetSession session, ITradeWindowReader reader,
         CasinoRoomsStore rooms, CasinoTablesStore tables, CasinoVenueStore venue, NotificationService notifications,
@@ -33,6 +39,8 @@ internal sealed class CasinoTradeSync : IDisposable
         this.venue = venue;
         this.notifications = notifications;
         this.accent = accent;
+        cardFor = tables.CardFor;
+        ledgerFor = tables.LedgerFor;
         Plugin.Framework.Update += OnFrameworkUpdate;
     }
 
@@ -87,30 +95,14 @@ internal sealed class CasinoTradeSync : IDisposable
 
     public TradeTableContext Context()
     {
-        var me = session.CurrentUser?.Id ?? string.Empty;
-        var board = rooms.Room.State?.Blackjack;
-        var roomId = rooms.Room.RoomId;
-        if (board is not null && roomId.Length > 0 && CasinoCurrencies.Of(board) == CasinoCurrencies.Gil)
-        {
-            var card = tables.CardFor(roomId);
-            return new TradeTableContext(roomId, me, card?.OwnerUserId ?? string.Empty, card?.OwnerName ?? string.Empty,
-                SeatsOf(board.Seats), EntriesOf(roomId));
-        }
+        var view = View();
+        return TradeContexts.Build(memory.Resolve(view, Environment.TickCount64), view);
+    }
 
-        var door = tables.Door;
-        if (door is null || !door.Owner)
-        {
-            return default;
-        }
-
-        var doorCard = tables.CardFor(door.RoomId);
-        if (doorCard is null || CasinoCurrencies.Of(doorCard) != CasinoCurrencies.Gil)
-        {
-            return default;
-        }
-
-        return new TradeTableContext(door.RoomId, me, me, doorCard.OwnerName, SeatsOf(door.Seated),
-            EntriesOf(door.RoomId));
+    private TradeTableView View()
+    {
+        return new TradeTableView(session.CurrentUser?.Id ?? string.Empty, rooms.Room.RoomId,
+            rooms.Room.State?.Blackjack, venue.View, tables.Door, tables.Listed, cardFor, ledgerFor);
     }
 
     private void OnFrameworkUpdate(IFramework framework)
@@ -120,18 +112,20 @@ internal sealed class CasinoTradeSync : IDisposable
             return;
         }
 
+        var now = Environment.TickCount64;
         var sample = reader.Sample();
         if (sample.Open && !wasOpen)
         {
-            var opened = Context();
-            if (opened.Known)
-            {
-                tables.RefreshLedgerNow(opened.TableId);
-            }
+            Opened(memory.Resolve(View(), now));
+        }
+        else if (now - locatedAtTick >= LocateEveryMilliseconds)
+        {
+            locatedAtTick = now;
+            memory.Resolve(View(), now);
         }
 
         wasOpen = sample.Open;
-        var completion = tracker.Observe(sample, Environment.TickCount64);
+        var completion = tracker.Observe(sample, now);
         if (completion is not { } done)
         {
             return;
@@ -159,41 +153,18 @@ internal sealed class CasinoTradeSync : IDisposable
         });
     }
 
-    private CasinoLedgerEntryDto[] EntriesOf(string roomId)
+    private void Opened(in TradeTableRef table)
     {
-        return tables.LedgerFor(roomId)?.Entries ?? Array.Empty<CasinoLedgerEntryDto>();
-    }
-
-    private static TradeSeat[] SeatsOf(CasinoBlackjackSeatDto[]? seats)
-    {
-        if (seats is null)
+        if (!table.Located)
         {
-            return Array.Empty<TradeSeat>();
+            return;
         }
 
-        var result = new TradeSeat[seats.Length];
-        for (var index = 0; index < seats.Length; index++)
+        tables.RefreshLedgerNow(table.TableId);
+        if (!table.Known)
         {
-            result[index] = new TradeSeat(seats[index].UserId, seats[index].DisplayName);
+            tables.RefreshCard(table.TableId);
         }
-
-        return result;
-    }
-
-    private static TradeSeat[] SeatsOf(CasinoTableSeatedDto[]? seated)
-    {
-        if (seated is null)
-        {
-            return Array.Empty<TradeSeat>();
-        }
-
-        var result = new TradeSeat[seated.Length];
-        for (var index = 0; index < seated.Length; index++)
-        {
-            result[index] = new TradeSeat(seated[index].UserId, seated[index].DisplayName);
-        }
-
-        return result;
     }
 
     public void Dispose()

@@ -25,7 +25,8 @@ internal readonly record struct TradeTableContext(
     string HostUserId,
     string HostName,
     TradeSeat[] Seats,
-    CasinoLedgerEntryDto[] Entries)
+    CasinoLedgerEntryDto[] Entries,
+    bool Venue = false)
 {
     public bool Known => !string.IsNullOrEmpty(TableId) && !string.IsNullOrEmpty(MyUserId)
         && !string.IsNullOrEmpty(HostUserId);
@@ -204,6 +205,11 @@ internal static class TradeLedgerMatcher
         }
 
         var kind = incoming == hostSide ? CasinoLedgerKinds.BuyIn : CasinoLedgerKinds.Payout;
+        if (context.Venue && string.Equals(kind, CasinoLedgerKinds.BuyIn, StringComparison.Ordinal))
+        {
+            return TradeProposal.None;
+        }
+
         return new TradeProposal(TradeProposalKind.Propose, context.TableId, kind, counterparty.UserId,
             counterparty.DisplayName, amount, string.Empty, hostSide, incoming);
     }
