@@ -703,6 +703,11 @@ internal sealed class CasinoRoomsStore : IDisposable
         }
 
         SyncPersonal();
+        if (signals.RealtimeActive)
+        {
+            room.RetryAttach(Environment.TickCount64);
+        }
+
         var nowUtc = DateTime.UtcNow;
         if (signals.RealtimeActive && room.Attached && !room.AwaitingSnapshot)
         {
