@@ -235,14 +235,14 @@ internal sealed partial class MachineCabinet
         MachineArt.SceneTint(drawList, frame.Full, machineId, sceneAmount, frame.Phase, scale);
         var lit = stage.Celebration.Active || playback.InFeature ? 1f : 0.55f;
         MachineArt.Chassis(drawList, chassis, machineId, frame.Phase, lit, playback.InFeature, scale);
-        DrawGlass(drawList, ui, frame, scale);
+        DrawGlass(drawList, frame, scale);
         MachineArt.ReelWindow(drawList, window, machineId, scale);
         drawList.PushClipRect(window.Min, window.Max, true);
-        reels.Draw(drawList, window, playback, machineId, frame.Phase, frame.DeltaSeconds, stage.Particles, scale);
+        reels.Draw(drawList, window, playback, machineId, frame.Phase, frame.DeltaSeconds, scale);
         drawList.PopClipRect();
         DrawBanners(drawList, frame, scale);
         DrawGamble(drawList, ui, frame, scale);
-        DrawStrip(drawList, ui, frame, scale);
+        DrawStrip(drawList, scale);
         HandleWindowTap(frame);
         DrawDeck(stage, frame, ui, state, state.Sitting ?? CasinoWire.NoBankroll, scale);
     }
@@ -573,7 +573,7 @@ internal sealed partial class MachineCabinet
             L.Machines.SpinFor, enabled, AutoAvailable: true, Knob: true, Repeat: stage.RepeatPressed(), Busy: busy,
             Cost: cost);
         var action = Composer.Draw(stage, ui, frame.Deck, model, frame.DeltaSeconds);
-        DrawKnob(ui, Composer.KnobRect, sitting, !busy && !Composer.Auto.Running && !blocked, scale);
+        DrawExtras(ui, Composer.KnobRect, sitting, !busy && !Composer.Auto.Running && !blocked, blocked, scale);
         if (blocked && Composer.Auto.Running)
         {
             Composer.Auto.Stop(AutoStop.Manual);

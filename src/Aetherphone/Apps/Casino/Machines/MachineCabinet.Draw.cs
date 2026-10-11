@@ -25,9 +25,27 @@ internal sealed partial class MachineCabinet
     private const float IntroCaptionShare = 0.2f;
     private const float IntroTileSpan = 1.3f;
     private const float NotePad = 8f;
-    private const string SkipId = "casino.machines.skip";
-    private const string GambleId = "casino.machines.gamble";
     private const string ReasonMarquee = "casino.machines.reason";
+    private const float StripRoundShare = 0.3f;
+    private const float MutedValueAlpha = 0.7f;
+
+    private const float HeroExtentShare = 0.42f;
+    private const float BannerTextShare = 0.84f;
+    private const float SignHeightShare = 0.62f;
+    private const float JackpotRadius = 12f;
+    private const float JackpotRimAlpha = 0.55f;
+    private const float FutureRungAlpha = 0.75f;
+    private const float MeterInset = 4f;
+
+    private static readonly TextStyle EyebrowStyle = TextStyles.FootnoteEmphasized;
+    private static readonly TextStyle CaptionStyle = TextStyles.FootnoteEmphasized;
+    private static readonly TextStyle JackpotEyebrowStyle = TextStyles.FootnoteEmphasized;
+    private static readonly TextStyle JackpotAmountStyle = TextStyles.Title3;
+    private static readonly Vector4 StripFill = new(0f, 0f, 0f, 0.55f);
+    private static readonly Vector4 JackpotFill = new(0f, 0f, 0f, 0.35f);
+    private static readonly Vector4 Divider = new(1f, 1f, 1f, 0.07f);
+    private static readonly Vector4 FutureRungFill = new(1f, 1f, 1f, 0.08f);
+    private static readonly Vector4 ActiveRungInk = new(0.02f, 0.05f, 0.08f, 1f);
 
     private static readonly Vector4 GlassTop = new(0.10f, 0.06f, 0.16f, 0.92f);
     private static readonly Vector4 GlassBottom = new(0.03f, 0.02f, 0.06f, 0.92f);
@@ -37,8 +55,6 @@ internal sealed partial class MachineCabinet
     private static readonly Vector4 Veil = new(0.01f, 0.0f, 0.03f, 0.78f);
     private static readonly CasinoSlotsCoinDto NoCoin = new();
 
-    private AmountSlot betLabel;
-    private AmountSlot anteLabel;
     private AmountSlot buyLabel;
     private AmountSlot meterHit;
     private AmountSlot gambleStake;
@@ -48,72 +64,69 @@ internal sealed partial class MachineCabinet
     private LabelSlot retrigger;
     private LabelSlot featureTotalLabel;
 
-    private void DrawGlass(ImDrawListPtr drawList, AppSkin ui, in CasinoStageFrame frame, float scale)
+    private void DrawGlass(ImDrawListPtr drawList, in CasinoStageFrame frame, float scale)
     {
         var radius = GlassRadius * scale;
+        var neon = MachineArt.NeonOf(machineId);
         Squircle.FillVerticalGradient(drawList, glass.Min, glass.Max, radius, ImGui.GetColorU32(GlassTop),
             ImGui.GetColorU32(GlassBottom));
-        Squircle.Stroke(drawList, glass.Min, glass.Max, radius,
-            ImGui.GetColorU32(MachineArt.NeonOf(machineId) with { W = 0.4f }), 1.5f * scale);
-        var half = glass.Height * 0.5f;
-        var topRow = new Rect(glass.Min, new Vector2(glass.Max.X, glass.Min.Y + half));
-        var bottomRow = new Rect(new Vector2(glass.Min.X, glass.Min.Y + half), glass.Max);
-        var heroExtent = half * 0.42f;
-        MachineArt.Hero(drawList, new Vector2(topRow.Min.X + half * 0.62f, topRow.Center.Y), heroExtent, machineId,
-            frame.Phase);
-        var jackpotWidth = topRow.Width * 0.3f;
-        var signWidth = topRow.Width - jackpotWidth - half * 1.3f;
-        var signCenter = new Vector2(topRow.Min.X + half * 1.24f + signWidth * 0.5f, topRow.Center.Y);
+        Squircle.Stroke(drawList, glass.Min, glass.Max, radius, ImGui.GetColorU32(neon with { W = 0.4f }), 1.5f * scale);
+        var eyebrow = Loc.T(L.Machines.FloorJackpot);
+        var amount = NumberText.Compact(store.Jackpot);
+        var eyebrowSize = Typography.Measure(eyebrow, JackpotEyebrowStyle);
+        var amountSize = CurrencyGlyph.MeasureAmount(amount, JackpotAmountStyle);
+        var ladder = machineIndex == 1 && !(playback.HasRound && playback.InFeature);
+        var layout = MachineGlassLayout.Compute(glass,
+            new Vector2(MathF.Max(eyebrowSize.X, amountSize.X), eyebrowSize.Y + amountSize.Y),
+            ladder ? Typography.LineHeight(CaptionStyle) : 0f, scale);
+        MachineArt.Hero(drawList, layout.Hero.Center, layout.Hero.Height * HeroExtentShare, machineId, frame.Phase);
         var sign = MachineArt.SignOf(machineId);
-        var signHeight = CasinoSigns.HeightToFit(sign, signWidth * 0.95f, half * 0.5f);
+        var signHeight = CasinoSigns.HeightToFit(sign, layout.Sign.Width, layout.Sign.Height * SignHeightShare);
         var flicker = 0.85f + 0.15f * Pulse.Wave(Pulse.Breath);
-        CasinoSigns.Draw(drawList, sign, signCenter, signHeight, MachineArt.NeonOf(machineId), flicker);
-        DrawFloorJackpot(drawList, new Rect(new Vector2(topRow.Max.X - jackpotWidth, topRow.Min.Y), topRow.Max),
-            scale);
-        var row = bottomRow.Inset(6f * scale);
+        CasinoSigns.Draw(drawList, sign, layout.Sign.Center, signHeight, neon, flicker);
+        DrawFloorJackpot(drawList, layout.Jackpot, eyebrow, amount, scale);
+        drawList.AddLine(new Vector2(layout.Top.Min.X, layout.Top.Max.Y), layout.Top.Max,
+            ImGui.GetColorU32(Divider), MathF.Max(1f, scale));
         switch (machineId)
         {
             case SlotsRules.CascadeId:
-                DrawCascadeRow(drawList, row, scale);
+                DrawCascadeRow(drawList, layout, scale);
                 break;
             case SlotsRules.MoogleId:
-                DrawMeterRow(drawList, row, scale);
+                DrawMeterRow(drawList, layout.Content, scale);
                 break;
             default:
-                DrawBirdRow(drawList, row, frame.Phase, scale);
+                DrawBirdRow(drawList, layout.Content, frame.Phase, scale);
                 break;
         }
     }
 
-    private void DrawFloorJackpot(ImDrawListPtr drawList, Rect area, float scale)
+    private static void DrawFloorJackpot(ImDrawListPtr drawList, Rect capsule, string eyebrow, string amount,
+        float scale)
     {
-        var inset = 8f * scale;
-        var width = area.Width - inset;
-        var eyebrow = Typography.FitText(Loc.T(L.Machines.FloorJackpot), width, TextStyles.Footnote);
-        var eyebrowHeight = Typography.LineHeight(TextStyles.Footnote);
-        var amount = NumberText.Compact(store.Jackpot);
-        var amountStyle = TextStyles.Title3;
+        var radius = MathF.Min(capsule.Height * 0.5f, JackpotRadius * scale);
+        Squircle.Fill(drawList, capsule.Min, capsule.Max, radius, ImGui.GetColorU32(JackpotFill));
+        Squircle.Stroke(drawList, capsule.Min, capsule.Max, radius,
+            ImGui.GetColorU32(CasinoColors.Money with { W = JackpotRimAlpha }), MathF.Max(1f, scale));
+        var width = MathF.Max(1f, capsule.Width - MachineGlassLayout.JackpotPadX * 2f * scale);
+        var room = MathF.Max(1f, capsule.Height - MachineGlassLayout.JackpotPadY * 2f * scale);
+        var eyebrowStyle = MachineText.Fit(eyebrow, width, JackpotEyebrowStyle);
+        var eyebrowSize = Typography.Measure(eyebrow, eyebrowStyle);
+        var amountStyle = JackpotAmountStyle;
         var amountSize = CurrencyGlyph.MeasureAmount(amount, amountStyle);
-        if (amountSize.X > width || eyebrowHeight + amountSize.Y > area.Height)
-        {
-            amountStyle = TextStyles.Headline;
-            amountSize = CurrencyGlyph.MeasureAmount(amount, amountStyle);
-        }
-
         var shrink = MathF.Min(width / MathF.Max(1f, amountSize.X),
-            (area.Height - eyebrowHeight) / MathF.Max(1f, amountSize.Y));
+            (room - eyebrowSize.Y) / MathF.Max(1f, amountSize.Y));
         if (shrink < 1f)
         {
-            amountStyle = amountStyle with { Scale = amountStyle.Scale * MathF.Max(0.1f, shrink) };
+            amountStyle = amountStyle with { Scale = amountStyle.Scale * MathF.Max(MachineText.LabelShrink, shrink) };
             amountSize = CurrencyGlyph.MeasureAmount(amount, amountStyle);
         }
 
-        var top = area.Center.Y - (eyebrowHeight + amountSize.Y) * 0.5f;
-        var eyebrowSize = Typography.Measure(eyebrow, TextStyles.Footnote);
-        Typography.Draw(drawList, new Vector2(area.Max.X - inset - eyebrowSize.X, top), eyebrow,
-            CasinoColors.MoneyHighlight, TextStyles.Footnote);
-        CurrencyGlyph.DrawAmount(drawList, new Vector2(area.Max.X - inset - amountSize.X, top + eyebrowHeight), amount,
-            CurrencyKind.Chips, CasinoColors.Money, amountStyle);
+        var top = capsule.Center.Y - (eyebrowSize.Y + amountSize.Y) * 0.5f;
+        Typography.Draw(drawList, new Vector2(capsule.Center.X - eyebrowSize.X * 0.5f, top), eyebrow,
+            CasinoColors.MoneyHighlight, eyebrowStyle);
+        CurrencyGlyph.DrawAmount(drawList, new Vector2(capsule.Center.X - amountSize.X * 0.5f, top + eyebrowSize.Y),
+            amount, CurrencyKind.Chips, CasinoColors.Money, amountStyle);
     }
 
     private void DrawBirdRow(ImDrawListPtr drawList, Rect row, float phase, float scale)
@@ -121,48 +134,71 @@ internal sealed partial class MachineCabinet
         var expander = playback.HasRound && playback.InFeature ? playback.Expander : -1;
         if (expander < 0 || playback.Beat == MachineBeat.Intro)
         {
-            var text = Typography.FitText(Loc.T(L.Machines.LinesInfo), row.Width, TextStyles.Headline);
-            Typography.DrawCentered(drawList, row.Center, text, StageInks.Strong, TextStyles.Headline);
+            var text = Loc.T(L.Machines.LinesInfo);
+            Typography.DrawCentered(drawList, row.Center, text, StageInks.Strong,
+                MachineText.Fit(text, row.Width, TextStyles.Headline));
             return;
         }
 
-        var label = Typography.FitText(Loc.T(L.Machines.Expanding), row.Width * 0.6f, TextStyles.Headline);
-        var labelSize = Typography.Measure(label, TextStyles.Headline);
         var symbolSize = row.Height * 0.45f;
-        var total = labelSize.X + Metrics.Space.Sm * scale + symbolSize * 2f;
+        var gap = Metrics.Space.Sm * scale;
+        var label = Loc.T(L.Machines.Expanding);
+        var style = MachineText.Fit(label, MathF.Max(1f, row.Width - gap - symbolSize * 2f), TextStyles.Headline);
+        var labelSize = Typography.Measure(label, style);
+        var total = labelSize.X + gap + symbolSize * 2f;
         var left = row.Center.X - total * 0.5f;
         Typography.Draw(drawList, new Vector2(left, row.Center.Y - labelSize.Y * 0.5f), label, CasinoColors.Money,
-            TextStyles.Headline);
-        MachineSymbols.Draw(drawList, machineId, expander,
-            new Vector2(left + labelSize.X + Metrics.Space.Sm * scale + symbolSize, row.Center.Y), symbolSize, 1f,
-            MachineSymbols.ShimmerFrame(0, phase));
+            style);
+        MachineSymbols.Draw(drawList, machineId, expander, new Vector2(left + labelSize.X + gap + symbolSize,
+            row.Center.Y), symbolSize, 1f, MachineSymbols.ShimmerFrame(0, phase));
     }
 
-    private void DrawCascadeRow(ImDrawListPtr drawList, Rect row, float scale)
+    private void DrawCascadeRow(ImDrawListPtr drawList, in MachineGlassLayout layout, float scale)
     {
+        var row = layout.Content;
         if (playback.HasRound && playback.InFeature)
         {
             var total = Math.Max(1, playback.FeatureTotal);
             var text = featureTotalLabel.Get(L.Machines.FeatureTotal, total);
-            var fitted = Typography.FitText(text, row.Width, TextStyles.Title3);
-            Typography.DrawCentered(drawList, row.Center, fitted, CasinoColors.Money, TextStyles.Title3);
+            Typography.DrawCentered(drawList, row.Center, text, CasinoColors.Money,
+                MachineText.Fit(text, row.Width, TextStyles.Title3));
             return;
         }
 
+        var caption = Loc.T(L.Machines.TumbleLadder);
+        var captionStyle = MachineText.Fit(caption, layout.Caption.Width, CaptionStyle);
+        var captionSize = Typography.Measure(caption, captionStyle);
+        Typography.Draw(drawList, new Vector2(layout.Caption.Center.X - captionSize.X * 0.5f,
+            layout.Caption.Center.Y - captionSize.Y * 0.5f), caption, CasinoColors.InkBody, captionStyle);
         var ladder = CrystalCascadeRules.TumbleLadder;
-        var current = playback.HasRound && playback.Active ? playback.Current.Multiplier : 0;
-        var pip = row.Width / ladder.Length;
+        var multiplier = playback.HasRound && playback.Active ? playback.Current.Multiplier : 1;
+        var active = MachineGlassLayout.ActiveRung(ladder, multiplier);
         for (var rung = 0; rung < ladder.Length; rung++)
         {
-            var min = new Vector2(row.Min.X + rung * pip + 3f * scale, row.Min.Y);
-            var max = new Vector2(min.X + pip - 6f * scale, row.Max.Y);
-            var lit = current >= ladder[rung] && current > 0;
-            Squircle.Fill(drawList, min, max, (max.Y - min.Y) * 0.5f,
-                ImGui.GetColorU32(lit ? CasinoColors.LightB with { W = 0.85f } : new Vector4(1f, 1f, 1f, 0.08f)));
+            var pill = MachineGlassLayout.Pill(row, rung, ladder.Length, scale);
+            var radius = pill.Height * 0.5f;
             var label = CasinoMultiples.Label(ladder[rung] * 100);
-            Typography.DrawCentered(drawList, (min + max) * 0.5f,
-                Typography.FitText(label, max.X - min.X, TextStyles.Headline),
-                lit ? new Vector4(0.02f, 0.05f, 0.08f, 1f) : StageInks.Strong, TextStyles.Headline);
+            var ink = StageInks.Strong with { W = FutureRungAlpha };
+            if (rung == active)
+            {
+                Squircle.Stroke(drawList, pill.Min, pill.Max, radius,
+                    ImGui.GetColorU32(CasinoColors.LightB with { W = 0.35f }), 3f * scale);
+                Squircle.Fill(drawList, pill.Min, pill.Max, radius, ImGui.GetColorU32(CasinoColors.LightB));
+                ink = ActiveRungInk;
+            }
+            else if (rung < active)
+            {
+                Squircle.Fill(drawList, pill.Min, pill.Max, radius,
+                    ImGui.GetColorU32(CasinoColors.LightB with { W = 0.28f }));
+                ink = StageInks.Strong;
+            }
+            else
+            {
+                Squircle.Fill(drawList, pill.Min, pill.Max, radius, ImGui.GetColorU32(FutureRungFill));
+            }
+
+            Typography.DrawCentered(drawList, pill.Center, label, ink,
+                MachineText.Fit(label, pill.Width - pill.Height * 0.5f, TextStyles.SubheadlineEmphasized));
         }
     }
 
@@ -198,13 +234,14 @@ internal sealed partial class MachineCabinet
                 value = SlotsRules.ChipsFor(bet, tier == 2 ? MoogleMoneyRules.MajorUnits : MoogleMoneyRules.GrandUnits);
             }
 
-            var labelText = Typography.FitText(Loc.T(label), column - 4f * scale, TextStyles.Footnote);
-            var labelHeight = Typography.LineHeight(TextStyles.Footnote);
+            var labelText = Loc.T(label);
+            var labelStyle = MachineText.Fit(labelText, column - MeterInset * scale, TextStyles.FootnoteEmphasized);
+            var labelHeight = Typography.LineHeight(TextStyles.FootnoteEmphasized);
             Typography.DrawCentered(drawList, new Vector2(cell.Center.X, cell.Min.Y + labelHeight * 0.5f), labelText,
-                tier == 3 ? CasinoColors.LightA : CasinoColors.MoneyHighlight, TextStyles.Footnote);
+                tier == 3 ? CasinoColors.LightA : CasinoColors.MoneyHighlight, labelStyle);
             var amountRoom = cell.Height - labelHeight - (fill < 0f ? 0f : MeterBarHeight * scale);
-            var amountStyle = FitHeight(TextStyles.Title3, amountRoom);
-            var amount = Typography.FitText(NumberText.Compact(value), column - 4f * scale, amountStyle);
+            var amount = NumberText.Compact(value);
+            var amountStyle = MachineText.Fit(amount, column - MeterInset * scale, FitHeight(TextStyles.Title3, amountRoom));
             Typography.DrawCentered(drawList,
                 new Vector2(cell.Center.X, cell.Min.Y + labelHeight + Typography.LineHeight(amountStyle) * 0.5f),
                 amount, CasinoColors.Money, amountStyle);
@@ -268,12 +305,13 @@ internal sealed partial class MachineCabinet
         if (playback.Finished && playback.CapApplied)
         {
             var pad = NotePad * scale;
-            var note = Typography.FitText(Loc.T(L.Machines.CapNote), window.Width - pad * 4f, TextStyles.Footnote);
-            var size = Typography.Measure(note, TextStyles.Footnote);
+            var note = Loc.T(L.Machines.CapNote);
+            var style = MachineText.Fit(note, window.Width - pad * 4f, TextStyles.FootnoteEmphasized);
+            var size = Typography.Measure(note, style);
             var center = new Vector2(window.Center.X, window.Max.Y - pad - size.Y * 0.5f);
             var half = new Vector2(size.X * 0.5f + pad, size.Y * 0.5f + pad * 0.5f);
             Squircle.Fill(drawList, center - half, center + half, half.Y, ImGui.GetColorU32(Veil));
-            Typography.DrawCentered(drawList, center, note, StageInks.Strong, TextStyles.Footnote);
+            Typography.DrawCentered(drawList, center, note, StageInks.Strong, style);
         }
     }
 
@@ -290,12 +328,14 @@ internal sealed partial class MachineCabinet
         var pad = IntroPad * scale;
         var inner = window.Inset(pad);
         var bird = string.Equals(machineId, SlotsRules.BirdId, StringComparison.Ordinal);
-        var titleStyle = FitHeight(TextStyles.Title1, inner.Height * IntroTitleShare);
-        var captionStyle = FitHeight(TextStyles.Title3, inner.Height * IntroCaptionShare);
+        var titleStyle = MachineText.Fit(title, inner.Width, FitHeight(TextStyles.Title1, inner.Height * IntroTitleShare),
+            MachineText.DisplayShrink);
+        var caption = Loc.T(L.Machines.Expanding);
+        var captionStyle = MachineText.Fit(caption, inner.Width,
+            FitHeight(TextStyles.Title3, inner.Height * IntroCaptionShare));
         var titleHeight = Typography.LineHeight(titleStyle);
         var captionHeight = bird ? Typography.LineHeight(captionStyle) : 0f;
-        var titleText = Typography.FitText(title, inner.Width, titleStyle);
-        Typography.DrawCentered(drawList, new Vector2(inner.Center.X, inner.Min.Y + titleHeight * 0.5f), titleText,
+        Typography.DrawCentered(drawList, new Vector2(inner.Center.X, inner.Min.Y + titleHeight * 0.5f), title,
             CasinoColors.Money, titleStyle);
         var gap = Metrics.Space.Xs * scale;
         var middleTop = inner.Min.Y + titleHeight + gap;
@@ -318,7 +358,6 @@ internal sealed partial class MachineCabinet
             extent * 0.3f, ImGui.GetColorU32(new Vector4(0.5f, 0.25f, 0.04f, 0.9f)),
             ImGui.GetColorU32(new Vector4(0.2f, 0.08f, 0f, 0.9f)));
         MachineSymbols.Draw(drawList, machineId, symbol, center, extent * (settledPick ? 1.1f : 1f), 1f, settledPick);
-        var caption = Typography.FitText(Loc.T(L.Machines.Expanding), inner.Width, captionStyle);
         Typography.DrawCentered(drawList, new Vector2(inner.Center.X, inner.Max.Y - captionHeight * 0.5f), caption,
             StageInks.Strong, captionStyle);
     }
@@ -338,14 +377,17 @@ internal sealed partial class MachineCabinet
             subtitleStyle = subtitleStyle with { Scale = subtitleStyle.Scale * shrink };
         }
 
-        var titleText = Typography.FitText(title, window.Width * 0.84f, titleStyle);
-        var titleSize = Typography.Measure(titleText, titleStyle);
-        var subtitleText = subtitle.Length > 0
-            ? Typography.FitText(subtitle, window.Width * 0.84f, subtitleStyle)
-            : string.Empty;
-        var subtitleHeight = subtitleText.Length > 0 ? Typography.LineHeight(subtitleStyle) : 0f;
-        var width = MathF.Min(window.Width - pad, MathF.Max(titleSize.X, subtitleText.Length > 0
-            ? Typography.Measure(subtitleText, subtitleStyle).X : 0f) + pad * 2f);
+        var textWidth = window.Width * BannerTextShare;
+        titleStyle = MachineText.Fit(title, textWidth, titleStyle, MachineText.DisplayShrink);
+        var titleSize = Typography.Measure(title, titleStyle);
+        if (subtitle.Length > 0)
+        {
+            subtitleStyle = MachineText.Fit(subtitle, textWidth, subtitleStyle, MachineText.DisplayShrink);
+        }
+
+        var subtitleHeight = subtitle.Length > 0 ? Typography.LineHeight(subtitleStyle) : 0f;
+        var width = MathF.Min(window.Width - pad, MathF.Max(titleSize.X, subtitle.Length > 0
+            ? Typography.Measure(subtitle, subtitleStyle).X : 0f) + pad * 2f);
         var height = titleSize.Y + subtitleHeight + pad * 1.5f;
         var center = window.Center;
         var min = center - new Vector2(width, height) * 0.5f;
@@ -354,12 +396,12 @@ internal sealed partial class MachineCabinet
         Squircle.Stroke(drawList, min, max, 16f * scale, ImGui.GetColorU32(accent with { W = 0.8f }), 2f * scale);
         CasinoLights.BulbChase(drawList, new Rect(min, max), 16f * scale, scale, frame.Phase, CasinoLights.BulbPitch,
             CasinoColors.Money, accent, 0.9f);
-        Typography.DrawCentered(drawList, new Vector2(center.X, min.Y + pad * 0.75f + titleSize.Y * 0.5f), titleText,
+        Typography.DrawCentered(drawList, new Vector2(center.X, min.Y + pad * 0.75f + titleSize.Y * 0.5f), title,
             accent, titleStyle);
-        if (subtitleText.Length > 0)
+        if (subtitle.Length > 0)
         {
             Typography.DrawCentered(drawList,
-                new Vector2(center.X, min.Y + pad * 0.75f + titleSize.Y + subtitleHeight * 0.5f), subtitleText,
+                new Vector2(center.X, min.Y + pad * 0.75f + titleSize.Y + subtitleHeight * 0.5f), subtitle,
                 StageInks.Strong, subtitleStyle);
         }
     }
@@ -375,107 +417,96 @@ internal sealed partial class MachineCabinet
         return style with { Scale = style.Scale * MathF.Max(0.1f, height) / line };
     }
 
-    private void DrawStrip(ImDrawListPtr drawList, AppSkin ui, in CasinoStageFrame frame, float scale)
+    private void DrawStrip(ImDrawListPtr drawList, float scale)
     {
-        var radius = strip.Height * 0.3f;
-        Squircle.Fill(drawList, strip.Min, strip.Max, radius, ImGui.GetColorU32(new Vector4(0f, 0f, 0f, 0.55f)));
-        var leftWidth = strip.Width * 0.46f;
-        var left = new Rect(strip.Min, new Vector2(strip.Min.X + leftWidth, strip.Max.Y)).Inset(8f * scale);
-        var right = new Rect(new Vector2(strip.Min.X + leftWidth, strip.Min.Y), strip.Max).Inset(8f * scale);
-        DrawStripLeft(drawList, ui, frame, left, scale);
-        DrawWinAmount(drawList, right);
-    }
-
-    private void DrawStripLeft(ImDrawListPtr drawList, AppSkin ui, in CasinoStageFrame frame, Rect area, float scale)
-    {
+        Squircle.Fill(drawList, strip.Min, strip.Max, strip.Height * StripRoundShare, ImGui.GetColorU32(StripFill));
+        var footer = MachineFooterLayout.Compute(strip, scale);
+        var eyebrowHeight = Typography.LineHeight(EyebrowStyle);
+        var valueStyle = FitHeight(TextStyles.Title2, footer.Right.Height - eyebrowHeight);
         if (inlineReason.Length > 0)
         {
-            var reason = CasinoReasons.Text(inlineReason, store.Ceiling.MaxBet);
-            var block = Typography.MeasureWrappedBlock(reason, TextStyles.Footnote, area.Width);
-            if (block.Y <= area.Height)
-            {
-                Typography.DrawWrappedCentered(drawList, reason, TextStyles.Footnote, StageInks.Strong,
-                    new Vector2(area.Center.X, area.Center.Y - block.Y * 0.5f), area.Width);
-                return;
-            }
-
-            var lineHeight = Typography.LineHeight(TextStyles.Footnote);
-            Marquee.DrawCentered(drawList, new MarqueeId(ReasonMarquee, 0), reason, area.Center.X,
-                area.Center.Y - lineHeight * 0.5f, area.Width, TextStyles.Footnote, StageInks.Strong,
-                UiInteract.Hover(area.Min, area.Max));
-            return;
-        }
-
-        var buttonHeight = MathF.Min(area.Height, Button.LargeHeight * scale);
-        var buttonRect = new Rect(new Vector2(area.Min.X, area.Center.Y - buttonHeight * 0.5f),
-            new Vector2(area.Max.X, area.Center.Y + buttonHeight * 0.5f));
-        if (playback.Active && playback.InFeature && !frame.Blocked)
-        {
-            if (Button.Draw(drawList, buttonRect, Loc.T(L.Machines.Skip), ui.Ink, ButtonStyle.Gray, id: SkipId))
-            {
-                playback.Skip();
-            }
-
-            return;
-        }
-
-        if (gamble.Offered && !Composer.Auto.Running && !frame.Blocked)
-        {
-            if (Button.Draw(drawList, buttonRect, Loc.T(L.Machines.Gamble), ui.Ink, ButtonStyle.Tinted, id: GambleId))
-            {
-                gamble.Choose();
-                CasinoSfx.Play(UiSound.CardSnap);
-            }
-
-            return;
-        }
-
-        string text;
-        var style = TextStyles.Title3;
-        if (playback.HasRound && playback.InHold)
-        {
-            text = respinCounter.Get(L.Machines.Respins, Math.Max(0, playback.Current.SpinsLeft));
-            style = TextStyles.Title2;
-        }
-        else if (playback.HasRound && playback.InFeature)
-        {
-            var played = playback.FeaturePlayed;
-            var total = played + playback.SpinsLeftShown();
-            var games = string.Equals(machineId, SlotsRules.MoogleId, StringComparison.Ordinal);
-            text = featureCounter.Get(games ? L.Machines.FreeGamesCounter : L.Machines.FreeSpinsCounter, played,
-                Math.Max(played, total));
+            DrawReason(drawList, footer.Left);
         }
         else
         {
-            text = betLabel.Get(L.Machines.CostLine, SlotsRules.CostOf(Mode, Composer.Amount));
+            DrawStripLeft(drawList, footer.Left, valueStyle);
         }
 
-        style = FitHeight(style, area.Height);
-        var fitted = Typography.FitText(text, area.Width, style);
-        Typography.DrawCentered(drawList, area.Center, fitted, StageInks.Strong, style);
+        var shown = playback.HasRound ? rollup.Shown : 0;
+        var lossLike = playback.HasRound && settled && playback.TotalWin + playback.Jackpot <= playback.Cost;
+        var ink = shown <= 0 || lossLike ? StageInks.Strong with { W = MutedValueAlpha } : CasinoColors.Money;
+        DrawFooterColumn(drawList, footer.Right, Loc.T(L.Machines.Win), NumberText.Group(shown), true, ink, valueStyle,
+            true);
     }
 
-    private void DrawWinAmount(ImDrawListPtr drawList, Rect area)
+    private void DrawReason(ImDrawListPtr drawList, Rect area)
     {
-        var shown = playback.HasRound ? rollup.Shown : 0;
-        var labelStyle = TextStyles.Footnote;
-        var label = Typography.FitText(Loc.T(L.Machines.Win), area.Width, labelStyle);
-        var labelHeight = Typography.LineHeight(labelStyle);
-        var amountStyle = FitHeight(TextStyles.Title1, area.Height - labelHeight);
-        var amount = NumberText.Group(shown);
-        var lossLike = playback.HasRound && settled && playback.TotalWin + playback.Jackpot <= playback.Cost;
-        var ink = shown <= 0 || lossLike ? StageInks.Strong with { W = 0.7f } : CasinoColors.Money;
-        var amountHeight = Typography.LineHeight(amountStyle);
-        var top = area.Center.Y - (labelHeight + amountHeight) * 0.5f;
-        var labelSize = Typography.Measure(label, labelStyle);
-        Typography.Draw(drawList, new Vector2(area.Max.X - labelSize.X, top), label, CasinoColors.MoneyHighlight,
-            labelStyle);
-        var size = CurrencyGlyph.MeasureAmount(amount, amountStyle);
-        var scaleFit = size.X > area.Width ? area.Width / size.X : 1f;
-        var style = scaleFit < 1f ? amountStyle with { Scale = amountStyle.Scale * scaleFit } : amountStyle;
-        var fittedSize = CurrencyGlyph.MeasureAmount(amount, style);
-        CurrencyGlyph.DrawAmount(drawList, new Vector2(area.Max.X - fittedSize.X, top + labelHeight), amount,
-            CurrencyKind.Chips, ink, style);
+        var reason = CasinoReasons.Text(inlineReason, store.Ceiling.MaxBet);
+        var block = Typography.MeasureWrappedBlock(reason, TextStyles.Footnote, area.Width);
+        if (block.Y <= area.Height)
+        {
+            Typography.DrawWrappedCentered(drawList, reason, TextStyles.Footnote, StageInks.Strong,
+                new Vector2(area.Center.X, area.Center.Y - block.Y * 0.5f), area.Width);
+            return;
+        }
+
+        var lineHeight = Typography.LineHeight(TextStyles.Footnote);
+        Marquee.DrawCentered(drawList, new MarqueeId(ReasonMarquee, 0), reason, area.Center.X,
+            area.Center.Y - lineHeight * 0.5f, area.Width, TextStyles.Footnote, StageInks.Strong,
+            UiInteract.Hover(area.Min, area.Max));
+    }
+
+    private void DrawStripLeft(ImDrawListPtr drawList, Rect area, in TextStyle valueStyle)
+    {
+        if (playback.HasRound && playback.InHold)
+        {
+            DrawFooterColumn(drawList, area, Loc.T(L.Machines.RespinsLabel),
+                GameNumber.Label(Math.Max(0, playback.Current.SpinsLeft)), false, StageInks.Strong, valueStyle, false);
+            return;
+        }
+
+        if (playback.HasRound && playback.InFeature)
+        {
+            var played = playback.FeaturePlayed;
+            var total = Math.Max(played, played + playback.SpinsLeftShown());
+            var games = string.Equals(machineId, SlotsRules.MoogleId, StringComparison.Ordinal);
+            DrawFooterColumn(drawList, area, Loc.T(games ? L.Machines.FreeGamesLabel : L.Machines.FreeSpinsLabel),
+                featureCounter.Get(L.Machines.CounterValue, played, total), false, StageInks.Strong, valueStyle, false);
+            return;
+        }
+
+        DrawFooterColumn(drawList, area, Loc.T(L.Machines.BetLabel),
+            NumberText.Compact(SlotsRules.CostOf(Mode, Composer.Amount)), true, StageInks.Strong, valueStyle, false);
+    }
+
+    private static void DrawFooterColumn(ImDrawListPtr drawList, Rect column, string eyebrow, string value,
+        bool chips, Vector4 valueInk, in TextStyle valueStyle, bool alignRight)
+    {
+        var eyebrowStyle = MachineText.Fit(eyebrow, column.Width, EyebrowStyle);
+        var eyebrowHeight = Typography.LineHeight(EyebrowStyle);
+        var valueHeight = Typography.LineHeight(valueStyle);
+        var top = MachineFooterLayout.BlockTop(column, eyebrowHeight, valueHeight);
+        var eyebrowSize = Typography.Measure(eyebrow, eyebrowStyle);
+        var eyebrowLeft = alignRight ? column.Max.X - eyebrowSize.X : column.Min.X;
+        Typography.Draw(drawList, new Vector2(eyebrowLeft, top + (eyebrowHeight - eyebrowSize.Y) * 0.5f), eyebrow,
+            CasinoColors.InkBody, eyebrowStyle);
+        var size = chips ? CurrencyGlyph.MeasureAmount(value, valueStyle) : Typography.Measure(value, valueStyle);
+        var style = valueStyle;
+        if (size.X > column.Width && size.X > 0f)
+        {
+            style = valueStyle with { Scale = valueStyle.Scale * column.Width / size.X };
+            size = chips ? CurrencyGlyph.MeasureAmount(value, style) : Typography.Measure(value, style);
+        }
+
+        var origin = new Vector2(alignRight ? column.Max.X - size.X : column.Min.X, top + eyebrowHeight + valueHeight
+            - size.Y);
+        if (chips)
+        {
+            CurrencyGlyph.DrawAmount(drawList, origin, value, CurrencyKind.Chips, valueInk, style);
+            return;
+        }
+
+        Typography.Draw(drawList, origin, value, valueInk, style);
     }
 
     private void DrawGamble(ImDrawListPtr drawList, AppSkin ui, in CasinoStageFrame frame, float scale)
@@ -488,49 +519,45 @@ internal sealed partial class MachineCabinet
         drawList.AddRectFilled(window.Min, window.Max, ImGui.GetColorU32(Veil), 12f * scale);
         var pad = 10f * scale;
         var inner = window.Inset(pad);
-        var heading = Typography.FitText(Loc.T(L.Machines.GambleHeading), inner.Width, TextStyles.Title3);
+        var heading = Loc.T(L.Machines.GambleHeading);
+        var headingStyle = MachineText.Fit(heading, inner.Width, TextStyles.Title3);
         var headingHeight = Typography.LineHeight(TextStyles.Title3);
         Typography.DrawCentered(drawList, new Vector2(inner.Center.X, inner.Min.Y + headingHeight * 0.5f), heading,
-            StageInks.Strong, TextStyles.Title3);
+            StageInks.Strong, headingStyle);
         var amount = gambleStake.Get(L.Machines.GambleAmount, gamble.Amount);
-        var amountText = Typography.FitText(amount, inner.Width, TextStyles.Title1);
+        var amountStyle = MachineText.Fit(amount, inner.Width, TextStyles.Title1, MachineText.DisplayShrink);
         var amountHeight = Typography.LineHeight(TextStyles.Title1);
         var amountCenterY = inner.Min.Y + headingHeight + amountHeight * 0.5f;
         var lost = gamble.Phase == GamblePhase.Closing && !gamble.Won;
-        Typography.DrawCentered(drawList, new Vector2(inner.Center.X, amountCenterY), amountText,
-            lost ? StageInks.Strong with { W = 0.6f } : CasinoColors.Money, TextStyles.Title1);
+        Typography.DrawCentered(drawList, new Vector2(inner.Center.X, amountCenterY), amount,
+            lost ? StageInks.Strong with { W = 0.6f } : CasinoColors.Money, amountStyle);
         var ladderTop = amountCenterY + amountHeight * 0.5f + Metrics.Space.Xs * scale;
         var ladderHeight = Typography.LineHeight(TextStyles.Footnote) + 8f * scale;
         DrawGambleLadder(drawList, new Rect(new Vector2(inner.Min.X, ladderTop),
             new Vector2(inner.Max.X, ladderTop + ladderHeight)), scale);
-        var buttonsHeight = Button.LargeHeight * scale;
-        var buttonsTop = inner.Max.Y - buttonsHeight;
+        var buttons = MachineGambleLayout.Compute(inner, Button.LargeHeight * scale, scale);
         var cardTop = ladderTop + ladderHeight + Metrics.Space.Xs * scale;
         var cardArea = new Rect(new Vector2(inner.Min.X, cardTop),
-            new Vector2(inner.Max.X, MathF.Max(cardTop, buttonsTop - Metrics.Space.Xs * scale)));
+            new Vector2(inner.Max.X, MathF.Max(cardTop, buttons.Red.Min.Y - Metrics.Space.Xs * scale)));
         if (cardArea.Height >= CardMinHeight * scale)
         {
             DrawCard(drawList, cardArea, scale);
         }
+
         var choosing = gamble.Phase == GamblePhase.Choosing && !play.RoundInFlight && !frame.Blocked;
-        var gap = Metrics.Space.Sm * scale;
-        var third = (inner.Width - gap * 2f) / 3f;
-        var red = new Rect(new Vector2(inner.Min.X, buttonsTop), new Vector2(inner.Min.X + third, inner.Max.Y));
-        var black = new Rect(new Vector2(red.Max.X + gap, buttonsTop), new Vector2(red.Max.X + gap + third, inner.Max.Y));
-        var collect = new Rect(new Vector2(black.Max.X + gap, buttonsTop), inner.Max);
-        if (Button.Draw(drawList, red, Loc.T(L.Machines.Red), ui.Ink, ButtonStyle.Prominent, ButtonRole.Destructive,
+        if (Button.Draw(drawList, buttons.Red, Loc.T(L.Machines.Red), ui.Ink, ButtonStyle.Prominent, ButtonRole.Destructive,
                 enabled: choosing, id: "casino.machines.red") && gamble.Pick(play, SlotsRules.GambleRed))
         {
             CasinoSfx.Play(UiSound.ChipSlide);
         }
 
-        if (Button.Draw(drawList, black, Loc.T(L.Machines.Black), ui.Ink, ButtonStyle.Prominent, enabled: choosing,
+        if (Button.Draw(drawList, buttons.Black, Loc.T(L.Machines.Black), ui.Ink, ButtonStyle.Prominent, enabled: choosing,
                 id: "casino.machines.black") && gamble.Pick(play, SlotsRules.GambleBlack))
         {
             CasinoSfx.Play(UiSound.ChipSlide);
         }
 
-        if (Button.Draw(drawList, collect, Loc.T(L.Machines.Collect), ui.Ink, ButtonStyle.Gray, enabled: choosing,
+        if (Button.Draw(drawList, buttons.Collect, Loc.T(L.Machines.Collect), ui.Ink, ButtonStyle.Gray, enabled: choosing,
                 id: "casino.machines.collect"))
         {
             gamble.Collect();
@@ -549,10 +576,10 @@ internal sealed partial class MachineCabinet
             var done = rung < reached;
             Squircle.Fill(drawList, min, max, (max.Y - min.Y) * 0.5f,
                 ImGui.GetColorU32(done ? CasinoColors.Money with { W = 0.85f } : new Vector4(1f, 1f, 1f, 0.08f)));
-            var value = gamble.RungAmount(rung + 1);
-            var text = Typography.FitText(NumberText.Compact(value), max.X - min.X, TextStyles.Footnote);
+            var text = NumberText.Compact(gamble.RungAmount(rung + 1));
             Typography.DrawCentered(drawList, (min + max) * 0.5f, text,
-                done ? new Vector4(0.08f, 0.05f, 0.02f, 1f) : StageInks.Strong, TextStyles.Footnote);
+                done ? new Vector4(0.08f, 0.05f, 0.02f, 1f) : StageInks.Strong,
+                MachineText.Fit(text, max.X - min.X - 4f * scale, TextStyles.FootnoteEmphasized));
         }
     }
 
@@ -584,64 +611,15 @@ internal sealed partial class MachineCabinet
         SlotsSymbolArt.Draw(drawList, suitSymbol, center, MathF.Min(halfWidth, height * 0.5f) * 0.6f, 1f);
         Squircle.Stroke(drawList, min, max, rounding, ImGui.GetColorU32(suitInk), 2f * scale);
         var verdict = gamble.Won ? L.Machines.GambleWon : L.Machines.GambleLost;
-        var text = Typography.FitText(Loc.T(verdict), area.Width, TextStyles.Headline);
+        var text = Loc.T(verdict);
+        var style = MachineText.Fit(text, area.Width - NotePad * 2f * scale, TextStyles.Headline);
         var verdictY = MathF.Min(max.Y + Typography.LineHeight(TextStyles.Headline) * 0.6f,
             area.Max.Y - Typography.LineHeight(TextStyles.Headline) * 0.5f);
-        var textSize = Typography.Measure(text, TextStyles.Headline);
+        var textSize = Typography.Measure(text, style);
         var plate = new Vector2(textSize.X * 0.5f + NotePad * scale, textSize.Y * 0.5f);
         var plateCenter = new Vector2(center.X, verdictY);
         Squircle.Fill(drawList, plateCenter - plate, plateCenter + plate, plate.Y, ImGui.GetColorU32(Veil));
         Typography.DrawCentered(drawList, plateCenter, text, gamble.Won ? CasinoColors.Money : StageInks.Strong,
-            TextStyles.Headline);
-    }
-
-    private void DrawKnob(AppSkin ui, Rect rect, CasinoSittingDto sitting, bool changeable, float scale)
-    {
-        if (rect.Width <= 0f)
-        {
-            return;
-        }
-
-        var drawList = ImGui.GetWindowDrawList();
-        var bonusRow = MachineBonusRow.Compute(rect, Metrics.Space.Sm * scale);
-        var turboRect = bonusRow.Turbo;
-        var turboHover = UiInteract.Hover(turboRect.Min, turboRect.Max);
-        ChipRail.PaintChip(drawList, turboRect, Loc.T(L.Machines.Turbo), turbo, turboHover, ui.Ink);
-        if (UiInteract.Click(turboRect.Min, turboRect.Max, turboHover))
-        {
-            turbo = !turbo;
-            UiFeedback.Play(turbo ? UiSound.ToggleOn : UiSound.ToggleOff);
-        }
-
-        if (machineIndex != 1)
-        {
-            var infoRect = bonusRow.Info;
-            var info = Typography.FitText(Loc.T(machineIndex == 2 ? L.Machines.MoogleKnobInfo : L.Machines.LinesInfo),
-                infoRect.Width, TextStyles.Footnote);
-            var size = Typography.Measure(info, TextStyles.Footnote);
-            Typography.Draw(drawList, new Vector2(infoRect.Min.X, infoRect.Center.Y - size.Y * 0.5f), info,
-                StageInks.Strong, TextStyles.Footnote);
-            return;
-        }
-
-        var bet = Composer.Amount;
-        var anteRect = bonusRow.Ante;
-        var anteHover = changeable && UiInteract.Hover(anteRect.Min, anteRect.Max);
-        ChipRail.PaintChip(drawList, anteRect, anteLabel.Get(L.Machines.AnteCost,
-            SlotsRules.CostOf(SlotsRules.AnteMode, bet)), ante, anteHover, ui.Ink);
-        if (UiInteract.Click(anteRect.Min, anteRect.Max, anteHover))
-        {
-            ante = !ante;
-            UiFeedback.Play(ante ? UiSound.ToggleOn : UiSound.ToggleOff);
-        }
-
-        var buyRect = bonusRow.Buy;
-        var cost = SlotsRules.CostOf(SlotsRules.BuyMode, bet);
-        var canBuy = changeable && cost <= sitting.Stack && !Composer.Auto.Running;
-        if (Button.Draw(drawList, buyRect, buyLabel.Get(L.Machines.BuyBonus, cost), ui.Ink, ButtonStyle.Tinted,
-                enabled: canBuy, id: "casino.machines.buy"))
-        {
-            AskBuy(bet);
-        }
+            style);
     }
 }

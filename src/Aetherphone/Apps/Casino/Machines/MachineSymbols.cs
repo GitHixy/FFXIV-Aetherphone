@@ -8,6 +8,10 @@ internal static class MachineSymbols
 {
     public const float ShimmerFrameSeconds = 0.6f;
 
+    private const float PopWhiteShare = 0.45f;
+
+    private static readonly Vector4 PopWhite = new(0.86f, 0.97f, 1f, 1f);
+
     private static readonly Vector4 Gold = new(1f, 0.80f, 0.30f, 1f);
     private static readonly Vector4 GoldDeep = new(0.78f, 0.48f, 0.10f, 1f);
     private static readonly Vector4 Sun = new(1f, 0.62f, 0.18f, 1f);
@@ -33,6 +37,29 @@ internal static class MachineSymbols
         new(0.86f, 0.90f, 1f, 1f),
         new(0.60f, 0.86f, 0.98f, 1f),
     };
+
+    public static Vector4 CascadePopTint(int symbol)
+    {
+        Vector4 tint;
+        if (symbol == CrystalCascadeRules.Orb)
+        {
+            tint = Orb;
+        }
+        else if (symbol == CrystalCascadeRules.Scatter)
+        {
+            tint = Crystal;
+        }
+        else if (symbol >= 4 && symbol < CrystalCascadeRules.SymbolCount)
+        {
+            tint = GemTints[symbol - 4];
+        }
+        else
+        {
+            tint = CascadeHighTints[Math.Clamp(symbol, 0, CascadeHighTints.Length - 1)];
+        }
+
+        return Vector4.Lerp(tint, PopWhite, PopWhiteShare) with { W = 1f };
+    }
 
     public static int SymbolCount(string machineId) => machineId switch
     {
