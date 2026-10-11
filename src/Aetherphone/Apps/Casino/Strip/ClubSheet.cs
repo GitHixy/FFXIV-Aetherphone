@@ -85,9 +85,12 @@ internal sealed class ClubSheet
             var intro = Typography.DrawWrappedLeft(origin, Loc.T(L.Club.TiersIntro), skin.BodyInk, TextStyles.Subheadline,
                 width);
             var top = origin.Y + intro + Metrics.Space.Md * scale;
-            var rowHeight = RowHeight * scale;
+            var perkWidth = PerkWidth(width, scale);
             for (var tier = 0; tier < CasinoClubTiers.Count; tier++)
             {
+                var lines = Typography.WrapText(perks[tier], TextStyles.Footnote, perkWidth).Length;
+                var rowHeight = RowHeightFor(lines, Typography.LineHeight(TextStyles.Headline),
+                    Typography.LineHeight(TextStyles.Footnote), scale);
                 var row = new Rect(new Vector2(origin.X, top), new Vector2(origin.X + width, top + rowHeight));
                 DrawTier(drawList, row, tier, scale);
                 top += rowHeight + Metrics.Space.Xs * scale;
@@ -120,7 +123,8 @@ internal sealed class ClubSheet
         var textWidth = MathF.Max(1f, row.Max.X - pad - textLeft - (badgeWidth > 0f ? badgeWidth + Metrics.Space.Sm * scale : 0f));
         var headline = Typography.LineHeight(TextStyles.Headline);
         var footnote = Typography.LineHeight(TextStyles.Footnote);
-        var top = row.Center.Y - (headline + footnote * 2f) * 0.5f;
+        var perkLines = Typography.WrapText(perks[tier], TextStyles.Footnote, PerkWidth(row.Width, scale));
+        var top = row.Center.Y - (headline + footnote * (1 + perkLines.Length)) * 0.5f;
         Typography.Draw(drawList, new Vector2(textLeft, top),
             Typography.FitText(Loc.T(ClubTierArt.TierName(tier)), textWidth, TextStyles.Headline), skin.TitleInk,
             TextStyles.Headline);
@@ -135,7 +139,17 @@ internal sealed class ClubSheet
             Typography.FitText(texts.Compact(L.Club.TierFloor, CasinoClubTiers.Floors[tier]), textWidth,
                 TextStyles.Footnote), skin.BodyInk, TextStyles.Footnote);
         top += footnote;
-        Typography.Draw(drawList, new Vector2(textLeft, top), Typography.FitText(perks[tier], textWidth, TextStyles.Footnote),
-            skin.BodyInk, TextStyles.Footnote);
+        for (var line = 0; line < perkLines.Length; line++)
+        {
+            Typography.Draw(drawList, new Vector2(textLeft, top), perkLines[line], skin.BodyInk, TextStyles.Footnote);
+            top += footnote;
+        }
     }
+
+    internal static float PerkWidth(float rowWidth, float scale) =>
+        MathF.Max(1f, rowWidth - Metrics.Space.Lg * scale * 2f - Tile * scale - CoinArt.TextGap * scale);
+
+    internal static float RowHeightFor(int perkLines, float headline, float footnote, float scale) =>
+        MathF.Max(RowHeight * scale,
+            headline + footnote * (1 + Math.Max(1, perkLines)) + Metrics.Space.Md * scale * 2f);
 }

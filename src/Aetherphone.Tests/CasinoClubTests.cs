@@ -36,6 +36,21 @@ public sealed class CasinoClubTests
         Assert.Equal(25_000_000, CasinoClubTiers.Floors[CasinoClubTiers.Obsidian]);
     }
 
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.5f)]
+    public void ClubTierRowsGrowWithTheirWrappedPerks(float scale)
+    {
+        var headline = 20f * scale;
+        var footnote = 16f * scale;
+        var one = ClubSheet.RowHeightFor(1, headline, footnote, scale);
+        var three = ClubSheet.RowHeightFor(3, headline, footnote, scale);
+        Assert.True(three >= headline + footnote * 4f);
+        Assert.True(three > one);
+        Assert.True(ClubSheet.PerkWidth(330f * scale, scale) > 200f * scale);
+    }
+
     [Fact]
     public void FameValuesReadAsChipsOrMultiples()
     {
