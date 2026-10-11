@@ -201,6 +201,7 @@ internal sealed partial class BlackjackTable
         var shoe = layout.ShoeAnchor;
         var dealerAnchor = layout.DealerFanCenter;
         var seated = BlackjackRules.IsSeat(mySeat);
+        var canSit = !seated && !dealing;
         var currency = CasinoCurrencies.Of(board);
         var limit = SeatLimit(board);
         var tapped = -1;
@@ -217,8 +218,8 @@ internal sealed partial class BlackjackTable
             var view = seatViews[seatIndex];
             if (view.Phase == SeatPhase.Empty)
             {
-                if (SeatSpot.DrawEmpty(drawList, puck, layout.SpotRadius, seated ? string.Empty : sitLabel,
-                        CasinoColors.Money, !seated, layout.SpotScale))
+                if (SeatSpot.DrawEmpty(drawList, puck, layout.SpotRadius, canSit ? sitLabel : string.Empty,
+                        CasinoColors.Money, canSit, layout.SpotScale))
                 {
                     tapped = seatIndex;
                 }
@@ -397,7 +398,11 @@ internal sealed partial class BlackjackTable
     {
         if (!BlackjackRules.IsSeat(mySeat))
         {
-            DrawHeroGhostSlots(drawList, scale);
+            if (!dealing)
+            {
+                DrawHeroGhostSlots(drawList, scale);
+            }
+
             return;
         }
 

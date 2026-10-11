@@ -58,6 +58,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
     private float reasonClock;
     private bool entered;
     private bool motionsPrimed;
+    private bool dealing;
 
     public BlackjackTable(CasinoStore chips, CasinoRoomsStore rooms, CasinoTablesStore tables,
         CasinoHistoryStore history, CasinoTurnNotifier turns, RemoteImageCache images, LodestoneService lodestone,
@@ -122,6 +123,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         roomId = nextRoomId;
         inlineReason = string.Empty;
         mySeat = -1;
+        dealing = false;
         projection.Reset();
         playback.Reset();
         seatFlow.Reset();
@@ -171,6 +173,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
         entered = false;
         mySeat = -1;
+        dealing = false;
         projection.Reset();
         playback.Reset();
         dealer.Clear();
@@ -220,6 +223,9 @@ internal sealed partial class BlackjackTable : ICabinetIdle
             LoadingPulse.Draw(safe.Center, 16f * scale, ui.Palette.Accent, ui.MutedInk, LoadingPulse.SafeLabel());
             return;
         }
+
+        dealing = BlackjackHosting.DealsFromDeck(board, rooms.AccountId, OwnerId(),
+            BlackjackRules.IsSeat(mySeat) || CasinoSeatMachine.Holds(seatFlow.Stage));
 
         if (frame.SnapToTruth)
         {
@@ -411,8 +417,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
             return y;
         }
 
-        var owner = tables.CardFor(roomId)?.OwnerUserId ?? string.Empty;
-        var dealerPowers = BlackjackHosting.DealerPowers(board, rooms.AccountId, owner);
+        var dealerPowers = BlackjackHosting.DealerPowers(board, rooms.AccountId, OwnerId());
         var gil = CasinoCurrencies.Of(board) == CasinoCurrencies.Gil;
         var height = Button.LargeHeight * scale;
         var right = left + width;
@@ -429,7 +434,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
             }
 
             right = pauseRect.Min.X - Metrics.Space.Sm * scale;
-            if (BlackjackHosting.HostDeals(board) && board.Phase == BlackjackPhases.Betting)
+            if (BlackjackHosting.HostDeals(board) && board.Phase == BlackjackPhases.Betting && !dealing)
             {
                 var dealLabel = Loc.T(L.Tables.Deal);
                 var dealWidth = Button.WidthFor(dealLabel, ButtonSize.Large);
@@ -488,6 +493,8 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
         return bottom + gap;
     }
+
+    private string OwnerId() => tables.CardFor(roomId)?.OwnerUserId ?? string.Empty;
 
     private static float DrawInfoBlock(ImDrawListPtr drawList, string text, float left, float top, float width,
         Vector4 ink, float scale)

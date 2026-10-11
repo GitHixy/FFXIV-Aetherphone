@@ -1,0 +1,63 @@
+namespace Aetherphone.Apps.Casino.Tables;
+
+internal enum BlackjackDeck : byte
+{
+    Sit,
+    Dealer,
+    Rebuy,
+    Ledger,
+    Insurance,
+    Bet,
+    Act,
+    Wait,
+}
+
+internal readonly record struct BlackjackDeckFacts(
+    bool Dealing,
+    bool Bought,
+    bool OnBoard,
+    bool HoldsSeat,
+    bool CanRebuy,
+    bool GilBroke,
+    bool InsuranceOffered,
+    bool CanBet,
+    bool Committed,
+    bool CanAct);
+
+internal static class BlackjackDeckFlow
+{
+    public static BlackjackDeck Pick(in BlackjackDeckFacts facts)
+    {
+        if (facts.Dealing)
+        {
+            return BlackjackDeck.Dealer;
+        }
+
+        if (!facts.Bought || (!facts.OnBoard && !facts.HoldsSeat))
+        {
+            return BlackjackDeck.Sit;
+        }
+
+        if (facts.OnBoard && facts.CanRebuy)
+        {
+            return BlackjackDeck.Rebuy;
+        }
+
+        if (facts.OnBoard && facts.GilBroke)
+        {
+            return BlackjackDeck.Ledger;
+        }
+
+        if (facts.OnBoard && facts.InsuranceOffered)
+        {
+            return BlackjackDeck.Insurance;
+        }
+
+        if (facts.CanBet && !facts.Committed)
+        {
+            return BlackjackDeck.Bet;
+        }
+
+        return facts.OnBoard && facts.CanAct ? BlackjackDeck.Act : BlackjackDeck.Wait;
+    }
+}

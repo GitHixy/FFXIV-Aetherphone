@@ -11420,6 +11420,9 @@ internal static class L
         public static readonly LocString Resume = new("casino.tables.resume", "Resume");
         public static readonly LocString WaitingDeal = new("casino.tables.waitingDeal", "Bets are open. {0} deals when ready.");
         public static readonly LocString DealtBy = new("casino.tables.dealtBy", "Dealer: {0}");
+        public static readonly LocString DealerWaitingBets = new("casino.tables.dealerWaitingBets", "Waiting for the first bet");
+        public static readonly LocString DealerHandLive = new("casino.tables.dealerHandLive", "The hand is playing out");
+        public static readonly LocString DealerPaused = new("casino.tables.dealerPaused", "Paused. Tap Resume when you are ready.");
         public static readonly LocString RulesLineStands = new("casino.tables.rulesLineStands", "Blackjack pays {0}, dealer stands on soft 17, {1} decks");
         public static readonly LocString RulesLineHits = new("casino.tables.rulesLineHits", "Blackjack pays {0}, dealer hits soft 17, {1} decks");
         public static readonly LocString GilLimits = new("casino.tables.gilLimits", "Bank {0} gil, max payout {1} gil");

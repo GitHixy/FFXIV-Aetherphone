@@ -4,6 +4,15 @@ using Aetherphone.Core.Localization;
 
 namespace Aetherphone.Apps.Casino.Tables;
 
+internal enum DealerDeck : byte
+{
+    Deal,
+    WaitingBets,
+    HandLive,
+    HandOver,
+    Paused,
+}
+
 internal static class BlackjackHosting
 {
     public static bool SeatBanked(CasinoBlackjackRoomStateDto board)
@@ -50,6 +59,61 @@ internal static class BlackjackHosting
     {
         return HostDeals(board) && board.Phase == BlackjackPhases.Betting && board.DeadlineUnixMs == 0
                && !board.Paused;
+    }
+
+    public static bool IsDealingHost(CasinoBlackjackRoomStateDto board, string me, string ownerId)
+    {
+        if (me.Length == 0 || !HostDeals(board))
+        {
+            return false;
+        }
+
+        return string.Equals(me, ownerId, StringComparison.Ordinal)
+               || string.Equals(me, board.DealerUserId, StringComparison.Ordinal);
+    }
+
+    public static bool DealsFromDeck(CasinoBlackjackRoomStateDto board, string me, string ownerId, bool seated)
+    {
+        return !seated && IsDealingHost(board, me, ownerId);
+    }
+
+    public static DealerDeck DealerDeckOf(CasinoBlackjackRoomStateDto board)
+    {
+        if (board.Paused)
+        {
+            return DealerDeck.Paused;
+        }
+
+        if (BlackjackPhases.Over(board.Phase))
+        {
+            return DealerDeck.HandOver;
+        }
+
+        if (board.Phase != BlackjackPhases.Betting)
+        {
+            return DealerDeck.HandLive;
+        }
+
+        return AnyBet(board) ? DealerDeck.Deal : DealerDeck.WaitingBets;
+    }
+
+    public static bool AnyBet(CasinoBlackjackRoomStateDto board)
+    {
+        var seats = board.Seats;
+        if (seats is null)
+        {
+            return false;
+        }
+
+        for (var index = 0; index < seats.Length; index++)
+        {
+            if (seats[index].Committed > 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static bool CanRebuy(CasinoBlackjackRoomStateDto board, long seatChips)
