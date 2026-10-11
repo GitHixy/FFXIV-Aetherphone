@@ -40,11 +40,6 @@ internal sealed class RaceTexts
     private long raceValue = -1;
     private CasinoRaceTicketDto[]? paysSource;
     private CasinoRaceRunnerDto[]? paysRunners;
-    private string betLine = string.Empty;
-    private long betAmount = -1;
-    private int betKey = int.MinValue;
-    private long betPay = -1;
-    private CasinoRaceRunnerDto[]? betRunners;
 
     public RaceTexts()
     {
@@ -74,7 +69,6 @@ internal sealed class RaceTexts
         ticketSource = null;
         resultSource = null;
         paysSource = null;
-        betKey = int.MinValue;
         rideValue = -1;
         wonValue = -1;
         countValue = -1;
@@ -142,27 +136,6 @@ internal sealed class RaceTexts
         }
 
         return index >= 0 && index < ticketPays.Length ? ticketPays[index] : string.Empty;
-    }
-
-    public string BetLine(long amount, int kind, int first, int second, CasinoRaceRunnerDto[] runners)
-    {
-        var key = RaceRules.TicketKey(kind, first, second);
-        var pay = PayOf(kind, first, second, runners);
-        if (amount == betAmount && key == betKey && pay == betPay && ReferenceEquals(betRunners, runners))
-        {
-            return betLine;
-        }
-
-        betAmount = amount;
-        betKey = key;
-        betPay = pay;
-        betRunners = runners;
-        var target = RaceRules.IsPair(kind)
-            ? string.Concat(GameNumber.Label(first + 1), "-", GameNumber.Label(second + 1))
-            : runners[first].Name;
-        betLine = Loc.T(L.Race.BetOn, RaceAmounts.Text(amount), target,
-            CasinoMultiples.Label((int)Math.Min(int.MaxValue, pay)));
-        return betLine;
     }
 
     public static long PayOf(int kind, int first, int second, CasinoRaceRunnerDto[] runners)

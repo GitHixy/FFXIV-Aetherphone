@@ -536,7 +536,7 @@ internal sealed class RaceCabinet : ICabinetIdle
         return RaceTicketBuilder.RideAmount(bets.PreviousPayout, chips.Ceiling.MaxBet, sitting.Stack);
     }
 
-    private string PrimaryLabel(CasinoRaceRunnerDto[] runners, bool full)
+    private string DeckCaption(CasinoRaceRunnerDto[] runners, bool full)
     {
         if (full)
         {
@@ -545,7 +545,7 @@ internal sealed class RaceCabinet : ICabinetIdle
 
         if (builder.Ready)
         {
-            return texts.BetLine(deck.Amount, builder.Kind, builder.First, builder.RunnerB, runners);
+            return deck.Caption(builder.Kind, builder.First, builder.RunnerB, runners);
         }
 
         return Loc.T(builder.WantsSecond ? L.Race.PromptSecond : L.Race.PromptPick);
@@ -557,8 +557,8 @@ internal sealed class RaceCabinet : ICabinetIdle
     {
         var enabled = !state.StakesPaused && !state.Draining && !rooms.StakeInFlight && !frame.Blocked && !full;
         var ride = RideAmount(bets, sitting);
-        var model = new RaceDeckModel(chips.Ceiling.MaxBet, sitting.Stack, builder.Kind, PrimaryLabel(runners, full),
-            builder.Ready, enabled, ride > 0 ? texts.Ride(ride) : string.Empty, stage.RepeatPressed());
+        var model = new RaceDeckModel(chips.Ceiling.MaxBet, sitting.Stack, builder.Kind, DeckCaption(runners, full),
+            builder.Ready, enabled, ride > 0 ? texts.Ride(ride) : string.Empty, stage.RepeatPressed(), ride);
         var action = deck.Draw(stage.Chips, ui, deckArea, texts.KindLabels, model, frame.DeltaSeconds);
         switch (action)
         {
