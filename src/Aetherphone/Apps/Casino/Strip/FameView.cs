@@ -13,8 +13,9 @@ namespace Aetherphone.Apps.Casino.Strip;
 
 internal sealed class FameView
 {
+    public const float RowHeight = 56f;
+
     private const float SegmentHeight = 36f;
-    private const float RowHeight = 56f;
     private const float RankWidth = 36f;
     private const float ChampionHeight = 64f;
 
@@ -155,8 +156,8 @@ internal sealed class FameView
         return max.Y;
     }
 
-    private void DrawEntry(ImDrawListPtr drawList, AppSkin ui, string boardKey, CasinoFameEntryDto entry, Rect row,
-        bool hairline, float scale)
+    internal static void DrawEntry(ImDrawListPtr drawList, AppSkin ui, string boardKey, CasinoFameEntryDto entry,
+        Rect row, bool hairline, float scale)
     {
         var pad = Metrics.Space.Lg * scale;
         if (hairline)

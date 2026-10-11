@@ -11193,6 +11193,10 @@ internal static class L
         public static readonly LocString FameOptIn = new("casino.club.fameOptIn", "Only players who allow leaderboards in their profile are named. Everyone else shows as Hidden.");
         public static readonly LocString FameChampionLine = new("casino.club.fameChampionLine", "Last week's champion: {0}");
         public static readonly LocString FameChampionValue = new("casino.club.fameChampionValue", "Champion with {0} profit");
+        public static readonly LocString FameConsentTitle = new("casino.club.fameConsentTitle", "Show up in the Hall of Fame?");
+        public static readonly LocString FameConsentBody = new("casino.club.fameConsentBody", "Your name, biggest wins and best multipliers can appear on the weekly Hall of Fame boards that everyone on the floor sees.");
+        public static readonly LocString FameConsentOff = new("casino.club.fameConsentOff", "If you say no, your name stays off every board.");
+        public static readonly LocString FameShowMe = new("casino.club.fameShowMe", "Show me");
     }
 
     internal static class Machines

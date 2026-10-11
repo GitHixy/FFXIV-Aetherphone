@@ -22,6 +22,8 @@ internal sealed partial class CasinoApp
     private readonly ClubSheet clubSheet = new();
     private readonly FamePodium famePodium = new();
     private readonly FameView fameView;
+    private readonly FameConsentSheet fameConsent;
+    private readonly CasinoFameChoiceStore fameChoice;
     private string challengeTextId = string.Empty;
     private LanguageInfo? challengeLanguage;
     private string challengeLeader = string.Empty;
@@ -89,6 +91,21 @@ internal sealed partial class CasinoApp
         fameView.Enter(FloorFameBoard);
         routes.Push(new CasinoRoute(CasinoScreen.Fame));
     }
+
+    private void OfferFameConsent()
+    {
+        if (fameConsent.IsOpen || !FloorIdle() || !fameChoice.Needed)
+        {
+            return;
+        }
+
+        fameConsent.Open();
+    }
+
+    private bool FloorIdle() =>
+        casino.State is not null && preferences.IntroSeen && routes.OnRoot && routes.Tab == CasinoTab.Floor
+        && !router.IsTransitioning && !LaunchActive && !rulesSheet.IsOpen && !clubSheet.IsOpen && !cashier.IsOpen
+        && !venueSheet.IsOpen && !tradePrompt.Visible && conduct.Active is null && confirm.Active is null;
 
     private void ConsumeMissionNotes()
     {

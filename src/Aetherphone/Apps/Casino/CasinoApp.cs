@@ -111,11 +111,14 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         ConductGateService conduct, Core.Media.RemoteImageCache remoteImages,
         Core.Lodestone.LodestoneService lodestone, Core.Casino.HoldemStore holdemStore,
         Core.Casino.CasinoVenueStore casinoVenue, Core.Casino.CasinoTradeSync tradeSync,
-        Core.Report.ReportService report, Core.Casino.CasinoFloorStore floor, Configuration configuration)
+        Core.Report.ReportService report, Core.Casino.CasinoFloorStore floor, Configuration configuration,
+        Core.Casino.CasinoFameChoiceStore fameChoice)
     {
         this.floor = floor;
         this.configuration = configuration;
+        this.fameChoice = fameChoice;
         fameView = new Strip.FameView(floor);
+        fameConsent = new Strip.FameConsentSheet(fameChoice);
         stage.Feed = floor;
         this.session = session;
         this.coins = coins;
@@ -225,6 +228,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         tableDoor.Reset();
         pendingTableId = string.Empty;
         rulesSheet.Close();
+        fameConsent.Close();
         stage.ResetSession();
         ResetLimitsEditor();
         ResetLobby();
@@ -267,6 +271,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         tableDoor.Reset();
         pendingTableId = string.Empty;
         rulesSheet.Close();
+        fameConsent.Close();
         stage.ResetSession();
         ResetLimitsEditor();
         ResetLaunch();
@@ -352,6 +357,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         frameArea = screen;
         barkeep.Tick();
         bonusShelf.Update(MathF.Min(ImGui.GetIO().DeltaTime, Core.Animation.TransitionTiming.MaxFrameSeconds), scale);
+        OfferFameConsent();
         cashier.Gate();
         machines.Gate();
         scratch.Gate();
@@ -362,6 +368,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         dealerHoldem.Gate();
         holdem.Gate();
         rulesSheet.Gate();
+        fameConsent.Gate();
         venueRoom.Gate();
         venueSheet.Gate();
         tradePrompt.Gate();
@@ -377,6 +384,12 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             Strip.StripIntro.Gate();
             TourHolds.Hold(Id);
         }
+
+        if (fameConsent.IsOpen)
+        {
+            TourHolds.Hold(Id);
+        }
+
         if (!DrawLaunchLayer(screen))
         {
             router.Draw(screen, AppSkin.Transparent, ImGui.GetIO().DeltaTime, drawView);
@@ -400,6 +413,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         venueSheet.Draw(screenArea, ui);
         HandleVenueSheet();
         rulesSheet.Draw(screenArea, ui);
+        fameConsent.Draw(screenArea, ui);
         clubSheet.Draw(screenArea, ui);
         cashier.Draw(screenArea, ui, openLimits);
         tradePrompt.Draw(screenArea, ui);
