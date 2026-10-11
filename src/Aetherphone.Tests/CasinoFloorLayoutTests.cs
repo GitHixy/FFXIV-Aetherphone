@@ -104,6 +104,25 @@ public sealed class CasinoFloorLayoutTests
                     <= PhoneWidth - StripHero.Pad * 2f);
     }
 
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.5f)]
+    public void MissionRowsGrowWithTheirWrappedSentence(float scale)
+    {
+        var line = 18f * scale;
+        var footnote = 16f * scale;
+        var one = MissionsCard.RowHeightFor(1, line, footnote, scale);
+        var two = MissionsCard.RowHeightFor(2, line, footnote, scale);
+        var three = MissionsCard.RowHeightFor(3, line, footnote, scale);
+        Assert.True(one >= MissionsCard.RowHeight * scale - 0.01f);
+        Assert.True(three > two);
+        Assert.True(three >= line * 3f + footnote + MissionsCard.BarHeight * scale);
+        Assert.True(MissionsCard.TextWidth(PhoneWidth * scale, 90f * scale, scale) > 100f * scale);
+        Assert.Equal(0f, MissionsCard.Height(0, 20f, 100f, scale));
+        Assert.True(MissionsCard.Height(2, 20f, one + two, scale) > one + two);
+    }
+
     [Fact]
     public void HeroCardsScaleWithTheWidthAndClamp()
     {
