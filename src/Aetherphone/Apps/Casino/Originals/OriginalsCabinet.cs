@@ -24,6 +24,8 @@ internal sealed class OriginalsCabinet
     };
 
     private const float AutoPauseSeconds = 0.35f;
+    private const float WrapLineSpacing = 1.25f;
+    private const string LineProbe = "Ay";
 
     private static readonly TextStyle StakeStyle = TextStyles.Headline;
     private static readonly TextStyle StakeCaptionStyle = TextStyles.SubheadlineEmphasized;
@@ -140,7 +142,7 @@ internal sealed class OriginalsCabinet
         Settle(stage, frame, state);
         var sitting = state.Sitting;
         var blocked = state.StakesPaused || state.Draining || frame.Blocked;
-        var statusHeight = Typography.LineHeight(TextStyles.Subheadline) * 2f + Metrics.Space.Md * scale;
+        var statusHeight = StatusHeight(state, frame.Safe.Width, scale);
         var hasStrip = skin.Strip.Key is not null;
         var layout = OriginalsLayout.Compute(frame.Safe, hasStrip, statusHeight, scale);
         DrawSign(drawList, frame, layout.Sign, scale);
@@ -237,34 +239,62 @@ internal sealed class OriginalsCabinet
         CasinoSigns.Draw(drawList, skin.Sign, band.Center, height, CasinoColors.LightA, flicker);
     }
 
+    private CasinoNoticeKind NoticeKind() =>
+        string.Equals(notice.Key, L.Originals.Resumed.Key, StringComparison.Ordinal)
+            ? CasinoNoticeKind.Info
+            : CasinoNoticeKind.Reason;
+
+    private string PlainStatus(CasinoStateDto state)
+    {
+        if (state.StakesPaused || state.Draining)
+        {
+            return Loc.T(state.StakesPaused ? L.Casino.PausedTitle : L.Casino.DrainingTitle);
+        }
+
+        var hint = skin.Hint;
+        return hint.Key is null ? string.Empty : Loc.T(hint);
+    }
+
+    private float StatusHeight(CasinoStateDto state, float width, float scale)
+    {
+        var reserve = Typography.LineHeight(TextStyles.Subheadline) * 2f + Metrics.Space.Md * scale;
+        var top = Metrics.Space.Xs * scale;
+        if (hasNotice)
+        {
+            return MathF.Max(reserve,
+                top + CasinoNotice.Height(NoticeKind(), string.Empty, Loc.T(notice), width, scale));
+        }
+
+        var text = PlainStatus(state);
+        return text.Length == 0 ? reserve : MathF.Max(reserve, top + WrappedHeight(text, TextStyles.Subheadline, width));
+    }
+
+    private static float WrappedHeight(string text, in TextStyle style, float width)
+    {
+        var block = Typography.MeasureWrappedBlock(text, style, width).Y;
+        var lines = MathF.Max(1f, MathF.Round(block / MathF.Max(1f, Typography.LineHeight(style))));
+        return lines * Typography.Measure(LineProbe, style).Y * WrapLineSpacing;
+    }
+
     private void DrawStatus(ImDrawListPtr drawList, AppSkin ui, CasinoStateDto state, Rect area, float scale)
     {
         var top = area.Min.Y + Metrics.Space.Xs * scale;
         if (hasNotice)
         {
-            var kind = string.Equals(notice.Key, L.Originals.Resumed.Key, StringComparison.Ordinal)
-                ? CasinoNoticeKind.Info
-                : CasinoNoticeKind.Reason;
-            CasinoNotice.Draw(drawList, ui, kind, string.Empty, Loc.T(notice), area.Min.X, top, area.Width, scale);
+            CasinoNotice.Draw(drawList, ui, NoticeKind(), string.Empty, Loc.T(notice), area.Min.X, top, area.Width,
+                scale);
             return;
         }
 
-        if (state.StakesPaused || state.Draining)
-        {
-            Typography.DrawWrappedCentered(drawList,
-                Loc.T(state.StakesPaused ? L.Casino.PausedTitle : L.Casino.DrainingTitle), TextStyles.Subheadline,
-                CasinoColors.InkTitle, new Vector2(area.Center.X, top), area.Width);
-            return;
-        }
-
-        var hint = skin.Hint;
-        if (hint.Key is null)
+        var text = PlainStatus(state);
+        if (text.Length == 0)
         {
             return;
         }
 
-        Typography.DrawWrappedCentered(drawList, Loc.T(hint), TextStyles.Subheadline, CasinoColors.InkBody,
-            new Vector2(area.Center.X, top), area.Width);
+        var ink = state.StakesPaused || state.Draining ? CasinoColors.InkTitle : CasinoColors.InkBody;
+        Typography.DrawWrappedCentered(drawList, text, TextStyles.Subheadline, ink, new Vector2(area.Center.X, top),
+            area.Width, WrapLineSpacing);
     }
 
     private void DrawLiveDeck(ImDrawListPtr drawList, AppSkin ui, Rect deck, bool blocked, float scale)
