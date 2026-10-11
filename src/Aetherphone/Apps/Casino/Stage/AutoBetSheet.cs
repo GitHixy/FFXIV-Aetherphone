@@ -14,7 +14,6 @@ internal sealed class AutoBetSheet
     private const float PanelHeightShare = 0.74f;
     private const float RowHeight = 44f;
     private const float FieldWidth = 104f;
-    private const float AdjustWidth = 168f;
     private const int RoundsDigits = 4;
     private const int PercentDigits = 4;
     private const int ChipDigits = 14;
@@ -175,22 +174,22 @@ internal sealed class AutoBetSheet
         adjustLabels[0] = Loc.T(L.Strip.AdjustReset);
         adjustLabels[1] = Loc.T(L.Strip.AdjustIncrease);
         var current = win ? plan.OnWin : plan.OnLoss;
-        var segment = new Rect(new Vector2(left, rowTop),
-            new Vector2(left + MathF.Min(AdjustWidth * scale, width * 0.55f), rowTop + rowHeight));
+        var segment = new Rect(new Vector2(left, rowTop), new Vector2(left + width, rowTop + rowHeight));
         var picked = SegmentStrip.Draw(win ? winId : lossId, segment, adjustLabels, (int)current,
             Surfaces.Fill(skin.TitleInk, FillLevel.Tertiary), skin.Accent, skin.MutedInk, CasinoColors.InkTitle,
-            overlay: true);
+            BetComposer.AmountHeight, TextStyles.SubheadlineEmphasized.Scale, true);
         var adjust = (AutoAdjust)picked;
         var percent = (int)Math.Min(AutoBetPlan.MaxPercent, Parse(field));
         if (adjust == AutoAdjust.Increase)
         {
-            var fieldRect = new Rect(new Vector2(segment.Max.X + Metrics.Space.Sm * scale, rowTop),
-                new Vector2(left + width, rowTop + rowHeight));
+            var fieldTop = segment.Max.Y + Metrics.Space.Sm * scale;
+            var fieldRect = new Rect(new Vector2(left, fieldTop), new Vector2(left + width, fieldTop + rowHeight));
             DrawField(drawList, fieldRect, field, PercentDigits);
             var suffix = PercentSuffix();
-            var suffixSize = Typography.Measure(suffix, TextStyles.Footnote);
-            Typography.Draw(drawList, new Vector2(fieldRect.Max.X - suffixSize.X - Metrics.Space.Md * scale,
-                fieldRect.Center.Y - suffixSize.Y * 0.5f), suffix, skin.MutedInk, TextStyles.Footnote);
+            var suffixSize = Typography.Measure(suffix, TextStyles.Subheadline);
+            Typography.Draw(drawList, new Vector2(fieldRect.Max.X - suffixSize.X - Metrics.Space.Lg * scale,
+                fieldRect.Center.Y - suffixSize.Y * 0.5f), suffix, skin.BodyInk, TextStyles.Subheadline);
+            rowTop = fieldRect.Min.Y;
         }
 
         if (win)
