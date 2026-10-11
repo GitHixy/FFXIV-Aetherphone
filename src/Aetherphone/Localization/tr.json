@@ -9280,6 +9280,7 @@
   "casino.plinko.notOpenBody": "Plinko yakında açılıyor. Salondaki diğer tüm oyunlar açık.",
   "casino.plinko.hint": "Bırak'a istediğin kadar dokun. Aynı anda en fazla on top düşer.",
   "casino.plinko.railEmpty": "Son bırakışların burada görünür.",
+  "casino.plinko.lastDrops": "Son toplar",
   "casino.plinko.factRows": "Sıralar",
   "casino.plinko.factRowsValue": "8, 12 veya 16",
   "casino.plinko.returnRange": "{0} ile {1} arası",

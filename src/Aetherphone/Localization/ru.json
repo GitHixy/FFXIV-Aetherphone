@@ -9280,6 +9280,7 @@
   "casino.plinko.notOpenBody": "Plinko скоро откроется. Все остальные игры зала открыты.",
   "casino.plinko.hint": "Нажимайте «Бросить» сколько угодно. Одновременно падает до десяти шаров.",
   "casino.plinko.railEmpty": "Здесь появятся ваши последние броски.",
+  "casino.plinko.lastDrops": "Недавние",
   "casino.plinko.factRows": "Ряды",
   "casino.plinko.factRowsValue": "8, 12 или 16",
   "casino.plinko.returnRange": "от {0} до {1}",

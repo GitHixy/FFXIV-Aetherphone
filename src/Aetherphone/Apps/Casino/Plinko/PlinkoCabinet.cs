@@ -15,8 +15,6 @@ namespace Aetherphone.Apps.Casino.Plinko;
 
 internal sealed class PlinkoCabinet : ICabinetIdle
 {
-    private const float RailChipWidth = 52f;
-    private const float RailGap = 4f;
     private const string HintMarquee = "casino.plinko.hint";
     private const float AutoSpacingSeconds = 0.3f;
     private const float SpotlightAlpha = 0.07f;
@@ -370,29 +368,43 @@ internal sealed class PlinkoCabinet : ICabinetIdle
             return;
         }
 
-        var gap = RailGap * scale;
-        var chipWidth = RailChipWidth * scale;
-        var fit = Math.Max(1, (int)((row.Width + gap) / (chipWidth + gap)));
-        var visible = Math.Min(rail.Count, fit);
+        var captionStyle = TextStyles.FootnoteEmphasized;
+        var caption = Typography.FitText(Loc.T(L.Plinko.LastDrops), PlinkoResultRail.CaptionRoom(row.Width),
+            captionStyle);
+        var captionSize = Typography.Measure(caption, captionStyle);
+        Typography.Draw(drawList, new Vector2(row.Min.X, row.Center.Y - captionSize.Y * 0.5f), caption,
+            CasinoColors.InkBody, captionStyle);
+        var chipWidth = PlinkoResultRail.ChipWidth * scale;
+        var visible = Math.Min(rail.Count, PlinkoResultRail.Fit(row.Width, captionSize.X, scale));
         var style = TextStyles.FootnoteEmphasized;
+        var stroke = MathF.Max(1f, 1.4f * scale);
         for (var age = 0; age < visible; age++)
         {
             var result = rail.Newest(age);
-            var left = row.Min.X + age * (chipWidth + gap);
+            var left = PlinkoResultRail.ChipLeft(row.Min.X, captionSize.X, age, scale);
             var grow = age == 0 ? 0.6f + 0.4f * rail.Arrival : 1f;
+            var alpha = PlinkoResultRail.AlphaFor(age);
             var center = new Vector2(left + chipWidth * 0.5f, row.Center.Y);
             var half = new Vector2(chipWidth, row.Height) * 0.5f * grow;
             var tint = PlinkoArt.SlotTint(result.Tenths, PlinkoRules.EdgeTenths(result.Rows, result.Risk));
             Squircle.Fill(drawList, center - half, center + half, half.Y,
-                ImGui.GetColorU32(tint with { W = RailFillAlpha }));
+                ImGui.GetColorU32(tint with { W = RailFillAlpha * alpha }));
             if (result.Edge)
             {
                 Squircle.Stroke(drawList, center - half, center + half, half.Y,
-                    ImGui.GetColorU32(CasinoColors.MoneyHighlight), MathF.Max(1f, 1.4f * scale));
+                    ImGui.GetColorU32(CasinoColors.MoneyHighlight with { W = alpha }), stroke);
+            }
+
+            if (age == 0)
+            {
+                var ring = new Vector2(stroke * 2f, stroke * 2f);
+                Squircle.Stroke(drawList, center - half - ring, center + half + ring, half.Y + ring.Y,
+                    ImGui.GetColorU32(CasinoColors.InkTitle), stroke);
             }
 
             var label = CasinoMultiples.Label(result.Tenths * PlinkoRules.TenthsPerMultiple);
-            Typography.DrawCentered(drawList, center, label, GamePalette.InkOn(tint), style.Scale * grow,
+            var ink = GamePalette.InkOn(tint);
+            Typography.DrawCentered(drawList, center, label, ink with { W = ink.W * alpha }, style.Scale * grow,
                 style.Weight);
         }
     }

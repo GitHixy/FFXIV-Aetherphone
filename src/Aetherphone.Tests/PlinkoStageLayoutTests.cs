@@ -51,6 +51,28 @@ public sealed class PlinkoStageLayoutTests
     }
 
     [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.5f)]
+    public void TheResultRailKeepsItsCaptionAndChipsInsideTheRowNewestFirst(float scale)
+    {
+        var rowLeft = 20f * scale;
+        var rowWidth = 320f * scale;
+        var caption = PlinkoResultRail.CaptionRoom(rowWidth);
+        var fit = PlinkoResultRail.Fit(rowWidth, caption, scale);
+
+        Assert.True(fit >= 1);
+        Assert.True(PlinkoResultRail.ChipLeft(rowLeft, caption, 0, scale) >= rowLeft + caption);
+        var last = PlinkoResultRail.ChipLeft(rowLeft, caption, fit - 1, scale) + PlinkoResultRail.ChipWidth * scale;
+        Assert.True(last <= rowLeft + rowWidth + 0.01f);
+        for (var age = 1; age < PlinkoResultRail.Capacity; age++)
+        {
+            Assert.True(PlinkoResultRail.AlphaFor(age) <= PlinkoResultRail.AlphaFor(age - 1));
+            Assert.True(PlinkoResultRail.AlphaFor(age) >= PlinkoResultRail.MinimumAlpha);
+        }
+    }
+
+    [Theory]
     [InlineData(5_000_000L, 1000, 50_000_000L, 55_000_000L)]
     [InlineData(1_000L, 1000, 50_000_000L, 1_000_000L)]
     [InlineData(5_000_000L, 1000, 0L, 5_000_000_000L)]

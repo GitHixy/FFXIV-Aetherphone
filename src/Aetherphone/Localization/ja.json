@@ -9280,6 +9280,7 @@
   "casino.plinko.notOpenBody": "Plinkoはまもなくオープン。フロアのほかのゲームはすべて遊べる。",
   "casino.plinko.hint": "好きなだけドロップをタップしよう。最大10個のボールが同時に落ちる。",
   "casino.plinko.railEmpty": "最近のドロップ結果がここに並ぶ。",
+  "casino.plinko.lastDrops": "最近",
   "casino.plinko.factRows": "段数",
   "casino.plinko.factRowsValue": "8、12、16",
   "casino.plinko.returnRange": "{0}〜{1}",

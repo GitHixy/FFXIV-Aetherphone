@@ -9280,6 +9280,7 @@
   "casino.plinko.notOpenBody": "Plinko abre pronto. El resto de juegos de la sala están abiertos.",
   "casino.plinko.hint": "Pulsa Soltar tantas veces como quieras. Caen hasta diez bolas a la vez.",
   "casino.plinko.railEmpty": "Aquí aparecen tus últimas tiradas.",
+  "casino.plinko.lastDrops": "Recientes",
   "casino.plinko.factRows": "Filas",
   "casino.plinko.factRowsValue": "8, 12 o 16",
   "casino.plinko.returnRange": "{0} a {1}",

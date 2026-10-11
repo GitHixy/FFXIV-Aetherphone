@@ -10349,6 +10349,7 @@ internal static class L
         public static readonly LocString NotOpenBody = new("casino.plinko.notOpenBody", "Plinko opens soon. Every other game on the floor is open.");
         public static readonly LocString Hint = new("casino.plinko.hint", "Tap Drop as often as you like. Up to ten balls fall at once.");
         public static readonly LocString RailEmpty = new("casino.plinko.railEmpty", "Your last drops land here.");
+        public static readonly LocString LastDrops = new("casino.plinko.lastDrops", "Last drops");
         public static readonly LocString FactRows = new("casino.plinko.factRows", "Rows");
         public static readonly LocString FactRowsValue = new("casino.plinko.factRowsValue", "8, 12 or 16");
         public static readonly LocString ReturnRange = new("casino.plinko.returnRange", "{0} to {1}");

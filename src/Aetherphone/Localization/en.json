@@ -9280,6 +9280,7 @@
   "casino.plinko.notOpenBody": "Plinko opens soon. Every other game on the floor is open.",
   "casino.plinko.hint": "Tap Drop as often as you like. Up to ten balls fall at once.",
   "casino.plinko.railEmpty": "Your last drops land here.",
+  "casino.plinko.lastDrops": "Last drops",
   "casino.plinko.factRows": "Rows",
   "casino.plinko.factRowsValue": "8, 12 or 16",
   "casino.plinko.returnRange": "{0} to {1}",

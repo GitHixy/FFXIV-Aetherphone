@@ -9280,6 +9280,7 @@
   "casino.plinko.notOpenBody": "Plinko öffnet bald. Alle anderen Spiele auf der Fläche sind geöffnet.",
   "casino.plinko.hint": "Tippe so oft auf Fallen lassen, wie du willst. Bis zu zehn Kugeln fallen gleichzeitig.",
   "casino.plinko.railEmpty": "Hier landen deine letzten Würfe.",
+  "casino.plinko.lastDrops": "Zuletzt",
   "casino.plinko.factRows": "Reihen",
   "casino.plinko.factRowsValue": "8, 12 oder 16",
   "casino.plinko.returnRange": "{0} bis {1}",

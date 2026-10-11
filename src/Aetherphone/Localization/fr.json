@@ -9280,6 +9280,7 @@
   "casino.plinko.notOpenBody": "Plinko ouvre bientôt. Tous les autres jeux de la salle sont ouverts.",
   "casino.plinko.hint": "Touchez Lâcher autant que vous voulez. Jusqu'à dix billes tombent en même temps.",
   "casino.plinko.railEmpty": "Vos derniers lâchers s'affichent ici.",
+  "casino.plinko.lastDrops": "Récentes",
   "casino.plinko.factRows": "Rangées",
   "casino.plinko.factRowsValue": "8, 12 ou 16",
   "casino.plinko.returnRange": "{0} à {1}",
