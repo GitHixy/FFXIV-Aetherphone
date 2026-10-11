@@ -467,6 +467,11 @@ internal sealed class TableLedger
         }
     }
 
+    internal static bool BarsReader(CasinoTableRowDto card, bool owner)
+    {
+        return !owner && !card.Admitted;
+    }
+
     internal static bool ShowsRecord(bool host, int players, bool guestsOpen, string hostUserId)
     {
         return host ? players > 0 || guestsOpen : hostUserId.Length > 0;

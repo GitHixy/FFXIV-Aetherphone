@@ -128,6 +128,19 @@ public sealed class CasinoTableLedgerTests
     }
 
     [Fact]
+    public void APatronTheTableHasNotAdmittedSeesTheDoorInsteadOfTheLedger()
+    {
+        var card = new CasinoTableRowDto(TableId: "t1", GameKind: CasinoWire.BookKind, Admitted: false,
+            Reason: CasinoReasons.InviteOnly);
+
+        Assert.True(TableLedger.BarsReader(card, false));
+        Assert.False(TableLedger.BarsReader(card, true));
+        Assert.False(TableLedger.BarsReader(card with { Admitted = true, Reason = string.Empty }, false));
+        Assert.Equal(TableDoorAction.Knock, TableDoorCard.ContentFor(card.Reason, CasinoKnockStatus.Idle,
+            L.Casino.BlackjackClosedTitle, L.Casino.BlackjackClosedHint).Pressed);
+    }
+
+    [Fact]
     public void TheHostGetsAGuestChoiceOnlyWhileTheServerListsTheBook()
     {
         Assert.True(TableLedger.ShowsRecord(true, 2, false, string.Empty));
