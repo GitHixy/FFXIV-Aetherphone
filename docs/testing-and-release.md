@@ -1,6 +1,6 @@
 # Testing, CI, and releases
 
-This page explains how Aetherphone code gets validated and shipped: the unit test project, the GitHub Actions workflows that run on every pull request, the tag-and-release pipeline, the in-app changelog system, and the Discord announcement hooks. Read it before you open your first pull request, and again before you cut your first release as a maintainer. Everything here is about the plugin client; the Aethernet backend lives in a separate repository with its own pipeline.
+This page explains how Aetherphone code gets validated and shipped: the unit test project, the GitHub Actions workflows that run on every pull request, the tag-and-release pipeline, the in-app changelog system, the Discord announcement hooks, and the Discord pull request forum. Read it before you open your first pull request, and again before you cut your first release as a maintainer. Everything here is about the plugin client; the Aethernet backend lives in a separate repository with its own pipeline.
 
 ## Key files
 
@@ -12,6 +12,8 @@ This page explains how Aetherphone code gets validated and shipped: the unit tes
 | .github/workflows/release.yml | Builds latest.zip, publishes the GitHub release, announces it, updates repo.json |
 | .github/scripts/Get-ChangelogNotes.ps1 | Turns a version's changelog entry into the Discord release post text |
 | .github/workflows/announce-commits.yml | Posts commits pushed to dev to Discord, never pings anyone |
+| .github/workflows/pull-request-forum.yml | Mirrors every pull request into its own Discord forum post and pings reviewers and authors |
+| .github/scripts/pull-request-forum.mjs | The forum mirror's logic: posts, status tags, pings, locking on merge or close |
 | .github/workflows/update-issue-template-versions.yml | Backfills the version dropdown in issue templates after a release |
 | .github/ISSUE_TEMPLATE/bug_report.yml | Holds the "Plugin version" dropdown, bumped by hand in each release commit |
 | .github/dependabot.yml | Dependabot updates: Actions and NuGet weekly, the three npm tools monthly |
@@ -197,6 +199,53 @@ Two webhooks, two very different behaviors:
 
 Both scrub em and en dashes from the text they post (the changelog pages in release.yml, the commit subjects in announce-commits.yml); release.yml goes further and fails the step if one survives anywhere in the final payload. Both exit quietly when their webhook secret is unset, so forks run green without any configuration.
 
+## Pull request forum on Discord
+
+.github/workflows/pull-request-forum.yml mirrors every pull request into a Discord forum channel, so reviewers and contributors get pinged where they already talk. One forum post per pull request, one message per event, a status tag that follows the review state, and the post is locked and archived when the pull request is merged or closed. The logic lives in .github/scripts/pull-request-forum.mjs, a dependency-free Node script that calls the Discord and GitHub REST APIs; the workflow only wires events and secrets to it.
+
+### What it posts and who it pings
+
+| GitHub event | Forum post | Pinged |
+| --- | --- | --- |
+| Opened (not as a draft), marked ready for review, reopened | Post created on first contact, tagged Open | The requested reviewers; the maintainers role when nobody was requested |
+| Converted to draft | Tagged Draft | Nobody |
+| Review requested | Message | The requested reviewer |
+| Review submitted (approved, changes requested, or comments) | Message with the review text and the inline comment count; the tag follows the state | The author; the reviewers when the author reviews their own pull request |
+| New commits pushed | Message listing the commits | The reviewers when the author pushed; the author when someone else (a maintainer fixing nits on the branch) pushed |
+| Conversation comment | Message with the comment text | The same counterpart rule, plus anyone @mentioned in the comment |
+| Merged or closed | Tagged Merged or Closed, then locked and archived | The author |
+| Title edited | Post renamed | Nobody |
+
+"The reviewers" means the requested reviewers plus everyone who has already submitted a review on that pull request. The person who caused an event is never pinged for it. Pings only ever name people from the user map (below); everyone else appears in bold without a notification. Pull requests opened by Dependabot or other bots are not mirrored, and comments by bots are skipped.
+
+Each new post also leaves one comment on the pull request ("Discussion thread on Discord: ...") that carries a hidden marker with the thread id. Later events find the post through that marker, so a pull request never gets a second post, even when two events fire in the same second: both runs create a post, then the one whose marker comment is not the earliest deletes its own post and comment again.
+
+### Setup
+
+On Discord:
+
+1. Create a Forum channel, for example `#pull-requests` under the Development category. The six status tags (Draft, Open, Changes requested, Approved, Merged, Closed) are created by the bot on its first run when it may manage the channel; otherwise create them by hand with exactly those names and tick "moderated" so members cannot change them.
+2. In the Discord Developer Portal, create an application and add a Bot to it. Copy the bot token and give the bot a name and avatar (the Aetherphone emblem fits); the bot never needs to be online, every call goes through REST, so it will show as offline forever and that is fine.
+3. Invite the bot with the `bot` scope and these permissions: View Channels, Send Messages, Send Messages in Threads, Create Public Threads (shown as "Create Posts" on a forum), Embed Links, Manage Threads, plus Manage Channels if the bot should create the tags itself. The invite URL is `https://discord.com/oauth2/authorize?client_id=<application id>&scope=bot&permissions=326417533968` (use `326417533952` to leave out Manage Channels). If the forum sits in a private category, also give the bot's role access to it.
+4. Turn on Developer Mode (User Settings, Advanced) and copy the ids you need: right-click the forum channel for its id, right-click the maintainers role under Server Settings, Roles, and right-click each member who should be pingable for their user id.
+
+On GitHub (repository Settings, Secrets and variables, Actions):
+
+| Name | Kind | Value |
+| --- | --- | --- |
+| `DISCORD_BOT_TOKEN` | secret | The bot token |
+| `DISCORD_PULL_REQUEST_FORUM_ID` | variable | The forum channel id |
+| `DISCORD_MAINTAINERS_ROLE_ID` | variable, optional | The role pinged for new pull requests that nobody was asked to review |
+| `DISCORD_GITHUB_USERS` | variable, optional | A JSON object from GitHub login to Discord user id, for example `{"XeldarAlz": "123456789012345678", "t3sco": "234567890123456789"}` |
+
+Then run the workflow by hand (Actions, Pull request forum, Run workflow) with the pull request number left empty: the run prints the bot's name, the forum, every tag, the role, and checks that each mapped user is a member of the server. Run it again with a pull request number to create or resync that pull request's post. Pull requests that were already open when the workflow landed get their post the first time anything happens on them, or when you sync them this way. A new contributor joins the map by sending you their Discord user id; until then their events still post, in bold and without a ping.
+
+The workflow skips cleanly when the secret or the forum id is unset, so forks run green without any configuration.
+
+### Why pull_request_target
+
+Contributor pull requests come from forks, and `pull_request` runs for forks get no secrets, so the bot token would be empty exactly when it matters. The workflow therefore listens to `pull_request_target`, which runs with this repository's secrets. That is safe only because the job never checks out or executes anything from the pull request: it checks out .github/scripts from the default branch and reads the event payload. Never add a checkout of the pull request head, a build, or a test step to this workflow; put those in ci.yml, which keeps using `pull_request`.
+
 ## Issue template version updater
 
 .github/workflows/update-issue-template-versions.yml also fires on `v*.*.*` tag pushes. It checks out the default branch (dev), scans every .github/ISSUE_TEMPLATE/*.yml, and rewrites each "Plugin version" dropdown it finds (today only bug_report.yml has one): the new version goes on top, the list keeps the five most recent versions, and the "Older / not sure" sentinel stays at the bottom. Any change is committed and pushed to dev with a rebase-and-retry loop.
@@ -235,6 +284,9 @@ A maintainer cutting version X.Y.Z.W:
 - **A missing key fails CI, an untranslated value does not.** LocalizationParityTests fails the pull request when a key declared in L.cs is absent from any of the nine catalogs, or a catalog carries an orphaned key. What still ships silently is a key that exists in a catalog with its text left in English: nothing checks translation quality, so proofread the values themselves.
 - **`[skip auto-tag]` in any commit message of a push** disables tagging for that entire push, including other commits in it.
 - **Tests need Dalamud on disk.** src/Aetherphone.Tests/Aetherphone.Tests.csproj references the Dalamud assembly from the per-OS dev-hooks default (XIVLauncher on Windows, XLCore on Linux, XIV on Mac on macOS) or `DALAMUD_HOME`; a bare CI-less machine without either cannot build the test project.
+- **The forum workflow runs the default branch's script, never the pull request's.** A change to .github/scripts/pull-request-forum.mjs takes effect only after it lands on dev; a pull request that edits it still mirrors itself with the old script. Test a change with the manual dispatch after it merges.
+- **The forum workflow has no `concurrency` block on purpose.** GitHub keeps one pending run per concurrency group and cancels older pending ones, which would drop a review that fired while another event was still posting. Simultaneous runs are reconciled through the marker comment instead; do not add a group to "fix" a duplicate you saw mid-run.
+- **Pings only fire from message content, never from inside an embed.** The mention line sits above the embed on purpose, and `allowed_mentions` lists exactly who may be notified, so quoted text containing `@everyone` or a stray mention cannot ping anyone.
 
 ## Related docs
 
