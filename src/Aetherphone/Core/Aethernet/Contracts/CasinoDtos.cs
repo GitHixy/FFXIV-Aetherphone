@@ -861,7 +861,8 @@ internal sealed record CasinoTableKnockDto(
 internal sealed record CasinoTableSeatedDto(
     string UserId = "",
     string DisplayName = "",
-    int SeatIndex = -1);
+    int SeatIndex = -1,
+    bool Leaving = false);
 
 internal sealed record CasinoTableDoorDto(
     string RoomId = "",

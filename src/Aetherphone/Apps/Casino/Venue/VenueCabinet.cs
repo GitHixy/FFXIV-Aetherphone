@@ -94,6 +94,7 @@ internal sealed class VenueCabinet : ICabinetIdle
         if (entered)
         {
             venue.Rooms.Leave();
+            venue.Tables.ForgetKnock();
         }
 
         entered = false;
@@ -153,14 +154,15 @@ internal sealed class VenueCabinet : ICabinetIdle
 
         var now = session.ServerNowUnixMs(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         DrawRibbon(drawList, frame, view, now, session.Attached, scale);
-        var world = safe;
+        var knockHeight = Tables.HostKnockBanner.Reserve(venue.Tables, roomId, safe.Width, scale);
+        var world = new Rect(new Vector2(safe.Min.X, safe.Min.Y + knockHeight), safe.Max);
         if (inlineReason.Length > 0)
         {
             var message = CasinoReasons.Text(inlineReason, 0);
             var height = CasinoNotice.Height(CasinoNoticeKind.Reason, string.Empty, message, safe.Width, scale);
             CasinoNotice.Draw(drawList, ui, CasinoNoticeKind.Reason, string.Empty, message, safe.Min.X,
                 safe.Max.Y - height, safe.Width, scale);
-            world = new Rect(safe.Min, new Vector2(safe.Max.X, safe.Max.Y - height - VenueArt.LineGap * scale));
+            world = new Rect(world.Min, new Vector2(safe.Max.X, safe.Max.Y - height - VenueArt.LineGap * scale));
         }
 
         var room = new VenueRoomFrame(stage, frame, ui, view, drawList, world, venue.AccountId, Hosting(),
@@ -177,6 +179,8 @@ internal sealed class VenueCabinet : ICabinetIdle
                 dice.Draw(room, frame.Deck);
                 break;
         }
+
+        Tables.HostKnockBanner.Draw(drawList, ui, venue.Tables, roomId, safe.Min, safe.Width, scale);
     }
 
     public void DrawIdle(ImDrawListPtr drawList, Rect rect, float deltaSeconds)
@@ -240,11 +244,24 @@ internal sealed class VenueCabinet : ICabinetIdle
 
     private void DrawClosed(ImDrawListPtr drawList, AppSkin ui, string reason, Rect safe, float scale)
     {
-        var title = Loc.T(L.Venue.RoomClosedTitle);
-        var hint = Loc.T(CasinoReasons.TryMessage(reason, out var known) ? known : L.Venue.RoomClosedHint);
-        CasinoNotice.DrawWithAction(drawList, ui, CasinoNoticeKind.Card, title, hint, Loc.T(L.Casino.WheelBackToFloor),
-            safe.Min.X, safe.Min.Y + Metrics.Space.Lg * scale, safe.Width, scale, out var pressed);
-        if (pressed)
+        if (venue.Tables.TakeKnockAdmitted(roomId))
+        {
+            venue.Rooms.Enter(roomId);
+            venue.Tables.RefreshCard(roomId);
+            return;
+        }
+
+        var knock = venue.Tables.KnockFor(roomId, reason);
+        venue.Tables.EnsureKnockFresh(roomId);
+        var action = Tables.TableDoorCard.Draw(drawList, ui, reason, knock, L.Venue.RoomClosedTitle,
+            L.Venue.RoomClosedHint, safe, scale);
+        if (action == Tables.TableDoorAction.Knock)
+        {
+            venue.Tables.Knock(roomId);
+            return;
+        }
+
+        if (action == Tables.TableDoorAction.Leave)
         {
             leaveRoom();
         }

@@ -113,6 +113,15 @@ public sealed class CasinoDoorLayoutTests
     }
 
     [Fact]
+    public void OnlyChipTablesExplainWhyPauseDealAndCoDealersAreMissing()
+    {
+        Assert.True(TableDoor.ExplainsHostLimits(new CasinoTableRowDto(TableId: "t1")));
+        Assert.False(TableDoor.ExplainsHostLimits(new CasinoTableRowDto(TableId: "t1", Practice: true)));
+        Assert.False(TableDoor.ExplainsHostLimits(
+            new CasinoTableRowDto(TableId: "t1", Currency: CasinoCurrencies.Gil)));
+    }
+
+    [Fact]
     public void HostDealtTablesOfferEveryControl()
     {
         var controls = new DoorControl[5];
@@ -131,6 +140,21 @@ public sealed class CasinoDoorLayoutTests
         Assert.Equal("ABCDEF", TableDoor.JoinCode(door, card));
         Assert.Equal("GHJKMN", TableDoor.JoinCode(new CasinoTableDoorDto(RoomId: "t1"), card));
         Assert.Equal(string.Empty, TableDoor.JoinCode(null, null));
+    }
+
+    [Fact]
+    public void AnEmptyDoorOnATableTheHostHoldsSendsThemToCheckWhetherItClosed()
+    {
+        var mine = new CasinoTableRowDto(TableId: "t1", OwnerUserId: "me");
+        var theirs = new CasinoTableRowDto(TableId: "t1", OwnerUserId: "them");
+        var shut = new CasinoTableDoorDto(RoomId: "t1", Owner: false);
+        var open = new CasinoTableDoorDto(RoomId: "t1", Owner: true);
+
+        Assert.True(CasinoTablesStore.LostOwnership(shut, mine, "me"));
+        Assert.False(CasinoTablesStore.LostOwnership(open, mine, "me"));
+        Assert.False(CasinoTablesStore.LostOwnership(shut, theirs, "me"));
+        Assert.False(CasinoTablesStore.LostOwnership(shut, null, "me"));
+        Assert.False(CasinoTablesStore.LostOwnership(shut, mine, string.Empty));
     }
 
     [Fact]

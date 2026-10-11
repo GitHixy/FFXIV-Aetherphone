@@ -296,13 +296,13 @@ internal sealed class HoldemPit
             {
                 inlineReason = string.Empty;
                 var row = hosted[index];
-                if (row.Admitted)
+                if (hostedViews[index].Mine)
                 {
-                    openTable(row.TableId);
+                    openDoor(row.TableId);
                 }
                 else
                 {
-                    openDoor(row.TableId);
+                    openTable(row.TableId);
                 }
             }
 

@@ -196,6 +196,22 @@ public sealed class CasinoTableWireContractTests
         Assert.Single(door.Seated!);
         Assert.Equal("u2", door.Seated![0].UserId);
         Assert.Equal(4, door.Seated![0].SeatIndex);
+        Assert.False(door.Seated![0].Leaving);
+    }
+
+    [Fact]
+    public void ASeatStandingAtTheEndOfTheHandReadsAsLeaving()
+    {
+        const string json = """
+        {
+          "roomId": "private-4f2a",
+          "owner": true,
+          "seated": [{"userId":"u2","displayName":"Hildibrand","seatIndex":4,"leaving":true}]
+        }
+        """;
+
+        var door = JsonSerializer.Deserialize(json, AethernetJsonContext.Default.CasinoTableDoorDto);
+        Assert.True(door!.Seated![0].Leaving);
     }
 
     [Fact]

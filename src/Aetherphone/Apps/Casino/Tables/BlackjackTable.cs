@@ -166,6 +166,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         {
             rooms.Leave();
             seatFlow.Left();
+            tables.ForgetKnock();
         }
 
         entered = false;
@@ -242,7 +243,8 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         var top = Venue.TournamentOverlay.Shows(board)
             ? safe.Min.Y + Venue.TournamentOverlay.Reserve(scale)
             : safe.Min.Y;
-        var feltTop = DrawHostedRow(drawList, ui, board, safe.Min.X, top, safe.Width, scale);
+        var knockTop = DrawHostedRow(drawList, ui, board, safe.Min.X, top, safe.Width, scale);
+        var feltTop = knockTop + HostKnockBanner.Reserve(tables, roomId, safe.Width, scale);
         ExpireReason(delta);
         var reason = ReasonText();
         var reasonHeight = reason.Length > 0
@@ -261,6 +263,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         layout.Compute(felt, BlackjackTableLayout.RailSeatCount(mySeat, SeatLimit(board)),
             BlackjackRules.IsSeat(mySeat), scale);
         DrawFelt(stage, drawList, ui, board, deadlineRemaining, delta, frame.Phase, scale);
+        HostKnockBanner.Draw(drawList, ui, tables, roomId, new Vector2(safe.Min.X, knockTop), safe.Width, scale);
         SpeakForPhase(board);
         SettleHand(stage, board, frame);
         if (reasonHeight > 0f)
@@ -311,31 +314,27 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
     private void DrawClosed(ImDrawListPtr drawList, AppSkin ui, string closedReason, Rect safe, float scale)
     {
-        var hint = Loc.T(CasinoReasons.TryMessage(closedReason, out var known) ? known : L.Casino.BlackjackClosedHint);
-        var asks = AsksToJoin(closedReason);
-        var title = Loc.T(asks ? L.Casino.BlackjackDoorTitle : L.Casino.BlackjackClosedTitle);
-        var action = Loc.T(asks ? L.Casino.BlackjackAskToJoin : L.Casino.WheelBackToFloor);
-        CasinoNotice.DrawWithAction(drawList, ui, CasinoNoticeKind.Card, title, hint, action, safe.Min.X,
-            safe.Min.Y + Metrics.Space.Lg * scale, safe.Width, scale, out var pressed);
-        if (!pressed)
+        if (tables.TakeKnockAdmitted(roomId))
         {
+            rooms.Enter(roomId);
+            tables.RefreshCard(roomId);
             return;
         }
 
-        if (asks)
+        var knock = tables.KnockFor(roomId, closedReason);
+        tables.EnsureKnockFresh(roomId);
+        var action = TableDoorCard.Draw(drawList, ui, closedReason, knock, L.Casino.BlackjackClosedTitle,
+            L.Casino.BlackjackClosedHint, safe, scale);
+        if (action == TableDoorAction.Knock)
         {
             tables.Knock(roomId);
             return;
         }
 
-        leaveRoom();
-    }
-
-    internal static bool AsksToJoin(string reason)
-    {
-        return string.Equals(reason, CasinoReasons.InviteOnly, StringComparison.Ordinal)
-            || string.Equals(reason, CasinoReasons.NotMember, StringComparison.Ordinal)
-            || string.Equals(reason, CasinoReasons.Denied, StringComparison.Ordinal);
+        if (action == TableDoorAction.Leave)
+        {
+            leaveRoom();
+        }
     }
 
     private string StateLabel(CasinoBlackjackRoomStateDto board, bool unreachable)

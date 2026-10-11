@@ -211,12 +211,6 @@ internal sealed partial class CasinoApp
             return;
         }
 
-        if (table.Kind == CasinoTableKinds.Private && !table.Admitted && !casinoTables.Owns(table))
-        {
-            OpenDoor(table.TableId);
-            return;
-        }
-
         OpenTable(table.TableId);
     }
 
