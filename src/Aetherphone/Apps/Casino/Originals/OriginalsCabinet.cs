@@ -201,6 +201,12 @@ internal sealed class OriginalsCabinet
             return;
         }
 
+        if (!skin.Live && Composer.Auto.WaitsOut(message))
+        {
+            autoPause = AutoBetPlan.PacingRetrySeconds;
+            return;
+        }
+
         notice = message;
         hasNotice = true;
         if (Composer.Auto.Running && !string.Equals(message.Key, L.Originals.Resumed.Key, StringComparison.Ordinal))

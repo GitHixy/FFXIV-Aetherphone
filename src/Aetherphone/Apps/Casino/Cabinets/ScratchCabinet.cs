@@ -192,6 +192,10 @@ internal sealed class ScratchCabinet : ICabinetIdle
                     playback.RevealAll();
                 }
             }
+            else if (!card.Granted && composer.Auto.WaitsOut(card.Reason))
+            {
+                autoPause = AutoBetPlan.PacingRetrySeconds;
+            }
             else
             {
                 inlineReason = card.Granted
