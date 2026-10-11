@@ -159,7 +159,11 @@ internal sealed class HostDraft
         MaxBet = span.Clamp(MaxBet);
         MinBet = Math.Clamp(MinBet, span.First, MaxBet);
         Stake = span.Clamp(Stake);
-        MaxPayout = PayoutSpan.Clamp(MaxPayout);
+        if (Gil)
+        {
+            MaxPayout = PayoutSpan.Clamp(MaxPayout);
+        }
+
         BigBlind = HostLadders.BigBlinds.Clamp(BigBlind);
     }
 
