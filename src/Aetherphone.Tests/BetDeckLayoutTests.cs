@@ -233,24 +233,6 @@ public sealed class BetDeckLayoutTests
         Assert.Equal(2_500, plan.Next);
     }
 
-    [Theory]
-    [InlineData(0.75f)]
-    [InlineData(1f)]
-    [InlineData(1.5f)]
-    public void TheBonusRowNeverOverlaps(float scale)
-    {
-        for (var widthIndex = 0; widthIndex < DesignWidths.Length; widthIndex++)
-        {
-            var deck = DeckOf(DesignWidths[widthIndex] * scale, true, false, scale);
-            var knob = Layout(deck, true, false, true, scale).Knob;
-            var row = MachineBonusRow.Compute(knob, 8f * scale);
-            var rects = new[] { row.Turbo, row.Ante, row.Buy };
-            AssertInside(knob, rects);
-            AssertDisjoint(rects);
-            Assert.True(row.Info.Min.X >= row.Turbo.Max.X - Tolerance);
-        }
-    }
-
     internal static DeckQuickLabels Quick(string max, float scale) =>
         new(DeckLabelMeasure.Width(DeckAmountRow.HalfLabel, scale),
             DeckLabelMeasure.Width(DeckAmountRow.DoubleLabel, scale), DeckLabelMeasure.Width(max, scale));

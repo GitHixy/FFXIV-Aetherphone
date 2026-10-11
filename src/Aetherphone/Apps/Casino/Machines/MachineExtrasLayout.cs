@@ -1,3 +1,4 @@
+using Aetherphone.Apps.Casino.Stage;
 using Aetherphone.Core;
 using Aetherphone.Windows.Components;
 
@@ -15,10 +16,10 @@ internal enum MachineExtra : byte
 internal static class MachineExtrasLayout
 {
     public const int MaxPills = 3;
-    public const float Gap = 8f;
+    public const float Gap = DeckActions.Gap;
     public const float PadX = 12f;
-    public const float IconGap = 6f;
-    public const float MinimumWidth = 44f;
+    public const float IconGap = DeckActions.IconGap;
+    public const float MinimumWidth = DeckActions.PillMinWidth;
     public const float FitSlack = 0.5f;
     public const float IconShare = 0.9f;
 
