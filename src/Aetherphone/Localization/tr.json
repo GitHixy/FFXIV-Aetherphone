@@ -8582,7 +8582,6 @@
   "casino.scratch.oddsPrize": "Ödül",
   "casino.scratch.oddsChance": "Olasılık",
   "casino.scratch.oddsChanceValue": "%{0}",
-  "casino.scratch.lowStack": "Bu kart için yeterli fiş yok. Daha fazlası için Fiş al'a dokun.",
   "casino.barkeep.wagerHint": "Giriş {0}. Her müşteriyi iyi ağırla, bahşiş merdiveni ödesin.",
   "casino.barkeep.practiceTitle": "Antrenman vardiyası",
   "casino.barkeep.practiceAgain": "Tekrar antrenman",

@@ -8582,7 +8582,6 @@
   "casino.scratch.oddsPrize": "奖金",
   "casino.scratch.oddsChance": "概率",
   "casino.scratch.oddsChanceValue": "{0}%",
-  "casino.scratch.lowStack": "筹码不足以购买这张卡。点击获取筹码即可买入更多。",
   "casino.barkeep.wagerHint": "入场费{0}。好好招待每位客人，小费阶梯就会付账。",
   "casino.barkeep.practiceTitle": "练习班次",
   "casino.barkeep.practiceAgain": "再练一次",

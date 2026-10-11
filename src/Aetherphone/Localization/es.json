@@ -8582,7 +8582,6 @@
   "casino.scratch.oddsPrize": "Premio",
   "casino.scratch.oddsChance": "Probabilidad",
   "casino.scratch.oddsChanceValue": "{0}%",
-  "casino.scratch.lowStack": "No hay fichas suficientes para ese boleto. Toca Conseguir fichas para comprar más.",
   "casino.barkeep.wagerHint": "Entrada {0}. Atiende bien a cada cliente y la escalera de propinas paga.",
   "casino.barkeep.practiceTitle": "Turno de práctica",
   "casino.barkeep.practiceAgain": "Practicar de nuevo",

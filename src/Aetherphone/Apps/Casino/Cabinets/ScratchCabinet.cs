@@ -11,6 +11,17 @@ using Dalamud.Bindings.ImGui;
 
 namespace Aetherphone.Apps.Casino.Cabinets;
 
+internal enum ScratchStatusLine : byte
+{
+    None,
+    Reason,
+    Paused,
+    Draining,
+    RevealAll,
+    Hint,
+    NoWin,
+}
+
 internal sealed class ScratchCabinet : ICabinetIdle
 {
     public const int RunLength = 5;
@@ -129,13 +140,14 @@ internal sealed class ScratchCabinet : ICabinetIdle
         ConsumeResults(stage, frame);
         var sitting = state.Sitting;
         var safe = frame.Safe;
-        var statusHeight = Typography.LineHeight(TextStyles.Subheadline) + Button.LargeHeight * scale
-            + StatusGap * 2f * scale;
+        var line = StatusLineOf(state);
+        var showRun = CanStartRun(stage, state, sitting);
+        var statusHeight = StatusHeight(line, showRun, safe.Width, scale) + StatusGap * 2f * scale;
         LayoutTicket(safe, safe.Max.Y - statusHeight, scale);
         DrawKiosk(drawList, stage, frame, scale);
         DrawTicket(drawList, stage, ui, frame, scale);
         var status = new Rect(new Vector2(safe.Min.X, ticketArea.Max.Y + StatusGap * scale), safe.Max);
-        DrawStatus(drawList, stage, ui, state, sitting, status, scale);
+        DrawStatus(drawList, stage, ui, line, showRun, status, scale);
         DrawDeck(stage, frame, ui, state, sitting ?? CasinoWire.NoBankroll, scale);
     }
 
@@ -366,59 +378,102 @@ internal sealed class ScratchCabinet : ICabinetIdle
         return new Vector2(grid.Min.X + column * (cell + gap), grid.Min.Y + row * (cell + gap));
     }
 
-    private void DrawStatus(ImDrawListPtr drawList, CasinoStage stage, AppSkin ui, CasinoStateDto state,
-        CasinoSittingDto? sitting, Rect area, float scale)
+    private ScratchStatusLine StatusLineOf(CasinoStateDto state)
+    {
+        if (inlineReason.Length > 0)
+        {
+            return ScratchStatusLine.Reason;
+        }
+
+        if (state.StakesPaused)
+        {
+            return ScratchStatusLine.Paused;
+        }
+
+        if (state.Draining)
+        {
+            return ScratchStatusLine.Draining;
+        }
+
+        if (playback.Phase == ScratchPhase.Scratching)
+        {
+            return stroked && !composer.Auto.Running ? ScratchStatusLine.RevealAll : ScratchStatusLine.Hint;
+        }
+
+        return playback.RevealComplete && playback.PrizeOnceRevealed <= 0
+            ? ScratchStatusLine.NoWin
+            : ScratchStatusLine.None;
+    }
+
+    private string StatusText(ScratchStatusLine line) => line switch
+    {
+        ScratchStatusLine.Reason => CasinoReasons.Text(inlineReason, store.Ceiling.MaxBet),
+        ScratchStatusLine.Paused => Loc.T(L.Casino.PausedTitle),
+        ScratchStatusLine.Draining => Loc.T(L.Casino.DrainingTitle),
+        ScratchStatusLine.Hint => Loc.T(L.Casino.ScratchHint),
+        ScratchStatusLine.NoWin => Loc.T(L.Casino.ScratchNoWin),
+        _ => string.Empty,
+    };
+
+    private float StatusHeight(ScratchStatusLine line, bool showRun, float width, float scale)
+    {
+        var button = Button.LargeHeight * scale;
+        var measured = line switch
+        {
+            ScratchStatusLine.Reason => CasinoNotice.Height(CasinoNoticeKind.Reason, string.Empty, StatusText(line),
+                width, scale),
+            ScratchStatusLine.RevealAll => button,
+            ScratchStatusLine.None => 0f,
+            _ => Typography.MeasureWrappedBlock(StatusText(line), TextStyles.Subheadline, width).Y,
+        };
+
+        return StatusReserve(measured, ShowsRun(line, showRun), Typography.LineHeight(TextStyles.Subheadline), button,
+            StatusGap * 0.5f * scale);
+    }
+
+    internal static bool ShowsRun(ScratchStatusLine line, bool canRun) =>
+        canRun && line is ScratchStatusLine.None or ScratchStatusLine.NoWin;
+
+    internal static float StatusReserve(float measured, bool run, float lineHeight, float button, float gap)
+    {
+        var needed = measured + (run ? (measured > 0f ? gap : 0f) + button : 0f);
+        return MathF.Max(lineHeight + gap + button, needed);
+    }
+
+    private void DrawStatus(ImDrawListPtr drawList, CasinoStage stage, AppSkin ui, ScratchStatusLine line,
+        bool showRun, Rect area, float scale)
     {
         var centerX = area.Center.X;
         var top = area.Min.Y;
-        if (inlineReason.Length > 0)
+        switch (line)
         {
-            CasinoNotice.Draw(drawList, ui, CasinoNoticeKind.Reason, string.Empty,
-                CasinoReasons.Text(inlineReason, store.Ceiling.MaxBet), area.Min.X, top, area.Width, scale);
-            return;
+            case ScratchStatusLine.Reason:
+                CasinoNotice.Draw(drawList, ui, CasinoNoticeKind.Reason, string.Empty, StatusText(line), area.Min.X,
+                    top, area.Width, scale);
+                return;
+            case ScratchStatusLine.RevealAll:
+                if (SmallButton(drawList, ui, Loc.T(L.Casino.ScratchRevealAll), centerX, top, area.Width, scale))
+                {
+                    playback.RevealAll();
+                    CasinoSfx.Play(UiSound.TileSafe);
+                }
+
+                return;
+            case ScratchStatusLine.None:
+                break;
+            default:
+                top = DrawLine(drawList, StatusText(line), centerX, top, area.Width,
+                    line == ScratchStatusLine.NoWin ? CasinoColors.InkBody : CasinoColors.InkTitle)
+                    + StatusGap * 0.5f * scale;
+                break;
         }
 
-        if (state.StakesPaused || state.Draining)
-        {
-            DrawLine(drawList, Loc.T(state.StakesPaused ? L.Casino.PausedTitle : L.Casino.DrainingTitle), centerX, top,
-                area.Width, CasinoColors.InkTitle);
-            return;
-        }
-
-        if (playback.Phase == ScratchPhase.Scratching && stroked && !composer.Auto.Running)
-        {
-            if (SmallButton(drawList, ui, Loc.T(L.Casino.ScratchRevealAll), centerX, top, area.Width, scale))
-            {
-                playback.RevealAll();
-                CasinoSfx.Play(UiSound.TileSafe);
-            }
-
-            return;
-        }
-
-        if (sitting is not null && sitting.Stack < CurrentPrice && playback.Phase != ScratchPhase.Scratching)
-        {
-            DrawLine(drawList, Loc.T(L.Casino.ScratchLowStack), centerX, top, area.Width, CasinoColors.InkTitle);
-            return;
-        }
-
-        var bottom = top + Typography.LineHeight(TextStyles.Subheadline);
-        if (playback.RevealComplete && playback.PrizeOnceRevealed <= 0)
-        {
-            bottom = DrawLine(drawList, Loc.T(L.Casino.ScratchNoWin), centerX, top, area.Width, CasinoColors.InkBody);
-        }
-        else if (playback.Phase is ScratchPhase.Idle or ScratchPhase.Scratching)
-        {
-            bottom = DrawLine(drawList, Loc.T(L.Casino.ScratchHint), centerX, top, area.Width, CasinoColors.InkTitle);
-        }
-
-        if (!CanStartRun(stage, state, sitting))
+        if (!ShowsRun(line, showRun))
         {
             return;
         }
 
-        var buttonTop = bottom + StatusGap * 0.5f * scale;
-        if (!SmallButton(drawList, ui, Loc.T(L.Casino.ScratchFiveInARow), centerX, buttonTop, area.Width, scale))
+        if (!SmallButton(drawList, ui, Loc.T(L.Casino.ScratchFiveInARow), centerX, top, area.Width, scale))
         {
             return;
         }

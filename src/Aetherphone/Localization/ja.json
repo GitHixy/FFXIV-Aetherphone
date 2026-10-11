@@ -8582,7 +8582,6 @@
   "casino.scratch.oddsPrize": "賞金",
   "casino.scratch.oddsChance": "確率",
   "casino.scratch.oddsChanceValue": "{0}%",
-  "casino.scratch.lowStack": "このカードにはチップが足りません。「チップを入手」で買い足せます。",
   "casino.barkeep.wagerHint": "参加料{0}。お客を上手にもてなすほど報酬が上がります。",
   "casino.barkeep.practiceTitle": "練習シフト",
   "casino.barkeep.practiceAgain": "もう一度練習",

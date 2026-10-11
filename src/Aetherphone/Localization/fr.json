@@ -8582,7 +8582,6 @@
   "casino.scratch.oddsPrize": "Prix",
   "casino.scratch.oddsChance": "Chance",
   "casino.scratch.oddsChanceValue": "{0}%",
-  "casino.scratch.lowStack": "Pas assez de jetons pour ce ticket. Appuie sur Prendre des jetons pour en acheter.",
   "casino.barkeep.wagerHint": "Entrée {0}. Servez bien chaque client et l'échelle des pourboires paie.",
   "casino.barkeep.practiceTitle": "Service d'entraînement",
   "casino.barkeep.practiceAgain": "S'entraîner encore",

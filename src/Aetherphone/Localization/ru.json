@@ -8582,7 +8582,6 @@
   "casino.scratch.oddsPrize": "Приз",
   "casino.scratch.oddsChance": "Шанс",
   "casino.scratch.oddsChanceValue": "{0}%",
-  "casino.scratch.lowStack": "Не хватает фишек на этот билет. Нажмите «Получить фишки», чтобы купить ещё.",
   "casino.barkeep.wagerHint": "Вход {0}. Обслужите гостей как следует, и лестница чаевых заплатит.",
   "casino.barkeep.practiceTitle": "Тренировочная смена",
   "casino.barkeep.practiceAgain": "Тренироваться ещё",

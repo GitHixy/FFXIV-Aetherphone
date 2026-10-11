@@ -8582,7 +8582,6 @@
   "casino.scratch.oddsPrize": "Prize",
   "casino.scratch.oddsChance": "Chance",
   "casino.scratch.oddsChanceValue": "{0}%",
-  "casino.scratch.lowStack": "Not enough chips for that card. Tap Get chips to buy more.",
   "casino.barkeep.wagerHint": "Entry {0}. Serve every patron well and the tip ladder pays out.",
   "casino.barkeep.practiceTitle": "Practice shift",
   "casino.barkeep.practiceAgain": "Practice again",
