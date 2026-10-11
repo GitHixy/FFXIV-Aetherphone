@@ -8,9 +8,11 @@ internal readonly record struct TradeWindowSample(
     string[] NameCandidates,
     long MyOffer,
     long TheirOffer,
-    long WalletGil);
+    long WalletGil,
+    bool PartnerRead = false);
 
-internal readonly record struct TradeCompletion(string[] NameCandidates, long Received, long Sent)
+internal readonly record struct TradeCompletion(string[] NameCandidates, long Received, long Sent,
+    bool PartnerRead = false)
 {
     public long Net => Received - Sent;
 }
@@ -65,6 +67,7 @@ internal sealed class TradeSyncTracker
     public const long SettleWindowMilliseconds = 4_000;
 
     private string[] candidates = Array.Empty<string>();
+    private bool partnerRead;
     private long myOffer;
     private long theirOffer;
     private long baseline;
@@ -79,6 +82,7 @@ internal sealed class TradeSyncTracker
             if (Stage != TradeTrackerStage.Open)
             {
                 candidates = Array.Empty<string>();
+                partnerRead = false;
                 myOffer = 0;
                 theirOffer = 0;
             }
@@ -89,6 +93,8 @@ internal sealed class TradeSyncTracker
             {
                 candidates = sample.NameCandidates;
             }
+
+            partnerRead |= sample.PartnerRead;
 
             myOffer = Math.Max(0, sample.MyOffer);
             theirOffer = Math.Max(0, sample.TheirOffer);
@@ -125,6 +131,7 @@ internal sealed class TradeSyncTracker
     {
         Stage = TradeTrackerStage.Idle;
         candidates = Array.Empty<string>();
+        partnerRead = false;
         myOffer = 0;
         theirOffer = 0;
         baseline = 0;
@@ -135,17 +142,17 @@ internal sealed class TradeSyncTracker
     {
         if (theirOffer - myOffer == delta)
         {
-            return new TradeCompletion(candidates, theirOffer, myOffer);
+            return new TradeCompletion(candidates, theirOffer, myOffer, partnerRead);
         }
 
         if (myOffer - theirOffer == delta)
         {
-            return new TradeCompletion(candidates, myOffer, theirOffer);
+            return new TradeCompletion(candidates, myOffer, theirOffer, partnerRead);
         }
 
         return delta > 0
-            ? new TradeCompletion(candidates, delta, 0)
-            : new TradeCompletion(candidates, 0, -delta);
+            ? new TradeCompletion(candidates, delta, 0, partnerRead)
+            : new TradeCompletion(candidates, 0, -delta, partnerRead);
     }
 }
 

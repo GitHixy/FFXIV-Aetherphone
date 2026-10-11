@@ -60,6 +60,20 @@ public sealed class TradeSyncTests
     }
 
     [Fact]
+    public void APartnerReadFromTheTradeArraysRidesOnToTheCompletion()
+    {
+        var tracker = new TradeSyncTracker();
+        tracker.Observe(new TradeWindowSample(true, MiraWindow, 0, 500_000, 1_000_000, true), 0);
+        tracker.Observe(Open(MiraWindow, 0, 500_000, 1_000_000), 5);
+        var done = tracker.Observe(Closed(1_500_000), 10);
+        Assert.True(done!.Value.PartnerRead);
+
+        tracker.Observe(Open(MiraWindow, 0, 500_000, 1_500_000), 20);
+        var plain = tracker.Observe(Closed(2_000_000), 30);
+        Assert.False(plain!.Value.PartnerRead);
+    }
+
+    [Fact]
     public void UnreadOffersFallBackToTheWalletDelta()
     {
         var tracker = new TradeSyncTracker();
