@@ -29,6 +29,7 @@ internal sealed class DiceTableRoom
 
     private int lastTumbleStep = -1;
     private long landedSeq;
+    private string roundLine = string.Empty;
 
     public DiceTableRoom(CasinoTextCache texts, Action<VenueActDraft> act)
     {
@@ -44,6 +45,7 @@ internal sealed class DiceTableRoom
         cheer.Clear();
         lastTumbleStep = -1;
         landedSeq = 0;
+        roundLine = string.Empty;
     }
 
     public void OnActAnswer(CasinoVenueActDto answer)
@@ -130,7 +132,12 @@ internal sealed class DiceTableRoom
     {
         var lineHeight = Typography.LineHeight(TextStyles.Subheadline);
         top += lineHeight + VenueArt.LineGap * room.Scale;
-        var text = RoundText(board);
+        if (!playback.Tumbling)
+        {
+            roundLine = RoundText(board);
+        }
+
+        var text = roundLine;
         if (text.Length == 0)
         {
             return top;

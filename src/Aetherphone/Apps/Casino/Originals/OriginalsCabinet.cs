@@ -61,6 +61,8 @@ internal sealed class OriginalsCabinet
 
     public static bool Owns(string gameId) => IndexOf(gameId) >= 0;
 
+    public long DisplayStack(long stack) => Math.Max(0, stack - skin.UnshownPayout);
+
     public ICabinetIdle? IdleFor(string gameId)
     {
         var index = IndexOf(gameId);
