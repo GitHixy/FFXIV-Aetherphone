@@ -152,6 +152,10 @@ public sealed class CasinoTableBrowserTests
         var unknown = TableBrowser.ViewOf(book, Me);
         Assert.Equal(Loc.T(L.Tables.HostedBy, "Emerald"), unknown.Stakes);
         Assert.Equal(string.Empty, unknown.Seats);
+        Assert.Equal(counted.Stakes, Apps.Casino.Venue.VenueContextCard.OwnLineOf(counted, 12));
+        Assert.Equal(Loc.T(L.Book.Plays), Apps.Casino.Venue.VenueContextCard.OwnLineOf(unknown, -1));
+        var table = TableBrowser.ViewOf(Row(), Me);
+        Assert.Equal(table.Seats, Apps.Casino.Venue.VenueContextCard.OwnLineOf(table, -1));
 
         var ledger = new CasinoTableLedgerDto("table-book", true, Currency: CasinoCurrencies.Gil,
             Entries: new[] { new CasinoLedgerEntryDto("g1"), new CasinoLedgerEntryDto("g2") });

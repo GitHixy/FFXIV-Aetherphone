@@ -2,12 +2,10 @@ using Aetherphone.Apps.Casino.Stage;
 using Aetherphone.Apps.Games;
 using Aetherphone.Core;
 using Aetherphone.Core.Animation;
-using Aetherphone.Core.Casino;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Onboarding;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 
 namespace Aetherphone.Apps.Casino.Strip;
@@ -132,9 +130,10 @@ internal sealed class StripShelves
 
             var tile = new Rect(new Vector2(left, top), new Vector2(left + tileWidth, top + tileHeight));
             using (ImRaii.PushId(railId))
+            using (ImRaii.PushId(index))
             {
-                if (DrawEntry(drawList, floor, entries[index], index, tile, phase, deltaSeconds, live, interactive,
-                        scale, out var pressed))
+                if (DrawEntry(drawList, floor, entries[index], tile, phase, deltaSeconds, live, interactive, scale,
+                        out var pressed))
                 {
                     tapped = entries[index];
                     source = pressed;
@@ -146,12 +145,12 @@ internal sealed class StripShelves
         return top + tileHeight;
     }
 
-    private bool DrawEntry(ImDrawListPtr drawList, IStripFloor floor, in StripEntry entry, int index, Rect tile,
-        float phase, float deltaSeconds, bool live, bool interactive, float scale, out Rect pressed)
+    private bool DrawEntry(ImDrawListPtr drawList, IStripFloor floor, in StripEntry entry, Rect tile, float phase,
+        float deltaSeconds, bool live, bool interactive, float scale, out Rect pressed)
     {
         var info = floor.Describe(entry);
         var tint = CasinoArt.TintOf(entry.GameId);
-        var id = ImGui.GetID($"tile{index}");
+        var id = ImGui.GetID("tile");
         var hovered = CasinoArt.PressCard(id, tile.Min, tile.Max, out var pressedMin, out var pressedMax, interactive);
         pressed = new Rect(pressedMin, pressedMax);
         PosterTile.DrawFrame(drawList, pressed, tint, scale);
@@ -163,13 +162,9 @@ internal sealed class StripShelves
             var art = new Rect(pressed.Min, new Vector2(pressed.Max.X, pressed.Max.Y - PosterTile.TextBlock(scale)));
             preview.Draw(drawList, art, Metrics.Radius.Widget * scale, tint, live, hovered, deltaSeconds, scale);
         }
-        else if (entry.Action == StripAction.Game && entry.Venue == VenueRoomKind.None)
-        {
-            PosterTile.DrawGlyph(drawList, pressed, entry.GameId, scale);
-        }
         else
         {
-            PosterTile.DrawIcon(drawList, pressed, IconOf(entry), scale);
+            PosterTile.DrawGlyph(drawList, pressed, entry.GameId, scale);
         }
 
         PosterTile.DrawSign(drawList, pressed, entry.Sign, phase, scale, PosterTile.SignBandTop(scale));
@@ -184,12 +179,4 @@ internal sealed class StripShelves
         PosterTile.DrawRim(drawList, pressed, tint, hovered, scale);
         return interactive && UiInteract.Click(tile.Min, tile.Max, hovered);
     }
-
-    private static FontAwesomeIcon IconOf(in StripEntry entry) => entry.Venue switch
-    {
-        VenueRoomKind.Dice => FontAwesomeIcon.Dice,
-        VenueRoomKind.Deathroll => FontAwesomeIcon.Skull,
-        VenueRoomKind.Raffle => FontAwesomeIcon.Ticket,
-        _ => FontAwesomeIcon.PlusCircle,
-    };
 }

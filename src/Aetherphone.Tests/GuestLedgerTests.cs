@@ -77,6 +77,35 @@ public sealed class GuestLedgerTests
     }
 
     [Fact]
+    public void ATypedGuestNameIsNormalisedAndBoundedBeforeItIsSent()
+    {
+        var entries = Array.Empty<CasinoLedgerEntryDto>();
+        var buyIn = GuestLedger.Typed(Table, "  Chea   Thorne ", false, 50_000, entries);
+        Assert.NotNull(buyIn);
+        Assert.Equal(Table, buyIn!.TableId);
+        Assert.Equal("Chea Thorne", buyIn.GuestName);
+        Assert.Equal(CasinoLedgerKinds.BuyIn, buyIn.LedgerKind);
+        Assert.Equal(50_000, buyIn.Amount);
+        Assert.True(buyIn.Incoming);
+
+        var payout = GuestLedger.Typed(Table, "Chea Thorne", true, 20_000, entries)!;
+        Assert.Equal(CasinoLedgerKinds.Payout, payout.LedgerKind);
+        Assert.False(payout.Incoming);
+        Assert.Equal(CasinoLedgerKinds.Rebuy,
+            GuestLedger.Typed(Table, "Chea Thorne", false, 10_000, new[] { GuestBuyIn("Chea Thorne") })!.LedgerKind);
+
+        var longest = new string('a', CasinoHostingRules.GuestNameMaxLength);
+        Assert.Equal(longest, GuestLedger.Typed(Table, longest, false, 1, entries)!.GuestName);
+        Assert.Equal(CasinoHostingRules.MaxGil,
+            GuestLedger.Typed(Table, "Chea Thorne", false, CasinoHostingRules.MaxGil, entries)!.Amount);
+        Assert.Null(GuestLedger.Typed(Table, longest + "a", false, 1, entries));
+        Assert.Null(GuestLedger.Typed(Table, " \t\u0007 ", false, 50_000, entries));
+        Assert.Null(GuestLedger.Typed(Table, "Chea Thorne", false, 0, entries));
+        Assert.Null(GuestLedger.Typed(Table, "Chea Thorne", false, CasinoHostingRules.MaxGil + 1, entries));
+        Assert.Null(GuestLedger.Typed(string.Empty, "Chea Thorne", false, 50_000, entries));
+    }
+
+    [Fact]
     public void DismissingTheOfferKeepsTheAmberLineForTenMinutes()
     {
         var miss = Miss();

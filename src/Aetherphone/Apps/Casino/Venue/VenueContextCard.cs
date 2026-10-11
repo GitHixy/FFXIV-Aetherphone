@@ -38,6 +38,7 @@ internal sealed class VenueContextCard
     private CasinoTableRowDto? ownRow;
     private CasinoTableLedgerDto? ownLedger;
     private TableRowView ownView;
+    private string ownLine = string.Empty;
     private string ownCurrencyLine = string.Empty;
     private LanguageInfo? ownLanguage;
     private string lettersOf = string.Empty;
@@ -70,7 +71,8 @@ internal sealed class VenueContextCard
     {
         nearby.Poll();
         var own = OwnTable();
-        var hasDraft = preferences.TryLoadHostDraft(out var memory);
+        var hasDraft = preferences.TryLoadHostDraft(out var memory)
+                       && HostDraft.Reopens(memory, chips.HasFeature(CasinoFeatures.VenueBook));
         Kind = VenueSectionState.Pick(own is not null, nearby.Count, hasDraft);
         switch (Kind)
         {
@@ -131,7 +133,7 @@ internal sealed class VenueContextCard
         Typography.Draw(drawList, new Vector2(layout.TextLeft, layout.NameTop),
             Typography.FitText(ownView.Name, layout.TextWidth, TextStyles.Headline), ui.TitleInk, TextStyles.Headline);
         Typography.Draw(drawList, new Vector2(layout.TextLeft, layout.SeatsTop),
-            Typography.FitText(ownView.Seats, layout.TextWidth, TextStyles.Footnote), ui.BodyInk, TextStyles.Footnote);
+            Typography.FitText(ownLine, layout.TextWidth, TextStyles.Footnote), ui.BodyInk, TextStyles.Footnote);
         Typography.Draw(drawList, new Vector2(layout.TextLeft, layout.CurrencyTop),
             Typography.FitText(ownCurrencyLine, layout.TextWidth, TextStyles.Footnote),
             TableRow.CurrencyTint(ownView.Currency, ui.Accent), TextStyles.Footnote);
@@ -223,12 +225,24 @@ internal sealed class VenueContextCard
         ownRow = row;
         ownLedger = ledger;
         ownLanguage = Loc.Current;
-        ownView = TableBrowser.ViewOf(row, tables.AccountId, TableBrowser.BookEntriesOf(row, ledger));
+        var entries = TableBrowser.BookEntriesOf(row, ledger);
+        ownView = TableBrowser.ViewOf(row, tables.AccountId, entries);
+        ownLine = OwnLineOf(ownView, entries);
         var bank = row.Config?.Bank ?? 0;
         var payout = row.Config?.MaxPayout ?? 0;
         ownCurrencyLine = ownView.Currency == CasinoCurrencies.Gil && bank > 0
             ? Loc.T(L.Tables.GilLimits, NumberText.Compact(bank), NumberText.Compact(payout > 0 ? payout : bank))
             : ownView.Stakes;
+    }
+
+    internal static string OwnLineOf(in TableRowView view, int bookEntries)
+    {
+        if (!view.Book)
+        {
+            return view.Seats;
+        }
+
+        return bookEntries >= 0 ? view.Stakes : Loc.T(L.Book.Plays);
     }
 
     private float DrawHost(ImDrawListPtr drawList, AppSkin ui, Vector2 origin, float width, float scale, string title,

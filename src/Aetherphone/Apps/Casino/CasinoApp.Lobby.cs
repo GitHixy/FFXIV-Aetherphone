@@ -85,20 +85,7 @@ internal sealed partial class CasinoApp
         }
     }
 
-    private void OpenEntry(in Strip.StripEntry entry, Rect source)
-    {
-        switch (entry.Action)
-        {
-            case Strip.StripAction.HostTable:
-                OpenHostSheet();
-                return;
-            case Strip.StripAction.HostVenue:
-                OpenVenueHostSheet(entry.Venue);
-                return;
-        }
-
-        OpenGame(entry.GameId, source);
-    }
+    private void OpenEntry(in Strip.StripEntry entry, Rect source) => OpenGame(entry.GameId, source);
 
     private float DrawHeroBlock(ImDrawListPtr drawList, Vector2 origin, float width, float delta, float scale)
     {

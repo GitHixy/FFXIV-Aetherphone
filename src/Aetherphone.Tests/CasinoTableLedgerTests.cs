@@ -128,6 +128,37 @@ public sealed class CasinoTableLedgerTests
     }
 
     [Fact]
+    public void APatronTheTableHasNotAdmittedSeesTheDoorInsteadOfTheLedger()
+    {
+        var card = new CasinoTableRowDto(TableId: "t1", GameKind: CasinoWire.BookKind, Admitted: false,
+            Reason: CasinoReasons.InviteOnly);
+
+        Assert.True(TableLedger.BarsReader(card, false));
+        Assert.False(TableLedger.BarsReader(card, true));
+        Assert.False(TableLedger.BarsReader(card with { Admitted = true, Reason = string.Empty }, false));
+        Assert.Equal(TableDoorAction.Knock, TableDoorCard.ContentFor(card.Reason, CasinoKnockStatus.Idle,
+            L.Casino.BlackjackClosedTitle, L.Casino.BlackjackClosedHint).Pressed);
+    }
+
+    [Fact]
+    public void TheHostGetsAGuestChoiceOnlyWhileTheServerListsTheBook()
+    {
+        Assert.True(TableLedger.ShowsRecord(true, 2, false, string.Empty));
+        Assert.True(TableLedger.ShowsRecord(true, 0, true, string.Empty));
+        Assert.False(TableLedger.ShowsRecord(true, 0, false, string.Empty));
+        Assert.True(TableLedger.ShowsRecord(false, 0, false, "h"));
+        Assert.False(TableLedger.ShowsRecord(false, 0, true, string.Empty));
+
+        Assert.Equal(3, TableLedger.ChoiceCount(2, true));
+        Assert.Equal(2, TableLedger.ChoiceCount(2, false));
+        Assert.Equal(1, TableLedger.ChoiceCount(0, true));
+        Assert.True(TableLedger.IsGuestChoice(2, 2, true));
+        Assert.True(TableLedger.IsGuestChoice(0, 0, true));
+        Assert.False(TableLedger.IsGuestChoice(1, 2, true));
+        Assert.False(TableLedger.IsGuestChoice(2, 2, false));
+    }
+
+    [Fact]
     public void CoDealersToggleInAndOut()
     {
         var config = new CasinoTableConfigDto(CoDealers: new[] { "u2" });

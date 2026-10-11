@@ -11093,8 +11093,6 @@ internal static class L
         public static readonly LocString HeroDealerEyebrow = new("casino.strip.heroDealerEyebrow", "YOU VS THE HOUSE");
         public static readonly LocString RaceBetsClose = new("casino.strip.raceBetsClose", "Bets close in {0}");
         public static readonly LocString FromChips = new("casino.strip.fromChips", "From {0}");
-        public static readonly LocString HostMeta = new("casino.strip.hostMeta", "Your table, your rules");
-        public static readonly LocString VenueMeta = new("casino.strip.venueMeta", "Host it at your venue");
         public static readonly LocString ShelfMachines = new("casino.strip.shelfMachines", "Machines");
         public static readonly LocString TickerEyebrow = new("casino.strip.tickerEyebrow", "BIG WINS");
         public static readonly LocString TickWin = new("casino.strip.tickWin", "{0} hit {1} on {2}");
@@ -11782,6 +11780,7 @@ internal static class L
         public static readonly LocString RowLine = new("casino.book.rowLine", "Book, {0} entries tonight");
         public static readonly LocString Summary = new("casino.book.summary", "{0}, bank {1}, {2}");
         public static readonly LocString DoorNote = new("casino.book.doorNote", "A Book runs no game of its own. Record every gil trade of the night here; it closes on its own after eight idle hours.");
+        public static readonly LocString GuestNameHint = new("casino.book.guestNameHint", "Character name");
     }
 
     internal static class Catalogs
