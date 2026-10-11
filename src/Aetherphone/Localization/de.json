@@ -7752,6 +7752,7 @@
   "changelog.r1300.79": "Behoben, dass Lodestone-Suchen hinter Porträt-Downloads warteten, wodurch die Suche bis zu einer Minute lang hängen konnte",
   "changelog.r1300.80": "Behoben, dass der Lodestone-Chip unter Leute bei größeren UI-Skalierungen auf zwei Zeilen umbrach",
   "changelog.r1300.84": "Behoben, dass das Mini-Telefon nach einem Neuladen des Plugins beim kurzen Datum blieb, beigetragen von t3sco",
+  "changelog.r1300.85": "Behoben, dass Tooltips nahe am Bildschirmrand von den abgerundeten Ecken und dem Rahmen abgeschnitten wurden, beigetragen von t3sco",
   "changelog.r1300.70": "Community-Richtlinien für ChocoChat sowie für den Sender-Chat und Jams in Musik hinzugefügt",
   "changelog.r1300.71": "Community-Richtlinien aller Apps in den Einstellungen unter Moderation und Sicherheit hinzugefügt",
   "changelog.r1300.72": "Community-Richtlinien in allen Apps überarbeitet: Jede zeigt jetzt, was erlaubt ist, was verschleiert wird, was entfernt wird und was zur Sperre des Kontos führt",

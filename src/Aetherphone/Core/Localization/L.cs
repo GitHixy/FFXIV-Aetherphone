@@ -2353,6 +2353,8 @@ internal static class L
                 "Fixed the handle hint saying letters when only lowercase letters are accepted"),
             new("changelog.r1300.84",
                 "Fixed the mini phone sticking to the short date after a plugin reload, contributed by t3sco"),
+            new("changelog.r1300.85",
+                "Fixed tooltips near the edge of the screen being cut off by the rounded corners and the frame, contributed by t3sco"),
         };
 
         public static readonly LocString[] Release1300ChirperAethergramVelvet =

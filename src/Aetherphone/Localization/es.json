@@ -7752,6 +7752,7 @@
   "changelog.r1300.79": "Corregido que las búsquedas de Lodestone esperaran detrás de las descargas de retratos, lo que podía dejar la búsqueda colgada hasta un minuto",
   "changelog.r1300.80": "Corregido que el chip Lodestone de Personas ocupara dos líneas con escalas de interfaz grandes",
   "changelog.r1300.84": "Corregido que el teléfono pequeño se quedara con la fecha corta tras recargar el plugin, contribuido por t3sco",
+  "changelog.r1300.85": "Se corrigió que las etiquetas de ayuda cerca del borde de la pantalla quedaran cortadas por las esquinas redondeadas y el marco, contribuido por t3sco",
   "changelog.r1300.70": "Se añadieron normas de la comunidad a ChocoChat, y al chat de las emisoras y a las sesiones de Jam en Música",
   "changelog.r1300.71": "Se añadieron las normas de la comunidad de cada app a Ajustes, en Moderación y seguridad",
   "changelog.r1300.72": "Se renovaron las normas de la comunidad de todas las apps: cada una muestra ahora qué está permitido, qué se vela, qué se elimina y qué hace que se suspenda una cuenta",
