@@ -299,6 +299,16 @@ public sealed class RaceScreenLayoutTests
     }
 
     [Fact]
+    public void TheBoardShowsTheOddsOfTheTicketBeingBuilt()
+    {
+        var runner = new Core.Aethernet.Contracts.CasinoRaceRunnerDto(OddsHundredths: 562, PlaceOddsHundredths: 215);
+        Assert.Equal(562, RaceFieldList.OddsFor(runner, RaceRules.KindWin));
+        Assert.Equal(215, RaceFieldList.OddsFor(runner, RaceRules.KindPlace));
+        Assert.Equal(562, RaceFieldList.OddsFor(runner, RaceRules.KindForecast));
+        Assert.Equal(562, RaceFieldList.OddsFor(runner, RaceRules.KindReverse));
+    }
+
+    [Fact]
     public void FormRatingsFoldOntoThreeStars()
     {
         Assert.Equal(1, RaceFieldList.Stars(RaceRules.MinRating));

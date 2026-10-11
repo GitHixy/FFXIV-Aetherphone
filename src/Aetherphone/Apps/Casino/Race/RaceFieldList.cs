@@ -67,7 +67,7 @@ internal sealed class RaceFieldList
                 var card = new Rect(new Vector2(origin.X + slide, origin.Y),
                     new Vector2(origin.X + width + slide, origin.Y + cardHeight));
                 var stake = slot < stakes.Length ? stakes[slot] : 0;
-                if (DrawCard(drawList, ui, card, runners, slot, builder.PickOf(slot), builder.Pair, stake, texts,
+                if (DrawCard(drawList, ui, card, runners, slot, builder.Kind, builder.PickOf(slot), stake, texts,
                         selectable && share >= 1f, MathF.Min(1f, share * 1.5f), scale))
                 {
                     tapped = slot;
@@ -82,8 +82,11 @@ internal sealed class RaceFieldList
 
     public static int Stars(int rating) => Math.Clamp((rating + 1) / 2, 1, GameStatsStore.MaxStars);
 
+    public static int OddsFor(CasinoRaceRunnerDto runner, int kind) =>
+        kind == RaceRules.KindPlace ? runner.PlaceOddsHundredths : runner.OddsHundredths;
+
     private static bool DrawCard(ImDrawListPtr drawList, AppSkin ui, Rect card, CasinoRaceRunnerDto[] runners,
-        int slot, int pick, bool pair, long stake, RaceTexts texts, bool selectable, float alpha, float scale)
+        int slot, int kind, int pick, long stake, RaceTexts texts, bool selectable, float alpha, float scale)
     {
         var runner = runners[slot];
         var radius = Metrics.Radius.Card * scale;
@@ -106,12 +109,12 @@ internal sealed class RaceFieldList
         var silk = MathF.Min(SilkSize * scale, card.Height - pad * 2f);
         var silkMin = new Vector2(card.Min.X + pad, card.Center.Y - silk * 0.5f);
         DrawSilkBadge(drawList, silkMin, silk, runner, slot, alpha, scale);
-        if (picked && pair)
+        if (picked && RaceRules.IsPair(kind))
         {
             DrawPickBadge(drawList, ui, new Vector2(silkMin.X + silk, silkMin.Y), texts.Place(pick), alpha, scale);
         }
 
-        var oddsText = CasinoMultiples.Label(runner.OddsHundredths);
+        var oddsText = CasinoMultiples.Label(OddsFor(runner, kind));
         var oddsStyle = TextStyles.Title2;
         var stakeStyle = TextStyles.FootnoteEmphasized;
         var stakeText = stake > 0 ? RaceAmounts.Text(stake) : string.Empty;
