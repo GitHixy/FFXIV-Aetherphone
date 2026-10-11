@@ -16,7 +16,6 @@ internal sealed class WheelStatusLine
     public static readonly TextStyle ClockStyle = TextStyles.SubheadlineEmphasized;
     public static readonly TextStyle CountStyle = TextStyles.SubheadlineEmphasized;
 
-    private static readonly Vector4 UrgentInk = new(1f, 0.63f, 0.28f, 1f);
     private static readonly Vector4 GlyphInk = CasinoColors.InkBody;
 
     private LabelSlot crowdHint;
@@ -83,7 +82,7 @@ internal sealed class WheelStatusLine
 
     private static void DrawClock(ImDrawListPtr drawList, Rect box, string clock, bool urgent)
     {
-        var ink = urgent ? UrgentInk with { W = 0.6f + 0.4f * Pulse.Wave(Pulse.Fast) } : StageText.Strong;
+        var ink = urgent ? TurnTimerRing.Warn with { W = 0.6f + 0.4f * Pulse.Wave(Pulse.Fast) } : StageText.Strong;
         var size = Typography.Measure(clock, ClockStyle);
         Typography.Draw(drawList, new Vector2(box.Max.X - size.X, box.Center.Y - size.Y * 0.5f), clock, ink,
             ClockStyle);
