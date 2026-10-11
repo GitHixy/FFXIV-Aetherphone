@@ -242,7 +242,7 @@ internal sealed partial class MachineCabinet
         drawList.PopClipRect();
         DrawBanners(drawList, frame, scale);
         DrawGamble(drawList, ui, frame, scale);
-        DrawStrip(drawList, ui, frame, scale);
+        DrawStrip(drawList, scale);
         HandleWindowTap(frame);
         DrawDeck(stage, frame, ui, state, state.Sitting ?? CasinoWire.NoBankroll, scale);
     }

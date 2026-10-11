@@ -11222,10 +11222,12 @@ internal static class L
         public static readonly LocString BuyConfirmBody = new("casino.slots.cascade.buyConfirmBody", "{0} chips start 10 free spins straight away.");
         public static readonly LocString BuyConfirm = new("casino.slots.cascade.buyConfirm", "Buy");
         public static readonly LocString LinesInfo = new("casino.slots.machine.linesInfo", "10 lines");
-        public static readonly LocString CostLine = new("casino.slots.machine.costLine", "Spin costs {0}");
         public static readonly LocString Win = new("casino.slots.machine.win", "WIN");
-        public static readonly LocString FreeSpinsCounter = new("casino.slots.machine.freeSpinsCounter", "Free spin {0} of {1}");
-        public static readonly LocString FreeGamesCounter = new("casino.slots.moogle.freeGamesCounter", "Free game {0} of {1}");
+        public static readonly LocString BetLabel = new("casino.slots.machine.betLabel", "BET");
+        public static readonly LocString FreeSpinsLabel = new("casino.slots.machine.freeSpinsLabel", "FREE SPINS");
+        public static readonly LocString FreeGamesLabel = new("casino.slots.moogle.freeGamesLabel", "FREE GAMES");
+        public static readonly LocString RespinsLabel = new("casino.slots.moogle.respinsLabel", "RESPINS");
+        public static readonly LocString CounterValue = new("casino.slots.machine.counterValue", "{0} / {1}");
         public static readonly LocString Respins = new("casino.slots.moogle.respins", "Respins {0}");
         public static readonly LocString Skip = new("casino.slots.machine.skip", "Skip to the result");
         public static readonly LocString Gamble = new("casino.slots.bird.gamble", "Gamble the win");

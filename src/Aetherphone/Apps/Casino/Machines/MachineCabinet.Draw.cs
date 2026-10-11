@@ -26,6 +26,12 @@ internal sealed partial class MachineCabinet
     private const float IntroTileSpan = 1.3f;
     private const float NotePad = 8f;
     private const string ReasonMarquee = "casino.machines.reason";
+    private const float StripRoundShare = 0.3f;
+    private const float MutedValueAlpha = 0.7f;
+    private const float MinimumShrink = 0.7f;
+
+    private static readonly TextStyle EyebrowStyle = TextStyles.FootnoteEmphasized;
+    private static readonly Vector4 StripFill = new(0f, 0f, 0f, 0.55f);
 
     private static readonly Vector4 GlassTop = new(0.10f, 0.06f, 0.16f, 0.92f);
     private static readonly Vector4 GlassBottom = new(0.03f, 0.02f, 0.06f, 0.92f);
@@ -35,7 +41,6 @@ internal sealed partial class MachineCabinet
     private static readonly Vector4 Veil = new(0.01f, 0.0f, 0.03f, 0.78f);
     private static readonly CasinoSlotsCoinDto NoCoin = new();
 
-    private AmountSlot betLabel;
     private AmountSlot buyLabel;
     private AmountSlot meterHit;
     private AmountSlot gambleStake;
@@ -372,83 +377,100 @@ internal sealed partial class MachineCabinet
         return style with { Scale = style.Scale * MathF.Max(0.1f, height) / line };
     }
 
-    private void DrawStrip(ImDrawListPtr drawList, AppSkin ui, in CasinoStageFrame frame, float scale)
+    private void DrawStrip(ImDrawListPtr drawList, float scale)
     {
-        var radius = strip.Height * 0.3f;
-        Squircle.Fill(drawList, strip.Min, strip.Max, radius, ImGui.GetColorU32(new Vector4(0f, 0f, 0f, 0.55f)));
-        var leftWidth = strip.Width * 0.46f;
-        var left = new Rect(strip.Min, new Vector2(strip.Min.X + leftWidth, strip.Max.Y)).Inset(8f * scale);
-        var right = new Rect(new Vector2(strip.Min.X + leftWidth, strip.Min.Y), strip.Max).Inset(8f * scale);
-        DrawStripLeft(drawList, ui, frame, left, scale);
-        DrawWinAmount(drawList, right);
-    }
-
-    private void DrawStripLeft(ImDrawListPtr drawList, AppSkin ui, in CasinoStageFrame frame, Rect area, float scale)
-    {
+        Squircle.Fill(drawList, strip.Min, strip.Max, strip.Height * StripRoundShare, ImGui.GetColorU32(StripFill));
+        var footer = MachineFooterLayout.Compute(strip, scale);
+        var eyebrowHeight = Typography.LineHeight(EyebrowStyle);
+        var valueStyle = FitHeight(TextStyles.Title2, footer.Right.Height - eyebrowHeight);
         if (inlineReason.Length > 0)
         {
-            var reason = CasinoReasons.Text(inlineReason, store.Ceiling.MaxBet);
-            var block = Typography.MeasureWrappedBlock(reason, TextStyles.Footnote, area.Width);
-            if (block.Y <= area.Height)
-            {
-                Typography.DrawWrappedCentered(drawList, reason, TextStyles.Footnote, StageInks.Strong,
-                    new Vector2(area.Center.X, area.Center.Y - block.Y * 0.5f), area.Width);
-                return;
-            }
-
-            var lineHeight = Typography.LineHeight(TextStyles.Footnote);
-            Marquee.DrawCentered(drawList, new MarqueeId(ReasonMarquee, 0), reason, area.Center.X,
-                area.Center.Y - lineHeight * 0.5f, area.Width, TextStyles.Footnote, StageInks.Strong,
-                UiInteract.Hover(area.Min, area.Max));
-            return;
-        }
-
-        string text;
-        var style = TextStyles.Title3;
-        if (playback.HasRound && playback.InHold)
-        {
-            text = respinCounter.Get(L.Machines.Respins, Math.Max(0, playback.Current.SpinsLeft));
-            style = TextStyles.Title2;
-        }
-        else if (playback.HasRound && playback.InFeature)
-        {
-            var played = playback.FeaturePlayed;
-            var total = played + playback.SpinsLeftShown();
-            var games = string.Equals(machineId, SlotsRules.MoogleId, StringComparison.Ordinal);
-            text = featureCounter.Get(games ? L.Machines.FreeGamesCounter : L.Machines.FreeSpinsCounter, played,
-                Math.Max(played, total));
+            DrawReason(drawList, footer.Left);
         }
         else
         {
-            text = betLabel.Get(L.Machines.CostLine, SlotsRules.CostOf(Mode, Composer.Amount));
+            DrawStripLeft(drawList, footer.Left, valueStyle);
         }
 
-        style = FitHeight(style, area.Height);
-        var fitted = Typography.FitText(text, area.Width, style);
-        Typography.DrawCentered(drawList, area.Center, fitted, StageInks.Strong, style);
+        var shown = playback.HasRound ? rollup.Shown : 0;
+        var lossLike = playback.HasRound && settled && playback.TotalWin + playback.Jackpot <= playback.Cost;
+        var ink = shown <= 0 || lossLike ? StageInks.Strong with { W = MutedValueAlpha } : CasinoColors.Money;
+        DrawFooterColumn(drawList, footer.Right, Loc.T(L.Machines.Win), NumberText.Group(shown), true, ink, valueStyle,
+            true);
     }
 
-    private void DrawWinAmount(ImDrawListPtr drawList, Rect area)
+    private void DrawReason(ImDrawListPtr drawList, Rect area)
     {
-        var shown = playback.HasRound ? rollup.Shown : 0;
-        var labelStyle = TextStyles.Footnote;
-        var label = Typography.FitText(Loc.T(L.Machines.Win), area.Width, labelStyle);
-        var labelHeight = Typography.LineHeight(labelStyle);
-        var amountStyle = FitHeight(TextStyles.Title1, area.Height - labelHeight);
-        var amount = NumberText.Group(shown);
-        var lossLike = playback.HasRound && settled && playback.TotalWin + playback.Jackpot <= playback.Cost;
-        var ink = shown <= 0 || lossLike ? StageInks.Strong with { W = 0.7f } : CasinoColors.Money;
-        var amountHeight = Typography.LineHeight(amountStyle);
-        var top = area.Center.Y - (labelHeight + amountHeight) * 0.5f;
-        var labelSize = Typography.Measure(label, labelStyle);
-        Typography.Draw(drawList, new Vector2(area.Max.X - labelSize.X, top), label, CasinoColors.MoneyHighlight,
-            labelStyle);
-        var size = CurrencyGlyph.MeasureAmount(amount, amountStyle);
-        var scaleFit = size.X > area.Width ? area.Width / size.X : 1f;
-        var style = scaleFit < 1f ? amountStyle with { Scale = amountStyle.Scale * scaleFit } : amountStyle;
-        var fittedSize = CurrencyGlyph.MeasureAmount(amount, style);
-        CurrencyGlyph.DrawAmount(drawList, new Vector2(area.Max.X - fittedSize.X, top + labelHeight), amount,
-            CurrencyKind.Chips, ink, style);
+        var reason = CasinoReasons.Text(inlineReason, store.Ceiling.MaxBet);
+        var block = Typography.MeasureWrappedBlock(reason, TextStyles.Footnote, area.Width);
+        if (block.Y <= area.Height)
+        {
+            Typography.DrawWrappedCentered(drawList, reason, TextStyles.Footnote, StageInks.Strong,
+                new Vector2(area.Center.X, area.Center.Y - block.Y * 0.5f), area.Width);
+            return;
+        }
+
+        var lineHeight = Typography.LineHeight(TextStyles.Footnote);
+        Marquee.DrawCentered(drawList, new MarqueeId(ReasonMarquee, 0), reason, area.Center.X,
+            area.Center.Y - lineHeight * 0.5f, area.Width, TextStyles.Footnote, StageInks.Strong,
+            UiInteract.Hover(area.Min, area.Max));
+    }
+
+    private void DrawStripLeft(ImDrawListPtr drawList, Rect area, in TextStyle valueStyle)
+    {
+        if (playback.HasRound && playback.InHold)
+        {
+            DrawFooterColumn(drawList, area, Loc.T(L.Machines.RespinsLabel),
+                GameNumber.Label(Math.Max(0, playback.Current.SpinsLeft)), false, StageInks.Strong, valueStyle, false);
+            return;
+        }
+
+        if (playback.HasRound && playback.InFeature)
+        {
+            var played = playback.FeaturePlayed;
+            var total = Math.Max(played, played + playback.SpinsLeftShown());
+            var games = string.Equals(machineId, SlotsRules.MoogleId, StringComparison.Ordinal);
+            DrawFooterColumn(drawList, area, Loc.T(games ? L.Machines.FreeGamesLabel : L.Machines.FreeSpinsLabel),
+                featureCounter.Get(L.Machines.CounterValue, played, total), false, StageInks.Strong, valueStyle, false);
+            return;
+        }
+
+        DrawFooterColumn(drawList, area, Loc.T(L.Machines.BetLabel),
+            NumberText.Compact(SlotsRules.CostOf(Mode, Composer.Amount)), true, StageInks.Strong, valueStyle, false);
+    }
+
+    private static void DrawFooterColumn(ImDrawListPtr drawList, Rect column, string eyebrow, string value,
+        bool chips, Vector4 valueInk, in TextStyle valueStyle, bool alignRight)
+    {
+        var eyebrowStyle = EyebrowStyle with
+        {
+            Scale = Typography.FitScale(eyebrow, column.Width, EyebrowStyle.Scale,
+                EyebrowStyle.Scale * MinimumShrink, EyebrowStyle.Weight),
+        };
+        var eyebrowHeight = Typography.LineHeight(EyebrowStyle);
+        var valueHeight = Typography.LineHeight(valueStyle);
+        var top = MachineFooterLayout.BlockTop(column, eyebrowHeight, valueHeight);
+        var eyebrowSize = Typography.Measure(eyebrow, eyebrowStyle);
+        var eyebrowLeft = alignRight ? column.Max.X - eyebrowSize.X : column.Min.X;
+        Typography.Draw(drawList, new Vector2(eyebrowLeft, top + (eyebrowHeight - eyebrowSize.Y) * 0.5f), eyebrow,
+            CasinoColors.InkBody, eyebrowStyle);
+        var size = chips ? CurrencyGlyph.MeasureAmount(value, valueStyle) : Typography.Measure(value, valueStyle);
+        var style = valueStyle;
+        if (size.X > column.Width && size.X > 0f)
+        {
+            style = valueStyle with { Scale = valueStyle.Scale * column.Width / size.X };
+            size = chips ? CurrencyGlyph.MeasureAmount(value, style) : Typography.Measure(value, style);
+        }
+
+        var origin = new Vector2(alignRight ? column.Max.X - size.X : column.Min.X, top + eyebrowHeight + valueHeight
+            - size.Y);
+        if (chips)
+        {
+            CurrencyGlyph.DrawAmount(drawList, origin, value, CurrencyKind.Chips, valueInk, style);
+            return;
+        }
+
+        Typography.Draw(drawList, origin, value, valueInk, style);
     }
 
     private void DrawGamble(ImDrawListPtr drawList, AppSkin ui, in CasinoStageFrame frame, float scale)
