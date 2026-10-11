@@ -37,8 +37,6 @@ internal sealed class BingoCabinet : ICabinetIdle
     private const float KnobPillGap = 6f;
     private const float VeilAlpha = 0.72f;
 
-    private static readonly MarqueeId CallerMarquee = new("casino.bingo.caller", 0L);
-
     private static readonly LocString[] StageNames =
     {
         L.Casino.BingoStageLine,
@@ -67,19 +65,14 @@ internal sealed class BingoCabinet : ICabinetIdle
     private readonly LabelSlot[] stageBalls = new LabelSlot[BingoRules.StageCount];
     private readonly LabelSlot[] stageWinners = new LabelSlot[BingoRules.StageCount];
 
-    private BingoLabel ribbonLabel;
-    private BingoLabel callerLabel;
     private BingoLabel captionLabel;
     private LabelSlot earlyBirdLabel;
-    private LabelSlot holdingLabel;
     private LabelSlot outcomeLabel;
     private Spring railOffset;
     private BingoHallLayout layout;
     private string inlineReason = string.Empty;
     private string celebratedRoundId = string.Empty;
     private int requestedCards = 1;
-    private string priceText = string.Empty;
-    private LanguageInfo? priceLanguage;
     private float lightPhase;
     private float heartbeatDub;
     private float railDragFrom;
@@ -187,13 +180,13 @@ internal sealed class BingoCabinet : ICabinetIdle
         PlayCues(playback.TakeCues(), frame.Instant);
         TickHeartbeat(delta);
         SettleRound(stage, snapshot, board, mine, frame);
-        PhaseRibbon.Draw(drawList, frame.Layout.Ribbon, RibbonLabel(snapshot.Phase, remaining), remaining,
+        PhaseRibbon.Draw(drawList, frame.Layout.Ribbon, RibbonLabel(snapshot.Phase), remaining,
             CasinoRoomCadence.BingoWindow(snapshot.Phase), snapshot.Occupancy,
             room.Attached ? CasinoColors.LightA : CasinoColors.InkMuted, scale);
         var calledOff = CalledOff(board, mine);
         BingoCardArt.DrawTumbler(drawList, layout.Tumbler, tumbler,
             playback.Stage == BingoStage.Calling ? 1f : 0.4f, scale);
-        DrawCaller(drawList, layout.Caller, snapshot.Phase, remaining, scale);
+        DrawCaller(drawList, layout.Caller, scale);
         BingoCardArt.DrawBoard(drawList, layout.Board, layout.Cell, playback, scale);
         DrawCards(drawList, ui, mine, holding, calledOff, frame.DeltaSeconds, scale);
         DrawPodiums(drawList, board, scale);
@@ -203,14 +196,7 @@ internal sealed class BingoCabinet : ICabinetIdle
         }
 
         DrawFlight(drawList, scale);
-        if (inlineReason.Length > 0)
-        {
-            var message = CasinoReasons.Text(inlineReason, chips.Ceiling.MaxBet);
-            var height = CasinoNotice.Height(CasinoNoticeKind.Reason, string.Empty, message, safe.Width, scale);
-            CasinoNotice.Draw(drawList, ui, CasinoNoticeKind.Reason, string.Empty, message, safe.Min.X,
-                layout.Podiums.Min.Y - height - PodiumGap * scale, safe.Width, scale);
-        }
-
+        DrawInlineReason(drawList, ui, holding, scale);
         DrawDeck(stage, frame, ui, state, state.Sitting ?? CasinoWire.NoBankroll, holding, calledOff, scale);
     }
 
@@ -307,18 +293,6 @@ internal sealed class BingoCabinet : ICabinetIdle
     {
         var interval = board?.BallIntervalMs ?? 0;
         return interval > 0 ? interval : BingoRules.BallIntervalMs;
-    }
-
-    internal static int NextRoomSeconds(int phase, long remainingMs)
-    {
-        var estimate = phase switch
-        {
-            CasinoRoomPhases.Locked => remainingMs + CasinoRoomCadence.BingoResultSeconds * 1000L,
-            CasinoRoomPhases.Result => remainingMs,
-            _ => 0L,
-        };
-
-        return (int)((estimate + 999) / 1000);
     }
 
     internal static CasinoBingoStageDto? StageAwarded(CasinoBingoRoomStateDto? board, int stage)
@@ -443,39 +417,36 @@ internal sealed class BingoCabinet : ICabinetIdle
         stage.Celebration.Celebrate(stake, payout, origin, frame.Instant);
     }
 
-    private string RibbonLabel(int phase, long remainingMs)
+    private static string RibbonLabel(int phase) => phase switch
     {
-        var seconds = (int)((Math.Max(0, remainingMs) + 999) / 1000);
-        return phase switch
+        CasinoRoomPhases.Open => Loc.T(L.Casino.BingoCardsOnSale),
+        CasinoRoomPhases.Locked => Loc.T(L.Casino.BingoCalling),
+        _ => Loc.T(L.Casino.BingoNextRoomSoon),
+    };
+
+    private void DrawInlineReason(ImDrawListPtr drawList, AppSkin ui, int holding, float scale)
+    {
+        if (inlineReason.Length == 0)
         {
-            CasinoRoomPhases.Open => ribbonLabel.Duration(L.Casino.BingoCardsClose, seconds),
-            CasinoRoomPhases.Locked => playback.BallCount > 0
-                ? ribbonLabel.Numbers(L.Casino.BingoCalledCount, playback.BallCount, BingoRules.Balls)
-                : Loc.T(L.Casino.BingoProgressWaiting),
-            _ => ribbonLabel.Duration(L.Casino.BingoNextRoom, NextRoomSeconds(phase, remainingMs)),
-        };
+            return;
+        }
+
+        var area = layout.Cards;
+        var message = CasinoReasons.Text(inlineReason, chips.Ceiling.MaxBet);
+        var height = CasinoNotice.Height(CasinoNoticeKind.Reason, string.Empty, message, area.Width, scale);
+        var top = holding == 0 ? area.Center.Y - height * 0.5f : area.Min.Y;
+        CasinoNotice.Draw(drawList, ui, CasinoNoticeKind.Reason, string.Empty, message, area.Min.X, top, area.Width,
+            scale);
     }
 
-    private void DrawCaller(ImDrawListPtr drawList, Rect rect, int phase, long remainingMs, float scale)
+    private void DrawCaller(ImDrawListPtr drawList, Rect rect, float scale)
     {
         if (rect.Width <= 0f || rect.Height <= 0f)
         {
             return;
         }
 
-        var seconds = (int)((Math.Max(0, remainingMs) + 999) / 1000);
         var center = rect.Center;
-        if (playback.Stage == BingoStage.Selling)
-        {
-            StageText.State(drawList, center - new Vector2(0f, Typography.LineHeight(TextStyles.Title2) * 0.5f),
-                callerLabel.Duration(L.Casino.BingoFirstBall, seconds), rect.Width, CallerMarquee);
-            var price = Typography.FitText(PriceText(), rect.Width, TextStyles.FootnoteEmphasized);
-            Typography.DrawCentered(drawList,
-                center + new Vector2(0f, Typography.LineHeight(TextStyles.FootnoteEmphasized)), price,
-                CasinoColors.Money, TextStyles.FootnoteEmphasized);
-            return;
-        }
-
         var radius = MathF.Min(rect.Height * CallerBallShare, rect.Width * 0.3f);
         var ballCenter = new Vector2(center.X, rect.Min.Y + radius + Metrics.Space.Xs * scale);
         var shown = playback.Flying ? PreviousBall() : playback.LatestBall;
@@ -501,19 +472,6 @@ internal sealed class BingoCabinet : ICabinetIdle
         Typography.DrawCentered(drawList,
             new Vector2(center.X, captionTop + Typography.LineHeight(TextStyles.FootnoteEmphasized) * 0.5f), caption,
             CasinoColors.InkTitle, TextStyles.FootnoteEmphasized);
-    }
-
-    private string PriceText()
-    {
-        if (ReferenceEquals(priceLanguage, Loc.Current) && priceText.Length > 0)
-        {
-            return priceText;
-        }
-
-        priceLanguage = Loc.Current;
-        priceText = Loc.T(L.Casino.BingoCardPrice, NumberText.Compact(BingoRules.CardPrice),
-            GameNumber.Label(BingoRules.MaxCards));
-        return priceText;
     }
 
     private int PreviousBall()
@@ -568,12 +526,12 @@ internal sealed class BingoCabinet : ICabinetIdle
     {
         if (holding == 0)
         {
-            if (calledOff || playback.Stage == BingoStage.Wrapped)
+            if (calledOff || playback.Stage != BingoStage.Selling || inlineReason.Length > 0)
             {
                 return;
             }
 
-            var hint = Loc.T(playback.Stage == BingoStage.Selling ? L.Casino.BingoNoCardsHint : L.Casino.BingoRoomRolling);
+            var hint = Loc.T(L.Casino.BingoNoCardsHint);
             var width = MathF.Min(layout.Cards.Width, layout.Hero.Width + OverlayPad * 2f * scale);
             var height = CasinoNotice.Height(CasinoNoticeKind.Info, string.Empty, hint, width, scale);
             CasinoNotice.Draw(drawList, ui, CasinoNoticeKind.Info, string.Empty, hint, layout.Cards.Center.X - width * 0.5f,
@@ -955,7 +913,7 @@ internal sealed class BingoCabinet : ICabinetIdle
         var labelLeft = avatarLeft + AvatarRadius * 2f * scale + (shown - 1) * AvatarStep * scale
             + Metrics.Space.Sm * scale;
         var label = winners > 1
-            ? stageWinners[stageIndex].Get(L.Bingo.Winners, winners)
+            ? stageWinners[stageIndex].Get(L.Bingo.WinnersCount, winners)
             : Loc.T(L.Bingo.OneWinner);
         if (mine)
         {
@@ -1002,10 +960,10 @@ internal sealed class BingoCabinet : ICabinetIdle
         if (!selling || headroom <= 0)
         {
             var message = calledOff
-                ? Loc.T(L.Casino.BingoCalledOff)
+                ? Loc.T(L.Casino.BingoCalledOffShort)
                 : headroom <= 0 && selling
-                    ? holdingLabel.Get(L.Casino.BingoHoldingFull, holding)
-                    : Loc.T(playback.Stage == BingoStage.Calling ? L.Casino.BingoCardsFinal : L.Casino.BingoNextRoomSale);
+                    ? Loc.T(L.Casino.BingoCardLimit)
+                    : Loc.T(playback.Stage == BingoStage.Calling ? L.Casino.BingoCardsLocked : L.Casino.BingoSaleNextRoom);
             var fitted = Typography.FitText(message, knob.Width, TextStyles.FootnoteEmphasized);
             Typography.DrawCentered(drawList, knob.Center, fitted, CasinoColors.InkTitle, TextStyles.FootnoteEmphasized);
             return;

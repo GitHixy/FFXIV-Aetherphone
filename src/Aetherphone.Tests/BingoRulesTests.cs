@@ -270,16 +270,6 @@ public sealed class BingoRulesTests
     }
 
     [Fact]
-    public void TheNextRoomClockAddsTheResultWindowWhileBallsAreStillRolling()
-    {
-        Assert.Equal(132 + CasinoRoomCadence.BingoResultSeconds,
-            BingoCabinet.NextRoomSeconds(CasinoRoomPhases.Locked, 132_000));
-        Assert.Equal(132, BingoCabinet.NextRoomSeconds(CasinoRoomPhases.Result, 131_001));
-        Assert.Equal(0, BingoCabinet.NextRoomSeconds(CasinoRoomPhases.Open, 45_000));
-        Assert.Equal(0, BingoCabinet.NextRoomSeconds(CasinoRoomPhases.Result, 0));
-    }
-
-    [Fact]
     public void AnAwardedStageIsReadFromTheRoomRatherThanRederived()
     {
         var board = Board(7, new[] { 1, 2 }, 40) with
