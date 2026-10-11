@@ -9503,6 +9503,7 @@
   "casino.venue.waitingTurn": "{0} würfelt",
   "casino.venue.stakeGil": "Einsatz {0} Gil",
   "casino.venue.stakePractice": "Einsatz {0} Übungschips",
+  "casino.venue.yourPracticeStack": "Dein Stapel: {0} Übungschips",
   "casino.venue.startsAt": "Beginnt bei {0}",
   "casino.venue.duelVs": "{0} gegen {1}",
   "casino.venue.outOf": "Von {0}",

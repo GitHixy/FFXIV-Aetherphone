@@ -9503,6 +9503,7 @@
   "casino.venue.waitingTurn": "{0} atıyor",
   "casino.venue.stakeGil": "Bahis {0} gil",
   "casino.venue.stakePractice": "Bahis {0} alıştırma fişi",
+  "casino.venue.yourPracticeStack": "Yığının: {0} alıştırma fişi",
   "casino.venue.startsAt": "{0} ile başlar",
   "casino.venue.duelVs": "{0} - {1}",
   "casino.venue.outOf": "{0} üzerinden",

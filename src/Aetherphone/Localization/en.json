@@ -9503,6 +9503,7 @@
   "casino.venue.waitingTurn": "{0} is rolling",
   "casino.venue.stakeGil": "Stake {0} gil",
   "casino.venue.stakePractice": "Stake {0} practice chips",
+  "casino.venue.yourPracticeStack": "Your stack: {0} practice chips",
   "casino.venue.startsAt": "Starts at {0}",
   "casino.venue.duelVs": "{0} vs {1}",
   "casino.venue.outOf": "Out of {0}",

@@ -9503,6 +9503,7 @@
   "casino.venue.waitingTurn": "{0}がロール中",
   "casino.venue.stakeGil": "賭け金 {0}ギル",
   "casino.venue.stakePractice": "賭け金 練習チップ{0}",
+  "casino.venue.yourPracticeStack": "あなたのスタック：練習チップ{0}",
   "casino.venue.startsAt": "{0}からスタート",
   "casino.venue.duelVs": "{0} 対 {1}",
   "casino.venue.outOf": "最大{0}",

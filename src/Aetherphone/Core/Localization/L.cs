@@ -11643,6 +11643,7 @@ internal static class L
         public static readonly LocString WaitingTurn = new("casino.venue.waitingTurn", "{0} is rolling");
         public static readonly LocString StakeGil = new("casino.venue.stakeGil", "Stake {0} gil");
         public static readonly LocString StakePractice = new("casino.venue.stakePractice", "Stake {0} practice chips");
+        public static readonly LocString YourPracticeStack = new("casino.venue.yourPracticeStack", "Your stack: {0} practice chips");
         public static readonly LocString StartsAt = new("casino.venue.startsAt", "Starts at {0}");
         public static readonly LocString DuelVs = new("casino.venue.duelVs", "{0} vs {1}");
         public static readonly LocString OutOf = new("casino.venue.outOf", "Out of {0}");

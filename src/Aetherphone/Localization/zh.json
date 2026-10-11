@@ -9503,6 +9503,7 @@
   "casino.venue.waitingTurn": "{0} 正在掷骰",
   "casino.venue.stakeGil": "赌注 {0} 金币",
   "casino.venue.stakePractice": "赌注 {0} 练习筹码",
+  "casino.venue.yourPracticeStack": "你的筹码：{0} 练习筹码",
   "casino.venue.startsAt": "从 {0} 开始",
   "casino.venue.duelVs": "{0} 对 {1}",
   "casino.venue.outOf": "上限 {0}",

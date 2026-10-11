@@ -9503,6 +9503,7 @@
   "casino.venue.waitingTurn": "{0} бросает",
   "casino.venue.stakeGil": "Ставка {0} гил",
   "casino.venue.stakePractice": "Ставка {0} тренировочных фишек",
+  "casino.venue.yourPracticeStack": "Ваш стек: {0} тренировочных фишек",
   "casino.venue.startsAt": "Начало с {0}",
   "casino.venue.duelVs": "{0} против {1}",
   "casino.venue.outOf": "Из {0}",

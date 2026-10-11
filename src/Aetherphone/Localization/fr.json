@@ -9503,6 +9503,7 @@
   "casino.venue.waitingTurn": "{0} lance",
   "casino.venue.stakeGil": "Mise {0} gils",
   "casino.venue.stakePractice": "Mise {0} jetons d'entraînement",
+  "casino.venue.yourPracticeStack": "Ton tapis : {0} jetons d'entraînement",
   "casino.venue.startsAt": "Commence à {0}",
   "casino.venue.duelVs": "{0} contre {1}",
   "casino.venue.outOf": "Sur {0}",

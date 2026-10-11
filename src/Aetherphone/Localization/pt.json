@@ -9503,6 +9503,7 @@
   "casino.venue.waitingTurn": "{0} está rolando",
   "casino.venue.stakeGil": "Aposta {0} gil",
   "casino.venue.stakePractice": "Aposta {0} fichas de treino",
+  "casino.venue.yourPracticeStack": "Sua pilha: {0} fichas de treino",
   "casino.venue.startsAt": "Começa em {0}",
   "casino.venue.duelVs": "{0} contra {1}",
   "casino.venue.outOf": "De {0}",
