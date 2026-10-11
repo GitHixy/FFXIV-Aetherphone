@@ -119,8 +119,10 @@ public sealed class VenuePlaybackTests
             with { LoserUserId = "u2" };
         var board = new CasinoDeathrollStateDto(Recent: new[] { finished });
         playback.Update(board, 0.016f, false);
+        Assert.True(playback.Rolling);
         Assert.False(playback.TakeFinish(out _));
         playback.Update(board, DeathrollPlayback.RollSeconds, false);
+        Assert.Equal(1, playback.Shown);
         Assert.True(playback.TakeFinish(out var loser));
         Assert.Equal("u2", loser);
         Assert.False(playback.TakeFinish(out _));
