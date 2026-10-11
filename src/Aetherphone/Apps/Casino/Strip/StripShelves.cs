@@ -130,9 +130,10 @@ internal sealed class StripShelves
 
             var tile = new Rect(new Vector2(left, top), new Vector2(left + tileWidth, top + tileHeight));
             using (ImRaii.PushId(railId))
+            using (ImRaii.PushId(index))
             {
-                if (DrawEntry(drawList, floor, entries[index], index, tile, phase, deltaSeconds, live, interactive,
-                        scale, out var pressed))
+                if (DrawEntry(drawList, floor, entries[index], tile, phase, deltaSeconds, live, interactive, scale,
+                        out var pressed))
                 {
                     tapped = entries[index];
                     source = pressed;
@@ -144,12 +145,12 @@ internal sealed class StripShelves
         return top + tileHeight;
     }
 
-    private bool DrawEntry(ImDrawListPtr drawList, IStripFloor floor, in StripEntry entry, int index, Rect tile,
-        float phase, float deltaSeconds, bool live, bool interactive, float scale, out Rect pressed)
+    private bool DrawEntry(ImDrawListPtr drawList, IStripFloor floor, in StripEntry entry, Rect tile, float phase,
+        float deltaSeconds, bool live, bool interactive, float scale, out Rect pressed)
     {
         var info = floor.Describe(entry);
         var tint = CasinoArt.TintOf(entry.GameId);
-        var id = ImGui.GetID($"tile{index}");
+        var id = ImGui.GetID("tile");
         var hovered = CasinoArt.PressCard(id, tile.Min, tile.Max, out var pressedMin, out var pressedMax, interactive);
         pressed = new Rect(pressedMin, pressedMax);
         PosterTile.DrawFrame(drawList, pressed, tint, scale);

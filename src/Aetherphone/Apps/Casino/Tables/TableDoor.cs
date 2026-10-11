@@ -377,11 +377,14 @@ internal sealed partial class TableDoor
             var destructive = control == DoorControl.Close;
             var style = active || control == DoorControl.Deal ? ButtonStyle.Prominent : ButtonStyle.Tinted;
             var enabled = ControlEnabled(control, busy, card.Paused);
-            if (RoundButton.FontIcon(drawList, ImGui.GetID($"door.control.{index}"), center, radius,
-                    ControlIcon(control, card), radius * 0.78f, ui.Ink, destructive ? ButtonStyle.Gray : style,
-                    enabled: enabled, glyphInk: destructive ? ui.Theme.Danger : null))
+            using (ImRaii.PushId(index))
             {
-                Press(control, card);
+                if (RoundButton.FontIcon(drawList, ImGui.GetID("door.control"), center, radius,
+                        ControlIcon(control, card), radius * 0.78f, ui.Ink, destructive ? ButtonStyle.Gray : style,
+                        enabled: enabled, glyphInk: destructive ? ui.Theme.Danger : null))
+                {
+                    Press(control, card);
+                }
             }
 
             var labelTop = cell.Min.Y + DoorLayout.ControlButton * scale + DoorLayout.LabelGap * scale;
