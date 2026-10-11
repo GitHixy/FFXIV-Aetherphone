@@ -154,7 +154,7 @@ internal sealed partial class CasinoApp
         CasinoGames.Bingo => BingoRules.CardPrice,
         CasinoGames.Scratch => ScratchRules.Prices[0],
         CasinoGames.Barkeep => BarkeepRules.EntryChips,
-        CasinoGames.Blackjack => BlackjackRules.HouseFloor,
+        CasinoGames.Blackjack => BlackjackRules.MinBet,
         CasinoGames.Holdem => HoldemRules.BigBlindFor(0),
         CasinoGames.DealerHoldem => DealerHoldemRules.MinAnte,
         _ => 0,

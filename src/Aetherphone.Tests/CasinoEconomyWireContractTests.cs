@@ -149,8 +149,7 @@ public sealed class CasinoEconomyWireContractTests
         Assert.Equal(50_000, WheelRules.MaxStakePerSpot);
         Assert.Equal(200_000, WheelRules.MaxStakePerRound);
         Assert.Equal(2_000, BarkeepRules.EntryChips);
-        Assert.Equal(new long[] { 500, 5_000, 50_000, 500_000 }, BlackjackRules.HouseTierMinBets);
-        Assert.Equal(new long[] { 10_000, 100_000, 1_000_000, 10_000_000 }, BlackjackRules.HouseTierMaxBets);
         Assert.Equal(500, BlackjackRules.MinBet);
+        Assert.Equal(10_000_000, BlackjackRules.MaxBet);
     }
 }

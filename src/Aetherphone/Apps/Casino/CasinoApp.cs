@@ -161,10 +161,11 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             lodestone, PopRoute);
         holdemPit = new Tables.HoldemPit(holdemStore, casino, openTable, openDoorFromRow, OpenHoldemHostSheet);
         holdemPit.Lead = DrawDealerHoldemLead;
-        browser = new Tables.TableBrowser(casinoTables, casino, openTable, openDoorFromRow, OpenHostSheet,
-            nearbyTables);
+        browser = new Tables.TableBrowser(casinoTables, holdemStore, casino, openTable, openDoorFromRow,
+            EnterHouseBlackjack, OpenHostSheet, nearbyTables);
         tableHands = new Tables.TableHandsCard(history);
-        pit = new Tables.BlackjackPit(casinoTables, casino, openTable, openDoorFromRow, OpenTables, OpenHostSheet);
+        pit = new Tables.BlackjackPit(casinoTables, casino, openTable, openDoorFromRow, EnterHouseBlackjack, OpenTables,
+            OpenHostSheet);
         hostSheet = new Tables.HostSheet(casinoTables, casino, new Venue.VenueHostOptions(casinoVenue));
         tableDoor = new Tables.TableDoor(casinoTables, confirm, openTable,
             new Venue.TournamentDoorCard(casinoVenue));
@@ -334,6 +335,11 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         casino.EnsureFresh();
         casinoRooms.EnsureFresh();
         casinoTables.EnsureFresh();
+        if (CasinoGameGate.IsOpen(casino.Features, CasinoGames.Holdem))
+        {
+            holdemStore.EnsureTables();
+        }
+
         casinoSpin.EnsureFresh();
         ConsumeTableAnswers();
         chipsDesk.Update();

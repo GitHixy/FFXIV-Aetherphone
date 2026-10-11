@@ -24,23 +24,6 @@ internal static class CasinoTableKinds
     public const int Private = 2;
 }
 
-internal static class CasinoHouseTiers
-{
-    public const int Pit = 0;
-
-    public const int Parlour = 1;
-
-    public const int Salon = 2;
-
-    public const int Vault = 3;
-
-    public const int Count = 3;
-
-    public static readonly int[] All = { Pit, Parlour, Salon };
-
-    public static readonly int[] PitOrder = { Pit, Parlour, Salon, Vault };
-}
-
 internal static class CasinoStakeTiers
 {
     public const int Any = 0;
@@ -48,11 +31,6 @@ internal static class CasinoStakeTiers
     public const int Low = 1;
 
     public const int High = 3;
-
-    public static int ForHouseTier(int houseTier)
-    {
-        return houseTier + 1;
-    }
 
     public static int From(CasinoTableFilter filter)
     {
@@ -147,9 +125,68 @@ internal static class CasinoTableFilters
         return kept;
     }
 
+    public static CasinoTableRowDto[] Floor(CasinoTableRowDto[] listed, CasinoTableRowDto[] holdem,
+        CasinoTableRowDto? houseLead)
+    {
+        var count = houseLead is null ? 0 : 1;
+        for (var index = 0; index < holdem.Length; index++)
+        {
+            if (!Contains(listed, holdem[index].TableId))
+            {
+                count++;
+            }
+        }
+
+        for (var index = 0; index < listed.Length; index++)
+        {
+            if (!HouseBlackjack.Is(listed[index]))
+            {
+                count++;
+            }
+        }
+
+        var rows = new CasinoTableRowDto[count];
+        var next = 0;
+        if (houseLead is not null)
+        {
+            rows[next++] = houseLead;
+        }
+
+        for (var index = 0; index < holdem.Length; index++)
+        {
+            if (!Contains(listed, holdem[index].TableId))
+            {
+                rows[next++] = holdem[index];
+            }
+        }
+
+        for (var index = 0; index < listed.Length; index++)
+        {
+            if (!HouseBlackjack.Is(listed[index]))
+            {
+                rows[next++] = listed[index];
+            }
+        }
+
+        return rows;
+    }
+
     public static bool HasOpenSeat(CasinoTableRowDto row)
     {
         return row.MaxSeats > 0 && row.SeatedCount < row.MaxSeats;
+    }
+
+    private static bool Contains(CasinoTableRowDto[] rows, string tableId)
+    {
+        for (var index = 0; index < rows.Length; index++)
+        {
+            if (string.Equals(rows[index].TableId, tableId, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static bool IsPrivate(CasinoTableRowDto row)

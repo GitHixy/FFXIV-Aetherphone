@@ -114,17 +114,7 @@ internal static class BlackjackRules
 
     public const long MaxBet = 10_000_000;
 
-    public const int HouseTierCount = 4;
-
     public const int InsuranceSeconds = 8;
-
-    public static readonly long[] HouseTierMinBets = { 500, 5_000, 50_000, 500_000 };
-
-    public static readonly long[] HouseTierMaxBets = { 10_000, 100_000, 1_000_000, 10_000_000 };
-
-    public static long HouseFloor => HouseTierMinBets[0];
-
-    public static long HouseTop => HouseTierMaxBets[^1];
 
     public const long BetStep = 10;
 
@@ -145,8 +135,6 @@ internal static class BlackjackRules
     public const int ReturnTenths = 995;
 
     private const long RackHands = 20;
-
-    private const long QuickTierHeadroom = 2;
 
     public static long RackFor(long playerMaxBet, long tableMinBet, long tableMaxBet, long minBuyIn, long maxBuyIn,
         long bankroll)
@@ -177,20 +165,6 @@ internal static class BlackjackRules
         }
 
         return action != 0 && (actionsMask & action) == action;
-    }
-
-    public static int QuickTierFor(long ceiling)
-    {
-        var tier = 0;
-        for (var index = 1; index < HouseTierCount; index++)
-        {
-            if (HouseTierMinBets[index] * QuickTierHeadroom <= ceiling)
-            {
-                tier = index;
-            }
-        }
-
-        return tier;
     }
 
     public static long InsuranceFor(long bet)

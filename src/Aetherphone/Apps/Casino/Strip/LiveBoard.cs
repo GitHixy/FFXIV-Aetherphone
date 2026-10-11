@@ -67,7 +67,7 @@ internal static class LiveBoard
             into[count++] = new LiveRow(LiveRowKind.Room, gameId, room.RoomId, room, null);
         }
 
-        count = AddTables(house, features, into, count);
+        count = AddHouseBlackjack(house, features, into, count);
         count = AddTables(holdem, features, into, count);
         return AddTables(listed, features, into, count);
     }
@@ -123,8 +123,7 @@ internal static class LiveBoard
             return false;
         }
 
-        return table.MinBet >= CasinoTableFilters.HighStakeFloor
-               || (table.Kind == CasinoTableKinds.House && table.StakeTier >= CasinoHouseTiers.Vault);
+        return table.MinBet >= CasinoTableFilters.HighStakeFloor;
     }
 
     public static int Filter(LiveRow[] rows, int count, LiveFilter filter, IReadOnlySet<string> friends,
@@ -142,13 +141,26 @@ internal static class LiveBoard
         return kept;
     }
 
+    private static int AddHouseBlackjack(CasinoTableRowDto[] rows, CasinoFeatureSet features, LiveRow[] into,
+        int count)
+    {
+        var lead = HouseBlackjack.Of(rows).Lead;
+        if (lead is null || count >= into.Length || !CasinoGameGate.RoomOpen(features, lead.GameKind))
+        {
+            return count;
+        }
+
+        into[count++] = new LiveRow(LiveRowKind.Table, CasinoGames.Blackjack, lead.TableId, null, lead);
+        return count;
+    }
+
     private static int AddTables(CasinoTableRowDto[] rows, CasinoFeatureSet features, LiveRow[] into, int count)
     {
         for (var index = 0; index < rows.Length && count < into.Length; index++)
         {
             var row = rows[index];
-            if (!CasinoTableFilters.Shown(row) || !CasinoGameGate.RoomOpen(features, row.GameKind)
-                || Contains(into, count, row.TableId))
+            if (!CasinoTableFilters.Shown(row) || HouseBlackjack.Is(row)
+                || !CasinoGameGate.RoomOpen(features, row.GameKind) || Contains(into, count, row.TableId))
             {
                 continue;
             }
