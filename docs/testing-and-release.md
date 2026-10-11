@@ -19,6 +19,8 @@ This page explains how Aetherphone code gets validated and shipped: the unit tes
 | .github/workflows/update-issue-template-versions.yml | Backfills the version dropdown in issue templates after a release |
 | .github/ISSUE_TEMPLATE/bug_report.yml | Holds the "Plugin version" dropdown, bumped by hand in each release commit |
 | .github/dependabot.yml | Dependabot updates: Actions and NuGet weekly, the three npm tools monthly |
+| .github/workflows/staff-role-sync.yml | Every ten minutes, aligns the community server's staff roles with the staff server |
+| .github/scripts/staff-role-sync.mjs | The role sync's logic: role map, plan, removal brake, apply, report |
 | .github/workflows/uptime.yml | Polls the backend health endpoint every five minutes |
 | Directory.Build.props | Single source of truth for the plugin version; also turns CI warnings into errors |
 | repo.json | This plugin's Dalamud repository manifest entry: version, download links, install count |
@@ -253,6 +255,23 @@ Contributor pull requests come from forks, and `pull_request` runs for forks get
 .github/workflows/update-issue-template-versions.yml also fires on `v*.*.*` tag pushes. It checks out the default branch (dev), scans every .github/ISSUE_TEMPLATE/*.yml, and rewrites each "Plugin version" dropdown it finds (today only bug_report.yml has one): the new version goes on top, the list keeps the five most recent versions, and the "Older / not sure" sentinel stays at the bottom. Any change is committed and pushed to dev with a rebase-and-retry loop.
 
 Maintainers now bump the dropdown by hand inside the release commit (see the checklist), so on a normal release the job finds nothing to change. It remains as a safety net and as a backfill: dispatch it manually with a version input.
+
+## Staff role sync
+
+.github/workflows/staff-role-sync.yml keeps the community Discord server's staff roles in step with the private staff server, using the same bot as the pull request forum. Every ten minutes (and on demand) .github/scripts/staff-role-sync.mjs reads every member and their roles on both servers and reconciles the mapped roles: a community member holds a mapped role only while the same Discord account holds one of the matching roles on the staff server. Someone who holds a mapped role on the community without the staff counterpart, or who is not on the staff server at all, loses it. Roles outside the map, bots, and the staff server itself are never touched; staff is the only source of truth.
+
+The map is a JSON secret from community role name to one or more staff role names, resolved by name on both servers at run time, for example `{"Moderator": ["Moderator", "Moderator Intern"], "Developer": ["Developer"]}`. A name that does not resolve on either server aborts the run before anything is changed, so a renamed role can never strip everyone.
+
+### Modes and safety
+
+- **Dry run** is the default for a manual dispatch: the plan is posted to the report channel and nothing changes. Scheduled runs stay dry too until the `DISCORD_ROLE_SYNC_ARMED` secret is set to `true`, and a dry scheduled run posts nothing, so arming is a deliberate step after you have read a dry-run report.
+- **Removal brake**: when a run would strip a mapped role from more than half of its current holders (and from more than five people), it stops and reports instead of applying. The first real run on a server where many people already hold the roles will trip it; dispatch with `force` to apply that one.
+- **Hierarchy check**: the run aborts if the bot lacks Manage Roles on the community server or if its role sits below any mapped community role, because Discord refuses role edits from below. Fix it in the community's role list by dragging the bot's role above the mapped roles.
+- **Report channel**: everything that names a person (who gained or lost what, failures, abort reasons) is posted by the bot into the staff channel in `DISCORD_ROLE_SYNC_REPORT_CHANNEL_ID`. The public workflow log only carries counts and role names, with ids redacted from error text, for the same reason as the pull request forum. Every applied change carries "Staff role sync" as the audit log reason.
+
+### Setup
+
+Invite the bot to the community server with Manage Roles and View Channels, move its role above the mapped roles, then add these secrets next to the pull request forum ones: `DISCORD_STAFF_GUILD_ID`, `DISCORD_COMMUNITY_GUILD_ID`, `DISCORD_ROLE_SYNC_MAP`, `DISCORD_ROLE_SYNC_REPORT_CHANNEL_ID` (optional but strongly recommended), and finally `DISCORD_ROLE_SYNC_ARMED` once a dry run looks right. The bot needs the Server Members Intent enabled in the Developer Portal to list members. The workflow skips cleanly while the guild ids or the map are unset.
 
 ## Uptime workflow
 
