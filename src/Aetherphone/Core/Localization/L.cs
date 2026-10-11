@@ -843,7 +843,8 @@ internal static class L
         public static readonly LocString Character = new("findPeople.character", "Character");
         public static readonly LocString FreeCompany = new("findPeople.freeCompany", "Free Company");
         public static readonly LocString NameHint = new("findPeople.nameHint", "Name");
-        public static readonly LocString WorldHint = new("findPeople.worldHint", "World or DC (optional)");
+        public static readonly LocString WorldMenu = new("findPeople.worldMenu", "World or Data Center");
+        public static readonly LocString AllWorlds = new("findPeople.allWorlds", "All worlds");
         public static readonly LocString Prompt = new("findPeople.prompt", "Search the Lodestone");
         public static readonly LocString PromptHint = new("findPeople.promptHint", "Find characters and free companies");
         public static readonly LocString NoResults = new("findPeople.noResults", "No matches found");

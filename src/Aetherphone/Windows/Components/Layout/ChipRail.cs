@@ -14,7 +14,7 @@ internal sealed class ChipRail
     public static readonly TextStyle LabelStyle = TextStyles.SubheadlineEmphasized;
 
     public const float DefaultLabelPadding = 26f;
-    public const float CompactLabelPadding = 14f;
+    public const float CompactLabelPadding = 18f;
 
     private const float Gap = 8f;
     private const float SidePad = 2f;
