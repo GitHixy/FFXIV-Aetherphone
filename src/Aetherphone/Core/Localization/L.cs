@@ -2240,7 +2240,7 @@ internal static class L
             new("changelog.r1300.18",
                 "Added floor challenges with a chip prize and the current leader on the Floor"),
             new("changelog.r1300.19",
-                "Added the Hall of Fame: weekly boards for profit, best multiplier and biggest win, naming only players who allow leaderboards"),
+                "Added the Hall of Fame: weekly boards for profit, best multiplier and biggest win, naming only players who choose to appear when Gamba asks"),
             new("changelog.r1300.20",
                 "Added chip rain: now and then, chips drop on everyone in a live room"),
             new("changelog.r1300.21",
