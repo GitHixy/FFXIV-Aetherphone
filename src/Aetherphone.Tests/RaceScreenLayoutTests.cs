@@ -3,6 +3,8 @@ using Aetherphone.Apps.Casino.Race;
 using Aetherphone.Apps.Casino.Stage;
 using Aetherphone.Core;
 using Aetherphone.Core.Casino;
+using Aetherphone.Core.Localization;
+using Aetherphone.Windows.Components;
 using Xunit;
 
 namespace Aetherphone.Tests;
@@ -10,6 +12,7 @@ namespace Aetherphone.Tests;
 public sealed class RaceScreenLayoutTests
 {
     private const float Tolerance = 0.01f;
+    private const float WrapSlack = 0.8f;
 
     private static readonly float[] Scales = { 0.75f, 1f, 1.25f, 1.5f };
 
@@ -50,8 +53,8 @@ public sealed class RaceScreenLayoutTests
         }
     }
 
-    private static CasinoStageLayout Stage(Rect full, float deckHeight, float scale) =>
-        CasinoStageLayout.Compute(full, false, false, deckHeight, scale);
+    internal static CasinoStageLayout Stage(Rect full, float deckHeight, float scale) =>
+        CasinoStageLayout.Compute(full, true, false, deckHeight, scale);
 
     [Theory]
     [MemberData(nameof(AllScales))]
@@ -79,6 +82,27 @@ public sealed class RaceScreenLayoutTests
                     Assert.Equal(notice > 0f, layout.HasNotice);
                     AssertAllApart(layout.List, layout.Tickets, layout.Notice, layout.Deck, stage.Band);
                 }
+            }
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(AllScales))]
+    public void ATallerDeckShortensTheTicketStripBeforeTheField(float scale)
+    {
+        var extras = new[] { 0f, 24f, 48f };
+        for (var phone = 0; phone < PortraitPhones.Length; phone++)
+        {
+            for (var extra = 0; extra < extras.Length; extra++)
+            {
+                var stage = Stage(Phone(PortraitPhones[phone], scale), RaceCabinet.DeckHeight + extras[extra], scale);
+                var layout = RaceOpenLayout.Compute(stage.Safe, stage.Deck, false, RaceRules.MaxTickets, true,
+                    56f * scale, scale);
+                Assert.True(layout.List.Height >= RaceOpenLayout.MinimumListHeight * scale - Tolerance,
+                    $"field {layout.List.Height / scale} with {extras[extra]} more deck on {PortraitPhones[phone]}");
+                Assert.True(layout.HasTickets);
+                Assert.True(layout.HasNotice);
+                AssertAllApart(layout.List, layout.Tickets, layout.Notice, layout.Deck, stage.Band, stage.Ribbon);
             }
         }
     }
@@ -131,44 +155,6 @@ public sealed class RaceScreenLayoutTests
 
     [Theory]
     [MemberData(nameof(AllScales))]
-    public void TheCountdownChipSitsInTheBandBetweenTheCapsuleAndTheInfoChip(float scale)
-    {
-        for (var phone = 0; phone < PortraitPhones.Length; phone++)
-        {
-            var stage = Stage(Phone(PortraitPhones[phone], scale), RaceCabinet.DeckHeight, scale);
-            var capsuleWidth = RaceCountdownLayout.CapsuleWidth(48f * scale, stage.CapsuleMaxWidth, scale);
-            var chip = RaceCountdownLayout.Compute(stage.CapsuleCenter, capsuleWidth, stage.InfoCenter,
-                stage.ChipRadiusPixels, scale, out _);
-            Assert.True(chip.Width >= RaceCountdownLayout.NarrowWidth * scale - Tolerance);
-            Assert.True(Inside(chip, stage.Band));
-            var capsule = new Rect(stage.CapsuleCenter - new Vector2(capsuleWidth * 0.5f, 17f * scale),
-                stage.CapsuleCenter + new Vector2(capsuleWidth * 0.5f, 17f * scale));
-            var info = new Rect(stage.InfoCenter - new Vector2(stage.ChipRadiusPixels, stage.ChipRadiusPixels),
-                stage.InfoCenter + new Vector2(stage.ChipRadiusPixels, stage.ChipRadiusPixels));
-            AssertAllApart(chip, capsule, info);
-        }
-    }
-
-    [Fact]
-    public void AWideBalanceShrinksTheChipThenHidesIt()
-    {
-        var stage = Stage(Phone(PortraitPhones[1], 1f), RaceCabinet.DeckHeight, 1f);
-        var roomy = RaceCountdownLayout.Compute(stage.CapsuleCenter, RaceCountdownLayout.CapsuleWidth(8f,
-            stage.CapsuleMaxWidth, 1f), stage.InfoCenter, stage.ChipRadiusPixels, 1f, out var roomyWide);
-        Assert.True(roomyWide);
-        Assert.Equal(RaceCountdownLayout.WideWidth, roomy.Width, 2);
-        var narrowCapsule = RaceCountdownLayout.CapsuleWidth(64f, stage.CapsuleMaxWidth, 1f);
-        var narrow = RaceCountdownLayout.Compute(stage.CapsuleCenter, narrowCapsule, stage.InfoCenter,
-            stage.ChipRadiusPixels, 1f, out var wide);
-        Assert.False(wide);
-        Assert.Equal(RaceCountdownLayout.NarrowWidth, narrow.Width, 2);
-        var hidden = RaceCountdownLayout.Compute(stage.CapsuleCenter, stage.CapsuleMaxWidth, stage.InfoCenter,
-            stage.ChipRadiusPixels, 1f, out _);
-        Assert.Equal(0f, hidden.Width);
-    }
-
-    [Theory]
-    [MemberData(nameof(AllScales))]
     public void TheLandscapeTrackFillsTheStageWithBigBirds(float scale)
     {
         for (var phone = 0; phone < LandscapePhones.Length; phone++)
@@ -177,6 +163,9 @@ public sealed class RaceScreenLayoutTests
             var stage = Stage(full, 0f, scale);
             var layout = RaceTrackLayout.Compute(full, stage.Band.Max.Y, scale);
             AssertRaceLayout(layout, full, stage, scale);
+            Assert.False(layout.Stacked);
+            Assert.True(layout.Caption.Width >= RaceTrackLayout.SideCaptionMin * scale - Tolerance);
+            Assert.Equal(layout.TopThree.Min.Y, layout.Caption.Min.Y, 2);
             Assert.Equal(full.Width, layout.Track.Width, 2);
             Assert.True(layout.Track.Height >= full.Height * 0.5f);
             Assert.True(RaceTrackView.SideBirdHeight(layout.Track, scale) >= 36f * scale,
@@ -200,8 +189,42 @@ public sealed class RaceScreenLayoutTests
             var stage = Stage(full, 0f, scale);
             var layout = RaceTrackLayout.Compute(full, stage.Band.Max.Y, scale);
             AssertRaceLayout(layout, full, stage, scale);
+            Assert.True(layout.Stacked);
+            Assert.Equal(full.Width - RaceTrackLayout.Inset * scale * 2f, layout.Caption.Width, 2);
+            Assert.True(layout.Caption.Max.Y <= layout.TopThree.Min.Y);
+            Assert.Equal(full.Center.X, layout.TopThree.Center.X, 2);
             Assert.True(layout.Track.Height >= full.Height * 0.7f);
             Assert.True(RaceTrackView.VerticalBirdLength(layout.Track) >= 36f * scale);
+        }
+    }
+
+    [Fact]
+    public void EveryFixedRaceCaptionFitsTheNarrowestPortraitTrack()
+    {
+        var lines = new[]
+        {
+            L.Race.Gates, L.Race.Replay, L.Race.PhotoFinish, L.Race.LineOff1, L.Race.LineOff2, L.Race.LineStretch1,
+            L.Race.LineStretch2,
+        };
+        var catalogs = RaceCopy.Catalogs;
+        for (var index = 0; index < Scales.Length; index++)
+        {
+            var scale = Scales[index];
+            var full = Phone(PortraitPhones[1], scale);
+            var layout = RaceTrackLayout.Compute(full, Stage(full, 0f, scale).Band.Max.Y, scale);
+            var room = layout.Caption.Width - layout.Caption.Height - 16f * scale;
+            for (var language = 0; language < catalogs.Length; language++)
+            {
+                for (var line = 0; line < lines.Length; line++)
+                {
+                    var text = RaceCopy.Text(catalogs[language], lines[line]);
+                    Assert.True(RaceCopy.Measure(text, TextStyles.SubheadlineEmphasized, scale, 1f) <= room,
+                        $"'{text}' at full size x{scale}");
+                    Assert.True(
+                        RaceCopy.Measure(text, TextStyles.FootnoteEmphasized, scale, RaceCopy.MaxTextZoom)
+                        <= room * RaceHud.CaptionLines * WrapSlack, $"'{text}' at the largest text size x{scale}");
+                }
+            }
         }
     }
 
@@ -213,6 +236,7 @@ public sealed class RaceScreenLayoutTests
         Assert.True(Inside(layout.Caption, full));
         Assert.True(layout.Progress.Height <= 24f * scale + Tolerance);
         Assert.True(layout.Progress.Min.Y >= stage.Band.Max.Y);
+        Assert.True(layout.Progress.Max.Y <= stage.Ribbon.Max.Y + Tolerance);
         Assert.True(layout.Caption.Min.Y >= layout.Track.Max.Y);
         Assert.True(layout.Caption.Width >= full.Width * 0.4f);
         Assert.Equal(layout.Track.Min.Y, layout.Stand.Max.Y, 2);
@@ -228,31 +252,34 @@ public sealed class RaceScreenLayoutTests
             var stage = Stage(Phone(PortraitPhones[phone], scale), 0f, scale);
             for (var paid = 0; paid <= RaceRules.MaxTickets; paid++)
             {
-                for (var mode = 0; mode < 3; mode++)
+                for (var mode = 0; mode < 6; mode++)
                 {
-                    var dividends = mode == 0 ? 0 : RaceRules.ResultRows;
-                    var expanded = mode == 2;
-                    var layout = RaceResultLayout.Compute(stage.Safe, paid, dividends, expanded, scale);
+                    var dividends = mode % 3 == 0 ? 0 : RaceRules.ResultRows;
+                    var expanded = mode % 3 == 2;
+                    var lines = mode < 3 ? 1 : RaceResultLayout.HeadlineMaxLines;
+                    var layout = RaceResultLayout.Compute(stage.Safe, lines, paid, dividends, expanded, scale);
                     Assert.True(Inside(layout.Card, stage.Safe));
                     Assert.Equal(paid > 0, layout.HasPaid);
+                    Assert.Equal((RaceResultLayout.HeadlineHeight + (lines - 1) * RaceResultLayout.HeadlineLineHeight)
+                        * scale, layout.Headline.Height, 2);
+                    Assert.Equal(RaceResultLayout.ContentWidthFor(stage.Safe, scale), layout.ContentWidth, 2);
                     var content = new Rect(Vector2.Zero, new Vector2(layout.ContentWidth, layout.ContentHeight));
-                    var rows = new Rect[6 + paid + (expanded ? dividends : 0)];
+                    var rows = new Rect[5 + paid + (expanded ? dividends : 0)];
                     rows[0] = layout.Headline;
                     rows[1] = layout.Meta;
                     rows[2] = layout.Winner;
                     rows[3] = layout.Second;
                     rows[4] = layout.Third;
-                    rows[5] = layout.Next;
                     for (var row = 0; row < paid; row++)
                     {
-                        rows[6 + row] = layout.PaidRow(row, scale);
-                        Assert.Equal(RaceResultLayout.RowHeight * scale, rows[6 + row].Height, 2);
+                        rows[5 + row] = layout.PaidRow(row, scale);
+                        Assert.Equal(RaceResultLayout.RowHeight * scale, rows[5 + row].Height, 2);
                     }
 
                     for (var row = 0; expanded && row < dividends; row++)
                     {
-                        rows[6 + paid + row] = layout.DividendRow(row, scale);
-                        Assert.Equal(RaceResultLayout.RowHeight * scale, rows[6 + paid + row].Height, 2);
+                        rows[5 + paid + row] = layout.DividendRow(row, scale);
+                        Assert.Equal(RaceResultLayout.RowHeight * scale, rows[5 + paid + row].Height, 2);
                     }
 
                     for (var index = 0; index < rows.Length; index++)
@@ -261,7 +288,8 @@ public sealed class RaceScreenLayoutTests
                     }
 
                     AssertAllApart(rows);
-                    AssertAllApart(layout.PaidHeader, layout.Toggle, layout.Headline, layout.Winner, layout.Next);
+                    AssertAllApart(layout.PaidHeader, layout.Toggle, layout.Headline, layout.Winner);
+                    Assert.True(Inside(layout.Toggle, content));
                     Assert.True(layout.Viewport(scale).Height > 0f);
                     Assert.True(Inside(layout.Viewport(scale), layout.Card));
                 }
@@ -273,7 +301,7 @@ public sealed class RaceScreenLayoutTests
     public void TheResultCardCentresAndCapsItsWidthInLandscape()
     {
         var stage = Stage(Phone(LandscapePhones[0], 1f), 0f, 1f);
-        var layout = RaceResultLayout.Compute(stage.Safe, 2, RaceRules.ResultRows, true, 1f);
+        var layout = RaceResultLayout.Compute(stage.Safe, 1, 2, RaceRules.ResultRows, true, 1f);
         Assert.Equal(RaceResultLayout.MaxCardWidth, layout.Card.Width, 2);
         Assert.Equal(stage.Safe.Center.X, layout.Card.Center.X, 2);
         Assert.True(layout.Card.Height <= stage.Safe.Height + Tolerance);
@@ -295,6 +323,16 @@ public sealed class RaceScreenLayoutTests
     {
         Assert.True(RaceOpenLayout.CardHeight >= 56f);
         Assert.True(RaceOpenLayout.StripHeader >= 40f);
+    }
+
+    [Fact]
+    public void TheBoardShowsTheOddsOfTheTicketBeingBuilt()
+    {
+        var runner = new Core.Aethernet.Contracts.CasinoRaceRunnerDto(OddsHundredths: 562, PlaceOddsHundredths: 215);
+        Assert.Equal(562, RaceFieldList.OddsFor(runner, RaceRules.KindWin));
+        Assert.Equal(215, RaceFieldList.OddsFor(runner, RaceRules.KindPlace));
+        Assert.Equal(562, RaceFieldList.OddsFor(runner, RaceRules.KindForecast));
+        Assert.Equal(562, RaceFieldList.OddsFor(runner, RaceRules.KindReverse));
     }
 
     [Fact]

@@ -15,6 +15,8 @@ internal readonly struct RaceOpenLayout
     public const float RailMin = 280f;
     public const float RailMax = 360f;
     public const float RailInset = 8f;
+    public const int MinimumCards = 2;
+    public const float MinimumListHeight = MinimumCards * CardHeight + (MinimumCards - 1) * CardGap;
 
     public readonly bool Landscape;
     public readonly Rect List;
@@ -53,8 +55,8 @@ internal readonly struct RaceOpenLayout
         }
 
         var column = new Rect(safe.Min, safe.Max);
-        var bottom = Stack(column, safe.Max.Y, (CardHeight + Gap) * scale, ticketCount, expanded, noticeHeight, scale,
-            out var tickets, out var notice, out var rows);
+        var bottom = Stack(column, safe.Max.Y, MinimumListHeight * scale + Gap * scale, ticketCount, expanded,
+            noticeHeight, scale, out var tickets, out var notice, out var rows);
         var list = Band(column.Min.X, column.Max.X, column.Min.Y, bottom, column.Max.Y);
         return new RaceOpenLayout(false, list, notice, tickets, stageDeck, Empty(safe), rows);
     }
@@ -188,34 +190,4 @@ internal readonly struct RaceDeckLayout
         var primary = new Rect(new Vector2(primaryLeft, actionTop), new Vector2(right, actionBottom));
         return new RaceDeckLayout(segment, amount, caption, ride, primary, rideCompact && ride.Width > 0f);
     }
-}
-
-internal static class RaceCountdownLayout
-{
-    public const float Height = 32f;
-    public const float WideWidth = 84f;
-    public const float NarrowWidth = 40f;
-    public const float Gap = 8f;
-    public const float CapsuleChrome = 52f;
-
-    public static Rect Compute(Vector2 capsuleCenter, float capsuleWidth, Vector2 infoCenter, float chipRadius,
-        float scale, out bool wide)
-    {
-        var gap = Gap * scale;
-        var right = infoCenter.X - chipRadius - gap;
-        var left = capsuleCenter.X + capsuleWidth * 0.5f + gap;
-        var half = Height * scale * 0.5f;
-        var room = right - left;
-        wide = room >= WideWidth * scale;
-        var width = wide ? WideWidth * scale : NarrowWidth * scale;
-        if (room < width)
-        {
-            return new Rect(new Vector2(right, infoCenter.Y), new Vector2(right, infoCenter.Y));
-        }
-
-        return new Rect(new Vector2(right - width, infoCenter.Y - half), new Vector2(right, infoCenter.Y + half));
-    }
-
-    public static float CapsuleWidth(float textWidth, float maxWidth, float scale) =>
-        MathF.Min(maxWidth, CapsuleChrome * scale + textWidth);
 }

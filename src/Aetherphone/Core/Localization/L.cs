@@ -11472,7 +11472,6 @@ internal static class L
         public static readonly LocString KindPlace = new("casino.race.kindPlace", "Place");
         public static readonly LocString KindForecast = new("casino.race.kindForecast", "Forecast");
         public static readonly LocString KindReverse = new("casino.race.kindReverse", "Reverse");
-        public static readonly LocString KindReverseLong = new("casino.race.kindReverseLong", "Reverse forecast");
         public static readonly LocString PlaceFirst = new("casino.race.placeFirst", "1st");
         public static readonly LocString PlaceSecond = new("casino.race.placeSecond", "2nd");
         public static readonly LocString PlaceThird = new("casino.race.placeThird", "3rd");
@@ -11512,6 +11511,8 @@ internal static class L
         public static readonly LocString BetCaption = new("casino.race.betCaption", "{0} · {1}");
         public static readonly LocString NoWin = new("casino.race.noWin", "No win this race");
         public static readonly LocString AllDividends = new("casino.race.allDividends", "All dividends");
+        public static readonly LocString StatusOpen = new("casino.race.statusOpen", "Betting open");
+        public static readonly LocString StatusOpens = new("casino.race.statusOpens", "Betting opens");
     }
 
     internal static class Blackjack

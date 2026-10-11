@@ -11,6 +11,8 @@ namespace Aetherphone.Apps.Casino.Race;
 
 internal sealed class RaceTicketStrip
 {
+    public const float PaysShare = 0.45f;
+
     private const float Pad = 12f;
     private const float ColumnGap = 10f;
     private const float ChevronSize = 5f;
@@ -87,21 +89,21 @@ internal sealed class RaceTicketStrip
         var totalRight = chevronCenter.X - chevron - ColumnGap * scale;
         var totalWidth = RaceAmounts.Measure(totalText, totalStyle).X;
         RaceAmounts.DrawRight(drawList, totalRight, header.Center.Y, totalText, CasinoColors.Money, totalStyle);
-        var titleStyle = TextStyles.SubheadlineEmphasized;
         var countStyle = TextStyles.Footnote;
         var count = texts.Count(tickets.Length);
         var countWidth = Typography.Measure(count, countStyle).X;
         var titleLeft = header.Min.X + pad;
         var titleRoom = MathF.Max(1f, totalRight - totalWidth - ColumnGap * scale - countWidth - ColumnGap * scale
                                       - titleLeft);
-        var title = Typography.FitText(Loc.T(L.Race.TicketsHeading), titleRoom, titleStyle);
-        var titleWidth = Typography.Measure(title, titleStyle).X;
-        Typography.Draw(drawList, new Vector2(titleLeft, header.Center.Y - Typography.LineHeight(titleStyle) * 0.5f),
-            title, CasinoColors.InkTitle, titleStyle);
+        var titleWidth = RaceLine.DrawLeft(drawList, titleLeft, header.Center.Y, Loc.T(L.Race.TicketsHeading),
+            titleRoom, TextStyles.SubheadlineEmphasized, TextStyles.FootnoteEmphasized, CasinoColors.InkTitle);
         Typography.Draw(drawList,
             new Vector2(titleLeft + titleWidth + ColumnGap * scale,
                 header.Center.Y - Typography.LineHeight(countStyle) * 0.5f), count, CasinoColors.InkBody, countStyle);
     }
+
+    public static float LabelRoom(float rowWidth, float paysWidth, float stakeWidth, float scale) =>
+        rowWidth - (Pad + ColumnGap) * scale * 2f - MathF.Min(paysWidth, rowWidth * PaysShare) - stakeWidth;
 
     private static void DrawRow(ImDrawListPtr drawList, Rect row, CasinoRaceTicketDto[] tickets,
         CasinoRaceRunnerDto[] runners, RaceTexts texts, int index, float pop, float scale)
@@ -112,26 +114,18 @@ internal sealed class RaceTicketStrip
         drawList.AddLine(new Vector2(row.Min.X + pad, row.Min.Y), new Vector2(row.Max.X - pad, row.Min.Y),
             ImGui.GetColorU32(StripRim), MathF.Max(1f, scale));
         var ticket = tickets[index];
-        var paysStyle = TextStyles.FootnoteEmphasized;
-        var pays = texts.TicketPays(tickets, runners, index);
-        var paysWidth = MathF.Min(row.Width * 0.4f, Typography.Measure(pays, paysStyle).X);
         var right = row.Max.X - pad + offset;
-        var shownPays = Typography.FitText(pays, paysWidth, paysStyle);
-        Typography.Draw(drawList,
-            new Vector2(right - Typography.Measure(shownPays, paysStyle).X,
-                row.Center.Y - Typography.LineHeight(paysStyle) * 0.5f), shownPays,
-            CasinoColors.Money with { W = pop }, paysStyle);
+        var paysWidth = RaceLine.DrawRight(drawList, right, row.Center.Y, texts.TicketPays(tickets, runners, index),
+            row.Width * PaysShare, TextStyles.FootnoteEmphasized, TextStyles.FootnoteEmphasized,
+            CasinoColors.Money with { W = pop });
         var stakeStyle = TextStyles.Footnote;
         var stake = RaceAmounts.Text(ticket.Amount);
         var stakeWidth = RaceAmounts.Measure(stake, stakeStyle).X;
-        var stakeRight = right - paysWidth - gap;
-        RaceAmounts.DrawRight(drawList, stakeRight, row.Center.Y, stake, CasinoColors.InkBody with { W = pop },
-            stakeStyle, pop);
-        var labelStyle = TextStyles.Subheadline;
-        var labelLeft = row.Min.X + pad + offset;
-        Typography.Draw(drawList, new Vector2(labelLeft, row.Center.Y - Typography.LineHeight(labelStyle) * 0.5f),
-            Typography.FitText(texts.Ticket(tickets, index), MathF.Max(1f, stakeRight - stakeWidth - gap - labelLeft),
-                labelStyle), CasinoColors.InkTitle with { W = pop }, labelStyle);
+        RaceAmounts.DrawRight(drawList, right - paysWidth - gap, row.Center.Y, stake,
+            CasinoColors.InkBody with { W = pop }, stakeStyle, pop);
+        RaceLine.DrawLeft(drawList, row.Min.X + pad + offset, row.Center.Y, texts.Ticket(tickets, index),
+            LabelRoom(row.Width, paysWidth, stakeWidth, scale), TextStyles.Subheadline, TextStyles.Footnote,
+            CasinoColors.InkTitle with { W = pop });
     }
 
     private static void DrawChevron(ImDrawListPtr drawList, Vector2 center, float size, bool open, float scale)
