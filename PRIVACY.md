@@ -1,6 +1,6 @@
 # Aetherphone Privacy Policy
 
-**Last updated:** 6 October 2026
+**Last updated:** 12 October 2026
 
 This policy explains how personal data is handled when you use the Aetherphone plugin, the Aetherphone companion app, and Aethernet, the online service behind their social features. Features of the plugin that work offline, such as wallpapers, timers and notes, keep their data on your computer.
 
