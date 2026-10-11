@@ -51,6 +51,16 @@ internal static class KnobSegmentsLayout
     }
 }
 
+internal static class KnobText
+{
+    private const float CompactCeiling = 31f;
+
+    public static TextStyle Style(float heightPixels) =>
+        heightPixels / MathF.Max(UiScale.Current, 0.0001f) <= CompactCeiling
+            ? TextStyles.FootnoteEmphasized
+            : TextStyles.SubheadlineEmphasized;
+}
+
 internal static class KnobSegments
 {
     private const float ThumbInset = 2f;
@@ -58,7 +68,7 @@ internal static class KnobSegments
 
     private static readonly Dictionary<string, Spring> Thumbs = new(StringComparer.Ordinal);
 
-    public static TextStyle LabelStyle(float height) => Button.LabelStyle(height);
+    public static TextStyle LabelStyle(float height) => KnobText.Style(height);
 
     public static float Width(ReadOnlySpan<string> labels, float height, float scale)
     {
@@ -169,7 +179,7 @@ internal static class KnobPicker
     public const float Chevron = 12f;
     public const float MinimumWidth = 44f;
 
-    public static TextStyle ValueStyle(float height) => Button.LabelStyle(height);
+    public static TextStyle ValueStyle(float height) => KnobText.Style(height);
 
     public static TextStyle CaptionStyle(float height) => ValueStyle(height) with { Weight = FontWeight.Regular };
 
