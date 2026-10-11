@@ -159,8 +159,9 @@ internal sealed class StripShelves
         {
             var preview = previews[Math.Max(0, Machines.MachineCabinet.IndexOf(entry.GameId))];
             preview.Prepare(idle);
-            preview.Draw(drawList, PosterTile.PreviewArt(pressed, scale), Metrics.Radius.Widget * scale, tint, live,
-                hovered, deltaSeconds, scale);
+            var art = new Rect(pressed.Min, new Vector2(pressed.Max.X, pressed.Max.Y - PosterTile.TextBlock(scale)));
+            preview.Draw(drawList, art, Metrics.Radius.Widget * scale, tint, live, hovered, deltaSeconds, scale);
+            PosterTile.DrawSignScrim(drawList, pressed, scale);
         }
         else
         {

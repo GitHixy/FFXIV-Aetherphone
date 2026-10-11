@@ -24,6 +24,7 @@ internal static class PosterTile
     public const float GlyphFraction = 0.22f;
     public const float CrowdHeight = 24f;
     public const float IconScale = 2.4f;
+    public const float SignFade = 14f;
 
     private const float SkyLuminance = 0.20f;
     private const float RimAlpha = 0.45f;
@@ -48,9 +49,18 @@ internal static class PosterTile
 
     public static float SignBandBottom(float scale) => SignBandTop(scale) + (SignHeight + CapsuleGap) * scale;
 
-    public static Rect PreviewArt(Rect tile, float scale) =>
-        new(new Vector2(tile.Min.X, tile.Min.Y + SignBandBottom(scale)),
-            new Vector2(tile.Max.X, MathF.Max(tile.Min.Y + SignBandBottom(scale), tile.Max.Y - TextBlock(scale))));
+    public static void DrawSignScrim(ImDrawListPtr drawList, Rect tile, float scale)
+    {
+        var bottom = tile.Min.Y + SignBandBottom(scale);
+        drawList.PushClipRect(tile.Min, new Vector2(tile.Max.X, bottom), true);
+        Squircle.Fill(drawList, tile.Min, tile.Max, Metrics.Radius.Widget * scale,
+            ImGui.GetColorU32(Night with { W = ScrimAlpha }));
+        drawList.PopClipRect();
+        var solid = ImGui.GetColorU32(Night with { W = ScrimAlpha });
+        var clear = ImGui.GetColorU32(Night with { W = 0f });
+        drawList.AddRectFilledMultiColor(new Vector2(tile.Min.X, bottom),
+            new Vector2(tile.Max.X, bottom + SignFade * scale), solid, solid, clear, clear);
+    }
 
     public static Vector2 ArtCenter(Rect tile, float textBlock, float scale)
     {

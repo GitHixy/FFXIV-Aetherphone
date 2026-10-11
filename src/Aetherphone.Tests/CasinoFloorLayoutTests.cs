@@ -523,7 +523,7 @@ public sealed class CasinoFloorLayoutTests
     [InlineData(0.75f)]
     [InlineData(1f)]
     [InlineData(1.5f)]
-    public void MachinePreviewsStartBelowTheSignBand(float scale)
+    public void TheSignScrimCoversTheWholeSignBand(float scale)
     {
         Assert.True(PosterTile.SignBandBottom(scale)
                     >= PosterTile.SignBandTop(scale) + PosterTile.SignHeight * scale);
