@@ -9816,6 +9816,8 @@
   "casino.race.betOn": "{1}に{0}を賭ける（{2}）",
   "casino.race.noWin": "このレースは当たりなし",
   "casino.race.allDividends": "すべての配当",
+  "casino.race.statusOpen": "ベット受付中",
+  "casino.race.statusNext": "次のレース",
   "casino.dealerholdem.game": "ディーラー・ホールデム",
   "casino.dealerholdem.pitch": "ディーラーと一対一のホールデム。手札が良ければ大きく賭けよう。ディーラーはワンペア以上で成立します。",
   "casino.dealerholdem.rulesStep1": "アンティを置きます。ブラインドは常に同額です。お好みでサイドベットのトリップスも追加できます。",

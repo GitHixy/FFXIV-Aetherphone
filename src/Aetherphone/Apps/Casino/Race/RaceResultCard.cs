@@ -16,7 +16,7 @@ internal sealed class RaceResultCard
     private const float PlaceSilk = 28f;
     private const float ColumnGap = 12f;
     private const float ChevronSize = 5f;
-    private const int Blocks = 7;
+    private const int Blocks = 6;
 
     private static readonly Vector4 CardFill = new(0.03f, 0.03f, 0.07f, 0.86f);
     private static readonly Vector4 CardRim = new(1f, 1f, 1f, 0.08f);
@@ -36,7 +36,7 @@ internal sealed class RaceResultCard
     }
 
     public void Draw(ImDrawListPtr drawList, Rect safe, CasinoRaceRoomStateDto board, CasinoRaceRunnerDto[] runners,
-        CasinoRaceBetsDto? bets, RaceTexts texts, string nextLine, float deltaSeconds, float scale)
+        CasinoRaceBetsDto? bets, RaceTexts texts, float deltaSeconds, float scale)
     {
         var order = board.Order;
         if (order is not { Length: RaceRules.FieldSize })
@@ -102,7 +102,6 @@ internal sealed class RaceResultCard
                 }
             }
 
-            DrawNext(list, Shift(layout.Next, origin), nextLine, Block(6));
             ImGui.SetCursorScreenPos(origin);
             ImGui.Dummy(new Vector2(layout.ContentWidth, layout.ContentHeight));
         }
@@ -317,19 +316,5 @@ internal sealed class RaceResultCard
         Typography.Draw(drawList, new Vector2(row.Min.X, row.Center.Y - Typography.LineHeight(labelStyle) * 0.5f),
             Typography.FitText(label, MathF.Max(1f, row.Width - multipleWidth - ColumnGap * scale), labelStyle),
             CasinoColors.InkBody, labelStyle);
-    }
-
-    private static void DrawNext(ImDrawListPtr drawList, Rect row, string text, float alpha)
-    {
-        if (alpha <= 0f || text.Length == 0)
-        {
-            return;
-        }
-
-        var style = TextStyles.Footnote;
-        var fitted = Typography.FitText(text, row.Width, style);
-        var size = Typography.Measure(fitted, style);
-        Typography.Draw(drawList, new Vector2(row.Center.X - size.X * 0.5f, row.Center.Y - size.Y * 0.5f), fitted,
-            CasinoColors.InkBody with { W = alpha }, style);
     }
 }

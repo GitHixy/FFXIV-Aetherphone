@@ -189,33 +189,3 @@ internal readonly struct RaceDeckLayout
         return new RaceDeckLayout(segment, field, half, twice, max, ride, primary, message);
     }
 }
-
-internal static class RaceCountdownLayout
-{
-    public const float Height = 32f;
-    public const float WideWidth = 84f;
-    public const float NarrowWidth = 40f;
-    public const float Gap = 8f;
-    public const float CapsuleChrome = 52f;
-
-    public static Rect Compute(Vector2 capsuleCenter, float capsuleWidth, Vector2 infoCenter, float chipRadius,
-        float scale, out bool wide)
-    {
-        var gap = Gap * scale;
-        var right = infoCenter.X - chipRadius - gap;
-        var left = capsuleCenter.X + capsuleWidth * 0.5f + gap;
-        var half = Height * scale * 0.5f;
-        var room = right - left;
-        wide = room >= WideWidth * scale;
-        var width = wide ? WideWidth * scale : NarrowWidth * scale;
-        if (room < width)
-        {
-            return new Rect(new Vector2(right, infoCenter.Y), new Vector2(right, infoCenter.Y));
-        }
-
-        return new Rect(new Vector2(right - width, infoCenter.Y - half), new Vector2(right, infoCenter.Y + half));
-    }
-
-    public static float CapsuleWidth(float textWidth, float maxWidth, float scale) =>
-        MathF.Min(maxWidth, CapsuleChrome * scale + textWidth);
-}

@@ -11491,6 +11491,8 @@ internal static class L
         public static readonly LocString BetOn = new("casino.race.betOn", "Bet {0} on {1} ({2})");
         public static readonly LocString NoWin = new("casino.race.noWin", "No win this race");
         public static readonly LocString AllDividends = new("casino.race.allDividends", "All dividends");
+        public static readonly LocString StatusOpen = new("casino.race.statusOpen", "Betting open");
+        public static readonly LocString StatusNext = new("casino.race.statusNext", "Next race");
     }
 
     internal static class Blackjack

@@ -14,7 +14,6 @@ internal readonly struct RaceResultLayout
     public const float SectionHeight = 28f;
     public const float RowHeight = 32f;
     public const float ToggleHeight = 44f;
-    public const float NextHeight = 28f;
     public const float AccentHeight = 2f;
 
     public readonly Rect Card;
@@ -29,10 +28,9 @@ internal readonly struct RaceResultLayout
     public readonly float PaidTop;
     public readonly Rect Toggle;
     public readonly float DividendTop;
-    public readonly Rect Next;
 
     private RaceResultLayout(Rect card, float contentWidth, float contentHeight, Rect headline, Rect meta, Rect winner,
-        Rect second, Rect third, Rect paidHeader, float paidTop, Rect toggle, float dividendTop, Rect next)
+        Rect second, Rect third, Rect paidHeader, float paidTop, Rect toggle, float dividendTop)
     {
         Card = card;
         ContentWidth = contentWidth;
@@ -46,7 +44,6 @@ internal readonly struct RaceResultLayout
         PaidTop = paidTop;
         Toggle = toggle;
         DividendTop = dividendTop;
-        Next = next;
     }
 
     public bool HasPaid => PaidHeader.Height > 0f;
@@ -66,32 +63,33 @@ internal readonly struct RaceResultLayout
         var meta = Band(width, ref top, MetaHeight * scale, gap);
         var winner = Band(width, ref top, WinnerHeight * scale, 0f);
         var second = Band(width, ref top, PlaceHeight * scale, 0f);
-        var third = Band(width, ref top, PlaceHeight * scale, gap);
+        var third = Band(width, ref top, PlaceHeight * scale, 0f);
         var paidHeader = new Rect(new Vector2(0f, top), new Vector2(width, top));
         var paidTop = top;
         if (paidRows > 0)
         {
+            top += gap;
             paidHeader = Band(width, ref top, SectionHeight * scale, 0f);
             paidTop = top;
-            top += paidRows * RowHeight * scale + gap;
+            top += paidRows * RowHeight * scale;
         }
 
         var toggle = new Rect(new Vector2(0f, top), new Vector2(width, top));
         var dividendTop = top;
         if (dividendRows > 0)
         {
+            top += gap;
             toggle = Band(width, ref top, ToggleHeight * scale, 0f);
             dividendTop = top;
-            top += (expanded ? dividendRows * RowHeight * scale : 0f) + gap;
+            top += expanded ? dividendRows * RowHeight * scale : 0f;
         }
 
-        var next = Band(width, ref top, NextHeight * scale, 0f);
         var contentHeight = top;
         var cardHeight = MathF.Min(safe.Height, contentHeight + pad * 2f + AccentHeight * scale);
         var left = safe.Center.X - cardWidth * 0.5f;
         var card = new Rect(new Vector2(left, safe.Min.Y), new Vector2(left + cardWidth, safe.Min.Y + cardHeight));
         return new RaceResultLayout(card, width, contentHeight, headline, meta, winner, second, third, paidHeader,
-            paidTop, toggle, dividendTop, next);
+            paidTop, toggle, dividendTop);
     }
 
     public Rect Viewport(float scale)

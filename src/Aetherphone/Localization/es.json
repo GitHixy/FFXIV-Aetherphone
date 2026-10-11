@@ -9816,6 +9816,8 @@
   "casino.race.betOn": "Apostar {0} a {1} ({2})",
   "casino.race.noWin": "Sin premio en esta carrera",
   "casino.race.allDividends": "Todos los dividendos",
+  "casino.race.statusOpen": "Apuestas abiertas",
+  "casino.race.statusNext": "Próxima carrera",
   "casino.dealerholdem.game": "Hold'em con crupier",
   "casino.dealerholdem.pitch": "Hold'em mano a mano contra el crupier. Apuesta fuerte cuando te gusten tus cartas; el crupier necesita una pareja para calificar.",
   "casino.dealerholdem.rulesStep1": "Pon un Ante; el Blind siempre lo iguala. Si quieres, añade la apuesta lateral Trips.",

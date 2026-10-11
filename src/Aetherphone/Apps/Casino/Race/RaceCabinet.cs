@@ -47,9 +47,6 @@ internal sealed class RaceCabinet : ICabinetIdle
 
     private string inlineReason = string.Empty;
     private string settledKey = string.Empty;
-    private string nextText = string.Empty;
-    private int nextSeconds = -1;
-    private LanguageInfo? nextLanguage;
     private long roundSeen = -1;
     private int phaseSeen = -1;
     private int timerSecond = -1;
@@ -77,8 +74,8 @@ internal sealed class RaceCabinet : ICabinetIdle
     {
         var phase = rooms.Room.State?.Snapshot?.Phase ?? CasinoRoomPhases.Open;
         var deckHeight = !landscape && phase == CasinoRoomPhases.Open ? DeckHeight : 0f;
-        return new CasinoStageSpec(CasinoGames.Race, L.Race.Title, Backdrop.Arena, DeckHeight: deckHeight,
-            InstantAvailable: true, ReturnTenths: RaceRules.ReturnTenths);
+        return new CasinoStageSpec(CasinoGames.Race, L.Race.Title, Backdrop.Arena, Room: true,
+            DeckHeight: deckHeight, InstantAvailable: true, ReturnTenths: RaceRules.ReturnTenths);
     }
 
     public void Enter()
@@ -149,7 +146,7 @@ internal sealed class RaceCabinet : ICabinetIdle
             return;
         }
 
-        DrawCountdown(drawList, frame, snapshot.Phase, remaining, room.Attached, state, scale);
+        DrawStatus(drawList, frame, snapshot.Phase, remaining, room.Attached, scale);
         if (runners is not { Length: RaceRules.FieldSize })
         {
             DrawCenterPill(drawList, safe, Loc.T(L.Race.WaitingField), 1f, scale);
@@ -168,7 +165,7 @@ internal sealed class RaceCabinet : ICabinetIdle
             return;
         }
 
-        result.Draw(drawList, safe, board, runners, bets, texts, NextLine(remaining), delta, scale);
+        result.Draw(drawList, safe, board, runners, bets, texts, delta, scale);
     }
 
     public void DrawIdle(ImDrawListPtr drawList, Rect rect, float deltaSeconds)
@@ -245,7 +242,7 @@ internal sealed class RaceCabinet : ICabinetIdle
             return;
         }
 
-        var seconds = (int)((Math.Max(0, remainingMs) + 999) / 1000);
+        var seconds = RaceStatusLine.SecondsLeft(remainingMs);
         if (seconds == timerSecond)
         {
             return;
@@ -428,17 +425,14 @@ internal sealed class RaceCabinet : ICabinetIdle
         }
     }
 
-    private void DrawCountdown(ImDrawListPtr drawList, in CasinoStageFrame frame, int phase, long remainingMs,
-        bool attached, CasinoStateDto state, float scale)
+    private static void DrawStatus(ImDrawListPtr drawList, in CasinoStageFrame frame, int phase, long remainingMs,
+        bool attached, float scale)
     {
-        var stageLayout = frame.Layout;
-        var balance = RaceAmounts.Text(state.Sitting?.Stack ?? 0);
-        var capsuleWidth = RaceCountdownLayout.CapsuleWidth(Typography.Measure(balance, TextStyles.Headline).X,
-            stageLayout.CapsuleMaxWidth, scale);
-        var chip = RaceCountdownLayout.Compute(stageLayout.CapsuleCenter, capsuleWidth, stageLayout.InfoCenter,
-            stageLayout.ChipRadiusPixels, scale, out var wide);
-        RaceCountdownChip.Draw(drawList, chip, wide, remainingMs, CasinoRoomCadence.RaceWindow(phase),
-            attached ? CasinoColors.LightA : CasinoColors.InkMuted, scale);
+        var seconds = RaceStatusLine.SecondsLeft(remainingMs);
+        var open = phase == CasinoRoomPhases.Open;
+        var label = Loc.T(open ? L.Race.StatusOpen : L.Race.StatusNext);
+        RaceStatusLine.Draw(drawList, frame.Layout, label, seconds, attached,
+            open && seconds <= RaceStatusLine.UrgentSeconds, scale);
     }
 
     private static void DrawRail(ImDrawListPtr drawList, Rect full, Vector2 corner, float scale)
@@ -583,20 +577,6 @@ internal sealed class RaceCabinet : ICabinetIdle
                 rooms.PlaceRaceBet(builder.Kind, builder.First, builder.RunnerB, ride);
                 break;
         }
-    }
-
-    private string NextLine(long remainingMs)
-    {
-        var seconds = (int)((Math.Max(0, remainingMs) + 999) / 1000);
-        if (seconds == nextSeconds && ReferenceEquals(nextLanguage, Loc.Current))
-        {
-            return nextText;
-        }
-
-        nextSeconds = seconds;
-        nextLanguage = Loc.Current;
-        nextText = Loc.T(L.Casino.RoomNextIn, TimeText.Duration(seconds));
-        return nextText;
     }
 
     private void DrawCenterPill(ImDrawListPtr drawList, Rect area, string text, float alpha, float scale)
