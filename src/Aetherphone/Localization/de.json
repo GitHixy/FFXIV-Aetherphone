@@ -9536,7 +9536,6 @@
   "casino.venue.broadcastPot": "Pot {0}",
   "casino.venue.broadcastBet": "Einsatz {0}",
   "casino.venue.tradeSync": "Handelsabgleich",
-  "casino.venue.tradeSyncToggle": "Meine Handel beobachten",
   "casino.venue.tradeAutoConfirm": "Meine Seite automatisch bestätigen",
   "casino.venue.tradeSyncHint": "Liest das Handelsfenster nur, um den passenden Kassenbucheintrag vorzuschlagen. Im Spiel wird nichts für dich geklickt.",
   "casino.venue.tradeNotifyTitle": "Diesen Handel eintragen?",

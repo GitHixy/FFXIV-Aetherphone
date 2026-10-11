@@ -9536,7 +9536,6 @@
   "casino.venue.broadcastPot": "Pot {0}",
   "casino.venue.broadcastBet": "Bet {0}",
   "casino.venue.tradeSync": "Trade sync",
-  "casino.venue.tradeSyncToggle": "Watch my trades",
   "casino.venue.tradeAutoConfirm": "Confirm my side automatically",
   "casino.venue.tradeSyncHint": "Reads the in-game trade window only to suggest the matching ledger entry. Nothing in the game is clicked for you.",
   "casino.venue.tradeNotifyTitle": "Record this trade?",

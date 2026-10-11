@@ -9536,7 +9536,6 @@
   "casino.venue.broadcastPot": "Банк {0}",
   "casino.venue.broadcastBet": "Ставка {0}",
   "casino.venue.tradeSync": "Синхронизация обменов",
-  "casino.venue.tradeSyncToggle": "Следить за моими обменами",
   "casino.venue.tradeAutoConfirm": "Подтверждать мою сторону автоматически",
   "casino.venue.tradeSyncHint": "Только читает окно обмена, чтобы предложить запись в журнал. Ничего в игре не нажимается за вас.",
   "casino.venue.tradeNotifyTitle": "Записать этот обмен?",

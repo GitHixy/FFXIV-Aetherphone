@@ -152,7 +152,7 @@ internal sealed class VenueTableSheet
 
         if (target.Gil)
         {
-            DrawTradeSync(ui, scale);
+            Tables.TradeSyncCard.Draw(ui, trade, scale, true);
         }
 
         if (target.CanBroadcast)
@@ -209,28 +209,6 @@ internal sealed class VenueTableSheet
         {
             venue.VerifyRoll(view.RoomId, seq, bound, value, deathroll);
         }
-    }
-
-    private void DrawTradeSync(AppSkin ui, float scale)
-    {
-        ui.SectionHeading(Loc.T(L.Venue.TradeSync), Metrics.Space.Sm);
-        var card = GroupCard.Begin(ui, 2, VenueFields.RowUnits);
-        var enabled = VenueFields.ToggleRow(ui, card.NextRow(VenueFields.RowUnits), "venue.trade.sync",
-            Loc.T(L.Venue.TradeSyncToggle), trade.Enabled, scale, overlay: true);
-        if (enabled != trade.Enabled)
-        {
-            trade.Enabled = enabled;
-        }
-
-        var auto = VenueFields.ToggleRow(ui, card.NextRow(VenueFields.RowUnits), "venue.trade.auto",
-            Loc.T(L.Venue.TradeAutoConfirm), trade.AutoConfirm, scale, overlay: true);
-        if (auto != trade.AutoConfirm)
-        {
-            trade.AutoConfirm = auto;
-        }
-
-        card.End();
-        VenueFields.Hint(ui, Loc.T(L.Venue.TradeSyncHint), scale);
     }
 
     private static void ActionRow(AppSkin ui, string label, string hint, ButtonStyle style, ButtonRole role,

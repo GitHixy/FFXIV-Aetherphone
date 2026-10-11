@@ -9536,7 +9536,6 @@
   "casino.venue.broadcastPot": "Pot {0}",
   "casino.venue.broadcastBet": "Bahis {0}",
   "casino.venue.tradeSync": "Takas eşitleme",
-  "casino.venue.tradeSyncToggle": "Takaslarımı izle",
   "casino.venue.tradeAutoConfirm": "Kendi tarafımı otomatik onayla",
   "casino.venue.tradeSyncHint": "Takas penceresini yalnızca uygun defter kaydını önermek için okur. Oyunda senin yerine hiçbir şeye tıklanmaz.",
   "casino.venue.tradeNotifyTitle": "Bu takas kaydedilsin mi?",

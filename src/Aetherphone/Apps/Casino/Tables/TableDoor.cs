@@ -47,13 +47,13 @@ internal sealed class TableDoor
     private bool coDealerMode;
 
     public TableDoor(CasinoTablesStore tables, ConfirmService confirm, Action<string> openTable,
-        Venue.TournamentDoorCard tournament)
+        Venue.TournamentDoorCard tournament, CasinoTradeSync trade)
     {
         this.tournament = tournament;
         this.tables = tables;
         this.confirm = confirm;
         this.openTable = openTable;
-        ledger = new TableLedger(tables, confirm);
+        ledger = new TableLedger(tables, confirm, trade);
     }
 
     public string RoomId => roomId;

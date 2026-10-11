@@ -9536,7 +9536,6 @@
   "casino.venue.broadcastPot": "Pot {0}",
   "casino.venue.broadcastBet": "Mise {0}",
   "casino.venue.tradeSync": "Synchro des échanges",
-  "casino.venue.tradeSyncToggle": "Suivre mes échanges",
   "casino.venue.tradeAutoConfirm": "Confirmer ma part automatiquement",
   "casino.venue.tradeSyncHint": "Lit la fenêtre d'échange uniquement pour proposer l'écriture correspondante. Rien n'est cliqué dans le jeu à votre place.",
   "casino.venue.tradeNotifyTitle": "Enregistrer cet échange ?",

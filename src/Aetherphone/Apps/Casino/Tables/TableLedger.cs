@@ -39,6 +39,7 @@ internal sealed class TableLedger
 
     private readonly CasinoTablesStore tables;
     private readonly ConfirmService confirm;
+    private readonly CasinoTradeSync trade;
     private readonly ChipRail playerRail = new();
     private readonly string[] kindOptions = new string[2];
 
@@ -56,10 +57,11 @@ internal sealed class TableLedger
     private int proposeKind;
     private int playerIndex;
 
-    public TableLedger(CasinoTablesStore tables, ConfirmService confirm)
+    public TableLedger(CasinoTablesStore tables, ConfirmService confirm, CasinoTradeSync trade)
     {
         this.tables = tables;
         this.confirm = confirm;
+        this.trade = trade;
     }
 
     public void Enter(string tableId)
@@ -105,6 +107,7 @@ internal sealed class TableLedger
         }
 
         ui.SectionHeading(Loc.T(L.Tables.GilLedgerHeading), Metrics.Space.Md);
+        TradeSyncCard.Draw(ui, trade, scale, false);
         if (waitingNote.Length > 0)
         {
             Note(ui, waitingNote, Amber, scale);

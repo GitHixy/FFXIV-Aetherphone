@@ -11672,7 +11672,6 @@ internal static class L
         public static readonly LocString BroadcastPot = new("casino.venue.broadcastPot", "Pot {0}");
         public static readonly LocString BroadcastBet = new("casino.venue.broadcastBet", "Bet {0}");
         public static readonly LocString TradeSync = new("casino.venue.tradeSync", "Trade sync");
-        public static readonly LocString TradeSyncToggle = new("casino.venue.tradeSyncToggle", "Watch my trades");
         public static readonly LocString TradeAutoConfirm = new("casino.venue.tradeAutoConfirm", "Confirm my side automatically");
         public static readonly LocString TradeSyncHint = new("casino.venue.tradeSyncHint", "Reads the in-game trade window only to suggest the matching ledger entry. Nothing in the game is clicked for you.");
         public static readonly LocString TradeNotifyTitle = new("casino.venue.tradeNotifyTitle", "Record this trade?");

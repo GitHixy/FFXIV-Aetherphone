@@ -9536,7 +9536,6 @@
   "casino.venue.broadcastPot": "ポット {0}",
   "casino.venue.broadcastBet": "ベット {0}",
   "casino.venue.tradeSync": "トレード連携",
-  "casino.venue.tradeSyncToggle": "自分のトレードを確認する",
   "casino.venue.tradeAutoConfirm": "自分側を自動で確認",
   "casino.venue.tradeSyncHint": "台帳への記録を提案するためにトレード画面を読み取るだけです。ゲーム内の操作は一切行いません。",
   "casino.venue.tradeNotifyTitle": "このトレードを記録しますか？",

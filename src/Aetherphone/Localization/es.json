@@ -9536,7 +9536,6 @@
   "casino.venue.broadcastPot": "Bote {0}",
   "casino.venue.broadcastBet": "Apuesta {0}",
   "casino.venue.tradeSync": "Sincronizar intercambios",
-  "casino.venue.tradeSyncToggle": "Vigilar mis intercambios",
   "casino.venue.tradeAutoConfirm": "Confirmar mi parte automáticamente",
   "casino.venue.tradeSyncHint": "Solo lee la ventana de intercambio para sugerir la entrada del registro. No se pulsa nada en el juego por ti.",
   "casino.venue.tradeNotifyTitle": "¿Registrar este intercambio?",

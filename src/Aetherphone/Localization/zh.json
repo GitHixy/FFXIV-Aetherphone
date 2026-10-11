@@ -9536,7 +9536,6 @@
   "casino.venue.broadcastPot": "底池 {0}",
   "casino.venue.broadcastBet": "下注 {0}",
   "casino.venue.tradeSync": "交易同步",
-  "casino.venue.tradeSyncToggle": "关注我的交易",
   "casino.venue.tradeAutoConfirm": "自动确认我这一方",
   "casino.venue.tradeSyncHint": "仅读取游戏内交易窗口以建议对应的账本记录，不会替你在游戏中点击任何内容。",
   "casino.venue.tradeNotifyTitle": "记录这笔交易？",
