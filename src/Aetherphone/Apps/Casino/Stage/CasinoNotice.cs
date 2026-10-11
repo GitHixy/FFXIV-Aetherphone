@@ -26,7 +26,9 @@ internal static class CasinoNotice
     {
         var pad = Pad(kind) * scale;
         var inner = width - pad * 2f;
-        var titleHeight = title.Length > 0 ? Typography.LineHeight(TitleStyle(kind)) + TitleGap(kind) * scale : 0f;
+        var titleHeight = title.Length > 0
+            ? Typography.MeasureWrappedBlock(title, TitleStyle(kind), inner).Y + TitleGap(kind) * scale
+            : 0f;
         var bodyHeight = body.Length > 0 ? Typography.MeasureWrappedBlock(body, BodyStyle(kind), inner).Y : 0f;
         return titleHeight + bodyHeight + pad * 2f;
     }
@@ -44,6 +46,7 @@ internal static class CasinoNotice
         }
         else
         {
+            Squircle.Fill(drawList, min, max, rounding, ImGui.GetColorU32(StageText.CapsuleFill));
             Squircle.Fill(drawList, min, max, rounding, ImGui.GetColorU32(Palette.WithAlpha(ui.Accent, TintFill)));
             Squircle.Stroke(drawList, min, max, rounding, ImGui.GetColorU32(Palette.WithAlpha(ui.Accent, TintStroke)),
                 MathF.Max(1f, scale));
@@ -54,10 +57,8 @@ internal static class CasinoNotice
         var textTop = min.Y + pad;
         if (title.Length > 0)
         {
-            var titleStyle = TitleStyle(kind);
-            Typography.Draw(drawList, new Vector2(min.X + pad, textTop), Typography.FitText(title, inner, titleStyle),
-                ui.TitleInk, titleStyle);
-            textTop += Typography.LineHeight(titleStyle) + TitleGap(kind) * scale;
+            textTop += Typography.DrawWrappedLeft(new Vector2(min.X + pad, textTop), title, ui.TitleInk,
+                TitleStyle(kind), inner) + TitleGap(kind) * scale;
         }
 
         if (body.Length > 0)
@@ -74,7 +75,8 @@ internal static class CasinoNotice
     {
         var bottom = Draw(drawList, ui, kind, title, body, left, y, width, scale);
         var pillTop = bottom + Metrics.Space.Md * scale;
-        var inset = width * (1f - ActionWidthShare) * 0.5f;
+        var pillWidth = Math.Clamp(Button.WidthFor(action, ButtonSize.Large), width * ActionWidthShare, width);
+        var inset = (width - pillWidth) * 0.5f;
         var pill = new Rect(new Vector2(left + inset, pillTop),
             new Vector2(left + width - inset, pillTop + Button.LargeHeight * scale));
         pressed = Button.Draw(drawList, pill, action, ui.Ink);
