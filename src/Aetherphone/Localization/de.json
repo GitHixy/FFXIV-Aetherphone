@@ -7878,6 +7878,7 @@
   "changelog.r1300.51": "Scrollleiste behoben, die sich bei gesperrter Telefonposition beim Ziehen in die falsche Richtung und zu langsam bewegte, beigetragen von jambalong",
   "changelog.r1300.52": "Behoben, dass Chats bei der neuesten Nachricht beim Hochziehen wieder nach unten sprangen, beigetragen von jambalong",
   "changelog.r1300.53": "Behoben, dass der Lotterie-Countdown und sein Widget eine beendete Lotterie statt der laufenden Sperrfrist zeigten, beigetragen von YozoraCho",
+  "changelog.r1300.54": "Behoben, dass Jagdmarkierungen auf der Karte und Minikarte in Gebieten mit vielen Spawn-Punkten die ganze Karte verdeckten, beigetragen von YozoraCho",
   "changelog.r1200.70": "Spiele überarbeitet: vier Tabs, Start, Zusammen, Bibliothek und Profil, mit dem Spiel des Tages live oben auf Start, darunter Weiterspielen, Neu dabei und Top der Woche",
   "changelog.r1200.71": "Bibliothek hinzugefügt: alle Spiele in einem Raster mit Suche, Genrefiltern und Sortierung",
   "changelog.r1200.72": "Ein gemaltes Symbol für jedes Spiel hinzugefügt, und jedes Spiel öffnet sich mit einem Zoom aus seinem Symbol",

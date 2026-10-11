@@ -2317,6 +2317,12 @@ internal static class L
                 "Fixed the lottery countdown and its widget showing an ended lottery instead of the unavailable period running now, contributed by YozoraCho"),
         };
 
+        public static readonly LocString[] Release1300Hunts =
+        {
+            new("changelog.r1300.54",
+                "Fixed hunt markers on the map and minimap covering the whole map in zones with many spawn points, contributed by YozoraCho"),
+        };
+
         public static readonly LocString[] Release1200Chirper =
         {
             new("changelog.r1200.73",
