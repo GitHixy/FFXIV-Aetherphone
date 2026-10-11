@@ -68,7 +68,8 @@ internal static class CasinoTableFilters
     {
         return string.Equals(row.GameKind, CasinoWire.BlackjackKind, StringComparison.Ordinal)
             || string.Equals(row.GameKind, HoldemKind, StringComparison.Ordinal)
-            || VenueKinds.IsVenue(row.GameKind);
+            || VenueKinds.IsVenue(row.GameKind)
+            || CasinoBookRules.IsBook(row.GameKind);
     }
 
     public static bool Matches(CasinoTableFilter filter, CasinoTableRowDto row, string myUserId)

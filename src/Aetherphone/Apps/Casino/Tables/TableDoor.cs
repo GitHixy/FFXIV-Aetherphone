@@ -111,15 +111,10 @@ internal sealed partial class TableDoor
             Gap(SectionGap, scale);
             ui.SectionHeading(Loc.T(L.Tables.HostPanelHeading), 0f);
             DrawControls(ui, card, width, scale);
-            if (ExplainsHostLimits(card))
+            if (NoteFor(card) is { } note)
             {
                 Gap(Metrics.Space.Sm, scale);
-                DrawNote(ui, width, Loc.T(L.Tables.ChipHostNote), scale);
-            }
-            else if (!TakesCoDealers(card))
-            {
-                Gap(Metrics.Space.Sm, scale);
-                DrawNote(ui, width, Loc.T(L.Tables.CoDealersHoldemNote), scale);
+                DrawNote(ui, width, Loc.T(note), scale);
             }
 
             if (renaming)
@@ -200,6 +195,34 @@ internal sealed partial class TableDoor
         into[count++] = DoorControl.Rename;
         into[count++] = DoorControl.Close;
         return count;
+    }
+
+    internal static int ControlsFor(CasinoTableRowDto card, DoorControl[] into)
+    {
+        if (CasinoBookRules.IsBook(card.GameKind))
+        {
+            return Controls(false, false, into);
+        }
+
+        var banked = CasinoCurrencies.SeatBanked(CasinoCurrencies.Of(card));
+        var hostDeals = card.Config is not null && card.Config.DealerMode == CasinoDealerModes.Host;
+        var count = Controls(banked, hostDeals, into);
+        return TakesCoDealers(card) ? count : WithoutCoDealers(into, count);
+    }
+
+    internal static LocString? NoteFor(CasinoTableRowDto card)
+    {
+        if (CasinoBookRules.IsBook(card.GameKind))
+        {
+            return L.Book.DoorNote;
+        }
+
+        if (ExplainsHostLimits(card))
+        {
+            return L.Tables.ChipHostNote;
+        }
+
+        return TakesCoDealers(card) ? null : L.Tables.CoDealersHoldemNote;
     }
 
     internal static bool ControlEnabled(DoorControl control, bool busy, bool paused)
@@ -327,13 +350,7 @@ internal sealed partial class TableDoor
     {
         var origin = ImGui.GetCursorScreenPos();
         var drawList = ImGui.GetWindowDrawList();
-        var banked = CasinoCurrencies.SeatBanked(CasinoCurrencies.Of(card));
-        var hostDeals = card.Config is not null && card.Config.DealerMode == CasinoDealerModes.Host;
-        var count = Controls(banked, hostDeals, controls);
-        if (!TakesCoDealers(card))
-        {
-            count = WithoutCoDealers(controls, count);
-        }
+        var count = ControlsFor(card, controls);
         var columns = DoorLayout.ControlColumns(width, count, scale);
         var cellWidth = DoorLayout.ControlCellWidth(width, columns, scale);
         var labelBlock = 0f;

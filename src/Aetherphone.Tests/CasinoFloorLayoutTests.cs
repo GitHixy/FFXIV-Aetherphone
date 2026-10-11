@@ -276,7 +276,7 @@ public sealed class CasinoFloorLayoutTests
         string[] unlisted =
         {
             CasinoGames.DailySpin, CasinoGames.Slots, CasinoGames.SlotsGamble, CasinoGames.DiceTable,
-            CasinoGames.Deathroll, CasinoGames.Raffle,
+            CasinoGames.Deathroll, CasinoGames.Raffle, CasinoGames.Book,
         };
         var fields = typeof(CasinoGames).GetFields(BindingFlags.Public | BindingFlags.Static);
         var shelved = 0;

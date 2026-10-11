@@ -62,6 +62,18 @@ public sealed class HostDraftSummaryTests
     }
 
     [Fact]
+    public void ABookDraftNamesItsBank()
+    {
+        var draft = new HostDraft();
+        draft.SelectGame(HostGame.Book, true);
+        draft.Bank = HostLadders.FloorIndex(HostLadders.Gil, 5_000_000);
+        draft.Normalize(true);
+
+        Assert.Equal("Book, Gil, bank " + NumberText.Compact(5_000_000), HostDraftSummary.Of(draft));
+        Assert.Equal(HostDraftSummary.Of(draft), HostDraftSummary.Of(draft.Snapshot(true), true));
+    }
+
+    [Fact]
     public void AHoldemDraftNamesItsBlinds()
     {
         var draft = new HostDraft();

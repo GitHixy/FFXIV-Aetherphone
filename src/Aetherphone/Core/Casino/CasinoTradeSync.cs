@@ -144,7 +144,8 @@ internal sealed class CasinoTradeSync : IDisposable
     private TradeTableView View()
     {
         return new TradeTableView(session.CurrentUser?.Id ?? string.Empty, rooms.Room.RoomId,
-            rooms.Room.State?.Blackjack, venue.View, tables.Door, tables.Listed, cardFor, ledgerFor);
+            rooms.Room.State?.Blackjack, venue.View, tables.Door, tables.Listed, cardFor, ledgerFor,
+            tables.LedgerRoomId);
     }
 
     private void OnFrameworkUpdate(IFramework framework)

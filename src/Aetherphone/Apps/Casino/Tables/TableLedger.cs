@@ -109,8 +109,13 @@ internal sealed class TableLedger
         }
 
         Refresh(ledger, myUserId);
-        DrawHeading(ui, ledger, scale);
-        DrawRows(ui, ledger.Currency, scale);
+        var book = CasinoBookRules.IsBook(tables.CardFor(roomId)?.GameKind);
+        DrawHeading(ui, ledger, book, scale);
+        if (!book)
+        {
+            DrawRows(ui, ledger.Currency, scale);
+        }
+
         if (ledger.Currency != CasinoCurrencies.Gil)
         {
             return;
@@ -307,7 +312,12 @@ internal sealed class TableLedger
         Note(ui, missText, Amber, scale);
     }
 
-    private void DrawHeading(AppSkin ui, CasinoTableLedgerDto ledger, float scale)
+    internal static bool CanCopy(CasinoTableLedgerDto ledger, bool book)
+    {
+        return (ledger.Rows?.Length ?? 0) > 0 || (book && (ledger.Entries?.Length ?? 0) > 0);
+    }
+
+    private void DrawHeading(AppSkin ui, CasinoTableLedgerDto ledger, bool book, float scale)
     {
         var width = ScrollLayout.StableContentWidth();
         var origin = ImGui.GetCursorScreenPos();
@@ -324,7 +334,7 @@ internal sealed class TableLedger
         var buttonTop = top + (height - buttonHeight) * 0.5f;
         var rect = new Rect(new Vector2(origin.X + width - buttonWidth, buttonTop),
             new Vector2(origin.X + width, buttonTop + buttonHeight));
-        if (Button.Draw(drawList, rect, copyLabel, ui.Ink, ButtonStyle.Tinted, enabled: (ledger.Rows?.Length ?? 0) > 0,
+        if (Button.Draw(drawList, rect, copyLabel, ui.Ink, ButtonStyle.Tinted, enabled: CanCopy(ledger, book),
                 id: "ledger.copy"))
         {
             ImGui.SetClipboardText(CopyText());

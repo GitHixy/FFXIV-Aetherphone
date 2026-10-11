@@ -475,6 +475,10 @@ internal sealed class CasinoTablesStore : IDisposable
         return held is not null && string.Equals(held.TableId, roomId, StringComparison.Ordinal) ? held : null;
     }
 
+    public CasinoTableLedgerDto? HeldLedger => ledger;
+
+    public string LedgerRoomId => ledgerRoomId;
+
     public void RefreshLedgerNow(string roomId)
     {
         if (roomId.Length == 0)

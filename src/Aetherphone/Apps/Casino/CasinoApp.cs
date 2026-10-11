@@ -1316,7 +1316,14 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             return;
         }
 
-        var roomKind = Core.Casino.VenueKinds.Of(casinoTables.CardFor(tableId)?.GameKind ?? string.Empty);
+        var card = casinoTables.CardFor(tableId);
+        if (card is not null && Core.Casino.CasinoBookRules.IsBook(card.GameKind))
+        {
+            OpenBook(card);
+            return;
+        }
+
+        var roomKind = Core.Casino.VenueKinds.Of(card?.GameKind ?? string.Empty);
         if (roomKind != Core.Casino.VenueRoomKind.None)
         {
             OpenVenueRoom(tableId, roomKind);
@@ -1325,6 +1332,17 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
 
         blackjack.Enter(tableId);
         router.Push(new CasinoRoute(CasinoScreen.Table, CasinoGames.Blackjack, string.Empty, tableId));
+    }
+
+    private void OpenBook(Core.Aethernet.Contracts.CasinoTableRowDto card)
+    {
+        if (casinoTables.Owns(card))
+        {
+            OpenDoor(card.TableId, card.InviteToken);
+            return;
+        }
+
+        OpenLedger(card.TableId);
     }
 
     private void OpenVenueRoom(string tableId, Core.Casino.VenueRoomKind roomKind)
