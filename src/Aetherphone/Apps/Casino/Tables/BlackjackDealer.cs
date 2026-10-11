@@ -25,6 +25,7 @@ internal sealed class BlackjackDealer
     private const float RestOffsetY = 12f;
     private const float LeadHold = 0.85f;
     private const float RimPulseRate = 2.4f;
+    private const int MaxSpeechLines = 2;
 
     private static readonly Vector4 PuckFill = new(0.06f, 0.10f, 0.09f, 1f);
     private static readonly Vector4 Glove = new(0.97f, 0.96f, 0.93f, 1f);
@@ -173,12 +174,26 @@ internal sealed class BlackjackDealer
 
         var padX = BubblePadX * scale;
         var padY = BubblePadY * scale;
-        var text = Typography.FitText(message, MathF.Max(1f, area.Width - padX * 2f), TextStyles.Subheadline);
-        var size = Typography.Measure(text, TextStyles.Subheadline);
+        var style = TextStyles.Subheadline;
+        var lines = Typography.WrapText(message, style, MathF.Max(1f, area.Width - padX * 2f));
+        var count = Math.Min(lines.Length, MaxSpeechLines);
+        if (count == 0)
+        {
+            return;
+        }
+
+        var lineHeight = Typography.LineHeight(style);
+        var textWidth = 0f;
+        for (var index = 0; index < count; index++)
+        {
+            textWidth = MathF.Max(textWidth, Typography.Measure(lines[index], style).X);
+        }
+
+        var textHeight = lineHeight * count;
         var right = puck.X - puckRadius - TailSize * scale;
-        var max = new Vector2(right, puck.Y + size.Y * 0.5f + padY);
-        var min = new Vector2(right - size.X - padX * 2f, puck.Y - size.Y * 0.5f - padY);
-        var rounding = (max.Y - min.Y) * 0.5f;
+        var max = new Vector2(right, puck.Y + textHeight * 0.5f + padY);
+        var min = new Vector2(right - textWidth - padX * 2f, puck.Y - textHeight * 0.5f - padY);
+        var rounding = MathF.Min((max.Y - min.Y) * 0.5f, lineHeight * 0.5f + padY);
         Material.Frosted(drawList, min, max, rounding, scale, alpha * 0.9f);
         var tail = TailSize * scale;
         drawList.AddTriangleFilled(new Vector2(max.X - 1f, puck.Y - tail * 0.7f),
@@ -186,7 +201,13 @@ internal sealed class BlackjackDealer
             ImGui.GetColorU32(CasinoColors.InkTitle with { W = 0.22f * alpha }));
         Squircle.Stroke(drawList, min, max, rounding,
             ImGui.GetColorU32(CasinoColors.Money with { W = 0.35f * alpha }), Metrics.Stroke.Hairline * scale);
-        Typography.DrawCentered(drawList, (min + max) * 0.5f, text, CasinoColors.InkTitle with { W = alpha },
-            TextStyles.Subheadline);
+        var centerX = (min.X + max.X) * 0.5f;
+        var ink = CasinoColors.InkTitle with { W = alpha };
+        for (var index = 0; index < count; index++)
+        {
+            var lineWidth = Typography.Measure(lines[index], style).X;
+            Typography.Draw(drawList, new Vector2(centerX - lineWidth * 0.5f, min.Y + padY + index * lineHeight),
+                lines[index], ink, style);
+        }
     }
 }

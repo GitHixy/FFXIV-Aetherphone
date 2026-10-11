@@ -26,6 +26,7 @@ internal sealed partial class BlackjackTable
     private const float StateRingRadius = 11f;
     private const float HeroColumnSink = 3f;
     private const float StateLineShare = 0.84f;
+    private const string StateMarquee = "casino.blackjack.state";
 
     private static readonly Vector4 PillFill = new(0f, 0f, 0f, 0.35f);
 
@@ -61,12 +62,6 @@ internal sealed partial class BlackjackTable
             return;
         }
 
-        if (BlackjackPhases.Over(board.Phase) && BlackjackRecap.PlayedSeats(board) > 0)
-        {
-            StageText.Status(drawList, center, Loc.T(L.Blackjack.RecapCaption), maxWidth, scale);
-            return;
-        }
-
         DrawStateLine(drawList, ui, board, center, remaining, scale);
     }
 
@@ -78,10 +73,20 @@ internal sealed partial class BlackjackTable
         var ringRadius = StateRingRadius * scale;
         var reserve = timed ? (ringRadius * 2f + Metrics.Space.Sm * scale) : 0f;
         var maxWidth = layout.Felt.Width * StateLineShare - reserve;
-        var fit = StageText.FitScale(stateLabel, maxWidth, TextStyles.Title2, StageTextRole.State);
-        var width = MathF.Min(maxWidth, Typography.Measure(stateLabel, fit, TextStyles.Title2.Weight).X);
         var center = new Vector2(bandCenter.X + reserve * 0.5f, y);
-        StageText.StateLine(drawList, center, stateLabel, maxWidth, StageText.Strong);
+        var stateStyle = StageText.Minimum(StageTextRole.State);
+        var titleWidth = Typography.Measure(stateLabel, stateStyle).X;
+        float width;
+        if (StageText.Fits(titleWidth, maxWidth))
+        {
+            StageText.StateLine(drawList, center, stateLabel, maxWidth, StageText.Strong);
+            width = titleWidth;
+        }
+        else
+        {
+            width = StageText.Status(drawList, center, stateLabel, maxWidth, StateMarquee).X;
+        }
+
         if (!timed)
         {
             return;

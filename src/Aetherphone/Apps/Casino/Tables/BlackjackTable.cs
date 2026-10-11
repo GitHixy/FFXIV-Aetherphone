@@ -234,7 +234,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
         var localNow = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var deadlineRemaining = room.RemainingMilliseconds(board.DeadlineUnixMs, localNow);
-        stateLabel = StateLabel(board, deadlineRemaining, unreachable);
+        stateLabel = StateLabel(board, unreachable);
         var feltTop = DrawHostedRow(drawList, ui, board, safe.Min.X, safe.Min.Y, safe.Width, scale);
         var felt = new Rect(new Vector2(safe.Min.X, feltTop), safe.Max);
         if (felt.Height <= 0f)
@@ -320,7 +320,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
             || string.Equals(reason, CasinoReasons.Denied, StringComparison.Ordinal);
     }
 
-    private string StateLabel(CasinoBlackjackRoomStateDto board, long deadlineRemaining, bool unreachable)
+    private string StateLabel(CasinoBlackjackRoomStateDto board, bool unreachable)
     {
         if (unreachable)
         {
@@ -335,7 +335,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
         if (seatFlow.StandQueued)
         {
-            return Loc.T(L.Casino.StandAtHandEnd);
+            return Loc.T(L.Casino.StandQueued);
         }
 
         if (seatFlow.Waiting)
@@ -345,7 +345,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
         if (board.Paused)
         {
-            return Loc.T(L.Tables.PausedBanner);
+            return Loc.T(L.Tables.PausedBadge);
         }
 
         if (BlackjackHosting.AwaitsDeal(board))
@@ -353,17 +353,14 @@ internal sealed partial class BlackjackTable : ICabinetIdle
             return hostedText.WaitingDeal(board.DealerName);
         }
 
-        var seconds = (int)((Math.Max(0, deadlineRemaining) + 999) / 1000);
         if (board.InsuranceOpen)
         {
-            return text.Duration(L.Blackjack.InsuranceClosesIn, seconds);
+            return Loc.T(L.Blackjack.InsuranceQuestion);
         }
 
         if (board.Phase == BlackjackPhases.Betting)
         {
-            return board.HandId.Length == 0 || deadlineRemaining <= 0
-                ? Loc.T(L.Casino.BlackjackWaitingForBets)
-                : text.Duration(L.Casino.BlackjackBetsCloseIn, seconds);
+            return Loc.T(L.Casino.BlackjackWaitingForBets);
         }
 
         if (BlackjackPhases.Over(board.Phase))

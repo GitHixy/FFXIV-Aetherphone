@@ -10614,7 +10614,6 @@ internal static class L
         public static readonly LocString BetMin = new("casino.bet.min", "Min");
         public static readonly LocString BetHalf = new("casino.bet.half", "Half");
         public static readonly LocString BetMax = new("casino.bet.max", "Max");
-        public static readonly LocString BlackjackBetsCloseIn = new("casino.blackjack.betsCloseIn", "Bets close in {0}");
         public static readonly LocString BlackjackWaitingForBets = new("casino.blackjack.waitingForBets", "Place your bets");
         public static readonly LocString BlackjackDealing = new("casino.blackjack.dealing", "Dealing");
         public static readonly LocString BlackjackYourTurn = new("casino.blackjack.yourTurn", "Your turn");
@@ -10664,7 +10663,6 @@ internal static class L
         public static readonly LocString SitDownAction = new("casino.seat.sitDown", "Sit down");
         public static readonly LocString StandAction = new("casino.seat.stand", "Leave the table");
         public static readonly LocString StandQueued = new("casino.seat.standQueued", "Leaving after this hand");
-        public static readonly LocString StandAtHandEnd = new("casino.seat.standAtHandEnd", "You leave once this hand settles.");
         public static readonly LocString DealtNextHand = new("casino.seat.dealtNextHand", "You are dealt in next hand");
         public static readonly LocString AwayBadge = new("casino.seat.awayBadge", "Away, your seat is protected");
         public static readonly LocString ReconnectTitle = new("casino.reconnect.title", "Reconnecting");
@@ -11360,7 +11358,6 @@ internal static class L
         public static readonly LocString OpenLedger = new("casino.tables.openLedger", "Ledger");
         public static readonly LocString Pause = new("casino.tables.pause", "Pause");
         public static readonly LocString Resume = new("casino.tables.resume", "Resume");
-        public static readonly LocString PausedBanner = new("casino.tables.pausedBanner", "The host paused the table. Hands resume when they are ready.");
         public static readonly LocString WaitingDeal = new("casino.tables.waitingDeal", "Bets are open. {0} deals when ready.");
         public static readonly LocString DealtBy = new("casino.tables.dealtBy", "Dealer: {0}");
         public static readonly LocString RulesLineStands = new("casino.tables.rulesLineStands", "Blackjack pays {0}, dealer stands on soft 17, {1} decks");
@@ -11505,7 +11502,6 @@ internal static class L
         public static readonly LocString ThreeSuitedTrips = new("casino.blackjack.threeSuitedTrips", "Suited trips");
         public static readonly LocString InsurancePays = new("casino.blackjack.insurancePays", "Insurance pays 2 to 1");
         public static readonly LocString InsuranceQuestion = new("casino.blackjack.insuranceQuestion", "Insurance?");
-        public static readonly LocString InsuranceClosesIn = new("casino.blackjack.insuranceClosesIn", "Insurance closes in {0}");
         public static readonly LocString InsuranceHint = new("casino.blackjack.insuranceHint", "The dealer shows an ace. Insurance pays 2 to 1 if they hold blackjack.");
         public static readonly LocString InsurePill = new("casino.blackjack.insurePill", "Insure {0}");
         public static readonly LocString NoInsurePill = new("casino.blackjack.noInsurePill", "No insurance");
@@ -11515,7 +11511,6 @@ internal static class L
         public static readonly LocString SurrenderPill = new("casino.blackjack.surrenderPill", "Surrender");
         public static readonly LocString SurrenderHalfBack = new("casino.blackjack.surrenderHalfBack", "Half back");
         public static readonly LocString OutcomeSurrender = new("casino.blackjack.outcomeSurrender", "Surrendered");
-        public static readonly LocString RecapCaption = new("casino.blackjack.recapCaption", "Every seat plays the dealer on their own");
         public static readonly LocString SoftTotal = new("casino.blackjack.softTotal", "Soft {0}");
         public static readonly LocString DealerBusts = new("casino.blackjack.dealerBusts", "Dealer busts");
         public static readonly LocString TableHandsHeading = new("casino.blackjack.tableHandsHeading", "Table hands");

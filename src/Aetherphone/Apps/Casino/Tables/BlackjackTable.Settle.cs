@@ -33,7 +33,6 @@ internal sealed partial class BlackjackTable
     private string spokenHandId = string.Empty;
     private int spokenPhase = -1;
     private int spokenSeat = int.MinValue;
-    private bool spokenInsurance;
     private int announceCount;
     private int announceIndex;
     private float announceClock;
@@ -44,7 +43,6 @@ internal sealed partial class BlackjackTable
         spokenHandId = string.Empty;
         spokenPhase = -1;
         spokenSeat = int.MinValue;
-        spokenInsurance = false;
         announceCount = 0;
         announceIndex = 0;
         announceClock = 0f;
@@ -97,33 +95,15 @@ internal sealed partial class BlackjackTable
 
     private void SpeakForPhase(CasinoBlackjackRoomStateDto board)
     {
-        if (board.InsuranceOpen && !spokenInsurance)
-        {
-            spokenInsurance = true;
-            dealer.Say(Loc.T(L.Blackjack.InsuranceQuestion));
-            return;
-        }
-
         if (board.Phase == spokenPhase && board.ActiveSeat == spokenSeat
             && string.Equals(spokenHandId, board.HandId, StringComparison.Ordinal))
         {
             return;
         }
 
-        if (!string.Equals(spokenHandId, board.HandId, StringComparison.Ordinal))
-        {
-            spokenInsurance = false;
-        }
-
         spokenPhase = board.Phase;
         spokenSeat = board.ActiveSeat;
         spokenHandId = board.HandId;
-        if (board.Phase == BlackjackPhases.Betting)
-        {
-            dealer.Say(Loc.T(L.Casino.BlackjackWaitingForBets));
-            return;
-        }
-
         if (BlackjackPhases.Over(board.Phase) && board.DealerTotal > 0)
         {
             dealer.Say(board.DealerTotal > BlackjackRules.TargetTotal
@@ -134,7 +114,6 @@ internal sealed partial class BlackjackTable
 
         if (board.ActiveSeat >= 0 && board.ActiveSeat == mySeat)
         {
-            dealer.Say(Loc.T(L.Casino.BlackjackYourTurn));
             CasinoSfx.Play(UiSound.TurnChime);
         }
     }
@@ -216,11 +195,6 @@ internal sealed partial class BlackjackTable
         if (recap.InsurancePaid)
         {
             Announce(Loc.T(L.Blackjack.InsurancePays));
-        }
-
-        if (announceCount > 0)
-        {
-            dealer.Say(announcements[0]);
         }
     }
 
