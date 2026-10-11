@@ -9549,6 +9549,7 @@
   "casino.venue.reportHint": "Moderatörler masayı el ve atış kaydı ve gil defteriyle birlikte alır.",
   "casino.venue.broadcastOpen": "Yayın görünümü",
   "casino.venue.broadcastHint": "İkinci ekran ya da bar ekranı için kontrolsüz büyük yatay görünüm.",
+  "casino.venue.hostControlsHint": "Kapıdan masayı yeniden adlandırabilir, duraklatabilir, oyuncu çıkarabilir ya da kapatabilirsin. Koltuğun sende kalır.",
   "casino.venue.broadcastTitle": "Yayın",
   "casino.venue.broadcastWaiting": "Sonraki el bekleniyor",
   "casino.venue.broadcastDealer": "Krupiye",

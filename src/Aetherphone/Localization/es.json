@@ -9549,6 +9549,7 @@
   "casino.venue.reportHint": "Los moderadores reciben la mesa con su registro de manos y tiradas y el libro de guiles.",
   "casino.venue.broadcastOpen": "Vista de retransmisión",
   "casino.venue.broadcastHint": "Una vista horizontal grande para una segunda pantalla o la barra, sin controles.",
+  "casino.venue.hostControlsHint": "Desde la puerta puedes cambiar el nombre, pausar, sacar jugadores o cerrar la mesa. Conservas tu asiento.",
   "casino.venue.broadcastTitle": "Retransmisión",
   "casino.venue.broadcastWaiting": "Esperando la siguiente mano",
   "casino.venue.broadcastDealer": "Crupier",

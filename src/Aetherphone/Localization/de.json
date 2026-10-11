@@ -9549,6 +9549,7 @@
   "casino.venue.reportHint": "Moderatoren erhalten den Tisch mit Hand- und Wurfprotokoll und dem Gil-Kassenbuch.",
   "casino.venue.broadcastOpen": "Übertragungsansicht",
   "casino.venue.broadcastHint": "Eine große Queransicht ohne Bedienelemente für einen zweiten Bildschirm oder die Bar.",
+  "casino.venue.hostControlsHint": "An der Tür kannst du den Tisch umbenennen, pausieren, Spieler entfernen oder schließen. Dein Platz bleibt dir.",
   "casino.venue.broadcastTitle": "Übertragung",
   "casino.venue.broadcastWaiting": "Warte auf die nächste Hand",
   "casino.venue.broadcastDealer": "Dealer",

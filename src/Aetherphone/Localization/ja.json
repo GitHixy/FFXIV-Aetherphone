@@ -9549,6 +9549,7 @@
   "casino.venue.reportHint": "モデレーターにテーブルの手札とロールの記録、ギル台帳が送られます。",
   "casino.venue.broadcastOpen": "配信ビュー",
   "casino.venue.broadcastHint": "サブ画面やバーのディスプレイ向けの操作のない大きな横画面ビュー。",
+  "casino.venue.hostControlsHint": "ドアから名前の変更、一時停止、プレイヤーの退席、テーブルの終了ができます。席はそのままです。",
   "casino.venue.broadcastTitle": "配信",
   "casino.venue.broadcastWaiting": "次のハンドを待っています",
   "casino.venue.broadcastDealer": "ディーラー",

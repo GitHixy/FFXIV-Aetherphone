@@ -11689,6 +11689,7 @@ internal static class L
         public static readonly LocString ReportHint = new("casino.venue.reportHint", "Moderators receive the table with its hand and roll log and the gil ledger.");
         public static readonly LocString BroadcastOpen = new("casino.venue.broadcastOpen", "Broadcast view");
         public static readonly LocString BroadcastHint = new("casino.venue.broadcastHint", "A large landscape view for a second screen or the bar display, without controls.");
+        public static readonly LocString HostControlsHint = new("casino.venue.hostControlsHint", "Rename, pause, remove players or close the table from its door. You keep your seat.");
         public static readonly LocString BroadcastTitle = new("casino.venue.broadcastTitle", "Broadcast");
         public static readonly LocString BroadcastWaiting = new("casino.venue.broadcastWaiting", "Waiting for the next hand");
         public static readonly LocString BroadcastDealer = new("casino.venue.broadcastDealer", "Dealer");
