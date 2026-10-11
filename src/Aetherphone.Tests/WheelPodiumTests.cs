@@ -69,6 +69,15 @@ public sealed class WheelPodiumTests
     }
 
     [Fact]
+    public void ThePickedCardStandsOutOnlyWhileBetsAreOpen()
+    {
+        Assert.True(new WheelSpotView(2, 0, 0, 0, true, false, false, false, true).Marked);
+        Assert.False(new WheelSpotView(2, 500, 1, 500, true, false, false, false, false).Marked);
+        Assert.False(new WheelSpotView(2, 500, 1, 500, true, false, false, true, false).Marked);
+        Assert.True(new WheelSpotView(2, 0, 0, 0, false, false, true, true, false).Marked);
+    }
+
+    [Fact]
     public void OnlyYourLosingSpotsDimWhenTheWheelLands()
     {
         Assert.True(new WheelSpotView(0, 500, 1, 500, false, false, false, true, false).Losing);

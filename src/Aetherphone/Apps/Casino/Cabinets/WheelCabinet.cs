@@ -152,7 +152,7 @@ internal sealed class WheelCabinet : ICabinetIdle
         WheelHistoryStrip.Draw(drawList, board.History, recent,
             LandingPop(playback.SpunLive, playback.Stage, playback.StageSeconds), scale);
         DrawWheel(drawList, board.Wheel, frame.Phase, delta, scale);
-        var choosing = snapshot.Phase == CasinoRoomPhases.Open && state.Sitting is not null && !frame.Blocked;
+        var choosing = snapshot.Phase == CasinoRoomPhases.Open && !frame.Blocked;
         WheelSpotCaption.Draw(drawList, board.Caption, choosing ? Loc.T(L.Casino.WheelPickSpot) : string.Empty,
             ReturnCaption(wheel), scale);
         DrawCards(drawList, ui, wheel, board, choosing, scale);

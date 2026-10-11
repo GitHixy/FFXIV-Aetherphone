@@ -39,6 +39,8 @@ internal readonly struct WheelSpotView
     public bool Losing => Settled && !Winning && Mine > 0;
 
     public bool Ghost => Open && Selected && Mine <= 0;
+
+    public bool Marked => Winning || (Open && Selected);
 }
 
 internal static class WheelSpotCard
@@ -66,7 +68,7 @@ internal static class WheelSpotCard
         var rounding = Metrics.Radius.Md * scale;
         var color = WheelRingArt.SpotColors[view.Spot];
         var ink = WheelRingArt.SpotTextInks[view.Spot];
-        var marked = view.Winning || (view.Selected && !view.Settled);
+        var marked = view.Marked;
         var lit = view.Winning ? 1f : marked ? 0.7f : 0.2f;
         var ground = ui.Palette.CardFill with { W = 1f };
         drawList.AddCircleFilled(new Vector2(rect.Center.X, rect.Min.Y), rect.Width * 0.6f,
