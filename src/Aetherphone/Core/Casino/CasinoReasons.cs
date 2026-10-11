@@ -78,6 +78,7 @@ internal static class CasinoReasons
     public const string TournamentLive = "tournament_live";
     public const string NoTournament = "no_tournament";
     public const string NothingToDeal = "nothing_to_deal";
+    public const string TablePaused = "table_paused";
     public const string NoSpectators = "no_spectators";
     public const string DuelLive = "duel_live";
     public const string NoDuel = "no_duel";
@@ -113,6 +114,7 @@ internal static class CasinoReasons
         TournamentLive,
         NoTournament,
         NothingToDeal,
+        TablePaused,
         NoSpectators,
         DuelLive,
         NoDuel,
@@ -204,6 +206,7 @@ internal static class CasinoReasons
         [TournamentLive] = L.Tables.ReasonTournamentLive,
         [NoTournament] = L.Tables.ReasonNoTournament,
         [NothingToDeal] = L.Tables.ReasonNothingToDeal,
+        [TablePaused] = L.Tables.ReasonTablePaused,
         [NoSpectators] = L.Tables.ReasonNoSpectators,
         [DuelLive] = L.Tables.ReasonDuelLive,
         [NoDuel] = L.Tables.ReasonNoDuel,

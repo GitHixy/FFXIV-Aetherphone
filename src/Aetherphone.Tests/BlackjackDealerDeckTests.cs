@@ -87,8 +87,8 @@ public sealed class BlackjackDealerDeckTests
         Assert.Equal("casino.tables.reasonDealerCannotSit", message.Key);
     }
 
-    private static BlackjackDeckFacts Facts(bool dealing = false, bool bought = true, bool onBoard = true,
-        bool holdsSeat = true, bool canRebuy = false, bool gilBroke = false, bool insurance = false,
-        bool canBet = false, bool committed = false, bool canAct = false) =>
-        new(dealing, bought, onBoard, holdsSeat, canRebuy, gilBroke, insurance, canBet, committed, canAct);
+    internal static BlackjackDeckFacts Facts(bool dealing = false, bool bought = true, bool onBoard = true,
+        bool holdsSeat = true, bool canRebuy = false, bool gilBroke = false, bool paused = false,
+        bool insurance = false, bool canBet = false, bool committed = false, bool canAct = false) =>
+        new(dealing, bought, onBoard, holdsSeat, canRebuy, gilBroke, paused, insurance, canBet, committed, canAct);
 }

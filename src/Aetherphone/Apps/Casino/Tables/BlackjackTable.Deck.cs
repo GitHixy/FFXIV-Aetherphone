@@ -178,6 +178,7 @@ internal sealed partial class BlackjackTable
             CasinoSeatMachine.Holds(seatFlow.Stage),
             banked && BlackjackHosting.CanRebuy(board, seatStack),
             banked && GilBroke(board, seatStack),
+            banked && board.Paused,
             BlackjackRecap.InsuranceOffered(board, mask),
             canBet,
             (seat?.Committed ?? 0) > 0,
@@ -195,6 +196,11 @@ internal sealed partial class BlackjackTable
                 return;
             case BlackjackDeck.Ledger:
                 DrawLedgerAction(ui, row);
+                return;
+            case BlackjackDeck.Paused:
+                StageText.Status(ImGui.GetWindowDrawList(), BlackjackDeckLayout.UpperRow(row, scale).Center,
+                    Loc.T(L.Tables.PausedByHost), row.Width, scale);
+                DrawStand(stage, ui, state, draining, banked);
                 return;
             case BlackjackDeck.Insurance:
                 DrawInsurance(ui, row, scale);

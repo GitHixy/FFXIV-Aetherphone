@@ -66,6 +66,7 @@ internal sealed partial class HoldemTable : ICabinetIdle
     private string ribbonHand = string.Empty;
     private int ribbonPhase = -1;
     private int ribbonCursor = int.MinValue;
+    private bool ribbonPaused;
     private LanguageInfo? ribbonLanguage;
     private HoldemDeckMode deckMode;
     private int mySeat = -1;
@@ -647,7 +648,7 @@ internal sealed partial class HoldemTable : ICabinetIdle
 
     private string RibbonLabel(CasinoHoldemRoomStateDto board)
     {
-        if (board.Phase == ribbonPhase && board.CursorSeat == ribbonCursor
+        if (board.Phase == ribbonPhase && board.CursorSeat == ribbonCursor && board.Paused == ribbonPaused
             && ReferenceEquals(ribbonLanguage, Loc.Current)
             && string.Equals(ribbonHand, board.HandId, StringComparison.Ordinal))
         {
@@ -656,14 +657,26 @@ internal sealed partial class HoldemTable : ICabinetIdle
 
         ribbonPhase = board.Phase;
         ribbonCursor = board.CursorSeat;
+        ribbonPaused = board.Paused;
         ribbonLanguage = Loc.Current;
         ribbonHand = board.HandId;
         ribbonText = BuildRibbon(board);
         return ribbonText;
     }
 
+    internal static bool PausedBetweenHands(CasinoHoldemRoomStateDto board)
+    {
+        return board.Paused && board.Phase is HoldemPhases.Waiting or HoldemPhases.Intermission
+            or HoldemPhases.Settled or HoldemPhases.Voided;
+    }
+
     private string BuildRibbon(CasinoHoldemRoomStateDto board)
     {
+        if (PausedBetweenHands(board))
+        {
+            return Loc.T(L.Tables.PausedByHost);
+        }
+
         switch (board.Phase)
         {
             case HoldemPhases.Waiting:

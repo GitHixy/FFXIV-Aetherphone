@@ -209,6 +209,16 @@ internal sealed class TableDoor
         return count;
     }
 
+    internal static bool ControlEnabled(DoorControl control, bool busy, bool paused)
+    {
+        if (control == DoorControl.Deal && paused)
+        {
+            return false;
+        }
+
+        return !busy || control is DoorControl.CoDealers or DoorControl.Rename;
+    }
+
     internal static bool ExplainsHostLimits(CasinoTableRowDto card)
     {
         return !CasinoCurrencies.SeatBanked(CasinoCurrencies.Of(card));
@@ -352,7 +362,7 @@ internal sealed class TableDoor
             };
             var destructive = control == DoorControl.Close;
             var style = active || control == DoorControl.Deal ? ButtonStyle.Prominent : ButtonStyle.Tinted;
-            var enabled = !busy || control is DoorControl.CoDealers or DoorControl.Rename;
+            var enabled = ControlEnabled(control, busy, card.Paused);
             if (RoundButton.FontIcon(drawList, ImGui.GetID($"door.control.{index}"), center, radius,
                     ControlIcon(control, card), radius * 0.78f, ui.Ink, destructive ? ButtonStyle.Gray : style,
                     enabled: enabled, glyphInk: destructive ? ui.Theme.Danger : null))
