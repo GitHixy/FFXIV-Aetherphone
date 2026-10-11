@@ -55,6 +55,10 @@ internal sealed class CasinoStage
     private float actionCursor;
     private int actionSecondaries;
     private float cappedLeft;
+    private ChromeCapsule capsule;
+    private string capsuleText = string.Empty;
+    private string capsuleCoins = string.Empty;
+    private float capsuleTextScale = 1f;
 
     public CasinoStage()
     {
@@ -79,6 +83,8 @@ internal sealed class CasinoStage
     public float Phase => phase;
 
     public Rect ActionRow => actionRow;
+
+    public Rect Capsule => capsule.Rect;
 
     public bool OverlayOpen => info.IsOpen || betsRail.IsOpen || (Chips?.SheetOpen ?? false);
 
@@ -182,6 +188,8 @@ internal sealed class CasinoStage
             balance.Update(balanceValue, delta);
         }
 
+        FitCapsule(scale);
+
         if (layout.HasDeck)
         {
             var panel = layout.DeckPanel;
@@ -207,6 +215,7 @@ internal sealed class CasinoStage
         {
             DrawCappedPill(drawList, scale);
         }
+
         if (layout.HasPractice)
         {
             PracticeRibbon.Draw(drawList, layout.Practice, scale);
@@ -223,7 +232,7 @@ internal sealed class CasinoStage
             betsRail.Open();
         }
 
-        if (DrawCapsule(drawList, scale))
+        if (!layout.Landscape && DrawCapsule(drawList, scale))
         {
             action = CasinoStageAction.Cashier;
         }
@@ -235,6 +244,11 @@ internal sealed class CasinoStage
         if (TouchTarget(layout.BackCenter) || backPressed)
         {
             action = CasinoStageAction.Back;
+        }
+
+        if (layout.Landscape)
+        {
+            return action;
         }
 
         var infoPressed = GlassCircle.Icon(drawList, ImGui.GetID("casino.stage.info"), layout.InfoCenter, chip,
@@ -375,24 +389,50 @@ internal sealed class CasinoStage
         return realityText;
     }
 
+    private void FitCapsule(float scale)
+    {
+        var style = TextStyles.Headline;
+        capsuleText = practice ? Loc.T(L.Strip.Practice) : NumberText.Compact(balance.Display);
+        capsuleTextScale = style.Scale * (practice ? 1f : balance.PopScale);
+        var textWidth = Typography.Measure(capsuleText, capsuleTextScale, style.Weight).X;
+        var chrome = (CapsulePadX * 2f + GlyphSize) * scale + Metrics.Space.Xs * scale;
+        var fullCoins = string.Empty;
+        var compactCoins = string.Empty;
+        var fullWidth = 0f;
+        var compactWidth = 0f;
+        if (!practice)
+        {
+            var rate = Chips?.Rate ?? CasinoChipLots.ChipPerCoin;
+            fullCoins = capsuleValue.Full(balance.Target, rate);
+            compactCoins = capsuleValue.Compact(balance.Target, rate);
+            fullWidth = Typography.Measure(fullCoins, TextStyles.Footnote).X;
+            compactWidth = Typography.Measure(compactCoins, TextStyles.Footnote).X;
+        }
+
+        capsule = ChromeCapsule.Fit(layout.CapsuleCenter, CasinoStageLayout.CapsuleHeight * scale,
+            layout.CapsuleMaxWidth, chrome, textWidth, fullWidth, compactWidth, Metrics.Space.Sm * scale);
+        capsuleCoins = capsule.Coins switch
+        {
+            CapsuleCoins.Full => fullCoins,
+            CapsuleCoins.Compact => compactCoins,
+            _ => string.Empty,
+        };
+        if (textWidth > capsule.TextRoom)
+        {
+            capsuleText = Typography.FitText(capsuleText, capsule.TextRoom, capsuleTextScale, style.Weight);
+        }
+    }
+
     private bool DrawCapsule(ImDrawListPtr drawList, float scale)
     {
-        var height = CasinoStageLayout.CapsuleHeight * scale;
-        var style = TextStyles.Headline;
-        var text = practice ? Loc.T(L.Strip.Practice) : NumberText.Compact(balance.Display);
-        var textScale = style.Scale * (practice ? 1f : balance.PopScale);
-        var textSize = Typography.Measure(text, textScale, style.Weight);
+        var rect = capsule.Rect;
+        var min = rect.Min;
+        var max = rect.Max;
+        var height = rect.Height;
+        var center = rect.Center;
+        var weight = TextStyles.Headline.Weight;
         var glyph = GlyphSize * scale;
         var padX = CapsulePadX * scale;
-        var coinGap = Metrics.Space.Sm * scale;
-        var core = padX * 2f + glyph + Metrics.Space.Xs * scale + textSize.X;
-        var coinWidth = 0f;
-        var coins = practice ? string.Empty : CapsuleCoins(layout.CapsuleMaxWidth - core - coinGap, out coinWidth);
-        var trailing = coins.Length > 0 ? coinGap + coinWidth : 0f;
-        var width = MathF.Min(layout.CapsuleMaxWidth, core + trailing);
-        var center = layout.CapsuleCenter;
-        var min = new Vector2(center.X - width * 0.5f, center.Y - height * 0.5f);
-        var max = new Vector2(center.X + width * 0.5f, center.Y + height * 0.5f);
         var interactive = !practice;
         var reach = MathF.Max(0f, (CasinoStageLayout.TouchTarget * scale - height) * 0.5f);
         var hitMin = new Vector2(min.X, min.Y - reach);
@@ -409,21 +449,15 @@ internal sealed class CasinoStage
             CurrencyGlyph.Draw(drawList, CurrencyKind.Chips, glyphCenter, glyph);
         }
 
+        var textSize = Typography.Measure(capsuleText, capsuleTextScale, weight);
         var textLeft = glyphCenter.X + glyph * 0.5f + Metrics.Space.Xs * scale;
-        var available = max.X - padX - trailing - textLeft;
-        if (textSize.X > available)
+        Typography.Draw(drawList, new Vector2(textLeft, center.Y - textSize.Y * 0.5f), capsuleText,
+            practice ? CasinoColors.Practice : CasinoColors.Money, capsuleTextScale, weight);
+        if (capsuleCoins.Length > 0)
         {
-            text = Typography.FitText(text, available, textScale, style.Weight);
-            textSize = Typography.Measure(text, textScale, style.Weight);
-        }
-
-        Typography.Draw(drawList, new Vector2(textLeft, center.Y - textSize.Y * 0.5f), text,
-            practice ? CasinoColors.Practice : CasinoColors.Money, textScale, style.Weight);
-        if (coins.Length > 0)
-        {
-            var footnote = Typography.LineHeight(TextStyles.Footnote);
-            Typography.Draw(drawList, new Vector2(max.X - padX - coinWidth, center.Y - footnote * 0.5f), coins,
-                CasinoColors.InkBody, TextStyles.Footnote);
+            var coinsSize = Typography.Measure(capsuleCoins, TextStyles.Footnote);
+            Typography.Draw(drawList, new Vector2(max.X - padX - coinsSize.X, center.Y - coinsSize.Y * 0.5f),
+                capsuleCoins, CasinoColors.InkBody, TextStyles.Footnote);
         }
 
         if (!interactive)
@@ -434,7 +468,7 @@ internal sealed class CasinoStage
         if (hovered)
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-            HoverTooltip.Show(new Rect(min, max), Loc.T(L.Strip.CashierHint), HoverLabelSide.Below);
+            HoverTooltip.Show(rect, Loc.T(L.Strip.CashierHint), HoverLabelSide.Below);
         }
 
         return UiInteract.Click(hitMin, hitMax, hovered);
@@ -444,47 +478,16 @@ internal sealed class CasinoStage
     {
         var text = Loc.T(L.Chips.MaxWinReached);
         var style = TextStyles.SubheadlineEmphasized;
-        var safe = layout.Safe;
         var height = CappedPillHeight * scale;
         var padX = height * 0.5f;
-        var textScale = Typography.FitScale(text, MathF.Max(1f, safe.Width - padX * 2f), style.Scale,
+        var textScale = Typography.FitScale(text, MathF.Max(1f, layout.Safe.Width - padX * 2f), style.Scale,
             TextStyles.Footnote.Scale, style.Weight);
         var size = Typography.Measure(text, textScale, style.Weight);
-        var width = MathF.Min(safe.Width, size.X + padX * 2f);
-        var center = new Vector2(safe.Center.X, safe.Min.Y + height * 0.5f);
-        var min = new Vector2(center.X - width * 0.5f, center.Y - height * 0.5f);
-        var max = new Vector2(center.X + width * 0.5f, center.Y + height * 0.5f);
+        var rect = layout.Notice(size.X + padX * 2f, height, scale);
+        var center = rect.Center;
         var alpha = Math.Clamp(cappedLeft / CappedFadeSeconds, 0f, 1f);
-        Material.FrostedGlass(drawList, min, max, height * 0.5f, scale, alpha);
+        Material.FrostedGlass(drawList, rect.Min, rect.Max, height * 0.5f, scale, alpha);
         Typography.Draw(drawList, new Vector2(center.X - size.X * 0.5f, center.Y - size.Y * 0.5f), text,
             CasinoColors.Money with { W = alpha }, textScale, style.Weight);
-    }
-
-    private string CapsuleCoins(float room, out float width)
-    {
-        width = 0f;
-        if (room <= 0f)
-        {
-            return string.Empty;
-        }
-
-        var rate = Chips?.Rate ?? CasinoChipLots.ChipPerCoin;
-        var full = capsuleValue.Full(balance.Target, rate);
-        var fullWidth = Typography.Measure(full, TextStyles.Footnote).X;
-        if (fullWidth <= room)
-        {
-            width = fullWidth;
-            return full;
-        }
-
-        var compact = capsuleValue.Compact(balance.Target, rate);
-        var compactWidth = Typography.Measure(compact, TextStyles.Footnote).X;
-        if (compactWidth > room)
-        {
-            return string.Empty;
-        }
-
-        width = compactWidth;
-        return compact;
     }
 }
