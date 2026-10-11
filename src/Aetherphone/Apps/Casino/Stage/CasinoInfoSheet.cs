@@ -213,38 +213,35 @@ internal sealed class CasinoInfoSheet
 
     private float DrawButtons(float left, float y, float width, float scale)
     {
-        var height = Button.RegularHeight * scale;
+        var height = Button.LargeHeight * scale;
         var gap = ButtonGap * scale;
-        var hasExtra = spec.Extra.Key is not null;
-        var columns = hasExtra ? 2 : 1;
-        var columnWidth = (width - gap * (columns - 1)) / columns;
-        var rules = new Rect(new Vector2(left, y), new Vector2(left + columnWidth, y + height));
-        if (Button.Draw(rules, Loc.T(L.Strip.HowToPlay), skin.Ink, ButtonStyle.Gray, enabled: sheet.IsOpen,
-                overlay: true))
+        if (DrawButton(left, y, width, height, Loc.T(L.Strip.HowToPlay), ButtonStyle.Gray))
         {
             Choose(CasinoInfoRequest.Rules);
         }
 
-        if (hasExtra)
+        y += height + gap;
+        if (spec.Extra.Key is not null)
         {
-            var extra = new Rect(new Vector2(left + columnWidth + gap, y), new Vector2(left + width, y + height));
-            if (Button.Draw(extra, Loc.T(spec.Extra), skin.Ink, ButtonStyle.Gray, enabled: sheet.IsOpen,
-                    overlay: true))
+            if (DrawButton(left, y, width, height, Loc.T(spec.Extra), ButtonStyle.Gray))
             {
                 Choose(CasinoInfoRequest.Extra);
             }
+
+            y += height + gap;
         }
 
-        y += height + gap;
-        var fairness = new Rect(new Vector2(left, y), new Vector2(left + width, y + height));
-        if (Button.Draw(fairness, Loc.T(L.Casino.FairnessRow), skin.Ink, ButtonStyle.Plain, enabled: sheet.IsOpen,
-                overlay: true))
+        if (DrawButton(left, y, width, height, Loc.T(L.Casino.FairnessRow), ButtonStyle.Plain))
         {
             Choose(CasinoInfoRequest.Fairness);
         }
 
         return y + height;
     }
+
+    private bool DrawButton(float left, float top, float width, float height, string label, ButtonStyle style) =>
+        Button.Draw(new Rect(new Vector2(left, top), new Vector2(left + width, top + height)), label, skin.Ink, style,
+            enabled: sheet.IsOpen, overlay: true);
 
     private void Choose(CasinoInfoRequest chosen)
     {
