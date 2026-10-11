@@ -81,6 +81,10 @@ internal interface IOriginalsSkin : ICabinetIdle
 
     void DrawKnob(ImDrawListPtr drawList, Rect rect, AppSkin ui, bool changeable);
 
+    void Gate();
+
+    void DrawOverlay(Rect screen, AppSkin ui);
+
     bool Play(CasinoOriginalsStore originals, long stake, bool auto);
 
     void CashOut(CasinoOriginalsStore originals);

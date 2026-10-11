@@ -194,6 +194,14 @@ internal sealed class MinesSkin : IOriginalsSkin
         CasinoSfx.Play(UiSound.ChipSlide);
     }
 
+    public void Gate()
+    {
+    }
+
+    public void DrawOverlay(Rect screen, AppSkin ui)
+    {
+    }
+
     public bool Play(CasinoOriginalsStore originals, long stake, bool auto)
     {
         if (board.Live)

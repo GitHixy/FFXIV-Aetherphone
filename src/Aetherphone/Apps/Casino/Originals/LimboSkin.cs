@@ -185,6 +185,14 @@ internal sealed class LimboSkin : IOriginalsSkin
             CasinoColors.LightB, TextStyles.FootnoteEmphasized);
     }
 
+    public void Gate()
+    {
+    }
+
+    public void DrawOverlay(Rect screen, AppSkin ui)
+    {
+    }
+
     public bool Play(CasinoOriginalsStore originals, long stake, bool auto)
     {
         if (!OriginalsRules.IsLimboTarget(target))

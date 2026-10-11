@@ -108,12 +108,14 @@ internal sealed class OriginalsCabinet
         for (var index = 0; index < composers.Length; index++)
         {
             composers[index].Gate();
+            skins[index].Gate();
         }
     }
 
     public void DrawOverlay(Rect screen, AppSkin ui)
     {
         Composer.DrawOverlay(screen, ui, false);
+        skin.DrawOverlay(screen, ui);
     }
 
     public void Draw(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui)

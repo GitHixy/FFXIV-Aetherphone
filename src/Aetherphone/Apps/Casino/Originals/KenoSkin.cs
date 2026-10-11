@@ -25,6 +25,7 @@ internal sealed class KenoSkin : IOriginalsSkin
     private readonly int[] chosen = new int[OriginalsRules.KenoMaxPicks];
     private readonly LabelSlot[] hitCaptions = new LabelSlot[OriginalsRules.KenoMaxPicks + 1];
     private readonly string[] riskLabels = new string[OriginalsRules.KenoRiskCount];
+    private readonly OriginalsChoice riskChoice = new("casino.originals.keno.risk", OriginalsRules.KenoRiskCount);
 
     private OriginalsPicker picker = OriginalsPicker.FromSeed(GameSeed.Fresh());
     private LabelSlot pickedLabel;
@@ -73,6 +74,7 @@ internal sealed class KenoSkin : IOriginalsSkin
     public void Reset()
     {
         playback.Clear();
+        riskChoice.Close();
         noticePending = false;
     }
 
@@ -167,8 +169,7 @@ internal sealed class KenoSkin : IOriginalsSkin
         riskLabels[OriginalsRules.KenoLow] = Loc.T(L.Originals.RiskLow);
         riskLabels[OriginalsRules.KenoMedium] = Loc.T(L.Originals.RiskMedium);
         riskLabels[OriginalsRules.KenoHigh] = Loc.T(L.Originals.RiskHigh);
-        var picked = SegmentStrip.Draw("casino.originals.keno.risk", rect, riskLabels, risk,
-            Surfaces.Fill(ui.TitleInk, FillLevel.Tertiary), ui.Accent, ui.MutedInk, CasinoColors.InkTitle);
+        var picked = riskChoice.Draw(drawList, rect, Loc.T(L.Originals.Risk), riskLabels, risk, ui, changeable);
         if (!changeable || picked == risk)
         {
             return;
@@ -177,6 +178,16 @@ internal sealed class KenoSkin : IOriginalsSkin
         risk = picked;
         playback.Clear();
         CasinoSfx.Play(UiSound.ChipSlide);
+    }
+
+    public void Gate()
+    {
+        riskChoice.Gate();
+    }
+
+    public void DrawOverlay(Rect screen, AppSkin ui)
+    {
+        riskChoice.DrawOverlay(screen, ui);
     }
 
     public bool Play(CasinoOriginalsStore originals, long stake, bool auto)

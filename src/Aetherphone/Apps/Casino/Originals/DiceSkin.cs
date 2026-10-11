@@ -8,6 +8,7 @@ using Aetherphone.Core.Notifications;
 using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 
 namespace Aetherphone.Apps.Casino.Originals;
 
@@ -19,7 +20,7 @@ internal sealed class DiceSkin : IOriginalsSkin
     private const float MarkerHeight = 30f;
     private const float TickLength = 6f;
     private const float FieldGap = 6f;
-    private const float SegmentShare = 0.4f;
+    private const float ToggleMaxShare = 0.5f;
     private const int TickCount = 5;
     private const int DragStep = 100;
     private const float IdleSweepRate = 0.35f;
@@ -29,7 +30,6 @@ internal sealed class DiceSkin : IOriginalsSkin
     private readonly DiceRollPlayback playback = new();
     private readonly OriginalsField chanceField = new("##originalsDiceChance");
     private readonly OriginalsField multiplierField = new("##originalsDiceMultiplier");
-    private readonly string[] sideLabels = new string[2];
 
     private int target = OriginalsRules.DiceDefaultTarget;
     private bool over = true;
@@ -164,20 +164,21 @@ internal sealed class DiceSkin : IOriginalsSkin
     {
         var scale = UiScale.Current;
         var gap = FieldGap * scale;
-        var segmentWidth = rect.Width * SegmentShare;
-        var segment = new Rect(rect.Min, new Vector2(rect.Min.X + segmentWidth, rect.Max.Y));
-        sideLabels[0] = Loc.T(L.Originals.RollOver);
-        sideLabels[1] = Loc.T(L.Originals.RollUnder);
-        var picked = SegmentStrip.Draw("casino.originals.dice.side", segment, sideLabels, over ? 0 : 1,
-            Surfaces.Fill(ui.TitleInk, FillLevel.Tertiary), ui.Accent, ui.MutedInk, CasinoColors.InkTitle);
-        if (changeable && picked != (over ? 0 : 1))
+        var overLabel = Loc.T(L.Originals.RollOver);
+        var underLabel = Loc.T(L.Originals.RollUnder);
+        var toggleWidth = MathF.Min(rect.Width * ToggleMaxShare,
+            MathF.Max(OriginalsControls.TogglePillWidth(overLabel, rect.Height, scale),
+                OriginalsControls.TogglePillWidth(underLabel, rect.Height, scale)));
+        var toggle = new Rect(rect.Min, new Vector2(rect.Min.X + toggleWidth, rect.Max.Y));
+        if (OriginalsControls.TogglePill(drawList, "casino.originals.dice.side", toggle, over ? overLabel : underLabel,
+                FontAwesomeIcon.ExchangeAlt, ui, changeable))
         {
-            SetSide(picked == 0);
+            SetSide(!over);
         }
 
-        var fieldWidth = (rect.Width - segmentWidth - gap * 2f) * 0.5f;
-        var chanceRect = new Rect(new Vector2(segment.Max.X + gap, rect.Min.Y),
-            new Vector2(segment.Max.X + gap + fieldWidth, rect.Max.Y));
+        var fieldWidth = (rect.Width - toggleWidth - gap * 2f) * 0.5f;
+        var chanceRect = new Rect(new Vector2(toggle.Max.X + gap, rect.Min.Y),
+            new Vector2(toggle.Max.X + gap + fieldWidth, rect.Max.Y));
         var multiplierRect = new Rect(new Vector2(chanceRect.Max.X + gap, rect.Min.Y), rect.Max);
         var chance = Chance;
         if (chanceField.Draw(drawList, chanceRect, string.Empty, OriginalsText.Percent(chance), chance / 100m, ui,
@@ -192,6 +193,14 @@ internal sealed class DiceSkin : IOriginalsSkin
         {
             SetChance(OriginalsRules.DiceChanceForMultiplier((long)Math.Round(typedMultiplier * 100m)));
         }
+    }
+
+    public void Gate()
+    {
+    }
+
+    public void DrawOverlay(Rect screen, AppSkin ui)
+    {
     }
 
     public bool Play(CasinoOriginalsStore originals, long stake, bool auto)

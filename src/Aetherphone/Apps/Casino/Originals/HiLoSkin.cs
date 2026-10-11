@@ -211,6 +211,14 @@ internal sealed class HiLoSkin : IOriginalsSkin
     {
     }
 
+    public void Gate()
+    {
+    }
+
+    public void DrawOverlay(Rect screen, AppSkin ui)
+    {
+    }
+
     public bool Play(CasinoOriginalsStore originals, long stake, bool auto)
     {
         if (chain.Live)
