@@ -53,12 +53,12 @@ internal sealed class StripShelves
     }
 
     public static float ShelfHeight(float width, float scale) =>
-        ShelfHeight(width, scale, Typography.LineHeight(TextStyles.Title3));
+        ShelfHeight(width, scale, Typography.LineHeight(TextStyles.Title3), PosterTile.TextBlock(scale));
 
-    public static float ShelfHeight(float width, float scale, float titleHeight)
+    public static float ShelfHeight(float width, float scale, float titleHeight, float textBlock)
     {
         var tile = PosterTile.Width(width, TileGap * scale, scale);
-        return titleHeight + TitleGap * scale + PosterTile.Height(tile) + RailPad * scale * 2f;
+        return titleHeight + TitleGap * scale + PosterTile.Height(tile, textBlock) + RailPad * scale * 2f;
     }
 
     public static float RowWidth(int count, float tileWidth, float gap) =>
@@ -72,7 +72,7 @@ internal sealed class StripShelves
         var top = origin.Y;
         var gap = TileGap * scale;
         var tileWidth = PosterTile.Width(width, gap, scale);
-        var tileHeight = PosterTile.Height(tileWidth);
+        var tileHeight = PosterTile.Height(tileWidth, PosterTile.TextBlock(scale));
         for (var shelfIndex = 0; shelfIndex < StripCatalog.Shelves.Length; shelfIndex++)
         {
             var shelf = StripCatalog.Shelves[shelfIndex];
@@ -146,7 +146,7 @@ internal sealed class StripShelves
             PosterTile.DrawIcon(drawList, pressed, IconOf(entry), scale);
         }
 
-        PosterTile.DrawSign(drawList, pressed, entry.Sign, phase, scale);
+        PosterTile.DrawSign(drawList, pressed, entry.Sign, phase, scale, PosterTile.SignBandTop(scale));
         PosterTile.DrawText(drawList, pressed, Loc.T(entry.Title), info, scale);
         PosterTile.DrawCrowd(drawList, pressed, info.Crowd, scale);
         PosterTile.DrawBadge(drawList, pressed, info.Badge, scale);

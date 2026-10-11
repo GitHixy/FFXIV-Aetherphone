@@ -1,5 +1,6 @@
 using Aetherphone.Apps.Casino;
 using Aetherphone.Apps.Casino.Strip;
+using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
 using Xunit;
@@ -20,7 +21,7 @@ public sealed class CasinoFloorLayoutTests
         var width = PosterTile.Width(PhoneWidth, gap, 1f);
         var visible = (PhoneWidth + gap) / (width + gap);
         Assert.InRange(visible, 2f, 2.5f);
-        Assert.True(PosterTile.Height(width) > width);
+        Assert.True(PosterTile.Height(width, PosterTile.TextBlock(1f, HeadlineHeight, FootnoteHeight)) > width);
     }
 
     [Theory]
@@ -37,9 +38,44 @@ public sealed class CasinoFloorLayoutTests
     public void PostersLeaveRoomForTheTitleBlockAndATouchTarget()
     {
         var width = PosterTile.Width(PhoneWidth, StripShelves.TileGap, 1f);
-        var height = PosterTile.Height(width);
-        Assert.True(height - PosterTile.TextBlock(1f, HeadlineHeight, FootnoteHeight) >= 88f);
+        var block = PosterTile.TextBlock(1f, HeadlineHeight, FootnoteHeight);
+        var height = PosterTile.Height(width, block);
+        Assert.True(height - block >= 88f);
         Assert.True(width >= 44f);
+    }
+
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.25f)]
+    [InlineData(1.5f)]
+    public void PosterTextBlockHoldsTwoTitleLinesAndTwoDetailLines(float scale)
+    {
+        var headline = HeadlineHeight * scale;
+        var footnote = FootnoteHeight * scale;
+        var block = PosterTile.TextBlock(scale, headline, footnote);
+        Assert.True(block >= headline * 2f + footnote * 2f + PosterTile.Pad * scale * 2f - 0.01f);
+    }
+
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.25f)]
+    [InlineData(1.5f)]
+    public void PosterSignClearsTheCornerCapsulesAndTheArtSitsBetweenSignAndText(float scale)
+    {
+        var width = PosterTile.Width(PhoneWidth * scale, StripShelves.TileGap * scale, scale);
+        var block = PosterTile.TextBlock(scale, HeadlineHeight * scale, FootnoteHeight * scale);
+        var tile = new Rect(System.Numerics.Vector2.Zero,
+            new System.Numerics.Vector2(width, PosterTile.Height(width, block)));
+        var capsuleBottom = (PosterTile.Pad * 0.6f + PosterTile.CrowdHeight) * scale;
+        var signTop = PosterTile.SignBandTop(scale);
+        var signBottom = signTop + PosterTile.SignHeight * scale;
+        Assert.True(signTop >= capsuleBottom);
+        var art = PosterTile.ArtCenter(tile, block, scale);
+        var glyphHalf = width * PosterTile.GlyphFraction * 0.9f;
+        Assert.True(art.Y - glyphHalf >= signBottom - 0.01f);
+        Assert.True(art.Y + glyphHalf <= tile.Max.Y - block + 0.01f);
     }
 
     [Fact]
@@ -70,8 +106,9 @@ public sealed class CasinoFloorLayoutTests
         Assert.Equal(0f, StripShelves.RowWidth(0, 120f, 12f));
         Assert.Equal(120f, StripShelves.RowWidth(1, 120f, 12f));
         Assert.Equal(384f, StripShelves.RowWidth(3, 120f, 12f));
-        Assert.True(StripShelves.ShelfHeight(PhoneWidth, 1f, TitleHeight)
-                    > PosterTile.Height(PosterTile.Width(PhoneWidth, 12f, 1f)) + TitleHeight);
+        var block = PosterTile.TextBlock(1f, HeadlineHeight, FootnoteHeight);
+        Assert.True(StripShelves.ShelfHeight(PhoneWidth, 1f, TitleHeight, block)
+                    > PosterTile.Height(PosterTile.Width(PhoneWidth, 12f, 1f), block) + TitleHeight);
     }
 
     [Theory]

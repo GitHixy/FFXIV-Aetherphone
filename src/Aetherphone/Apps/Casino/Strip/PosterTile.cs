@@ -12,7 +12,10 @@ internal readonly record struct PosterInfo(bool Open, int Crowd, string Meta, st
 internal static class PosterTile
 {
     public const float VisibleTiles = 2.3f;
-    public const float Aspect = 1.34f;
+    public const float ArtAspect = 0.9f;
+    public const int TitleLines = 2;
+    public const int DetailLines = 2;
+    public const float CapsuleGap = 4f;
     public const float MinWidth = 128f;
     public const float MaxWidth = 176f;
     public const float Pad = 10f;
@@ -33,13 +36,22 @@ internal static class PosterTile
     public static float Width(float rowWidth, float gap, float scale) =>
         Math.Clamp((rowWidth - gap) / VisibleTiles, MinWidth * scale, MaxWidth * scale);
 
-    public static float Height(float tileWidth) => tileWidth * Aspect;
+    public static float Height(float tileWidth, float textBlock) => tileWidth * ArtAspect + textBlock;
 
     public static float TextBlock(float scale) =>
         TextBlock(scale, Typography.LineHeight(TextStyles.Headline), Typography.LineHeight(TextStyles.Footnote));
 
     public static float TextBlock(float scale, float headlineHeight, float footnoteHeight) =>
-        Pad * scale * 2f + headlineHeight + footnoteHeight;
+        Pad * scale * 2f + headlineHeight * TitleLines + footnoteHeight * DetailLines;
+
+    public static float SignBandTop(float scale) => (Pad * 0.6f + CrowdHeight + CapsuleGap) * scale;
+
+    public static Vector2 ArtCenter(Rect tile, float textBlock, float scale)
+    {
+        var signBottom = tile.Min.Y + SignBandTop(scale) + SignHeight * scale;
+        var artBottom = tile.Max.Y - textBlock;
+        return new Vector2(tile.Center.X, (signBottom + artBottom) * 0.5f);
+    }
 
     public static void DrawFrame(ImDrawListPtr drawList, Rect tile, Vector4 tint, float scale)
     {
@@ -52,27 +64,27 @@ internal static class PosterTile
             40);
     }
 
-    public static void DrawSign(ImDrawListPtr drawList, Rect tile, CasinoSign sign, float phase, float scale)
+    public static void DrawSign(ImDrawListPtr drawList, Rect tile, CasinoSign sign, float phase, float scale) =>
+        DrawSign(drawList, tile, sign, phase, scale, SignTop * scale);
+
+    public static void DrawSign(ImDrawListPtr drawList, Rect tile, CasinoSign sign, float phase, float scale,
+        float top)
     {
         var maxHeight = SignHeight * scale;
         var height = CasinoSigns.HeightToFit(sign, tile.Width - Pad * 2f * scale, maxHeight);
-        var center = new Vector2(tile.Center.X, tile.Min.Y + SignTop * scale + maxHeight * 0.5f);
+        var center = new Vector2(tile.Center.X, tile.Min.Y + top + maxHeight * 0.5f);
         var flicker = 0.84f + 0.16f * MathF.Sin(phase * 2.7f + tile.Min.X * 0.013f);
         CasinoSigns.Draw(drawList, sign, center, height, CasinoColors.LightA, flicker);
     }
 
-    public static void DrawGlyph(ImDrawListPtr drawList, Rect tile, string gameId, float scale)
-    {
-        var center = new Vector2(tile.Center.X, tile.Min.Y + (tile.Height - TextBlock(scale)) * 0.55f + SignHeight * scale * 0.5f);
-        CasinoGlyphs.Draw(drawList, gameId, center, tile.Width * GlyphFraction, ImGui.GetColorU32(CasinoArt.White),
-            ImGui.GetColorU32(Night));
-    }
+    public static void DrawGlyph(ImDrawListPtr drawList, Rect tile, string gameId, float scale) =>
+        CasinoGlyphs.Draw(drawList, gameId, ArtCenter(tile, TextBlock(scale), scale), tile.Width * GlyphFraction,
+            ImGui.GetColorU32(CasinoArt.White), ImGui.GetColorU32(Night));
 
-    public static void DrawIcon(ImDrawListPtr drawList, Rect tile, Dalamud.Interface.FontAwesomeIcon icon, float scale)
-    {
-        var center = new Vector2(tile.Center.X, tile.Min.Y + (tile.Height - TextBlock(scale)) * 0.55f + SignHeight * scale * 0.5f);
-        AppSkin.Icon(drawList, center, IconGlyph.Of(icon), CasinoArt.White, IconScale);
-    }
+    public static void DrawIcon(ImDrawListPtr drawList, Rect tile, Dalamud.Interface.FontAwesomeIcon icon,
+        float scale) =>
+        AppSkin.Icon(drawList, ArtCenter(tile, TextBlock(scale), scale), IconGlyph.Of(icon), CasinoArt.White,
+            IconScale);
 
     public static void DrawText(ImDrawListPtr drawList, Rect tile, string title, in PosterInfo info, float scale)
     {
@@ -83,30 +95,54 @@ internal static class PosterTile
         drawList.PushClipRect(new Vector2(tile.Min.X, scrimTop), tile.Max, true);
         Squircle.Fill(drawList, tile.Min, tile.Max, radius, ImGui.GetColorU32(Night with { W = ScrimAlpha }));
         drawList.PopClipRect();
-        var width = tile.Width - pad * 2f;
-        var top = scrimTop + pad;
-        Typography.Draw(drawList, new Vector2(tile.Min.X + pad, top),
-            Typography.FitText(title, width, TextStyles.Headline), CasinoColors.InkTitle, TextStyles.Headline);
-        top += Typography.LineHeight(TextStyles.Headline);
-        var returnWidth = info.Return.Length > 0 ? Typography.Measure(info.Return, TextStyles.FootnoteEmphasized).X : 0f;
-        if (returnWidth > 0f && returnWidth < width * 0.5f)
+        var width = MathF.Max(1f, tile.Width - pad * 2f);
+        var left = tile.Min.X + pad;
+        var titleStyle = TitleStyle(title, width);
+        var titleLines = Typography.WrapText(title, titleStyle, width);
+        var titleCount = Math.Min(titleLines.Length, TitleLines);
+        var titleHeight = Typography.LineHeight(titleStyle);
+        var footnoteHeight = Typography.LineHeight(TextStyles.Footnote);
+        var metaLines = info.Meta.Length > 0 && info.Return.Length == 0
+            ? Typography.WrapText(info.Meta, TextStyles.Footnote, width)
+            : Array.Empty<string>();
+        var metaCount = info.Return.Length > 0
+            ? (info.Meta.Length > 0 ? 1 : 0) + 1
+            : Math.Min(metaLines.Length, DetailLines);
+        var top = tile.Max.Y - pad - titleCount * titleHeight - metaCount * footnoteHeight;
+        for (var line = 0; line < titleCount; line++)
         {
-            Typography.Draw(drawList, new Vector2(tile.Max.X - pad - returnWidth, top), info.Return, CasinoColors.Money,
-                TextStyles.FootnoteEmphasized);
-        }
-        else
-        {
-            returnWidth = 0f;
+            Typography.Draw(drawList, new Vector2(left, top), titleLines[line], CasinoColors.InkTitle, titleStyle);
+            top += titleHeight;
         }
 
-        if (info.Meta.Length > 0)
+        if (info.Return.Length > 0)
         {
-            var metaWidth = MathF.Max(1f, width - returnWidth - (returnWidth > 0f ? Metrics.Space.Xs * scale : 0f));
-            Typography.Draw(drawList, new Vector2(tile.Min.X + pad, top),
-                Typography.FitText(info.Meta, metaWidth, TextStyles.Footnote), CasinoColors.InkBody,
+            if (info.Meta.Length > 0)
+            {
+                Typography.Draw(drawList, new Vector2(left, top),
+                    Typography.FitText(info.Meta, width, TextStyles.Footnote), CasinoColors.InkBody,
+                    TextStyles.Footnote);
+                top += footnoteHeight;
+            }
+
+            Typography.Draw(drawList, new Vector2(left, top),
+                Typography.FitText(info.Return, width, TextStyles.FootnoteEmphasized), CasinoColors.Money,
+                TextStyles.FootnoteEmphasized);
+            return;
+        }
+
+        for (var line = 0; line < metaCount; line++)
+        {
+            Typography.Draw(drawList, new Vector2(left, top), metaLines[line], CasinoColors.InkBody,
                 TextStyles.Footnote);
+            top += footnoteHeight;
         }
     }
+
+    private static TextStyle TitleStyle(string title, float width) =>
+        Typography.WrapText(title, TextStyles.Headline, width).Length <= TitleLines
+            ? TextStyles.Headline
+            : TextStyles.SubheadlineEmphasized;
 
     public static void DrawCrowd(ImDrawListPtr drawList, Rect tile, int crowd, float scale)
     {
