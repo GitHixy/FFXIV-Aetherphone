@@ -14,7 +14,11 @@ internal static class RaceHud
     public const float FadeInSeconds = 0.2f;
     public const float FadeOutSeconds = 0.4f;
     public const int Podium = 3;
+    public const int CaptionLines = 2;
+    public const float CaptionPadY = 6f;
 
+    private const float LiveDot = 4f;
+    private const float FitSlack = 0.5f;
     private const float DotShare = 0.42f;
     private const float LineThickness = 2f;
     private const float RingThickness = 2f;
@@ -103,25 +107,70 @@ internal static class RaceHud
         }
 
         var style = TextStyles.SubheadlineEmphasized;
+        var floor = TextStyles.FootnoteEmphasized;
         var padX = rect.Height * 0.5f;
-        var dot = live ? 4f * scale : 0f;
+        var dot = live ? LiveDot * scale : 0f;
         var dotRoom = live ? dot * 4f : 0f;
-        var fitted = Typography.FitText(text, MathF.Max(1f, rect.Width - padX * 2f - dotRoom), style);
-        var size = Typography.Measure(fitted, style);
-        var width = MathF.Min(rect.Width, size.X + padX * 2f + dotRoom);
-        var min = new Vector2(rect.Center.X - width * 0.5f, rect.Min.Y);
-        var max = new Vector2(rect.Center.X + width * 0.5f, rect.Max.Y);
-        StageText.Capsule(drawList, min, max, alpha);
-        var textLeft = min.X + padX + dotRoom;
-        if (live)
+        var room = MathF.Max(1f, rect.Width - padX * 2f - dotRoom);
+        var ink = CasinoColors.InkTitle with { W = alpha };
+        var fontScale = Typography.FitScale(text, room, style.Scale, floor.Scale, style.Weight);
+        var size = Typography.Measure(text, fontScale, style.Weight);
+        if (size.X <= room + FitSlack)
         {
-            var blink = 0.4f + 0.6f * Pulse.Wave(Pulse.Fast);
-            drawList.AddCircleFilled(new Vector2(min.X + padX + dot, rect.Center.Y), dot,
-                ImGui.GetColorU32(CasinoColors.LightA with { W = blink * alpha }), 12);
+            var single = Capsule(drawList, rect, size.X + padX * 2f + dotRoom, rect.Height, alpha);
+            DrawLiveDot(drawList, single, padX, dot, live, alpha);
+            Typography.Draw(drawList, new Vector2(single.Min.X + padX + dotRoom, single.Center.Y - size.Y * 0.5f),
+                text, ink, fontScale, style.Weight);
+            return;
         }
 
-        Typography.Draw(drawList, new Vector2(textLeft, rect.Center.Y - size.Y * 0.5f), fitted,
-            CasinoColors.InkTitle with { W = alpha }, style);
+        var lines = Typography.WrapText(text, floor, room);
+        if (lines.Length != CaptionLines)
+        {
+            var fitted = Typography.FitText(text, room, floor);
+            var fittedSize = Typography.Measure(fitted, floor);
+            var single = Capsule(drawList, rect, fittedSize.X + padX * 2f + dotRoom, rect.Height, alpha);
+            DrawLiveDot(drawList, single, padX, dot, live, alpha);
+            Typography.Draw(drawList,
+                new Vector2(single.Min.X + padX + dotRoom, single.Center.Y - fittedSize.Y * 0.5f), fitted, ink, floor);
+            return;
+        }
+
+        var lineHeight = Typography.LineHeight(floor);
+        var widest = MathF.Max(Typography.Measure(lines[0], floor).X, Typography.Measure(lines[1], floor).X);
+        var height = MathF.Max(rect.Height, lineHeight * CaptionLines + CaptionPadY * scale * 2f);
+        var capsule = Capsule(drawList, rect, widest + padX * 2f + dotRoom, height, alpha);
+        DrawLiveDot(drawList, capsule, padX, dot, live, alpha);
+        var textCenter = capsule.Min.X + dotRoom + (capsule.Width - dotRoom) * 0.5f;
+        var textTop = capsule.Center.Y - lineHeight * CaptionLines * 0.5f;
+        for (var line = 0; line < CaptionLines; line++)
+        {
+            var width = Typography.Measure(lines[line], floor).X;
+            Typography.Draw(drawList, new Vector2(textCenter - width * 0.5f, textTop + line * lineHeight),
+                lines[line], ink, floor);
+        }
+    }
+
+    private static Rect Capsule(ImDrawListPtr drawList, Rect rect, float width, float height, float alpha)
+    {
+        var shown = MathF.Min(rect.Width, width);
+        var capsule = new Rect(new Vector2(rect.Center.X - shown * 0.5f, rect.Max.Y - height),
+            new Vector2(rect.Center.X + shown * 0.5f, rect.Max.Y));
+        StageText.Capsule(drawList, capsule.Min, capsule.Max, alpha);
+        return capsule;
+    }
+
+    private static void DrawLiveDot(ImDrawListPtr drawList, Rect capsule, float padX, float dot, bool live,
+        float alpha)
+    {
+        if (!live)
+        {
+            return;
+        }
+
+        var blink = 0.4f + 0.6f * Pulse.Wave(Pulse.Fast);
+        drawList.AddCircleFilled(new Vector2(capsule.Min.X + padX + dot, capsule.Center.Y), dot,
+            ImGui.GetColorU32(CasinoColors.LightA with { W = blink * alpha }), 12);
     }
 
     private static void DrawDot(ImDrawListPtr drawList, Vector2 center, float radius, int slot, bool backed,

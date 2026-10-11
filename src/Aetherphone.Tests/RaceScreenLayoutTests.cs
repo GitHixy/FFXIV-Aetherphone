@@ -3,6 +3,8 @@ using Aetherphone.Apps.Casino.Race;
 using Aetherphone.Apps.Casino.Stage;
 using Aetherphone.Core;
 using Aetherphone.Core.Casino;
+using Aetherphone.Core.Localization;
+using Aetherphone.Windows.Components;
 using Xunit;
 
 namespace Aetherphone.Tests;
@@ -10,6 +12,7 @@ namespace Aetherphone.Tests;
 public sealed class RaceScreenLayoutTests
 {
     private const float Tolerance = 0.01f;
+    private const float WrapSlack = 0.8f;
 
     private static readonly float[] Scales = { 0.75f, 1f, 1.25f, 1.5f };
 
@@ -137,6 +140,9 @@ public sealed class RaceScreenLayoutTests
             var stage = Stage(full, 0f, scale);
             var layout = RaceTrackLayout.Compute(full, stage.Band.Max.Y, scale);
             AssertRaceLayout(layout, full, stage, scale);
+            Assert.False(layout.Stacked);
+            Assert.True(layout.Caption.Width >= RaceTrackLayout.SideCaptionMin * scale - Tolerance);
+            Assert.Equal(layout.TopThree.Min.Y, layout.Caption.Min.Y, 2);
             Assert.Equal(full.Width, layout.Track.Width, 2);
             Assert.True(layout.Track.Height >= full.Height * 0.5f);
             Assert.True(RaceTrackView.SideBirdHeight(layout.Track, scale) >= 36f * scale,
@@ -160,8 +166,42 @@ public sealed class RaceScreenLayoutTests
             var stage = Stage(full, 0f, scale);
             var layout = RaceTrackLayout.Compute(full, stage.Band.Max.Y, scale);
             AssertRaceLayout(layout, full, stage, scale);
+            Assert.True(layout.Stacked);
+            Assert.Equal(full.Width - RaceTrackLayout.Inset * scale * 2f, layout.Caption.Width, 2);
+            Assert.True(layout.Caption.Max.Y <= layout.TopThree.Min.Y);
+            Assert.Equal(full.Center.X, layout.TopThree.Center.X, 2);
             Assert.True(layout.Track.Height >= full.Height * 0.7f);
             Assert.True(RaceTrackView.VerticalBirdLength(layout.Track) >= 36f * scale);
+        }
+    }
+
+    [Fact]
+    public void EveryFixedRaceCaptionFitsTheNarrowestPortraitTrack()
+    {
+        var lines = new[]
+        {
+            L.Race.Gates, L.Race.Replay, L.Race.PhotoFinish, L.Race.LineOff1, L.Race.LineOff2, L.Race.LineStretch1,
+            L.Race.LineStretch2,
+        };
+        var catalogs = RaceCopy.Catalogs;
+        for (var index = 0; index < Scales.Length; index++)
+        {
+            var scale = Scales[index];
+            var full = Phone(PortraitPhones[1], scale);
+            var layout = RaceTrackLayout.Compute(full, Stage(full, 0f, scale).Band.Max.Y, scale);
+            var room = layout.Caption.Width - layout.Caption.Height - 16f * scale;
+            for (var language = 0; language < catalogs.Length; language++)
+            {
+                for (var line = 0; line < lines.Length; line++)
+                {
+                    var text = RaceCopy.Text(catalogs[language], lines[line]);
+                    Assert.True(RaceCopy.Measure(text, TextStyles.SubheadlineEmphasized, scale, 1f) <= room,
+                        $"'{text}' at full size x{scale}");
+                    Assert.True(
+                        RaceCopy.Measure(text, TextStyles.FootnoteEmphasized, scale, RaceCopy.MaxTextZoom)
+                        <= room * RaceHud.CaptionLines * WrapSlack, $"'{text}' at the largest text size x{scale}");
+                }
+            }
         }
     }
 
@@ -173,6 +213,7 @@ public sealed class RaceScreenLayoutTests
         Assert.True(Inside(layout.Caption, full));
         Assert.True(layout.Progress.Height <= 24f * scale + Tolerance);
         Assert.True(layout.Progress.Min.Y >= stage.Band.Max.Y);
+        Assert.True(layout.Progress.Max.Y <= stage.Ribbon.Max.Y + Tolerance);
         Assert.True(layout.Caption.Min.Y >= layout.Track.Max.Y);
         Assert.True(layout.Caption.Width >= full.Width * 0.4f);
         Assert.Equal(layout.Track.Min.Y, layout.Stand.Max.Y, 2);

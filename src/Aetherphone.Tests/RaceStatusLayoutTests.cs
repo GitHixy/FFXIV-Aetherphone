@@ -11,11 +11,6 @@ namespace Aetherphone.Tests;
 public sealed class RaceStatusLayoutTests
 {
     private const float Tolerance = 0.01f;
-    private const float EmPixels = 16f;
-    private const float MaxTextZoom = 1.5f;
-    private const float NarrowAdvance = 0.62f;
-    private const float WideAdvance = 1f;
-    private const char FirstWideCharacter = (char)0x2E80;
     private const string WidestClock = "1:00";
 
     private static readonly float[] Scales = { 0.75f, 1f, 1.25f, 1.5f };
@@ -27,16 +22,11 @@ public sealed class RaceStatusLayoutTests
 
     private static readonly LocString[] Labels = { L.Race.StatusOpen, L.Race.StatusNext };
 
-    internal static float Measure(string text, in TextStyle style, float scale, float zoom)
-    {
-        var ems = 0f;
-        for (var index = 0; index < text.Length; index++)
-        {
-            ems += text[index] >= FirstWideCharacter ? WideAdvance : NarrowAdvance;
-        }
+    private static CasinoStageLayout Stage(Vector2 phone, float scale) =>
+        RaceScreenLayoutTests.Stage(RaceScreenLayoutTests.Phone(phone, scale), RaceCabinet.DeckHeight, scale);
 
-        return ems * EmPixels * style.Scale * zoom * scale;
-    }
+    private static float Clock(float scale, float zoom) =>
+        RaceCopy.Measure(WidestClock, TextStyles.Headline, scale, zoom);
 
     private static Rect Capsule(in CasinoStageLayout stage, float width, float scale)
     {
@@ -53,11 +43,10 @@ public sealed class RaceStatusLayoutTests
         for (var scaleIndex = 0; scaleIndex < Scales.Length; scaleIndex++)
         {
             var scale = Scales[scaleIndex];
-            var clock = Measure(WidestClock, TextStyles.Headline, scale, MaxTextZoom);
+            var clock = Clock(scale, RaceCopy.MaxTextZoom);
             for (var phone = 0; phone < Phones.Length; phone++)
             {
-                var stage = RaceScreenLayoutTests.Stage(RaceScreenLayoutTests.Phone(Phones[phone], scale),
-                    RaceCabinet.DeckHeight, scale);
+                var stage = Stage(Phones[phone], scale);
                 var layout = RaceStatusLayout.Compute(stage, clock, scale);
                 Assert.True(layout.Visible);
                 Assert.True(layout.Area.Height <= RaceStatusLayout.MaxHeight * scale + Tolerance);
@@ -81,10 +70,8 @@ public sealed class RaceStatusLayoutTests
             var scale = Scales[scaleIndex];
             for (var phone = 0; phone < Phones.Length; phone++)
             {
-                var stage = RaceScreenLayoutTests.Stage(RaceScreenLayoutTests.Phone(Phones[phone], scale),
-                    RaceCabinet.DeckHeight, scale);
-                var layout = RaceStatusLayout.Compute(stage, Measure(WidestClock, TextStyles.Headline, scale, 1f),
-                    scale);
+                var stage = Stage(Phones[phone], scale);
+                var layout = RaceStatusLayout.Compute(stage, Clock(scale, 1f), scale);
                 var back = Touch(stage.BackCenter, stage.TouchRadiusPixels);
                 var info = Touch(stage.InfoCenter, stage.TouchRadiusPixels);
                 for (var step = 0; step <= 10; step++)
@@ -99,27 +86,26 @@ public sealed class RaceStatusLayoutTests
     [Fact]
     public void EveryLanguageFitsTheStatusLabelWhole()
     {
-        var catalogs = Catalogs();
+        var catalogs = RaceCopy.Catalogs;
         for (var scaleIndex = 0; scaleIndex < Scales.Length; scaleIndex++)
         {
             var scale = Scales[scaleIndex];
             for (var phone = 0; phone < Phones.Length; phone++)
             {
-                var stage = RaceScreenLayoutTests.Stage(RaceScreenLayoutTests.Phone(Phones[phone], scale),
-                    RaceCabinet.DeckHeight, scale);
-                var zoomed = RaceStatusLayout.Compute(stage,
-                    Measure(WidestClock, TextStyles.Headline, scale, MaxTextZoom), scale);
-                var regular = RaceStatusLayout.Compute(stage, Measure(WidestClock, TextStyles.Headline, scale, 1f),
-                    scale);
+                var stage = Stage(Phones[phone], scale);
+                var zoomed = RaceStatusLayout.Compute(stage, Clock(scale, RaceCopy.MaxTextZoom), scale);
+                var regular = RaceStatusLayout.Compute(stage, Clock(scale, 1f), scale);
                 for (var language = 0; language < catalogs.Length; language++)
                 {
                     for (var label = 0; label < Labels.Length; label++)
                     {
-                        var text = Text(catalogs[language], Labels[label]);
-                        Assert.True(Measure(text, TextStyles.SubheadlineEmphasized, scale, 1f) <= regular.Label.Width,
+                        var text = RaceCopy.Text(catalogs[language], Labels[label]);
+                        Assert.True(
+                            RaceCopy.Measure(text, TextStyles.SubheadlineEmphasized, scale, 1f) <= regular.Label.Width,
                             $"'{text}' at full size on {Phones[phone]} x{scale}");
                         Assert.True(
-                            Measure(text, TextStyles.FootnoteEmphasized, scale, MaxTextZoom) <= zoomed.Label.Width,
+                            RaceCopy.Measure(text, TextStyles.FootnoteEmphasized, scale, RaceCopy.MaxTextZoom)
+                            <= zoomed.Label.Width,
                             $"'{text}' at the largest text size on {Phones[phone]} x{scale}");
                     }
                 }
@@ -143,38 +129,5 @@ public sealed class RaceStatusLayoutTests
         Assert.Equal(1, RaceStatusLine.SecondsLeft(1));
         Assert.Equal(1, RaceStatusLine.SecondsLeft(1000));
         Assert.Equal(60, RaceStatusLine.SecondsLeft(59_001));
-    }
-
-    internal static StringCatalog[] Catalogs()
-    {
-        var directory = LocalizationDirectory();
-        var catalogs = new StringCatalog[Languages.All.Length];
-        for (var index = 0; index < catalogs.Length; index++)
-        {
-            catalogs[index] = StringCatalog.Load(Path.Combine(directory,
-                string.Concat(Languages.All[index].Code, ".json")));
-        }
-
-        return catalogs;
-    }
-
-    internal static string Text(StringCatalog catalog, LocString entry) =>
-        catalog.TryGet(entry.Key, out var value) ? value : entry.Source;
-
-    private static string LocalizationDirectory()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null)
-        {
-            var candidate = Path.Combine(directory.FullName, "src", "Aetherphone", "Localization");
-            if (Directory.Exists(candidate))
-            {
-                return candidate;
-            }
-
-            directory = directory.Parent;
-        }
-
-        throw new DirectoryNotFoundException(AppContext.BaseDirectory);
     }
 }
