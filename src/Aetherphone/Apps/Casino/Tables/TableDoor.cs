@@ -93,6 +93,7 @@ internal sealed class TableDoor
     {
         var scale = UiScale.Current;
         ConsumeOutcomes();
+        tables.EnsureDoorFresh(roomId);
         using var surface = AppSurface.Begin(body);
         var width = ScrollLayout.StableContentWidth();
         var door = tables.DoorFor(roomId);

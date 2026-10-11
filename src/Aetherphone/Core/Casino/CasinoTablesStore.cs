@@ -16,6 +16,7 @@ internal sealed class CasinoTablesStore : IDisposable
     private static readonly TimeSpan BackgroundPollInterval = TimeSpan.FromSeconds(120);
     private const long RetryAfterAttemptMilliseconds = 30_000;
     private const long LedgerRefreshMilliseconds = 10_000;
+    private const long DoorRefreshMilliseconds = 5_000;
     private const int NotFoundStatus = 404;
 
     private readonly AethernetSession session;
@@ -63,6 +64,7 @@ internal sealed class CasinoTablesStore : IDisposable
     private int fetchingDoor;
     private long tablesAttemptedAtTick;
     private long doorAttemptedAtTick;
+    private long doorLoadedAtTick;
     private string? lastAccountId;
 
     public CasinoTablesStore(AethernetSession session, CasinoClient casino, CasinoStore chips,
@@ -793,11 +795,34 @@ internal sealed class CasinoTablesStore : IDisposable
         RefreshDoor(roomId);
     }
 
+    public void EnsureDoorFresh(string roomId)
+    {
+        if (roomId.Length == 0 || !session.IsSignedIn)
+        {
+            return;
+        }
+
+        if (!string.Equals(doorRoomId, roomId, StringComparison.Ordinal))
+        {
+            RefreshDoorNow(roomId);
+            return;
+        }
+
+        var last = Interlocked.Read(ref doorLoadedAtTick);
+        if (last != 0 && Environment.TickCount64 - last < DoorRefreshMilliseconds)
+        {
+            return;
+        }
+
+        RefreshDoor(roomId);
+    }
+
     public void ForgetDoor()
     {
         doorRoomId = string.Empty;
         door = null;
         Interlocked.Exchange(ref doorAttemptedAtTick, 0);
+        Interlocked.Exchange(ref doorLoadedAtTick, 0);
     }
 
     public CasinoTableDoorDto? DoorFor(string roomId)
@@ -958,6 +983,7 @@ internal sealed class CasinoTablesStore : IDisposable
             }
 
             door = fresh;
+            Interlocked.Exchange(ref doorLoadedAtTick, Environment.TickCount64);
         }, () => Interlocked.Exchange(ref fetchingDoor, 0));
     }
 
