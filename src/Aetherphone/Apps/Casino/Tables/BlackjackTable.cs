@@ -97,13 +97,14 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
     public static float DeckHeightFor(int currency)
     {
+        var composerHeight = BetComposer.DeckHeightFor(false, false);
         if (currency != CasinoCurrencies.Gil)
         {
-            return BetComposer.DeckHeightFor(false, false);
+            return BlackjackDeckLayout.DeckHeight(composerHeight);
         }
 
-        return MathF.Max(BetComposer.DeckHeightFor(false, false),
-            ClassicBetComposer.HeightFor(1f) + BetComposer.Pad * 2f);
+        return BlackjackDeckLayout.DeckHeight(MathF.Max(composerHeight,
+            ClassicBetComposer.HeightFor(1f) + BetComposer.Pad * 2f));
     }
 
     public void Enter(string tableId)

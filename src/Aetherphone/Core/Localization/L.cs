@@ -11502,14 +11502,12 @@ internal static class L
         public static readonly LocString ThreeSuitedTrips = new("casino.blackjack.threeSuitedTrips", "Suited trips");
         public static readonly LocString InsurancePays = new("casino.blackjack.insurancePays", "Insurance pays 2 to 1");
         public static readonly LocString InsuranceQuestion = new("casino.blackjack.insuranceQuestion", "Insurance?");
-        public static readonly LocString InsuranceHint = new("casino.blackjack.insuranceHint", "The dealer shows an ace. Insurance pays 2 to 1 if they hold blackjack.");
         public static readonly LocString InsurePill = new("casino.blackjack.insurePill", "Insure {0}");
         public static readonly LocString NoInsurePill = new("casino.blackjack.noInsurePill", "No insurance");
         public static readonly LocString Insured = new("casino.blackjack.insured", "Insured {0}");
         public static readonly LocString InsuranceWaiting = new("casino.blackjack.insuranceWaiting", "Waiting for the dealer to peek");
         public static readonly LocString BetIn = new("casino.blackjack.betIn", "Your bet is in");
         public static readonly LocString SurrenderPill = new("casino.blackjack.surrenderPill", "Surrender");
-        public static readonly LocString SurrenderHalfBack = new("casino.blackjack.surrenderHalfBack", "Half back");
         public static readonly LocString OutcomeSurrender = new("casino.blackjack.outcomeSurrender", "Surrendered");
         public static readonly LocString SoftTotal = new("casino.blackjack.softTotal", "Soft {0}");
         public static readonly LocString DealerBusts = new("casino.blackjack.dealerBusts", "Dealer busts");

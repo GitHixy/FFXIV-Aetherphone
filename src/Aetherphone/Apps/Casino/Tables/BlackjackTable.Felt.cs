@@ -21,8 +21,6 @@ internal sealed partial class BlackjackTable
     private const float BadgePopSeconds = 0.25f;
     private const float HeroRaiseSmoothing = 0.12f;
     private const float TitleDrop = 6f;
-    private const float SurrenderWidth = 0.34f;
-    private const float OpeningHandSpan = 1.45f;
     private const float StateRingRadius = 11f;
     private const float HeroColumnSink = 3f;
     private const float StateLineShare = 0.84f;
@@ -47,7 +45,6 @@ internal sealed partial class BlackjackTable
         }
 
         DrawHero(drawList, ui, board, turnRemaining, delta, scale);
-        DrawSurrenderPill(ui, board, scale);
         dealer.DrawHand(drawList, shoe, delta, scale);
     }
 
@@ -615,39 +612,5 @@ internal sealed partial class BlackjackTable
         }
 
         return hand.Delta > 0 ? NumberText.Signed(hand.Delta) : string.Empty;
-    }
-
-    private void DrawSurrenderPill(AppSkin ui, CasinoBlackjackRoomStateDto board, float scale)
-    {
-        if (!BlackjackRules.IsSeat(mySeat) || board.ActiveSeat != mySeat
-            || !BlackjackRules.Allows(projection.ActionsMask, BlackjackRules.ActionSurrender))
-        {
-            return;
-        }
-
-        var felt = layout.Felt;
-        var centerY = layout.SurrenderCenterY;
-        var height = MathF.Min(Button.LargeHeight * scale, layout.SurrenderBand);
-        var handHalf = layout.HeroCardPixels(1) * OpeningHandSpan * 0.5f
-            + BlackjackTableLayout.HeroSlotPad * scale;
-        var right = felt.Max.X - BlackjackTableLayout.SideInset * 2f * scale;
-        var width = MathF.Min(felt.Width * SurrenderWidth, right - felt.Center.X - handHalf);
-        if (width <= height)
-        {
-            return;
-        }
-
-        var rect = new Rect(new Vector2(right - width, centerY - height * 0.5f),
-            new Vector2(right, centerY + height * 0.5f));
-        var legal = !rooms.StakeInFlight;
-        if (!AppSkin.StackedPillButton(rect, Loc.T(L.Blackjack.SurrenderPill), Loc.T(L.Blackjack.SurrenderHalfBack),
-                false, legal, ui.Ink) || !legal)
-        {
-            return;
-        }
-
-        inlineReason = string.Empty;
-        rooms.SendBlackjackAction(BlackjackRules.ActionSurrender);
-        CasinoSfx.Play(UiSound.ChipSlide);
     }
 }
