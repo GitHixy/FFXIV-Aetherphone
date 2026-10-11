@@ -1,4 +1,5 @@
 using Aetherphone.Apps.Casino.Stage;
+using Aetherphone.Apps.Games.Framework;
 using Aetherphone.Core.Notifications;
 using Xunit;
 
@@ -48,18 +49,32 @@ public sealed class WinLadderTests
     {
         Assert.Equal(12, WinLadder.Spec(WinTier.Win).Sparkles);
         Assert.Equal(0.4f, WinLadder.Spec(WinTier.Win).CountUpSeconds);
-        Assert.Equal(36, WinLadder.Spec(WinTier.Nice).Confetti);
-        Assert.Equal(90, WinLadder.Spec(WinTier.Big).Confetti);
+        Assert.Equal(18, WinLadder.Spec(WinTier.Nice).Confetti);
+        Assert.Equal(36, WinLadder.Spec(WinTier.Big).Confetti);
         Assert.Equal(1f, WinLadder.Spec(WinTier.Big).ShowerSeconds);
         Assert.Equal(UiSound.WinBig, WinLadder.Spec(WinTier.Big).Sound);
         Assert.True(WinLadder.Spec(WinTier.Mega).Fanfare);
-        Assert.Equal(160, WinLadder.Spec(WinTier.Mega).Confetti);
+        Assert.Equal(54, WinLadder.Spec(WinTier.Mega).Confetti);
         Assert.True(WinLadder.Spec(WinTier.Epic).FullCard);
         Assert.Equal(UiSound.WinEpic, WinLadder.Spec(WinTier.Epic).Sound);
-        Assert.Equal(320, WinLadder.Spec(WinTier.Legendary).Confetti);
+        Assert.Equal(90, WinLadder.Spec(WinTier.Legendary).Confetti);
         Assert.Equal(4f, WinLadder.Spec(WinTier.Legendary).CountUpSeconds);
         Assert.False(WinLadder.Spec(WinTier.Win).Banner);
-        Assert.True(WinLadder.Spec(WinTier.Nice).Banner);
+        Assert.False(WinLadder.Spec(WinTier.Nice).Banner);
+        Assert.True(WinLadder.Spec(WinTier.Big).Banner);
+    }
+
+    [Fact]
+    public void ChipWinEffectsCarryNoCoinShapesOrCoinGold()
+    {
+        var sparkle = CasinoLights.ChipSparkle(1f);
+        var shard = CasinoLights.ChipShard(1f);
+
+        Assert.NotEqual(ParticleShape.Coin, sparkle.Shape);
+        Assert.NotEqual(ParticleShape.Coin, shard.Shape);
+        Assert.NotEqual(CasinoColors.Money, sparkle.StartColor);
+        Assert.NotEqual(CasinoColors.Money, shard.StartColor);
+        Assert.NotEqual(CasinoColors.Money, shard.EndColor);
     }
 
     [Fact]
