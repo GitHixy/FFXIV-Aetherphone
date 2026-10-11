@@ -314,7 +314,7 @@ internal sealed class BetComposer
         var queued = startQueued ? StartQueued(model, desk, need, ready) : BetComposerAction.None;
         startQueued = false;
         var canBet = ready && need <= model.Stack;
-        var label = ActionLabel(model.Action, amount, int.MinValue);
+        var label = ActionLabel(model.Action, need, int.MinValue);
         var pressed = desk is null || model.Rack
             ? Button.Draw(actionRect, label, ui.Ink, ButtonStyle.Prominent, enabled: canBet, id: ActionId)
             : desk.Primary(actionRect, label, need, model.Stack, ready, ui.Ink, ActionId, ref pending)
