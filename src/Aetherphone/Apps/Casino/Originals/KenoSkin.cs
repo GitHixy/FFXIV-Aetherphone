@@ -143,7 +143,8 @@ internal sealed class KenoSkin : IOriginalsSkin
     {
         var scale = UiScale.Current;
         var world = frame.World;
-        var footer = Button.SmallHeight * scale;
+        var statusHeight = Typography.LineHeight(TextStyles.FootnoteEmphasized);
+        var footer = KenoFooterLayout.Height(statusHeight, scale);
         var gap = Metrics.Space.Sm * scale;
         var boardArea = new Rect(world.Min, new Vector2(world.Max.X, world.Max.Y - footer - gap));
         var cell = MathF.Min((boardArea.Width - BoardPad * 2f * scale - TileGap * scale * (Columns - 1)) / Columns,
@@ -159,7 +160,7 @@ internal sealed class KenoSkin : IOriginalsSkin
         var editable = frame.Interactive && !playback.Drawing && !frame.Originals.InFlight;
         DrawTiles(drawList, ui, cell, editable, scale);
         DrawFooter(drawList, ui, new Rect(new Vector2(world.Min.X, boardRect.Max.Y + gap),
-            new Vector2(world.Max.X, boardRect.Max.Y + gap + footer)), editable, scale);
+            new Vector2(world.Max.X, boardRect.Max.Y + gap + footer)), statusHeight, editable, scale);
     }
 
     public void DrawKnob(ImDrawListPtr drawList, Rect rect, AppSkin ui, bool changeable)
@@ -331,16 +332,17 @@ internal sealed class KenoSkin : IOriginalsSkin
         }
     }
 
-    private void DrawFooter(ImDrawListPtr drawList, AppSkin ui, Rect row, bool editable, float scale)
+    private void DrawFooter(ImDrawListPtr drawList, AppSkin ui, Rect footer, float statusHeight, bool editable,
+        float scale)
     {
-        var gap = Metrics.Space.Sm * scale;
+        var status = pickedLabel.Get(L.Originals.KenoPicked, playback.HasDraw ? playback.Picks : pickCount);
+        var statusRow = KenoFooterLayout.Status(footer, statusHeight);
+        var fitted = Typography.FitText(status, statusRow.Width, TextStyles.FootnoteEmphasized);
+        Typography.DrawCentered(drawList, statusRow.Center, fitted, CasinoColors.InkTitle, TextStyles.FootnoteEmphasized);
         var autoLabel = Loc.T(L.Originals.AutoPick);
         var clearLabel = Loc.T(L.Originals.Clear);
-        var autoWidth = Button.WidthFor(autoLabel, ButtonSize.Small);
-        var clearWidth = Button.WidthFor(clearLabel, ButtonSize.Small);
-        var autoRect = new Rect(row.Min, new Vector2(row.Min.X + autoWidth, row.Max.Y));
-        var clearRect = new Rect(new Vector2(autoRect.Max.X + gap, row.Min.Y),
-            new Vector2(autoRect.Max.X + gap + clearWidth, row.Max.Y));
+        KenoFooterLayout.Buttons(footer, statusHeight, Button.WidthFor(autoLabel, ButtonSize.Large),
+            Button.WidthFor(clearLabel, ButtonSize.Large), scale, out var autoRect, out var clearRect);
         if (Button.Draw(drawList, autoRect, autoLabel, ui.Ink, ButtonStyle.Tinted, enabled: editable))
         {
             AutoPick();
@@ -353,13 +355,6 @@ internal sealed class KenoSkin : IOriginalsSkin
             playback.Clear();
             CasinoSfx.Play(UiSound.ChipSlide);
         }
-
-        var status = pickedLabel.Get(L.Originals.KenoPicked, playback.HasDraw ? playback.Picks : pickCount);
-        var available = MathF.Max(1f, row.Max.X - clearRect.Max.X - gap);
-        var fitted = Typography.FitText(status, available, TextStyles.FootnoteEmphasized);
-        var size = Typography.Measure(fitted, TextStyles.FootnoteEmphasized);
-        Typography.Draw(drawList, new Vector2(row.Max.X - size.X, row.Center.Y - size.Y * 0.5f), fitted,
-            CasinoColors.InkTitle, TextStyles.FootnoteEmphasized);
     }
 
     private void Toggle(int tile)

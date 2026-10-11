@@ -77,6 +77,38 @@ public sealed class OriginalsLayoutTests
 
     [Theory]
     [MemberData(nameof(Scales))]
+    public void KenoFooterKeepsTheStatusOnItsOwnLineAboveTouchSizedButtons(float scale)
+    {
+        var status = 18f * scale;
+        var top = 400f * scale;
+        var footer = new Rect(new Vector2(12f * scale, top),
+            new Vector2(348f * scale, top + KenoFooterLayout.Height(status, scale)));
+        KenoFooterLayout.Buttons(footer, status, 150f * scale, 100f * scale, scale, out var first, out var second);
+        var statusRow = KenoFooterLayout.Status(footer, status);
+
+        Assert.True(first.Height >= 44f * scale - 0.01f);
+        Assert.Equal(first.Height, second.Height, 2);
+        Assert.True(statusRow.Max.Y <= first.Min.Y);
+        Assert.True(first.Max.X <= second.Min.X);
+        Assert.True(first.Min.X >= footer.Min.X - 0.01f && second.Max.X <= footer.Max.X + 0.01f);
+        Assert.True(second.Max.Y <= footer.Max.Y + 0.01f);
+        Assert.Equal(150f * scale, first.Width, 2);
+    }
+
+    [Theory]
+    [MemberData(nameof(Scales))]
+    public void KenoButtonsThatCannotFitShrinkInsideTheFooter(float scale)
+    {
+        var footer = new Rect(Vector2.Zero, new Vector2(200f * scale, 100f * scale));
+        KenoFooterLayout.Buttons(footer, 18f * scale, 180f * scale, 120f * scale, scale, out var first, out var second);
+
+        Assert.True(first.Min.X >= footer.Min.X - 0.01f);
+        Assert.True(second.Max.X <= footer.Max.X + 0.01f);
+        Assert.True(first.Max.X <= second.Min.X);
+    }
+
+    [Theory]
+    [MemberData(nameof(Scales))]
     public void TheFocusedStepIsAlwaysVisible(float scale)
     {
         for (var focus = 0; focus < 20; focus++)
