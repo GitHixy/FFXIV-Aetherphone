@@ -25,15 +25,6 @@ internal sealed partial class MachineCabinet
         "casino.machines.gamble",
     };
 
-    private static readonly FontAwesomeIcon[] ExtraIcons =
-    {
-        FontAwesomeIcon.Bolt,
-        FontAwesomeIcon.AngleDoubleUp,
-        FontAwesomeIcon.ShoppingBag,
-        FontAwesomeIcon.FastForward,
-        FontAwesomeIcon.Dice,
-    };
-
     private readonly MachineExtra[] extraKinds = new MachineExtra[MachineExtrasLayout.MaxPills];
     private readonly string[] extraLabels = new string[MachineExtrasLayout.MaxPills];
     private readonly float[] extraWidths = new float[MachineExtrasLayout.MaxPills];
@@ -125,6 +116,13 @@ internal sealed partial class MachineCabinet
         _ => !blocked,
     };
 
+    private static FontAwesomeIcon IconOf(MachineExtra kind) => kind switch
+    {
+        MachineExtra.Skip => FontAwesomeIcon.Forward,
+        MachineExtra.Gamble => FontAwesomeIcon.Dice,
+        _ => FontAwesomeIcon.Bolt,
+    };
+
     private bool ExtraOn(MachineExtra kind) => kind switch
     {
         MachineExtra.Turbo => turbo,
@@ -165,8 +163,8 @@ internal sealed partial class MachineCabinet
         var left = shape.Center.X - (icon + labelSize.X) * 0.5f;
         if (icon > 0f)
         {
-            ProgressRing.CenterIcon(drawList, new Vector2(left + iconHeight * 0.5f, shape.Center.Y),
-                ExtraIcons[(int)kind], iconInk, iconHeight);
+            ProgressRing.CenterIcon(drawList, new Vector2(left + iconHeight * 0.5f, shape.Center.Y), IconOf(kind),
+                iconInk, iconHeight);
         }
 
         Typography.Draw(drawList, new Vector2(left + icon, shape.Center.Y - labelSize.Y * 0.5f), label, labelInk,
