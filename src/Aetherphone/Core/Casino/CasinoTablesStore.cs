@@ -35,6 +35,8 @@ internal sealed class CasinoTablesStore : IDisposable
     private volatile CasinoTableRowDto? card;
     private readonly Action<int> cardStatusSink;
     private int fetchingCard;
+    private long cardAtTick;
+    private long listedAtTick;
     private int cardMissing;
     private string vanishedTableId = string.Empty;
     private readonly Action<int> knockStatusSink;
@@ -97,13 +99,21 @@ internal sealed class CasinoTablesStore : IDisposable
 
     public CasinoTableRowDto[] Listed => listed;
 
-    public CasinoTableRowDto? CardFor(string roomId) => CardIn(listed, card, roomId);
+    public CasinoTableRowDto? CardFor(string roomId) =>
+        CardIn(listed, Interlocked.Read(ref listedAtTick), card, Interlocked.Read(ref cardAtTick), roomId);
 
-    internal static CasinoTableRowDto? CardIn(CasinoTableRowDto[] rows, CasinoTableRowDto? held, string roomId)
+    internal static CasinoTableRowDto? CardIn(CasinoTableRowDto[] rows, long rowsAtTick, CasinoTableRowDto? held,
+        long heldAtTick, string roomId)
     {
         if (roomId.Length == 0)
         {
             return null;
+        }
+
+        var holds = held is not null && string.Equals(held.TableId, roomId, StringComparison.Ordinal);
+        if (holds && heldAtTick >= rowsAtTick)
+        {
+            return held;
         }
 
         for (var index = 0; index < rows.Length; index++)
@@ -114,7 +124,13 @@ internal sealed class CasinoTablesStore : IDisposable
             }
         }
 
-        return held is not null && string.Equals(held.TableId, roomId, StringComparison.Ordinal) ? held : null;
+        return holds ? held : null;
+    }
+
+    private void HoldCard(CasinoTableRowDto fresh)
+    {
+        card = fresh;
+        Interlocked.Exchange(ref cardAtTick, Environment.TickCount64);
     }
 
     public void RefreshCard(string roomId)
@@ -130,7 +146,7 @@ internal sealed class CasinoTablesStore : IDisposable
             var fresh = await casino.TableAsync(roomId, cardStatusSink, token).ConfigureAwait(false);
             if (fresh is not null)
             {
-                card = fresh;
+                HoldCard(fresh);
                 return;
             }
 
@@ -710,7 +726,7 @@ internal sealed class CasinoTablesStore : IDisposable
 
     private void Resolved(CasinoTableRowDto table, string doorReason)
     {
-        card = table;
+        HoldCard(table);
         if (doorReason.Length > 0)
         {
             knock = new CasinoKnockStatus(table.TableId, CasinoKnocks.FromDecline(doorReason), doorReason);
@@ -825,7 +841,7 @@ internal sealed class CasinoTablesStore : IDisposable
             var stage = CasinoKnocks.FromCard(watched.Stage, fresh.Admitted, fresh.Reason);
             if (stage == KnockStage.Admitted)
             {
-                card = fresh;
+                HoldCard(fresh);
             }
 
             if (stage != watched.Stage)
@@ -1064,7 +1080,7 @@ internal sealed class CasinoTablesStore : IDisposable
 
     private void Hosted(CasinoTableRowDto table)
     {
-        card = table;
+        HoldCard(table);
         Interlocked.Exchange(ref hostedTable, table);
         RefreshNow();
     }
@@ -1168,6 +1184,7 @@ internal sealed class CasinoTablesStore : IDisposable
             Interlocked.Exchange(ref tablesAttemptedAtTick, 0);
             var rows = directory.Tables ?? Array.Empty<CasinoTableRowDto>();
             listed = rows;
+            Interlocked.Exchange(ref listedAtTick, Environment.TickCount64);
             tables = CasinoTableFilters.OfKind(rows, CasinoWire.BlackjackKind);
             loaded = true;
         }, () =>

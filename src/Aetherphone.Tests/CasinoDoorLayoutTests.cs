@@ -191,12 +191,25 @@ public sealed class CasinoDoorLayoutTests
     {
         var hosted = new CasinoTableRowDto(TableId: "t1", JoinCode: "ABCDEF");
         var nothingListed = Array.Empty<CasinoTableRowDto>();
-        var card = CasinoTablesStore.CardIn(nothingListed, hosted, "t1");
+        var card = CasinoTablesStore.CardIn(nothingListed, 0, hosted, 1, "t1");
         Assert.Same(hosted, card);
         Assert.Equal("ABCDEF", TableDoor.JoinCode(null, card));
-        Assert.Null(CasinoTablesStore.CardIn(nothingListed, hosted, "t2"));
-        Assert.Null(CasinoTablesStore.CardIn(nothingListed, hosted, string.Empty));
+        Assert.Null(CasinoTablesStore.CardIn(nothingListed, 0, hosted, 1, "t2"));
+        Assert.Null(CasinoTablesStore.CardIn(nothingListed, 0, hosted, 1, string.Empty));
         var listed = new[] { new CasinoTableRowDto(TableId: "t1", SeatedCount: 1, JoinCode: "ABCDEF") };
-        Assert.Same(listed[0], CasinoTablesStore.CardIn(listed, hosted, "t1"));
+        Assert.Same(listed[0], CasinoTablesStore.CardIn(listed, 2, hosted, 1, "t1"));
+    }
+
+    [Fact]
+    public void TheFresherOfTheCardAndTheListingWins()
+    {
+        var fetched = new CasinoTableRowDto(TableId: "t1", Name: "Renamed", Paused: true);
+        var listed = new[] { new CasinoTableRowDto(TableId: "t1", Name: "Old name") };
+
+        Assert.Same(fetched, CasinoTablesStore.CardIn(listed, 1_000, fetched, 5_000, "t1"));
+        Assert.Same(listed[0], CasinoTablesStore.CardIn(listed, 9_000, fetched, 5_000, "t1"));
+        Assert.Same(fetched, CasinoTablesStore.CardIn(listed, 5_000, fetched, 5_000, "t1"));
+        Assert.Same(listed[0], CasinoTablesStore.CardIn(listed, 1_000, null, 0, "t1"));
+        Assert.Same(listed[0], CasinoTablesStore.CardIn(listed, 1_000, fetched with { TableId = "t2" }, 5_000, "t1"));
     }
 }
