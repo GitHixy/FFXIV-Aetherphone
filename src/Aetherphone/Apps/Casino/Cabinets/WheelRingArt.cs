@@ -119,6 +119,12 @@ internal static class WheelRingArt
         }
     }
 
+    public static string SpotLabel(int spot)
+    {
+        RefreshSpotLabels();
+        return SpotLabels[spot];
+    }
+
     private static void RefreshSpotLabels()
     {
         if (ReferenceEquals(spotLabelLanguage, Loc.Current))
@@ -207,32 +213,5 @@ internal static class WheelRingArt
         drawList.AddTriangleFilled(tip, back - across * width, back + across * width, ImGui.GetColorU32(Brass));
         drawList.AddCircleFilled(back + along * 2f * scale, 4f * scale,
             ImGui.GetColorU32(Palette.WithAlpha(LightInk, 0.85f)), 16);
-    }
-
-    public static void DrawCountdown(ImDrawListPtr drawList, Vector2 center, float radius, float fraction,
-        Vector4 color, float scale)
-    {
-        var track = ImGui.GetColorU32(Palette.WithAlpha(color, 0.16f));
-        drawList.AddCircle(center, radius, track, 96, 3f * scale);
-        if (fraction <= 0f)
-        {
-            return;
-        }
-
-        if (fraction > 1f)
-        {
-            fraction = 1f;
-        }
-
-        var steps = Math.Max(4, (int)MathF.Ceiling(fraction * 96f));
-        var tint = ImGui.GetColorU32(color);
-        var previous = center + Direction(0f) * radius;
-        for (var step = 1; step <= steps; step++)
-        {
-            var angle = fraction * WheelChoreography.Tau * (step / (float)steps);
-            var next = center + Direction(angle) * radius;
-            drawList.AddLine(previous, next, tint, 3f * scale);
-            previous = next;
-        }
     }
 }

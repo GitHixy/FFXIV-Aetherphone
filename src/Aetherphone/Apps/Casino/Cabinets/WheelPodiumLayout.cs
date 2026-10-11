@@ -4,40 +4,47 @@ namespace Aetherphone.Apps.Casino.Cabinets;
 
 internal readonly struct WheelPodiumLayout
 {
-    public const float Pad = 6f;
-    public const float RowGap = 4f;
-    public const float HeaderHeight = 26f;
-    public const float BetHeight = 22f;
-    public const float BackHeight = 18f;
+    public const float PadTop = 6f;
+    public const float PadBottom = 6f;
+    public const float InsetX = 4f;
+    public const float HeaderHeight = 28f;
+    public const float HeaderGap = 2f;
+    public const float StakeHeight = 20f;
+    public const float DividerGap = 5f;
+    public const float TableRowHeight = 18f;
 
     public readonly Rect Header;
-    public readonly Rect Bet;
+    public readonly Rect Stake;
+    public readonly float DividerY;
     public readonly Rect Crowd;
-    public readonly Rect Back;
+    public readonly Rect Total;
 
-    private WheelPodiumLayout(Rect header, Rect bet, Rect crowd, Rect back)
+    private WheelPodiumLayout(Rect header, Rect stake, float dividerY, Rect crowd, Rect total)
     {
         Header = header;
-        Bet = bet;
+        Stake = stake;
+        DividerY = dividerY;
         Crowd = crowd;
-        Back = back;
+        Total = total;
     }
 
     public static float Height(float scale) =>
-        (Pad * 2f + HeaderHeight + BetHeight + BackHeight + RowGap * 3f) * scale + WheelCrowdArt.Height(scale);
+        (PadTop + HeaderHeight + HeaderGap + StakeHeight + DividerGap * 2f + TableRowHeight * 2f + PadBottom)
+        * scale;
 
     public static WheelPodiumLayout Compute(Rect podium, float scale)
     {
-        var pad = Pad * scale;
-        var gap = RowGap * scale;
-        var left = podium.Min.X + pad * 0.5f;
-        var right = MathF.Max(left, podium.Max.X - pad * 0.5f);
-        var top = podium.Min.Y + pad;
-        var header = Row(left, right, ref top, HeaderHeight * scale, gap);
-        var bet = Row(left, right, ref top, BetHeight * scale, gap);
-        var crowd = Row(left, right, ref top, WheelCrowdArt.Height(scale), gap);
-        var back = Row(left, right, ref top, BackHeight * scale, gap);
-        return new WheelPodiumLayout(header, bet, crowd, back);
+        var inset = InsetX * scale;
+        var left = podium.Min.X + inset;
+        var right = MathF.Max(left, podium.Max.X - inset);
+        var top = podium.Min.Y + PadTop * scale;
+        var header = Row(left, right, ref top, HeaderHeight * scale, HeaderGap * scale);
+        var stake = Row(left, right, ref top, StakeHeight * scale, DividerGap * scale);
+        var dividerY = top;
+        top += DividerGap * scale;
+        var crowd = Row(left, right, ref top, TableRowHeight * scale, 0f);
+        var total = Row(left, right, ref top, TableRowHeight * scale, 0f);
+        return new WheelPodiumLayout(header, stake, dividerY, crowd, total);
     }
 
     private static Rect Row(float left, float right, ref float top, float height, float gap)
