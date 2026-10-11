@@ -116,6 +116,11 @@ internal sealed partial class TableDoor
                 Gap(Metrics.Space.Sm, scale);
                 DrawNote(ui, width, Loc.T(L.Tables.ChipHostNote), scale);
             }
+            else if (!TakesCoDealers(card))
+            {
+                Gap(Metrics.Space.Sm, scale);
+                DrawNote(ui, width, Loc.T(L.Tables.CoDealersHoldemNote), scale);
+            }
 
             if (renaming)
             {
@@ -325,6 +330,10 @@ internal sealed partial class TableDoor
         var banked = CasinoCurrencies.SeatBanked(CasinoCurrencies.Of(card));
         var hostDeals = card.Config is not null && card.Config.DealerMode == CasinoDealerModes.Host;
         var count = Controls(banked, hostDeals, controls);
+        if (!TakesCoDealers(card))
+        {
+            count = WithoutCoDealers(controls, count);
+        }
         var columns = DoorLayout.ControlColumns(width, count, scale);
         var cellWidth = DoorLayout.ControlCellWidth(width, columns, scale);
         var labelBlock = 0f;

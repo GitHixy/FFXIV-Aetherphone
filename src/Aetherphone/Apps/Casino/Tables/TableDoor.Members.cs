@@ -16,6 +16,25 @@ internal sealed partial class TableDoor
         return card is null || VenueKinds.Of(card.GameKind) == VenueRoomKind.None;
     }
 
+    internal static bool TakesCoDealers(CasinoTableRowDto card)
+    {
+        return !string.Equals(card.GameKind, HoldemRules.Kind, StringComparison.Ordinal);
+    }
+
+    internal static int WithoutCoDealers(DoorControl[] controls, int count)
+    {
+        var write = 0;
+        for (var index = 0; index < count; index++)
+        {
+            if (controls[index] != DoorControl.CoDealers)
+            {
+                controls[write++] = controls[index];
+            }
+        }
+
+        return write;
+    }
+
     internal static bool Removable(string userId, CasinoTableRowDto? card)
     {
         return card is null || !string.Equals(card.OwnerUserId, userId, StringComparison.Ordinal);

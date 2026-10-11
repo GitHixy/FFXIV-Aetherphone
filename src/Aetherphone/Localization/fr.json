@@ -8971,6 +8971,7 @@
   "casino.tables.dealerHost": "Je distribue",
   "casino.tables.autoDeal": "Distribuer automatiquement à l'horloge des mises",
   "casino.tables.coDealersNote": "Une fois les joueurs assis, nomme jusqu'à 3 co-croupiers depuis la porte. Ils ont les mêmes boutons Distribuer et Pause.",
+  "casino.tables.coDealersHoldemNote": "Aux tables de poker, c'est la maison qui distribue : pas de co-croupiers.",
   "casino.tables.dealerChipNote": "Aux tables à jetons, la maison distribue à l'horloge. Joue en entraînement ou en gils pour distribuer toi-même et nommer des co-croupiers.",
   "casino.tables.rulesPays": "Le blackjack paie",
   "casino.tables.pays32": "3:2",

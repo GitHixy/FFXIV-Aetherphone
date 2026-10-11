@@ -8971,6 +8971,7 @@
   "casino.tables.dealerHost": "Ich gebe",
   "casino.tables.autoDeal": "Automatisch nach der Einsatz-Uhr geben",
   "casino.tables.coDealersNote": "Sobald Spieler sitzen, ernennst du an der Tür bis zu 3 Co-Dealer. Sie bekommen dieselben Knöpfe Geben und Pause.",
+  "casino.tables.coDealersHoldemNote": "Pokertische gibt das Haus, deshalb gibt es dort keine Co-Dealer.",
   "casino.tables.dealerChipNote": "Chip-Tische gibt das Haus nach der Uhr. Spiel um Übung oder Gil, um selbst zu geben und Co-Dealer zu ernennen.",
   "casino.tables.rulesPays": "Blackjack zahlt",
   "casino.tables.pays32": "3:2",

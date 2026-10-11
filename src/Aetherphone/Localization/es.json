@@ -8971,6 +8971,7 @@
   "casino.tables.dealerHost": "Reparto yo",
   "casino.tables.autoDeal": "Repartir automáticamente con el reloj de apuestas",
   "casino.tables.coDealersNote": "Cuando haya jugadores, nombra hasta 3 codealers desde la puerta. Tendrán los mismos controles de Repartir y Pausa.",
+  "casino.tables.coDealersHoldemNote": "En las mesas de póker reparte la casa, así que no admiten codealers.",
   "casino.tables.dealerChipNote": "En las mesas de fichas reparte la casa con el reloj. Juega por práctica o por gil para repartir tú y nombrar co-crupieres.",
   "casino.tables.rulesPays": "El blackjack paga",
   "casino.tables.pays32": "3:2",

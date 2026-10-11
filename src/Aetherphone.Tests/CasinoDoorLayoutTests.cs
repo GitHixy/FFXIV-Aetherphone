@@ -133,6 +133,22 @@ public sealed class CasinoDoorLayoutTests
     }
 
     [Fact]
+    public void APokerDoorHidesCoDealersAndKeepsTheRest()
+    {
+        var holdem = new CasinoTableRowDto(TableId: "t1", GameKind: HoldemRules.Kind, Practice: true);
+        var blackjack = new CasinoTableRowDto(TableId: "t2", GameKind: CasinoWire.BlackjackKind, Practice: true);
+        Assert.False(TableDoor.TakesCoDealers(holdem));
+        Assert.True(TableDoor.TakesCoDealers(blackjack));
+
+        var controls = new DoorControl[5];
+        var count = TableDoor.WithoutCoDealers(controls, TableDoor.Controls(true, false, controls));
+        Assert.Equal(3, count);
+        Assert.Equal(DoorControl.Pause, controls[0]);
+        Assert.Equal(DoorControl.Rename, controls[1]);
+        Assert.Equal(DoorControl.Close, controls[2]);
+    }
+
+    [Fact]
     public void AVenueDoorListsTheRoomInsteadOfSeatsAndTheHostIsNeverRemovable()
     {
         Assert.False(TableDoor.HasSeats(new CasinoTableRowDto(TableId: "t1", GameKind: VenueKinds.Raffle)));
