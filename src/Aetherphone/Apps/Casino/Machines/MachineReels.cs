@@ -15,6 +15,16 @@ internal sealed class MachineReels
     public const float RowsPerSecond = 16f;
     public const float SymbolShare = 0.36f;
 
+    private const ulong PopSeedPrime = 1099511628211UL;
+    private const float FlashStart = 0.85f;
+    private const float FlashGrowth = 0.35f;
+    private const float FlashAlpha = 0.45f;
+    private const float FlashCoreShare = 0.55f;
+    private const float FlashCoreAlpha = 0.85f;
+    private const float SparkShrink = 0.5f;
+    private const float SparkLength = 1.6f;
+    private const float SparkWidth = 0.6f;
+
     private static readonly Vector4 Gold = new(1f, 0.80f, 0.30f, 1f);
     private static readonly Vector4 SlotInk = new(0f, 0f, 0f, 0.42f);
 
@@ -24,8 +34,12 @@ internal sealed class MachineReels
     private readonly int[] survivorRows = new int[MachineRoundPlayback.MaxCells];
     private readonly MachineTraceCycle traces = new();
     private readonly MachineCellOutline outline = new();
+    private readonly CascadePop pop = new();
+    private readonly bool[] popped = new bool[MachineRoundPlayback.MaxCells];
 
-    private int shatteredStep = -1;
+    private int poppedRound = -1;
+    private int poppedStep = -1;
+    private GameRandom popRandom;
     private string restingMachine = string.Empty;
 
     public void Rest(string machineId)
@@ -49,8 +63,9 @@ internal sealed class MachineReels
     }
 
     public void Draw(ImDrawListPtr drawList, Rect window, MachineRoundPlayback playback, string machineId,
-        float phase, float deltaSeconds, ParticleSystem particles, float scale)
+        float phase, float deltaSeconds, float scale)
     {
+        pop.Update(deltaSeconds);
         var info = SlotsMachines.For(machineId);
         var cellWidth = window.Width / info.Reels;
         var cellHeight = window.Height / info.Rows;
@@ -82,8 +97,7 @@ internal sealed class MachineReels
             }
             else if (beat == MachineBeat.Tumble && playback.Previous?.Grid is { } before)
             {
-                DrawTumble(drawList, playback, info, before, grid, reel, columnMin, cellWidth, cellHeight, extent,
-                    particles, scale);
+                DrawTumble(drawList, playback, info, before, grid, reel, columnMin, cellWidth, cellHeight, extent);
             }
             else
             {
@@ -101,6 +115,7 @@ internal sealed class MachineReels
             }
         }
 
+        DrawPop(drawList);
         if (beat == MachineBeat.Expand)
         {
             DrawExpand(drawList, window, playback, info, cellWidth, extent, scale);
@@ -269,8 +284,7 @@ internal sealed class MachineReels
     }
 
     private void DrawTumble(ImDrawListPtr drawList, MachineRoundPlayback playback, SlotsMachineInfo info,
-        int[] before, int[] after, int reel, Vector2 columnMin, float cellWidth, float cellHeight, float extent,
-        ParticleSystem particles, float scale)
+        int[] before, int[] after, int reel, Vector2 columnMin, float cellWidth, float cellHeight, float extent)
     {
         var shatter = MachineTiming.Scaled(MachineTiming.Shatter, playback.Turbo);
         var fall = MachineTiming.Scaled(MachineTiming.Fall, playback.Turbo);
@@ -291,21 +305,14 @@ internal sealed class MachineReels
                 var center = new Vector2(centerX, columnMin.Y + (row + 0.5f) * cellHeight);
                 if (previousWinning[cell])
                 {
-                    drawList.AddCircleFilled(center, extent * (1.3f - shrink * 0.3f),
-                        ImGui.GetColorU32(new Vector4(0.7f, 0.95f, 1f, 0.35f * shrink)), 24);
+                    Pop(playback, cell, before[cell], center, extent);
                     MachineSymbols.Draw(drawList, info.Id, before[cell], center, extent * shrink, shrink, false);
-                    if (shatteredStep != playback.StepIndex * 8 + reel)
-                    {
-                        particles.Emit(CasinoLights.Shard(scale), center, 6);
-                    }
-
                     continue;
                 }
 
                 MachineSymbols.Draw(drawList, info.Id, before[cell], center, extent, 1f, false);
             }
 
-            shatteredStep = playback.StepIndex * 8 + reel;
             return;
         }
 
@@ -337,6 +344,63 @@ internal sealed class MachineReels
             var y = Easing.Lerp(startY, targetY, progress);
             MachineSymbols.Draw(drawList, info.Id, after[reel * info.Rows + row], new Vector2(centerX, y), extent, 1f,
                 false);
+        }
+    }
+
+    private void Pop(MachineRoundPlayback playback, int cell, int symbol, Vector2 center, float extent)
+    {
+        if (poppedRound != playback.Serial || poppedStep != playback.StepIndex)
+        {
+            poppedRound = playback.Serial;
+            poppedStep = playback.StepIndex;
+            Array.Clear(popped);
+            popRandom = GameRandom.FromSeed(playback.SeedHash ^ (ulong)(uint)playback.StepIndex * PopSeedPrime);
+        }
+
+        if (cell < 0 || cell >= popped.Length || popped[cell])
+        {
+            return;
+        }
+
+        popped[cell] = true;
+        pop.Burst(center, extent, MachineSymbols.CascadePopTint(symbol), ref popRandom);
+    }
+
+    private void DrawPop(ImDrawListPtr drawList)
+    {
+        for (var index = 0; index < pop.FlashCount; index++)
+        {
+            ref readonly var flash = ref pop.FlashAt(index);
+            var progress = flash.Age / CascadePop.FlashSeconds;
+            var fade = 1f - progress;
+            var radius = flash.Radius * (FlashStart + FlashGrowth * progress);
+            drawList.AddCircleFilled(flash.Center, radius, ImGui.GetColorU32(flash.Color with { W = FlashAlpha * fade }),
+                24);
+            drawList.AddCircleFilled(flash.Center, radius * FlashCoreShare,
+                ImGui.GetColorU32(new Vector4(1f, 1f, 1f, FlashCoreAlpha * fade * fade)), 20);
+        }
+
+        Span<Vector2> shard = stackalloc Vector2[4];
+        for (var index = 0; index < pop.SparkCount; index++)
+        {
+            ref readonly var spark = ref pop.SparkAt(index);
+            var progress = spark.Age / spark.Life;
+            var position = CascadePop.PositionOf(spark);
+            var size = spark.Size * (1f - SparkShrink * progress);
+            var angle = spark.Spin * spark.Age + MathF.Atan2(spark.Velocity.Y, spark.Velocity.X);
+            var along = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * size * SparkLength;
+            var across = new Vector2(-along.Y, along.X) * (SparkWidth / SparkLength);
+            shard[0] = position + along;
+            shard[1] = position + across;
+            shard[2] = position - along;
+            shard[3] = position - across;
+            drawList.PathClear();
+            for (var point = 0; point < shard.Length; point++)
+            {
+                drawList.PathLineTo(shard[point]);
+            }
+
+            drawList.PathFillConvex(ImGui.GetColorU32(spark.Color with { W = 1f - progress }));
         }
     }
 

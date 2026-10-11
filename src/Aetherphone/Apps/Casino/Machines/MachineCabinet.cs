@@ -238,7 +238,7 @@ internal sealed partial class MachineCabinet
         DrawGlass(drawList, ui, frame, scale);
         MachineArt.ReelWindow(drawList, window, machineId, scale);
         drawList.PushClipRect(window.Min, window.Max, true);
-        reels.Draw(drawList, window, playback, machineId, frame.Phase, frame.DeltaSeconds, stage.Particles, scale);
+        reels.Draw(drawList, window, playback, machineId, frame.Phase, frame.DeltaSeconds, scale);
         drawList.PopClipRect();
         DrawBanners(drawList, frame, scale);
         DrawGamble(drawList, ui, frame, scale);

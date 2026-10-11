@@ -60,6 +60,8 @@ internal sealed class MachineRoundPlayback
 
     public int Serial { get; private set; }
 
+    public ulong SeedHash { get; private set; }
+
     public string MachineId => info.Id;
 
     public SlotsMachineInfo Info => info;
@@ -699,6 +701,7 @@ internal sealed class MachineRoundPlayback
             hash *= FnvPrime;
         }
 
+        SeedHash = hash;
         var random = GameRandom.FromSeed(hash);
         for (var reel = 0; reel < MaxReels; reel++)
         {
