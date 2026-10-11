@@ -56,7 +56,10 @@ internal sealed class RaceResultCard
         var paidCount = CollectPaid(tickets);
         var results = board.Results ?? Array.Empty<CasinoRaceResultDto>();
         var dividendCount = Math.Min(results.Length, RaceRules.ResultRows);
-        var layout = RaceResultLayout.Compute(safe, paidCount, dividendCount, dividendsOpen, scale);
+        var headline = Headline(bets, texts, out var headlineInk, out var headlineStyle);
+        var headlineLines = Typography.WrapText(headline, headlineStyle, RaceResultLayout.ContentWidthFor(safe, scale));
+        var layout = RaceResultLayout.Compute(safe, headlineLines.Length, paidCount, dividendCount, dividendsOpen,
+            scale);
         var card = layout.Card;
         var radius = Metrics.Radius.Card * scale;
         Squircle.Fill(drawList, card.Min, card.Max, radius, ImGui.GetColorU32(CardFill));
@@ -76,7 +79,7 @@ internal sealed class RaceResultCard
         {
             var list = ImGui.GetWindowDrawList();
             var origin = ImGui.GetCursorScreenPos();
-            DrawHeadline(list, Shift(layout.Headline, origin), bets, texts, Block(0));
+            DrawHeadline(list, Shift(layout.Headline, origin), headlineLines, headlineInk, headlineStyle, Block(0));
             DrawMeta(list, Shift(layout.Meta, origin), board, texts, Block(1), scale);
             DrawWinner(list, Shift(layout.Winner, origin), runners[order[0]], texts, Block(2), scale);
             DrawPlace(list, Shift(layout.Second, origin), runners[order[1]], 1, texts, Block(3), scale);
@@ -126,7 +129,31 @@ internal sealed class RaceResultCard
 
     private static Rect Shift(Rect rect, Vector2 origin) => rect.Translate(origin);
 
-    private static void DrawHeadline(ImDrawListPtr drawList, Rect row, CasinoRaceBetsDto? bets, RaceTexts texts,
+    private static string Headline(CasinoRaceBetsDto? bets, RaceTexts texts, out Vector4 ink, out TextStyle style)
+    {
+        ink = CasinoColors.InkBody;
+        style = TextStyles.Title2;
+        var tickets = bets?.Tickets;
+        if (bets is null || tickets is null || tickets.Length == 0)
+        {
+            return Loc.T(L.Race.SatOut);
+        }
+
+        if (bets.MyPayout <= 0)
+        {
+            return Loc.T(L.Race.NoWin);
+        }
+
+        if (bets.MyPayout > bets.MyStake)
+        {
+            ink = CasinoColors.Money;
+            style = TextStyles.Title1;
+        }
+
+        return texts.Won(bets.MyPayout);
+    }
+
+    private static void DrawHeadline(ImDrawListPtr drawList, Rect row, string[] lines, Vector4 ink, in TextStyle style,
         float alpha)
     {
         if (alpha <= 0f)
@@ -134,32 +161,14 @@ internal sealed class RaceResultCard
             return;
         }
 
-        var tickets = bets?.Tickets;
-        string text;
-        Vector4 ink;
-        var style = TextStyles.Title2;
-        if (tickets is null || tickets.Length == 0)
+        var count = Math.Min(lines.Length, RaceResultLayout.HeadlineMaxLines);
+        var lineHeight = Typography.LineHeight(style);
+        var top = row.Center.Y - lineHeight * count * 0.5f;
+        for (var line = 0; line < count; line++)
         {
-            text = Loc.T(L.Race.SatOut);
-            ink = CasinoColors.InkBody;
+            Typography.Draw(drawList, new Vector2(row.Min.X, top + line * lineHeight), lines[line],
+                ink with { W = alpha }, style);
         }
-        else if (bets!.MyPayout > 0)
-        {
-            text = texts.Won(bets.MyPayout);
-            var profit = bets.MyPayout > bets.MyStake;
-            ink = profit ? CasinoColors.Money : CasinoColors.InkBody;
-            style = profit ? TextStyles.Title1 : TextStyles.Title2;
-        }
-        else
-        {
-            text = Loc.T(L.Race.NoWin);
-            ink = CasinoColors.InkBody;
-        }
-
-        var fitted = Typography.FitText(text, row.Width, style);
-        var height = Typography.LineHeight(style);
-        Typography.Draw(drawList, new Vector2(row.Min.X, row.Center.Y - height * 0.5f), fitted, ink with { W = alpha },
-            style);
     }
 
     private static void DrawMeta(ImDrawListPtr drawList, Rect row, CasinoRaceRoomStateDto board, RaceTexts texts,

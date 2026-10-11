@@ -8,6 +8,8 @@ internal readonly struct RaceResultLayout
     public const float Pad = 16f;
     public const float Gap = 10f;
     public const float HeadlineHeight = 44f;
+    public const float HeadlineLineHeight = 30f;
+    public const int HeadlineMaxLines = 2;
     public const float MetaHeight = 22f;
     public const float WinnerHeight = 64f;
     public const float PlaceHeight = 40f;
@@ -52,14 +54,19 @@ internal readonly struct RaceResultLayout
 
     public Rect DividendRow(int index, float scale) => Row(DividendTop, index, scale);
 
-    public static RaceResultLayout Compute(Rect safe, int paidRows, int dividendRows, bool expanded, float scale)
+    public static float ContentWidthFor(Rect safe, float scale) =>
+        MathF.Max(1f, MathF.Min(safe.Width, MaxCardWidth * scale) - Pad * scale * 2f);
+
+    public static RaceResultLayout Compute(Rect safe, int headlineLines, int paidRows, int dividendRows,
+        bool expanded, float scale)
     {
         var pad = Pad * scale;
         var gap = Gap * scale;
         var cardWidth = MathF.Min(safe.Width, MaxCardWidth * scale);
-        var width = MathF.Max(1f, cardWidth - pad * 2f);
+        var width = ContentWidthFor(safe, scale);
+        var extraLines = Math.Clamp(headlineLines, 1, HeadlineMaxLines) - 1;
         var top = 0f;
-        var headline = Band(width, ref top, HeadlineHeight * scale, 0f);
+        var headline = Band(width, ref top, (HeadlineHeight + extraLines * HeadlineLineHeight) * scale, 0f);
         var meta = Band(width, ref top, MetaHeight * scale, gap);
         var winner = Band(width, ref top, WinnerHeight * scale, 0f);
         var second = Band(width, ref top, PlaceHeight * scale, 0f);

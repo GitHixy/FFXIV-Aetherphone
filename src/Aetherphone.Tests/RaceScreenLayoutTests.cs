@@ -229,13 +229,17 @@ public sealed class RaceScreenLayoutTests
             var stage = Stage(Phone(PortraitPhones[phone], scale), 0f, scale);
             for (var paid = 0; paid <= RaceRules.MaxTickets; paid++)
             {
-                for (var mode = 0; mode < 3; mode++)
+                for (var mode = 0; mode < 6; mode++)
                 {
-                    var dividends = mode == 0 ? 0 : RaceRules.ResultRows;
-                    var expanded = mode == 2;
-                    var layout = RaceResultLayout.Compute(stage.Safe, paid, dividends, expanded, scale);
+                    var dividends = mode % 3 == 0 ? 0 : RaceRules.ResultRows;
+                    var expanded = mode % 3 == 2;
+                    var lines = mode < 3 ? 1 : RaceResultLayout.HeadlineMaxLines;
+                    var layout = RaceResultLayout.Compute(stage.Safe, lines, paid, dividends, expanded, scale);
                     Assert.True(Inside(layout.Card, stage.Safe));
                     Assert.Equal(paid > 0, layout.HasPaid);
+                    Assert.Equal((RaceResultLayout.HeadlineHeight + (lines - 1) * RaceResultLayout.HeadlineLineHeight)
+                        * scale, layout.Headline.Height, 2);
+                    Assert.Equal(RaceResultLayout.ContentWidthFor(stage.Safe, scale), layout.ContentWidth, 2);
                     var content = new Rect(Vector2.Zero, new Vector2(layout.ContentWidth, layout.ContentHeight));
                     var rows = new Rect[5 + paid + (expanded ? dividends : 0)];
                     rows[0] = layout.Headline;
@@ -274,7 +278,7 @@ public sealed class RaceScreenLayoutTests
     public void TheResultCardCentresAndCapsItsWidthInLandscape()
     {
         var stage = Stage(Phone(LandscapePhones[0], 1f), 0f, 1f);
-        var layout = RaceResultLayout.Compute(stage.Safe, 2, RaceRules.ResultRows, true, 1f);
+        var layout = RaceResultLayout.Compute(stage.Safe, 1, 2, RaceRules.ResultRows, true, 1f);
         Assert.Equal(RaceResultLayout.MaxCardWidth, layout.Card.Width, 2);
         Assert.Equal(stage.Safe.Center.X, layout.Card.Center.X, 2);
         Assert.True(layout.Card.Height <= stage.Safe.Height + Tolerance);
