@@ -11745,6 +11745,14 @@ internal static class L
 
     internal static class VenueHub
     {
+        public static readonly LocString Title = new("casino.venuehub.title", "Venues");
+        public static readonly LocString PlaysGilPracticeChips = new("casino.venuehub.playsGilPracticeChips", "Gil, practice or chips");
+        public static readonly LocString PlaysChipsPractice = new("casino.venuehub.playsChipsPractice", "Chips or practice");
+        public static readonly LocString PlaysGilPractice = new("casino.venuehub.playsGilPractice", "Gil or practice");
+        public static readonly LocString PlaysGilFree = new("casino.venuehub.playsGilFree", "Gil or free tickets");
+        public static readonly LocString PlaysPractice = new("casino.venuehub.playsPractice", "Practice only");
+        public static readonly LocString PlaysFreeTickets = new("casino.venuehub.playsFreeTickets", "Free tickets");
+        public static readonly LocString GilBadge = new("casino.venuehub.gilBadge", "Gil");
         public static readonly LocString HostAgain = new("casino.venuehub.hostAgain", "Host again");
         public static readonly LocString Host = new("casino.venuehub.host", "Host");
         public static readonly LocString NewTable = new("casino.venuehub.newTable", "New table");

@@ -79,7 +79,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private readonly Venue.VenueTableSheet venueSheet;
     private readonly Venue.TradeSyncPrompt tradePrompt;
     private readonly Venue.NearbyTablesCard nearbyTables;
-    private readonly Action<Core.Aethernet.Contracts.CasinoTableRowDto> openNearbyRow;
+    private readonly Venue.VenueSection venueSection;
     private readonly CasinoStage stage = new();
     private readonly GameRulesSheet rulesSheet = new();
     private readonly TabBar bottomNav = new();
@@ -161,7 +161,11 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         venueSheet = new Venue.VenueTableSheet(casinoVenue, tradeSync, report, JoinCodeOf);
         tradePrompt = new Venue.TradeSyncPrompt(tradeSync);
         nearbyTables = new Venue.NearbyTablesCard(casinoVenue);
-        openNearbyRow = row => OpenTable(row.TableId);
+        var contextActions = new Venue.VenueContextActions(openTable, openDoorFromRow, OpenLedger, OpenHostDraft,
+            OpenHostSheet);
+        venueSection = new Venue.VenueSection(
+            new Venue.VenueContextCard("casino.venue.floor", casinoTables, casino, preferences, nearbyTables,
+                contextActions), casino, OpenHostGame);
         this.holdemStore = holdemStore;
         holdem = new Tables.HoldemTable(casino, casinoRooms, casinoTables, holdemStore, casinoTurns, remoteImages,
             lodestone, PopRoute);
@@ -241,6 +245,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         clubSheet.Close();
         heroCards.Reset();
         shelves.Reset();
+        venueSection.Reset();
         winsTicker.Reset();
         RefreshFloor();
         floor.Watch();
@@ -1188,6 +1193,29 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         router.Push(new CasinoRoute(CasinoScreen.HostTable, CasinoGames.Holdem));
     }
 
+    private void OpenHostGame(Tables.HostGame game, bool preferGil)
+    {
+        if (router.Current.Screen == CasinoScreen.HostTable)
+        {
+            return;
+        }
+
+        hostSheet.EnterGame(game, preferGil);
+        routes.Push(new CasinoRoute(CasinoScreen.HostTable, Tables.HostGames.Of(game).GameId));
+    }
+
+    private void OpenHostDraft()
+    {
+        if (router.Current.Screen == CasinoScreen.HostTable || !preferences.TryLoadHostDraft(out var saved))
+        {
+            return;
+        }
+
+        hostSheet.EnterDraft(saved);
+        routes.Push(new CasinoRoute(CasinoScreen.HostTable,
+            Tables.HostGames.Of(Tables.HostDraft.GameOf(saved)).GameId));
+    }
+
     private void OpenHoldemPit()
     {
         if (router.Current.Screen == CasinoScreen.Tables && IsHoldem(router.Current))
@@ -1367,12 +1395,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             OpenBroadcast(current.TableId,
                 IsHoldem(current) ? Venue.BroadcastGame.Holdem : Venue.BroadcastGame.Blackjack);
         }
-    }
-
-    private float DrawNearbyTables(ImDrawListPtr drawList, float top, float left, float width, float scale)
-    {
-        var bottom = nearbyTables.Draw(drawList, ui, new Vector2(left, top), width, openNearbyRow);
-        return bottom > top ? bottom + CardGap * scale : top;
     }
 
     internal void OpenBroadcast(string tableId, Venue.BroadcastGame game)
