@@ -9813,6 +9813,8 @@
   "casino.venuehub.gilBadge": "ギル",
   "casino.venuehub.tab": "会場",
   "casino.book.reasonGuestEntry": "ゲスト記録はその場で確定するため、確認や異議申し立てはできません。",
+  "casino.book.recordGuest": "ゲストとして記録",
+  "casino.book.guestHint": "このテーブルにその名前の相手はいません。ゲスト記録はその場で確定し、異議申し立てはできません。",
   "conduct.casino.title": "Gambaのハウスルール",
   "conduct.casino.intro": "Gambaは楽しむための場所です。チップとAether Coinは遊びのお金で、ギルテーブルはプレイヤーが運営しています。",
   "conduct.casino.money.title": "お金の仕組み",

@@ -9813,6 +9813,8 @@
   "casino.venuehub.gilBadge": "Gil",
   "casino.venuehub.tab": "Mekanlar",
   "casino.book.reasonGuestEntry": "Misafir kaydı anında kapanır, bu yüzden onaylanacak veya itiraz edilecek bir şey yoktur.",
+  "casino.book.recordGuest": "Misafir olarak kaydet",
+  "casino.book.guestHint": "Bu masada o isimle eşleşen kimse yok. Misafir kaydı anında kapanır ve itiraz edilemez.",
   "conduct.casino.title": "Gamba Ev Kuralları",
   "conduct.casino.intro": "Gamba eğlence içindir. Fişler ve Aether Coin oyun parasıdır, gil masalarını ise oyuncular yönetir.",
   "conduct.casino.money.title": "Para nasıl işler",

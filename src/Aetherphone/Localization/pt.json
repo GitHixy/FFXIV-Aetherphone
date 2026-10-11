@@ -9813,6 +9813,8 @@
   "casino.venuehub.gilBadge": "Gil",
   "casino.venuehub.tab": "Locais",
   "casino.book.reasonGuestEntry": "Um lançamento de convidado é liquidado na hora, então não há nada a confirmar nem a contestar.",
+  "casino.book.recordGuest": "Registrar como convidado",
+  "casino.book.guestHint": "Ninguém nesta mesa corresponde a esse nome. Um lançamento de convidado é liquidado na hora e não pode ser contestado.",
   "conduct.casino.title": "Regras da casa de Gamba",
   "conduct.casino.intro": "O Gamba é para diversão. Fichas e Aether Coins são dinheiro de brincadeira, e as mesas de gil são organizadas por jogadores.",
   "conduct.casino.money.title": "Como o dinheiro funciona",

@@ -11771,6 +11771,8 @@ internal static class L
     internal static class Book
     {
         public static readonly LocString ReasonGuestEntry = new("casino.book.reasonGuestEntry", "A guest entry settles at once, so there is nothing to confirm or dispute.");
+        public static readonly LocString RecordGuest = new("casino.book.recordGuest", "Record as guest");
+        public static readonly LocString GuestHint = new("casino.book.guestHint", "Nobody at this table matched that name. A guest entry is settled on the spot and cannot be disputed.");
     }
 
     internal static class Catalogs
