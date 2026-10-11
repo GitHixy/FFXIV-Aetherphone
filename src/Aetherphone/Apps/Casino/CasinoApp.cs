@@ -833,7 +833,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         CasinoScreen.Tables or CasinoScreen.Table when IsHoldem(route) => Loc.T(L.Casino.GameHoldem),
         CasinoScreen.Tables => Loc.T(L.VenueHub.Tab),
         CasinoScreen.Pit => Loc.T(L.Blackjack.PitTitle),
-        CasinoScreen.TableDoor => Loc.T(L.Casino.DoorTitle),
+        CasinoScreen.TableDoor => Loc.T(Tables.TableDoor.TitleFor(casinoTables.CardFor(route.TableId))),
         CasinoScreen.HostTable => Loc.T(L.Tables.HostTitle),
         CasinoScreen.TableLedger => Loc.T(L.Tables.LedgerHeading),
         CasinoScreen.GilLedger => Loc.T(L.Tables.MyLedgerTitle),

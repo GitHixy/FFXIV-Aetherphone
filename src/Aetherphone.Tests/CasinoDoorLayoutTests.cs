@@ -243,4 +243,16 @@ public sealed class CasinoDoorLayoutTests
         Assert.Same(listed[0], CasinoTablesStore.CardIn(listed, 1_000, null, 0, "t1"));
         Assert.Same(listed[0], CasinoTablesStore.CardIn(listed, 1_000, fetched with { TableId = "t2" }, 5_000, "t1"));
     }
+
+    [Fact]
+    public void ABookDoorNamesTheBookAndOpensTheLedger()
+    {
+        var book = new CasinoTableRowDto(TableId: "b1", GameKind: CasinoWire.BookKind);
+        var blackjack = new CasinoTableRowDto(TableId: "t1");
+        Assert.Equal(L.Book.DoorTitle.Key, TableDoor.TitleFor(book).Key);
+        Assert.Equal(L.Book.OpenLedger.Key, TableDoor.OpenLabelFor(book).Key);
+        Assert.Equal(L.Casino.DoorTitle.Key, TableDoor.TitleFor(blackjack).Key);
+        Assert.Equal(L.Casino.DoorOpenTable.Key, TableDoor.OpenLabelFor(blackjack).Key);
+        Assert.Equal(L.Casino.DoorTitle.Key, TableDoor.TitleFor(null).Key);
+    }
 }

@@ -9823,6 +9823,8 @@
   "casino.book.summary": "{0}，庄家资金 {1}，{2}",
   "casino.book.doorNote": "账本本身不运行任何游戏。把今晚每一笔金币交易记在这里；闲置八小时后会自动关闭。",
   "casino.book.guestNameHint": "角色名",
+  "casino.book.doorTitle": "你的账本",
+  "casino.book.openLedger": "打开账本",
   "conduct.casino.title": "以太赌场场馆规则",
   "conduct.casino.intro": "以太赌场只是娱乐。筹码和以太积分都是游戏币，金币桌由玩家经营。",
   "conduct.casino.money.title": "关于货币",

@@ -40,7 +40,7 @@ internal static class HostGames
             CasinoSign.Deathroll, FontAwesomeIcon.Skull, false, VenueRoomKind.Deathroll, AccentRing.Orange),
         new(HostGame.Raffle, CasinoGames.Raffle, L.Venue.GameRaffle, L.Tables.GameRaffleLine, CasinoSign.Raffle,
             FontAwesomeIcon.Ticket, false, VenueRoomKind.Raffle, AccentRing.Gold),
-        new(HostGame.Book, CasinoGames.Book, L.Book.Game, L.Book.Line, CasinoSign.Gamba, FontAwesomeIcon.Book,
+        new(HostGame.Book, CasinoGames.Book, L.Book.Game, L.Book.Line, CasinoSign.Book, FontAwesomeIcon.Book,
             false, VenueRoomKind.None, AccentRing.Violet),
     };
 

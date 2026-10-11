@@ -99,7 +99,7 @@ internal sealed partial class TableDoor
         SeedName(card);
         code.Draw(ui, JoinCode(door, card), Token(door), width, scale);
         Gap(Metrics.Space.Md, scale);
-        DrawOpenTable(ui, width, scale);
+        DrawOpenTable(ui, OpenLabelFor(card), width, scale);
         if (inlineReason.Length > 0)
         {
             Gap(Metrics.Space.Md, scale);
@@ -332,11 +332,17 @@ internal sealed partial class TableDoor
         }
     }
 
-    private void DrawOpenTable(AppSkin ui, float width, float scale)
+    internal static LocString OpenLabelFor(CasinoTableRowDto? card) =>
+        card is not null && CasinoBookRules.IsBook(card.GameKind) ? L.Book.OpenLedger : L.Casino.DoorOpenTable;
+
+    internal static LocString TitleFor(CasinoTableRowDto? card) =>
+        card is not null && CasinoBookRules.IsBook(card.GameKind) ? L.Book.DoorTitle : L.Casino.DoorTitle;
+
+    private void DrawOpenTable(AppSkin ui, LocString label, float width, float scale)
     {
         var origin = ImGui.GetCursorScreenPos();
         var rect = new Rect(origin, new Vector2(origin.X + width, origin.Y + Button.LargeHeight * scale));
-        if (Button.Draw(ImGui.GetWindowDrawList(), rect, Loc.T(L.Casino.DoorOpenTable), ui.Ink, ButtonStyle.Tinted,
+        if (Button.Draw(ImGui.GetWindowDrawList(), rect, Loc.T(label), ui.Ink, ButtonStyle.Tinted,
                 enabled: roomId.Length > 0, id: "casino.door.open"))
         {
             openTable(roomId);

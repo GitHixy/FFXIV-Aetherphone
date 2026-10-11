@@ -9823,6 +9823,8 @@
   "casino.book.summary": "{0}, banca {1}, {2}",
   "casino.book.doorNote": "Um livro não conduz nenhum jogo próprio. Registre aqui cada troca de gil da noite; ele fecha sozinho após oito horas sem atividade.",
   "casino.book.guestNameHint": "Nome do personagem",
+  "casino.book.doorTitle": "Seu livro",
+  "casino.book.openLedger": "Abrir o registro",
   "conduct.casino.title": "Regras da casa de Gamba",
   "conduct.casino.intro": "O Gamba é para diversão. Fichas e Aether Coins são dinheiro de brincadeira, e as mesas de gil são organizadas por jogadores.",
   "conduct.casino.money.title": "Como o dinheiro funciona",

@@ -9823,6 +9823,8 @@
   "casino.book.summary": "{0}, kasa {1}, {2}",
   "casino.book.doorNote": "Defter kendi başına oyun yürütmez. Gecenin her gil takasını buraya kaydet; sekiz saat hareketsiz kalınca kendiliğinden kapanır.",
   "casino.book.guestNameHint": "Karakter adı",
+  "casino.book.doorTitle": "Defterin",
+  "casino.book.openLedger": "Defteri aç",
   "conduct.casino.title": "Gamba Ev Kuralları",
   "conduct.casino.intro": "Gamba eğlence içindir. Fişler ve Aether Coin oyun parasıdır, gil masalarını ise oyuncular yönetir.",
   "conduct.casino.money.title": "Para nasıl işler",

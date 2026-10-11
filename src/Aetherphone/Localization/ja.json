@@ -9823,6 +9823,8 @@
   "casino.book.summary": "{0}、バンク {1}、{2}",
   "casino.book.doorNote": "帳簿は自身ではゲームを進行しません。今夜のギルのトレードをすべてここに記録してください。8時間動きがなければ自動的に閉じます。",
   "casino.book.guestNameHint": "キャラクター名",
+  "casino.book.doorTitle": "あなたの帳簿",
+  "casino.book.openLedger": "台帳を開く",
   "conduct.casino.title": "Gambaのハウスルール",
   "conduct.casino.intro": "Gambaは楽しむための場所です。チップとAether Coinは遊びのお金で、ギルテーブルはプレイヤーが運営しています。",
   "conduct.casino.money.title": "お金の仕組み",
