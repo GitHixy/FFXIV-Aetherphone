@@ -9,6 +9,8 @@ namespace Aetherphone.Apps.Casino.DealerHoldem;
 internal static class DealerHoldemArt
 {
     public const float PrintAlpha = 0.62f;
+    public const float TextAlpha = 0.9f;
+    public const float FitSlack = 0.5f;
     public const float RingAlpha = 0.45f;
     public const float LitRingAlpha = 0.95f;
     public const float DiscRadius = 9f;
@@ -32,51 +34,41 @@ internal static class DealerHoldemArt
 
         var titleStyle = TextStyles.FootnoteEmphasized;
         var rowStyle = TextStyles.Footnote;
-        var rowScale = RowScale(rect.Width, names, odds, rowStyle, scale);
-        if (rowScale <= 0f)
+        if (!RowsFit(rect.Width, names, odds, rowStyle, scale)
+            || Typography.Measure(title, titleStyle).X > rect.Width + FitSlack)
         {
             return;
         }
 
-        var ink = CasinoColors.Money with { W = PrintAlpha };
-        var titleShown = Typography.FitText(title, rect.Width, titleStyle);
-        var titleSize = Typography.Measure(titleShown, titleStyle);
-        var lineHeight = Typography.LineHeight(rowStyle) * rowScale / rowStyle.Scale + TableRowGap * scale;
+        var ink = CasinoColors.Money with { W = TextAlpha };
+        var titleSize = Typography.Measure(title, titleStyle);
+        var lineHeight = Typography.LineHeight(rowStyle) + TableRowGap * scale;
         var blockHeight = titleSize.Y + lineHeight * names.Length;
-        if (blockHeight > rect.Height)
+        if (blockHeight > rect.Height + FitSlack)
         {
-            var shrink = MathF.Max(0f, rect.Height - titleSize.Y) / (lineHeight * names.Length);
-            rowScale *= shrink;
-            if (rowScale < TextStyles.Caption2.Scale)
-            {
-                return;
-            }
-
-            lineHeight *= shrink;
-            blockHeight = titleSize.Y + lineHeight * names.Length;
+            return;
         }
+
         var top = rect.Center.Y - blockHeight * 0.5f;
         var titleLeft = alignRight ? rect.Max.X - titleSize.X : rect.Min.X;
-        Typography.Draw(drawList, new Vector2(titleLeft, top), titleShown, ink, titleStyle);
+        Typography.Draw(drawList, new Vector2(titleLeft, top), title, ink, titleStyle);
         var y = top + titleSize.Y;
         var gap = Metrics.Space.Xs * scale;
+        var oddsStyle = TextStyles.FootnoteEmphasized;
         for (var index = 0; index < names.Length; index++)
         {
-            var oddsSize = Typography.Measure(odds[index], rowScale, rowStyle.Weight);
-            var name = Typography.FitText(names[index], rect.Width - oddsSize.X - gap, rowScale, rowStyle.Weight);
-            var nameSize = Typography.Measure(name, rowScale, rowStyle.Weight);
+            var oddsSize = Typography.Measure(odds[index], oddsStyle);
+            var nameSize = Typography.Measure(names[index], rowStyle);
             if (alignRight)
             {
-                Typography.Draw(drawList, new Vector2(rect.Max.X - oddsSize.X, y), odds[index], ink, rowScale,
-                    TextStyles.FootnoteEmphasized.Weight);
-                Typography.Draw(drawList, new Vector2(rect.Max.X - oddsSize.X - gap - nameSize.X, y), name, ink,
-                    rowScale, rowStyle.Weight);
+                Typography.Draw(drawList, new Vector2(rect.Max.X - oddsSize.X, y), odds[index], ink, oddsStyle);
+                Typography.Draw(drawList, new Vector2(rect.Max.X - oddsSize.X - gap - nameSize.X, y), names[index],
+                    ink, rowStyle);
             }
             else
             {
-                Typography.Draw(drawList, new Vector2(rect.Min.X, y), name, ink, rowScale, rowStyle.Weight);
-                Typography.Draw(drawList, new Vector2(rect.Min.X + nameSize.X + gap, y), odds[index], ink, rowScale,
-                    TextStyles.FootnoteEmphasized.Weight);
+                Typography.Draw(drawList, new Vector2(rect.Min.X, y), names[index], ink, rowStyle);
+                Typography.Draw(drawList, new Vector2(rect.Min.X + nameSize.X + gap, y), odds[index], ink, oddsStyle);
             }
 
             y += lineHeight;
@@ -87,25 +79,21 @@ internal static class DealerHoldemArt
         Typography.LineHeight(TextStyles.FootnoteEmphasized)
         + (Typography.LineHeight(TextStyles.Footnote) + TableRowGap * scale) * rows;
 
-    private static float RowScale(float width, ReadOnlySpan<string> names, ReadOnlySpan<string> odds,
+    private static bool RowsFit(float width, ReadOnlySpan<string> names, ReadOnlySpan<string> odds,
         in TextStyle style, float scale)
     {
-        var widest = 0f;
         var gap = Metrics.Space.Xs * scale;
         for (var index = 0; index < names.Length; index++)
         {
             var row = Typography.Measure(names[index], style).X + gap
                       + Typography.Measure(odds[index], TextStyles.FootnoteEmphasized).X;
-            widest = MathF.Max(widest, row);
+            if (row > width + FitSlack)
+            {
+                return false;
+            }
         }
 
-        if (widest <= width)
-        {
-            return style.Scale;
-        }
-
-        var shrunk = style.Scale * width / widest;
-        return shrunk >= TextStyles.Caption2.Scale ? shrunk : 0f;
+        return true;
     }
 
     public static void Spot(ImDrawListPtr drawList, Vector2 center, float radius, bool lit, float glow, float scale)
@@ -204,7 +192,7 @@ internal static class DealerHoldemArt
         var style = TextStyles.FootnoteEmphasized;
         var shown = Typography.FitText(label, maxWidth, style);
         var size = Typography.Measure(shown, style);
-        var ink = lit ? CasinoColors.MoneyHighlight : CasinoColors.Money with { W = PrintAlpha };
+        var ink = lit ? CasinoColors.MoneyHighlight : CasinoColors.Money with { W = TextAlpha };
         Typography.Draw(drawList, new Vector2(center.X - size.X * 0.5f, center.Y - size.Y * 0.5f), shown, ink, style);
     }
 
