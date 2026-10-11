@@ -58,6 +58,8 @@ internal sealed class MachineRoundPlayback
 
     public string RoundId { get; private set; } = string.Empty;
 
+    public int Serial { get; private set; }
+
     public string MachineId => info.Id;
 
     public SlotsMachineInfo Info => info;
@@ -153,6 +155,7 @@ internal sealed class MachineRoundPlayback
         }
 
         Reset();
+        Serial++;
         info = SlotsMachines.For(round.MachineId);
         steps = round.Steps!;
         RoundId = round.RoundId;

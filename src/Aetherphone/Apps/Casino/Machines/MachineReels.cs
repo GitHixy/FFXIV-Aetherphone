@@ -14,7 +14,6 @@ internal sealed class MachineReels
 {
     public const float RowsPerSecond = 16f;
     public const float SymbolShare = 0.36f;
-    public const float TraceCycleSeconds = 0.8f;
 
     private static readonly Vector4 Gold = new(1f, 0.80f, 0.30f, 1f);
     private static readonly Vector4 SlotInk = new(0f, 0f, 0f, 0.42f);
@@ -22,12 +21,9 @@ internal sealed class MachineReels
     private readonly bool[] winning = new bool[MachineRoundPlayback.MaxCells];
     private readonly bool[] previousWinning = new bool[MachineRoundPlayback.MaxCells];
     private readonly int[] restingGrid = new int[MachineRoundPlayback.MaxCells];
-    private readonly int[] traceOrder = new int[64];
     private readonly int[] survivorRows = new int[MachineRoundPlayback.MaxCells];
+    private readonly MachineTraceCycle traces = new();
 
-    private int traceCount;
-    private int tracedStep = -1;
-    private float traceSeconds;
     private int shatteredStep = -1;
     private string restingMachine = string.Empty;
 
@@ -55,7 +51,6 @@ internal sealed class MachineReels
         float phase, float deltaSeconds, ParticleSystem particles, float scale)
     {
         var info = SlotsMachines.For(machineId);
-        traceSeconds += deltaSeconds;
         var cellWidth = window.Width / info.Reels;
         var cellHeight = window.Height / info.Rows;
         var extent = MathF.Min(cellWidth, cellHeight) * SymbolShare;
@@ -68,7 +63,7 @@ internal sealed class MachineReels
         }
 
         var grid = GridFor(playback, current);
-        PrepareWins(playback, current);
+        PrepareWins(playback, current, deltaSeconds);
         for (var reel = 0; reel < info.Reels; reel++)
         {
             var columnMin = new Vector2(window.Min.X + reel * cellWidth, window.Min.Y);
@@ -142,7 +137,7 @@ internal sealed class MachineReels
         return restingGrid;
     }
 
-    private void PrepareWins(MachineRoundPlayback playback, CasinoSlotsStepDto? current)
+    private void PrepareWins(MachineRoundPlayback playback, CasinoSlotsStepDto? current, float deltaSeconds)
     {
         Array.Clear(winning);
         if (current is null || !Presenting(playback))
@@ -151,31 +146,8 @@ internal sealed class MachineReels
         }
 
         MarkCells(current, winning);
-        if (tracedStep == playback.StepIndex)
-        {
-            return;
-        }
-
-        tracedStep = playback.StepIndex;
-        traceSeconds = 0f;
-        traceCount = 0;
-        if (current.Wins is not { } wins)
-        {
-            return;
-        }
-
-        for (var index = 0; index < wins.Length && traceCount < traceOrder.Length; index++)
-        {
-            var slot = traceCount;
-            while (slot > 0 && wins[traceOrder[slot - 1]].Pay < wins[index].Pay)
-            {
-                traceOrder[slot] = traceOrder[slot - 1];
-                slot--;
-            }
-
-            traceOrder[slot] = index;
-            traceCount++;
-        }
+        traces.Track(playback.Serial, playback.StepIndex, current.Wins);
+        traces.Advance(deltaSeconds);
     }
 
     private static void MarkCells(CasinoSlotsStepDto step, bool[] mask)
@@ -405,18 +377,12 @@ internal sealed class MachineReels
     private void DrawTraces(ImDrawListPtr drawList, Rect window, CasinoSlotsStepDto step, SlotsMachineInfo info,
         float cellWidth, float cellHeight, float scale)
     {
-        if (traceCount == 0 || step.Wins is not { } wins || info.Layout == SlotsLayout.Cluster)
+        if (info.Layout == SlotsLayout.Cluster || step.Wins is not { } wins || !traces.TryActive(wins, out var active))
         {
             return;
         }
 
-        var active = traceOrder[(int)(traceSeconds / TraceCycleSeconds) % traceCount];
         var win = wins[active];
-        if (win.Line < 0 || win.Line >= SlotsRules.PaylineCount)
-        {
-            return;
-        }
-
         var rows = SlotsRules.Paylines[win.Line];
         var count = Math.Clamp(win.Count, 2, SlotsRules.ReelCount);
         Span<Vector2> points = stackalloc Vector2[SlotsRules.ReelCount];
