@@ -10277,7 +10277,6 @@ internal static class L
         public static readonly LocString FactTopMultiplier = new("casino.originals.factTopMultiplier", "Top multiplier");
         public static readonly LocString FactMines = new("casino.originals.factMines", "Mines on the board");
         public static readonly LocString Percent = new("casino.originals.percent", "{0}%");
-        public static readonly LocString Next = new("casino.originals.next", "Next {0}");
         public static readonly LocString Chance = new("casino.originals.chance", "Chance {0}");
         public static readonly LocString CashOutFor = new("casino.originals.cashOutFor", "Cash out {0}");
         public static readonly LocString RollFor = new("casino.originals.rollFor", "Roll {0}");
@@ -10286,7 +10285,7 @@ internal static class L
         public static readonly LocString DealFor = new("casino.originals.dealFor", "Deal {0}");
         public static readonly LocString MinesKnob = new("casino.originals.minesKnob", "Mines");
         public static readonly LocString RandomPick = new("casino.originals.randomPick", "Random pick");
-        public static readonly LocString PickCaption = new("casino.originals.pickCaption", "Pick {0}");
+        public static readonly LocString StripPicks = new("casino.originals.stripPicks", "Picks");
         public static readonly LocString MinesHint = new("casino.originals.minesHint", "Tap a tile to reveal it, or cash out.");
         public static readonly LocString MinesIdleHint = new("casino.originals.minesIdleHint", "Set the mines, then place a bet.");
         public static readonly LocString MinesAutoHint = new("casino.originals.minesAutoHint", "Tap tiles to plan the picks Auto makes every round.");
@@ -10295,8 +10294,6 @@ internal static class L
         public static readonly LocString Resumed = new("casino.originals.resumed", "Your open round is back on the table.");
         public static readonly LocString RollOver = new("casino.originals.rollOver", "Roll over");
         public static readonly LocString RollUnder = new("casino.originals.rollUnder", "Roll under");
-        public static readonly LocString WinChance = new("casino.originals.winChance", "Win chance");
-        public static readonly LocString Multiplier = new("casino.originals.multiplier", "Multiplier");
         public static readonly LocString DiceHint = new("casino.originals.diceHint", "Drag the slider or type a chance.");
         public static readonly LocString Target = new("casino.originals.target", "Target");
         public static readonly LocString LimboHint = new("casino.originals.limboHint", "Type a target multiplier, then play.");
@@ -10309,14 +10306,14 @@ internal static class L
         public static readonly LocString Clear = new("casino.originals.clear", "Clear");
         public static readonly LocString KenoPicked = new("casino.originals.kenoPicked", "{0} of 10 picked");
         public static readonly LocString KenoPickFirst = new("casino.originals.kenoPickFirst", "Pick at least one number before you draw.");
-        public static readonly LocString KenoHits = new("casino.originals.kenoHits", "Hits: {0} of {1}");
-        public static readonly LocString HitsCaption = new("casino.originals.hitsCaption", "Hits {0}");
+        public static readonly LocString StripHits = new("casino.originals.stripHits", "Hits");
         public static readonly LocString Higher = new("casino.originals.higher", "Higher or same");
         public static readonly LocString Lower = new("casino.originals.lower", "Lower or same");
         public static readonly LocString Above = new("casino.originals.above", "Higher");
         public static readonly LocString Below = new("casino.originals.below", "Lower");
         public static readonly LocString Same = new("casino.originals.same", "Same");
         public static readonly LocString Skip = new("casino.originals.skip", "Skip");
+        public static readonly LocString StripChain = new("casino.originals.stripChain", "Chain");
         public static readonly LocString HiLoHint = new("casino.originals.hiLoHint", "Call the next card, skip it, or cash out.");
         public static readonly LocString HiLoIdleHint = new("casino.originals.hiLoIdleHint", "Place a bet to turn up the first card.");
         public static readonly LocString HiLoBusted = new("casino.originals.hiLoBusted", "Wrong call. This round pays nothing.");

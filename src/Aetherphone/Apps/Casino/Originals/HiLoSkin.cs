@@ -17,11 +17,7 @@ internal sealed class HiLoSkin : IOriginalsSkin
 {
     private const float MaxCardWidth = 120f;
     private const float CardShare = 0.34f;
-    private const float RailCardWidth = 30f;
-    private const float RailOverlap = 0.55f;
-    private const float RailHeightShare = 0.22f;
     private const float CallGap = 10f;
-    private const int RailShown = 12;
     private const int CardTag = 1;
 
     private readonly HiLoChain chain = new();
@@ -45,6 +41,8 @@ internal sealed class HiLoSkin : IOriginalsSkin
     public LocString Action => L.Originals.DealFor;
 
     public LocString Hint => chain.Live ? L.Originals.HiLoHint : L.Originals.HiLoIdleHint;
+
+    public LocString Strip => L.Originals.StripChain;
 
     public bool Knob => false;
 
@@ -195,10 +193,7 @@ internal sealed class HiLoSkin : IOriginalsSkin
     public void DrawWorld(ImDrawListPtr drawList, in OriginalsFrame frame, AppSkin ui)
     {
         var scale = UiScale.Current;
-        var world = frame.World;
-        var railHeight = MathF.Min(world.Height * RailHeightShare, PlayingCards.HeightFor(RailCardWidth * scale));
-        DrawRail(drawList, new Rect(world.Min, new Vector2(world.Max.X, world.Min.Y + railHeight)), scale);
-        var stage = new Rect(new Vector2(world.Min.X, world.Min.Y + railHeight + Metrics.Space.Sm * scale), world.Max);
+        var stage = frame.World;
         cardWidth = MathF.Min(MathF.Min(stage.Width * CardShare, MaxCardWidth * scale),
             PlayingCards.WidthFor(stage.Height * 0.78f));
         cardCenter = new Vector2(stage.Center.X, stage.Min.Y + PlayingCards.HeightFor(cardWidth) * 0.5f);
@@ -348,37 +343,6 @@ internal sealed class HiLoSkin : IOriginalsSkin
         var pulse = 0.18f + 0.14f * Pulse.Wave(Pulse.Breath);
         Squircle.Fill(drawList, cardCenter - half, cardCenter + half, rounding,
             ImGui.GetColorU32(OriginalsArt.Boom with { W = pulse }));
-    }
-
-    private void DrawRail(ImDrawListPtr drawList, Rect row, float scale)
-    {
-        if (!chain.HasRound || chain.Count < 2)
-        {
-            return;
-        }
-
-        var width = PlayingCards.WidthFor(row.Height);
-        var step = width * (1f - RailOverlap);
-        var past = chain.Count - 1;
-        var first = Math.Max(0, past - RailShown);
-        var shown = past - first;
-        var total = width + step * (shown - 1);
-        var left = row.Center.X - total * 0.5f + width * 0.5f;
-        for (var index = 0; index < shown; index++)
-        {
-            var cardIndex = first + index;
-            var center = new Vector2(left + index * step, row.Center.Y);
-            OriginalsArt.Card(drawList, center, width, chain.Card(cardIndex), true, 1f, scale, false);
-            var result = chain.StepResult(cardIndex);
-            var dot = result switch
-            {
-                HiLoStep.Won => CasinoColors.Money,
-                HiLoStep.Lost => OriginalsArt.Boom,
-                _ => CasinoColors.InkMuted,
-            };
-            drawList.AddCircleFilled(new Vector2(center.X, row.Max.Y + 3f * scale), 2.5f * scale,
-                ImGui.GetColorU32(dot), 10);
-        }
     }
 
     private void DrawCalls(ImDrawListPtr drawList, in OriginalsFrame frame, AppSkin ui, Rect stage, float scale)

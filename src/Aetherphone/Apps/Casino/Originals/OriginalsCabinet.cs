@@ -23,8 +23,6 @@ internal sealed class OriginalsCabinet
         CasinoGames.HiLo,
     };
 
-    private const float SignHeight = 30f;
-    private const float SectionGap = 8f;
     private const float AutoPauseSeconds = 0.35f;
     private const float SpotlightAlpha = 0.05f;
 
@@ -139,21 +137,20 @@ internal sealed class OriginalsCabinet
         Settle(stage, frame, state);
         var sitting = state.Sitting;
         var blocked = state.StakesPaused || state.Draining || frame.Blocked;
-        var safe = frame.Safe;
-        var signBottom = safe.Min.Y + SignHeight * scale;
-        DrawSign(drawList, frame, new Rect(safe.Min, new Vector2(safe.Max.X, signBottom)), scale);
-        var ladderTop = signBottom + SectionGap * scale;
-        var ladderBottom = ladderTop + OriginalsLadder.Height * scale;
-        var count = skin.FillLadder(ladder, out var focus);
-        OriginalsLadder.Draw(drawList, new Rect(new Vector2(safe.Min.X, ladderTop), new Vector2(safe.Max.X, ladderBottom)),
-            ladder.AsSpan(0, count), focus, ui, scale);
         var statusHeight = Typography.LineHeight(TextStyles.Subheadline) * 2f + Metrics.Space.Md * scale;
-        var world = new Rect(new Vector2(safe.Min.X, ladderBottom + SectionGap * scale),
-            new Vector2(safe.Max.X, MathF.Max(ladderBottom + SectionGap * scale, safe.Max.Y - statusHeight)));
+        var hasStrip = skin.Strip.Key is not null;
+        var layout = OriginalsLayout.Compute(frame.Safe, hasStrip, statusHeight, scale);
+        DrawSign(drawList, frame, layout.Sign, scale);
+        if (hasStrip)
+        {
+            var count = skin.FillLadder(ladder, out var focus);
+            OriginalsLadder.Draw(drawList, layout.Ladder, Loc.T(skin.Strip), ladder.AsSpan(0, count), focus, ui, scale);
+        }
+
         var interactive = !blocked && !Composer.Auto.Running && sitting is not null;
-        skin.DrawWorld(drawList, new OriginalsFrame(stage, originals, world, frame.DeltaSeconds, frame.Phase,
+        skin.DrawWorld(drawList, new OriginalsFrame(stage, originals, layout.World, frame.DeltaSeconds, frame.Phase,
             frame.Instant, interactive, Composer.AutoTabSelected), ui);
-        DrawStatus(drawList, ui, state, new Rect(new Vector2(safe.Min.X, world.Max.Y), safe.Max), scale);
+        DrawStatus(drawList, ui, state, layout.Status, scale);
         if (skin.Live)
         {
             DrawLiveDeck(drawList, ui, frame.Deck, blocked, scale);

@@ -47,6 +47,8 @@ internal interface IOriginalsSkin : ICabinetIdle
 
     LocString Hint { get; }
 
+    LocString Strip { get; }
+
     bool Knob { get; }
 
     bool AutoAvailable { get; }

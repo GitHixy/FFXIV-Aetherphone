@@ -49,6 +49,8 @@ internal sealed class DiceSkin : IOriginalsSkin
 
     public LocString Hint => L.Originals.DiceHint;
 
+    public LocString Strip => default;
+
     public bool Knob => true;
 
     public bool AutoAvailable => true;
@@ -125,19 +127,7 @@ internal sealed class DiceSkin : IOriginalsSkin
     public int FillLadder(Span<LadderStep> steps, out int focus)
     {
         focus = 0;
-        if (steps.Length < 3)
-        {
-            return 0;
-        }
-
-        var chance = Chance;
-        steps[0] = new LadderStep(Loc.T(L.Originals.Multiplier),
-            OriginalsText.Multiplier(OriginalsRules.DiceMultiplierTenThousandths(chance)), LadderState.Current);
-        steps[1] = new LadderStep(Loc.T(L.Originals.WinChance), OriginalsText.Percent(chance), LadderState.Upcoming);
-        steps[2] = new LadderStep(Loc.T(over ? L.Originals.RollOver : L.Originals.RollUnder),
-            OriginalsText.Decimal(target), LadderState.Upcoming);
-        focus = 1;
-        return 3;
+        return 0;
     }
 
     public void DrawWorld(ImDrawListPtr drawList, in OriginalsFrame frame, AppSkin ui)

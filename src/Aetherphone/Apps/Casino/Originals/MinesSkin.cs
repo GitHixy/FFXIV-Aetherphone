@@ -23,11 +23,9 @@ internal sealed class MinesSkin : IOriginalsSkin
     private readonly MinesBoard board = new();
     private readonly bool[] planned = new bool[OriginalsRules.MinesTiles];
     private readonly bool[] open = new bool[OriginalsRules.MinesTiles];
-    private readonly LabelSlot[] pickCaptions = new LabelSlot[OriginalsRules.MinesTiles];
     private readonly OriginalsStepper stepper = new("casino.originals.mines");
 
     private OriginalsPicker picker = OriginalsPicker.FromSeed(GameSeed.Fresh());
-    private OriginalsLabel nextLabel;
     private OriginalsLabel chanceLabel;
     private int mineCount = OriginalsRules.DefaultMines;
     private int plannedCount;
@@ -50,6 +48,8 @@ internal sealed class MinesSkin : IOriginalsSkin
     public LocString Hint => board.Live
         ? L.Originals.MinesHint
         : autoTab ? L.Originals.MinesAutoHint : L.Originals.MinesIdleHint;
+
+    public LocString Strip => L.Originals.StripPicks;
 
     public bool Knob => true;
 
@@ -150,7 +150,7 @@ internal sealed class MinesSkin : IOriginalsSkin
                 : pick == picks ? LadderState.Hit
                 : pick == picks + 1 && board.Live ? LadderState.Current
                 : LadderState.Upcoming;
-            steps[index] = new LadderStep(pickCaptions[index].Get(L.Originals.PickCaption, pick),
+            steps[index] = new LadderStep(GameNumber.Label(pick),
                 OriginalsText.MultiplierHundredths(OriginalsRules.MinesHundredths(mines, pick)), state);
         }
 
@@ -164,7 +164,7 @@ internal sealed class MinesSkin : IOriginalsSkin
         autoTab = frame.AutoTab;
         var world = frame.World;
         var statHeight = OriginalsControls.StatHeight * scale;
-        DrawStats(drawList, new Rect(world.Min, new Vector2(world.Max.X, world.Min.Y + statHeight)), ui, scale);
+        DrawStats(drawList, new Rect(world.Min, new Vector2(world.Max.X, world.Min.Y + statHeight)));
         var top = world.Min.Y + statHeight + Metrics.Space.Sm * scale;
         var side = MathF.Max(0f, MathF.Min(world.Width, world.Max.Y - top));
         var boardRect = new Rect(new Vector2(world.Center.X - side * 0.5f, top),
@@ -336,17 +336,16 @@ internal sealed class MinesSkin : IOriginalsSkin
         }
     }
 
-    private void DrawStats(ImDrawListPtr drawList, Rect row, AppSkin ui, float scale)
+    private void DrawStats(ImDrawListPtr drawList, Rect row)
     {
         var mines = board.HasRound ? board.Mines : mineCount;
         var picks = board.HasRound ? board.SafePicks : 0;
-        var next = OriginalsRules.MinesHundredths(mines, picks + 1);
         var chance = OriginalsRules.MinesNextChanceBasisPoints(mines, picks);
         var finished = board.HasRound && !board.Live;
-        var nextText = nextLabel.Get(L.Originals.Next, OriginalsText.MultiplierHundredths(next));
-        var chanceText = chanceLabel.Get(L.Originals.Chance, OriginalsText.Percent(chance));
-        OriginalsControls.StatRow(drawList, row, string.Empty, nextText, finished ? ui.MutedInk : CasinoColors.Money,
-            string.Empty, chanceText, finished ? ui.MutedInk : CasinoColors.LightB, ui, scale);
+        var chanceText = Typography.FitText(chanceLabel.Get(L.Originals.Chance, OriginalsText.Percent(chance)),
+            row.Width, TextStyles.SubheadlineEmphasized);
+        Typography.DrawCentered(drawList, row.Center, chanceText, finished ? CasinoColors.InkBody : CasinoColors.LightB,
+            TextStyles.SubheadlineEmphasized);
     }
 
     private void PlayEvents(in OriginalsFrame frame, float scale)

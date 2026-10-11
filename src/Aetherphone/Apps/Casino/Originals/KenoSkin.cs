@@ -23,13 +23,11 @@ internal sealed class KenoSkin : IOriginalsSkin
     private readonly KenoDrawPlayback playback = new();
     private readonly bool[] picks = new bool[OriginalsRules.KenoTiles];
     private readonly int[] chosen = new int[OriginalsRules.KenoMaxPicks];
-    private readonly LabelSlot[] hitCaptions = new LabelSlot[OriginalsRules.KenoMaxPicks + 1];
     private readonly string[] riskLabels = new string[OriginalsRules.KenoRiskCount];
     private readonly OriginalsChoice riskChoice = new("casino.originals.keno.risk", OriginalsRules.KenoRiskCount);
 
     private OriginalsPicker picker = OriginalsPicker.FromSeed(GameSeed.Fresh());
     private LabelSlot pickedLabel;
-    private OriginalsLabel hitsLabel;
     private int pickCount;
     private int risk = OriginalsRules.KenoClassic;
     private bool noticePending;
@@ -46,6 +44,8 @@ internal sealed class KenoSkin : IOriginalsSkin
     public LocString Action => L.Originals.DrawFor;
 
     public LocString Hint => pickCount == 0 && !playback.HasDraw ? L.Originals.KenoPickFirst : default;
+
+    public LocString Strip => L.Originals.StripHits;
 
     public bool Knob => true;
 
@@ -132,8 +132,7 @@ internal sealed class KenoSkin : IOriginalsSkin
                 : hit != hits ? LadderState.Upcoming
                 : pay > 100 ? LadderState.Hit
                 : LadderState.Current;
-            steps[hit] = new LadderStep(hitCaptions[hit].Get(L.Originals.HitsCaption, hit),
-                OriginalsText.MultiplierHundredths(pay), state);
+            steps[hit] = new LadderStep(GameNumber.Label(hit), OriginalsText.MultiplierHundredths(pay), state);
         }
 
         focus = playback.HasDraw ? Math.Min(hits, count - 1) : count - 1;
@@ -355,15 +354,12 @@ internal sealed class KenoSkin : IOriginalsSkin
             CasinoSfx.Play(UiSound.ChipSlide);
         }
 
-        var status = playback.HasDraw && !playback.Drawing
-            ? hitsLabel.Get(L.Originals.KenoHits, GameNumber.Label(playback.HitsShown), GameNumber.Label(playback.Picks))
-            : pickedLabel.Get(L.Originals.KenoPicked, pickCount);
+        var status = pickedLabel.Get(L.Originals.KenoPicked, playback.HasDraw ? playback.Picks : pickCount);
         var available = MathF.Max(1f, row.Max.X - clearRect.Max.X - gap);
         var fitted = Typography.FitText(status, available, TextStyles.FootnoteEmphasized);
         var size = Typography.Measure(fitted, TextStyles.FootnoteEmphasized);
         Typography.Draw(drawList, new Vector2(row.Max.X - size.X, row.Center.Y - size.Y * 0.5f), fitted,
-            playback.HasDraw && playback.HitsShown > 0 ? CasinoColors.Money : CasinoColors.InkTitle,
-            TextStyles.FootnoteEmphasized);
+            CasinoColors.InkTitle, TextStyles.FootnoteEmphasized);
     }
 
     private void Toggle(int tile)
