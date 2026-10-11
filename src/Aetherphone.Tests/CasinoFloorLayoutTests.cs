@@ -279,6 +279,25 @@ public sealed class CasinoFloorLayoutTests
     }
 
     [Fact]
+    public void JumpBackInPicksShelfGamesNewestFirstAndStopsAtFour()
+    {
+        var rounds = new[]
+        {
+            Played("casino.plinko"), Played("casino.race"), Played("casino.plinko"), Played("casino.slots.bird"),
+            Played("casino.blackjack"), Played("casino.bartender"), Played("casino.keno"),
+        };
+        Span<int> picked = stackalloc int[CasinoApp.RecentGamesCap];
+        var count = CasinoRecentGames.Collect(rounds, StripCatalog.PlayableIds, picked);
+        Assert.Equal(4, CasinoApp.RecentGamesCap);
+        Assert.Equal(4, count);
+        Assert.Equal(CasinoGames.Plinko, StripCatalog.Playable[picked[0]].GameId);
+        Assert.Equal(CasinoGames.SlotsBird, StripCatalog.Playable[picked[1]].GameId);
+        Assert.Equal(CasinoGames.Blackjack, StripCatalog.Playable[picked[2]].GameId);
+        Assert.Equal(CasinoGames.Barkeep, StripCatalog.Playable[picked[3]].GameId);
+        Assert.Equal(0, CasinoRecentGames.Collect(Array.Empty<CasinoRoundHistoryDto>(), StripCatalog.PlayableIds, picked));
+    }
+
+    [Fact]
     public void MachinePostersRunLiveIdleReels()
     {
         var machines = StripCatalog.EntriesOf(StripShelf.Machines);
@@ -406,6 +425,8 @@ public sealed class CasinoFloorLayoutTests
     }
 
     private static int CasinoAppReturns(string gameId) => CasinoApp.ReturnTenthsOf(gameId);
+
+    private static CasinoRoundHistoryDto Played(string kind) => new(RoundId: kind, GameKind: kind);
 
     private static int Occurrences(string gameId)
     {

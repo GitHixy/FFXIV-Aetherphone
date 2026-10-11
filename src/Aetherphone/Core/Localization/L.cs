@@ -11137,6 +11137,7 @@ internal static class L
         public static readonly LocString ShelfCards = new("casino.floor.shelfCards", "Cards");
         public static readonly LocString ShelfQuickBets = new("casino.floor.shelfQuickBets", "Quick bets");
         public static readonly LocString SkillBadge = new("casino.floor.skillBadge", "Skill");
+        public static readonly LocString JumpBackIn = new("casino.floor.jumpBackIn", "Jump back in");
     }
 
     internal static class Chips

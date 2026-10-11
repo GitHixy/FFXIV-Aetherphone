@@ -62,6 +62,7 @@ internal sealed partial class CasinoApp
             cursorY = tickerBottom > cursorY ? tickerBottom + gap : cursorY;
             cursorY = DrawNearbyTables(drawList, cursorY, origin.X, width, scale);
             cursorY = DrawLiveNow(drawList, new Vector2(origin.X, cursorY), width, scale);
+            cursorY = DrawRecentGames(drawList, new Vector2(origin.X, cursorY), width, delta, scale);
             cursorY = DrawFloorExtras(drawList, new Vector2(origin.X, cursorY), width, scale);
             cursorY += FloorSectionGap * scale * 0.5f;
             var shelvesBottom = shelves.Draw(drawList, ui, this, new Vector2(origin.X, cursorY), width, stage.Phase,

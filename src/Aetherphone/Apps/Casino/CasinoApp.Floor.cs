@@ -28,9 +28,15 @@ internal sealed partial class CasinoApp
     private const float RecordsTileHeight = 84f;
     private const float RecordsIcon = 34f;
 
+    internal const int RecentGamesCap = 4;
+
     internal static readonly string[] LiveRooms = { CasinoGames.Race, CasinoGames.Wheel, CasinoGames.Bingo };
 
     private readonly LiveNowItem[] liveNow = new LiveNowItem[LiveNowCapacity];
+    private readonly int[] recentPicks = new int[RecentGamesCap];
+    private readonly StripEntry[] recentEntries = new StripEntry[RecentGamesCap];
+    private CasinoRoundHistoryDto[]? recentRounds;
+    private int recentCount;
     private readonly TileRail liveNowRail = new();
     private readonly Dictionary<int, string> returnLabels = new();
     private LanguageInfo? returnLanguage;
@@ -227,6 +233,42 @@ internal sealed partial class CasinoApp
     }
 
     public ICabinetIdle? IdleFor(string gameId) => machines.IdleFor(gameId);
+
+    private float DrawRecentGames(ImDrawListPtr drawList, Vector2 origin, float width, float delta, float scale)
+    {
+        RefreshRecentGames();
+        if (recentCount == 0)
+        {
+            return origin.Y;
+        }
+
+        var top = origin.Y + FloorSectionGap * scale * 0.5f;
+        var bottom = shelves.DrawRecent(drawList, ui, this, new Vector2(origin.X, top), width, stage.Phase, delta,
+            !router.IsTransitioning && !LaunchActive, scale, recentEntries.AsSpan(0, recentCount), out var tapped,
+            out var source);
+        if (tapped.GameId is not null)
+        {
+            OpenEntry(tapped, source);
+        }
+
+        return bottom + CardGap * scale;
+    }
+
+    private void RefreshRecentGames()
+    {
+        var rounds = history.Rounds;
+        if (ReferenceEquals(rounds, recentRounds))
+        {
+            return;
+        }
+
+        recentRounds = rounds;
+        recentCount = CasinoRecentGames.Collect(rounds, StripCatalog.PlayableIds, recentPicks);
+        for (var index = 0; index < recentCount; index++)
+        {
+            recentEntries[index] = StripCatalog.Playable[recentPicks[index]];
+        }
+    }
 
     private float DrawLiveNow(ImDrawListPtr drawList, Vector2 origin, float width, float scale)
     {
