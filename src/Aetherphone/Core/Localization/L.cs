@@ -11530,10 +11530,10 @@ internal static class L
         public static readonly LocString TableSheet = new("casino.venue.tableSheet", "Table");
         public static readonly LocString RoomClosedTitle = new("casino.venue.roomClosedTitle", "This room has closed");
         public static readonly LocString RoomClosedHint = new("casino.venue.roomClosedHint", "The host closed it, or everyone left.");
-        public static readonly LocString DiceRibbon = new("casino.venue.diceRibbon", "Rolls from 1 to {0}");
-        public static readonly LocString RoundEndsIn = new("casino.venue.roundEndsIn", "Highest roll wins, {0} left");
+        public static readonly LocString HighestRollWins = new("casino.venue.highestRollWins", "Highest roll wins");
         public static readonly LocString Rolling = new("casino.venue.rolling", "Rolling...");
         public static readonly LocString LogEmpty = new("casino.venue.logEmpty", "No rolls yet");
+        public static readonly LocString RecentRolls = new("casino.venue.recentRolls", "Recent rolls");
         public static readonly LocString RolledOf = new("casino.venue.rolledOf", "{0} rolled, 1 to {1}");
         public static readonly LocString RoundNoRolls = new("casino.venue.roundNoRolls", "No rolls counted this round");
         public static readonly LocString RoundLeader = new("casino.venue.roundLeader", "{0} leads with {1}");
@@ -11559,10 +11559,8 @@ internal static class L
         public static readonly LocString DuelHint = new("casino.venue.duelHint", "Two players roll down from the start number, a 1 loses");
         public static readonly LocString ChallengeGil = new("casino.venue.challengeGil", "Challenge for {0} gil");
         public static readonly LocString ChallengePractice = new("casino.venue.challengePractice", "Challenge for {0}");
-        public static readonly LocString TimeLeft = new("casino.venue.timeLeft", "{0} left");
         public static readonly LocString CancelChallenge = new("casino.venue.cancelChallenge", "Cancel");
         public static readonly LocString AcceptDuel = new("casino.venue.acceptDuel", "Accept duel");
-        public static readonly LocString WaitingTaker = new("casino.venue.waitingTaker", "Waiting for a taker");
         public static readonly LocString NoRaffle = new("casino.venue.noRaffle", "No raffle open");
         public static readonly LocString Drawing = new("casino.venue.drawing", "Drawing...");
         public static readonly LocString Entrants = new("casino.venue.entrants", "{0} entrants, {1} tickets");
@@ -11575,13 +11573,10 @@ internal static class L
         public static readonly LocString TicketPriceGil = new("casino.venue.ticketPriceGil", "Ticket {0} gil, paid to the host by trade");
         public static readonly LocString RaffleFree = new("casino.venue.raffleFree", "Tickets are free");
         public static readonly LocString DrawNow = new("casino.venue.drawNow", "Draw now");
-        public static readonly LocString TicketsMaxed = new("casino.venue.ticketsMaxed", "You hold every ticket you can");
         public static readonly LocString TakeTicket = new("casino.venue.takeTicket", "Take a ticket");
         public static readonly LocString ReplayDraw = new("casino.venue.replayDraw", "Replay the draw");
-        public static readonly LocString RaffleHostHint = new("casino.venue.raffleHostHint", "Open a raffle for everyone in the room");
         public static readonly LocString RaffleWaitHint = new("casino.venue.raffleWaitHint", "The host opens raffles here");
         public static readonly LocString RaffleOpenAction = new("casino.venue.raffleOpenAction", "Open a raffle");
-        public static readonly LocString WaitingHost = new("casino.venue.waitingHost", "Waiting for the host");
         public static readonly LocString RaffleTitle = new("casino.venue.raffleTitle", "Title");
         public static readonly LocString RaffleTitleHint = new("casino.venue.raffleTitleHint", "What is it for?");
         public static readonly LocString TicketsEach = new("casino.venue.ticketsEach", "Tickets each");

@@ -14,6 +14,8 @@ internal sealed class DiceTableRoom
     private const float TileShare = 0.46f;
     private const float TileWidthShare = 0.62f;
     private const float LogTopGap = 14f;
+    private const float LogCaptionGap = 4f;
+    private const float LogFadeFloor = 0.75f;
     private const long MeasureMoment = 46_800_000;
     private const string Tumbling = "...";
     private const string StateMarquee = "venue.dice.state";
@@ -66,13 +68,13 @@ internal sealed class DiceTableRoom
         var world = room.World;
         var top = VenueArt.DrawSign(drawList, CasinoSign.Dice, world, room.Frame.Phase, scale);
         var round = board.Round;
-        var remaining = round is null ? 0 : Math.Max(0, round.EndsAtUnixMs - room.NowUnixMs);
-        var state = round is not null && !round.Closed
-            ? texts.Duration(L.Venue.RoundEndsIn, (int)((remaining + 999) / 1000))
-            : texts.Number(L.Venue.DiceRibbon, board.Sides);
         var stateHeight = Typography.LineHeight(TextStyles.Title2);
-        StageText.State(drawList, new Vector2(world.Center.X, top + stateHeight * 0.5f), state, world.Width,
-            StateMarquee);
+        if (round is not null && !round.Closed)
+        {
+            StageText.State(drawList, new Vector2(world.Center.X, top + stateHeight * 0.5f),
+                Loc.T(L.Venue.HighestRollWins), world.Width, StateMarquee);
+        }
+
         top += stateHeight + VenueArt.SignGap * scale;
         var tileSide = MathF.Min(world.Width * TileWidthShare, (world.Max.Y - top) * TileShare);
         var tile = new Rect(new Vector2(world.Center.X - tileSide * 0.5f, top),
@@ -170,9 +172,13 @@ internal sealed class DiceTableRoom
         }
 
         var scale = room.Scale;
-        var rowHeight = MathF.Max(VenueArt.RowHeight * scale, Typography.LineHeight(TextStyles.Subheadline) + 6f * scale);
-        var count = Math.Min(rolls.Length, (int)(area.Height / rowHeight));
         var drawList = room.DrawList;
+        var captionHeight = Typography.LineHeight(TextStyles.FootnoteEmphasized);
+        Typography.Draw(drawList, area.Min, Typography.FitText(Loc.T(L.Venue.RecentRolls), area.Width,
+            TextStyles.FootnoteEmphasized), StageText.Strong, TextStyles.FootnoteEmphasized);
+        area = new Rect(new Vector2(area.Min.X, area.Min.Y + captionHeight + LogCaptionGap * scale), area.Max);
+        var rowHeight = MathF.Max(VenueArt.RowHeight * scale, Typography.LineHeight(TextStyles.Subheadline) + 6f * scale);
+        var count = Math.Min(rolls.Length, (int)(MathF.Max(0f, area.Height) / rowHeight));
         var timeWidth = Typography.Measure(labels.Time(-1, MeasureMoment), TextStyles.Footnote).X + 64f * scale;
         for (var index = 0; index < count; index++)
         {
@@ -180,12 +186,12 @@ internal sealed class DiceTableRoom
             var rowTop = area.Min.Y + index * rowHeight;
             var mine = room.IsMe(roll.UserId);
             var fresh = index == 0 && playback.Tumbling && roll.Seq == playback.HeroSeq;
-            var alpha = 1f - index * 0.6f / Math.Max(1, count);
+            var alpha = 1f - index * (1f - LogFadeFloor) / Math.Max(1, count);
             var center = rowTop + rowHeight * 0.5f;
             var time = labels.Time(roll.Seq, roll.AtUnixMs);
             Typography.Draw(drawList,
                 new Vector2(area.Min.X, center - Typography.LineHeight(TextStyles.Footnote) * 0.5f), time,
-                CasinoColors.InkBody with { W = alpha }, TextStyles.Footnote);
+                StageText.Strong with { W = alpha }, TextStyles.Footnote);
             var value = fresh ? Tumbling : labels.Value(roll.Value);
             var valueSize = Typography.Measure(value, TextStyles.Headline);
             Typography.Draw(drawList, new Vector2(area.Max.X - valueSize.X, center - valueSize.Y * 0.5f), value,
@@ -219,10 +225,6 @@ internal sealed class DiceTableRoom
         Rect deck)
     {
         var canOpenRound = room.Hosting && board.HighestWins && (round is null || round.Closed);
-        var caption = round is not null && !round.Closed
-            ? Loc.T(L.Venue.RoundFirstRollCounts)
-            : Loc.T(L.Venue.DiceHint);
-        VenueArt.DeckCaption(room.DrawList, deck, caption, room.Scale);
         if (canOpenRound && room.Stage.SecondaryAction(Loc.T(L.Venue.RoundOpen), room.Enabled, room.Ui.Ink))
         {
             act(new VenueActDraft(VenueActions.RoundOpen));
