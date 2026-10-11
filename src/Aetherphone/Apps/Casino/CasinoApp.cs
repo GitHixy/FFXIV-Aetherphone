@@ -627,7 +627,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
                 DeckHeight: Cabinets.BingoCabinet.DeckHeight, ReturnTenths: Core.Casino.BingoRules.ReturnTenths,
                 Extra: bingo.DaubLabel),
             CasinoGames.Wheel => new CasinoStageSpec(route.GameId, L.Casino.GameWheel, Backdrop.Strip, Room: true,
-                DeckHeight: Cabinets.WheelCabinet.DeckHeight),
+                DeckHeight: Cabinets.WheelCabinet.DeckHeight, ReturnTenths: ReturnTenthsOf(CasinoGames.Wheel)),
             _ when Originals.OriginalsCabinet.Owns(route.GameId) => originals.SpecFor(route.GameId),
             CasinoGames.Race => race.Spec(RaceLandscape()),
             CasinoGames.Plinko => plinko.Spec,
