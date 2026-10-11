@@ -174,7 +174,7 @@ Seeded games share vector files with the backend: `src/Aetherphone.Tests/Vectors
 
 | Game | Code | Kind | Notes |
 | --- | --- | --- | --- |
-| Golden Bird Deluxe, Crystal Cascade, Moogle Money | Machines/MachineCabinet | solo, `casino.slots` with `machineId` `slots.bird`, `slots.cascade`, `slots.moogle` | One shell: chassis, top glass and reel window fill the stage; the Golden Bird gamble ladder (`GambleLadder`), the Crystal Cascade ante and bonus buy modes, the Moogle Money Mini and Minor meters; every machine also draws the floor jackpot |
+| Golden Bird Deluxe, Crystal Cascade, Moogle Money | Machines/MachineCabinet | solo, `casino.slots` with `machineId` `slots.bird`, `slots.cascade`, `slots.moogle` | One shell: chassis, top glass and reel window fill the stage; the Golden Bird gamble ladder (`GambleLadder`), the Crystal Cascade ante and bonus buy modes, the Moogle Money Mini and Minor meters; every machine also draws the floor jackpot, where a round's tickets are its cost capped at 10 coins, so every spin from 10 coins up has the same chance |
 | Plinko | Plinko/PlinkoCabinet | solo, `casino.plinko` | 8, 12 or 16 rows, three risks, a result rail of recent drops |
 | Mines, Dice, Limbo, Keno, Hi-Lo | Originals/OriginalsCabinet | solo, `casino.mines` and the rest | One cabinet with an `IOriginalsSkin` per game; Mines and Hi-Lo keep an open round across picks and cash out |
 | Scratch | Cabinets/ScratchCabinet | solo, `casino.scratch` | Five ticket tiers, buy five in a row, the solo reference cabinet |

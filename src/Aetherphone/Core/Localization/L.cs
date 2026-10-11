@@ -2301,6 +2301,8 @@ internal static class L
                 "Changed bet limits: your ceiling now grows with your level and your balance"),
             new("changelog.r1300.50",
                 "Changed every chip balance to show its value in coins"),
+            new("changelog.r1300.77",
+                "Changed the floor jackpot draw: a spin counts at most 10 coins of tickets, so every spin from 10 coins up has the same chance"),
             new("changelog.r1300.47",
                 "Fixed Barkeep practice shifts needing chips to open"),
         };
@@ -11252,7 +11254,7 @@ internal static class L
         public static readonly LocString CascadeRuleFree = new("casino.slots.cascade.ruleFree", "Four or more crystal stars pay and award 10 free spins. Orbs worth 2x to 500x land only in free spins; when a spin wins, its orbs join a feature total that multiplies that spin. Three stars add 5 spins, up to 50.");
         public static readonly LocString MoogleRuleHold = new("casino.slots.moogle.ruleHold", "Each cell can land a pom coin worth 1x to 50x the bet, or Mini, Minor or Major. Six or more start hold and spin: coins lock, 3 respins, each new coin resets them to 3. It ends when the respins run out or all 15 cells hold a coin, which adds the Grand.");
         public static readonly LocString MoogleRuleGames = new("casino.slots.moogle.ruleGames", "Three wings on reels 2 to 4 start 6 free games. In each, one giant symbol covers the middle reels; a giant coin is nine coins and always starts hold and spin. Mini and Minor grow with every spin at your bet and must hit before they reach their ceiling.");
-        public static readonly LocString JackpotRule = new("casino.slots.machine.jackpotRule", "Floor jackpot: every paid spin on any machine also draws for the floor jackpot, and every chip staked is a ticket. It has nothing to do with the reels.");
+        public static readonly LocString JackpotRule = new("casino.slots.machine.jackpotRule", "Floor jackpot: every paid spin on any machine also draws for the floor jackpot. Each chip staked is a ticket, up to 10 coins a spin, so every spin from 10 coins up has the same chance. It has nothing to do with the reels.");
         public static readonly LocString Turbo = new("casino.slots.machine.turbo", "Turbo");
         public static readonly LocString AnteBoost = new("casino.slots.cascade.anteBoost", "2× bonus");
         public static readonly LocString AnteHint = new("casino.slots.cascade.anteHint", "Ante Bet: each spin costs a quarter more and the bonus comes about twice as often.");
