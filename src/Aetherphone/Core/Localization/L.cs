@@ -2240,7 +2240,7 @@ internal static class L
             new("changelog.r1300.18",
                 "Added floor challenges with a chip prize and the current leader on the Floor"),
             new("changelog.r1300.19",
-                "Added the Hall of Fame: weekly boards for profit, best multiplier and biggest win, naming only players who allow leaderboards"),
+                "Added the Hall of Fame: weekly boards for profit, best multiplier and biggest win, naming only players who choose to appear when Gamba asks"),
             new("changelog.r1300.20",
                 "Added chip rain: now and then, chips drop on everyone in a live room"),
             new("changelog.r1300.21",
@@ -11187,12 +11187,19 @@ internal static class L
         public static readonly LocString FamePoker = new("casino.club.famePoker", "Poker");
         public static readonly LocString FameThisWeek = new("casino.club.fameThisWeek", "This week");
         public static readonly LocString FameLastWeek = new("casino.club.fameLastWeek", "Last week");
-        public static readonly LocString FameEmpty = new("casino.club.fameEmpty", "No one on this board yet. Players who allow leaderboards show here as they win.");
+        public static readonly LocString FameEmpty = new("casino.club.fameEmpty", "No one on this board yet. Players who choose to appear show here as they win.");
         public static readonly LocString FameYourRank = new("casino.club.fameYourRank", "You are #{0}");
         public static readonly LocString FameNotRanked = new("casino.club.fameNotRanked", "You are not on this board yet");
-        public static readonly LocString FameOptIn = new("casino.club.fameOptIn", "Only players who allow leaderboards in their profile are named. Everyone else shows as Hidden.");
+        public static readonly LocString FameOptIn = new("casino.club.fameOptIn", "Only players who choose to appear are on these boards. You can change your choice any time in Settings > Privacy.");
         public static readonly LocString FameChampionLine = new("casino.club.fameChampionLine", "Last week's champion: {0}");
         public static readonly LocString FameChampionValue = new("casino.club.fameChampionValue", "Champion with {0} profit");
+        public static readonly LocString FameConsentTitle = new("casino.club.fameConsentTitle", "Show up in the Hall of Fame?");
+        public static readonly LocString FameConsentBody = new("casino.club.fameConsentBody", "Your name, biggest wins and best multipliers can appear on the weekly Hall of Fame boards that everyone on the floor sees.");
+        public static readonly LocString FameConsentOff = new("casino.club.fameConsentOff", "If you say no, your name stays off every board.");
+        public static readonly LocString FameShowMe = new("casino.club.fameShowMe", "Show me");
+        public static readonly LocString FameHiddenLine = new("casino.club.fameHiddenLine", "You are hidden from the Hall of Fame");
+        public static readonly LocString FameSetting = new("casino.club.fameSetting", "Show me in the Gamba Hall of Fame");
+        public static readonly LocString FameSettingHint = new("casino.club.fameSettingHint", "When this is off, Gamba leaves your name off the Hall of Fame boards.");
     }
 
     internal static class Machines
