@@ -399,6 +399,7 @@ internal sealed class TableDoor
             case DoorControl.Deal:
                 inlineReason = string.Empty;
                 tables.Deal(roomId);
+                openTable(roomId);
                 break;
             case DoorControl.CoDealers:
                 coDealerMode = !coDealerMode;
