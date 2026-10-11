@@ -51,6 +51,14 @@ public sealed class BlackjackHostedLayoutTests
     }
 
     [Fact]
+    public void ARailPlateShortensANameToTheForename()
+    {
+        Assert.Equal("Chea", PitText.Forename("Chea Thorne"));
+        Assert.Equal("Ciri", PitText.Forename("Ciri"));
+        Assert.Equal(" Lead", PitText.Forename(" Lead"));
+    }
+
+    [Fact]
     public void TheTournamentStripReservesItsBandOnlyWhileItShows()
     {
         Assert.False(TournamentOverlay.Shows(null));

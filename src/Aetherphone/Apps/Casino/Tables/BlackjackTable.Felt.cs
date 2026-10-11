@@ -270,7 +270,7 @@ internal sealed partial class BlackjackTable
         Material.LiquidGlass(drawList, min, max, rounding, scale, GlassTone.Dark, 0f);
         var inner = width - 6f * scale;
         var lineHeight = (max.Y - min.Y) * 0.5f;
-        var name = Typography.FitText(view.DisplayName, inner, TextStyles.Footnote);
+        var name = Typography.FitText(RailName(view.SeatIndex, view.DisplayName, inner), inner, TextStyles.Footnote);
         Typography.DrawCentered(drawList, new Vector2(puck.X, min.Y + lineHeight * 0.55f), name,
             dimmed ? StageText.Body : StageText.Strong, TextStyles.Footnote);
         var stack = StackLabel(currency, view.Stack, true);
@@ -279,6 +279,22 @@ internal sealed partial class BlackjackTable
         Typography.DrawCentered(drawList, new Vector2(puck.X, min.Y + lineHeight * 1.45f),
             Typography.FitText(stack, inner, fit, style.Weight), dimmed ? StageText.Body : StackInk(currency), fit,
             style.Weight);
+    }
+
+    private string RailName(int seatIndex, string displayName, float width)
+    {
+        if (Typography.Measure(displayName, TextStyles.Footnote).X <= width)
+        {
+            return displayName;
+        }
+
+        if (!ReferenceEquals(railNameSources[seatIndex], displayName))
+        {
+            railNameSources[seatIndex] = displayName;
+            railForenames[seatIndex] = PitText.Forename(displayName);
+        }
+
+        return railForenames[seatIndex];
     }
 
     private static void DrawBalanceTitle(ImDrawListPtr drawList, int currency, long stack, Vector2 puck,
@@ -303,7 +319,7 @@ internal sealed partial class BlackjackTable
     {
         if (currency == CasinoCurrencies.Gil)
         {
-            return hostedText.Gil(amount);
+            return compact ? hostedText.GilCompact(amount) : hostedText.Gil(amount);
         }
 
         return compact ? NumberText.Compact(amount) : NumberText.Group(amount);

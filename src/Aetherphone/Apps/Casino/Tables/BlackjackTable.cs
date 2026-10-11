@@ -17,6 +17,7 @@ namespace Aetherphone.Apps.Casino.Tables;
 internal sealed partial class BlackjackTable : ICabinetIdle
 {
     private const float HostedRowGap = 6f;
+    private const string InfoMarquee = "casino.blackjack.hostedInfo";
     private const float SnappedClock = 10f;
     private const float ReasonSeconds = 6f;
 
@@ -50,6 +51,8 @@ internal sealed partial class BlackjackTable : ICabinetIdle
     private readonly SeatMotion[] motions = new SeatMotion[BlackjackRules.SeatCount];
     private readonly BlackjackSeatRecap[] recaps = new BlackjackSeatRecap[BlackjackRules.SeatCount];
     private readonly Spring[] heroRaise = new Spring[BlackjackRules.MaxHandsPerSeat];
+    private readonly string[] railNameSources = new string[BlackjackRules.SeatCount];
+    private readonly string[] railForenames = new string[BlackjackRules.SeatCount];
 
     private int mySeat = -1;
     private string roomId = CasinoRoomIds.BlackjackPit;
@@ -249,14 +252,20 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         var top = Venue.TournamentOverlay.Shows(board)
             ? safe.Min.Y + Venue.TournamentOverlay.Reserve(scale)
             : safe.Min.Y;
-        var knockTop = DrawHostedRow(drawList, ui, board, safe.Min.X, top, safe.Width, scale);
-        var feltTop = knockTop + HostKnockBanner.Reserve(tables, roomId, safe.Width, scale);
+        var seated = BlackjackRules.IsSeat(mySeat);
+        var railCount = BlackjackTableLayout.RailSeatCount(mySeat, SeatLimit(board));
+        var feltFloor = BlackjackTableLayout.MinimumHeight(safe.Width, railCount, seated, scale);
+        var knockReserve = HostKnockBanner.Reserve(tables, roomId, safe.Width, scale);
+        var knockTop = DrawHostedRow(drawList, ui, board, safe.Min.X, top, safe.Width,
+            safe.Max.Y - knockReserve - feltFloor, scale);
+        var feltTop = BlackjackTableLayout.FeltTop(knockTop, knockReserve, safe.Max.Y, feltFloor);
         ExpireReason(delta);
         var reason = ReasonText();
         var reasonHeight = reason.Length > 0
             ? CasinoNotice.Height(CasinoNoticeKind.Reason, string.Empty, reason, safe.Width, scale)
             : 0f;
-        var feltBottom = reasonHeight > 0f ? safe.Max.Y - reasonHeight - Metrics.Space.Sm * scale : safe.Max.Y;
+        var noticeReserve = reasonHeight > 0f ? reasonHeight + Metrics.Space.Sm * scale : 0f;
+        var feltBottom = BlackjackTableLayout.FeltBottom(feltTop, safe.Max.Y, noticeReserve, feltFloor);
         var felt = new Rect(new Vector2(safe.Min.X, feltTop), new Vector2(safe.Max.X, feltBottom));
         if (felt.Height <= 0f)
         {
@@ -266,8 +275,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         BuildSeatViews(board);
         BuildRecaps(board);
         UpdateMotions(delta);
-        layout.Compute(felt, BlackjackTableLayout.RailSeatCount(mySeat, SeatLimit(board)),
-            BlackjackRules.IsSeat(mySeat), scale);
+        layout.Compute(felt, railCount, seated, scale);
         DrawFelt(stage, drawList, ui, board, deadlineRemaining, delta, frame.Phase, scale);
         HostKnockBanner.Draw(drawList, ui, tables, roomId, new Vector2(safe.Min.X, knockTop), safe.Width, scale);
         SpeakForPhase(board);
@@ -410,7 +418,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
     }
 
     private float DrawHostedRow(ImDrawListPtr drawList, AppSkin ui, CasinoBlackjackRoomStateDto board, float left,
-        float y, float width, float scale)
+        float y, float width, float limit, float scale)
     {
         if (!BlackjackHosting.SeatBanked(board))
         {
@@ -471,34 +479,68 @@ internal sealed partial class BlackjackTable : ICabinetIdle
             right = ledgerRect.Min.X - buttonGap;
         }
 
-        var info = gil ? hostedText.GilLimits(board) : hostedText.Rules(board);
+        var first = gil ? hostedText.GilLimits(board) : hostedText.Rules(board);
+        var second = gil && board.Rules is not null ? hostedText.Rules(board) : string.Empty;
+        var gap = HostedRowGap * scale;
+        var rowBottom = buttons > 0 ? y + height : y;
+        var leadGap = buttons > 0 ? gap : 0f;
+        var free = right - left;
+        var firstBeside = buttons > 0
+                          && HostedInfoLayout.FitsLine(Typography.Measure(first, TextStyles.Footnote).X, free, scale);
+        var blocksHeight = (firstBeside ? 0f : leadGap + InfoBlockHeight(first, width, scale))
+                           + (second.Length > 0 ? gap + InfoBlockHeight(second, width, scale) : 0f);
+        var lineHeight = HostedInfoLayout.BlockHeight(Typography.LineHeight(TextStyles.Footnote), 1, scale);
+        var mode = HostedInfoLayout.Mode(blocksHeight, leadGap + lineHeight, limit - gap - rowBottom,
+            buttons > 0 ? free : 0f, scale);
+        switch (mode)
+        {
+            case HostedInfoMode.Blocks:
+                return DrawInfoBlocks(drawList, ui, first, second, firstBeside, gil, left, y, rowBottom, free,
+                    width, height, scale) + gap;
+            case HostedInfoMode.Beside:
+                StageText.Status(drawList, new Vector2(left + free * 0.5f, y + height * 0.5f),
+                    hostedText.Info(first, second), free, InfoMarquee, TextStyles.Footnote, true);
+                return rowBottom + gap;
+            case HostedInfoMode.Line:
+                StageText.Status(drawList, new Vector2(left + width * 0.5f, rowBottom + leadGap + lineHeight * 0.5f),
+                    hostedText.Info(first, second), width, InfoMarquee, TextStyles.Footnote, true);
+                return rowBottom + leadGap + lineHeight + gap;
+            default:
+                return rowBottom + gap;
+        }
+    }
+
+    private float DrawInfoBlocks(ImDrawListPtr drawList, AppSkin ui, string first, string second, bool firstBeside,
+        bool gil, float left, float y, float rowBottom, float free, float width, float height, float scale)
+    {
         var ink = gil ? TableRow.CurrencyTint(CasinoCurrencies.Gil, ui.Accent) : StageText.Strong;
         var gap = HostedRowGap * scale;
-        var bottom = y;
-        if (right < left + width)
+        var bottom = rowBottom;
+        if (firstBeside)
         {
-            bottom = y + height;
-            var free = right - left;
-            if (HostedInfoLayout.FitsLine(Typography.Measure(info, TextStyles.Footnote).X, free, scale))
-            {
-                StageText.Plate(drawList, new Vector2(left + free * 0.5f, y + height * 0.5f), info, free, ink,
-                    TextStyles.Footnote, scale);
-                info = string.Empty;
-            }
+            StageText.Plate(drawList, new Vector2(left + free * 0.5f, y + height * 0.5f), first, free, ink,
+                TextStyles.Footnote, scale);
+        }
+        else
+        {
+            bottom = DrawInfoBlock(drawList, first, left, bottom > y ? bottom + gap : bottom, width, ink, scale);
         }
 
-        if (info.Length > 0)
+        if (second.Length > 0)
         {
-            bottom = DrawInfoBlock(drawList, info, left, bottom > y ? bottom + gap : bottom, width, ink, scale);
+            bottom = DrawInfoBlock(drawList, second, left, bottom + gap, width, StageText.Strong, scale);
         }
 
-        if (gil && board.Rules is not null)
-        {
-            bottom = DrawInfoBlock(drawList, hostedText.Rules(board), left, bottom + gap, width, StageText.Strong,
-                scale);
-        }
+        return bottom;
+    }
 
-        return bottom + gap;
+    private static float InfoBlockHeight(string text, float width, float scale)
+    {
+        var style = TextStyles.Footnote;
+        var padX = StageText.CapsulePadX * scale;
+        var count = Math.Min(Typography.WrapText(text, style, MathF.Max(1f, width - padX * 2f)).Length,
+            HostedInfoLayout.MaxLines);
+        return count == 0 ? 0f : HostedInfoLayout.BlockHeight(Typography.LineHeight(style), count, scale);
     }
 
     private string OwnerId() => tables.CardFor(roomId)?.OwnerUserId ?? string.Empty;

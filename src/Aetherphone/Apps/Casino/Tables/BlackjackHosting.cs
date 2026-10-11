@@ -136,12 +136,35 @@ internal static class BlackjackHosting
 
 internal sealed class BlackjackHostedText
 {
+    private const string InfoSeparator = " · ";
+
     private static readonly LocString[] PaysLabels = { L.Tables.Pays32, L.Tables.Pays21, L.Tables.Pays11 };
 
     private readonly CasinoTextCache texts = new();
     private CasinoBlackjackRuleSheetDto? rulesSource;
     private LanguageInfo? rulesLanguage;
     private string rules = string.Empty;
+    private string infoFirst = string.Empty;
+    private string infoSecond = string.Empty;
+    private string info = string.Empty;
+
+    public string Info(string first, string second)
+    {
+        if (second.Length == 0)
+        {
+            return first;
+        }
+
+        if (ReferenceEquals(first, infoFirst) && ReferenceEquals(second, infoSecond))
+        {
+            return info;
+        }
+
+        infoFirst = first;
+        infoSecond = second;
+        info = string.Concat(first, InfoSeparator, second);
+        return info;
+    }
 
     public string Rules(CasinoBlackjackRoomStateDto board)
     {
@@ -183,6 +206,11 @@ internal sealed class BlackjackHostedText
     public string Gil(long amount)
     {
         return texts.Number(L.Tables.GilAmount, amount);
+    }
+
+    public string GilCompact(long amount)
+    {
+        return texts.Compact(L.Tables.GilAmount, amount);
     }
 
     public string Rebuy(long stack)
