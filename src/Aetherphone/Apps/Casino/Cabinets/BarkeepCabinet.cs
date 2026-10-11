@@ -46,7 +46,6 @@ internal sealed class BarkeepCabinet : ICabinetIdle
     private const float CardGap = 6f;
     private const float LadderRowHeight = 22f;
     private const float ShadowOffset = 1.5f;
-    private const float PracticePillShare = 0.6f;
     private const float HudPad = 4f;
     private const ulong JitterSeed = 0xBA2C4EE5UL;
     private const ulong IdleSeed = 0x1D1EBA2UL;
@@ -95,7 +94,6 @@ internal sealed class BarkeepCabinet : ICabinetIdle
     private Vector2 tossTo;
     private GameRandom jitter = GameRandom.FromSeed(JitterSeed);
     private LabelSlot comboLabel;
-    private LabelSlot waitLabel;
     private LabelSlot lastCallLabel;
     private LabelSlot noTipsLabel;
     private LabelSlot bestLabel;
@@ -117,10 +115,7 @@ internal sealed class BarkeepCabinet : ICabinetIdle
 
     public Backdrop IdleBackdrop => Backdrop.Strip;
 
-    public static float DeckHeight => BetComposer.Pad * 2f + BetComposer.ActionHeight * 2f + BetComposer.Gap
-        + HudExtra;
-
-    private const float HudExtra = 8f;
+    public static float DeckHeight => BarkeepDeckLayout.Height;
 
     public static int ReturnTenths => BarkeepRules.ReturnBasisPointsAtPerfectPlay / 10;
 
@@ -468,7 +463,6 @@ internal sealed class BarkeepCabinet : ICabinetIdle
 
     private void DrawLobbyWork(ImDrawListPtr drawList, AppSkin ui, Rect work, float scale)
     {
-        var state = store.State;
         var top = work.Min.Y;
         var width = work.Width;
         if (inlineReason.Length > 0)
@@ -492,14 +486,6 @@ internal sealed class BarkeepCabinet : ICabinetIdle
         var best = bestLabel.Get(L.Casino.BarkeepBestScore, stats.Get(PracticeStatsId).BestScore);
         Typography.DrawCentered(drawList, new Vector2(work.Center.X, top + LadderRowHeight * scale * 0.5f),
             Typography.FitText(best, width, TextStyles.Footnote), CasinoColors.InkBody, TextStyles.Footnote);
-        if (state is null || state.Sitting is not null)
-        {
-            return;
-        }
-
-        top += LadderRowHeight * scale + CardGap * scale;
-        Typography.DrawWrappedCentered(drawList, Loc.T(L.Casino.BarkeepNeedSeat), TextStyles.Subheadline,
-            CasinoColors.InkTitle, new Vector2(work.Center.X, top), width);
     }
 
     private void DrawShiftWork(ImDrawListPtr drawList, CasinoStage stage, in CasinoStageFrame frame, AppSkin ui,
@@ -543,13 +529,18 @@ internal sealed class BarkeepCabinet : ICabinetIdle
         if (!flow.AtRail(current, current.CurrentPatronIndex) || !current.CurrentPatronArrived(elapsed))
         {
             verbStage.Cancel();
-            ShadowedCentered(drawList, area.Center with { Y = area.Center.Y - 16f * scale },
-                Typography.FitText(Loc.T(L.Casino.BarkeepNextPatron), area.Width, TextStyles.Title2),
-                CasinoColors.InkTitle, TextStyles.Title2, scale);
             var wait = (int)Math.Ceiling(current.SecondsUntilCurrentPatron(elapsed));
+            var next = Loc.T(L.Casino.BarkeepNextPatron);
+            var block = Typography.MeasureWrappedBlock(next, TextStyles.Title2, area.Width).Y;
+            var number = wait > 0 ? Typography.LineHeight(TextStyles.Title2) + CardGap * scale : 0f;
+            var blockTop = area.Center.Y - (block + number) * 0.5f;
+            var blockBottom = Typography.DrawWrappedCentered(drawList, next, TextStyles.Title2, CasinoColors.InkTitle,
+                new Vector2(area.Center.X, blockTop), area.Width);
             if (wait > 0)
             {
-                ShadowedCentered(drawList, area.Center with { Y = area.Center.Y + 18f * scale },
+                ShadowedCentered(drawList,
+                    new Vector2(area.Center.X,
+                        blockBottom + CardGap * scale + Typography.LineHeight(TextStyles.Title2) * 0.5f),
                     GameNumber.Label(wait), CasinoColors.Money, TextStyles.Title2, scale);
             }
 
@@ -969,15 +960,10 @@ internal sealed class BarkeepCabinet : ICabinetIdle
             return;
         }
 
-        var pad = BetComposer.Pad * scale;
-        var row = new Rect(new Vector2(deck.Min.X + pad, deck.Min.Y + pad),
-            new Vector2(deck.Max.X - pad, deck.Min.Y + pad + BetComposer.ActionHeight * scale));
-        var actionTop = deck.Max.Y - (BetComposer.Pad + BetComposer.ActionHeight) * scale;
-        var action = new Rect(new Vector2(deck.Min.X + pad, actionTop),
-            new Vector2(deck.Max.X - pad, actionTop + BetComposer.ActionHeight * scale));
+        var layout = BarkeepDeckLayout.Compute(deck, scale);
         if (settle is not null)
         {
-            if (Button.Draw(action, Loc.T(L.Casino.BarkeepDone), ui.Ink))
+            if (Button.Draw(layout.Action, Loc.T(L.Casino.BarkeepDone), ui.Ink))
             {
                 FinishSettle();
             }
@@ -987,14 +973,12 @@ internal sealed class BarkeepCabinet : ICabinetIdle
 
         if (practiceSettled)
         {
-            var donePill = new Rect(new Vector2(row.Center.X - row.Width * PracticePillShare * 0.5f, row.Min.Y),
-                new Vector2(row.Center.X + row.Width * PracticePillShare * 0.5f, row.Max.Y));
-            if (Button.Draw(donePill, Loc.T(L.Casino.BarkeepDone), ui.Ink, ButtonStyle.Gray))
+            if (DrawRowPill(ui, layout.Row, Loc.T(L.Casino.BarkeepDone), ButtonStyle.Gray, true, scale))
             {
                 FinishSettle();
             }
 
-            if (Button.Draw(action, Loc.T(L.Casino.BarkeepPracticeAgain), ui.Ink))
+            if (Button.Draw(layout.Action, Loc.T(L.Casino.BarkeepPracticeAgain), ui.Ink))
             {
                 StartPractice();
             }
@@ -1004,31 +988,42 @@ internal sealed class BarkeepCabinet : ICabinetIdle
 
         if (shift is not null)
         {
-            DrawShiftDeck(ui, row, action, scale);
+            DrawShiftDeck(ui, layout, scale);
             return;
         }
 
-        DrawLobbyDeck(stage, frame, ui, row);
+        DrawLobbyDeck(stage, frame, ui, layout, scale);
     }
 
-    private void DrawShiftDeck(AppSkin ui, Rect row, Rect action, float scale)
+    private static bool DrawRowPill(AppSkin ui, Rect row, string label, ButtonStyle style, bool enabled, float scale)
+    {
+        var labelWidth = Typography.Measure(label, Button.LabelStyle(row.Height)).X;
+        return Button.Draw(BarkeepDeckLayout.Pill(row, labelWidth, scale), label, ui.Ink, style, enabled: enabled);
+    }
+
+    private void DrawShiftDeck(AppSkin ui, in BarkeepDeckLayout layout, float scale)
     {
         var current = shift!;
         var drawList = ImGui.GetWindowDrawList();
         var elapsed = current.ElapsedSeconds(NowUnixSeconds());
         scoreRoll.Update(current.Score, ImGui.GetIO().DeltaTime);
-        var third = row.Width / 3f;
         var inset = HudPad * scale;
-        DrawHudCell(drawList, new Rect(row.Min, new Vector2(row.Min.X + third, row.Max.Y)), Loc.T(L.Casino.BarkeepScore),
-            GameNumber.Label(scoreRoll.Display), inset);
-        DrawHudCell(drawList, new Rect(new Vector2(row.Min.X + third, row.Min.Y), new Vector2(row.Min.X + third * 2f, row.Max.Y)),
-            string.Empty, counterLabel.Get(L.Casino.BarkeepPatronCounter,
-                Math.Min(current.CompletedOrders + 1, current.PatronCount), current.PatronCount), inset);
-        DrawHudCell(drawList, new Rect(new Vector2(row.Min.X + third * 2f, row.Min.Y), row.Max), string.Empty,
-            TimeText.Duration((int)elapsed), inset);
+        var canEnd = current.CanFinish(elapsed) && !finishSent;
+        var waiting = mode == BarkeepMode.Wager && !canEnd;
+        DrawHudCell(drawList, BarkeepDeckLayout.Cell(layout.Row, 0), Loc.T(L.Casino.BarkeepScore),
+            GameNumber.Label(scoreRoll.Display), CasinoColors.Money, inset);
+        DrawHudCell(drawList, BarkeepDeckLayout.Cell(layout.Row, 1), Loc.T(L.Casino.BarkeepPatron),
+            counterLabel.Get(L.Casino.BarkeepPatronOf, Math.Min(current.CompletedOrders + 1, current.PatronCount),
+                current.PatronCount), CasinoColors.InkTitle, inset);
+        var clockSeconds = waiting
+            ? Math.Max(0, (int)Math.Ceiling(BarkeepShift.FinishEarliestSeconds - elapsed))
+            : (int)elapsed;
+        DrawHudCell(drawList, BarkeepDeckLayout.Cell(layout.Row, 2),
+            Loc.T(waiting ? L.Casino.BarkeepEndIn : L.Casino.BarkeepClock), TimeText.Duration(clockSeconds),
+            CasinoColors.InkTitle, inset);
         if (mode == BarkeepMode.Practice)
         {
-            if (Button.Draw(action, Loc.T(L.Casino.BarkeepEndPractice), ui.Ink, ButtonStyle.Tinted))
+            if (Button.Draw(layout.Action, Loc.T(L.Casino.BarkeepEndPractice), ui.Ink, ButtonStyle.Tinted))
             {
                 EndPractice();
             }
@@ -1036,43 +1031,31 @@ internal sealed class BarkeepCabinet : ICabinetIdle
             return;
         }
 
-        var canEnd = current.CanFinish(elapsed) && !finishSent;
-        var label = canEnd
-            ? Loc.T(L.Casino.BarkeepEndShift)
-            : waitLabel.Get(L.Casino.BarkeepSettlesIn,
-                Math.Max(0, (int)Math.Ceiling(BarkeepShift.FinishEarliestSeconds - elapsed)));
-        if (Button.Draw(action, label, ui.Ink, ButtonStyle.Prominent, enabled: canEnd))
+        if (Button.Draw(layout.Action, Loc.T(L.Casino.BarkeepEndShift), ui.Ink, ButtonStyle.Prominent,
+                enabled: canEnd))
         {
             SendFinish();
         }
     }
 
-    private static void DrawHudCell(ImDrawListPtr drawList, Rect cell, string caption, string value, float inset)
+    private static void DrawHudCell(ImDrawListPtr drawList, Rect cell, string caption, string value, Vector4 valueInk,
+        float inset)
     {
         var width = cell.Width - inset * 2f;
         var centerX = cell.Center.X;
-        if (caption.Length == 0)
-        {
-            var fitted = Typography.FitText(value, width, TextStyles.Headline);
-            Typography.DrawCentered(drawList, cell.Center, fitted, CasinoColors.InkTitle, TextStyles.Headline);
-            return;
-        }
-
         var captionHeight = Typography.LineHeight(TextStyles.Footnote);
-        var valueHeight = Typography.LineHeight(TextStyles.Title3);
+        var valueHeight = Typography.LineHeight(TextStyles.Headline);
         var top = cell.Center.Y - (captionHeight + valueHeight) * 0.5f;
         Line(drawList, caption, centerX, top, width, CasinoColors.InkBody, TextStyles.Footnote);
-        Line(drawList, value, centerX, top + captionHeight, width, CasinoColors.Money, TextStyles.Title3);
+        Line(drawList, value, centerX, top + captionHeight, width, valueInk, TextStyles.Headline);
     }
 
-    private void DrawLobbyDeck(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui, Rect row)
+    private void DrawLobbyDeck(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui, in BarkeepDeckLayout layout,
+        float scale)
     {
         var state = store.State;
         var busy = startRequested || play.RoundInFlight;
-        var pillWidth = row.Width * PracticePillShare;
-        var pill = new Rect(new Vector2(row.Center.X - pillWidth * 0.5f, row.Min.Y),
-            new Vector2(row.Center.X + pillWidth * 0.5f, row.Max.Y));
-        if (Button.Draw(pill, Loc.T(L.Casino.BarkeepPracticeTitle), ui.Ink, ButtonStyle.Tinted, enabled: !busy))
+        if (DrawRowPill(ui, layout.Row, Loc.T(L.Casino.BarkeepPracticeTitle), ButtonStyle.Tinted, !busy, scale))
         {
             StartPractice();
         }
@@ -1087,7 +1070,7 @@ internal sealed class BarkeepCabinet : ICabinetIdle
         var enabled = !blocked && !busy;
         composer.Reset(BarkeepRules.EntryChips);
         var model = new BetComposerModel(BarkeepRules.EntryChips, BarkeepRules.EntryChips, sitting.Stack,
-            L.Barkeep.StartFor, enabled, FixedAmount: true, Knob: true, Repeat: stage.RepeatPressed(), Busy: busy);
+            L.Barkeep.StartFor, enabled, FixedAmount: true, Repeat: stage.RepeatPressed(), Busy: busy);
         if (composer.Draw(stage, ui, frame.Deck, model, frame.DeltaSeconds) != BetComposerAction.Confirm)
         {
             return;

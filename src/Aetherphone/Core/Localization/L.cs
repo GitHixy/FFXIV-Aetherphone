@@ -10494,7 +10494,8 @@ internal static class L
         public static readonly LocString BarkeepBestScore = new("casino.barkeep.bestScore", "Best score: {0}");
         public static readonly LocString BarkeepLadderRow = new("casino.barkeep.ladderRow", "{0}+ points pay {1}");
         public static readonly LocString BarkeepScore = new("casino.barkeep.score", "Score");
-        public static readonly LocString BarkeepPatronCounter = new("casino.barkeep.patronCounter", "Patron {0} of {1}");
+        public static readonly LocString BarkeepPatron = new("casino.barkeep.patron", "Patron");
+        public static readonly LocString BarkeepPatronOf = new("casino.barkeep.patronOf", "{0}/{1}");
         public static readonly LocString BarkeepNextPatron = new("casino.barkeep.nextPatron", "The next patron is on the way");
         public static readonly LocString BarkeepVerbPour = new("casino.barkeep.verbPour", "Pour");
         public static readonly LocString BarkeepVerbShake = new("casino.barkeep.verbShake", "Shake");
@@ -10510,14 +10511,14 @@ internal static class L
         public static readonly LocString BarkeepGradeMiss = new("casino.barkeep.gradeMiss", "Missed");
         public static readonly LocString BarkeepEndShift = new("casino.barkeep.endShift", "End shift");
         public static readonly LocString BarkeepEndPractice = new("casino.barkeep.endPractice", "End practice");
-        public static readonly LocString BarkeepSettlesIn = new("casino.barkeep.settlesIn", "The shift can wrap in {0}s");
+        public static readonly LocString BarkeepEndIn = new("casino.barkeep.endIn", "Can end in");
+        public static readonly LocString BarkeepClock = new("casino.barkeep.clock", "Time");
         public static readonly LocString BarkeepLastCall = new("casino.barkeep.lastCall", "Last call: the shift forfeits in {0}s");
         public static readonly LocString BarkeepShiftDone = new("casino.barkeep.shiftDone", "Shift complete");
         public static readonly LocString BarkeepServed = new("casino.barkeep.served", "{0} of {1} patrons served");
         public static readonly LocString BarkeepNoTips = new("casino.barkeep.noTips", "No tips tonight. The ladder starts at {0} points.");
         public static readonly LocString BarkeepNewBest = new("casino.barkeep.newBest", "New best!");
         public static readonly LocString BarkeepExpired = new("casino.barkeep.expired", "The shift ran past close, so the entry stayed behind the bar.");
-        public static readonly LocString BarkeepNeedSeat = new("casino.barkeep.needSeat", "Get chips to work a paid shift.");
         public static readonly LocString BarkeepDone = new("casino.barkeep.done", "Done");
         public static readonly LocString RecordsHeading = new("casino.recordsHeading", "On the record");
         public static readonly LocString HistoryRow = new("casino.historyRow", "Round history");
