@@ -52,6 +52,8 @@ internal readonly struct CasinoStageLayout
 
     public bool HasPractice => Practice.Height > 0f;
 
+    public bool Landscape => Full.Width > Full.Height;
+
     public static CasinoStageLayout Compute(Rect full, bool ribbon, bool practice, float deckHeight, float scale) =>
         Compute(full, full, ribbon, practice, deckHeight, scale);
 
@@ -82,7 +84,7 @@ internal readonly struct CasinoStageLayout
 
         var bottom = MathF.Max(top, content.Max.Y);
         var deckTop = MathF.Max(top, bottom - MathF.Max(0f, deckHeight) * scale);
-        var deck = new Rect(new Vector2(content.Min.X, deckTop), new Vector2(content.Max.X, bottom));
+        var deck = new Rect(new Vector2(full.Min.X, deckTop), new Vector2(full.Max.X, bottom));
         var inset = SafeInset * scale;
         var safeMin = new Vector2(full.Min.X + inset, top + inset);
         var safeMax = new Vector2(full.Max.X - inset, deckTop - inset);
@@ -97,14 +99,33 @@ internal readonly struct CasinoStageLayout
     public bool ChromeContains(Vector2 point)
     {
         var radiusSquared = TouchRadiusPixels * TouchRadiusPixels;
-        if (Vector2.DistanceSquared(point, BackCenter) <= radiusSquared
-            || Vector2.DistanceSquared(point, InfoCenter) <= radiusSquared)
+        if (Vector2.DistanceSquared(point, BackCenter) <= radiusSquared)
+        {
+            return true;
+        }
+
+        if (Landscape)
+        {
+            return false;
+        }
+
+        if (Vector2.DistanceSquared(point, InfoCenter) <= radiusSquared)
         {
             return true;
         }
 
         return point.Y >= Band.Min.Y && point.Y <= Band.Max.Y
             && MathF.Abs(point.X - CapsuleCenter.X) <= CapsuleMaxWidth * 0.5f;
+    }
+
+    public Rect Notice(float width, float height, float scale)
+    {
+        var clearance = (BetsRail.HandleHeight * 0.5f + DeckActions.Gap) * scale;
+        var bottom = HasDeck ? Deck.Min.Y - clearance : Safe.Max.Y;
+        var fitted = MathF.Min(width, Safe.Width);
+        var center = Safe.Center.X;
+        return new Rect(new Vector2(center - fitted * 0.5f, bottom - height),
+            new Vector2(center + fitted * 0.5f, bottom));
     }
 
     public Rect Body => new(new Vector2(Full.Min.X, Practice.Max.Y), Full.Max);

@@ -64,6 +64,111 @@ public sealed class CasinoStageLayoutTests
     }
 
     [Fact]
+    public void LandscapeChromeIsTheBackChipOnly()
+    {
+        var wide = new Rect(Vector2.Zero, new Vector2(844f, 390f));
+        var layout = CasinoStageLayout.Compute(wide, false, false, 0f, 1f);
+        Assert.True(layout.Landscape);
+        Assert.True(layout.ChromeContains(layout.BackCenter));
+        Assert.False(layout.ChromeContains(layout.InfoCenter));
+        Assert.False(layout.ChromeContains(layout.CapsuleCenter));
+        Assert.False(CasinoStageLayout.Compute(Phone, false, false, 0f, 1f).Landscape);
+    }
+
+    [Fact]
+    public void TheCapsuleDropsItsCoinValueBeforeItOutgrowsTheBand()
+    {
+        var center = new Vector2(200f, 26f);
+        const float chrome = 50f;
+        const float text = 60f;
+        const float full = 90f;
+        const float compact = 40f;
+        const float gap = 8f;
+        var roomy = ChromeCapsule.Fit(center, 34f, 400f, chrome, text, full, compact, gap);
+        Assert.Equal(CapsuleCoins.Full, roomy.Coins);
+        Assert.Equal(chrome + text + gap + full, roomy.Rect.Width, 3);
+        Assert.Equal(text, roomy.TextRoom, 3);
+
+        var compactFit = ChromeCapsule.Fit(center, 34f, chrome + text + gap + full - 1f, chrome, text, full, compact,
+            gap);
+        Assert.Equal(CapsuleCoins.Compact, compactFit.Coins);
+        Assert.Equal(chrome + text + gap + compact, compactFit.Rect.Width, 3);
+
+        var bare = ChromeCapsule.Fit(center, 34f, chrome + text + gap + compact - 1f, chrome, text, full, compact, gap);
+        Assert.Equal(CapsuleCoins.None, bare.Coins);
+        Assert.Equal(chrome + text, bare.Rect.Width, 3);
+
+        var squeezed = ChromeCapsule.Fit(center, 34f, chrome + text - 20f, chrome, text, full, compact, gap);
+        Assert.Equal(CapsuleCoins.None, squeezed.Coins);
+        Assert.Equal(chrome + text - 20f, squeezed.Rect.Width, 3);
+        Assert.Equal(text - 20f, squeezed.TextRoom, 3);
+        Assert.Equal(center.X, squeezed.Rect.Center.X, 3);
+        Assert.Equal(34f, squeezed.Rect.Height, 3);
+    }
+
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.5f)]
+    public void TheWidestCapsuleStillClearsTheBackAndInfoChips(float scale)
+    {
+        var screen = new Rect(Vector2.Zero, new Vector2(328f * scale, 760f * scale));
+        var content = new Rect(new Vector2(16f * scale, 48f * scale), new Vector2(312f * scale, 730f * scale));
+        var layout = CasinoStageLayout.Compute(screen, content, true, false, CasinoStageLayout.DeckHeight, scale);
+        var capsule = ChromeCapsule.Fit(layout.CapsuleCenter, CasinoStageLayout.CapsuleHeight * scale,
+            layout.CapsuleMaxWidth, 60f * scale, 900f * scale, 120f * scale, 50f * scale, 8f * scale);
+        Assert.Equal(CapsuleCoins.None, capsule.Coins);
+        Assert.True(capsule.Rect.Min.X >= layout.BackCenter.X + layout.ChipRadiusPixels);
+        Assert.True(capsule.Rect.Max.X <= layout.InfoCenter.X - layout.ChipRadiusPixels);
+        Assert.True(capsule.Rect.Max.Y <= layout.Band.Max.Y);
+        Assert.True(capsule.Rect.Max.Y <= layout.Ribbon.Min.Y);
+    }
+
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.5f)]
+    public void TheCappedNoticeSitsAboveTheDeckAndNeverOverTheRoomStrips(float scale)
+    {
+        var screen = new Rect(Vector2.Zero, new Vector2(328f * scale, 760f * scale));
+        var content = new Rect(new Vector2(16f * scale, 48f * scale), new Vector2(312f * scale, 730f * scale));
+        var layout = CasinoStageLayout.Compute(screen, content, true, true, 184f, scale);
+        var notice = layout.Notice(900f * scale, 34f * scale, scale);
+        Assert.True(notice.Max.Y <= layout.Deck.Min.Y - (BetsRail.HandleHeight * 0.5f + DeckActions.Gap) * scale
+            + 0.01f);
+        Assert.True(notice.Min.Y > layout.Safe.Center.Y);
+        Assert.True(notice.Min.Y >= layout.Practice.Max.Y);
+        Assert.True(notice.Width <= layout.Safe.Width + 0.01f);
+        Assert.Equal(layout.Safe.Center.X, notice.Center.X, 3);
+
+        var bare = CasinoStageLayout.Compute(screen, content, true, false, 0f, scale);
+        var bareNotice = bare.Notice(120f * scale, 34f * scale, scale);
+        Assert.Equal(bare.Safe.Max.Y, bareNotice.Max.Y, 3);
+        Assert.Equal(120f * scale, bareNotice.Width, 3);
+    }
+
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.5f)]
+    public void TheBetsHandleHoldsItsLabelAndOnlyTakesTapsBetweenTheWorldAndTheDeck(float scale)
+    {
+        var screen = new Rect(Vector2.Zero, new Vector2(328f * scale, 760f * scale));
+        var content = new Rect(new Vector2(16f * scale, 48f * scale), new Vector2(312f * scale, 730f * scale));
+        var layout = CasinoStageLayout.Compute(screen, content, false, false, 184f, scale);
+        var label = DeckLabelMeasure.Width(DeckLabelMeasure.Widest(L.Strip.Bets, scale), scale) * 0.8f;
+        var handle = BetsRail.HandleRect(layout.Deck, label, scale);
+        Assert.True(handle.Width - handle.Height >= label - 0.01f);
+        Assert.True(handle.Width >= BetsRail.HandleWidth * scale - 0.01f);
+        Assert.Equal(layout.Deck.Center.X, handle.Center.X, 3);
+        Assert.Equal(layout.Deck.Min.Y, handle.Center.Y, 3);
+        var hit = BetsRail.HandleHit(handle, scale);
+        Assert.True(hit.Min.Y >= layout.Safe.Max.Y - 0.01f);
+        Assert.True(hit.Max.Y <= layout.Deck.Min.Y + DeckActions.Pad * scale);
+        Assert.True(hit.Height >= handle.Height - 0.01f);
+    }
+
+    [Fact]
     public void ATinyScreenNeverInvertsSafe()
     {
         var tiny = new Rect(Vector2.Zero, new Vector2(80f, 120f));
@@ -76,7 +181,7 @@ public sealed class CasinoStageLayoutTests
     [InlineData(0.75f)]
     [InlineData(1f)]
     [InlineData(1.5f)]
-    public void TheStageIsFullBleedWhileChromeAndDeckStayInsideTheContent(float scale)
+    public void TheStageIsFullBleedWhileTheChromeStaysInsideTheContentAndTheDeckSpansTheScreen(float scale)
     {
         var screen = new Rect(new Vector2(84f, 2f), new Vector2(84f + 393f * scale, 2f + 852f * scale));
         var content = new Rect(new Vector2(screen.Min.X + 16f * scale, screen.Min.Y + 48f * scale),
@@ -87,7 +192,8 @@ public sealed class CasinoStageLayoutTests
         Assert.Equal(content.Min.Y + CasinoStageLayout.ChromeBand * scale, layout.Band.Max.Y, 3);
         Assert.True(layout.BackCenter.Y - layout.ChipRadiusPixels >= content.Min.Y);
         Assert.Equal(content.Max.Y, layout.Deck.Max.Y, 3);
-        Assert.Equal(content.Min.X, layout.Deck.Min.X, 3);
+        Assert.Equal(screen.Min.X, layout.Deck.Min.X, 3);
+        Assert.Equal(screen.Max.X, layout.Deck.Max.X, 3);
         Assert.Equal(screen.Max.Y, layout.DeckPanel.Max.Y, 3);
         Assert.Equal(screen.Min.X, layout.DeckPanel.Min.X, 3);
         Assert.Equal(screen.Max.X, layout.DeckPanel.Max.X, 3);

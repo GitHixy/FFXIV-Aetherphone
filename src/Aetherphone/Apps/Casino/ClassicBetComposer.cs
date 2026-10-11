@@ -1,26 +1,23 @@
 using System.Globalization;
+using Aetherphone.Apps.Casino.Stage;
 using Aetherphone.Core;
-using Aetherphone.Core.Localization;
+using Aetherphone.Core.Notifications;
 using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 
 namespace Aetherphone.Apps.Casino;
 
 internal sealed class ClassicBetComposer
 {
-    public const float FieldHeight = 40f;
+    public const float FieldHeight = BetDeckLayout.AmountHeight;
 
-    public const float QuickHeight = Button.RegularHeight;
-
-    public const float ConfirmHeight = Button.LargeHeight;
+    public const float ConfirmHeight = DeckActions.PrimaryHeight;
 
     private const int BufferLength = 8;
-    private const float RowGap = 8f;
-    private const float StepperRadius = RoundButton.RegularRadius;
     private const float FlashSeconds = 0.5f;
+    private const string ConfirmId = "casino.deck.classic";
 
     private readonly string fieldId;
 
@@ -57,14 +54,20 @@ internal sealed class ClassicBetComposer
         return value > ceiling ? ceiling : value;
     }
 
-    public static long Half(long minimumBet, long maximumBet, long stack)
+    public static long Half(long value, long minimumBet, long maximumBet, long stack)
     {
-        return Clamp(Ceiling(maximumBet, stack) / 2, minimumBet, maximumBet, stack);
+        return Clamp(value / 2, minimumBet, maximumBet, stack);
+    }
+
+    public static long Double(long value, long minimumBet, long maximumBet, long stack)
+    {
+        var doubled = value > long.MaxValue / 2 ? long.MaxValue : value * 2;
+        return Clamp(doubled, minimumBet, maximumBet, stack);
     }
 
     public static float HeightFor(float scale)
     {
-        return (FieldHeight + QuickHeight + ConfirmHeight + RowGap * 2f) * scale;
+        return (FieldHeight + DeckActions.Gap + ConfirmHeight) * scale;
     }
 
     public void Reset(long value)
@@ -84,21 +87,21 @@ internal sealed class ClassicBetComposer
         Reset(value);
     }
 
-    public bool Draw(AppSkin skin, in Rect bounds, long minimumBet, long maximumBet, long stack, long step,
-        bool enabled, string confirmLabel, float deltaSeconds)
+    public bool Draw(AppSkin skin, in Rect bounds, long minimumBet, long maximumBet, long stack, bool enabled,
+        string confirmLabel, float deltaSeconds)
     {
         var scale = UiScale.Current;
-        var quickBottom = DrawAmount(skin, bounds, minimumBet, maximumBet, stack, step, enabled, deltaSeconds);
-        var confirmRect = new Rect(new Vector2(bounds.Min.X, quickBottom + RowGap * scale),
-            new Vector2(bounds.Max.X, quickBottom + (RowGap + ConfirmHeight) * scale));
+        DrawAmount(skin, bounds, minimumBet, maximumBet, stack, enabled, deltaSeconds, scale);
+        var confirmTop = MathF.Max(bounds.Min.Y, bounds.Max.Y - ConfirmHeight * scale);
+        var confirmRect = new Rect(new Vector2(bounds.Min.X, confirmTop), new Vector2(bounds.Max.X, bounds.Max.Y));
         var confirmEnabled = enabled && amount >= minimumBet && amount <= Ceiling(maximumBet, stack);
-        return Button.Draw(confirmRect, confirmLabel, skin.Ink, ButtonStyle.Prominent, enabled: confirmEnabled);
+        return Button.Draw(confirmRect, confirmLabel, skin.Ink, ButtonStyle.Prominent, enabled: confirmEnabled,
+            id: ConfirmId);
     }
 
-    public float DrawAmount(AppSkin skin, in Rect bounds, long minimumBet, long maximumBet, long stack, long step,
-        bool enabled, float deltaSeconds)
+    private void DrawAmount(AppSkin skin, in Rect bounds, long minimumBet, long maximumBet, long stack, bool enabled,
+        float deltaSeconds, float scale)
     {
-        var scale = UiScale.Current;
         var drawList = ImGui.GetWindowDrawList();
         if (clampFlash > 0f)
         {
@@ -107,80 +110,48 @@ internal sealed class ClassicBetComposer
 
         var typed = Parse();
         amount = Clamp(typed, minimumBet, maximumBet, stack);
-        var ceiling = Ceiling(maximumBet, stack);
-        var y = bounds.Min.Y;
-
-        var stepperRadius = StepperRadius * scale;
-        var stepperWidth = stepperRadius * 2f;
-        var fieldMin = new Vector2(bounds.Min.X + stepperWidth + RowGap * scale, y);
-        var fieldMax = new Vector2(bounds.Max.X - stepperWidth - RowGap * scale, y + FieldHeight * scale);
-        var rowCenterY = (fieldMin.Y + fieldMax.Y) * 0.5f;
-        if (DrawStepper(drawList, skin, new Vector2(bounds.Min.X + stepperRadius, rowCenterY), stepperRadius,
-                IconGlyph.Of(FontAwesomeIcon.Minus), enabled))
+        var row = new Rect(bounds.Min, new Vector2(bounds.Max.X, bounds.Min.Y + FieldHeight * scale));
+        var layout = DeckAmountRow.Compute(row, DeckAmountRow.Measure(row.Height), scale);
+        DrawField(drawList, skin, layout.Field, scale, enabled);
+        var tapped = layout.DrawChips(skin.Ink, enabled);
+        if (tapped != QuickChip.None)
         {
-            Reset(Clamp(amount - step, minimumBet, maximumBet, stack));
-        }
-
-        DrawField(drawList, skin, fieldMin, fieldMax, scale, enabled);
-
-        if (DrawStepper(drawList, skin, new Vector2(bounds.Max.X - stepperRadius, rowCenterY), stepperRadius,
-                IconGlyph.Of(FontAwesomeIcon.Plus), enabled))
-        {
-            Reset(Clamp(amount + step, minimumBet, maximumBet, stack));
-        }
-
-        y = fieldMax.Y + RowGap * scale;
-        var quickHeight = QuickHeight * scale;
-        var quickWidth = (bounds.Width - RowGap * scale * 2f) / 3f;
-        if (DrawQuick(skin, new Rect(new Vector2(bounds.Min.X, y),
-                new Vector2(bounds.Min.X + quickWidth, y + quickHeight)), Loc.T(L.Casino.BetMin), enabled))
-        {
-            Reset(Clamp(minimumBet, minimumBet, maximumBet, stack));
-        }
-
-        var middleLeft = bounds.Min.X + quickWidth + RowGap * scale;
-        if (DrawQuick(skin, new Rect(new Vector2(middleLeft, y),
-                new Vector2(middleLeft + quickWidth, y + quickHeight)), Loc.T(L.Casino.BetHalf), enabled))
-        {
-            Reset(Half(minimumBet, maximumBet, stack));
-        }
-
-        if (DrawQuick(skin, new Rect(new Vector2(bounds.Max.X - quickWidth, y),
-                new Vector2(bounds.Max.X, y + quickHeight)), Loc.T(L.Casino.BetMax), enabled))
-        {
-            Reset(Clamp(ceiling, minimumBet, maximumBet, stack));
+            Reset(tapped switch
+            {
+                QuickChip.Half => Half(amount, minimumBet, maximumBet, stack),
+                QuickChip.Double => Double(amount, minimumBet, maximumBet, stack),
+                _ => Clamp(Ceiling(maximumBet, stack), minimumBet, maximumBet, stack),
+            });
+            UiFeedback.Play(UiSound.ChipSlide);
+            return;
         }
 
         if (typed > 0 && typed != amount)
         {
             clampFlash = FlashSeconds;
         }
-
-        return y + quickHeight;
     }
 
-    private void DrawField(ImDrawListPtr drawList, AppSkin skin, Vector2 min, Vector2 max, float scale, bool enabled)
+    private void DrawField(ImDrawListPtr drawList, AppSkin skin, Rect field, float scale, bool enabled)
     {
-        var field = new Rect(min, max);
-        SearchBar.Surface(drawList, field, skin.Ink);
+        var capsule = DeckAmountRow.FieldSurface(drawList, field, skin.Ink);
         if (clampFlash > 0f)
         {
             var strength = clampFlash / FlashSeconds;
-            var capsule = SearchBar.Capsule(field);
             Squircle.Stroke(drawList, capsule.Min, capsule.Max, capsule.Height * 0.5f,
                 ImGui.GetColorU32(Palette.WithAlpha(skin.Accent, strength)), Metrics.Stroke.Ring * scale);
         }
 
         if (!enabled)
         {
-            Typography.DrawCentered(drawList, new Vector2((min.X + max.X) * 0.5f, (min.Y + max.Y) * 0.5f),
-                buffer.Length > 0 ? buffer : "0", skin.MutedInk, TextStyles.Subheadline);
+            Typography.DrawCentered(drawList, field.Center, buffer.Length > 0 ? buffer : "0", skin.MutedInk,
+                TextStyles.Headline);
             return;
         }
 
-        ImGui.SetCursorScreenPos(new Vector2(min.X + 10f * scale,
-            (min.Y + max.Y) * 0.5f - ImGui.GetFrameHeight() * 0.5f));
-        ImGui.SetNextItemWidth(max.X - min.X - 20f * scale);
+        var inset = capsule.Height * 0.4f;
+        ImGui.SetCursorScreenPos(new Vector2(capsule.Min.X + inset, field.Center.Y - ImGui.GetFrameHeight() * 0.5f));
+        ImGui.SetNextItemWidth(MathF.Max(1f, capsule.Width - inset * 2f));
         using (ImRaii.PushColor(ImGuiCol.FrameBg, AppSkin.Transparent))
         using (ImRaii.PushColor(ImGuiCol.Text, skin.TitleInk))
         {
@@ -188,13 +159,6 @@ internal sealed class ClassicBetComposer
                 ImGuiInputTextFlags.CharsDecimal | ImGuiInputTextFlags.AutoSelectAll);
         }
     }
-
-    private static bool DrawStepper(ImDrawListPtr drawList, AppSkin skin, Vector2 center, float radius, string glyph,
-        bool enabled) =>
-        RoundButton.Icon(drawList, center, radius, glyph, skin.Ink, ButtonStyle.Gray, enabled: enabled);
-
-    private static bool DrawQuick(AppSkin skin, in Rect rect, string label, bool enabled) =>
-        Button.Draw(rect, label, skin.Ink, ButtonStyle.Gray, enabled: enabled);
 
     private long Parse()
     {

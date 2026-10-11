@@ -113,16 +113,18 @@ public sealed class RaceScreenLayoutTests
         var rides = new[] { 0f, 90f * scale, 400f * scale };
         for (var index = 0; index < rides.Length; index++)
         {
-            var layout = RaceDeckLayout.Compute(deck, rides[index], scale);
-            AssertAllApart(layout.Segment, layout.Field, layout.Half, layout.Double, layout.Max, layout.Ride,
+            var layout = RaceDeckLayout.Compute(deck, BetDeckLayoutTests.Quick("Max", scale), rides[index],
+                RaceDeckLayout.ActionHeight * scale, scale);
+            var amount = layout.Amount;
+            AssertAllApart(layout.Segment, amount.Field, amount.Half, amount.Double, amount.Max, layout.Ride,
                 layout.Primary);
             Assert.True(Inside(layout.Segment, deck));
-            Assert.True(Inside(layout.Field, deck));
-            Assert.True(Inside(layout.Max, deck));
+            Assert.True(Inside(amount.Field, deck));
+            Assert.True(Inside(amount.Max, deck));
             Assert.True(Inside(layout.Primary, deck));
             Assert.True(layout.Primary.Width >= RaceDeckLayout.PrimaryMinWidth * scale - Tolerance);
             Assert.True(layout.Primary.Height >= 44f * scale);
-            Assert.True(layout.Half.Height >= 36f * scale);
+            Assert.True(amount.Half.Height >= 44f * scale - Tolerance);
             Assert.Equal(rides[index] > 0f, layout.HasRide);
         }
     }

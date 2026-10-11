@@ -10642,8 +10642,6 @@ internal static class L
         public static readonly LocString SpinTopNote = new("casino.spin.topNote", "Sixteen segments, and the best of them pays {0} coins.");
         public static readonly LocString SpinClaimedTitle = new("casino.spin.claimedTitle", "Today's spin is spent");
         public static readonly LocString SeatOpen = new("casino.seat.open", "Open");
-        public static readonly LocString BetMin = new("casino.bet.min", "Min");
-        public static readonly LocString BetHalf = new("casino.bet.half", "Half");
         public static readonly LocString BetMax = new("casino.bet.max", "Max");
         public static readonly LocString BlackjackBetsCloseIn = new("casino.blackjack.betsCloseIn", "Bets close in {0}");
         public static readonly LocString BlackjackWaitingForBets = new("casino.blackjack.waitingForBets", "Place your bets");
@@ -10995,11 +10993,10 @@ internal static class L
         public static readonly LocString CeilingBalance = new("casino.strip.ceilingBalance", "5 percent of your balance, above the level {0} cap of {1}");
         public static readonly LocString BetFor = new("casino.strip.betFor", "Bet {0}");
         public static readonly LocString BuyFor = new("casino.strip.buyFor", "Buy {0}");
-        public static readonly LocString Manual = new("casino.strip.manual", "Manual");
         public static readonly LocString Auto = new("casino.strip.auto", "Auto");
-        public static readonly LocString AutoFor = new("casino.strip.autoFor", "Auto {0}");
         public static readonly LocString AutoStopLeft = new("casino.strip.autoStopLeft", "Stop ({0} left)");
         public static readonly LocString AutoStop = new("casino.strip.autoStop", "Stop auto");
+        public static readonly LocString AutoStart = new("casino.strip.autoStart", "Start auto");
         public static readonly LocString AutoTitle = new("casino.strip.autoTitle", "Auto play");
         public static readonly LocString AutoRounds = new("casino.strip.autoRounds", "Rounds");
         public static readonly LocString AutoRoundsHint = new("casino.strip.autoRoundsHint", "0 keeps going until you stop it");
@@ -11512,6 +11509,7 @@ internal static class L
         public static readonly LocString LineWinner1 = new("casino.race.lineWinner1", "{0} wins it!");
         public static readonly LocString LineWinner2 = new("casino.race.lineWinner2", "{0} gets there first!");
         public static readonly LocString BetOn = new("casino.race.betOn", "Bet {0} on {1} ({2})");
+        public static readonly LocString BetCaption = new("casino.race.betCaption", "{0} · {1}");
         public static readonly LocString NoWin = new("casino.race.noWin", "No win this race");
         public static readonly LocString AllDividends = new("casino.race.allDividends", "All dividends");
     }
