@@ -153,14 +153,15 @@ internal sealed class VenueCabinet : ICabinetIdle
 
         var now = session.ServerNowUnixMs(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         DrawRibbon(drawList, frame, view, now, session.Attached, scale);
-        var world = safe;
+        var knockHeight = Tables.HostKnockBanner.Reserve(venue.Tables, roomId, safe.Width, scale);
+        var world = new Rect(new Vector2(safe.Min.X, safe.Min.Y + knockHeight), safe.Max);
         if (inlineReason.Length > 0)
         {
             var message = CasinoReasons.Text(inlineReason, 0);
             var height = CasinoNotice.Height(CasinoNoticeKind.Reason, string.Empty, message, safe.Width, scale);
             CasinoNotice.Draw(drawList, ui, CasinoNoticeKind.Reason, string.Empty, message, safe.Min.X,
                 safe.Max.Y - height, safe.Width, scale);
-            world = new Rect(safe.Min, new Vector2(safe.Max.X, safe.Max.Y - height - VenueArt.LineGap * scale));
+            world = new Rect(world.Min, new Vector2(safe.Max.X, safe.Max.Y - height - VenueArt.LineGap * scale));
         }
 
         var room = new VenueRoomFrame(stage, frame, ui, view, drawList, world, venue.AccountId, Hosting(),
@@ -177,6 +178,8 @@ internal sealed class VenueCabinet : ICabinetIdle
                 dice.Draw(room, frame.Deck);
                 break;
         }
+
+        Tables.HostKnockBanner.Draw(drawList, ui, venue.Tables, roomId, safe.Min, safe.Width, scale);
     }
 
     public void DrawIdle(ImDrawListPtr drawList, Rect rect, float deltaSeconds)

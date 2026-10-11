@@ -255,7 +255,9 @@ internal sealed partial class HoldemTable : ICabinetIdle
             flights.Advance(delta);
         }
 
-        layout.Compute(safe, SeatCountOf(board), mySeat >= 0 ? mySeat : 0, mySeat >= 0, scale);
+        var knockHeight = HostKnockBanner.Reserve(tables, roomId, safe.Width, scale);
+        var tableArea = new Rect(new Vector2(safe.Min.X, safe.Min.Y + knockHeight), safe.Max);
+        layout.Compute(tableArea, SeatCountOf(board), mySeat >= 0 ? mySeat : 0, mySeat >= 0, scale);
         DrainLaunches(board, scale);
         DrainCues(stage, frame, board, scale);
         AdvanceClocks(delta);
@@ -285,6 +287,7 @@ internal sealed partial class HoldemTable : ICabinetIdle
         }
 
         TrackTurn(board, mine, remaining);
+        HostKnockBanner.Draw(drawList, ui, tables, roomId, safe.Min, safe.Width, scale);
         DrawDeck(stage, frame, ui, board, mine, hero, scale);
         if (veiled)
         {

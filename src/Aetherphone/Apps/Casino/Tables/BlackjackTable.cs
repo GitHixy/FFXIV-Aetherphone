@@ -242,7 +242,8 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         var top = Venue.TournamentOverlay.Shows(board)
             ? safe.Min.Y + Venue.TournamentOverlay.Reserve(scale)
             : safe.Min.Y;
-        var feltTop = DrawHostedRow(drawList, ui, board, safe.Min.X, top, safe.Width, scale);
+        var knockTop = DrawHostedRow(drawList, ui, board, safe.Min.X, top, safe.Width, scale);
+        var feltTop = knockTop + HostKnockBanner.Reserve(tables, roomId, safe.Width, scale);
         ExpireReason(delta);
         var reason = ReasonText();
         var reasonHeight = reason.Length > 0
@@ -261,6 +262,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         layout.Compute(felt, BlackjackTableLayout.RailSeatCount(mySeat, SeatLimit(board)),
             BlackjackRules.IsSeat(mySeat), scale);
         DrawFelt(stage, drawList, ui, board, deadlineRemaining, delta, frame.Phase, scale);
+        HostKnockBanner.Draw(drawList, ui, tables, roomId, new Vector2(safe.Min.X, knockTop), safe.Width, scale);
         SpeakForPhase(board);
         SettleHand(stage, board, frame);
         if (reasonHeight > 0f)
