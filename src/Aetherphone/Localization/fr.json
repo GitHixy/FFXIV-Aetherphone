@@ -7875,6 +7875,8 @@
   "changelog.r1300.48": "Ajout de Prendre des jetons : quand une mise dépasse tes jetons, achètes-en d'un seul appui sans quitter le jeu, ou laisse la recharge auto s'en charger",
   "changelog.r1300.49": "Ajout d'un gain maximal par mise, affiché dans les infos de chaque jeu, avec une ligne claire quand un résultat l'atteint",
   "changelog.r1300.50": "Modification des soldes de jetons : chacun affiche maintenant sa valeur en pièces",
+  "changelog.r1300.51": "Correction de la barre de défilement qui, glissée avec la position du téléphone verrouillée, allait dans le mauvais sens et trop lentement, contribution de jambalong",
+  "changelog.r1300.52": "Correction des discussions au dernier message qui revenaient brusquement en bas quand on les faisait glisser vers le haut, contribution de jambalong",
   "changelog.r1200.70": "Refonte de Jeux autour de quatre onglets, Accueil, Ensemble, Bibliothèque et Profil, avec le jeu du jour en direct en haut d'Accueil, au-dessus de Reprendre, Nouveautés et Top de la semaine",
   "changelog.r1200.71": "Ajout de Bibliothèque : tous les jeux dans une grille avec recherche, filtres par genre et tri",
   "changelog.r1200.72": "Ajout d'une icône peinte pour chaque jeu, et chaque jeu s'ouvre en zoomant depuis son icône",

@@ -2299,6 +2299,18 @@ internal static class L
                 "Fixed Barkeep practice shifts needing chips to open"),
         };
 
+        public static readonly LocString[] Release1300Phone =
+        {
+            new("changelog.r1300.51",
+                "Fixed the scrollbar moving the wrong way and too slowly when dragged while the phone position is locked, contributed by jambalong"),
+        };
+
+        public static readonly LocString[] Release1300Messaging =
+        {
+            new("changelog.r1300.52",
+                "Fixed chats at the newest message snapping back to the bottom when you drag to scroll up, contributed by jambalong"),
+        };
+
         public static readonly LocString[] Release1200Chirper =
         {
             new("changelog.r1200.73",
