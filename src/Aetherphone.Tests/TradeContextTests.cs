@@ -28,7 +28,7 @@ public sealed class TradeContextTests
     {
         var rows = listed ?? new[] { GilCard, RaffleCard };
         return new TradeTableView(me, roomId, board, venue, door, rows,
-            tableId => CasinoTablesStore.CardIn(rows, null, tableId),
+            tableId => CasinoTablesStore.CardIn(rows, 0, null, 0, tableId),
             tableId => ledger is not null && string.Equals(ledger.TableId, tableId, StringComparison.Ordinal)
                 ? ledger
                 : null);

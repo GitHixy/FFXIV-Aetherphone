@@ -199,4 +199,9 @@ internal static class CasinoTableFilters
         var watching = row.Occupancy - row.SeatedCount;
         return watching > 0 ? watching : 0;
     }
+
+    public static int PlayersOf(CasinoTableRowDto row)
+    {
+        return VenueKinds.IsVenue(row.GameKind) ? row.Occupancy : row.SeatedCount;
+    }
 }

@@ -133,6 +133,13 @@ internal sealed class VenueCabinet : ICabinetIdle
             || (card.Config is not null && Tables.TableDoor.IsCoDealer(card.Config, me));
     }
 
+    private bool Owning()
+    {
+        var me = venue.AccountId;
+        var card = venue.Tables.CardFor(roomId);
+        return card is not null && me.Length > 0 && string.Equals(card.OwnerUserId, me, StringComparison.Ordinal);
+    }
+
     public void Draw(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui)
     {
         var scale = UiScale.Current;
@@ -167,8 +174,8 @@ internal sealed class VenueCabinet : ICabinetIdle
             world = new Rect(world.Min, new Vector2(safe.Max.X, safe.Max.Y - height - VenueArt.LineGap * scale));
         }
 
-        var room = new VenueRoomFrame(stage, frame, ui, view, drawList, world, venue.AccountId, Hosting(),
-            venue.ActInFlight, now, scale);
+        var room = new VenueRoomFrame(stage, frame, ui, view, drawList, world, venue.AccountId, Hosting(), Owning(),
+            venue.ActInFlight || view.Paused, now, scale);
         switch (view.Kind)
         {
             case VenueRoomKind.Deathroll:
@@ -225,6 +232,13 @@ internal sealed class VenueCabinet : ICabinetIdle
     private void DrawRibbon(ImDrawListPtr drawList, in CasinoStageFrame frame, VenueRoomView view, long now,
         bool attached, float scale)
     {
+        if (view.Paused)
+        {
+            PhaseRibbon.Draw(drawList, frame.Layout.Ribbon, Loc.T(L.Tables.PausedByHost), 0, 0,
+                view.Snapshot.Occupancy, CasinoColors.InkMuted, scale);
+            return;
+        }
+
         var name = view.Name.Length > 0 ? view.Name : Loc.T(NameOf(view.Kind));
         var remaining = 0L;
         var window = 0;

@@ -1,4 +1,5 @@
 using Aetherphone.Apps.Casino.Tables;
+using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
 using Aetherphone.Core.Localization;
 using Xunit;
@@ -17,6 +18,53 @@ public sealed class CasinoKnockFlowTests
         Assert.Equal(KnockStage.Refused, CasinoKnocks.FromDecline(CasinoReasons.Kicked));
         Assert.Equal(KnockStage.Refused, CasinoKnocks.FromDecline(CasinoReasons.BannedFromTable));
         Assert.Equal(KnockStage.None, CasinoKnocks.FromDecline(CasinoReasons.Ended));
+    }
+
+    [Fact]
+    public void ANotFoundRoomReadAsksTheCardWhyBeforeEndingTheRoom()
+    {
+        Assert.Equal(CasinoReasons.InviteOnly, CasinoRoomsStore.DoorReason(
+            new CasinoTableRowDto(TableId: "t1", Admitted: false, Reason: CasinoReasons.InviteOnly), false));
+        Assert.Equal(CasinoReasons.KnockPending, CasinoRoomsStore.DoorReason(
+            new CasinoTableRowDto(TableId: "t1", Admitted: false, Reason: CasinoReasons.KnockPending), false));
+        Assert.Equal(CasinoReasons.BannedFromTable, CasinoRoomsStore.DoorReason(
+            new CasinoTableRowDto(TableId: "t1", Admitted: false, Reason: CasinoReasons.BannedFromTable), false));
+        Assert.Equal(CasinoReasons.NoSpectators, CasinoRoomsStore.DoorReason(
+            new CasinoTableRowDto(TableId: "t1", Admitted: false, Reason: CasinoReasons.NoSpectators), false));
+        Assert.Equal(CasinoReasons.Ended, CasinoRoomsStore.DoorReason(
+            new CasinoTableRowDto(TableId: "t1", Admitted: false), false));
+        Assert.Equal(string.Empty, CasinoRoomsStore.DoorReason(
+            new CasinoTableRowDto(TableId: "t1", Admitted: true), false));
+        Assert.Equal(CasinoReasons.Ended, CasinoRoomsStore.DoorReason(null, true));
+        Assert.Equal(string.Empty, CasinoRoomsStore.DoorReason(null, false));
+
+        var asking = TableDoorCard.ContentFor(CasinoRoomsStore.DoorReason(
+                new CasinoTableRowDto(TableId: "t1", Reason: CasinoReasons.InviteOnly), false),
+            CasinoKnockStatus.Idle, L.Casino.BlackjackClosedTitle, L.Casino.BlackjackClosedHint);
+        Assert.Equal(TableDoorAction.Knock, asking.Pressed);
+    }
+
+    [Fact]
+    public void OnlyAnAnswerIsWorthANotificationAndOnlyWhileTheCardIsOffScreen()
+    {
+        Assert.True(CasinoKnockNotifier.AnswerWorthTelling(KnockStage.Admitted));
+        Assert.True(CasinoKnockNotifier.AnswerWorthTelling(KnockStage.Denied));
+        Assert.False(CasinoKnockNotifier.AnswerWorthTelling(KnockStage.Waiting));
+        Assert.False(CasinoKnockNotifier.AnswerWorthTelling(KnockStage.Refused));
+        Assert.False(CasinoKnockNotifier.AnswerWorthTelling(KnockStage.None));
+
+        Assert.False(CasinoTablesStore.Attended(0, 10_000));
+        Assert.True(CasinoTablesStore.Attended(9_000, 10_000));
+        Assert.False(CasinoTablesStore.Attended(5_000, 10_000));
+    }
+
+    [Fact]
+    public void AKnockerIsHeardOncePerKnock()
+    {
+        var first = new CasinoTableKnockDto("u1", "Mira", 1_750_000_000_000);
+        var again = new CasinoTableKnockDto("u1", "Mira", 1_750_000_090_000);
+        Assert.Equal(CasinoKnockNotifier.KnockKey(first), CasinoKnockNotifier.KnockKey(first with { DisplayName = "M" }));
+        Assert.NotEqual(CasinoKnockNotifier.KnockKey(first), CasinoKnockNotifier.KnockKey(again));
     }
 
     [Fact]
