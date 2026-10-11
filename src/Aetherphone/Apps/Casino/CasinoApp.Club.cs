@@ -15,6 +15,7 @@ namespace Aetherphone.Apps.Casino;
 internal sealed partial class CasinoApp
 {
     private const float ChallengeBulbInset = 6f;
+    private const string FloorFameBoard = CasinoFameBoards.Win;
 
     private readonly MissionsCard missionsCard = new();
     private readonly ClubCapsule clubCapsule = new();
@@ -63,14 +64,14 @@ internal sealed partial class CasinoApp
             return origin.Y;
         }
 
-        floor.EnsureFame(CasinoFameBoards.Profit, CasinoFameSpans.Week);
-        var board = floor.Fame(CasinoFameBoards.Profit, CasinoFameSpans.Week);
-        if (board?.Entries is not { Length: > 0 } && board?.Champion is null)
+        floor.EnsureFame(FloorFameBoard, CasinoFameSpans.Week);
+        var board = floor.Fame(FloorFameBoard, CasinoFameSpans.Week);
+        if (board is null)
         {
             return origin.Y;
         }
 
-        if (famePodium.Draw(drawList, ui, board!, origin, width, scale, out var bottom))
+        if (famePodium.Draw(drawList, ui, board, origin, width, scale, out var bottom))
         {
             OpenFame();
         }
@@ -85,7 +86,7 @@ internal sealed partial class CasinoApp
             return;
         }
 
-        fameView.Enter();
+        fameView.Enter(FloorFameBoard);
         routes.Push(new CasinoRoute(CasinoScreen.Fame));
     }
 
