@@ -55,6 +55,16 @@ public sealed class CasinoTableWireContractTests
         Assert.True(CasinoTableFilters.HasOpenSeat(row));
         Assert.Equal(4, CasinoTableFilters.SpectatorsOf(row));
         Assert.False(CasinoTableFilters.IsPrivate(row));
+        Assert.Equal(3, CasinoTableFilters.PlayersOf(row));
+    }
+
+    [Fact]
+    public void AVenueRoomCountsEveryoneInItAsPlaying()
+    {
+        var room = new CasinoTableRowDto(TableId: "table-raffle", GameKind: VenueKinds.Raffle, MaxSeats: 0,
+            SeatedCount: 0, Occupancy: 5);
+        Assert.Equal(5, CasinoTableFilters.PlayersOf(room));
+        Assert.Equal(0, CasinoTableFilters.PlayersOf(room with { Occupancy = 0 }));
     }
 
     [Fact]
