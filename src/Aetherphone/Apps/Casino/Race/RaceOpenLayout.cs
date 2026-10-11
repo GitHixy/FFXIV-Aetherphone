@@ -14,6 +14,8 @@ internal readonly struct RaceOpenLayout
     public const float RailMin = 280f;
     public const float RailMax = 360f;
     public const float RailInset = 8f;
+    public const int MinimumCards = 2;
+    public const float MinimumListHeight = MinimumCards * CardHeight + (MinimumCards - 1) * CardGap;
 
     public readonly bool Landscape;
     public readonly Rect List;
@@ -52,8 +54,8 @@ internal readonly struct RaceOpenLayout
         }
 
         var column = new Rect(safe.Min, safe.Max);
-        var bottom = Stack(column, safe.Max.Y, (CardHeight + Gap) * scale, ticketCount, expanded, noticeHeight, scale,
-            out var tickets, out var notice, out var rows);
+        var bottom = Stack(column, safe.Max.Y, MinimumListHeight * scale + Gap * scale, ticketCount, expanded,
+            noticeHeight, scale, out var tickets, out var notice, out var rows);
         var list = Band(column.Min.X, column.Max.X, column.Min.Y, bottom, column.Max.Y);
         return new RaceOpenLayout(false, list, notice, tickets, stageDeck, Empty(safe), rows);
     }

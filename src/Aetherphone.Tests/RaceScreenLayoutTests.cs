@@ -88,6 +88,27 @@ public sealed class RaceScreenLayoutTests
 
     [Theory]
     [MemberData(nameof(AllScales))]
+    public void ATallerDeckShortensTheTicketStripBeforeTheField(float scale)
+    {
+        var extras = new[] { 0f, 24f, 48f };
+        for (var phone = 0; phone < PortraitPhones.Length; phone++)
+        {
+            for (var extra = 0; extra < extras.Length; extra++)
+            {
+                var stage = Stage(Phone(PortraitPhones[phone], scale), RaceCabinet.DeckHeight + extras[extra], scale);
+                var layout = RaceOpenLayout.Compute(stage.Safe, stage.Deck, false, RaceRules.MaxTickets, true,
+                    56f * scale, scale);
+                Assert.True(layout.List.Height >= RaceOpenLayout.MinimumListHeight * scale - Tolerance,
+                    $"field {layout.List.Height / scale} with {extras[extra]} more deck on {PortraitPhones[phone]}");
+                Assert.True(layout.HasTickets);
+                Assert.True(layout.HasNotice);
+                AssertAllApart(layout.List, layout.Tickets, layout.Notice, layout.Deck, stage.Band, stage.Ribbon);
+            }
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(AllScales))]
     public void LandscapeBettingKeepsTheFieldLeftOfTheRail(float scale)
     {
         for (var phone = 0; phone < LandscapePhones.Length; phone++)
