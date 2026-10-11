@@ -183,28 +183,35 @@ public sealed class StagePolishTests
     }
 
     [Fact]
-    public void SecondaryPillsNeverSqueezeThePrimary()
+    public void SecondaryPillsKeepTheirLabelAndThePrimaryKeepsItsFloor()
     {
-        var deck = new Rect(new Vector2(0f, 600f), new Vector2(300f, 760f));
+        var deck = new Rect(new Vector2(0f, 600f), new Vector2(361f, 760f));
         var row = DeckActions.Row(deck, 1f);
         var cursor = row.Min.X;
+        var labels = new[] { 64f, 58f };
         for (var pill = 0; pill < DeckActions.MaxSecondary; pill++)
         {
-            var rect = DeckActions.Secondary(row, cursor, DeckActions.PillMaxWidth, 1f);
-            Assert.True(rect.Width >= 0f);
+            var wanted = DeckActions.PillWidth(labels[pill], 1f);
+            var rect = DeckActions.Secondary(row, cursor, wanted, 1f);
+            Assert.Equal(wanted, rect.Width, 3);
             cursor = DeckActions.Advance(rect, 1f);
         }
 
         var primary = DeckActions.Primary(row, cursor);
-        Assert.True(primary.Width >= DeckActions.PrimaryMinWidth - 0.01f, primary.Width.ToString());
+        Assert.True(primary.Width >= DeckActions.PrimaryFloorWidth - 0.01f, primary.Width.ToString());
+        var greedy = DeckActions.Secondary(row, row.Min.X, 900f, 1f);
+        Assert.True(DeckActions.Primary(row, DeckActions.Advance(greedy, 1f)).Width
+            >= DeckActions.PrimaryFloorWidth - 0.01f);
     }
 
     [Fact]
-    public void PillsKeepATouchSizedWidth()
+    public void PillsGrowWithTheirLabelAndKeepATouchSizedWidth()
     {
-        Assert.True(DeckActions.PillWidth(0f, 56f, SmallScale) >= DeckActions.PillMinWidth * SmallScale);
-        Assert.True(DeckActions.PillWidth(900f, 56f, 1f) <= DeckActions.PillMaxWidth);
+        Assert.Equal(DeckActions.PillMinWidth * SmallScale, DeckActions.PillWidth(0f, SmallScale), 3);
+        Assert.Equal(900f + DeckActions.PillPadX * 2f, DeckActions.PillWidth(900f, 1f), 3);
         Assert.True(DeckActions.PillMinWidth >= 44f);
+        Assert.Equal(DeckActions.PillWidth(40f, 1f) + DeckActions.PillWidth(60f, 1f) + DeckActions.Gap,
+            DeckActions.PillsWidth(new[] { 40f, 60f }, 1f), 3);
     }
 
     [Fact]

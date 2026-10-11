@@ -62,7 +62,7 @@ internal sealed class RaceDeck
         var rideWidth = model.Ride.Length == 0
             ? 0f
             : DeckActions.PillWidth(Typography.Measure(model.Ride, Button.LabelStyle(RaceDeckLayout.ActionHeight * scale)).X,
-                RaceDeckLayout.ActionHeight * scale, scale);
+                scale);
         var layout = RaceDeckLayout.Compute(deck, rideWidth, scale);
         var result = RaceDeckAction.None;
         PickedKind = model.Kind;
@@ -76,8 +76,8 @@ internal sealed class RaceDeck
         }
 
         DrawAmount(drawList, ui, layout, model, scale);
-        if (layout.HasRide && Button.Draw(layout.Ride, model.Ride, ui.Ink, ButtonStyle.Gray,
-                enabled: model.Enabled && model.Ready))
+        if (layout.HasRide && DeckActions.DrawPill(layout.Ride, model.Ride, ui.Ink, ButtonStyle.Gray,
+                model.Enabled && model.Ready))
         {
             result = RaceDeckAction.Ride;
         }
