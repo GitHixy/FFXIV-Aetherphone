@@ -2300,10 +2300,20 @@ internal static class L
                 "Fixed Barkeep practice shifts needing chips to open"),
         };
 
+        public static readonly LocString[] Release1300Linkpearl =
+        {
+            new("changelog.r1300.55",
+                "Changed the Lodestone search in People to pick a world or data center from a list instead of typing one"),
+            new("changelog.r1300.56",
+                "Changed the People filters to sit at the top, so they no longer move when search opens"),
+        };
+
         public static readonly LocString[] Release1300Phone =
         {
             new("changelog.r1300.51",
                 "Fixed the scrollbar moving the wrong way and too slowly when dragged while the phone position is locked, contributed by jambalong"),
+            new("changelog.r1300.57",
+                "Fixed Linkpearl's filters and the photo editor's aspect ratios cutting their labels short"),
         };
 
         public static readonly LocString[] Release1300Messaging =
