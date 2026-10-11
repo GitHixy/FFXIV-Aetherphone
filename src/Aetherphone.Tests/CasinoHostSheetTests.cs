@@ -41,6 +41,19 @@ public sealed class CasinoHostSheetTests
     }
 
     [Fact]
+    public void RaisingTheCoinMaxBetPastTheGilBankIndexNeverThrows()
+    {
+        var draft = new HostDraft();
+        var span = draft.BetSpan;
+        for (var index = span.First; index <= span.Last; index++)
+        {
+            draft.MaxBet = index;
+            draft.Normalize(false);
+            Assert.Equal(index, draft.MaxBet);
+        }
+    }
+
+    [Fact]
     public void APracticeDraftCarriesItsStackRulesAndDealer()
     {
         var draft = new HostDraft();
