@@ -24,6 +24,9 @@ internal sealed class OriginalsCabinet
     };
 
     private const float AutoPauseSeconds = 0.35f;
+
+    private static readonly TextStyle StakeStyle = TextStyles.Headline;
+    private static readonly TextStyle StakeCaptionStyle = TextStyles.SubheadlineEmphasized;
     private const float SpotlightAlpha = 0.05f;
 
     private readonly CasinoStore store;
@@ -269,14 +272,22 @@ internal sealed class OriginalsCabinet
         var pad = BetComposer.Pad * scale;
         var left = deck.Min.X + pad;
         var right = deck.Max.X - pad;
+        var bandTop = deck.Min.Y + pad;
         if (skin.Knob)
         {
-            var knobTop = deck.Min.Y + pad;
-            skin.DrawKnob(drawList, new Rect(new Vector2(left, knobTop),
-                new Vector2(right, knobTop + BetComposer.KnobHeight * scale)), ui, false);
+            var knobBottom = bandTop + BetComposer.KnobHeight * scale;
+            skin.DrawKnob(drawList, new Rect(new Vector2(left, bandTop), new Vector2(right, knobBottom)), ui, false);
+            bandTop = knobBottom + BetComposer.Gap * scale;
         }
 
         var row = DeckActions.Row(deck, scale);
+        var bandBottom = row.Min.Y - BetComposer.Gap * scale;
+        if (bandBottom > bandTop && skin.LiveStake > 0)
+        {
+            DrawStakeLine(drawList, new Rect(new Vector2(left, bandTop), new Vector2(right, bandBottom)),
+                skin.LiveStake, scale);
+        }
+
         var cursor = row.Min.X;
         var secondaries = 0;
         var idle = !blocked && !originals.InFlight;
@@ -294,6 +305,33 @@ internal sealed class OriginalsCabinet
             skin.CashOut(originals);
             CasinoSfx.Play(UiSound.ChipSlide);
         }
+    }
+
+    private static void DrawStakeLine(ImDrawListPtr drawList, Rect band, long stake, float scale)
+    {
+        var amount = NumberText.Compact(stake);
+        var amountSize = CurrencyGlyph.MeasureAmount(amount, StakeStyle);
+        if (amountSize.Y > band.Height || amountSize.X > band.Width)
+        {
+            return;
+        }
+
+        var caption = Loc.T(L.Casino.RoundStake);
+        var gap = Metrics.Space.Sm * scale;
+        var captionWidth = Typography.Measure(caption, StakeCaptionStyle).X;
+        var showCaption = captionWidth + gap + amountSize.X <= band.Width;
+        var total = showCaption ? captionWidth + gap + amountSize.X : amountSize.X;
+        var left = band.Center.X - total * 0.5f;
+        if (showCaption)
+        {
+            var captionHeight = Typography.Measure(caption, StakeCaptionStyle).Y;
+            Typography.Draw(drawList, new Vector2(left, band.Center.Y - captionHeight * 0.5f), caption,
+                CasinoColors.InkBody, StakeCaptionStyle);
+            left += captionWidth + gap;
+        }
+
+        CurrencyGlyph.DrawAmount(drawList, new Vector2(left, band.Center.Y - amountSize.Y * 0.5f), amount,
+            CurrencyKind.Chips, CasinoColors.Money, StakeStyle);
     }
 
     private void DrawComposer(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui, CasinoSittingDto sitting,

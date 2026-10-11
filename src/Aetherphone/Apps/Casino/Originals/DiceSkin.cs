@@ -63,6 +63,8 @@ internal sealed class DiceSkin : IOriginalsSkin
 
     public long CashOutValue => 0;
 
+    public long LiveStake => 0;
+
     public LocString LiveSecondary => default;
 
     public Vector2 Focus => new(MarkerX(playback.Marker), track.Min.Y);

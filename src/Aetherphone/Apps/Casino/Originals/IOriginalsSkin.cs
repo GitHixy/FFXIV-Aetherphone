@@ -61,6 +61,8 @@ internal interface IOriginalsSkin : ICabinetIdle
 
     long CashOutValue { get; }
 
+    long LiveStake { get; }
+
     LocString LiveSecondary { get; }
 
     Vector2 Focus { get; }

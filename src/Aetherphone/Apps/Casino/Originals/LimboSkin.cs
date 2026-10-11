@@ -59,6 +59,8 @@ internal sealed class LimboSkin : IOriginalsSkin
 
     public long CashOutValue => 0;
 
+    public long LiveStake => 0;
+
     public LocString LiveSecondary => default;
 
     public Vector2 Focus => dialCenter;

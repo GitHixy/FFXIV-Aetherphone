@@ -63,6 +63,8 @@ internal sealed class HiLoSkin : IOriginalsSkin
 
     public long CashOutValue => chain.CashOutValue;
 
+    public long LiveStake => chain.Stake;
+
     public LocString LiveSecondary => L.Originals.Skip;
 
     public Vector2 Focus => cardCenter;

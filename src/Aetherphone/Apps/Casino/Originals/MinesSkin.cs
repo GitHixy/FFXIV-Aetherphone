@@ -63,6 +63,8 @@ internal sealed class MinesSkin : IOriginalsSkin
 
     public long CashOutValue => board.CashOutValue;
 
+    public long LiveStake => board.Stake;
+
     public LocString LiveSecondary => L.Originals.RandomPick;
 
     public Vector2 Focus => grid.Center;
