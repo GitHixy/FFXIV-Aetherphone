@@ -8,35 +8,37 @@ namespace Aetherphone.Tests;
 public sealed class MachineTraceCycleTests
 {
     private const float Frame = 1f / 60f;
+    private const int BirdCells = SlotsRules.CellCount;
 
     [Fact]
     public void ANewRoundOnTheSameStepTracesItsOwnWins()
     {
         var cycle = new MachineTraceCycle();
         var threeLines = new[] { Line(0, 3, 400), Line(3, 4, 900), Line(7, 3, 100) };
-        cycle.Track(1, 0, threeLines);
+        cycle.Track(1, 0, threeLines, BirdCells);
         cycle.Advance(MachineTraceCycle.SlotSeconds * 2.5f);
         Assert.Equal(3, cycle.Count);
         Assert.True(cycle.TryActive(threeLines, out _));
 
         var none = Array.Empty<CasinoSlotsWinDto>();
-        cycle.Track(2, 0, none);
+        cycle.Track(2, 0, none, BirdCells);
         Assert.Equal(0, cycle.Count);
         Assert.False(cycle.TryActive(none, out _));
 
         var oneLine = new[] { Line(5, 3, 250) };
-        cycle.Track(3, 0, oneLine);
+        cycle.Track(3, 0, oneLine, BirdCells);
         Assert.Equal(1, cycle.Count);
+        Assert.False(cycle.Overview);
         Assert.True(cycle.TryActive(oneLine, out var active));
         Assert.Equal(0, active);
     }
 
     [Fact]
-    public void LinesCycleInPayOrder()
+    public void WinsShowTogetherFirstThenCycleInPayOrder()
     {
         var cycle = new MachineTraceCycle();
         var wins = new[] { Line(0, 3, 100), Line(1, 5, 500), Line(2, 4, 200) };
-        cycle.Track(1, 0, wins);
+        cycle.Track(1, 0, wins, BirdCells);
         Assert.True(cycle.Overview);
         Assert.False(cycle.TryActive(wins, out _));
         cycle.Advance(MachineTraceCycle.OverviewSeconds + MachineTraceCycle.SlotSeconds * 0.5f);
@@ -52,14 +54,16 @@ public sealed class MachineTraceCycleTests
     }
 
     [Fact]
-    public void OnlyPaylinesAreTracedAsLines()
+    public void PaylinesTraceAsLinesAndEveryOtherWinTracesItsCells()
     {
-        Assert.True(MachineTraceCycle.Traceable(Line(9, 3, 1)));
-        Assert.False(MachineTraceCycle.Traceable(Line(SlotsRules.LineScatter, 3, 1)));
-        Assert.False(MachineTraceCycle.Traceable(Line(SlotsRules.LineCluster, 9, 1)));
-        Assert.False(MachineTraceCycle.Traceable(Line(SlotsRules.LineExpander, 3, 1)));
-        Assert.False(MachineTraceCycle.Traceable(Line(SlotsRules.LineGrand, 15, 1)));
-        Assert.False(MachineTraceCycle.Traceable(Line(SlotsRules.PaylineCount, 3, 1)));
+        Assert.True(MachineTraceCycle.IsLine(Line(9, 3, 1)));
+        Assert.False(MachineTraceCycle.IsLine(Line(SlotsRules.LineScatter, 3, 1)));
+        Assert.False(MachineTraceCycle.IsLine(Line(SlotsRules.LineCluster, 9, 1)));
+        Assert.False(MachineTraceCycle.IsLine(Line(SlotsRules.PaylineCount, 3, 1)));
+        Assert.True(MachineTraceCycle.Traceable(Cells(SlotsRules.LineCluster, 40, 0, 1, 2), 30));
+        Assert.True(MachineTraceCycle.Traceable(Cells(SlotsRules.LineScatter, 40, 3, 7, 12), BirdCells));
+        Assert.False(MachineTraceCycle.Traceable(Cells(SlotsRules.LineGrand, 40), BirdCells));
+        Assert.False(MachineTraceCycle.Traceable(Cells(SlotsRules.LineCluster, 40, 30, 31), 30));
     }
 
     [Fact]
@@ -68,12 +72,14 @@ public sealed class MachineTraceCycleTests
         var playback = new MachineRoundPlayback();
         var cycle = new MachineTraceCycle();
         var traced = 0;
+        var clusters = 0;
         for (var pass = 0; pass < 2; pass++)
         {
             foreach (var (name, round) in SlotsVectorFiles.Rounds())
             {
                 var spin = SlotsVectorFiles.Spin(name, round);
                 Assert.True(playback.Begin(spin), spin.RoundId);
+                var cells = playback.Info.CellCount;
                 var guard = 0;
                 while (guard < 200_000)
                 {
@@ -85,13 +91,19 @@ public sealed class MachineTraceCycleTests
                     }
 
                     var wins = playback.Current.Wins;
-                    cycle.Track(playback.Serial, playback.StepIndex, wins);
+                    cycle.Track(playback.Serial, playback.StepIndex, wins, cells);
                     cycle.Advance(Frame);
+                    for (var slot = 0; slot < cycle.Count; slot++)
+                    {
+                        Assert.InRange(cycle.WinAt(slot), 0, wins!.Length - 1);
+                    }
+
                     if (cycle.TryActive(wins, out var active))
                     {
                         Assert.InRange(active, 0, wins!.Length - 1);
-                        Assert.True(MachineTraceCycle.Traceable(wins[active]), spin.RoundId);
+                        Assert.True(MachineTraceCycle.Traceable(wins[active], cells), spin.RoundId);
                         traced++;
+                        clusters += wins[active].Line == SlotsRules.LineCluster ? 1 : 0;
                     }
 
                     if (playback.Finished)
@@ -103,24 +115,19 @@ public sealed class MachineTraceCycleTests
         }
 
         Assert.True(traced > 0);
+        Assert.True(clusters > 0);
     }
 
     [Fact]
-    public void EveryLineWinOfAStepIsShownOnce()
+    public void EveryTraceableWinOfAStepIsShownOnce()
     {
-        var spin = FirstLineWin();
-        var step = 0;
-        while (spin.Steps![step].Wins is not { Length: > 0 } stepWins || !HasLine(stepWins))
-        {
-            step++;
-        }
-
-        var wins = spin.Steps[step].Wins!;
+        var (spin, step) = FirstStepWith(wins => wins.Length > 1);
+        var wins = spin.Steps![step].Wins!;
+        var cells = SlotsMachines.For(spin.MachineId).CellCount;
         var cycle = new MachineTraceCycle();
-        cycle.Track(1, step, wins);
+        cycle.Track(1, step, wins, cells);
         cycle.Advance((cycle.Count > 1 ? MachineTraceCycle.OverviewSeconds : 0f)
             + MachineTraceCycle.SlotSeconds * 0.5f);
-
         var shown = new bool[wins.Length];
         for (var slot = 0; slot < cycle.Count; slot++)
         {
@@ -132,40 +139,30 @@ public sealed class MachineTraceCycleTests
 
         for (var index = 0; index < wins.Length; index++)
         {
-            Assert.Equal(MachineTraceCycle.Traceable(wins[index]), shown[index]);
+            Assert.Equal(MachineTraceCycle.Traceable(wins[index], cells), shown[index]);
         }
     }
 
     private static CasinoSlotsWinDto Line(int line, int count, long pay) =>
         new(line, 1, count, Array.Empty<int>(), pay);
 
-    private static bool HasLine(CasinoSlotsWinDto[] wins)
-    {
-        for (var index = 0; index < wins.Length; index++)
-        {
-            if (MachineTraceCycle.Traceable(wins[index]))
-            {
-                return true;
-            }
-        }
+    private static CasinoSlotsWinDto Cells(int line, long pay, params int[] cells) =>
+        new(line, 1, cells.Length, cells, pay);
 
-        return false;
-    }
-
-    private static CasinoSlotsSpinDto FirstLineWin()
+    private static (CasinoSlotsSpinDto Spin, int Step) FirstStepWith(Func<CasinoSlotsWinDto[], bool> wanted)
     {
         foreach (var (name, round) in SlotsVectorFiles.Rounds())
         {
             var spin = SlotsVectorFiles.Spin(name, round);
             for (var index = 0; index < spin.Steps!.Length; index++)
             {
-                if (spin.Steps[index].Wins is { } wins && HasLine(wins))
+                if (spin.Steps[index].Wins is { } wins && wanted(wins))
                 {
-                    return spin;
+                    return (spin, index);
                 }
             }
         }
 
-        throw new InvalidOperationException("no line win in the vectors");
+        throw new InvalidOperationException("no matching step in the vectors");
     }
 }

@@ -26,7 +26,7 @@ internal sealed class MachineTraceCycle
 
     public int WinAt(int slot) => order[slot];
 
-    public void Track(int round, int step, CasinoSlotsWinDto[]? wins)
+    public void Track(int round, int step, CasinoSlotsWinDto[]? wins, int cellCount)
     {
         if (round == tracedRound && step == tracedStep)
         {
@@ -44,7 +44,7 @@ internal sealed class MachineTraceCycle
 
         for (var index = 0; index < wins.Length && count < Capacity; index++)
         {
-            if (!Traceable(wins[index]))
+            if (!Traceable(wins[index], cellCount))
             {
                 continue;
             }
@@ -108,8 +108,31 @@ internal sealed class MachineTraceCycle
         }
     }
 
-    public static bool Traceable(CasinoSlotsWinDto win)
+    public static bool Traceable(CasinoSlotsWinDto win, int cellCount)
+    {
+        return IsLine(win) || HasCells(win, cellCount);
+    }
+
+    public static bool IsLine(CasinoSlotsWinDto win)
     {
         return win.Line >= 0 && win.Line < SlotsRules.PaylineCount && win.Count >= 2;
+    }
+
+    public static bool HasCells(CasinoSlotsWinDto win, int cellCount)
+    {
+        if (win.Cells is not { } cells)
+        {
+            return false;
+        }
+
+        for (var index = 0; index < cells.Length; index++)
+        {
+            if (cells[index] >= 0 && cells[index] < cellCount)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

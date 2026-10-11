@@ -23,6 +23,7 @@ internal sealed class MachineReels
     private readonly int[] restingGrid = new int[MachineRoundPlayback.MaxCells];
     private readonly int[] survivorRows = new int[MachineRoundPlayback.MaxCells];
     private readonly MachineTraceCycle traces = new();
+    private readonly MachineCellOutline outline = new();
 
     private int shatteredStep = -1;
     private string restingMachine = string.Empty;
@@ -146,7 +147,7 @@ internal sealed class MachineReels
         }
 
         MarkCells(current, winning);
-        traces.Track(playback.Serial, playback.StepIndex, current.Wins);
+        traces.Track(playback.Serial, playback.StepIndex, current.Wins, playback.Info.CellCount);
         traces.Advance(deltaSeconds);
     }
 
@@ -377,7 +378,7 @@ internal sealed class MachineReels
     private void DrawTraces(ImDrawListPtr drawList, Rect window, CasinoSlotsStepDto step, SlotsMachineInfo info,
         float cellWidth, float cellHeight, float scale)
     {
-        if (info.Layout == SlotsLayout.Cluster || step.Wins is not { } wins || traces.Count == 0)
+        if (step.Wins is not { } wins || traces.Count == 0)
         {
             return;
         }
@@ -390,21 +391,32 @@ internal sealed class MachineReels
                 var index = traces.WinAt(slot);
                 if (index < wins.Length)
                 {
-                    MachineTraceArt.Line(drawList, window, cellWidth, cellHeight, wins[index],
-                        MachineTraceArt.OverviewAlpha, reveal, false, scale);
+                    DrawTrace(drawList, window, wins[index], info, cellWidth, cellHeight,
+                        MachineTraceArt.OverviewAlpha, reveal, true, scale);
                 }
             }
 
             return;
         }
 
-        if (!traces.TryActive(wins, out var active))
+        if (traces.TryActive(wins, out var active))
         {
+            DrawTrace(drawList, window, wins[active], info, cellWidth, cellHeight, 1f,
+                traces.ActiveProgress / MachineTraceArt.RevealShare, false, scale);
+        }
+    }
+
+    private void DrawTrace(ImDrawListPtr drawList, Rect window, CasinoSlotsWinDto win, SlotsMachineInfo info,
+        float cellWidth, float cellHeight, float alpha, float reveal, bool overview, float scale)
+    {
+        if (MachineTraceCycle.IsLine(win) && info.Layout != SlotsLayout.Cluster)
+        {
+            MachineTraceArt.Line(drawList, window, cellWidth, cellHeight, win, alpha, reveal, !overview, scale);
             return;
         }
 
-        MachineTraceArt.Line(drawList, window, cellWidth, cellHeight, wins[active], 1f,
-            traces.ActiveProgress / MachineTraceArt.RevealShare, true, scale);
+        MachineTraceArt.Cells(drawList, outline, window, cellWidth, cellHeight, info.Reels, info.Rows, win,
+            MachineArt.NeonOf(info.Id), alpha, reveal, scale);
     }
 
     private static void DrawCoinLabel(ImDrawListPtr drawList, CasinoSlotsStepDto? step, int cell, Vector2 center,
