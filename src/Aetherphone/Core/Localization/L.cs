@@ -10425,7 +10425,6 @@ internal static class L
         public static readonly LocString GameBarkeep = new("casino.game.barkeep", "Barkeep");
         public static readonly LocString GameDailySpin = new("casino.game.dailySpin", "Daily spin");
         public static readonly LocString LimitsRow = new("casino.limitsRow", "Daily loss limit");
-        public static readonly LocString LimitsRowHint = new("casino.limitsRowHint", "Set an optional daily loss limit");
         public static readonly LocString CabinetSoonTitle = new("casino.cabinetSoonTitle", "The cabinet is on its way");
         public static readonly LocString CabinetSoonHint = new("casino.cabinetSoonHint", "This game is still being wired up. It arrives in a coming update.");
         public static readonly LocString Cashier = new("casino.cashier", "Cashier");
@@ -10510,9 +10509,7 @@ internal static class L
         public static readonly LocString BarkeepDone = new("casino.barkeep.done", "Done");
         public static readonly LocString RecordsHeading = new("casino.recordsHeading", "On the record");
         public static readonly LocString HistoryRow = new("casino.historyRow", "Round history");
-        public static readonly LocString HistoryRowHint = new("casino.historyRowHint", "Every stake and payout, on the record");
         public static readonly LocString FairnessRow = new("casino.fairnessRow", "Fair play");
-        public static readonly LocString FairnessRowHint = new("casino.fairnessRowHint", "Check settled rounds yourself");
         public static readonly LocString HistoryEmptyTitle = new("casino.history.emptyTitle", "No rounds yet");
         public static readonly LocString HistoryEmptyHint = new("casino.history.emptyHint", "Play a round and it lands here, newest first.");
         public static readonly LocString HistoryStakeLine = new("casino.history.stakeLine", "Stake {0}");

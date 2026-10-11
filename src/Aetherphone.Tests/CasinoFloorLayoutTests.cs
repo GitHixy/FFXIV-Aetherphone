@@ -123,6 +123,22 @@ public sealed class CasinoFloorLayoutTests
         Assert.True(MissionsCard.Height(2, 20f, one + two, scale) > one + two);
     }
 
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.5f)]
+    public void RecordTilesGrowToHoldEveryWrappedLabelLine(float scale)
+    {
+        var line = 19f * scale;
+        var one = CasinoApp.RecordsTileHeightFor(1, line, scale);
+        var three = CasinoApp.RecordsTileHeightFor(3, line, scale);
+        Assert.True(three - one >= line * 2f - 0.01f || one > 84f * scale);
+        Assert.True(three >= line * 3f + 34f * scale);
+        var tile = (PhoneWidth * scale - 24f * scale) / 3f;
+        Assert.True(CasinoApp.RecordsLabelWidth(tile, scale) < tile);
+        Assert.True(CasinoApp.RecordsLabelWidth(tile, scale) > 60f * scale);
+    }
+
     [Fact]
     public void HeroCardsScaleWithTheWidthAndClamp()
     {
