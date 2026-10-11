@@ -30,6 +30,13 @@ public sealed class CasinoBroadcastLayoutTests
         return data;
     }
 
+    [Fact]
+    public void TheTradePromptStacksItsButtonsWhenBothLabelsCannotSitWhole()
+    {
+        Assert.False(TradeSyncPrompt.ButtonsStack(300f, 160f, 110f, 8f));
+        Assert.True(TradeSyncPrompt.ButtonsStack(300f, 200f, 110f, 8f));
+    }
+
     [Theory]
     [MemberData(nameof(Cases))]
     public void SeatsNeverTouchTheBoardOrPotAndStayOnTheStage(float scale, int count)
