@@ -12624,7 +12624,7 @@ internal static class L
         public static readonly LocString RemovedErp = new("conduct.removed.erp", "Asking for or offering ERP, or describing sex acts or arousal");
         public static readonly LocString RemovedFetish = new("conduct.removed.fetish", "Fetish content shown sexually, and bodies beyond the game's sliders");
         public static readonly LocString RemovedGore = new("conduct.removed.gore", "Gore: dismemberment, mutilation, torture or real-world gore");
-        public static readonly LocString RemovedAi = new("conduct.removed.ai", "Images made or changed by generative AI. Upscaling, color, crops and clipping fixes are fine");
+        public static readonly LocString RemovedAi = new("conduct.removed.ai", "Images made or changed by generative AI. Minor upscaling, color, crops and clipping fixes are fine");
         public static readonly LocString RemovedCreators = new("conduct.removed.creators", "Reposting someone's art or screenshots without permission, or removing a watermark");
         public static readonly LocString RemovedPolitics = new("conduct.removed.politics", "Real-world politics: elections, parties, campaigns and policy debates. Eorzean politics is fine");
         public static readonly LocString RemovedHarassment = new("conduct.removed.harassment", "Harassment, callouts that name or tag a player, slurs and hate speech");
