@@ -427,6 +427,8 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         {
             OpenGame(rulesSheet.GameId);
         }
+
+        ConsumeFameConsentRequest();
     }
 
     private bool IntroShowing => casino.State is not null && !preferences.IntroSeen && routes.OnRoot

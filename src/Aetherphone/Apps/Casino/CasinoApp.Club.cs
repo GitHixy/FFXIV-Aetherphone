@@ -92,6 +92,14 @@ internal sealed partial class CasinoApp
         routes.Push(new CasinoRoute(CasinoScreen.Fame));
     }
 
+    private void ConsumeFameConsentRequest()
+    {
+        if (fameView.TakeConsentRequest())
+        {
+            fameConsent.Open();
+        }
+    }
+
     private void OfferFameConsent()
     {
         if (fameConsent.IsOpen || !FloorIdle() || !fameChoice.Needed)

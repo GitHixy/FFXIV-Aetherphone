@@ -126,7 +126,7 @@ internal sealed class SettingsApp : IResumableApp, ISettingsNavigator, ISpotligh
         var commands = new CommandsPage();
         tagsMentionsPage = new TagsMentionsPage(aethernetSession, aethernet.Account, this);
         privacyPage = new PrivacyPage(configuration, aethernetSession, aethernet.Account, services.Leaderboard,
-            aethernet.Safety, confirm, this, tagsMentionsPage, services.CacheStorage);
+            services.CasinoFameChoice, aethernet.Safety, confirm, this, tagsMentionsPage, services.CacheStorage);
         var about = new AboutPage(configuration, gameData, aethernetSession);
         changelogPage = new ChangelogPage(configuration);
         linkedDevicesPage = new LinkedDevicesPage(configuration, aethernetSession, aethernet.Auth, this);
