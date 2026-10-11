@@ -803,7 +803,8 @@ internal sealed record CasinoDiceTableStateDto(
     CasinoVenueRollDto[]? Rolls = null,
     CasinoDiceRoundDto? Round = null,
     CasinoDiceRoundDto? LastRound = null,
-    int Currency = 1);
+    int Currency = 1,
+    bool Paused = false);
 
 internal sealed record CasinoDeathrollDuelDto(
     long Seq = 0,
@@ -831,7 +832,8 @@ internal sealed record CasinoDeathrollStateDto(
     CasinoDeathrollDuelDto? Duel = null,
     CasinoDeathrollDuelDto[]? Recent = null,
     CasinoVenueStackDto[]? Stacks = null,
-    int Currency = 1);
+    int Currency = 1,
+    bool Paused = false);
 
 internal sealed record CasinoRaffleEntrantDto(string UserId = "", string DisplayName = "", int Tickets = 0);
 
@@ -856,7 +858,8 @@ internal sealed record CasinoRaffleStateDto(
     string NextCommit = "",
     CasinoRaffleDto? Raffle = null,
     CasinoRaffleDto? Last = null,
-    int Currency = 1);
+    int Currency = 1,
+    bool Paused = false);
 
 internal sealed record CasinoTableResultDto(
     bool Granted = false,

@@ -175,7 +175,7 @@ internal sealed class VenueCabinet : ICabinetIdle
         }
 
         var room = new VenueRoomFrame(stage, frame, ui, view, drawList, world, venue.AccountId, Hosting(), Owning(),
-            venue.ActInFlight, now, scale);
+            venue.ActInFlight || view.Paused, now, scale);
         switch (view.Kind)
         {
             case VenueRoomKind.Deathroll:
@@ -232,6 +232,13 @@ internal sealed class VenueCabinet : ICabinetIdle
     private void DrawRibbon(ImDrawListPtr drawList, in CasinoStageFrame frame, VenueRoomView view, long now,
         bool attached, float scale)
     {
+        if (view.Paused)
+        {
+            PhaseRibbon.Draw(drawList, frame.Layout.Ribbon, Loc.T(L.Tables.PausedByHost), 0, 0,
+                view.Snapshot.Occupancy, CasinoColors.InkMuted, scale);
+            return;
+        }
+
         var name = view.Name.Length > 0 ? view.Name : Loc.T(NameOf(view.Kind));
         var remaining = 0L;
         var window = 0;
