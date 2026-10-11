@@ -168,25 +168,41 @@ internal sealed class MachinePaySheet
         float scale)
     {
         var height = StatRowHeight * scale;
-        var center = y + height * 0.5f;
+        var lineHeight = Typography.LineHeight(TextStyles.Subheadline);
         var valueSize = Typography.Measure(value, TextStyles.SubheadlineEmphasized);
-        var fitted = Typography.FitText(label, width - valueSize.X - Metrics.Space.Md * scale, TextStyles.Subheadline);
-        Typography.Draw(drawList, new Vector2(left, center - Typography.LineHeight(TextStyles.Subheadline) * 0.5f),
-            fitted, skin.BodyInk, TextStyles.Subheadline);
-        Typography.Draw(drawList, new Vector2(left + width - valueSize.X, center - valueSize.Y * 0.5f), value,
-            CasinoColors.Money, TextStyles.SubheadlineEmphasized);
-        drawList.AddLine(new Vector2(left, y + height), new Vector2(left + width, y + height),
+        var labelWidth = Typography.Measure(label, TextStyles.Subheadline).X;
+        var bottom = y + height;
+        if (labelWidth + Metrics.Space.Md * scale + valueSize.X <= width)
+        {
+            var center = y + height * 0.5f;
+            Typography.Draw(drawList, new Vector2(left, center - lineHeight * 0.5f), label, skin.BodyInk,
+                TextStyles.Subheadline);
+            Typography.Draw(drawList, new Vector2(left + width - valueSize.X, center - valueSize.Y * 0.5f), value,
+                CasinoColors.Money, TextStyles.SubheadlineEmphasized);
+        }
+        else
+        {
+            var padY = MathF.Max(0f, (height - lineHeight) * 0.5f);
+            var labelHeight = Typography.DrawWrappedLeft(new Vector2(left, y + padY), label, skin.BodyInk,
+                TextStyles.Subheadline, width);
+            var valueTop = y + padY + labelHeight;
+            Typography.Draw(drawList, new Vector2(left + width - valueSize.X, valueTop), value, CasinoColors.Money,
+                TextStyles.SubheadlineEmphasized);
+            bottom = valueTop + valueSize.Y + padY;
+        }
+
+        drawList.AddLine(new Vector2(left, bottom), new Vector2(left + width, bottom),
             ImGui.GetColorU32(Palette.WithAlpha(skin.TitleInk, 0.06f)), 1f);
-        return y + height;
+        return bottom;
     }
 
     private float VolatilityRow(ImDrawListPtr drawList, float left, float y, float width, int bars, float scale)
     {
         var height = StatRowHeight * scale;
         var center = y + height * 0.5f;
+        var label = Loc.T(L.Machines.Volatility);
         Typography.Draw(drawList, new Vector2(left, center - Typography.LineHeight(TextStyles.Subheadline) * 0.5f),
-            Typography.FitText(Loc.T(L.Machines.Volatility), width * 0.6f, TextStyles.Subheadline), skin.BodyInk,
-            TextStyles.Subheadline);
+            label, skin.BodyInk, MachineText.Fit(label, width * 0.6f, TextStyles.Subheadline));
         var barsHeight = 16f * scale;
         MachineArt.VolatilityBars(drawList, new Vector2(left + width - 42f * scale, center - barsHeight * 0.5f),
             barsHeight, bars, CasinoColors.Money, scale);
@@ -195,8 +211,8 @@ internal sealed class MachinePaySheet
 
     private float Heading(ImDrawListPtr drawList, float left, float y, float width, string text, float scale)
     {
-        Typography.Draw(drawList, new Vector2(left, y), Typography.FitText(text, width, TextStyles.Headline),
-            skin.TitleInk, TextStyles.Headline);
+        Typography.Draw(drawList, new Vector2(left, y), text, skin.TitleInk,
+            MachineText.Fit(text, width, TextStyles.Headline));
         return y + Typography.LineHeight(TextStyles.Headline) + Metrics.Space.Sm * scale;
     }
 
@@ -231,10 +247,10 @@ internal sealed class MachinePaySheet
             {
                 var text = pays[symbol * Columns + column];
                 var x = left + IconColumn * scale + column * columnWidth;
-                var fitted = Typography.FitText(text, columnWidth - Metrics.Space.Xs * scale, TextStyles.Subheadline);
-                var size = Typography.Measure(fitted, TextStyles.Subheadline);
-                Typography.Draw(drawList, new Vector2(x + columnWidth - size.X, center - size.Y * 0.5f), fitted,
-                    CasinoColors.Money, TextStyles.Subheadline);
+                var style = MachineText.Fit(text, columnWidth - Metrics.Space.Xs * scale, TextStyles.Subheadline);
+                var size = Typography.Measure(text, style);
+                Typography.Draw(drawList, new Vector2(x + columnWidth - size.X, center - size.Y * 0.5f), text,
+                    CasinoColors.Money, style);
             }
 
             y += height;
@@ -253,8 +269,8 @@ internal sealed class MachinePaySheet
             MachineSymbols.Draw(drawList, machineId, scatter, new Vector2(left + IconColumn * 0.5f * scale, center),
                 height * 0.34f, 1f, false);
             Typography.Draw(drawList, new Vector2(left + IconColumn * scale, center - lineHeight * 0.5f),
-                Typography.FitText(scatters[count], width - IconColumn * scale, TextStyles.Subheadline),
-                CasinoColors.Money, TextStyles.Subheadline);
+                scatters[count], CasinoColors.Money,
+                MachineText.Fit(scatters[count], width - IconColumn * scale, TextStyles.Subheadline));
             y += height;
         }
 
@@ -275,9 +291,9 @@ internal sealed class MachinePaySheet
 
             var column = shown % Columns;
             var row = shown / Columns;
-            Typography.Draw(drawList, new Vector2(left + column * columnWidth, y + row * lineHeight),
-                Typography.FitText(coins[index], columnWidth - Metrics.Space.Xs * scale, TextStyles.Subheadline),
-                CasinoColors.Money, TextStyles.Subheadline);
+            Typography.Draw(drawList, new Vector2(left + column * columnWidth, y + row * lineHeight), coins[index],
+                CasinoColors.Money, MachineText.Fit(coins[index], columnWidth - Metrics.Space.Xs * scale,
+                    TextStyles.Subheadline));
             shown++;
         }
 
