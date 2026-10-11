@@ -128,6 +128,7 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
     public Dictionary<string, int> OnboardingCompleted { get; set; } = new();
     public bool LockPosition { get; set; }
     public bool ShowInGpose { get; set; } = true;
+    public bool ShowInCutscenes { get; set; }
     public Vector2? MaximizedPosition { get; set; }
     public Vector2? MinimizedPosition { get; set; }
     public Vector2? LandscapePosition { get; set; }
