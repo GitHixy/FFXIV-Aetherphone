@@ -2,6 +2,7 @@ using Aetherphone.Apps.Casino.Tables;
 using Aetherphone.Core.Aethernet.Clients;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
+using Aetherphone.Core.Localization;
 using Xunit;
 
 namespace Aetherphone.Tests;
@@ -178,12 +179,23 @@ public sealed class CasinoTableBrowserTests
     [Fact]
     public void OnlyADoorRefusalOffersTheKnock()
     {
-        Assert.True(BlackjackTable.AsksToJoin(CasinoReasons.InviteOnly));
-        Assert.True(BlackjackTable.AsksToJoin(CasinoReasons.NotMember));
-        Assert.True(BlackjackTable.AsksToJoin(CasinoReasons.Denied));
-        Assert.False(BlackjackTable.AsksToJoin(CasinoReasons.BannedFromTable));
-        Assert.False(BlackjackTable.AsksToJoin(CasinoReasons.Ended));
-        Assert.False(BlackjackTable.AsksToJoin(CasinoReasons.Full));
+        Assert.True(TableDoorCard.AsksToJoin(CasinoReasons.InviteOnly));
+        Assert.True(TableDoorCard.AsksToJoin(CasinoReasons.NotMember));
+        Assert.True(TableDoorCard.AsksToJoin(CasinoReasons.Denied));
+        Assert.False(TableDoorCard.AsksToJoin(CasinoReasons.BannedFromTable));
+        Assert.False(TableDoorCard.AsksToJoin(CasinoReasons.Ended));
+        Assert.False(TableDoorCard.AsksToJoin(CasinoReasons.Full));
+    }
+
+    [Fact]
+    public void ARemovedPlayerIsToldTheyWereRemovedRatherThanThatTheTableClosed()
+    {
+        var closed = L.Casino.BlackjackClosedTitle;
+        Assert.Equal(L.Tables.RemovedTitle.Key, TableDoorCard.TitleFor(CasinoReasons.Kicked, closed).Key);
+        Assert.Equal(L.Tables.RemovedTitle.Key, TableDoorCard.TitleFor(CasinoReasons.BannedFromTable, closed).Key);
+        Assert.Equal(L.Casino.BlackjackDoorTitle.Key, TableDoorCard.TitleFor(CasinoReasons.InviteOnly, closed).Key);
+        Assert.Equal(closed.Key, TableDoorCard.TitleFor(CasinoReasons.Ended, closed).Key);
+        Assert.True(CasinoReasons.TryMessage(CasinoReasons.Kicked, out _));
     }
 
     private static CasinoTableRowDto Row(long minBet = 500, int seatsTaken = 1, int seatCount = 5,

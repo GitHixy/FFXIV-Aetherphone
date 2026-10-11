@@ -559,7 +559,11 @@ internal sealed class TableDoor
         var top = row.Center.Y - (nameHeight + lineHeight) * 0.5f;
         Typography.Draw(drawList, new Vector2(textLeft, top),
             Typography.FitText(occupant.DisplayName, textWidth, TextStyles.Headline), ui.TitleInk, TextStyles.Headline);
-        var line = coDealer ? Loc.T(L.Tables.CoDealerOn) : texts.Count(L.Tables.SeatLabel, occupant.SeatIndex + 1);
+        var line = coDealer
+            ? Loc.T(L.Tables.CoDealerOn)
+            : occupant.Leaving
+                ? Loc.T(L.Casino.StandQueued)
+                : texts.Count(L.Tables.SeatLabel, occupant.SeatIndex + 1);
         Typography.Draw(drawList, new Vector2(textLeft, top + nameHeight),
             Typography.FitText(line, textWidth, TextStyles.Subheadline), coDealer ? ui.Accent : ui.BodyInk,
             TextStyles.Subheadline);
@@ -574,8 +578,8 @@ internal sealed class TableDoor
                 tables.SetCoDealers(roomId, Toggled(config!.CoDealers, occupant.UserId));
             }
         }
-        else if (Button.Draw(drawList, button, label, ui.Ink, ButtonStyle.Gray, ButtonRole.Destructive, !busy,
-                     id: "casino.door.remove"))
+        else if (Button.Draw(drawList, button, label, ui.Ink, ButtonStyle.Gray, ButtonRole.Destructive,
+                     !busy && !occupant.Leaving, id: "casino.door.remove"))
         {
             AskRemove(occupant.UserId, occupant.DisplayName);
         }

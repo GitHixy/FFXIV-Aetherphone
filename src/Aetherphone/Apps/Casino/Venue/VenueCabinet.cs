@@ -240,11 +240,15 @@ internal sealed class VenueCabinet : ICabinetIdle
 
     private void DrawClosed(ImDrawListPtr drawList, AppSkin ui, string reason, Rect safe, float scale)
     {
-        var title = Loc.T(L.Venue.RoomClosedTitle);
-        var hint = Loc.T(CasinoReasons.TryMessage(reason, out var known) ? known : L.Venue.RoomClosedHint);
-        CasinoNotice.DrawWithAction(drawList, ui, CasinoNoticeKind.Card, title, hint, Loc.T(L.Casino.WheelBackToFloor),
-            safe.Min.X, safe.Min.Y + Metrics.Space.Lg * scale, safe.Width, scale, out var pressed);
-        if (pressed)
+        var action = Tables.TableDoorCard.Draw(drawList, ui, reason, L.Venue.RoomClosedTitle, L.Venue.RoomClosedHint,
+            safe, scale);
+        if (action == Tables.TableDoorAction.Knock)
+        {
+            venue.Tables.Knock(roomId);
+            return;
+        }
+
+        if (action == Tables.TableDoorAction.Leave)
         {
             leaveRoom();
         }

@@ -8908,6 +8908,7 @@
   "casino.tables.reasonSettled": "Bu ödeme iki taraf için de zaten kapandı.",
   "casino.tables.reasonGilOnly": "Bu yalnızca gil masalarında çalışır.",
   "casino.tables.reasonNotOwner": "Bunu yalnızca bu masanın ev sahibi yapabilir.",
+  "casino.tables.removedTitle": "Bu masadan çıkarıldın",
   "casino.strip.getChips": "Fiş al",
   "casino.strip.coinsFieldHint": "Kaç Coin?",
   "casino.strip.becomesChips": "{0} fiş eder",

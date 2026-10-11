@@ -712,24 +712,18 @@ internal sealed partial class HoldemTable : ICabinetIdle
 
     private void DrawClosed(ImDrawListPtr drawList, AppSkin ui, string reason, Rect safe, float scale)
     {
-        var asks = BlackjackTable.AsksToJoin(reason);
-        var title = Loc.T(asks ? L.Casino.BlackjackDoorTitle : L.Holdem.ClosedTitle);
-        var hint = Loc.T(CasinoReasons.TryMessage(reason, out var known) ? known : L.Holdem.ClosedHint);
-        var action = Loc.T(asks ? L.Casino.BlackjackAskToJoin : L.Casino.WheelBackToFloor);
-        CasinoNotice.DrawWithAction(drawList, ui, CasinoNoticeKind.Card, title, hint, action, safe.Min.X,
-            safe.Min.Y + Metrics.Space.Lg * scale, safe.Width, scale, out var pressed);
-        if (!pressed)
-        {
-            return;
-        }
-
-        if (asks)
+        var action = TableDoorCard.Draw(drawList, ui, reason, L.Holdem.ClosedTitle, L.Holdem.ClosedHint, safe,
+            scale);
+        if (action == TableDoorAction.Knock)
         {
             tables.Knock(roomId);
             return;
         }
 
-        leaveRoom();
+        if (action == TableDoorAction.Leave)
+        {
+            leaveRoom();
+        }
     }
 
     private void DrawElsewhere(ImDrawListPtr drawList, AppSkin ui, CasinoRoomSession room, Rect body, float scale)

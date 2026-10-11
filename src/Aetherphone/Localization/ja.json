@@ -8908,6 +8908,7 @@
   "casino.tables.reasonSettled": "この支払いはすでに双方で確定しています。",
   "casino.tables.reasonGilOnly": "それはギルテーブルでのみ使えます。",
   "casino.tables.reasonNotOwner": "それはこのテーブルのホストだけが行えます。",
+  "casino.tables.removedTitle": "このテーブルから外されました",
   "casino.strip.getChips": "チップを入手",
   "casino.strip.coinsFieldHint": "何コイン？",
   "casino.strip.becomesChips": "{0}チップになります",

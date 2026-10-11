@@ -8908,6 +8908,7 @@
   "casino.tables.reasonSettled": "这笔款项双方均已确认结清。",
   "casino.tables.reasonGilOnly": "该操作仅适用于金币桌。",
   "casino.tables.reasonNotOwner": "只有这张桌子的桌主才能这样做。",
+  "casino.tables.removedTitle": "你已被移出此桌",
   "casino.strip.getChips": "获取筹码",
   "casino.strip.coinsFieldHint": "多少硬币？",
   "casino.strip.becomesChips": "可换 {0} 筹码",

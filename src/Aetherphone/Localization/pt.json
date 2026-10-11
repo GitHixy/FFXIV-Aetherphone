@@ -8908,6 +8908,7 @@
   "casino.tables.reasonSettled": "Este pagamento já está acertado dos dois lados.",
   "casino.tables.reasonGilOnly": "Isso só funciona em mesas de gil.",
   "casino.tables.reasonNotOwner": "Só o anfitrião desta mesa pode fazer isso.",
+  "casino.tables.removedTitle": "Você foi removido desta mesa",
   "casino.strip.getChips": "Pegar fichas",
   "casino.strip.coinsFieldHint": "Quantas moedas?",
   "casino.strip.becomesChips": "Viram {0} fichas",

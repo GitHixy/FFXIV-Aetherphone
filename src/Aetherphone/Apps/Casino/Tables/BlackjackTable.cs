@@ -311,31 +311,18 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
     private void DrawClosed(ImDrawListPtr drawList, AppSkin ui, string closedReason, Rect safe, float scale)
     {
-        var hint = Loc.T(CasinoReasons.TryMessage(closedReason, out var known) ? known : L.Casino.BlackjackClosedHint);
-        var asks = AsksToJoin(closedReason);
-        var title = Loc.T(asks ? L.Casino.BlackjackDoorTitle : L.Casino.BlackjackClosedTitle);
-        var action = Loc.T(asks ? L.Casino.BlackjackAskToJoin : L.Casino.WheelBackToFloor);
-        CasinoNotice.DrawWithAction(drawList, ui, CasinoNoticeKind.Card, title, hint, action, safe.Min.X,
-            safe.Min.Y + Metrics.Space.Lg * scale, safe.Width, scale, out var pressed);
-        if (!pressed)
-        {
-            return;
-        }
-
-        if (asks)
+        var action = TableDoorCard.Draw(drawList, ui, closedReason, L.Casino.BlackjackClosedTitle,
+            L.Casino.BlackjackClosedHint, safe, scale);
+        if (action == TableDoorAction.Knock)
         {
             tables.Knock(roomId);
             return;
         }
 
-        leaveRoom();
-    }
-
-    internal static bool AsksToJoin(string reason)
-    {
-        return string.Equals(reason, CasinoReasons.InviteOnly, StringComparison.Ordinal)
-            || string.Equals(reason, CasinoReasons.NotMember, StringComparison.Ordinal)
-            || string.Equals(reason, CasinoReasons.Denied, StringComparison.Ordinal);
+        if (action == TableDoorAction.Leave)
+        {
+            leaveRoom();
+        }
     }
 
     private string StateLabel(CasinoBlackjackRoomStateDto board, bool unreachable)
