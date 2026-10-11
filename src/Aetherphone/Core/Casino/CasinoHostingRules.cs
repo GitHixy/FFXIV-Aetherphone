@@ -173,6 +173,12 @@ internal static class CasinoHostingRules
 
     public const long MinHoldemBigBlind = 100;
 
+    public const int GuestNameMaxLength = 64;
+
+    public const int BookIdleHours = 8;
+
+    public const int BookTouchSeconds = 60;
+
     public static readonly int[] TurnSeconds = { 15, 20, 30, 45 };
 
     public static bool IsTurnSeconds(int seconds)
@@ -185,6 +191,11 @@ internal static class CasinoHostingRules
         if (string.Equals(config.GameKind, HoldemRules.Kind, StringComparison.Ordinal))
         {
             return CheckHoldem(config);
+        }
+
+        if (CasinoBookRules.IsBook(config.GameKind))
+        {
+            return CasinoBookRules.Check(config);
         }
 
         if (config.Seats < MinSeats || config.Seats > MaxSeats || !IsTurnSeconds(config.TurnSeconds)

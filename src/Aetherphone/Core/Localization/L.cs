@@ -11768,6 +11768,11 @@ internal static class L
         public static readonly LocString DraftSummaryPlain = new("casino.venuehub.draftSummaryPlain", "{0}, {1}");
     }
 
+    internal static class Book
+    {
+        public static readonly LocString ReasonGuestEntry = new("casino.book.reasonGuestEntry", "A guest entry settles at once, so there is nothing to confirm or dispute.");
+    }
+
     internal static class Catalogs
     {
         public static readonly LocString AccentViolet = new("catalog.accent.violet", "Violet");

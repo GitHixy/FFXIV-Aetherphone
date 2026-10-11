@@ -8,7 +8,7 @@ namespace Aetherphone.Core.Casino;
 
 internal sealed record CasinoSeatOutcome(bool Granted, string Reason, bool JoinsNextHand, bool AtHandEnd);
 
-internal readonly record struct LedgerIntent(string Kind, string Counterparty, long Amount);
+internal readonly record struct LedgerIntent(string Kind, string Counterparty, long Amount, bool Guest = false);
 
 internal sealed class CasinoTablesStore : IDisposable
 {
@@ -69,6 +69,7 @@ internal sealed class CasinoTablesStore : IDisposable
     private volatile bool intentInFlight;
     private CasinoSeatOutcome? seatOutcome;
     private CasinoStakeOutcome? noticeOutcome;
+    private CasinoStakeOutcome? guestOutcome;
     private string closedTableId = string.Empty;
     private string quickSeatRefusal = string.Empty;
     private string seatIntentId = string.Empty;
@@ -226,6 +227,11 @@ internal sealed class CasinoTablesStore : IDisposable
     public CasinoStakeOutcome? TakeNoticeOutcome()
     {
         return Interlocked.Exchange(ref noticeOutcome, null);
+    }
+
+    public CasinoStakeOutcome? TakeGuestOutcome()
+    {
+        return Interlocked.Exchange(ref guestOutcome, null);
     }
 
     public CasinoQuickSeatDto? TakeQuickSeat()
@@ -567,20 +573,7 @@ internal sealed class CasinoTablesStore : IDisposable
             return;
         }
 
-        string clientEntryId;
-        lock (intentGate)
-        {
-            if (!string.Equals(ledgerIntentKey.Kind, kind, StringComparison.Ordinal)
-                || !string.Equals(ledgerIntentKey.Counterparty, counterpartyUserId, StringComparison.Ordinal)
-                || ledgerIntentKey.Amount != amount || ledgerIntentId.Length == 0)
-            {
-                ledgerIntentId = Guid.NewGuid().ToString("N");
-            }
-
-            ledgerIntentKey = new LedgerIntent(kind, counterpartyUserId, amount);
-            clientEntryId = ledgerIntentId;
-        }
-
+        var clientEntryId = LedgerIntentIdFor(new LedgerIntent(kind, counterpartyUserId, amount));
         var request = new CasinoLedgerProposeRequest(clientEntryId, kind, counterpartyUserId, amount,
             CasinoLedgerKinds.Manual);
         work.Run("ledger propose", async token =>
@@ -592,17 +585,66 @@ internal sealed class CasinoTablesStore : IDisposable
                 return;
             }
 
-            lock (intentGate)
-            {
-                if (string.Equals(ledgerIntentId, clientEntryId, StringComparison.Ordinal))
-                {
-                    ledgerIntentId = string.Empty;
-                }
-            }
-
+            ForgetLedgerIntent(clientEntryId);
             Interlocked.Exchange(ref noticeOutcome, new CasinoStakeOutcome(answer.Granted, Named(answer.Reason)));
             RefreshLedgerNow(roomId);
         }, EndIntent);
+    }
+
+    public void ProposeGuestEntry(string roomId, string kind, string guestName, long amount)
+    {
+        var name = CasinoBookRules.NormalizeGuestName(guestName);
+        if (roomId.Length == 0 || !CasinoBookRules.IsGuestName(name) || amount <= 0
+            || !CasinoLedgerKinds.Proposable(kind) || !Begin())
+        {
+            return;
+        }
+
+        var clientEntryId = LedgerIntentIdFor(new LedgerIntent(kind, name, amount, true));
+        var request = new CasinoLedgerProposeRequest(clientEntryId, kind, string.Empty, amount,
+            CasinoLedgerKinds.Trade, name);
+        work.Run("guest entry", async token =>
+        {
+            var answer = await casino.ProposeLedgerEntryAsync(roomId, request, token).ConfigureAwait(false);
+            if (answer is null)
+            {
+                Interlocked.Exchange(ref guestOutcome, new CasinoStakeOutcome(false, CasinoReasons.Unreachable));
+                return;
+            }
+
+            ForgetLedgerIntent(clientEntryId);
+            Interlocked.Exchange(ref guestOutcome, new CasinoStakeOutcome(answer.Granted, Named(answer.Reason)));
+            RefreshLedgerNow(roomId);
+            if (myLedgerLoaded)
+            {
+                RefreshMyLedgerNow();
+            }
+        }, EndIntent);
+    }
+
+    private string LedgerIntentIdFor(in LedgerIntent key)
+    {
+        lock (intentGate)
+        {
+            if (ledgerIntentKey != key || ledgerIntentId.Length == 0)
+            {
+                ledgerIntentId = Guid.NewGuid().ToString("N");
+            }
+
+            ledgerIntentKey = key;
+            return ledgerIntentId;
+        }
+    }
+
+    private void ForgetLedgerIntent(string intentId)
+    {
+        lock (intentGate)
+        {
+            if (string.Equals(ledgerIntentId, intentId, StringComparison.Ordinal))
+            {
+                ledgerIntentId = string.Empty;
+            }
+        }
     }
 
     public void ConfirmLedgerEntry(string roomId, string entryId)
@@ -1183,6 +1225,7 @@ internal sealed class CasinoTablesStore : IDisposable
         Interlocked.Exchange(ref resolvedTable, null);
         Interlocked.Exchange(ref seatOutcome, null);
         Interlocked.Exchange(ref noticeOutcome, null);
+        Interlocked.Exchange(ref guestOutcome, null);
         Interlocked.Exchange(ref closedTableId, string.Empty);
         Interlocked.Exchange(ref vanishedTableId, string.Empty);
         Interlocked.Exchange(ref cardMissing, 0);
