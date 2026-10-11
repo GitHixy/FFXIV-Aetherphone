@@ -24,7 +24,8 @@ internal sealed class WheelCabinet : ICabinetIdle
     private const float RimInset = 16f;
     private const float LockFlashSeconds = 0.45f;
     private const float IdleTurnRate = 0.25f;
-    private const float RailPopSeconds = 0.35f;
+    private const float LandPopSeconds = 0.35f;
+    private const float MinimumPop = 0.05f;
     private const string RangeJoin = "-";
 
     private readonly CasinoStore chips;
@@ -148,7 +149,8 @@ internal sealed class WheelCabinet : ICabinetIdle
             remaining);
         statusLine.Draw(drawList, frame.Layout.Ribbon, status, snapshot.Occupancy, scale);
         var board = WheelBoardLayout.Compute(safe, scale);
-        WheelHistoryStrip.Draw(drawList, board.History, recent, HistoryPop(), scale);
+        WheelHistoryStrip.Draw(drawList, board.History, recent,
+            LandingPop(playback.SpunLive, playback.Stage, playback.StageSeconds), scale);
         DrawWheel(drawList, board.Wheel, frame.Phase, delta, scale);
         var choosing = snapshot.Phase == CasinoRoomPhases.Open && state.Sitting is not null && !frame.Blocked;
         WheelSpotCaption.Draw(drawList, board.Caption, choosing ? Loc.T(L.Casino.WheelPickSpot) : string.Empty,
@@ -320,8 +322,9 @@ internal sealed class WheelCabinet : ICabinetIdle
         if (playback.Stage == WheelStage.Settling && WheelRules.IsSegment(playback.Segment))
         {
             var spot = WheelRules.SpotAt(playback.Segment);
-            Typography.DrawCentered(drawList, ringCenter, MultiplierLabel(spot), WheelRingArt.SpotTextInks[spot],
-                TextStyles.Title2);
+            var pop = LandingPop(playback.SpunLive, playback.Stage, playback.StageSeconds);
+            Typography.DrawCenteredExact(drawList, ringCenter, MultiplierLabel(spot), WheelRingArt.SpotTextInks[spot],
+                TextStyles.Title2.Scale * pop, TextStyles.Title2.Weight);
             return;
         }
 
@@ -331,9 +334,15 @@ internal sealed class WheelCabinet : ICabinetIdle
 
     private static string MultiplierLabel(int spot) => WheelRingArt.SpotLabel(spot);
 
-    private float HistoryPop() => recent.HasLanded && playback.StageSeconds < RailPopSeconds
-        ? GameJuice.PopIn(playback.StageSeconds / RailPopSeconds)
-        : 1f;
+    internal static float LandingPop(bool spunLive, WheelStage stage, float stageSeconds)
+    {
+        if (!spunLive || stage != WheelStage.Settling || stageSeconds >= LandPopSeconds)
+        {
+            return 1f;
+        }
+
+        return MathF.Max(MinimumPop, GameJuice.PopIn(stageSeconds / LandPopSeconds));
+    }
 
     private void DrawCards(ImDrawListPtr drawList, AppSkin ui, CasinoWheelRoomStateDto? wheel,
         in WheelBoardLayout board, bool selectable, float scale)
