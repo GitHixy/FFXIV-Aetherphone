@@ -28,6 +28,20 @@ internal static class GuestLedger
         return new GuestOffer(miss.TableId, miss.PartnerName, kind, miss.Amount, miss.Incoming);
     }
 
+    public static GuestOffer? Typed(string tableId, string rawName, bool payout, long amount,
+        CasinoLedgerEntryDto[] entries)
+    {
+        var name = CasinoBookRules.NormalizeGuestName(rawName);
+        if (tableId.Length == 0 || !CasinoBookRules.IsGuestName(name) || amount <= 0
+            || amount > CasinoHostingRules.MaxGil)
+        {
+            return null;
+        }
+
+        var kind = payout ? CasinoLedgerKinds.Payout : BuyInKindFor(entries, name);
+        return new GuestOffer(tableId, name, kind, amount, !payout);
+    }
+
     public static string BuyInKindFor(CasinoLedgerEntryDto[] entries, string guestName)
     {
         for (var index = 0; index < entries.Length; index++)

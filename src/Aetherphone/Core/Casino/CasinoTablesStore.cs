@@ -595,7 +595,7 @@ internal sealed class CasinoTablesStore : IDisposable
         }, EndIntent);
     }
 
-    public void ProposeGuestEntry(string roomId, string kind, string guestName, long amount)
+    public void ProposeGuestEntry(string roomId, string kind, string guestName, long amount, string source)
     {
         var name = CasinoBookRules.NormalizeGuestName(guestName);
         if (roomId.Length == 0 || !CasinoBookRules.IsGuestName(name) || amount <= 0
@@ -605,8 +605,7 @@ internal sealed class CasinoTablesStore : IDisposable
         }
 
         var clientEntryId = LedgerIntentIdFor(new LedgerIntent(kind, name, amount, true));
-        var request = new CasinoLedgerProposeRequest(clientEntryId, kind, string.Empty, amount,
-            CasinoLedgerKinds.Trade, name);
+        var request = new CasinoLedgerProposeRequest(clientEntryId, kind, string.Empty, amount, source, name);
         work.Run("guest entry", async token =>
         {
             var answer = await casino.ProposeLedgerEntryAsync(roomId, request, token).ConfigureAwait(false);

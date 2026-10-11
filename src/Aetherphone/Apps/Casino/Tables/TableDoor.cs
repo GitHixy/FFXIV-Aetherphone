@@ -46,14 +46,14 @@ internal sealed partial class TableDoor
     private bool renaming;
     private bool coDealerMode;
 
-    public TableDoor(CasinoTablesStore tables, ConfirmService confirm, Action<string> openTable,
+    public TableDoor(CasinoTablesStore tables, CasinoStore chips, ConfirmService confirm, Action<string> openTable,
         Venue.TournamentDoorCard tournament, CasinoTradeSync trade)
     {
         this.tournament = tournament;
         this.tables = tables;
         this.confirm = confirm;
         this.openTable = openTable;
-        ledger = new TableLedger(tables, confirm, trade);
+        ledger = new TableLedger(tables, chips, confirm, trade);
     }
 
     public string RoomId => roomId;

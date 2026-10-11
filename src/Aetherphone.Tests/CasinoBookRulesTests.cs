@@ -74,6 +74,16 @@ public sealed class CasinoBookRulesTests
     }
 
     [Fact]
+    public void ATypedNameCountsOnceItHasAVisibleCharacter()
+    {
+        Assert.True(CasinoBookRules.HasGuestName("C"));
+        Assert.True(CasinoBookRules.HasGuestName("   Chea"));
+        Assert.False(CasinoBookRules.HasGuestName(string.Empty));
+        Assert.False(CasinoBookRules.HasGuestName("   "));
+        Assert.False(CasinoBookRules.HasGuestName("\t\u0001\n"));
+    }
+
+    [Fact]
     public void TheBookConstantsMirrorTheServer()
     {
         Assert.Equal(64, CasinoHostingRules.GuestNameMaxLength);

@@ -127,7 +127,8 @@ internal sealed class CasinoTradeSync : IDisposable
 
         lastMiss = null;
         AepLog.Info($"[TradeSync] Recording a guest {offer.LedgerKind} of {offer.Amount} gil at table {offer.TableId}");
-        tables.ProposeGuestEntry(offer.TableId, offer.LedgerKind, offer.GuestName, offer.Amount);
+        tables.ProposeGuestEntry(offer.TableId, offer.LedgerKind, offer.GuestName, offer.Amount,
+            CasinoLedgerKinds.Trade);
     }
 
     public void DismissGuest()

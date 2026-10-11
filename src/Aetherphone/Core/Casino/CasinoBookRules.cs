@@ -72,4 +72,18 @@ internal static class CasinoBookRules
     {
         return name.Length > 0 && name.Length <= CasinoHostingRules.GuestNameMaxLength;
     }
+
+    public static bool HasGuestName(string raw)
+    {
+        for (var index = 0; index < raw.Length; index++)
+        {
+            var character = raw[index];
+            if (!char.IsControl(character) && !char.IsWhiteSpace(character))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

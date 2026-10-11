@@ -152,7 +152,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         dealerHoldem = new DealerHoldem.DealerHoldemCabinet(casino, casinoPlay.DealerHoldem);
         blackjack = new Tables.BlackjackTable(casino, casinoRooms, casinoTables, history, casinoTurns, remoteImages,
             lodestone, PopRoute, OpenLedger, OpenGilLedger);
-        playerLedger = new Tables.TableLedger(casinoTables, confirm, tradeSync);
+        playerLedger = new Tables.TableLedger(casinoTables, casino, confirm, tradeSync);
         gilLedger = new Tables.GilLedgerView(casinoTables, confirm);
         openTable = OpenTable;
         openDoorFromRow = OpenDoor;
@@ -180,7 +180,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         pit = new Tables.BlackjackPit(casinoTables, casino, openTable, openDoorFromRow, EnterHouseBlackjack, OpenTables,
             OpenHostSheet);
         hostSheet = new Tables.HostSheet(casinoTables, casino, new Venue.VenueHostOptions(casinoVenue), preferences);
-        tableDoor = new Tables.TableDoor(casinoTables, confirm, openTable,
+        tableDoor = new Tables.TableDoor(casinoTables, casino, confirm, openTable,
             new Venue.TournamentDoorCard(casinoVenue), tradeSync);
         router = new ViewRouter<CasinoRoute>(CasinoRoute.Floor);
         routes = new CasinoNavigation(router);

@@ -9824,6 +9824,7 @@
   "casino.book.rowLine": "Book, {0} entries tonight",
   "casino.book.summary": "{0}, bank {1}, {2}",
   "casino.book.doorNote": "A Book runs no game of its own. Record every gil trade of the night here; it closes on its own after eight idle hours.",
+  "casino.book.guestNameHint": "Character name",
   "conduct.casino.title": "Gamba House Rules",
   "conduct.casino.intro": "Gamba is for fun. Chips and Aether Coins are play money, and gil tables are run by players.",
   "conduct.casino.money.title": "How the money works",

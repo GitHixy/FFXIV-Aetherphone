@@ -9824,6 +9824,7 @@
   "casino.book.rowLine": "Livre, {0} entrées ce soir",
   "casino.book.summary": "{0}, banque {1}, {2}",
   "casino.book.doorNote": "Un livre ne fait tourner aucun jeu. Inscrivez-y chaque échange de gils de la soirée ; il se ferme de lui-même après huit heures d'inactivité.",
+  "casino.book.guestNameHint": "Nom du personnage",
   "conduct.casino.title": "Règles de la maison de Gamba",
   "conduct.casino.intro": "Gamba, c'est pour s'amuser. Les jetons et les Aether Coins sont de l'argent fictif, et les tables en gils sont tenues par des joueurs.",
   "conduct.casino.money.title": "Comment fonctionne l'argent",

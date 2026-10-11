@@ -11782,6 +11782,7 @@ internal static class L
         public static readonly LocString RowLine = new("casino.book.rowLine", "Book, {0} entries tonight");
         public static readonly LocString Summary = new("casino.book.summary", "{0}, bank {1}, {2}");
         public static readonly LocString DoorNote = new("casino.book.doorNote", "A Book runs no game of its own. Record every gil trade of the night here; it closes on its own after eight idle hours.");
+        public static readonly LocString GuestNameHint = new("casino.book.guestNameHint", "Character name");
     }
 
     internal static class Catalogs
