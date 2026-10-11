@@ -65,25 +65,39 @@ internal sealed class BetsRail
         return taken;
     }
 
+    public static Rect HandleRect(Rect deck, float labelWidth, float scale)
+    {
+        var height = HandleHeight * scale;
+        var width = MathF.Max(HandleWidth * scale, labelWidth + height);
+        var center = new Vector2(deck.Center.X, deck.Min.Y);
+        var half = new Vector2(width, height) * 0.5f;
+        return new Rect(center - half, center + half);
+    }
+
+    public static Rect HandleHit(Rect handle, float scale)
+    {
+        var deckTop = handle.Center.Y;
+        var top = MathF.Min(handle.Min.Y, deckTop - CasinoStageLayout.SafeInset * scale);
+        return new Rect(new Vector2(handle.Min.X, top), handle.Max);
+    }
+
     public static bool DrawHandle(ImDrawListPtr drawList, Rect deck, float scale)
     {
-        var size = new Vector2(HandleWidth, HandleHeight) * scale;
-        var center = new Vector2(deck.Center.X, deck.Min.Y);
-        var min = center - size * 0.5f;
-        var max = center + size * 0.5f;
-        var reach = new Vector2(0f, MathF.Max(0f, (CasinoStageLayout.TouchTarget * scale - size.Y) * 0.5f));
-        var hitMin = min - reach;
-        var hitMax = max + reach;
-        var hovered = UiInteract.Hover(hitMin, hitMax);
-        Material.LiquidGlass(drawList, min, max, size.Y * 0.5f, scale, GlassTone.Dark, hovered ? 0.4f : 0f);
-        var label = Typography.FitText(Loc.T(L.Strip.Bets), size.X - size.Y, TextStyles.FootnoteEmphasized);
-        Typography.DrawCentered(drawList, center, label, CasinoColors.InkTitle, TextStyles.FootnoteEmphasized);
+        var label = Loc.T(L.Strip.Bets);
+        var style = TextStyles.FootnoteEmphasized;
+        var handle = HandleRect(deck, Typography.Measure(label, style).X, scale);
+        var hit = HandleHit(handle, scale);
+        var hovered = UiInteract.Hover(hit.Min, hit.Max);
+        Material.LiquidGlass(drawList, handle.Min, handle.Max, handle.Height * 0.5f, scale, GlassTone.Dark,
+            hovered ? 0.4f : 0f);
+        Typography.DrawCentered(drawList, handle.Center,
+            Typography.FitText(label, handle.Width - handle.Height, style), CasinoColors.InkTitle, style);
         if (hovered)
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
         }
 
-        return UiInteract.Click(hitMin, hitMax, hovered);
+        return UiInteract.Click(hit.Min, hit.Max, hovered);
     }
 
     public void Draw(Rect screen, AppSkin ui, CasinoBetsLog bets, CasinoFloorStore? floorFeed)

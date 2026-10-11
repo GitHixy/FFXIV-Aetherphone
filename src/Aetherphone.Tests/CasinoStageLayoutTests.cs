@@ -147,6 +147,27 @@ public sealed class CasinoStageLayoutTests
         Assert.Equal(120f * scale, bareNotice.Width, 3);
     }
 
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.5f)]
+    public void TheBetsHandleHoldsItsLabelAndOnlyTakesTapsBetweenTheWorldAndTheDeck(float scale)
+    {
+        var screen = new Rect(Vector2.Zero, new Vector2(328f * scale, 760f * scale));
+        var content = new Rect(new Vector2(16f * scale, 48f * scale), new Vector2(312f * scale, 730f * scale));
+        var layout = CasinoStageLayout.Compute(screen, content, false, false, 184f, scale);
+        var label = DeckLabelMeasure.Width(DeckLabelMeasure.Widest(L.Strip.Bets, scale), scale) * 0.8f;
+        var handle = BetsRail.HandleRect(layout.Deck, label, scale);
+        Assert.True(handle.Width - handle.Height >= label - 0.01f);
+        Assert.True(handle.Width >= BetsRail.HandleWidth * scale - 0.01f);
+        Assert.Equal(layout.Deck.Center.X, handle.Center.X, 3);
+        Assert.Equal(layout.Deck.Min.Y, handle.Center.Y, 3);
+        var hit = BetsRail.HandleHit(handle, scale);
+        Assert.True(hit.Min.Y >= layout.Safe.Max.Y - 0.01f);
+        Assert.True(hit.Max.Y <= layout.Deck.Min.Y + DeckActions.Pad * scale);
+        Assert.True(hit.Height >= handle.Height - 0.01f);
+    }
+
     [Fact]
     public void ATinyScreenNeverInvertsSafe()
     {
