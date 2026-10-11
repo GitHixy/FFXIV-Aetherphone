@@ -12633,7 +12633,7 @@ internal static class L
         public static readonly LocString RemovedImpersonation = new("conduct.removed.impersonation", "Pretending to be another player, a venue or staff");
         public static readonly LocString ZeroTitle = new("conduct.zero.title", "Zero tolerance");
         public static readonly LocString ZeroLead = new("conduct.zero.lead", "Removed and the account suspended at once, whatever the history. Roleplay, lore or a joke is never an excuse.");
-        public static readonly LocString ZeroChildSafety = new("conduct.zero.childSafety", "Sexualizing minors or child-like characters, including Kitten mods, a stated or implied minor, child-like body sliders, or a Lalafell in swimwear, lingerie or a presenting pose");
+        public static readonly LocString ZeroChildSafety = new("conduct.zero.childSafety", "Sexualizing minors or child-like characters, including Kitten mods, a stated or implied minor or child-like body sliders, and any Lalafell with a modified body (only vanilla Lalafell are allowed)");
         public static readonly LocString[] ZeroItems =
         {
             new("conduct.zero.1", "Child sexual abuse material, revenge porn, explicit deepfakes of real people, blackmail or sextortion"),
