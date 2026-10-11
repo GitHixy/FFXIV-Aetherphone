@@ -36,7 +36,7 @@ internal sealed class RaceTicketStrip
         Array.Clear(age);
     }
 
-    public void Draw(ImDrawListPtr drawList, Rect rect, int rows, CasinoRaceTicketDto[] tickets,
+    public void Draw(ImDrawListPtr drawList, Rect rect, int rows, float rowHeight, CasinoRaceTicketDto[] tickets,
         CasinoRaceRunnerDto[] runners, RaceTexts texts, long roundIndex, float deltaSeconds, float scale)
     {
         Track(tickets.Length, roundIndex, deltaSeconds);
@@ -51,7 +51,6 @@ internal sealed class RaceTicketStrip
         var header = new Rect(rect.Min, new Vector2(rect.Max.X, rect.Min.Y + RaceOpenLayout.StripHeader * scale));
         DrawHeader(drawList, header, tickets, texts, scale);
         var top = header.Max.Y;
-        var rowHeight = RaceOpenLayout.StripRow * scale;
         for (var index = 0; index < rows && index < tickets.Length; index++)
         {
             var row = new Rect(new Vector2(rect.Min.X, top), new Vector2(rect.Max.X, top + rowHeight));

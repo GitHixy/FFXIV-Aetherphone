@@ -11,6 +11,7 @@ internal readonly struct RaceOpenLayout
     public const float CardGap = 6f;
     public const float StripHeader = 40f;
     public const float StripRow = 34f;
+    public const float StripRowMin = 28f;
     public const float RailShare = 0.42f;
     public const float RailMin = 280f;
     public const float RailMax = 360f;
@@ -25,8 +26,10 @@ internal readonly struct RaceOpenLayout
     public readonly Rect Deck;
     public readonly Rect Rail;
     public readonly int TicketRows;
+    public readonly float TicketRowHeight;
 
-    private RaceOpenLayout(bool landscape, Rect list, Rect notice, Rect tickets, Rect deck, Rect rail, int ticketRows)
+    private RaceOpenLayout(bool landscape, Rect list, Rect notice, Rect tickets, Rect deck, Rect rail, int ticketRows,
+        float ticketRowHeight)
     {
         Landscape = landscape;
         List = list;
@@ -35,6 +38,7 @@ internal readonly struct RaceOpenLayout
         Deck = deck;
         Rail = rail;
         TicketRows = ticketRows;
+        TicketRowHeight = ticketRowHeight;
     }
 
     public bool HasNotice => Notice.Height > 0f;
@@ -56,9 +60,9 @@ internal readonly struct RaceOpenLayout
 
         var column = new Rect(safe.Min, safe.Max);
         var bottom = Stack(column, safe.Max.Y, MinimumListHeight * scale + Gap * scale, ticketCount, expanded,
-            noticeHeight, scale, out var tickets, out var notice, out var rows);
+            noticeHeight, scale, out var tickets, out var notice, out var rows, out var rowHeight);
         var list = Band(column.Min.X, column.Max.X, column.Min.Y, bottom, column.Max.Y);
-        return new RaceOpenLayout(false, list, notice, tickets, stageDeck, Empty(safe), rows);
+        return new RaceOpenLayout(false, list, notice, tickets, stageDeck, Empty(safe), rows, rowHeight);
     }
 
     private static RaceOpenLayout Landscaped(Rect safe, int ticketCount, bool expanded, float noticeHeight,
@@ -72,14 +76,14 @@ internal readonly struct RaceOpenLayout
         var deck = new Rect(new Vector2(railLeft, deckTop), safe.Max);
         var column = new Rect(new Vector2(railLeft, safe.Min.Y), new Vector2(safe.Max.X, deckTop));
         Stack(column, MathF.Max(safe.Min.Y, deckTop - gap), 0f, ticketCount, expanded, noticeHeight, scale,
-            out var tickets, out var notice, out var rows);
+            out var tickets, out var notice, out var rows, out var rowHeight);
         var list = Band(safe.Min.X, MathF.Max(safe.Min.X, railLeft - gap - RailInset * scale), safe.Min.Y, safe.Max.Y,
             safe.Max.Y);
-        return new RaceOpenLayout(true, list, notice, tickets, deck, rail, rows);
+        return new RaceOpenLayout(true, list, notice, tickets, deck, rail, rows, rowHeight);
     }
 
     private static float Stack(Rect column, float bottom, float keep, int ticketCount, bool expanded,
-        float noticeHeight, float scale, out Rect tickets, out Rect notice, out int rows)
+        float noticeHeight, float scale, out Rect tickets, out Rect notice, out int rows, out float rowHeight)
     {
         var gap = Gap * scale;
         var top = column.Min.Y;
@@ -87,6 +91,7 @@ internal readonly struct RaceOpenLayout
         tickets = new Rect(new Vector2(column.Min.X, bottom), new Vector2(column.Max.X, bottom));
         notice = tickets;
         rows = 0;
+        rowHeight = StripRow * scale;
         if (noticeHeight > 0f && available >= noticeHeight)
         {
             notice = new Rect(new Vector2(column.Min.X, bottom - noticeHeight), new Vector2(column.Max.X, bottom));
@@ -97,9 +102,11 @@ internal readonly struct RaceOpenLayout
         if (ticketCount > 0 && available >= StripHeader * scale)
         {
             var wanted = expanded ? Math.Min(ticketCount, RaceRules.MaxTickets) : 0;
-            var fit = (int)((available - StripHeader * scale) / (StripRow * scale));
+            var room = available - StripHeader * scale;
+            rowHeight = wanted > 0 ? Math.Clamp(room / wanted, StripRowMin * scale, StripRow * scale) : rowHeight;
+            var fit = (int)(room / rowHeight);
             rows = Math.Clamp(wanted, 0, Math.Max(0, fit));
-            var height = (StripHeader + rows * StripRow) * scale;
+            var height = StripHeader * scale + rows * rowHeight;
             tickets = new Rect(new Vector2(column.Min.X, bottom - height), new Vector2(column.Max.X, bottom));
             bottom = tickets.Min.Y - gap;
         }

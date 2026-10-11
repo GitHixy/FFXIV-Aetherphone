@@ -79,6 +79,8 @@ public sealed class RaceScreenLayoutTests
                     Assert.True(layout.List.Max.Y <= stage.Deck.Min.Y);
                     Assert.Equal(tickets > 0, layout.HasTickets);
                     Assert.Equal(expanded ? tickets : 0, layout.TicketRows);
+                    Assert.True(layout.TicketRowHeight >= RaceOpenLayout.StripRowMin * scale - Tolerance);
+                    Assert.True(layout.TicketRowHeight <= RaceOpenLayout.StripRow * scale + Tolerance);
                     Assert.Equal(notice > 0f, layout.HasNotice);
                     AssertAllApart(layout.List, layout.Tickets, layout.Notice, layout.Deck, stage.Band);
                 }

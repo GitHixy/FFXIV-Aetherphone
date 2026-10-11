@@ -509,8 +509,8 @@ internal sealed class RaceCabinet : ICabinetIdle
             CasinoSfx.Play(UiSound.ChipSlide);
         }
 
-        strip.Draw(drawList, layout.Tickets, layout.TicketRows, tickets, runners, texts, snapshot.RoundIndex,
-            frame.DeltaSeconds, scale);
+        strip.Draw(drawList, layout.Tickets, layout.TicketRows, layout.TicketRowHeight, tickets, runners, texts,
+            snapshot.RoundIndex, frame.DeltaSeconds, scale);
         if (layout.HasNotice)
         {
             CasinoNotice.Draw(drawList, ui, CasinoNoticeKind.Reason, string.Empty, message, layout.Notice.Min.X,
