@@ -122,6 +122,24 @@ public sealed class CasinoRoomCodeTests
         Assert.True(height >= TableCardLayout.MinHeight * scale);
     }
 
+    [Theory]
+    [MemberData(nameof(Scales))]
+    public void ACappedPhasePillLeavesTheTableNameMostOfTheTextColumn(float scale)
+    {
+        var headline = 22f * scale;
+        var footnote = 18f * scale;
+        var row = 22f * scale;
+        var card = new Rect(Vector2.Zero,
+            new Vector2(PhoneWidth * scale, TableCardLayout.Height(scale, headline, footnote, row, 0f)));
+        var column = TableCardLayout.TextColumn(card, scale);
+        var cap = Aetherphone.Apps.Casino.TableRow.PhaseCap(column);
+        var layout = TableCardLayout.Compute(card, scale, headline, footnote, row, cap, 22f * scale);
+
+        Assert.Equal(layout.LineRight - layout.TextLeft, column, 2);
+        Assert.True(layout.NameRight - layout.TextLeft >= column * 0.5f);
+        Assert.True(layout.Phase.Max.X <= layout.LineRight + 0.01f);
+    }
+
     private static void CheckCodeCard(float width, float scale)
     {
         var label = 22f * scale;

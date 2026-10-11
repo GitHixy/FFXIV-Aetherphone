@@ -46,6 +46,7 @@ internal sealed class BlackjackTableLayout
     public const float CapsulePuckRadius = 16f;
     public const float CapsuleBottomInset = 4f;
     public const float SideSpotOffset = 70f;
+    public const float SideCaptionHalf = 32f;
     public const float GhostBottomInset = 12f;
     public const float HeroSlotWidthCap = 150f;
     public const float HeroSlotPad = 8f;
@@ -146,9 +147,7 @@ internal sealed class BlackjackTableLayout
 
     public float MainPlateMaxWidth => (SideSpotOffset * Scale - BetSpotPixels - SpotGap * Scale) * 2f;
 
-    public float SurrenderBand => MathF.Max(0f, HeroTotalY - TotalCapsuleHeight * 0.5f * Scale - HeroTop - Scale);
-
-    public float SurrenderCenterY => (HeroTop + HeroTotalY - TotalCapsuleHeight * 0.5f * Scale) * 0.5f;
+    public float SideCaptionWidth => SideCaptionHalf * 2f * Scale;
 
     public float HeroCardPixels(int handCount) => HeroCardWidth(handCount) * Fit * Scale;
 

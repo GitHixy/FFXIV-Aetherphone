@@ -12,6 +12,7 @@ internal static class HoldemArt
 
     private const float SignAlpha = 0.16f;
     private const float DealerButtonRadius = 11f;
+    private const float TagPadX = 5f;
     private const float StitchInset = 8f;
 
     private static readonly Vector4 RailHighlight = new(0.36f, 0.22f, 0.14f, 1f);
@@ -83,10 +84,19 @@ internal static class HoldemArt
         Typography.DrawCentered(drawList, center, "D", ButtonInk, TextStyles.FootnoteEmphasized);
     }
 
-    public static void DrawTag(ImDrawListPtr drawList, Vector2 center, string label, Vector4 tint, float scale)
+    public static float TagWidth(string label, float scale) =>
+        Typography.Measure(label, TextStyles.FootnoteEmphasized).X + TagPadX * 2f * scale;
+
+    public static void DrawTag(ImDrawListPtr drawList, Vector2 center, string label, Vector4 tint, float maxWidth,
+        float scale)
     {
+        if (TagWidth(label, scale) > maxWidth)
+        {
+            return;
+        }
+
         var size = Typography.Measure(label, TextStyles.FootnoteEmphasized);
-        var half = new Vector2(size.X * 0.5f + 5f * scale, size.Y * 0.5f + 1.5f * scale);
+        var half = new Vector2(size.X * 0.5f + TagPadX * scale, size.Y * 0.5f + 1.5f * scale);
         Squircle.Fill(drawList, center - half, center + half, half.Y, ImGui.GetColorU32(tint with { W = 0.22f }));
         Squircle.Stroke(drawList, center - half, center + half, half.Y, ImGui.GetColorU32(tint with { W = 0.75f }),
             MathF.Max(1f, scale));

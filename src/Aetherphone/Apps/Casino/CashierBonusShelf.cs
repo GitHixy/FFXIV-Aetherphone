@@ -10,15 +10,22 @@ namespace Aetherphone.Apps.Casino;
 
 internal sealed class CashierBonusShelf
 {
-    private const float ShowerSeconds = 1.1f;
-    private const float ShowerRate = 70f;
-    private const int ShowerBurst = 22;
+    private const int ConfettiBurst = 28;
+    private const int SparkleBurst = 10;
+    private const float ConfettiSpeed = 170f;
+    private const float ConfettiSize = 4f;
+    private const float ConfettiLife = 1.1f;
+
+    private static readonly Vector4[] ChipConfetti =
+    {
+        CasinoColors.LightA,
+        CasinoColors.LightB,
+        CasinoColors.InkTitle,
+    };
 
     private readonly CasinoStore store;
     private readonly ParticleSystem shower = new(240);
     private readonly Vector2[] claimCenters = new Vector2[CasinoBonusKinds.All.Length];
-    private Emitter emitter;
-    private float showerLeft;
     private Vector2 showerOrigin;
     private string refusal = string.Empty;
 
@@ -44,10 +51,10 @@ internal sealed class CashierBonusShelf
     public void Shower(Vector2 origin, float scale)
     {
         showerOrigin = origin;
-        shower.Emit(CasinoLights.CoinFountain(scale), showerOrigin, ShowerBurst);
-        emitter = CasinoLights.CoinShowerEmitter(scale, ShowerRate);
-        showerLeft = ShowerSeconds;
-        UiFeedback.Play(UiSound.CoinShower);
+        shower.Confetti(showerOrigin, ConfettiBurst, ChipConfetti, ConfettiSpeed * scale, ConfettiSize * scale,
+            ConfettiLife);
+        shower.Emit(CasinoLights.ChipSparkle(scale), showerOrigin, SparkleBurst);
+        UiFeedback.Play(UiSound.CasinoChips);
     }
 
     public string TakeRefusal()
@@ -61,21 +68,12 @@ internal sealed class CashierBonusShelf
     {
         refusal = string.Empty;
         shower.Clear();
-        emitter.Reset();
-        showerLeft = 0f;
     }
 
     public void Update(float delta, float scale)
     {
         ConsumeResults(scale);
         shower.Update(delta);
-        if (showerLeft <= 0f)
-        {
-            return;
-        }
-
-        emitter.Advance(delta, showerOrigin, shower);
-        showerLeft -= delta;
     }
 
     public void DrawShower(ImDrawListPtr drawList, float scale)

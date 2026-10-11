@@ -38,11 +38,11 @@ internal static class WinLadder
     {
         new(WinTier.None, 0, 0, 0, 0f, 0f, 0f, UiSound.WinSmall, false, false, false, false),
         new(WinTier.Win, 0, 0, 12, 0f, 0f, 0.4f, UiSound.WinSmall, false, false, false, false),
-        new(WinTier.Nice, 3, 36, 0, 0f, 0.4f, 0.8f, UiSound.WinSmall, false, true, false, false),
-        new(WinTier.Big, 10, 90, 0, 1f, 0.7f, 1.6f, UiSound.WinBig, false, true, true, false),
-        new(WinTier.Mega, 25, 160, 0, 2f, 0.85f, 2.4f, UiSound.WinBig, true, true, true, false),
-        new(WinTier.Epic, 50, 240, 0, 3f, 1f, 3.2f, UiSound.WinEpic, false, true, true, true),
-        new(WinTier.Legendary, 100, 320, 0, 4f, 1f, 4f, UiSound.WinEpic, true, true, true, true),
+        new(WinTier.Nice, 3, 18, 0, 0f, 0.4f, 0.8f, UiSound.WinSmall, false, false, false, false),
+        new(WinTier.Big, 10, 36, 0, 1f, 0.7f, 1.6f, UiSound.WinBig, false, true, true, false),
+        new(WinTier.Mega, 25, 54, 0, 2f, 0.85f, 2.4f, UiSound.WinBig, true, true, true, false),
+        new(WinTier.Epic, 50, 72, 0, 3f, 1f, 3.2f, UiSound.WinEpic, false, true, true, true),
+        new(WinTier.Legendary, 100, 90, 0, 4f, 1f, 4f, UiSound.WinEpic, true, true, true, true),
     };
 
     public static WinTierSpec Spec(WinTier tier) => Specs[(int)tier];

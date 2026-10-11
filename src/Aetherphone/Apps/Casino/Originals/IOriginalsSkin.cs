@@ -47,6 +47,8 @@ internal interface IOriginalsSkin : ICabinetIdle
 
     LocString Hint { get; }
 
+    LocString Strip { get; }
+
     bool Knob { get; }
 
     bool AutoAvailable { get; }
@@ -58,6 +60,8 @@ internal interface IOriginalsSkin : ICabinetIdle
     bool CanCashOut { get; }
 
     long CashOutValue { get; }
+
+    long LiveStake { get; }
 
     LocString LiveSecondary { get; }
 
@@ -80,6 +84,10 @@ internal interface IOriginalsSkin : ICabinetIdle
     void DrawWorld(ImDrawListPtr drawList, in OriginalsFrame frame, AppSkin ui);
 
     void DrawKnob(ImDrawListPtr drawList, Rect rect, AppSkin ui, bool changeable);
+
+    void Gate();
+
+    void DrawOverlay(Rect screen, AppSkin ui);
 
     bool Play(CasinoOriginalsStore originals, long stake, bool auto);
 

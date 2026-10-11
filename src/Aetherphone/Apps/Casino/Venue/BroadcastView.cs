@@ -1,6 +1,5 @@
 using Aetherphone.Apps.Casino.Stage;
 using Aetherphone.Apps.Games.Framework;
-using Aetherphone.Apps.Games.Framework.Cards;
 using Aetherphone.Core;
 using Aetherphone.Core.Animation;
 using Aetherphone.Core.Apps;
@@ -19,7 +18,6 @@ internal sealed class BroadcastView
     private const float CardWidthShare = 0.075f;
     private const float MinCardWidth = 44f;
     private const float CardOverlap = 0.42f;
-    private const float SeatRingInset = 0.16f;
     private const string StateMarquee = "venue.broadcast.state";
     private const string DealerMarquee = "venue.broadcast.dealer";
     private const string PotMarquee = "venue.broadcast.pot";
@@ -101,30 +99,36 @@ internal sealed class BroadcastView
 
         var cardWidth = MathF.Max(MinCardWidth * scale, safe.Width * CardWidthShare);
         var cardHeight = PlayingCards.HeightFor(cardWidth);
-        var top = safe.Min.Y + cardHeight * 0.5f + 8f * scale;
+        var top = BroadcastLayout.TopRowY(safe, cardHeight, scale);
+        float topBottom;
         if (game == BroadcastGame.Blackjack)
         {
             DrawRow(drawList, table.DealerCards, new Vector2(safe.Center.X, top), cardWidth, scale);
             var label = table.DealerTotal > 0
                 ? texts.Count(L.Venue.BroadcastDealerTotal, table.DealerTotal)
                 : Loc.T(L.Venue.BroadcastDealer);
-            StageText.Label(drawList, new Vector2(safe.Center.X, top + cardHeight * 0.5f + 16f * scale), label,
+            var labelHeight = Typography.LineHeight(TextStyles.Headline);
+            StageText.Label(drawList,
+                new Vector2(safe.Center.X, BroadcastLayout.TopLabelY(top, cardHeight, labelHeight, scale)), label,
                 safe.Width * 0.4f, DealerMarquee, TextStyles.Headline, false);
+            topBottom = BroadcastLayout.TopBottom(top, cardHeight, labelHeight, scale);
         }
         else
         {
-            DrawRow(drawList, table.Board, new Vector2(safe.Center.X, safe.Min.Y + safe.Height * 0.36f), cardWidth,
-                scale);
+            DrawRow(drawList, table.Board, new Vector2(safe.Center.X, top), cardWidth, scale);
+            var potHeight = Typography.LineHeight(TextStyles.Title2);
             if (table.Pot > 0)
             {
                 StageText.Amount(drawList,
-                    new Vector2(safe.Center.X, safe.Min.Y + safe.Height * 0.36f + cardHeight * 0.5f + 20f * scale),
+                    new Vector2(safe.Center.X, BroadcastLayout.TopLabelY(top, cardHeight, potHeight, scale)),
                     texts.Number(L.Venue.BroadcastPot, table.Pot), safe.Width * 0.5f, PotMarquee, TextStyles.Title2,
                     CasinoColors.Money);
             }
+
+            topBottom = BroadcastLayout.TopBottom(top, cardHeight, potHeight, scale);
         }
 
-        DrawSeats(drawList, safe, cardWidth * 0.8f, scale);
+        DrawSeats(drawList, safe, cardWidth * 0.8f, topBottom, scale);
     }
 
     private void Project()
@@ -158,7 +162,7 @@ internal sealed class BroadcastView
         table = BroadcastProjection.FromHoldem(gameState);
     }
 
-    private void DrawSeats(ImDrawListPtr drawList, Rect safe, float cardWidth, float scale)
+    private void DrawSeats(ImDrawListPtr drawList, Rect safe, float cardWidth, float topBottom, float scale)
     {
         var seats = table.Seats;
         var count = Math.Min(seats.Length, MaxSeats);
@@ -167,24 +171,16 @@ internal sealed class BroadcastView
             return;
         }
 
-        var ring = new Rect(new Vector2(safe.Min.X + safe.Width * SeatRingInset, safe.Min.Y + safe.Height * 0.30f),
-            new Vector2(safe.Max.X - safe.Width * SeatRingInset, safe.Max.Y - safe.Height * 0.08f));
-        if (game == BroadcastGame.Blackjack)
+        var cardHeight = PlayingCards.HeightFor(cardWidth);
+        var above = BroadcastLayout.SeatAbove(cardHeight, Typography.LineHeight(TextStyles.Subheadline), scale);
+        var below = BroadcastLayout.SeatBelow(cardHeight, Typography.LineHeight(TextStyles.Headline),
+            Typography.LineHeight(TextStyles.Title3), scale);
+        for (var index = 0; index < count; index++)
         {
-            for (var index = 0; index < count; index++)
-            {
-                var share = count == 1 ? 0.5f : index / (float)(count - 1);
-                seatCenters[index] = new Vector2(safe.Min.X + safe.Width * (0.1f + 0.8f * share),
-                    safe.Min.Y + safe.Height * (0.66f + 0.12f * MathF.Sin(MathF.PI * share)));
-            }
-        }
-        else
-        {
-            SeatLayout.Ring(count, ring, seatCenters.AsSpan(0, count));
+            seatCenters[index] = BroadcastLayout.Seat(safe, index, count, topBottom, above, below, scale);
         }
 
-        var nameWidth = MathF.Max(cardWidth * 2.4f, safe.Width / (count + 1));
-        var cardHeight = PlayingCards.HeightFor(cardWidth);
+        var nameWidth = BroadcastLayout.NameWidth(safe, count, cardWidth, scale);
         for (var index = 0; index < count; index++)
         {
             var seat = seats[index];
@@ -198,7 +194,7 @@ internal sealed class BroadcastView
             }
 
             DrawRow(drawList, seat.Cards, center, cardWidth, scale, seat.Out ? 0.45f : 1f);
-            var nameTop = center.Y + cardHeight * 0.5f + 6f * scale;
+            var nameTop = center.Y + cardHeight * 0.5f + BroadcastLayout.NameGap * scale;
             var nameHeight = Typography.LineHeight(TextStyles.Headline);
             VenueArt.Line(drawList, seat.Name, new Vector2(center.X, nameTop + nameHeight * 0.5f), nameWidth,
                 seat.Acting ? CasinoColors.MoneyHighlight : CasinoColors.InkTitle, TextStyles.Headline);
@@ -207,7 +203,7 @@ internal sealed class BroadcastView
                 amounts.Value(seat.Stack), nameWidth, new MarqueeId(StackMarquee, index));
             if (seat.Bet > 0)
             {
-                StageText.Label(drawList, new Vector2(center.X, center.Y - cardHeight * 0.5f - 12f * scale),
+                StageText.Label(drawList, new Vector2(center.X, center.Y - cardHeight * 0.5f - BroadcastLayout.BetGap * scale),
                     texts.Number(L.Venue.BroadcastBet, seat.Bet), nameWidth, new MarqueeId(BetMarquee, index),
                     TextStyles.Subheadline, false);
             }

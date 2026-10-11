@@ -16,6 +16,7 @@ internal sealed class WinsTicker
     public const string Separator = "     ·     ";
 
     private const float Pad = 14f;
+    private const float EyebrowShare = 0.35f;
     private const string MarqueeKey = "casino.floor.ticker";
 
     private readonly StringBuilder builder = new();
@@ -54,8 +55,8 @@ internal sealed class WinsTicker
         Squircle.Stroke(drawList, min, max, radius, ImGui.GetColorU32(CasinoColors.Money with { W = 0.35f }),
             MathF.Max(1f, scale));
         var pad = Pad * scale;
-        var eyebrow = Loc.T(L.Strip.TickerEyebrow);
         var eyebrowStyle = TextStyles.FootnoteEmphasized;
+        var eyebrow = Typography.FitText(Loc.T(L.Strip.TickerEyebrow), width * EyebrowShare, eyebrowStyle);
         var eyebrowSize = Typography.Measure(eyebrow, eyebrowStyle);
         var dotCenter = new Vector2(min.X + pad + CasinoArt.LiveDotRadius * scale, min.Y + height * 0.5f);
         CasinoArt.LiveDot(drawList, dotCenter, scale, CasinoColors.LightA, true);

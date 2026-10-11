@@ -45,6 +45,8 @@ internal sealed class LimboSkin : IOriginalsSkin
 
     public LocString Hint => L.Originals.LimboHint;
 
+    public LocString Strip => default;
+
     public bool Knob => true;
 
     public bool AutoAvailable => true;
@@ -56,6 +58,8 @@ internal sealed class LimboSkin : IOriginalsSkin
     public bool CanCashOut => false;
 
     public long CashOutValue => 0;
+
+    public long LiveStake => 0;
 
     public LocString LiveSecondary => default;
 
@@ -121,16 +125,7 @@ internal sealed class LimboSkin : IOriginalsSkin
     public int FillLadder(Span<LadderStep> steps, out int focus)
     {
         focus = 0;
-        if (steps.Length < 2)
-        {
-            return 0;
-        }
-
-        steps[0] = new LadderStep(Loc.T(L.Originals.Target), OriginalsText.MultiplierHundredths(target),
-            LadderState.Current);
-        steps[1] = new LadderStep(Loc.T(L.Originals.WinChance),
-            OriginalsText.Percent(OriginalsRules.LimboChanceBasisPoints(target)), LadderState.Upcoming);
-        return 2;
+        return 0;
     }
 
     public void DrawWorld(ImDrawListPtr drawList, in OriginalsFrame frame, AppSkin ui)
@@ -153,14 +148,6 @@ internal sealed class LimboSkin : IOriginalsSkin
         var numberInk = settledWin ? OriginalsArt.Gem : settledLoss ? CasinoColors.Loss : CasinoColors.InkTitle;
         Typography.DrawCentered(drawList, dialCenter, Typography.FitText(number, radius * 1.6f, TextStyles.LargeTitle),
             numberInk, TextStyles.LargeTitle);
-        var caption = Loc.T(L.Originals.Target);
-        var captionTop = dialCenter.Y + Typography.LineHeight(TextStyles.LargeTitle) * 0.6f;
-        Typography.DrawCentered(drawList, new Vector2(dialCenter.X, captionTop + Typography.LineHeight(TextStyles.Footnote)
-            * 0.5f), Typography.FitText(caption, radius, TextStyles.Footnote), CasinoColors.InkBody, TextStyles.Footnote);
-        Typography.DrawCentered(drawList,
-            new Vector2(dialCenter.X, captionTop + Typography.LineHeight(TextStyles.Footnote)
-                + Typography.LineHeight(TextStyles.FootnoteEmphasized) * 0.5f),
-            OriginalsText.MultiplierHundredths(target), CasinoColors.LightA, TextStyles.FootnoteEmphasized);
         CueStop(frame, scale);
     }
 
@@ -178,11 +165,17 @@ internal sealed class LimboSkin : IOriginalsSkin
         var chanceRect = new Rect(new Vector2(fieldRect.Max.X + FieldGap * scale, rect.Min.Y), rect.Max);
         var chance = chanceLabel.Get(L.Originals.Chance,
             OriginalsText.Percent(OriginalsRules.LimboChanceBasisPoints(target)));
-        Squircle.Fill(drawList, chanceRect.Min, chanceRect.Max, chanceRect.Height * 0.5f,
-            ImGui.GetColorU32(Surfaces.Fill(ui.TitleInk, FillLevel.Quaternary)));
         Typography.DrawCentered(drawList, chanceRect.Center,
-            Typography.FitText(chance, chanceRect.Width - chanceRect.Height * 0.5f, TextStyles.FootnoteEmphasized),
-            CasinoColors.LightB, TextStyles.FootnoteEmphasized);
+            Typography.FitText(chance, chanceRect.Width, TextStyles.SubheadlineEmphasized), CasinoColors.InkTitle,
+            TextStyles.SubheadlineEmphasized);
+    }
+
+    public void Gate()
+    {
+    }
+
+    public void DrawOverlay(Rect screen, AppSkin ui)
+    {
     }
 
     public bool Play(CasinoOriginalsStore originals, long stake, bool auto)

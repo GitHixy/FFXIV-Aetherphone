@@ -12,13 +12,19 @@ namespace Aetherphone.Apps.Casino.Tables;
 internal sealed partial class BlackjackTable
 {
     private const int MainTarget = -1;
+    private const float SideCaptionGap = 3f;
 
-    private static readonly int[] ActionBits =
+    private static readonly int[] MainActions =
     {
         BlackjackRules.ActionHit,
         BlackjackRules.ActionStand,
+    };
+
+    private static readonly int[] SideActions =
+    {
         BlackjackRules.ActionDouble,
         BlackjackRules.ActionSplit,
+        BlackjackRules.ActionSurrender,
     };
 
     private static readonly BlackjackSideBet[] SideBets = { BlackjackSideBet.PerfectPairs, BlackjackSideBet.TwentyOnePlusThree };
@@ -102,14 +108,24 @@ internal sealed partial class BlackjackTable
         var ink = paid ? CasinoColors.Money : targeted ? CasinoColors.LightB : StageText.Strong;
         drawList.AddCircle(center, radius, ImGui.GetColorU32(ink with { W = 0.5f + 0.5f * lit }), 32,
             MathF.Max(1.2f, (targeted ? 2.2f : 1.4f) * scale));
-        var label = amount > 0
-            ? NumberText.Compact(amount)
-            : Loc.T(bet == BlackjackSideBet.PerfectPairs ? L.Blackjack.SidePairs : L.Blackjack.SideThree);
         var style = TextStyles.FootnoteEmphasized;
-        var inner = radius * 1.8f;
-        var fit = StageText.FitScale(label, inner, style, StageTextRole.Label);
-        Typography.DrawCentered(drawList, center, Typography.FitText(label, inner, fit, style.Weight),
-            amount > 0 ? CasinoColors.Money : StageText.Strong, fit, style.Weight);
+        if (amount > 0)
+        {
+            var stake = NumberText.Compact(amount);
+            var inner = radius * 1.8f;
+            var fit = StageText.FitScale(stake, inner, style, StageTextRole.Label);
+            Typography.DrawCentered(drawList, center, Typography.FitText(stake, inner, fit, style.Weight),
+                CasinoColors.Money, fit, style.Weight);
+        }
+        else if (interactive)
+        {
+            var name = Loc.T(bet == BlackjackSideBet.PerfectPairs ? L.Blackjack.SidePairs : L.Blackjack.SideThree);
+            var captionHeight = Typography.LineHeight(style);
+            var captionCenter = new Vector2(center.X, center.Y - radius - SideCaptionGap * scale - captionHeight * 0.5f);
+            Typography.DrawCentered(drawList, captionCenter,
+                Typography.FitText(name, layout.SideCaptionWidth, style), StageText.Strong, style);
+        }
+
         if (hovered)
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
@@ -167,7 +183,7 @@ internal sealed partial class BlackjackTable
         var mask = projection.ActionsMask;
         if (onBoard && BlackjackRecap.InsuranceOffered(board, mask))
         {
-            DrawInsurance(ui, board, row, scale);
+            DrawInsurance(ui, row, scale);
             return;
         }
 
@@ -182,7 +198,7 @@ internal sealed partial class BlackjackTable
 
         if (onBoard && CasinoJoinGate.CanAct(true, seatFlow.Waiting, mask != 0))
         {
-            DrawActionBar(ui, board, seatStack, row, scale);
+            DrawActionBar(ui, seatStack, row, scale);
             return;
         }
 
@@ -191,40 +207,45 @@ internal sealed partial class BlackjackTable
             var status = board.InsuranceOpen && seat is { Insurance: > 0 }
                 ? text.Compact(L.Blackjack.Insured, seat.Insurance)
                 : Loc.T(board.InsuranceOpen ? L.Blackjack.InsuranceWaiting : L.Blackjack.BetIn);
-            StageText.Status(ImGui.GetWindowDrawList(),
-                new Vector2(row.Center.X, DeckActions.Above(row, Button.RegularHeight * scale, scale).Center.Y),
-                status, row.Width, scale);
+            StageText.Status(ImGui.GetWindowDrawList(), BlackjackDeckLayout.UpperRow(row, scale).Center, status,
+                row.Width, scale);
         }
 
-        var standLabel = seatFlow.StandQueued
-            ? Loc.T(L.Casino.StandQueued)
-            : stakeBlocked ? Loc.T(L.Casino.CashOut) : Loc.T(L.Casino.StandAction);
-        if (DeckActions.DrawSecondary(row, standLabel, ui.Ink, !seatFlow.Busy && !seatFlow.StandQueued,
-                "blackjack.stand"))
+        if (seatFlow.StandQueued)
+        {
+            return;
+        }
+
+        var standLabel = stakeBlocked ? Loc.T(L.Casino.CashOut) : Loc.T(L.Casino.StandAction);
+        if (stage.SecondaryAction(standLabel, !seatFlow.Busy, ui.Ink))
         {
             inlineReason = string.Empty;
             seatFlow.Stand(roomId);
         }
     }
 
-    private void DrawInsurance(AppSkin ui, CasinoBlackjackRoomStateDto board, Rect row, float scale)
+    private void DrawInsurance(AppSkin ui, Rect row, float scale)
     {
         var bet = ActiveBetOf();
         var cost = BlackjackRules.InsuranceFor(bet > 0 ? bet : projection.SeatAt(mySeat)?.Committed ?? 0);
         var enabled = !rooms.StakeInFlight;
-        StageText.Status(ImGui.GetWindowDrawList(),
-            new Vector2(row.Center.X, DeckActions.Above(row, Button.RegularHeight * scale, scale).Center.Y),
-            Loc.T(L.Blackjack.InsuranceHint), row.Width, scale);
-        if (DeckActions.DrawPrimary(DeckActions.Slice(row, 0, 2, scale), text.Compact(L.Blackjack.InsurePill, cost),
-                ui.Ink, enabled, "blackjack.insure"))
+        var insureLabel = text.Compact(L.Blackjack.InsurePill, cost);
+        var declineLabel = Loc.T(L.Blackjack.NoInsurePill);
+        var style = Button.LabelStyle(row.Height);
+        BlackjackDeckLayout.Split(row, BlackjackDeckLayout.UpperRow(row, scale),
+            Typography.Measure(declineLabel, style).X, Typography.Measure(insureLabel, style).X, scale,
+            out var declineRect, out var insureRect);
+        var drawList = ImGui.GetWindowDrawList();
+        if (Button.Draw(drawList, insureRect, insureLabel, ui.Ink, ButtonStyle.Prominent, enabled: enabled,
+                id: "blackjack.insure"))
         {
             inlineReason = string.Empty;
             rooms.SendBlackjackAction(BlackjackRules.ActionInsurance);
             CasinoSfx.Play(UiSound.ChipSlide);
         }
 
-        if (DeckActions.DrawSecondary(DeckActions.Slice(row, 1, 2, scale), Loc.T(L.Blackjack.NoInsurePill), ui.Ink,
-                enabled, "blackjack.noInsure"))
+        if (Button.Draw(drawList, declineRect, declineLabel, ui.Ink, ButtonStyle.Gray, enabled: enabled,
+                id: "blackjack.noInsure"))
         {
             inlineReason = string.Empty;
             rooms.SendBlackjackAction(BlackjackRules.ActionDeclineInsurance);
@@ -342,48 +363,81 @@ internal sealed partial class BlackjackTable
         return seat is not null && seat.Chips > 0 ? seat.Chips : sitting.Stack;
     }
 
-    private void DrawActionBar(AppSkin ui, CasinoBlackjackRoomStateDto board, long seatStack, Rect row, float scale)
+    private void DrawActionBar(AppSkin ui, long seatStack, Rect row, float scale)
     {
         var mask = projection.ActionsMask;
-        var offered = 0;
-        for (var index = 0; index < ActionBits.Length; index++)
-        {
-            if (BlackjackRules.Allows(mask, ActionBits[index]))
-            {
-                offered++;
-            }
-        }
-
-        if (offered == 0)
+        var mainCount = OfferedCount(mask, MainActions);
+        var sideCount = OfferedCount(mask, SideActions);
+        if (mainCount + sideCount == 0)
         {
             return;
         }
 
         var cost = ActiveBetOf();
         var affordable = seatStack >= cost;
-        var drawn = 0;
-        for (var index = 0; index < ActionBits.Length; index++)
+        var drawList = ImGui.GetWindowDrawList();
+        DrawActionRow(drawList, ui, mask, MainActions, mainCount, row, cost, affordable, scale);
+        var sideRow = mainCount > 0 ? BlackjackDeckLayout.UpperRow(row, scale) : row;
+        DrawActionRow(drawList, ui, mask, SideActions, sideCount, sideRow, cost, affordable, scale);
+    }
+
+    private static int OfferedCount(int mask, int[] actions)
+    {
+        var count = 0;
+        for (var index = 0; index < actions.Length; index++)
         {
-            var bit = ActionBits[index];
+            if (BlackjackRules.Allows(mask, actions[index]))
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private void DrawActionRow(ImDrawListPtr drawList, AppSkin ui, int mask, int[] actions, int count, Rect row,
+        long cost, bool affordable, float scale)
+    {
+        var drawn = 0;
+        for (var index = 0; index < actions.Length; index++)
+        {
+            var bit = actions[index];
             if (!BlackjackRules.Allows(mask, bit))
             {
                 continue;
             }
 
-            var rect = DeckActions.Slice(row, drawn, offered, scale);
+            var rect = DeckActions.Slice(row, drawn, count, scale);
             drawn++;
             var wagered = bit == BlackjackRules.ActionDouble || bit == BlackjackRules.ActionSplit;
             var legal = !rooms.StakeInFlight && (!wagered || affordable);
             var costLine = wagered ? NumberText.Compact(cost) : string.Empty;
-            if (AppSkin.StackedPillButton(rect, LabelFor(bit), costLine, bit != BlackjackRules.ActionHit, legal,
-                    ui.Ink) && legal)
+            if (!TableButton.Draw(drawList, rect, LabelFor(bit), costLine, ui.Ink, StyleFor(bit), legal, IdFor(bit)))
             {
-                inlineReason = string.Empty;
-                rooms.SendBlackjackAction(bit);
-                CasinoSfx.Play(wagered ? UiSound.ChipSlide : UiSound.CardSnap);
+                continue;
             }
+
+            inlineReason = string.Empty;
+            rooms.SendBlackjackAction(bit);
+            CasinoSfx.Play(wagered || bit == BlackjackRules.ActionSurrender ? UiSound.ChipSlide : UiSound.CardSnap);
         }
     }
+
+    private static ButtonStyle StyleFor(int action) => action switch
+    {
+        BlackjackRules.ActionHit => ButtonStyle.Prominent,
+        BlackjackRules.ActionStand => ButtonStyle.Tinted,
+        _ => ButtonStyle.Gray,
+    };
+
+    private static string IdFor(int action) => action switch
+    {
+        BlackjackRules.ActionHit => "blackjack.action.hit",
+        BlackjackRules.ActionStand => "blackjack.action.stand",
+        BlackjackRules.ActionDouble => "blackjack.action.double",
+        BlackjackRules.ActionSplit => "blackjack.action.split",
+        _ => "blackjack.action.surrender",
+    };
 
     private long ActiveBetOf()
     {
@@ -404,7 +458,8 @@ internal sealed partial class BlackjackTable
             BlackjackRules.ActionHit => Loc.T(L.Casino.BlackjackActionHit),
             BlackjackRules.ActionStand => Loc.T(L.Casino.BlackjackActionStand),
             BlackjackRules.ActionDouble => Loc.T(L.Casino.BlackjackActionDouble),
-            _ => Loc.T(L.Casino.BlackjackActionSplit),
+            BlackjackRules.ActionSplit => Loc.T(L.Casino.BlackjackActionSplit),
+            _ => Loc.T(L.Blackjack.SurrenderPill),
         };
     }
 

@@ -67,17 +67,19 @@ internal static class DoorLayout
         return new Rect(new Vector2(max.X - buttonWidth, max.Y - touch), max);
     }
 
-    public static float KnockHeight(float scale, float nameHeight, float lineHeight) =>
-        Pad * 2f * scale + MathF.Max(Avatar * scale, nameHeight + lineHeight) + ButtonGap * 1.5f * scale + Touch * scale;
+    public static bool KnockSideBySide(float cardWidth, float approveLabel, float denyLabel, float scale) =>
+        TablePairLayout.SideBySide(cardWidth - Pad * 2f * scale, Touch * scale, approveLabel, denyLabel, scale);
 
-    public static Rect KnockButton(in Rect card, int index, float scale)
+    public static float KnockHeight(float scale, float nameHeight, float lineHeight, bool sideBySide) =>
+        Pad * 2f * scale + MathF.Max(Avatar * scale, nameHeight + lineHeight) + ButtonGap * 1.5f * scale
+        + TablePairLayout.Height(sideBySide, Touch * scale, scale);
+
+    public static Rect KnockButton(in Rect card, int index, bool sideBySide, float scale)
     {
         var pad = Pad * scale;
-        var gap = ButtonGap * scale;
-        var width = (card.Width - pad * 2f - gap) * 0.5f;
-        var x = card.Min.X + pad + index * (width + gap);
-        var bottom = card.Max.Y - pad;
-        return new Rect(new Vector2(x, bottom - Touch * scale), new Vector2(x + width, bottom));
+        var touch = Touch * scale;
+        var top = card.Max.Y - pad - TablePairLayout.Height(sideBySide, touch, scale);
+        return TablePairLayout.Cell(card.Min.X + pad, top, card.Width - pad * 2f, touch, index, sideBySide, scale);
     }
 
     public static Vector2 KnockAvatar(in Rect card, float scale) =>

@@ -22,7 +22,6 @@ internal sealed partial class DealerHoldemCabinet : ICabinetIdle
     public const int WinningsTag = 9;
 
     private const float NoticeSeconds = 4f;
-    private const float BannerSeconds = 2.2f;
     private const float FlightSeconds = 0.34f;
     private const float RevealSeconds = 0.42f;
     private const float FinishRetrySeconds = 1f;
@@ -36,7 +35,6 @@ internal sealed partial class DealerHoldemCabinet : ICabinetIdle
     private readonly DealerHoldemChipFlights chips = new();
     private readonly DealerHoldemTexts texts = new();
     private readonly DealerHoldemPaySheet paySheet = new();
-    private readonly BlackjackDealer dealer = new();
     private readonly string[] tripsOptions = new string[2];
     private readonly string[] spotLines = new string[DealerHoldemRules.SpotCount];
     private readonly string[] spotShort = new string[DealerHoldemRules.SpotCount];
@@ -52,7 +50,6 @@ internal sealed partial class DealerHoldemCabinet : ICabinetIdle
     private bool dealing;
     private string noticeText = string.Empty;
     private float noticeClock;
-    private float bannerClock;
     private int resolvingSpot = -1;
     private float idleTime;
     private float finishClock;
@@ -83,12 +80,10 @@ internal sealed partial class DealerHoldemCabinet : ICabinetIdle
         playback.Clear();
         cards.Clear();
         chips.Clear();
-        dealer.Clear();
         paySheet.Close();
         ClearResults();
         dealing = false;
         noticeText = string.Empty;
-        bannerClock = 0f;
     }
 
     public void Gate()
@@ -133,7 +128,6 @@ internal sealed partial class DealerHoldemCabinet : ICabinetIdle
         playback.Advance(frame.DeltaSeconds);
         cards.Advance(frame.DeltaSeconds);
         chips.Advance(frame.DeltaSeconds);
-        dealer.Update(frame.DeltaSeconds);
         TickClocks(frame.DeltaSeconds);
         while (playback.TryTake(out var cue))
         {
@@ -182,11 +176,6 @@ internal sealed partial class DealerHoldemCabinet : ICabinetIdle
             {
                 noticeText = string.Empty;
             }
-        }
-
-        if (bannerClock > 0f)
-        {
-            bannerClock -= deltaSeconds;
         }
 
         idleTime += deltaSeconds;
@@ -251,9 +240,7 @@ internal sealed partial class DealerHoldemCabinet : ICabinetIdle
     {
         cards.Clear();
         chips.Clear();
-        dealer.Clear();
         ClearResults();
-        bannerClock = 0f;
     }
 
     private void ClearResults()
@@ -291,7 +278,6 @@ internal sealed partial class DealerHoldemCabinet : ICabinetIdle
                 Reveal(instant);
                 break;
             case DealerHoldemCueKind.Verdict:
-                Verdict(instant);
                 break;
             case DealerHoldemCueKind.Resolve:
                 Resolve((DealerHoldemSpot)cue.Index, instant);
@@ -327,25 +313,6 @@ internal sealed partial class DealerHoldemCabinet : ICabinetIdle
             cards.Launch(card, DealerPose(index, false), DealerPose(index, true), delay: index * 0.12f, flip: true,
                 tag: DealerTag + index, seconds: RevealSeconds, arc: 0f);
         }
-    }
-
-    private void Verdict(bool instant)
-    {
-        var round = playback.Round;
-        if (round is null || round.Phase == DealerHoldemRules.PhaseVoided)
-        {
-            return;
-        }
-
-        var hand = HoldemHandNames.Describe(round.DealerHand);
-        if (!round.DealerQualifies)
-        {
-            bannerClock = instant ? 0f : BannerSeconds;
-            dealer.Say(Loc.T(L.DealerHoldem.NoQualify));
-            return;
-        }
-
-        dealer.Say(dealerLine.Get(L.DealerHoldem.DealerHas, hand));
     }
 
     private void Resolve(DealerHoldemSpot spot, bool instant)

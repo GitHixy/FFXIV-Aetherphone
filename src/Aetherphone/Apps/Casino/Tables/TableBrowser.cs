@@ -125,8 +125,6 @@ internal sealed class TableBrowser
         DrawFilters(ui);
         Gap(Metrics.Space.Sm, scale);
         DrawRows(ui, width, scale);
-        Gap(RowGap, scale);
-        DrawQuickSeat(ui, width, scale);
         Gap(Metrics.Space.Xl, scale);
     }
 
@@ -582,21 +580,5 @@ internal sealed class TableBrowser
             TextStyles.Subheadline, width - pad * 2f);
         ImGui.SetCursorScreenPos(origin);
         ImGui.Dummy(new Vector2(width, max.Y - origin.Y));
-    }
-
-    private void DrawQuickSeat(AppSkin ui, float width, float scale)
-    {
-        var origin = ImGui.GetCursorScreenPos();
-        var height = Button.LargeHeight * scale;
-        var rect = new Rect(origin, new Vector2(origin.X + width, origin.Y + height));
-        if (Button.Draw(ImGui.GetWindowDrawList(), rect, Loc.T(L.Casino.QuickSeatAction), ui.Ink, ButtonStyle.Tinted,
-                enabled: !tables.IntentInFlight, id: "casino.tables.quickSeat"))
-        {
-            inlineReason = string.Empty;
-            enterHouse();
-        }
-
-        ImGui.SetCursorScreenPos(origin);
-        ImGui.Dummy(new Vector2(width, height));
     }
 }

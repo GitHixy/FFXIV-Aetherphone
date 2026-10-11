@@ -23,9 +23,12 @@ internal sealed class OriginalsCabinet
         CasinoGames.HiLo,
     };
 
-    private const float SignHeight = 30f;
-    private const float SectionGap = 8f;
     private const float AutoPauseSeconds = 0.35f;
+    private const float WrapLineSpacing = 1.25f;
+    private const string LineProbe = "Ay";
+
+    private static readonly TextStyle StakeStyle = TextStyles.Headline;
+    private static readonly TextStyle StakeCaptionStyle = TextStyles.SubheadlineEmphasized;
     private const float SpotlightAlpha = 0.05f;
 
     private readonly CasinoStore store;
@@ -108,12 +111,14 @@ internal sealed class OriginalsCabinet
         for (var index = 0; index < composers.Length; index++)
         {
             composers[index].Gate();
+            skins[index].Gate();
         }
     }
 
     public void DrawOverlay(Rect screen, AppSkin ui)
     {
         Composer.DrawOverlay(screen, ui, false);
+        skin.DrawOverlay(screen, ui);
     }
 
     public void Draw(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui)
@@ -137,21 +142,20 @@ internal sealed class OriginalsCabinet
         Settle(stage, frame, state);
         var sitting = state.Sitting;
         var blocked = state.StakesPaused || state.Draining || frame.Blocked;
-        var safe = frame.Safe;
-        var signBottom = safe.Min.Y + SignHeight * scale;
-        DrawSign(drawList, frame, new Rect(safe.Min, new Vector2(safe.Max.X, signBottom)), scale);
-        var ladderTop = signBottom + SectionGap * scale;
-        var ladderBottom = ladderTop + OriginalsLadder.Height * scale;
-        var count = skin.FillLadder(ladder, out var focus);
-        OriginalsLadder.Draw(drawList, new Rect(new Vector2(safe.Min.X, ladderTop), new Vector2(safe.Max.X, ladderBottom)),
-            ladder.AsSpan(0, count), focus, ui, scale);
-        var statusHeight = Typography.LineHeight(TextStyles.Subheadline) * 2f + Metrics.Space.Md * scale;
-        var world = new Rect(new Vector2(safe.Min.X, ladderBottom + SectionGap * scale),
-            new Vector2(safe.Max.X, MathF.Max(ladderBottom + SectionGap * scale, safe.Max.Y - statusHeight)));
+        var statusHeight = StatusHeight(state, frame.Safe.Width, scale);
+        var hasStrip = skin.Strip.Key is not null;
+        var layout = OriginalsLayout.Compute(frame.Safe, hasStrip, statusHeight, scale);
+        DrawSign(drawList, frame, layout.Sign, scale);
+        if (hasStrip)
+        {
+            var count = skin.FillLadder(ladder, out var focus);
+            OriginalsLadder.Draw(drawList, layout.Ladder, Loc.T(skin.Strip), ladder.AsSpan(0, count), focus, ui, scale);
+        }
+
         var interactive = !blocked && !Composer.Auto.Running && sitting is not null;
-        skin.DrawWorld(drawList, new OriginalsFrame(stage, originals, world, frame.DeltaSeconds, frame.Phase,
+        skin.DrawWorld(drawList, new OriginalsFrame(stage, originals, layout.World, frame.DeltaSeconds, frame.Phase,
             frame.Instant, interactive, Composer.AutoArmed), ui);
-        DrawStatus(drawList, ui, state, new Rect(new Vector2(safe.Min.X, world.Max.Y), safe.Max), scale);
+        DrawStatus(drawList, ui, state, layout.Status, scale);
         if (skin.Live)
         {
             DrawLiveDeck(drawList, ui, frame.Deck, blocked, scale);
@@ -235,34 +239,62 @@ internal sealed class OriginalsCabinet
         CasinoSigns.Draw(drawList, skin.Sign, band.Center, height, CasinoColors.LightA, flicker);
     }
 
+    private CasinoNoticeKind NoticeKind() =>
+        string.Equals(notice.Key, L.Originals.Resumed.Key, StringComparison.Ordinal)
+            ? CasinoNoticeKind.Info
+            : CasinoNoticeKind.Reason;
+
+    private string PlainStatus(CasinoStateDto state)
+    {
+        if (state.StakesPaused || state.Draining)
+        {
+            return Loc.T(state.StakesPaused ? L.Casino.PausedTitle : L.Casino.DrainingTitle);
+        }
+
+        var hint = skin.Hint;
+        return hint.Key is null ? string.Empty : Loc.T(hint);
+    }
+
+    private float StatusHeight(CasinoStateDto state, float width, float scale)
+    {
+        var reserve = Typography.LineHeight(TextStyles.Subheadline) * 2f + Metrics.Space.Md * scale;
+        var top = Metrics.Space.Xs * scale;
+        if (hasNotice)
+        {
+            return MathF.Max(reserve,
+                top + CasinoNotice.Height(NoticeKind(), string.Empty, Loc.T(notice), width, scale));
+        }
+
+        var text = PlainStatus(state);
+        return text.Length == 0 ? reserve : MathF.Max(reserve, top + WrappedHeight(text, TextStyles.Subheadline, width));
+    }
+
+    private static float WrappedHeight(string text, in TextStyle style, float width)
+    {
+        var block = Typography.MeasureWrappedBlock(text, style, width).Y;
+        var lines = MathF.Max(1f, MathF.Round(block / MathF.Max(1f, Typography.LineHeight(style))));
+        return lines * Typography.Measure(LineProbe, style).Y * WrapLineSpacing;
+    }
+
     private void DrawStatus(ImDrawListPtr drawList, AppSkin ui, CasinoStateDto state, Rect area, float scale)
     {
         var top = area.Min.Y + Metrics.Space.Xs * scale;
         if (hasNotice)
         {
-            var kind = string.Equals(notice.Key, L.Originals.Resumed.Key, StringComparison.Ordinal)
-                ? CasinoNoticeKind.Info
-                : CasinoNoticeKind.Reason;
-            CasinoNotice.Draw(drawList, ui, kind, string.Empty, Loc.T(notice), area.Min.X, top, area.Width, scale);
+            CasinoNotice.Draw(drawList, ui, NoticeKind(), string.Empty, Loc.T(notice), area.Min.X, top, area.Width,
+                scale);
             return;
         }
 
-        if (state.StakesPaused || state.Draining)
-        {
-            Typography.DrawWrappedCentered(drawList,
-                Loc.T(state.StakesPaused ? L.Casino.PausedTitle : L.Casino.DrainingTitle), TextStyles.Subheadline,
-                CasinoColors.InkTitle, new Vector2(area.Center.X, top), area.Width);
-            return;
-        }
-
-        var hint = skin.Hint;
-        if (hint.Key is null)
+        var text = PlainStatus(state);
+        if (text.Length == 0)
         {
             return;
         }
 
-        Typography.DrawWrappedCentered(drawList, Loc.T(hint), TextStyles.Subheadline, CasinoColors.InkBody,
-            new Vector2(area.Center.X, top), area.Width);
+        var ink = state.StakesPaused || state.Draining ? CasinoColors.InkTitle : CasinoColors.InkBody;
+        Typography.DrawWrappedCentered(drawList, text, TextStyles.Subheadline, ink, new Vector2(area.Center.X, top),
+            area.Width, WrapLineSpacing);
     }
 
     private void DrawLiveDeck(ImDrawListPtr drawList, AppSkin ui, Rect deck, bool blocked, float scale)
@@ -270,14 +302,22 @@ internal sealed class OriginalsCabinet
         var pad = BetComposer.Pad * scale;
         var left = deck.Min.X + pad;
         var right = deck.Max.X - pad;
+        var bandTop = deck.Min.Y + pad;
         if (skin.Knob)
         {
-            var knobTop = deck.Min.Y + pad;
-            skin.DrawKnob(drawList, new Rect(new Vector2(left, knobTop),
-                new Vector2(right, knobTop + BetComposer.KnobHeight * scale)), ui, false);
+            var knobBottom = bandTop + BetComposer.KnobHeight * scale;
+            skin.DrawKnob(drawList, new Rect(new Vector2(left, bandTop), new Vector2(right, knobBottom)), ui, false);
+            bandTop = knobBottom + BetComposer.Gap * scale;
         }
 
         var row = DeckActions.Row(deck, scale);
+        var bandBottom = row.Min.Y - BetComposer.Gap * scale;
+        if (bandBottom > bandTop && skin.LiveStake > 0)
+        {
+            DrawStakeLine(drawList, new Rect(new Vector2(left, bandTop), new Vector2(right, bandBottom)),
+                skin.LiveStake, scale);
+        }
+
         var cursor = row.Min.X;
         var secondaries = 0;
         var idle = !blocked && !originals.InFlight;
@@ -295,6 +335,33 @@ internal sealed class OriginalsCabinet
             skin.CashOut(originals);
             CasinoSfx.Play(UiSound.ChipSlide);
         }
+    }
+
+    private static void DrawStakeLine(ImDrawListPtr drawList, Rect band, long stake, float scale)
+    {
+        var amount = NumberText.Compact(stake);
+        var amountSize = CurrencyGlyph.MeasureAmount(amount, StakeStyle);
+        if (amountSize.Y > band.Height || amountSize.X > band.Width)
+        {
+            return;
+        }
+
+        var caption = Loc.T(L.Casino.RoundStake);
+        var gap = Metrics.Space.Sm * scale;
+        var captionWidth = Typography.Measure(caption, StakeCaptionStyle).X;
+        var showCaption = captionWidth + gap + amountSize.X <= band.Width;
+        var total = showCaption ? captionWidth + gap + amountSize.X : amountSize.X;
+        var left = band.Center.X - total * 0.5f;
+        if (showCaption)
+        {
+            var captionHeight = Typography.Measure(caption, StakeCaptionStyle).Y;
+            Typography.Draw(drawList, new Vector2(left, band.Center.Y - captionHeight * 0.5f), caption,
+                CasinoColors.InkBody, StakeCaptionStyle);
+            left += captionWidth + gap;
+        }
+
+        CurrencyGlyph.DrawAmount(drawList, new Vector2(left, band.Center.Y - amountSize.Y * 0.5f), amount,
+            CurrencyKind.Chips, CasinoColors.Money, StakeStyle);
     }
 
     private void DrawComposer(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui, CasinoSittingDto sitting,

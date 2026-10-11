@@ -42,17 +42,30 @@ public sealed class CasinoDoorLayoutTests
     {
         var name = 22f * scale;
         var line = 20f * scale;
-        var height = DoorLayout.KnockHeight(scale, name, line);
-        var card = new Rect(Vector2.Zero, new Vector2(PhoneWidth * scale, height));
-        var approve = DoorLayout.KnockButton(card, 0, scale);
-        var deny = DoorLayout.KnockButton(card, 1, scale);
-        var avatar = DoorLayout.KnockAvatar(card, scale);
+        var width = PhoneWidth * scale;
+        var shortLabel = 50f * scale;
+        var longLabel = 125f * scale;
+        Assert.True(DoorLayout.KnockSideBySide(width, shortLabel, shortLabel, scale));
+        Assert.False(DoorLayout.KnockSideBySide(width, shortLabel, longLabel, scale));
+        for (var arrangement = 0; arrangement < 2; arrangement++)
+        {
+            var sideBySide = arrangement == 0;
+            var label = sideBySide ? shortLabel : longLabel;
+            var height = DoorLayout.KnockHeight(scale, name, line, sideBySide);
+            var card = new Rect(Vector2.Zero, new Vector2(width, height));
+            var approve = DoorLayout.KnockButton(card, 0, sideBySide, scale);
+            var deny = DoorLayout.KnockButton(card, 1, sideBySide, scale);
+            var avatar = DoorLayout.KnockAvatar(card, scale);
 
-        Assert.True(approve.Height >= DoorLayout.Touch * scale - 0.01f);
-        Assert.True(approve.Max.X < deny.Min.X);
-        Assert.True(deny.Max.X <= card.Max.X);
-        Assert.True(avatar.Y + DoorLayout.Avatar * 0.5f * scale <= approve.Min.Y);
-        Assert.True(avatar.Y + (name + line) * 0.5f <= approve.Min.Y);
+            Assert.True(approve.Height >= DoorLayout.Touch * scale - 0.01f);
+            Assert.True(deny.Height >= DoorLayout.Touch * scale - 0.01f);
+            Assert.True(approve.Max.X <= deny.Min.X || approve.Max.Y <= deny.Min.Y);
+            Assert.True(deny.Max.X <= card.Max.X && deny.Max.Y <= card.Max.Y);
+            Assert.True(approve.Width >= label + approve.Height - 0.01f);
+            Assert.True(deny.Width >= label + deny.Height - 0.01f);
+            Assert.True(avatar.Y + DoorLayout.Avatar * 0.5f * scale <= approve.Min.Y);
+            Assert.True(avatar.Y + (name + line) * 0.5f <= approve.Min.Y);
+        }
     }
 
     [Theory]

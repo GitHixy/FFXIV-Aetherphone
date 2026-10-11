@@ -18,6 +18,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 {
     private const float HostedRowGap = 6f;
     private const float SnappedClock = 10f;
+    private const float ReasonSeconds = 6f;
 
     private struct SeatMotion
     {
@@ -53,6 +54,8 @@ internal sealed partial class BlackjackTable : ICabinetIdle
     private int mySeat = -1;
     private string roomId = CasinoRoomIds.BlackjackPit;
     private string inlineReason = string.Empty;
+    private string shownReason = string.Empty;
+    private float reasonClock;
     private bool entered;
     private bool motionsPrimed;
 
@@ -97,13 +100,14 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
     public static float DeckHeightFor(int currency)
     {
+        var composerHeight = BetComposer.DeckHeightFor(false, false);
         if (currency != CasinoCurrencies.Gil)
         {
-            return BetComposer.DeckHeightFor(false, false);
+            return BlackjackDeckLayout.DeckHeight(composerHeight);
         }
 
-        return MathF.Max(BetComposer.DeckHeightFor(false, false),
-            ClassicBetComposer.HeightFor(1f) + BetComposer.Pad * 2f);
+        return BlackjackDeckLayout.DeckHeight(MathF.Max(composerHeight,
+            ClassicBetComposer.HeightFor(1f) + BetComposer.Pad * 2f));
     }
 
     public void Enter(string tableId)
@@ -234,9 +238,18 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
         var localNow = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var deadlineRemaining = room.RemainingMilliseconds(board.DeadlineUnixMs, localNow);
-        stateLabel = StateLabel(board, deadlineRemaining, unreachable);
-        var feltTop = DrawHostedRow(drawList, ui, board, safe.Min.X, safe.Min.Y, safe.Width, scale);
-        var felt = new Rect(new Vector2(safe.Min.X, feltTop), safe.Max);
+        stateLabel = StateLabel(board, unreachable);
+        var top = Venue.TournamentOverlay.Shows(board)
+            ? safe.Min.Y + Venue.TournamentOverlay.Reserve(scale)
+            : safe.Min.Y;
+        var feltTop = DrawHostedRow(drawList, ui, board, safe.Min.X, top, safe.Width, scale);
+        ExpireReason(delta);
+        var reason = ReasonText();
+        var reasonHeight = reason.Length > 0
+            ? CasinoNotice.Height(CasinoNoticeKind.Reason, string.Empty, reason, safe.Width, scale)
+            : 0f;
+        var feltBottom = reasonHeight > 0f ? safe.Max.Y - reasonHeight - Metrics.Space.Sm * scale : safe.Max.Y;
+        var felt = new Rect(new Vector2(safe.Min.X, feltTop), new Vector2(safe.Max.X, feltBottom));
         if (felt.Height <= 0f)
         {
             return;
@@ -250,7 +263,12 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         DrawFelt(stage, drawList, ui, board, deadlineRemaining, delta, frame.Phase, scale);
         SpeakForPhase(board);
         SettleHand(stage, board, frame);
-        DrawInlineReason(drawList, ui, frame.Deck, safe, scale);
+        if (reasonHeight > 0f)
+        {
+            CasinoNotice.Draw(drawList, ui, CasinoNoticeKind.Reason, string.Empty, reason, safe.Min.X,
+                safe.Max.Y - reasonHeight, safe.Width, scale);
+        }
+
         DrawDeck(stage, frame, ui, state, board, snapshot, deadlineRemaining, veiled);
         if (veiled)
         {
@@ -320,7 +338,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
             || string.Equals(reason, CasinoReasons.Denied, StringComparison.Ordinal);
     }
 
-    private string StateLabel(CasinoBlackjackRoomStateDto board, long deadlineRemaining, bool unreachable)
+    private string StateLabel(CasinoBlackjackRoomStateDto board, bool unreachable)
     {
         if (unreachable)
         {
@@ -335,7 +353,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
         if (seatFlow.StandQueued)
         {
-            return Loc.T(L.Casino.StandAtHandEnd);
+            return Loc.T(L.Casino.StandQueued);
         }
 
         if (seatFlow.Waiting)
@@ -345,7 +363,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
         if (board.Paused)
         {
-            return Loc.T(L.Tables.PausedBanner);
+            return Loc.T(L.Tables.PausedBadge);
         }
 
         if (BlackjackHosting.AwaitsDeal(board))
@@ -353,17 +371,14 @@ internal sealed partial class BlackjackTable : ICabinetIdle
             return hostedText.WaitingDeal(board.DealerName);
         }
 
-        var seconds = (int)((Math.Max(0, deadlineRemaining) + 999) / 1000);
         if (board.InsuranceOpen)
         {
-            return text.Duration(L.Blackjack.InsuranceClosesIn, seconds);
+            return Loc.T(L.Blackjack.InsuranceQuestion);
         }
 
         if (board.Phase == BlackjackPhases.Betting)
         {
-            return board.HandId.Length == 0 || deadlineRemaining <= 0
-                ? Loc.T(L.Casino.BlackjackWaitingForBets)
-                : text.Duration(L.Casino.BlackjackBetsCloseIn, seconds);
+            return Loc.T(L.Casino.BlackjackWaitingForBets);
         }
 
         if (BlackjackPhases.Over(board.Phase))
@@ -447,36 +462,95 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
         var info = gil ? hostedText.GilLimits(board) : hostedText.Rules(board);
         var ink = gil ? TableRow.CurrencyTint(CasinoCurrencies.Gil, ui.Accent) : StageText.Strong;
-        var rowBottom = y + height;
-        var infoWidth = right - left;
-        if (infoWidth > height * 3f)
+        var gap = HostedRowGap * scale;
+        var bottom = y;
+        if (right < left + width)
         {
-            StageText.Plate(drawList, new Vector2(left + infoWidth * 0.5f, y + height * 0.5f), info, infoWidth, ink,
-                TextStyles.Footnote, scale);
+            bottom = y + height;
+            var free = right - left;
+            if (HostedInfoLayout.FitsLine(Typography.Measure(info, TextStyles.Footnote).X, free, scale))
+            {
+                StageText.Plate(drawList, new Vector2(left + free * 0.5f, y + height * 0.5f), info, free, ink,
+                    TextStyles.Footnote, scale);
+                info = string.Empty;
+            }
+        }
+
+        if (info.Length > 0)
+        {
+            bottom = DrawInfoBlock(drawList, info, left, bottom > y ? bottom + gap : bottom, width, ink, scale);
         }
 
         if (gil && board.Rules is not null)
         {
-            var lineHeight = Typography.LineHeight(TextStyles.Footnote) + 6f * scale;
-            StageText.Status(drawList, new Vector2(left + width * 0.5f, rowBottom + HostedRowGap * scale
-                + lineHeight * 0.5f), hostedText.Rules(board), width, scale);
-            rowBottom += HostedRowGap * scale + lineHeight;
+            bottom = DrawInfoBlock(drawList, hostedText.Rules(board), left, bottom + gap, width, StageText.Strong,
+                scale);
         }
 
-        return rowBottom + HostedRowGap * scale;
+        return bottom + gap;
     }
 
-    private void DrawInlineReason(ImDrawListPtr drawList, AppSkin ui, Rect deck, Rect safe, float scale)
+    private static float DrawInfoBlock(ImDrawListPtr drawList, string text, float left, float top, float width,
+        Vector4 ink, float scale)
+    {
+        var style = TextStyles.Footnote;
+        var padX = StageText.CapsulePadX * scale;
+        var lines = Typography.WrapText(text, style, MathF.Max(1f, width - padX * 2f));
+        var count = Math.Min(lines.Length, HostedInfoLayout.MaxLines);
+        if (count == 0)
+        {
+            return top;
+        }
+
+        var lineHeight = Typography.LineHeight(style);
+        var textWidth = 0f;
+        for (var index = 0; index < count; index++)
+        {
+            textWidth = MathF.Max(textWidth, Typography.Measure(lines[index], style).X);
+        }
+
+        var height = HostedInfoLayout.BlockHeight(lineHeight, count, scale);
+        var centerX = left + width * 0.5f;
+        var min = new Vector2(centerX - textWidth * 0.5f - padX, top);
+        var max = new Vector2(centerX + textWidth * 0.5f + padX, top + height);
+        StageText.Capsule(drawList, min, max);
+        var textTop = top + (height - lineHeight * count) * 0.5f;
+        for (var index = 0; index < count; index++)
+        {
+            var lineWidth = Typography.Measure(lines[index], style).X;
+            Typography.Draw(drawList, new Vector2(centerX - lineWidth * 0.5f, textTop + index * lineHeight),
+                lines[index], ink, style);
+        }
+
+        return max.Y;
+    }
+
+    private string ReasonText() =>
+        inlineReason.Length == 0 ? string.Empty : CasinoReasons.Text(inlineReason, chips.Ceiling.MaxBet);
+
+    private void ExpireReason(float delta)
     {
         if (inlineReason.Length == 0)
+        {
+            shownReason = string.Empty;
+            return;
+        }
+
+        if (!ReferenceEquals(inlineReason, shownReason))
+        {
+            shownReason = inlineReason;
+            reasonClock = 0f;
+            return;
+        }
+
+        reasonClock += delta;
+        if (reasonClock < ReasonSeconds)
         {
             return;
         }
 
-        var message = CasinoReasons.Text(inlineReason, chips.Ceiling.MaxBet);
-        var height = CasinoNotice.Height(CasinoNoticeKind.Reason, string.Empty, message, safe.Width, scale);
-        CasinoNotice.Draw(drawList, ui, CasinoNoticeKind.Reason, string.Empty, message, safe.Min.X,
-            deck.Min.Y - height - Metrics.Space.Sm * scale, safe.Width, scale);
+        inlineReason = string.Empty;
+        shownReason = string.Empty;
     }
 
     private void BuildSeatViews(CasinoBlackjackRoomStateDto board)

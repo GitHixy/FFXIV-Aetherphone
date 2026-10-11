@@ -14,7 +14,7 @@ internal sealed partial class DealerHoldemCabinet
 {
     private const float PreviewAlpha = 0.45f;
     private const float StateShare = 0.92f;
-    private const float BannerFade = 0.3f;
+    private const string StateMarquee = "casino.dealerholdem.state";
     private const float IdleCycle = 6f;
     private const float IdleDealSeconds = 0.35f;
     private const float WinGlow = 0.6f;
@@ -38,9 +38,6 @@ internal sealed partial class DealerHoldemCabinet
         DrawHeroCards(drawList, round, scale);
         DrawFlights(drawList, scale);
         DrawHandNames(drawList, round, scale);
-        dealer.DrawSpeech(drawList, new Rect(layout.Safe.Min, new Vector2(layout.Puck.X, layout.Dealer.Max.Y)),
-            layout.Puck, layout.PuckRadiusPixels, scale);
-        DrawBanner(drawList, scale);
     }
 
     private void DrawDealerCards(ImDrawListPtr drawList, CasinoDealerHoldemDto? round, float scale)
@@ -238,21 +235,11 @@ internal sealed partial class DealerHoldemCabinet
             return;
         }
 
-        var line = dealerLine.Get(L.DealerHoldem.DealerHas, HoldemHandNames.Describe(round.DealerHand));
+        var line = round.DealerQualifies
+            ? dealerLine.Get(L.DealerHoldem.DealerHas, HoldemHandNames.Describe(round.DealerHand))
+            : Loc.T(L.DealerHoldem.NoQualify);
         StageText.Plate(drawList, new Vector2(layout.Safe.Center.X, layout.DealerNameY), line, width,
             round.DealerQualifies ? StageText.Strong : StageText.Body, TextStyles.FootnoteEmphasized, scale);
-    }
-
-    private void DrawBanner(ImDrawListPtr drawList, float scale)
-    {
-        if (bannerClock <= 0f)
-        {
-            return;
-        }
-
-        var fade = MathF.Min(1f, bannerClock / BannerFade);
-        StageText.Plate(drawList, layout.Board.Center, Loc.T(L.DealerHoldem.NoQualify), layout.Safe.Width * StateShare,
-            CasinoColors.InkTitle with { W = fade }, TextStyles.Title3, scale);
     }
 
     private void DrawStateLine(ImDrawListPtr drawList, float scale)
@@ -273,7 +260,19 @@ internal sealed partial class DealerHoldemCabinet
             return;
         }
 
-        StageText.StateLine(drawList, center, StateText(), width, StageText.Strong);
+        var text = FeltText();
+        if (text.Length == 0)
+        {
+            return;
+        }
+
+        StageText.State(drawList, center, text, width, new MarqueeId(StateMarquee, 0));
+    }
+
+    private bool Waiting()
+    {
+        var round = playback.Round;
+        return dealing || playback.Finishing || round is not null && playback.Busy;
     }
 
     private string StateText()
@@ -285,21 +284,27 @@ internal sealed partial class DealerHoldemCabinet
             return Loc.T(L.DealerHoldem.Dealing);
         }
 
-        if (round is null)
+        return Loc.T(L.DealerHoldem.Showdown);
+    }
+
+    private string FeltText()
+    {
+        var round = playback.Round;
+        if (round is null && !dealing)
         {
             return Loc.T(L.DealerHoldem.PlaceAnte);
         }
 
-        if (playback.Busy)
+        if (round is null || Waiting())
         {
-            return Loc.T(L.DealerHoldem.Showdown);
+            return string.Empty;
         }
 
         return round.Phase switch
         {
-            DealerHoldemRules.PhasePreFlop => Loc.T(L.DealerHoldem.DecidePreFlop),
-            DealerHoldemRules.PhaseFlop => Loc.T(L.DealerHoldem.DecideFlop),
-            DealerHoldemRules.PhaseRiver => Loc.T(L.DealerHoldem.DecideRiver),
+            DealerHoldemRules.PhasePreFlop => Loc.T(L.Holdem.StepPreflop),
+            DealerHoldemRules.PhaseFlop => Loc.T(L.Holdem.StepFlop),
+            DealerHoldemRules.PhaseRiver => Loc.T(L.Holdem.StepRiver),
             _ => OutcomeText(round),
         };
     }
@@ -313,13 +318,12 @@ internal sealed partial class DealerHoldemCabinet
 
         if (round.Payout > round.Stake)
         {
-            return outcomeLabel.Get(round.Capped ? L.DealerHoldem.YouWinCapped : L.DealerHoldem.YouWin,
-                NumberText.Compact(round.Payout - round.Stake));
+            return outcomeLabel.Get(L.DealerHoldem.YouWin, NumberText.Compact(round.Payout - round.Stake));
         }
 
         if (round.Payout == round.Stake)
         {
-            return Loc.T(L.DealerHoldem.PushLine);
+            return Loc.T(L.DealerHoldem.Push);
         }
 
         return Loc.T(round.Folded ? L.DealerHoldem.Folded : L.DealerHoldem.DealerWins);

@@ -46,6 +46,8 @@ internal static class TableRow
     private const float ChipGap = 8f;
     private const int SeatDotLimit = 9;
     private const int DiscSegments = 28;
+    private const float PhaseShare = 0.45f;
+    private const float IconShare = 0.55f;
 
     private static readonly Vector4 GilTint = new(1f, 0.788f, 0.290f, 1f);
 
@@ -105,8 +107,42 @@ internal static class TableRow
             return view.Seats;
         }
 
-        return view.Full ? Loc.T(L.Casino.TableFullBadge) : Loc.T(L.Tables.PhaseOpen);
+        return view.Full ? Loc.T(L.Casino.TableFullBadge) : string.Empty;
     }
+
+    public static bool TryBadgeIcon(in TableRowView view, out FontAwesomeIcon icon)
+    {
+        icon = default;
+        if (view.PhaseLabel.Length > 0 || view.Room != VenueRoomKind.None)
+        {
+            return false;
+        }
+
+        if (view.Draining)
+        {
+            icon = FontAwesomeIcon.Clock;
+        }
+        else if (view.Paused)
+        {
+            icon = FontAwesomeIcon.Pause;
+        }
+        else if (view.Mine)
+        {
+            icon = FontAwesomeIcon.Star;
+        }
+        else if (view.InviteOnly)
+        {
+            icon = FontAwesomeIcon.Lock;
+        }
+        else if (view.Full)
+        {
+            icon = FontAwesomeIcon.Ban;
+        }
+
+        return icon != default;
+    }
+
+    public static float PhaseCap(float textColumn) => textColumn * PhaseShare;
 
     public static bool Live(in TableRowView view)
     {
@@ -136,14 +172,33 @@ internal static class TableRow
         }
 
         var phase = PhaseOf(view);
-        var live = Live(view);
+        var live = Live(view) && phase.Length > 0;
         var headline = Typography.LineHeight(TextStyles.Headline);
         var footnote = Typography.LineHeight(TextStyles.Footnote);
         var rowHeight = MathF.Max(footnote, ChipHeight(scale));
-        var layout = TableCardLayout.Compute(row, scale, headline, footnote, rowHeight, PillWidth(phase, live, scale),
-            ChipHeight(scale));
+        var cap = PhaseCap(TableCardLayout.TextColumn(row, scale));
+        var pillWidth = phase.Length > 0 ? PillWidth(phase, live, scale) : 0f;
+        var iconBadge = TryBadgeIcon(view, out var icon) && pillWidth > cap;
+        if (iconBadge)
+        {
+            pillWidth = ChipHeight(scale);
+        }
+        else if (pillWidth > cap)
+        {
+            pillWidth = cap;
+        }
+
+        var layout = TableCardLayout.Compute(row, scale, headline, footnote, rowHeight, pillWidth, ChipHeight(scale));
         DrawArt(drawList, ui, view, layout, scale);
-        DrawPill(drawList, layout.Phase, phase, live ? ui.Accent : ui.MutedInk, live, scale);
+        var pillInk = live ? ui.Accent : ui.BodyInk;
+        if (iconBadge)
+        {
+            DrawIconPill(drawList, layout.Phase, icon, pillInk);
+        }
+        else if (phase.Length > 0)
+        {
+            DrawPill(drawList, layout.Phase, phase, pillInk, live, scale);
+        }
         CasinoArt.Chevron(drawList, layout.Chevron, ui.MutedInk);
         var nameWidth = MathF.Max(1f, layout.NameRight - layout.TextLeft);
         Typography.Draw(drawList, new Vector2(layout.TextLeft, layout.NameTop),
@@ -261,8 +316,16 @@ internal static class TableRow
             left = dot.X + CasinoArt.LiveDotRadius * scale + PillDotGap * scale;
         }
 
+        var room = MathF.Max(1f, pill.Max.X - PillPadX * scale - left);
         Typography.Draw(drawList,
-            new Vector2(left, pill.Center.Y - Typography.LineHeight(TextStyles.FootnoteEmphasized) * 0.5f), label, ink,
-            TextStyles.FootnoteEmphasized);
+            new Vector2(left, pill.Center.Y - Typography.LineHeight(TextStyles.FootnoteEmphasized) * 0.5f),
+            Typography.FitText(label, room, TextStyles.FootnoteEmphasized), ink, TextStyles.FootnoteEmphasized);
+    }
+
+    private static void DrawIconPill(ImDrawListPtr drawList, in Rect pill, FontAwesomeIcon icon, Vector4 ink)
+    {
+        var rounding = pill.Height * 0.5f;
+        Squircle.Fill(drawList, pill.Min, pill.Max, rounding, ImGui.GetColorU32(Palette.WithAlpha(ink, FillAlpha)));
+        ProgressRing.CenterIcon(drawList, pill.Center, icon, ink, pill.Height * IconShare);
     }
 }

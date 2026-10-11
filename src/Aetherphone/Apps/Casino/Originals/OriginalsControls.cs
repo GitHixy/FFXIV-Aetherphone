@@ -13,11 +13,44 @@ namespace Aetherphone.Apps.Casino.Originals;
 internal static class OriginalsControls
 {
     public const float StatHeight = 28f;
+    public const float TogglePad = 14f;
+    public const float ToggleIcon = 14f;
+    public const float ToggleGap = 6f;
 
     private const float StatPad = 10f;
 
     public static LocString ReasonNotice(string reason) =>
         CasinoReasons.MessageFor(reason.Length > 0 ? reason : CasinoReasons.Unreachable);
+
+    public static float TogglePillWidth(string label, float height, float scale) =>
+        MathF.Max(CasinoStageLayout.TouchTarget * scale,
+            (TogglePad * 2f + ToggleIcon + ToggleGap) * scale + Typography.Measure(label, Button.LabelStyle(height)).X);
+
+    public static bool TogglePill(ImDrawListPtr drawList, string id, Rect rect, string label, FontAwesomeIcon icon,
+        AppSkin ui, bool enabled)
+    {
+        if (rect.Width <= 0f || rect.Height <= 0f)
+        {
+            return false;
+        }
+
+        var scale = UiScale.Current;
+        var hovered = enabled && UiInteract.Hover(rect.Min, rect.Max);
+        var face = Button.Surface(drawList, rect, ui.Ink, ButtonStyle.Gray, ButtonRole.Normal, enabled, hovered,
+            ImGui.GetID(id));
+        var style = Button.LabelStyle(rect.Height);
+        var iconSize = ToggleIcon * scale;
+        var gap = ToggleGap * scale;
+        var room = MathF.Max(1f, face.Face.Width - TogglePad * 2f * scale - iconSize - gap);
+        var shown = Typography.FitText(label, room, style);
+        var labelSize = Typography.Measure(shown, style);
+        var left = face.Face.Center.X - (iconSize + gap + labelSize.X) * 0.5f;
+        var centerY = face.Face.Center.Y;
+        ProgressRing.CenterIcon(drawList, new Vector2(left + iconSize * 0.5f, centerY), icon, face.LabelInk, iconSize);
+        Typography.Draw(drawList, new Vector2(left + iconSize + gap, centerY - labelSize.Y * 0.5f), shown,
+            face.LabelInk, style);
+        return enabled && UiInteract.Click(rect.Min, rect.Max, hovered);
+    }
 
     public static float StatPill(ImDrawListPtr drawList, Vector2 origin, string caption, string value, Vector4 valueInk,
         AppSkin ui, float scale)

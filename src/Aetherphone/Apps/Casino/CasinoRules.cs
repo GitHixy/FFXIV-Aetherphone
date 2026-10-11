@@ -143,6 +143,17 @@ internal static class CasinoRules
         L.Plinko.RulesStep4,
     };
 
+    private static readonly LocString[] DiceTableSteps =
+    {
+        L.Venue.HighestRollWins,
+        L.Venue.RoundFirstRollCounts,
+    };
+
+    private static readonly LocString[] RaffleSteps =
+    {
+        L.Venue.RaffleWaitHint,
+    };
+
     private const int RangeFact = 0;
     private const int TimesBetFact = 1;
     private const int OneInFact = 2;
@@ -174,6 +185,9 @@ internal static class CasinoRules
         CasinoGames.Holdem => L.Holdem.Pitch,
         CasinoGames.DealerHoldem => L.DealerHoldem.Pitch,
         CasinoGames.Barkeep => L.Casino.PitchBarkeep,
+        CasinoGames.DiceTable => L.Venue.DiceHint,
+        CasinoGames.Deathroll => L.Venue.DuelHint,
+        CasinoGames.Raffle => L.Venue.RaffleHint,
         _ => L.Casino.PitchGeneric,
     };
 
@@ -196,6 +210,9 @@ internal static class CasinoRules
         CasinoGames.Holdem => L.Casino.GameHoldem,
         CasinoGames.DealerHoldem => L.DealerHoldem.Game,
         CasinoGames.Barkeep => L.Casino.GameBarkeep,
+        CasinoGames.DiceTable => L.Venue.GameDiceTable,
+        CasinoGames.Deathroll => L.Venue.GameDeathroll,
+        CasinoGames.Raffle => L.Venue.GameRaffle,
         _ => L.Apps.Casino,
     };
 
@@ -218,6 +235,8 @@ internal static class CasinoRules
         CasinoGames.Holdem => HoldemSteps,
         CasinoGames.DealerHoldem => DealerHoldemSteps,
         CasinoGames.Barkeep => BarkeepSteps,
+        CasinoGames.DiceTable => DiceTableSteps,
+        CasinoGames.Raffle => RaffleSteps,
         _ => NoSteps,
     };
 

@@ -382,24 +382,47 @@ internal sealed partial class CasinoApp
         OpenGame(item.GameId, source);
     }
 
+    internal static float RecordsTileHeightFor(int lines, float lineHeight, float scale) =>
+        MathF.Max(RecordsTileHeight * scale,
+            Metrics.Space.Md * scale * 2f + RecordsIcon * scale + Metrics.Space.Sm * scale
+            + Math.Max(1, lines) * lineHeight);
+
+    internal static float RecordsLabelWidth(float tileWidth, float scale) =>
+        MathF.Max(1f, tileWidth - Metrics.Space.Sm * 2f * scale);
+
+    private static LocString RecordTitle(int index) => index switch
+    {
+        0 => L.Casino.HistoryRow,
+        1 => L.Casino.FairnessRow,
+        _ => L.Casino.LimitsRow,
+    };
+
     private float DrawRecordsRow(ImDrawListPtr drawList, Vector2 origin, float width, float scale)
     {
         var top = SectionTitle(drawList, origin, width, Loc.T(L.Casino.RecordsHeading), scale);
         var gap = CardGap * scale;
         var tileWidth = (width - gap * 2f) / 3f;
-        var height = RecordsTileHeight * scale;
+        var labelWidth = RecordsLabelWidth(tileWidth, scale);
+        var lines = 1;
+        for (var index = 0; index < 3; index++)
+        {
+            lines = Math.Max(lines, Typography.WrapText(Loc.T(RecordTitle(index)), TextStyles.SubheadlineEmphasized,
+                labelWidth).Length);
+        }
+
+        var height = RecordsTileHeightFor(lines, Typography.LineHeight(TextStyles.SubheadlineEmphasized), scale);
         UiAnchors.Report("casino.records", new Rect(new Vector2(origin.X, top), new Vector2(origin.X + width, top + height)));
         for (var index = 0; index < 3; index++)
         {
             var left = origin.X + index * (tileWidth + gap);
             var tile = new Rect(new Vector2(left, top), new Vector2(left + tileWidth, top + height));
-            var (icon, tint, title) = index switch
+            var (icon, tint) = index switch
             {
-                0 => (FontAwesomeIcon.Receipt, AccentRing.Indigo, L.Casino.HistoryRow),
-                1 => (FontAwesomeIcon.ShieldAlt, AccentRing.Green, L.Casino.FairnessRow),
-                _ => (FontAwesomeIcon.HandHoldingHeart, AccentRing.Rose, L.Casino.LimitsRow),
+                0 => (FontAwesomeIcon.Receipt, AccentRing.Indigo),
+                1 => (FontAwesomeIcon.ShieldAlt, AccentRing.Green),
+                _ => (FontAwesomeIcon.HandHoldingHeart, AccentRing.Rose),
             };
-            if (!DrawRecordTile(drawList, tile, icon, tint, title, index, scale))
+            if (!DrawRecordTile(drawList, tile, icon, tint, RecordTitle(index), index, scale))
             {
                 continue;
             }
@@ -430,10 +453,15 @@ internal sealed partial class CasinoApp
         var iconCenter = new Vector2(tile.Center.X, tile.Min.Y + Metrics.Space.Md * scale + iconSize * 0.5f);
         CasinoArt.IconTileAt(drawList, iconCenter, iconSize, tint, icon);
         var labelTop = iconCenter.Y + iconSize * 0.5f + Metrics.Space.Sm * scale;
-        Typography.DrawCentered(drawList,
-            new Vector2(tile.Center.X, labelTop + Typography.LineHeight(TextStyles.SubheadlineEmphasized) * 0.5f),
-            Typography.FitText(Loc.T(title), tile.Width - Metrics.Space.Sm * 2f * scale,
-                TextStyles.SubheadlineEmphasized), ui.TitleInk, TextStyles.SubheadlineEmphasized);
+        var style = TextStyles.SubheadlineEmphasized;
+        var lineHeight = Typography.LineHeight(style);
+        var lines = Typography.WrapText(Loc.T(title), style, RecordsLabelWidth(tile.Width, scale));
+        for (var line = 0; line < lines.Length; line++)
+        {
+            Typography.DrawCentered(drawList, new Vector2(tile.Center.X, labelTop + lineHeight * (line + 0.5f)),
+                lines[line], ui.TitleInk, style);
+        }
+
         return UiInteract.Click(tile.Min, tile.Max, hovered);
     }
 
@@ -457,34 +485,6 @@ internal sealed partial class CasinoApp
         var top = origin.Y + CoinArt.SectionGap * scale;
         return top + CardSectionHeader.Draw(drawList, new Vector2(origin.X, top), width, title, ui.TitleInk) +
                CoinArt.HeaderGap * scale;
-    }
-
-    private float DrawRecordsCard(ImDrawListPtr drawList, Vector2 origin, float width, float scale)
-    {
-        var top = SectionTitle(drawList, origin, width, Loc.T(L.Casino.RecordsHeading), scale);
-        var rowHeight = RecordRowHeight * scale;
-        var min = new Vector2(origin.X, top);
-        var max = new Vector2(origin.X + width, top + rowHeight * 3f);
-        ui.Card(drawList, min, max, Metrics.Radius.Grouped * scale);
-        if (DrawRecordRow(drawList, RowAt(min, max.X, rowHeight, 0), FontAwesomeIcon.Receipt, AccentRing.Indigo,
-                L.Casino.HistoryRow, L.Casino.HistoryRowHint, false, scale))
-        {
-            OpenHistory();
-        }
-
-        if (DrawRecordRow(drawList, RowAt(min, max.X, rowHeight, 1), FontAwesomeIcon.ShieldAlt, AccentRing.Green,
-                L.Casino.FairnessRow, L.Casino.FairnessRowHint, true, scale))
-        {
-            OpenFairness();
-        }
-
-        if (DrawRecordRow(drawList, RowAt(min, max.X, rowHeight, 2), FontAwesomeIcon.HandHoldingHeart,
-                AccentRing.Rose, L.Casino.LimitsRow, L.Casino.LimitsRowHint, true, scale))
-        {
-            OpenLimits();
-        }
-
-        return max.Y;
     }
 
     private static Rect RowAt(Vector2 min, float right, float rowHeight, int index)

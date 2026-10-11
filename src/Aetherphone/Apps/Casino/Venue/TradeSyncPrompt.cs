@@ -24,13 +24,16 @@ internal sealed class TradeSyncPrompt
 
     public void Gate()
     {
-        if (Visible && shield.Width > 0f && ImGui.IsMouseHoveringRect(shield.Min, shield.Max, false))
+        if (Visible && shield.Width > 0f && UiInteract.HoverWindowOnly(shield.Min, shield.Max, false))
         {
             UiInteract.BlockThisFrame();
         }
     }
 
     public bool Visible => trade.Pending.Kind != TradeProposalKind.None;
+
+    public static bool ButtonsStack(float rowWidth, float confirmWidth, float dismissWidth, float gap) =>
+        confirmWidth + gap + dismissWidth > rowWidth + 0.5f;
 
     public void Draw(Rect screen, AppSkin ui)
     {
@@ -50,7 +53,17 @@ internal sealed class TradeSyncPrompt
         var bodyBlock = Typography.MeasureWrappedBlock(body, TextStyles.Subheadline, width - pad * 2f);
         var buttonHeight = Button.LargeHeight * scale;
         var titleHeight = Typography.LineHeight(TextStyles.Headline);
-        var height = pad + titleHeight + Gap * scale + bodyBlock.Y + Gap * 1.5f * scale + buttonHeight + pad;
+        var dismissLabel = Loc.T(L.Venue.NotNow);
+        var confirmLabel = Loc.T(proposal.Kind == TradeProposalKind.Confirm
+            ? L.Venue.TradeConfirmEntry
+            : string.Equals(proposal.LedgerKind, CasinoLedgerKinds.BuyIn, StringComparison.Ordinal)
+                ? L.Venue.TradeRecordBuyIn
+                : L.Venue.TradeRecordPayout);
+        var dismissWidth = Button.WidthFor(dismissLabel, ButtonSize.Large);
+        var stacked = ButtonsStack(width - pad * 2f, Button.WidthFor(confirmLabel, ButtonSize.Large), dismissWidth,
+            Gap * scale);
+        var buttons = stacked ? buttonHeight * 2f + Gap * scale : buttonHeight;
+        var height = pad + titleHeight + Gap * scale + bodyBlock.Y + Gap * 1.5f * scale + buttons + pad;
         var bottom = screen.Max.Y - BottomInset * scale;
         var min = new Vector2(screen.Min.X + pad, bottom - height);
         var max = new Vector2(screen.Max.X - pad, bottom);
@@ -65,17 +78,14 @@ internal sealed class TradeSyncPrompt
         Typography.DrawWrappedLeft(new Vector2(left, top), body, Stage.CasinoColors.InkBody, TextStyles.Subheadline,
             width - pad * 2f);
         top += bodyBlock.Y + Gap * 1.5f * scale;
-        var dismissLabel = Loc.T(L.Venue.NotNow);
-        var dismissWidth = Button.WidthFor(dismissLabel, ButtonSize.Large);
-        var confirmRect = new Rect(new Vector2(left, top),
-            new Vector2(max.X - pad - dismissWidth - Gap * scale, top + buttonHeight));
-        var dismissRect = new Rect(new Vector2(max.X - pad - dismissWidth, top), new Vector2(max.X - pad,
-            top + buttonHeight));
-        var confirmLabel = Loc.T(proposal.Kind == TradeProposalKind.Confirm
-            ? L.Venue.TradeConfirmEntry
-            : string.Equals(proposal.LedgerKind, CasinoLedgerKinds.BuyIn, StringComparison.Ordinal)
-                ? L.Venue.TradeRecordBuyIn
-                : L.Venue.TradeRecordPayout);
+        var right = max.X - pad;
+        var confirmRect = stacked
+            ? new Rect(new Vector2(left, top), new Vector2(right, top + buttonHeight))
+            : new Rect(new Vector2(left, top), new Vector2(right - dismissWidth - Gap * scale, top + buttonHeight));
+        var dismissTop = stacked ? confirmRect.Max.Y + Gap * scale : top;
+        var dismissRect = stacked
+            ? new Rect(new Vector2(left, dismissTop), new Vector2(right, dismissTop + buttonHeight))
+            : new Rect(new Vector2(right - dismissWidth, top), new Vector2(right, top + buttonHeight));
         if (Button.Draw(drawList, confirmRect, confirmLabel, ui.Ink, ButtonStyle.Prominent, enabled: !trade.Busy,
                 overlay: true, id: "venue.trade.confirm"))
         {

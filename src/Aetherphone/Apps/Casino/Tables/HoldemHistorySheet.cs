@@ -289,9 +289,11 @@ internal sealed class HoldemHistorySheet
         var last = HoldemReplay.LastStepOf(hand);
         AdvanceAuto(last);
         var origin = ImGui.GetCursorScreenPos();
-        var backRect = new Rect(origin, new Vector2(origin.X + width * 0.34f, origin.Y + Button.SmallHeight * scale));
-        if (Button.Draw(drawList, backRect, Loc.T(L.Holdem.ReplayAllHands), ui.Ink, ButtonStyle.Gray,
-                id: "holdem.replay.list"))
+        var backLabel = Loc.T(L.Holdem.ReplayAllHands);
+        var backHeight = Button.RegularHeight * scale;
+        var backRect = new Rect(origin, new Vector2(origin.X + MathF.Min(width * 0.6f,
+            Button.WidthFor(backLabel, ButtonSize.Regular)), origin.Y + backHeight));
+        if (Button.Draw(drawList, backRect, backLabel, ui.Ink, ButtonStyle.Gray))
         {
             selected = -1;
             playing = false;
@@ -299,9 +301,10 @@ internal sealed class HoldemHistorySheet
 
         var title = texts.Number(L.Holdem.HandNumber, hand.HandIndex);
         var titleSize = Typography.Measure(title, TextStyles.Headline);
-        Typography.Draw(drawList, new Vector2(origin.X + width - titleSize.X, origin.Y), title, ui.TitleInk,
+        var titleTop = origin.Y + (backHeight - titleSize.Y) * 0.5f;
+        Typography.Draw(drawList, new Vector2(origin.X + width - titleSize.X, titleTop), title, ui.TitleInk,
             TextStyles.Headline);
-        ImGui.Dummy(new Vector2(width, Button.SmallHeight * scale + Metrics.Space.Md * scale));
+        ImGui.Dummy(new Vector2(width, backHeight + Metrics.Space.Md * scale));
 
         var stripOrigin = ImGui.GetCursorScreenPos();
         var strip = new Rect(stripOrigin, new Vector2(stripOrigin.X + width, stripOrigin.Y + 30f * scale));

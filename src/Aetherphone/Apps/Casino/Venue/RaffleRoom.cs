@@ -266,7 +266,7 @@ internal sealed class RaffleRoom
         var drawList = room.DrawList;
         if (live is null)
         {
-            DrawIdleDeck(room, board, deck);
+            DrawIdleDeck(room, board);
             return;
         }
 
@@ -281,23 +281,18 @@ internal sealed class RaffleRoom
             act(new VenueActDraft(VenueActions.RaffleDraw));
         }
 
-        var label = maxed ? Loc.T(L.Venue.TicketsMaxed) : Loc.T(L.Venue.TakeTicket);
-        if (room.Stage.PrimaryAction(label, room.Enabled && !maxed, room.Ui.Ink) && !maxed)
+        if (room.Stage.PrimaryAction(Loc.T(L.Venue.TakeTicket), room.Enabled && !maxed, room.Ui.Ink) && !maxed)
         {
             CasinoSfx.Play(UiSound.Daub);
             act(new VenueActDraft(VenueActions.RaffleTicket, 1));
         }
     }
 
-    private void DrawIdleDeck(in VenueRoomFrame room, CasinoRaffleStateDto board, Rect deck)
+    private void DrawIdleDeck(in VenueRoomFrame room, CasinoRaffleStateDto board)
     {
-        var scale = room.Scale;
-        var drawList = room.DrawList;
         var last = board.Last;
         var canReplay = last is not null && playback.CanReplay(board);
         var replayLabel = canReplay ? Loc.T(L.Venue.ReplayDraw) : string.Empty;
-        VenueArt.DeckCaption(drawList, deck, Loc.T(room.Hosting ? L.Venue.RaffleHostHint : L.Venue.RaffleWaitHint),
-            scale);
         if (room.Hosting)
         {
             if (canReplay && room.Stage.SecondaryAction(replayLabel, true, room.Ui.Ink))
@@ -313,7 +308,7 @@ internal sealed class RaffleRoom
             return;
         }
 
-        var primaryLabel = canReplay ? replayLabel : Loc.T(L.Venue.WaitingHost);
+        var primaryLabel = canReplay ? replayLabel : Loc.T(L.Venue.TakeTicket);
         if (room.Stage.PrimaryAction(primaryLabel, canReplay, room.Ui.Ink) && canReplay)
         {
             playback.Replay(last!);

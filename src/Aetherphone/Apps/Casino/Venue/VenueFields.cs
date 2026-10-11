@@ -15,12 +15,32 @@ internal static class VenueFields
     private const float FieldWidthFraction = 0.46f;
     private const float FieldHeight = 36f;
 
+    public const int MaxLabelLines = 2;
+
     public static void Label(AppSkin ui, in Rect row, string label, float scale)
     {
         var width = row.Width * (1f - FieldWidthFraction) - Metrics.Space.Sm * scale;
-        var height = Typography.LineHeight(TextStyles.Body);
-        Typography.Draw(ImGui.GetWindowDrawList(), new Vector2(row.Min.X, row.Center.Y - height * 0.5f),
-            Typography.FitText(label, width, TextStyles.Body), ui.TitleInk, TextStyles.Body);
+        DrawLabel(ImGui.GetWindowDrawList(), row.Min.X, row.Center.Y, label, width, ui.TitleInk);
+    }
+
+    public static void DrawLabel(ImDrawListPtr drawList, float left, float centerY, string label, float width,
+        Vector4 ink)
+    {
+        var style = TextStyles.Body;
+        var lines = Typography.WrapText(label, style, MathF.Max(1f, width));
+        if (lines.Length > MaxLabelLines)
+        {
+            style = TextStyles.Subheadline;
+            lines = Typography.WrapText(label, style, MathF.Max(1f, width));
+        }
+
+        var count = Math.Min(lines.Length, MaxLabelLines);
+        var lineHeight = Typography.LineHeight(style);
+        var top = centerY - count * lineHeight * 0.5f;
+        for (var line = 0; line < count; line++)
+        {
+            Typography.Draw(drawList, new Vector2(left, top + line * lineHeight), lines[line], ink, style);
+        }
     }
 
     public static void TextRow(AppSkin ui, in Rect row, string id, string label, string hint, ref string buffer,
@@ -53,10 +73,8 @@ internal static class VenueFields
     {
         var width = Metrics.Size.ToggleWidth * scale;
         var height = Metrics.Size.ToggleHeight * scale;
-        var labelHeight = Typography.LineHeight(TextStyles.Body);
-        Typography.Draw(ImGui.GetWindowDrawList(), new Vector2(row.Min.X, row.Center.Y - labelHeight * 0.5f),
-            Typography.FitText(label, row.Width - width - Metrics.Space.Md * scale, TextStyles.Body), ui.TitleInk,
-            TextStyles.Body);
+        DrawLabel(ImGui.GetWindowDrawList(), row.Min.X, row.Center.Y, label,
+            row.Width - width - Metrics.Space.Md * scale, ui.TitleInk);
         var toggleMin = new Vector2(row.Max.X - width, row.Center.Y - height * 0.5f);
         return Toggle.Draw(id, new Rect(toggleMin, toggleMin + new Vector2(width, height)), value, ui.Theme);
     }

@@ -112,12 +112,15 @@ internal sealed class GameRulesSheet
         Typography.DrawWrappedLeft(pitchOrigin, pitch, ui.BodyInk, TextStyles.Subheadline, width);
         ImGui.Dummy(new Vector2(width, pitchBlock.Y + Metrics.Space.Md * scale));
 
-        var headingOrigin = ImGui.GetCursorScreenPos();
-        Typography.Draw(drawList, headingOrigin, Loc.T(L.Casino.RulesHowToPlay), ui.MutedInk,
-            TextStyles.FootnoteEmphasized);
-        ImGui.Dummy(new Vector2(width, 24f * scale));
-
         var steps = CasinoRules.StepsOf(gameId);
+        if (steps.Length > 0)
+        {
+            var headingOrigin = ImGui.GetCursorScreenPos();
+            Typography.Draw(drawList, headingOrigin, Loc.T(L.Casino.RulesHowToPlay), ui.MutedInk,
+                TextStyles.FootnoteEmphasized);
+            ImGui.Dummy(new Vector2(width, 24f * scale));
+        }
+
         var textLeft = BulletRadius * 2f + 12f * scale;
         for (var index = 0; index < steps.Length; index++)
         {
@@ -137,10 +140,13 @@ internal sealed class GameRulesSheet
         }
 
         ImGui.Dummy(new Vector2(width, Metrics.Space.Sm * scale));
-        var factsOrigin = ImGui.GetCursorScreenPos();
-        Typography.Draw(drawList, factsOrigin, Loc.T(L.Casino.RulesNumbers), ui.MutedInk,
-            TextStyles.FootnoteEmphasized);
-        ImGui.Dummy(new Vector2(width, 24f * scale));
+        if (CasinoRules.FactsOf(gameId, 0, out _, out _))
+        {
+            var factsOrigin = ImGui.GetCursorScreenPos();
+            Typography.Draw(drawList, factsOrigin, Loc.T(L.Casino.RulesNumbers), ui.MutedInk,
+                TextStyles.FootnoteEmphasized);
+            ImGui.Dummy(new Vector2(width, 24f * scale));
+        }
 
         for (var index = 0; CasinoRules.FactsOf(gameId, index, out var label, out var value); index++)
         {

@@ -267,6 +267,28 @@ public sealed class BlackjackTableLayoutTests
         Assert.Equal(layout.Felt.Center.X - leftHand.X, rightHand.X - layout.Felt.Center.X, 3);
     }
 
+    [Theory]
+    [MemberData(nameof(Tables))]
+    public void SideBetCaptionsStayClearOfTheCentreColumnAndInsideTheFelt(float scale, float width, float height,
+        int railCount, bool seated)
+    {
+        var layout = Compute(scale, width, height, railCount, seated);
+        if (!seated)
+        {
+            return;
+        }
+
+        var half = layout.SideCaptionWidth * 0.5f;
+        var pairs = layout.SideSpot(BlackjackSideBet.PerfectPairs);
+        var three = layout.SideSpot(BlackjackSideBet.TwentyOnePlusThree);
+        var ghostHalf = layout.HeroCardPixels(1) * 0.75f;
+        Assert.True(pairs.X + half <= layout.Felt.Center.X - ghostHalf + Epsilon);
+        Assert.True(three.X - half >= layout.Felt.Center.X + ghostHalf - Epsilon);
+        Assert.True(pairs.X - half >= layout.Felt.Min.X - Epsilon);
+        Assert.True(three.X + half <= layout.Felt.Max.X + Epsilon);
+        Assert.True(layout.SideCaptionWidth >= 56f * scale);
+    }
+
     private static BlackjackTableLayout Compute(float scale, float width, float height, int railCount, bool seated)
     {
         var origin = new Vector2(40f, 120f);

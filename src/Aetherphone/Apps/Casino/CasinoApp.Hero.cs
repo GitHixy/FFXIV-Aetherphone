@@ -25,9 +25,11 @@ internal sealed partial class CasinoApp
     private readonly CabinetPreview[] heroPreviews = { new(), new(), new(), new() };
     private RollingAmount jackpotRoll;
     private CasinoTableRowDto? hotTable;
-    private CasinoTableRowDto? namedTable;
+    private const int NamedTableSlots = 16;
+    private readonly CasinoTableRowDto?[] namedTables = new CasinoTableRowDto?[NamedTableSlots];
+    private readonly string[] namedTableTexts = new string[NamedTableSlots];
     private LanguageInfo? namedLanguage;
-    private string namedTableText = string.Empty;
+    private int namedNext;
 
     private float DrawCarousel(ImDrawListPtr drawList, Vector2 origin, float width, float delta, float scale)
     {
@@ -304,14 +306,24 @@ internal sealed partial class CasinoApp
 
     private string TableName(CasinoTableRowDto row)
     {
-        if (ReferenceEquals(row, namedTable) && ReferenceEquals(namedLanguage, Loc.Current))
+        if (!ReferenceEquals(namedLanguage, Loc.Current))
         {
-            return namedTableText;
+            namedLanguage = Loc.Current;
+            Array.Clear(namedTables);
         }
 
-        namedTable = row;
-        namedLanguage = Loc.Current;
-        namedTableText = Tables.TableBrowser.ViewOf(row, string.Empty).Name;
-        return namedTableText;
+        for (var slot = 0; slot < NamedTableSlots; slot++)
+        {
+            if (ReferenceEquals(namedTables[slot], row))
+            {
+                return namedTableTexts[slot];
+            }
+        }
+
+        var next = namedNext;
+        namedNext = (namedNext + 1) % NamedTableSlots;
+        namedTables[next] = row;
+        namedTableTexts[next] = Tables.TableBrowser.ViewOf(row, string.Empty).Name;
+        return namedTableTexts[next];
     }
 }

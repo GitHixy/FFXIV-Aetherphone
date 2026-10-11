@@ -9,28 +9,37 @@ namespace Aetherphone.Apps.Casino.Stage;
 
 internal sealed class WinCelebration
 {
-    private const float ShowerRate = 40f;
-    private const float FlashAlpha = 0.38f;
+    private const float FlashAlpha = 0.22f;
     private const float PunchAmount = 0.05f;
     private const float SlowMoFactor = 0.6f;
     private const float SlowMoSeconds = 0.5f;
-    private const float VignetteStrength = 0.5f;
+    private const float VignetteStrength = 0.35f;
     private const float VignetteSeconds = 1.4f;
     private const float EdgeGlowStrength = 0.6f;
     private const float TailSeconds = 0.9f;
-    private const float CardVeil = 0.55f;
+    private const float CardVeil = 0.32f;
+    private const float BannerHeightShare = 0.22f;
+    private const float ConfettiSpeed = 150f;
+    private const float ConfettiSize = 4f;
+    private const float ConfettiLife = 1.1f;
     private const float AmountRise = 26f;
     private const float AmountGap = 22f;
     private const float SkipHintGap = 34f;
     private const int RingBursts = 3;
-    private const int ShardCount = 40;
+    private const int ShardCount = 18;
     private const ulong FlourishSeed = 0x6A3BA5EEDUL;
+
+    private static readonly Vector4[] ChipConfetti =
+    {
+        CasinoColors.LightA,
+        CasinoColors.LightB,
+        CasinoColors.InkTitle,
+    };
 
     private readonly ParticleSystem particles;
     private readonly ScreenFx fx;
     private readonly StageBackdrop backdrop;
 
-    private GameRandom random = GameRandom.FromSeed(FlourishSeed);
     private RollingAmount count;
     private WinTierSpec spec = WinLadder.Spec(WinTier.None);
     private Vector2 origin;
@@ -38,8 +47,6 @@ internal sealed class WinCelebration
     private bool jackpot;
     private bool instant;
     private float elapsed;
-    private float showerLeft;
-    private float showerAccumulator;
     private float total;
     private bool skipped;
 
@@ -60,7 +67,6 @@ internal sealed class WinCelebration
 
     public void Reseed(ulong seed)
     {
-        random = GameRandom.FromSeed(seed);
         particles.Reseed(seed ^ FlourishSeed);
     }
 
@@ -85,20 +91,17 @@ internal sealed class WinCelebration
         instant = instantMode;
         elapsed = 0f;
         skipped = false;
-        showerAccumulator = 0f;
         count.Snap(0);
         var scale = UiScale.Current;
         if (instant)
         {
             total = WinLadder.InstantPopSeconds;
-            showerLeft = 0f;
             count.Snap(amount);
             CasinoSfx.Play(Core.Notifications.UiSound.WinSmall);
             return;
         }
 
         total = spec.CountUpSeconds + (spec.Banner ? WinLadder.BannerHoldSeconds : TailSeconds);
-        showerLeft = spec.ShowerSeconds;
         CasinoSfx.Win(spec);
         Burst(scale);
         if (spec.Sweep > 0f)
@@ -108,13 +111,13 @@ internal sealed class WinCelebration
 
         if (tier >= WinTier.Mega)
         {
-            fx.Flash(CasinoColors.Money, FlashAlpha);
+            fx.Flash(CasinoColors.InkTitle, FlashAlpha);
             fx.Punch(PunchAmount);
         }
 
         if (tier >= WinTier.Epic)
         {
-            fx.Vignette(CasinoColors.Money, VignetteStrength, VignetteSeconds);
+            fx.Vignette(CasinoColors.LightA, VignetteStrength, VignetteSeconds);
         }
 
         if (tier == WinTier.Legendary)
@@ -131,7 +134,6 @@ internal sealed class WinCelebration
         }
 
         skipped = true;
-        showerLeft = 0f;
         count.Snap(amount);
         elapsed = MathF.Max(elapsed, total - TailSeconds * 0.5f);
     }
@@ -141,7 +143,6 @@ internal sealed class WinCelebration
         spec = WinLadder.Spec(WinTier.None);
         elapsed = 0f;
         total = 0f;
-        showerLeft = 0f;
         amount = 0;
         count.Snap(0);
     }
@@ -168,12 +169,6 @@ internal sealed class WinCelebration
         if (spec.BulbChase && !skipped && elapsed < spec.CountUpSeconds)
         {
             fx.EdgeGlow(EdgeGlowStrength);
-        }
-
-        if (showerLeft > 0f)
-        {
-            showerLeft -= deltaSeconds;
-            Shower(deltaSeconds, layout.Full, UiScale.Current);
         }
     }
 
@@ -225,7 +220,8 @@ internal sealed class WinCelebration
             return;
         }
 
-        var bannerCenter = new Vector2(layout.Safe.Center.X, layout.Safe.Min.Y + layout.Safe.Height * 0.40f);
+        var bannerCenter = new Vector2(layout.Safe.Center.X,
+            layout.Safe.Min.Y + layout.Safe.Height * BannerHeightShare);
         var style = spec.Tier >= WinTier.Big ? TextStyles.Title1 : TextStyles.Title3;
         var progress = MathF.Min(0.99f, elapsed / total);
         var banner = Typography.FitText(Loc.T(WinLadder.Banner(spec.Tier, jackpot)), layout.Safe.Width * 0.8f, style);
@@ -259,18 +255,18 @@ internal sealed class WinCelebration
     {
         if (spec.Sparkles > 0)
         {
-            particles.Emit(CasinoLights.Sparkle(scale), origin, spec.Sparkles);
+            particles.Emit(CasinoLights.ChipSparkle(scale), origin, spec.Sparkles);
         }
 
         if (spec.Confetti > 0)
         {
-            particles.Confetti(origin, spec.Confetti, CasinoColors.Confetti, (220f + spec.Confetti) * scale, 4.5f * scale,
-                1.4f + spec.ShowerSeconds * 0.2f);
+            particles.Confetti(origin, spec.Confetti, ChipConfetti, ConfettiSpeed * scale, ConfettiSize * scale,
+                ConfettiLife);
         }
 
         if (spec.Tier >= WinTier.Epic)
         {
-            particles.Emit(CasinoLights.Shard(scale), origin, ShardCount);
+            particles.Emit(CasinoLights.ChipShard(scale), origin, ShardCount);
         }
 
         if (spec.Tier == WinTier.Legendary)
@@ -279,19 +275,6 @@ internal sealed class WinCelebration
             {
                 particles.Emit(CasinoLights.Ring(scale), origin, 1);
             }
-        }
-    }
-
-    private void Shower(float deltaSeconds, Rect full, float scale)
-    {
-        showerAccumulator += deltaSeconds * ShowerRate;
-        var drops = (int)showerAccumulator;
-        showerAccumulator -= drops;
-        var coin = CasinoLights.CoinShower(scale);
-        for (var drop = 0; drop < drops; drop++)
-        {
-            var x = full.Min.X + random.NextFloat() * full.Width;
-            particles.Emit(coin, new Vector2(x, full.Min.Y - 6f * scale), 1);
         }
     }
 }

@@ -15,10 +15,7 @@ namespace Aetherphone.Apps.Casino.Plinko;
 
 internal sealed class PlinkoCabinet : ICabinetIdle
 {
-    private const float RailChipWidth = 52f;
-    private const float RailGap = 4f;
     private const string HintMarquee = "casino.plinko.hint";
-    private const float RowsShare = 0.42f;
     private const float AutoSpacingSeconds = 0.3f;
     private const float SpotlightAlpha = 0.07f;
     private const float SpotlightSpread = 0.42f;
@@ -45,7 +42,8 @@ internal sealed class PlinkoCabinet : ICabinetIdle
     private readonly int[] idlePath = new int[IdleRows];
     private readonly string[] rowLabels = new string[PlinkoRules.RowCounts.Length];
     private readonly string[] riskLabels = new string[PlinkoRules.RiskCount];
-    private readonly LabelSlot[] rowSlots = new LabelSlot[PlinkoRules.RowCounts.Length];
+    private readonly OriginalsChoice rowsChoice = new("casino.plinko.rows", PlinkoRules.RowCounts.Length);
+    private readonly OriginalsChoice riskChoice = new("casino.plinko.risk", PlinkoRules.RiskCount);
 
     private GameRandom idleRandom = GameRandom.FromSeed(IdleSeed);
     private OriginalsLabel edgeLabel;
@@ -99,6 +97,8 @@ internal sealed class PlinkoCabinet : ICabinetIdle
     public void Reset()
     {
         preferences.RememberPlinko(rows, risk);
+        rowsChoice.Close();
+        riskChoice.Close();
         flight.Clear();
         fx.Clear();
         for (var index = 0; index < trails.Length; index++)
@@ -117,11 +117,15 @@ internal sealed class PlinkoCabinet : ICabinetIdle
     public void Gate()
     {
         composer.Gate();
+        rowsChoice.Gate();
+        riskChoice.Gate();
     }
 
     public void DrawOverlay(Rect screen, AppSkin ui)
     {
         composer.DrawOverlay(screen, ui, false);
+        rowsChoice.DrawOverlay(screen, ui);
+        riskChoice.DrawOverlay(screen, ui);
     }
 
     public void Draw(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui)
@@ -279,23 +283,24 @@ internal sealed class PlinkoCabinet : ICabinetIdle
     {
         plinko.Land(drop.Payout);
         var onBoard = drop.Rows == rows && drop.Risk == risk;
+        var tier = WinLadder.TierFor(drop.Stake, drop.Payout);
+        var bigEdge = drop.Edge && tier >= WinTier.Big;
         if (onBoard)
         {
-            fx.Land(drop.Slot, drop.Won, drop.Edge);
+            fx.Land(drop.Slot, drop.Won, bigEdge);
         }
 
         rail.Push(new PlinkoResult(drop.Tenths, drop.Rows, drop.Risk, drop.Edge));
         stage.Settle(new CasinoBetRecord(L.Plinko.Game, drop.Stake, drop.Payout, drop.RoundId,
             DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), drop.Capped));
         var origin = onBoard ? layout.SlotCenter(drop.Slot) : layout.Bounds.Center;
-        var tier = WinLadder.TierFor(drop.Stake, drop.Payout);
         var celebration = stage.Celebration;
-        if (tier != WinTier.None && (!celebration.Active || tier >= celebration.Tier))
+        if (tier != WinTier.None && (!celebration.Active || tier > celebration.Tier))
         {
             celebration.Celebrate(drop.Stake, drop.Payout, origin, instant);
         }
 
-        if (drop.Edge && !instant)
+        if (bigEdge && !instant)
         {
             CasinoSfx.Play(UiSound.Fanfare);
             stage.Particles.Emit(CasinoLights.Shard(scale), origin, EdgeShards);
@@ -363,29 +368,43 @@ internal sealed class PlinkoCabinet : ICabinetIdle
             return;
         }
 
-        var gap = RailGap * scale;
-        var chipWidth = RailChipWidth * scale;
-        var fit = Math.Max(1, (int)((row.Width + gap) / (chipWidth + gap)));
-        var visible = Math.Min(rail.Count, fit);
+        var captionStyle = TextStyles.FootnoteEmphasized;
+        var caption = Typography.FitText(Loc.T(L.Plinko.LastDrops), PlinkoResultRail.CaptionRoom(row.Width),
+            captionStyle);
+        var captionSize = Typography.Measure(caption, captionStyle);
+        Typography.Draw(drawList, new Vector2(row.Min.X, row.Center.Y - captionSize.Y * 0.5f), caption,
+            CasinoColors.InkBody, captionStyle);
+        var chipWidth = PlinkoResultRail.ChipWidth * scale;
+        var visible = Math.Min(rail.Count, PlinkoResultRail.Fit(row.Width, captionSize.X, scale));
         var style = TextStyles.FootnoteEmphasized;
+        var stroke = MathF.Max(1f, 1.4f * scale);
         for (var age = 0; age < visible; age++)
         {
             var result = rail.Newest(age);
-            var left = row.Min.X + age * (chipWidth + gap);
+            var left = PlinkoResultRail.ChipLeft(row.Min.X, captionSize.X, age, scale);
             var grow = age == 0 ? 0.6f + 0.4f * rail.Arrival : 1f;
+            var alpha = PlinkoResultRail.AlphaFor(age);
             var center = new Vector2(left + chipWidth * 0.5f, row.Center.Y);
             var half = new Vector2(chipWidth, row.Height) * 0.5f * grow;
             var tint = PlinkoArt.SlotTint(result.Tenths, PlinkoRules.EdgeTenths(result.Rows, result.Risk));
             Squircle.Fill(drawList, center - half, center + half, half.Y,
-                ImGui.GetColorU32(tint with { W = RailFillAlpha }));
+                ImGui.GetColorU32(tint with { W = RailFillAlpha * alpha }));
             if (result.Edge)
             {
                 Squircle.Stroke(drawList, center - half, center + half, half.Y,
-                    ImGui.GetColorU32(CasinoColors.MoneyHighlight), MathF.Max(1f, 1.4f * scale));
+                    ImGui.GetColorU32(CasinoColors.MoneyHighlight with { W = alpha }), stroke);
+            }
+
+            if (age == 0)
+            {
+                var ring = new Vector2(stroke * 2f, stroke * 2f);
+                Squircle.Stroke(drawList, center - half - ring, center + half + ring, half.Y + ring.Y,
+                    ImGui.GetColorU32(CasinoColors.InkTitle), stroke);
             }
 
             var label = CasinoMultiples.Label(result.Tenths * PlinkoRules.TenthsPerMultiple);
-            Typography.DrawCentered(drawList, center, label, GamePalette.InkOn(tint), style.Scale * grow,
+            var ink = GamePalette.InkOn(tint);
+            Typography.DrawCentered(drawList, center, label, ink with { W = ink.W * alpha }, style.Scale * grow,
                 style.Weight);
         }
     }
@@ -435,7 +454,8 @@ internal sealed class PlinkoCabinet : ICabinetIdle
         var edgeTenths = PlinkoRules.EdgeTenths(rows, risk);
         var ceiling = store.Ceiling.MaxBet;
         var maxWin = ceiling > 0
-            ? NumberText.Compact(PlinkoRules.Payout(ceiling, edgeTenths))
+            ? NumberText.Compact(PlinkoStageLayout.PaidAtMost(PlinkoRules.Payout(ceiling, edgeTenths), ceiling,
+                store.MaxWinPerBet))
             : CasinoMultiples.Label(edgeTenths * PlinkoRules.TenthsPerMultiple);
         var odds = edgeLabel.Get(L.Plinko.EdgeOdds, NumberText.Group(PlinkoRules.EdgeOneIn(rows)));
         OriginalsControls.StatRow(drawList, area, Loc.T(L.Plinko.MaxWin), maxWin, CasinoColors.Money,
@@ -538,23 +558,24 @@ internal sealed class PlinkoCabinet : ICabinetIdle
             return;
         }
 
-        var gap = BetComposer.Gap * UiScale.Current;
-        var split = rect.Min.X + (rect.Width - gap) * RowsShare;
-        var rowsRect = new Rect(rect.Min, new Vector2(split, rect.Max.Y));
-        var riskRect = new Rect(new Vector2(split + gap, rect.Min.Y), rect.Max);
+        var scale = UiScale.Current;
+        var drawList = ImGui.GetWindowDrawList();
         for (var index = 0; index < rowLabels.Length; index++)
         {
-            rowLabels[index] = rowSlots[index].Get(L.Plinko.RowsOption, PlinkoRules.RowCounts[index]);
+            rowLabels[index] = GameNumber.Label(PlinkoRules.RowCounts[index]);
         }
 
         riskLabels[PlinkoRules.Low] = Loc.T(L.Originals.RiskLow);
         riskLabels[PlinkoRules.Medium] = Loc.T(L.Originals.RiskMedium);
         riskLabels[PlinkoRules.High] = Loc.T(L.Originals.RiskHigh);
-        var track = Surfaces.Fill(ui.TitleInk, FillLevel.Tertiary);
-        var pickedRows = SegmentStrip.Draw("casino.plinko.rows", rowsRect, rowLabels,
-            PlinkoRules.RowsIndex(rows), track, ui.Accent, ui.MutedInk, CasinoColors.InkTitle);
-        var pickedRisk = SegmentStrip.Draw("casino.plinko.risk", riskRect, riskLabels, risk, track, ui.Accent,
-            ui.MutedInk, CasinoColors.InkTitle);
+        var rowsCaption = Loc.T(L.Plinko.FactRows);
+        var riskCaption = Loc.T(L.Originals.Risk);
+        PlinkoStageLayout.SplitKnob(rect, OriginalsChoice.PickerWidth(rowsCaption, rowLabels, rect.Height, scale),
+            OriginalsChoice.PickerWidth(riskCaption, riskLabels, rect.Height, scale), BetComposer.Gap * scale,
+            out var rowsRect, out var riskRect);
+        var pickedRows = rowsChoice.DrawPicker(drawList, rowsRect, rowsCaption, rowLabels,
+            PlinkoRules.RowsIndex(rows), ui, changeable);
+        var pickedRisk = riskChoice.DrawPicker(drawList, riskRect, riskCaption, riskLabels, risk, ui, changeable);
         if (!changeable)
         {
             return;

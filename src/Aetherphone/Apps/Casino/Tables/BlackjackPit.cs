@@ -196,20 +196,24 @@ internal sealed class BlackjackPit
     {
         var origin = ImGui.GetCursorScreenPos();
         var height = Button.LargeHeight * scale;
-        var row = new Rect(origin, new Vector2(origin.X + width, origin.Y + height));
-        if (DeckActions.DrawSecondary(DeckActions.Slice(row, 0, 2, scale), Loc.T(L.Blackjack.PitBrowse), ui.Ink,
-                true, "blackjack.pit.browse"))
+        var browse = Loc.T(L.Blackjack.PitBrowse);
+        var host = Loc.T(L.Tables.HostTitle);
+        var style = Button.LabelStyle(height);
+        var sideBySide = TablePairLayout.SideBySide(width, height, Typography.Measure(browse, style).X,
+            Typography.Measure(host, style).X, scale);
+        if (DeckActions.DrawSecondary(TablePairLayout.Cell(origin.X, origin.Y, width, height, 0, sideBySide, scale),
+                browse, ui.Ink, true, "blackjack.pit.browse"))
         {
             openBrowser();
         }
 
-        if (DeckActions.DrawSecondary(DeckActions.Slice(row, 1, 2, scale), Loc.T(L.Tables.HostTitle), ui.Ink, true,
-                "blackjack.pit.host"))
+        if (DeckActions.DrawSecondary(TablePairLayout.Cell(origin.X, origin.Y, width, height, 1, sideBySide, scale),
+                host, ui.Ink, true, "blackjack.pit.host"))
         {
             openHostSheet();
         }
 
         ImGui.SetCursorScreenPos(origin);
-        ImGui.Dummy(new Vector2(width, height + RowGap * scale));
+        ImGui.Dummy(new Vector2(width, TablePairLayout.Height(sideBySide, height, scale) + RowGap * scale));
     }
 }

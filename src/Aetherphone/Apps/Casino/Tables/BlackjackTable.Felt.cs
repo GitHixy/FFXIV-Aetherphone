@@ -21,11 +21,11 @@ internal sealed partial class BlackjackTable
     private const float BadgePopSeconds = 0.25f;
     private const float HeroRaiseSmoothing = 0.12f;
     private const float TitleDrop = 6f;
-    private const float SurrenderWidth = 0.34f;
-    private const float OpeningHandSpan = 1.45f;
     private const float StateRingRadius = 11f;
     private const float HeroColumnSink = 3f;
     private const float StateLineShare = 0.84f;
+    private const string StateMarquee = "casino.blackjack.state";
+    private const string EvenDelta = "±0";
 
     private static readonly Vector4 PillFill = new(0f, 0f, 0f, 0.35f);
 
@@ -46,7 +46,6 @@ internal sealed partial class BlackjackTable
         }
 
         DrawHero(drawList, ui, board, turnRemaining, delta, scale);
-        DrawSurrenderPill(ui, board, scale);
         dealer.DrawHand(drawList, shoe, delta, scale);
     }
 
@@ -61,12 +60,6 @@ internal sealed partial class BlackjackTable
             return;
         }
 
-        if (BlackjackPhases.Over(board.Phase) && BlackjackRecap.PlayedSeats(board) > 0)
-        {
-            StageText.Status(drawList, center, Loc.T(L.Blackjack.RecapCaption), maxWidth, scale);
-            return;
-        }
-
         DrawStateLine(drawList, ui, board, center, remaining, scale);
     }
 
@@ -78,10 +71,20 @@ internal sealed partial class BlackjackTable
         var ringRadius = StateRingRadius * scale;
         var reserve = timed ? (ringRadius * 2f + Metrics.Space.Sm * scale) : 0f;
         var maxWidth = layout.Felt.Width * StateLineShare - reserve;
-        var fit = StageText.FitScale(stateLabel, maxWidth, TextStyles.Title2, StageTextRole.State);
-        var width = MathF.Min(maxWidth, Typography.Measure(stateLabel, fit, TextStyles.Title2.Weight).X);
         var center = new Vector2(bandCenter.X + reserve * 0.5f, y);
-        StageText.StateLine(drawList, center, stateLabel, maxWidth, StageText.Strong);
+        var stateStyle = StageText.Minimum(StageTextRole.State);
+        var titleWidth = Typography.Measure(stateLabel, stateStyle).X;
+        float width;
+        if (StageText.Fits(titleWidth, maxWidth))
+        {
+            StageText.StateLine(drawList, center, stateLabel, maxWidth, StageText.Strong);
+            width = titleWidth;
+        }
+        else
+        {
+            width = StageText.Status(drawList, center, stateLabel, maxWidth, StateMarquee).X;
+        }
+
         if (!timed)
         {
             return;
@@ -331,22 +334,19 @@ internal sealed partial class BlackjackTable
             var fanCenter = new Vector2(puck.X + (handIndex - (count - 1) * 0.5f) * handWidth, fanY);
             DrawHandFan(drawList, seatIndex, handIndex, hand, fanCenter, cardWidth, handWidth - 3f * scale, shoe,
                 scale);
-            var outcomeText = OutcomeLabel(hand);
+            var outcomeText = RailOutcomeLabel(hand);
             var badgeEntrance = BadgeEntrance(seatIndex);
-            var badgeShown = hand.Outcome != BlackjackOutcomes.Pending && outcomeText.Length > 0
-                && badgeEntrance > 0f;
+            var badgeShown = outcomeText.Length > 0 && badgeEntrance > 0f;
             if (badgeShown)
             {
-                var won = hand.Delta > 0;
-                BlackjackTableArt.DrawOutcomeBadge(drawList,
-                    fanCenter, outcomeText,
-                    won ? CasinoColors.Money : ui.TitleInk, won ? CasinoColors.Money : ui.BodyInk, badgeEntrance,
+                var tint = hand.Delta > 0 ? CasinoColors.Money : hand.Delta < 0 ? StageText.Body : StageText.Strong;
+                BlackjackTableArt.DrawOutcomeBadge(drawList, fanCenter, outcomeText, tint, tint, badgeEntrance,
                     handWidth, scale);
             }
             else if (hand.Total > 0)
             {
                 var ink = hand.Outcome == BlackjackOutcomes.Bust
-                    ? ui.MutedInk
+                    ? StageText.Body
                     : handIndex == activeHand ? ui.Accent : ui.TitleInk;
                 BlackjackTableArt.DrawTotalPill(drawList, fanCenter, GameNumber.Label(hand.Total), PillFill, ink,
                     scale);
@@ -432,7 +432,7 @@ internal sealed partial class BlackjackTable
             {
                 var fill = active ? Palette.WithAlpha(ui.Accent, 0.30f) : PillFill;
                 var ink = hand.Outcome == BlackjackOutcomes.Bust
-                    ? ui.MutedInk
+                    ? StageText.Body
                     : hand.Total == BlackjackRules.TargetTotal ? CasinoColors.Money : ui.TitleInk;
                 BlackjackTableArt.DrawTotalCapsule(drawList, new Vector2(fanCenter.X, layout.HeroTotalY),
                     TotalLabel(hand.Total, hand.Soft, live && hand.Outcome == BlackjackOutcomes.Pending), fill, ink,
@@ -612,37 +612,18 @@ internal sealed partial class BlackjackTable
         return hand.Delta > 0 ? NumberText.Signed(hand.Delta) : string.Empty;
     }
 
-    private void DrawSurrenderPill(AppSkin ui, CasinoBlackjackRoomStateDto board, float scale)
+    private string RailOutcomeLabel(CasinoBlackjackHandDto hand)
     {
-        if (!BlackjackRules.IsSeat(mySeat) || board.ActiveSeat != mySeat
-            || !BlackjackRules.Allows(projection.ActionsMask, BlackjackRules.ActionSurrender))
+        if (hand.Outcome == BlackjackOutcomes.Pending)
         {
-            return;
+            return string.Empty;
         }
 
-        var felt = layout.Felt;
-        var centerY = layout.SurrenderCenterY;
-        var height = MathF.Min(Button.LargeHeight * scale, layout.SurrenderBand);
-        var handHalf = layout.HeroCardPixels(1) * OpeningHandSpan * 0.5f
-            + BlackjackTableLayout.HeroSlotPad * scale;
-        var right = felt.Max.X - BlackjackTableLayout.SideInset * 2f * scale;
-        var width = MathF.Min(felt.Width * SurrenderWidth, right - felt.Center.X - handHalf);
-        if (width <= height)
+        if (hand.Delta > 0)
         {
-            return;
+            return text.Compact(L.Stage.Plus, hand.Delta);
         }
 
-        var rect = new Rect(new Vector2(right - width, centerY - height * 0.5f),
-            new Vector2(right, centerY + height * 0.5f));
-        var legal = !rooms.StakeInFlight;
-        if (!AppSkin.StackedPillButton(rect, Loc.T(L.Blackjack.SurrenderPill), Loc.T(L.Blackjack.SurrenderHalfBack),
-                false, legal, ui.Ink) || !legal)
-        {
-            return;
-        }
-
-        inlineReason = string.Empty;
-        rooms.SendBlackjackAction(BlackjackRules.ActionSurrender);
-        CasinoSfx.Play(UiSound.ChipSlide);
+        return hand.Delta < 0 ? NumberText.Compact(hand.Delta) : EvenDelta;
     }
 }

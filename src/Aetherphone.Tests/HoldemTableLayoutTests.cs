@@ -2,7 +2,9 @@ using System.Numerics;
 using Aetherphone.Apps.Casino.Stage;
 using Aetherphone.Apps.Casino.Tables;
 using Aetherphone.Core;
+using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
+using Aetherphone.Core.Localization;
 using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
 using Xunit;
@@ -321,6 +323,53 @@ public sealed class HoldemTableLayoutTests
             var chip = new Rect(rows.Quick.Min, rows.Quick.Min + new Vector2(width, chipHeight));
             Assert.True(ChipRail.LabelRoom(chip) >= labelWidth * scale);
         }
+    }
+
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.5f)]
+    public void TheBackPillFitsItsLabelAndLeavesTheConfirmTheRest(float scale)
+    {
+        var origin = new Vector2(30f, 500f);
+        var deck = new Rect(origin, origin + new Vector2(336f, HoldemRaiseComposer.DeckHeight) * scale);
+        var action = HoldemRaiseComposer.RowsFor(deck, scale).Action;
+        Assert.Equal(HoldemRaiseComposer.ActionHeight * scale, action.Height, 2);
+        for (var labelWidth = 10f; labelWidth <= 80f; labelWidth += 10f)
+        {
+            var back = HoldemRaiseComposer.BackRect(action, labelWidth * scale, scale);
+            var confirm = HoldemRaiseComposer.ConfirmRect(action, back, scale);
+            Assert.True(back.Width - back.Height >= labelWidth * scale - Epsilon);
+            Assert.True(back.Width >= HoldemRaiseComposer.TouchTarget * scale - Epsilon);
+            Assert.True(back.Max.X + HoldemRaiseComposer.Gap * scale <= confirm.Min.X + Epsilon);
+            Assert.True(confirm.Width >= action.Width * (1f - HoldemRaiseComposer.BackMaxShare) - Epsilon
+                - HoldemRaiseComposer.Gap * scale);
+            Assert.True(Inside(action, back));
+            Assert.True(Inside(action, confirm));
+        }
+    }
+
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.5f)]
+    public void ThePostToggleSitsInsideItsRowAtTheEnd(float scale)
+    {
+        var row = new Rect(new Vector2(12f, 400f) * scale, new Vector2(348f, 444f) * scale);
+        var toggle = HoldemTable.PostToggleRect(row, scale);
+        Assert.True(Inside(row, toggle));
+        Assert.Equal(row.Max.X, toggle.Max.X, 2);
+        Assert.True(toggle.Width < row.Width * 0.5f);
+    }
+
+    [Fact]
+    public void ADealtInHeroGetsNoDeckStatusWhileOthersAct()
+    {
+        Assert.Null(HoldemTable.StatusOf(new CasinoHoldemSeatDto(State: HoldemSeatStates.InHand)).Key);
+        Assert.Equal(L.Holdem.StatusFolded.Key,
+            HoldemTable.StatusOf(new CasinoHoldemSeatDto(State: HoldemSeatStates.Folded)).Key);
+        Assert.Equal(L.Holdem.StatusNextHand.Key,
+            HoldemTable.StatusOf(new CasinoHoldemSeatDto(State: HoldemSeatStates.Seated)).Key);
     }
 
     private static Rect StageSafe(PhoneCaseKind kind, float deckHeight, bool practice)

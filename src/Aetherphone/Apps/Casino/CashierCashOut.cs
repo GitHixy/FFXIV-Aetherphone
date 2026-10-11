@@ -14,7 +14,6 @@ internal sealed class CashierCashOut
     private readonly CasinoStore store;
     private readonly ConfirmService confirm;
     private readonly CasinoTextCache texts = new();
-    private readonly ChipValueText value = new();
     private readonly Action closeSitting;
 
     public CashierCashOut(CasinoStore store, ConfirmService confirm)
@@ -28,7 +27,7 @@ internal sealed class CashierCashOut
         bool interactive, bool overlay)
     {
         var line = layout.CashLine;
-        var amount = value.Full(stack, rate);
+        var amount = NumberText.Group(ChipValue.Coins(stack, rate));
         var amountSize = CurrencyGlyph.MeasureAmount(amount, TextStyles.Title3);
         var labelHeight = Typography.LineHeight(TextStyles.Subheadline);
         Typography.Draw(drawList, new Vector2(line.Min.X, line.Center.Y - labelHeight * 0.5f),

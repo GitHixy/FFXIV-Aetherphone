@@ -11,13 +11,9 @@ internal static class CasinoLights
     public const float ChaseBulbsPerSecond = 6f;
     public const float NeonHaloScale = 2.4f;
     public const float NeonHaloAlpha = 0.18f;
-    public const float CoinGravity = 640f;
     public const float CoinRadius = 3.4f;
-    public const float CoinLaunchSpeed = 300f;
-    public const float CoinLife = 1.15f;
     public const float CoinDrag = 0.35f;
     public const float CoinSpin = 14f;
-    public const float CoinSpread = 0.75f;
     public const float CoinRainSpeed = 70f;
     public const float CoinRainLife = 1.7f;
     public const float CoinRainGravity = 360f;
@@ -185,11 +181,6 @@ internal static class CasinoLights
             CoinRainGravity * scale, CoinDrag, CoinSpin, CoinRainSpread, MathF.PI * 0.5f, ParticleShape.Coin,
             SizeCurve.Shrink, false);
 
-    public static ParticleSpec CoinFountain(float scale) =>
-        new(CasinoColors.Money, CasinoColors.MoneyHighlight, CoinRadius * scale, CoinLaunchSpeed * scale, CoinLife,
-            CoinGravity * scale, CoinDrag, CoinSpin, CoinSpread, -MathF.PI * 0.5f, ParticleShape.Coin, SizeCurve.Shrink,
-            false);
-
     public static ParticleSpec Sparkle(float scale) =>
         new(CasinoColors.MoneyHighlight, CasinoColors.Money, 3f * scale, 150f * scale, 0.8f, 40f * scale, 2.2f, 6f,
             MathF.PI * 2f, 0f, ParticleShape.Star, SizeCurve.Shrink, true);
@@ -198,11 +189,17 @@ internal static class CasinoLights
         new(CasinoColors.MoneyHighlight, CasinoColors.LightA, 5f * scale, 320f * scale, 1.2f, 260f * scale, 1.2f, 14f,
             MathF.PI * 2f, 0f, ParticleShape.Shard, SizeCurve.Shrink, true);
 
+    public static ParticleSpec ChipSparkle(float scale) =>
+        new(CasinoColors.InkTitle, CasinoColors.LightA, 3f * scale, 120f * scale, 0.7f, 40f * scale, 2.4f, 6f,
+            MathF.PI * 2f, 0f, ParticleShape.Star, SizeCurve.Shrink, true);
+
+    public static ParticleSpec ChipShard(float scale) =>
+        new(CasinoColors.LightB, CasinoColors.LightA, 4f * scale, 190f * scale, 0.8f, 200f * scale, 1.8f, 12f,
+            MathF.PI * 2f, 0f, ParticleShape.Shard, SizeCurve.Shrink, true);
+
     public static ParticleSpec Ring(float scale) =>
         new(CasinoColors.Money, CasinoColors.LightA, 60f * scale, 0f, 0.9f, 0f, 0f, 0f, 0f, 0f, ParticleShape.Ring,
             SizeCurve.Grow, true);
-
-    public static Emitter CoinShowerEmitter(float scale, float rate) => new(CoinShower(scale), rate);
 
     public static void LightSweep(StageBackdrop backdrop, float strength)
     {
