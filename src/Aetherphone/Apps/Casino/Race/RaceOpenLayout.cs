@@ -1,3 +1,4 @@
+using Aetherphone.Apps.Casino.Stage;
 using Aetherphone.Core;
 using Aetherphone.Core.Casino;
 
@@ -122,40 +123,32 @@ internal readonly struct RaceOpenLayout
 
 internal readonly struct RaceDeckLayout
 {
-    public const float Pad = 12f;
-    public const float Gap = 8f;
-    public const float SegmentHeight = 36f;
-    public const float AmountHeight = 40f;
-    public const float ActionHeight = 56f;
-    public const float QuickWidth = 54f;
-    public const float PrimaryMinWidth = 150f;
+    public const float Pad = DeckActions.Pad;
+    public const float Gap = DeckActions.Gap;
+    public const float SegmentHeight = DeckActions.SecondaryHeight;
+    public const float AmountHeight = DeckActions.SecondaryHeight;
+    public const float ActionHeight = DeckActions.PrimaryHeight;
+    public const float PrimaryMinWidth = 120f;
     public const float Height = Pad * 2f + SegmentHeight + AmountHeight + ActionHeight + Gap * 2f;
 
     public readonly Rect Segment;
-    public readonly Rect Field;
-    public readonly Rect Half;
-    public readonly Rect Double;
-    public readonly Rect Max;
+    public readonly DeckAmountRow Amount;
     public readonly Rect Ride;
     public readonly Rect Primary;
-    public readonly Rect Message;
 
-    private RaceDeckLayout(Rect segment, Rect field, Rect half, Rect twice, Rect max, Rect ride, Rect primary,
-        Rect message)
+    private RaceDeckLayout(Rect segment, in DeckAmountRow amount, Rect ride, Rect primary)
     {
         Segment = segment;
-        Field = field;
-        Half = half;
-        Double = twice;
-        Max = max;
+        Amount = amount;
         Ride = ride;
         Primary = primary;
-        Message = message;
     }
 
     public bool HasRide => Ride.Width > 0f;
 
-    public static RaceDeckLayout Compute(Rect deck, float rideWidth, float scale)
+    public Rect Field => Amount.Field;
+
+    public static RaceDeckLayout Compute(Rect deck, in DeckQuickLabels quick, float rideWidth, float scale)
     {
         var pad = Pad * scale;
         var gap = Gap * scale;
@@ -164,16 +157,9 @@ internal readonly struct RaceDeckLayout
         var top = deck.Min.Y + pad;
         var segment = new Rect(new Vector2(left, top), new Vector2(right, top + SegmentHeight * scale));
         var amountTop = segment.Max.Y + gap;
-        var amountBottom = amountTop + AmountHeight * scale;
-        var quick = MathF.Min(QuickWidth * scale, MathF.Max(0f, (right - left - gap * 3f) * 0.2f));
-        var maxLeft = right - quick;
-        var doubleLeft = maxLeft - gap - quick;
-        var halfLeft = doubleLeft - gap - quick;
-        var field = new Rect(new Vector2(left, amountTop), new Vector2(MathF.Max(left, halfLeft - gap), amountBottom));
-        var half = new Rect(new Vector2(halfLeft, amountTop), new Vector2(halfLeft + quick, amountBottom));
-        var twice = new Rect(new Vector2(doubleLeft, amountTop), new Vector2(doubleLeft + quick, amountBottom));
-        var max = new Rect(new Vector2(maxLeft, amountTop), new Vector2(right, amountBottom));
-        var actionTop = MathF.Max(amountBottom + gap, deck.Max.Y - pad - ActionHeight * scale);
+        var amountRow = new Rect(new Vector2(left, amountTop), new Vector2(right, amountTop + AmountHeight * scale));
+        var amount = DeckAmountRow.Compute(amountRow, quick, scale);
+        var actionTop = MathF.Max(amountRow.Max.Y + gap, deck.Max.Y - pad - ActionHeight * scale);
         var actionBottom = actionTop + ActionHeight * scale;
         var rideRight = left;
         if (rideWidth > 0f)
@@ -185,8 +171,7 @@ internal readonly struct RaceDeckLayout
         var ride = new Rect(new Vector2(left, actionTop), new Vector2(rideRight, actionBottom));
         var primaryLeft = ride.Width > 0f ? ride.Max.X + gap : left;
         var primary = new Rect(new Vector2(primaryLeft, actionTop), new Vector2(right, actionBottom));
-        var message = new Rect(new Vector2(left, top), new Vector2(right, amountBottom));
-        return new RaceDeckLayout(segment, field, half, twice, max, ride, primary, message);
+        return new RaceDeckLayout(segment, amount, ride, primary);
     }
 }
 

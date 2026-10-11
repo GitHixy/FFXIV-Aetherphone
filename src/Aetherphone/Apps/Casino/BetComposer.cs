@@ -138,7 +138,10 @@ internal sealed class BetComposer
 
         var running = Auto.Running;
         var controlsEnabled = model.Enabled && !running && !model.Busy;
-        var layout = BetDeckLayout.Compute(deck, model.Knob, model.FixedAmount, model.AutoAvailable, scale);
+        var quick = model.FixedAmount
+            ? default
+            : DeckAmountRow.Measure(BetDeckLayout.AmountHeight * scale);
+        var layout = BetDeckLayout.Compute(deck, model.Knob, model.FixedAmount, model.AutoAvailable, quick, scale);
         KnobRect = layout.Knob;
         if (layout.HasAmount)
         {
@@ -173,30 +176,25 @@ internal sealed class BetComposer
         in BetComposerModel model, bool enabled)
     {
         DrawField(drawList, ui, layout.Field, model, enabled, UiScale.Current);
-        if (Quick(ui, layout.Half, Loc.T(L.Casino.BetHalf), enabled))
+        var tapped = layout.Amount.DrawChips(ui.Ink, enabled);
+        if (tapped == QuickChip.None)
         {
-            amount = CasinoLadder.Half(amount, model.MinimumBet, model.MaximumBet, Bound(model));
-            UiFeedback.Play(UiSound.ChipSlide);
+            return;
         }
 
-        if (Quick(ui, layout.Double, CasinoMultiples.Label(200), enabled))
+        amount = tapped switch
         {
-            amount = CasinoLadder.Double(amount, model.MinimumBet, model.MaximumBet, Bound(model));
-            UiFeedback.Play(UiSound.ChipSlide);
-        }
-
-        if (Quick(ui, layout.Max, Loc.T(L.Casino.BetMax), enabled))
-        {
-            amount = CasinoLadder.Top(model.MinimumBet, model.MaximumBet, Bound(model));
-            UiFeedback.Play(UiSound.ChipSlide);
-        }
+            QuickChip.Half => CasinoLadder.Half(amount, model.MinimumBet, model.MaximumBet, Bound(model)),
+            QuickChip.Double => CasinoLadder.Double(amount, model.MinimumBet, model.MaximumBet, Bound(model)),
+            _ => CasinoLadder.Top(model.MinimumBet, model.MaximumBet, Bound(model)),
+        };
+        UiFeedback.Play(UiSound.ChipSlide);
     }
 
     private void DrawField(ImDrawListPtr drawList, AppSkin ui, Rect field, in BetComposerModel model, bool enabled,
         float scale)
     {
-        SearchBar.Surface(drawList, field, ui.Ink);
-        var capsule = SearchBar.Capsule(field);
+        var capsule = DeckAmountRow.FieldSurface(drawList, field, ui.Ink);
         if (flash > 0f)
         {
             Squircle.Stroke(drawList, capsule.Min, capsule.Max, capsule.Height * 0.5f,
@@ -204,7 +202,7 @@ internal sealed class BetComposer
                 Metrics.Stroke.Ring * scale);
         }
 
-        var inset = capsule.Height * 0.4f;
+        var inset = DeckAmountRow.FieldInset(scale);
         if (editing && enabled)
         {
             DrawEditor(field, capsule, inset, model);
@@ -213,10 +211,11 @@ internal sealed class BetComposer
 
         editing = false;
         var text = NumberText.Compact(amount);
-        var size = CurrencyGlyph.MeasureAmount(text, TextStyles.SubheadlineEmphasized);
+        var style = DeckAmountRow.AmountStyle(text, capsule.Width - inset * 2f);
+        var size = CurrencyGlyph.MeasureAmount(text, style);
         var origin = new Vector2(capsule.Min.X + inset, capsule.Center.Y - size.Y * 0.5f);
         CurrencyGlyph.DrawAmount(drawList, origin, text, CurrencyKind.Chips,
-            enabled ? CasinoColors.Money : ui.MutedInk, TextStyles.SubheadlineEmphasized, enabled ? 1f : 0.5f);
+            enabled ? CasinoColors.Money : ui.MutedInk, style, enabled ? 1f : 0.5f);
         var hovered = enabled && UiInteract.Hover(field.Min, field.Max);
         if (hovered)
         {
@@ -413,7 +412,4 @@ internal sealed class BetComposer
             : Loc.T(template, Games.Framework.GameNumber.Label(remaining));
         return actionLabel;
     }
-
-    private static bool Quick(AppSkin ui, Rect rect, string label, bool enabled) =>
-        Button.Draw(rect, label, ui.Ink, ButtonStyle.Gray, enabled: enabled);
 }

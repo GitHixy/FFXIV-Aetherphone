@@ -63,7 +63,8 @@ internal sealed class RaceDeck
             ? 0f
             : DeckActions.PillWidth(Typography.Measure(model.Ride, Button.LabelStyle(RaceDeckLayout.ActionHeight * scale)).X,
                 scale);
-        var layout = RaceDeckLayout.Compute(deck, rideWidth, scale);
+        var layout = RaceDeckLayout.Compute(deck, DeckAmountRow.Measure(RaceDeckLayout.AmountHeight * scale),
+            rideWidth, scale);
         var result = RaceDeckAction.None;
         PickedKind = model.Kind;
         var picked = SegmentStrip.Draw("##raceKind", layout.Segment, kindLabels, model.Kind,
@@ -100,8 +101,7 @@ internal sealed class RaceDeck
         float scale)
     {
         var field = layout.Field;
-        SearchBar.Surface(drawList, field, ui.Ink);
-        var capsule = SearchBar.Capsule(field);
+        var capsule = DeckAmountRow.FieldSurface(drawList, field, ui.Ink);
         if (flash > 0f)
         {
             Squircle.Stroke(drawList, capsule.Min, capsule.Max, capsule.Height * 0.5f,
@@ -109,31 +109,24 @@ internal sealed class RaceDeck
                 Metrics.Stroke.Ring * scale);
         }
 
-        var style = TextStyles.Headline;
         var text = RaceAmounts.Text(amount);
+        var inset = DeckAmountRow.FieldInset(scale);
+        var style = DeckAmountRow.AmountStyle(text, capsule.Width - inset * 2f);
         var size = RaceAmounts.Measure(text, style);
-        var inset = capsule.Height * 0.4f;
         RaceAmounts.Draw(drawList, new Vector2(capsule.Min.X + inset, capsule.Center.Y - size.Y * 0.5f), text,
             model.Enabled ? CasinoColors.Money : ui.MutedInk, style, model.Enabled ? 1f : 0.5f);
-        var enabled = model.Enabled;
-        if (Button.Draw(layout.Half, Loc.T(L.Casino.BetHalf), ui.Ink, ButtonStyle.Gray, enabled: enabled))
-        {
-            amount = CasinoLadder.Half(amount, RaceRules.MinBet, model.MaximumBet, long.MaxValue);
-            UiFeedback.Play(UiSound.ChipSlide);
-        }
-
-        if (Button.Draw(layout.Double, CasinoMultiples.Label(200), ui.Ink, ButtonStyle.Gray, enabled: enabled))
-        {
-            amount = CasinoLadder.Double(amount, RaceRules.MinBet, model.MaximumBet, long.MaxValue);
-            UiFeedback.Play(UiSound.ChipSlide);
-        }
-
-        if (!Button.Draw(layout.Max, Loc.T(L.Casino.BetMax), ui.Ink, ButtonStyle.Gray, enabled: enabled))
+        var tapped = layout.Amount.DrawChips(ui.Ink, model.Enabled);
+        if (tapped == QuickChip.None)
         {
             return;
         }
 
-        amount = CasinoLadder.Top(RaceRules.MinBet, model.MaximumBet, long.MaxValue);
+        amount = tapped switch
+        {
+            QuickChip.Half => CasinoLadder.Half(amount, RaceRules.MinBet, model.MaximumBet, long.MaxValue),
+            QuickChip.Double => CasinoLadder.Double(amount, RaceRules.MinBet, model.MaximumBet, long.MaxValue),
+            _ => CasinoLadder.Top(RaceRules.MinBet, model.MaximumBet, long.MaxValue),
+        };
         UiFeedback.Play(UiSound.ChipSlide);
     }
 }

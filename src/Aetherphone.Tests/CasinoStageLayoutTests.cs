@@ -76,7 +76,7 @@ public sealed class CasinoStageLayoutTests
     [InlineData(0.75f)]
     [InlineData(1f)]
     [InlineData(1.5f)]
-    public void TheStageIsFullBleedWhileChromeAndDeckStayInsideTheContent(float scale)
+    public void TheStageIsFullBleedWhileTheChromeStaysInsideTheContentAndTheDeckSpansTheScreen(float scale)
     {
         var screen = new Rect(new Vector2(84f, 2f), new Vector2(84f + 393f * scale, 2f + 852f * scale));
         var content = new Rect(new Vector2(screen.Min.X + 16f * scale, screen.Min.Y + 48f * scale),
@@ -87,7 +87,8 @@ public sealed class CasinoStageLayoutTests
         Assert.Equal(content.Min.Y + CasinoStageLayout.ChromeBand * scale, layout.Band.Max.Y, 3);
         Assert.True(layout.BackCenter.Y - layout.ChipRadiusPixels >= content.Min.Y);
         Assert.Equal(content.Max.Y, layout.Deck.Max.Y, 3);
-        Assert.Equal(content.Min.X, layout.Deck.Min.X, 3);
+        Assert.Equal(screen.Min.X, layout.Deck.Min.X, 3);
+        Assert.Equal(screen.Max.X, layout.Deck.Max.X, 3);
         Assert.Equal(screen.Max.Y, layout.DeckPanel.Max.Y, 3);
         Assert.Equal(screen.Min.X, layout.DeckPanel.Min.X, 3);
         Assert.Equal(screen.Max.X, layout.DeckPanel.Max.X, 3);

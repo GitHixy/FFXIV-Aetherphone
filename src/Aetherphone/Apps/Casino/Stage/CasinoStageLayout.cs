@@ -82,7 +82,7 @@ internal readonly struct CasinoStageLayout
 
         var bottom = MathF.Max(top, content.Max.Y);
         var deckTop = MathF.Max(top, bottom - MathF.Max(0f, deckHeight) * scale);
-        var deck = new Rect(new Vector2(content.Min.X, deckTop), new Vector2(content.Max.X, bottom));
+        var deck = new Rect(new Vector2(full.Min.X, deckTop), new Vector2(full.Max.X, bottom));
         var inset = SafeInset * scale;
         var safeMin = new Vector2(full.Min.X + inset, top + inset);
         var safeMax = new Vector2(full.Max.X - inset, deckTop - inset);

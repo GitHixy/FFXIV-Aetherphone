@@ -1,5 +1,5 @@
 using Aetherphone.Apps.Casino;
-using Aetherphone.Windows.Components;
+using Aetherphone.Apps.Casino.Stage;
 using Xunit;
 
 namespace Aetherphone.Tests;
@@ -36,12 +36,22 @@ public sealed class ClassicBetComposerTests
     }
 
     [Fact]
-    public void HalfIsHalfOfWhatCouldBeStakedAndNeverBelowTheMinimum()
+    public void HalfHalvesTheAmountAndNeverDropsBelowTheMinimum()
     {
-        Assert.Equal(250, ClassicBetComposer.Half(Minimum, Maximum, 1000));
-        Assert.Equal(60, ClassicBetComposer.Half(Minimum, Maximum, 120));
-        Assert.Equal(Minimum, ClassicBetComposer.Half(Minimum, Maximum, 15));
-        Assert.Equal(0, ClassicBetComposer.Half(Minimum, Maximum, 9));
+        Assert.Equal(200, ClassicBetComposer.Half(400, Minimum, Maximum, 1000));
+        Assert.Equal(60, ClassicBetComposer.Half(900, Minimum, Maximum, 60));
+        Assert.Equal(Minimum, ClassicBetComposer.Half(15, Minimum, Maximum, 1000));
+        Assert.Equal(0, ClassicBetComposer.Half(400, Minimum, Maximum, 9));
+    }
+
+    [Fact]
+    public void DoubleDoublesTheAmountUpToTheCeiling()
+    {
+        Assert.Equal(400, ClassicBetComposer.Double(200, Minimum, Maximum, 1000));
+        Assert.Equal(Maximum, ClassicBetComposer.Double(400, Minimum, Maximum, 1000));
+        Assert.Equal(120, ClassicBetComposer.Double(100, Minimum, Maximum, 120));
+        Assert.Equal(Maximum, ClassicBetComposer.Double(long.MaxValue, Minimum, Maximum, long.MaxValue));
+        Assert.Equal(Minimum, ClassicBetComposer.Double(0, Minimum, Maximum, 1000));
     }
 
     [Fact]
@@ -51,9 +61,11 @@ public sealed class ClassicBetComposerTests
     }
 
     [Fact]
-    public void TheComposerHeightIsTheThreeRowsItActuallyDraws()
+    public void TheComposerHeightIsTheAmountRowAndThePrimaryRow()
     {
-        var expected = (ClassicBetComposer.FieldHeight + ClassicBetComposer.QuickHeight + ClassicBetComposer.ConfirmHeight + 16f) * 2f;
+        var expected = (ClassicBetComposer.FieldHeight + DeckActions.Gap + ClassicBetComposer.ConfirmHeight) * 2f;
         Assert.Equal(expected, ClassicBetComposer.HeightFor(2f), 3);
+        Assert.Equal(DeckActions.SecondaryHeight, ClassicBetComposer.FieldHeight);
+        Assert.Equal(DeckActions.PrimaryHeight, ClassicBetComposer.ConfirmHeight);
     }
 }

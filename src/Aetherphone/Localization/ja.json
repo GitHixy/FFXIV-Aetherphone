@@ -8714,8 +8714,6 @@
   "casino.spin.topNote": "16マスあり、一番よいマスは {0} コインです。",
   "casino.spin.claimedTitle": "今日のスピンは使い切りました",
   "casino.seat.open": "空席",
-  "casino.bet.min": "最小",
-  "casino.bet.half": "半分",
   "casino.bet.max": "最大",
   "casino.blackjack.betsCloseIn": "ベット締切まで{0}",
   "casino.blackjack.waitingForBets": "ベットしてください",

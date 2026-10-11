@@ -245,7 +245,7 @@ internal sealed partial class BlackjackTable
             var bounds = new Rect(new Vector2(frame.Deck.Min.X + inset, frame.Deck.Min.Y + inset),
                 new Vector2(frame.Deck.Max.X - inset, frame.Deck.Max.Y - inset));
             var label = text.Named(L.Strip.BetFor, hostedText.Gil(gilComposer.Amount));
-            if (gilComposer.Draw(ui, bounds, minimum, tableMax, seatStack, 1, !blocked, label, frame.DeltaSeconds))
+            if (gilComposer.Draw(ui, bounds, minimum, tableMax, seatStack, !blocked, label, frame.DeltaSeconds))
             {
                 inlineReason = string.Empty;
                 rooms.PlaceBlackjackBet(gilComposer.Amount);

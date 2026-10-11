@@ -10619,8 +10619,6 @@ internal static class L
         public static readonly LocString SpinTopNote = new("casino.spin.topNote", "Sixteen segments, and the best of them pays {0} coins.");
         public static readonly LocString SpinClaimedTitle = new("casino.spin.claimedTitle", "Today's spin is spent");
         public static readonly LocString SeatOpen = new("casino.seat.open", "Open");
-        public static readonly LocString BetMin = new("casino.bet.min", "Min");
-        public static readonly LocString BetHalf = new("casino.bet.half", "Half");
         public static readonly LocString BetMax = new("casino.bet.max", "Max");
         public static readonly LocString BlackjackBetsCloseIn = new("casino.blackjack.betsCloseIn", "Bets close in {0}");
         public static readonly LocString BlackjackWaitingForBets = new("casino.blackjack.waitingForBets", "Place your bets");

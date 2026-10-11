@@ -8714,8 +8714,6 @@
   "casino.spin.topNote": "On altı dilim var ve en iyisi {0} coin veriyor.",
   "casino.spin.claimedTitle": "Bugünün çevirmesi harcandı",
   "casino.seat.open": "Boş",
-  "casino.bet.min": "En az",
-  "casino.bet.half": "Yarısı",
   "casino.bet.max": "En çok",
   "casino.blackjack.betsCloseIn": "Bahisler {0} içinde kapanıyor",
   "casino.blackjack.waitingForBets": "Bahislerinizi yapın",
