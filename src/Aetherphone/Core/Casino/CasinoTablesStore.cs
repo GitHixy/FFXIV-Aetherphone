@@ -49,6 +49,11 @@ internal sealed class CasinoTablesStore : IDisposable
     private int fetchingLedger;
     private long ledgerAttemptedAtTick;
     private long ledgerLoadedAtTick;
+    private volatile CasinoLedgerEntryDto[] myEntries = Array.Empty<CasinoLedgerEntryDto>();
+    private volatile bool myLedgerLoaded;
+    private int fetchingMyLedger;
+    private long myLedgerAttemptedAtTick;
+    private long myLedgerLoadedAtTick;
     private volatile CasinoQuickSeatDto? quickSeat;
     private volatile CasinoTableRowDto? hostedTable;
     private volatile CasinoTableRowDto? resolvedTable;
@@ -477,6 +482,54 @@ internal sealed class CasinoTablesStore : IDisposable
         RefreshLedger(roomId);
     }
 
+    public CasinoLedgerEntryDto[] MyEntries => myEntries;
+
+    public bool MyLedgerLoaded => myLedgerLoaded;
+
+    public void EnsureMyLedgerFresh()
+    {
+        var last = Interlocked.Read(ref myLedgerLoadedAtTick);
+        if (last != 0 && Environment.TickCount64 - last < LedgerRefreshMilliseconds)
+        {
+            return;
+        }
+
+        RefreshMyLedger();
+    }
+
+    public void RefreshMyLedgerNow()
+    {
+        Interlocked.Exchange(ref myLedgerAttemptedAtTick, 0);
+        Interlocked.Exchange(ref myLedgerLoadedAtTick, 0);
+        RefreshMyLedger();
+    }
+
+    private void RefreshMyLedger()
+    {
+        if (!session.IsSignedIn
+            || CoolingDown(Interlocked.Read(ref myLedgerAttemptedAtTick), Environment.TickCount64)
+            || Interlocked.Exchange(ref fetchingMyLedger, 1) != 0)
+        {
+            return;
+        }
+
+        Interlocked.Exchange(ref myLedgerAttemptedAtTick, Environment.TickCount64);
+        var account = session.CurrentUser?.Id;
+        work.Run("my gil ledger", async token =>
+        {
+            var fresh = await casino.MyLedgerAsync(token).ConfigureAwait(false);
+            if (fresh is null || !string.Equals(account, session.CurrentUser?.Id, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            Interlocked.Exchange(ref myLedgerAttemptedAtTick, 0);
+            Interlocked.Exchange(ref myLedgerLoadedAtTick, Environment.TickCount64);
+            myEntries = fresh.Entries ?? Array.Empty<CasinoLedgerEntryDto>();
+            myLedgerLoaded = true;
+        }, () => Interlocked.Exchange(ref fetchingMyLedger, 0));
+    }
+
     public void ForgetLedger()
     {
         ledgerRoomId = string.Empty;
@@ -585,6 +638,10 @@ internal sealed class CasinoTablesStore : IDisposable
 
             Interlocked.Exchange(ref noticeOutcome, new CasinoStakeOutcome(answer.Granted, Named(answer.Reason)));
             RefreshLedgerNow(roomId);
+            if (myLedgerLoaded)
+            {
+                RefreshMyLedgerNow();
+            }
         }, EndIntent);
     }
 
@@ -1065,6 +1122,10 @@ internal sealed class CasinoTablesStore : IDisposable
         Interlocked.Exchange(ref intentFailed, 0);
         Interlocked.Exchange(ref tablesAttemptedAtTick, 0);
         Interlocked.Exchange(ref doorAttemptedAtTick, 0);
+        myEntries = Array.Empty<CasinoLedgerEntryDto>();
+        myLedgerLoaded = false;
+        Interlocked.Exchange(ref myLedgerAttemptedAtTick, 0);
+        Interlocked.Exchange(ref myLedgerLoadedAtTick, 0);
         lock (intentGate)
         {
             seatIntentId = string.Empty;

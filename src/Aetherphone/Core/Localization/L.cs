@@ -11388,6 +11388,10 @@ internal static class L
         public static readonly LocString CopyRow = new("casino.tables.copyRow", "{0}: in {1}, stack {2}, net {3}, {4} hands");
         public static readonly LocString CopyEntry = new("casino.tables.copyEntry", "{0}: {1} to {2}, {3}, {4}");
         public static readonly LocString GilLedgerHeading = new("casino.tables.gilLedgerHeading", "Gil ledger");
+        public static readonly LocString LedgerUpdated = new("casino.tables.ledgerUpdated", "Gil ledger updated");
+        public static readonly LocString MyLedgerTitle = new("casino.tables.myLedgerTitle", "My gil ledger");
+        public static readonly LocString MyLedgerLine = new("casino.tables.myLedgerLine", "Every gil entry you are a side of from the last 30 days, at open and closed tables.");
+        public static readonly LocString MyLedgerEmpty = new("casino.tables.myLedgerEmpty", "No gil entries from the last 30 days.");
         public static readonly LocString GilAmount = new("casino.tables.gilAmount", "{0} gil");
         public static readonly LocString KindBuyIn = new("casino.tables.kindBuyIn", "Buy-in");
         public static readonly LocString KindRebuy = new("casino.tables.kindRebuy", "Rebuy");
@@ -11673,7 +11677,8 @@ internal static class L
         public static readonly LocString BroadcastBet = new("casino.venue.broadcastBet", "Bet {0}");
         public static readonly LocString TradeSync = new("casino.venue.tradeSync", "Trade sync");
         public static readonly LocString TradeAutoConfirm = new("casino.venue.tradeAutoConfirm", "Confirm my side automatically");
-        public static readonly LocString TradeSyncHint = new("casino.venue.tradeSyncHint", "Reads the in-game trade window only to suggest the matching ledger entry. Nothing in the game is clicked for you.");
+        public static readonly LocString TradeSyncHint = new("casino.venue.tradeSyncHint", "Reads the in-game trade window only to suggest the matching ledger entry. The trade partner's name is checked against this table on the server and is never shown to anyone. Nothing in the game is clicked for you.");
+        public static readonly LocString TradeUnmatched = new("casino.venue.tradeUnmatched", "Your last trade of {0} gil matched nobody at this table. Record it below if it belongs here.");
         public static readonly LocString TradeNotifyTitle = new("casino.venue.tradeNotifyTitle", "Record this trade?");
         public static readonly LocString TradeReceivedFrom = new("casino.venue.tradeReceivedFrom", "You received {1} gil from {0}");
         public static readonly LocString TradeSentTo = new("casino.venue.tradeSentTo", "You sent {1} gil to {0}");

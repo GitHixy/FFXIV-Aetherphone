@@ -37,6 +37,7 @@ internal sealed class TradeSyncPrompt
 
     public void Draw(Rect screen, AppSkin ui)
     {
+        Tables.TableLedger.Toast(trade.TakeOutcome());
         var proposal = trade.Pending;
         if (proposal.Kind == TradeProposalKind.None)
         {

@@ -47,6 +47,7 @@ internal sealed class TableBrowser
     private readonly Action<string> openDoor;
     private readonly Action enterHouse;
     private readonly Action openHostSheet;
+    private readonly Action openGilLedger;
     private readonly Venue.NearbyTablesCard nearby;
     private readonly Action<CasinoTableRowDto> openNearby;
     private readonly ChipRail rail = new();
@@ -68,7 +69,7 @@ internal sealed class TableBrowser
 
     public TableBrowser(CasinoTablesStore tables, HoldemStore holdemTables, CasinoStore chips,
         Action<string> openTable, Action<string> openDoor, Action enterHouse, Action openHostSheet,
-        Venue.NearbyTablesCard nearby)
+        Action openGilLedger, Venue.NearbyTablesCard nearby)
     {
         this.nearby = nearby;
         openNearby = row => openTable(row.TableId);
@@ -79,6 +80,7 @@ internal sealed class TableBrowser
         this.openDoor = openDoor;
         this.enterHouse = enterHouse;
         this.openHostSheet = openHostSheet;
+        this.openGilLedger = openGilLedger;
     }
 
     private enum JoinInput : byte
@@ -120,6 +122,7 @@ internal sealed class TableBrowser
 
         Gap(SectionGap, scale);
         DrawHostCta(ui, width, scale);
+        DrawGilLedgerCta(ui, width, scale);
         Gap(SectionGap, scale);
         DrawNearby(ui, width, scale);
         DrawFilters(ui);
@@ -373,6 +376,30 @@ internal sealed class TableBrowser
 
     private void DrawHostCta(AppSkin ui, float width, float scale)
     {
+        if (DrawCta(ui, width, scale, FontAwesomeIcon.Plus, Loc.T(L.Tables.HostCta), Loc.T(L.Tables.HostCtaLine), true))
+        {
+            OpenHost();
+        }
+    }
+
+    private void DrawGilLedgerCta(AppSkin ui, float width, float scale)
+    {
+        if (!chips.HasFeature(CasinoFeatures.HostingV2))
+        {
+            return;
+        }
+
+        Gap(RowGap, scale);
+        if (DrawCta(ui, width, scale, FontAwesomeIcon.Book, Loc.T(L.Tables.MyLedgerTitle), Loc.T(L.Tables.MyLedgerLine),
+                false))
+        {
+            openGilLedger();
+        }
+    }
+
+    private static bool DrawCta(AppSkin ui, float width, float scale, FontAwesomeIcon glyph, string title,
+        string line, bool accent)
+    {
         var origin = ImGui.GetCursorScreenPos();
         var drawList = ImGui.GetWindowDrawList();
         var pad = 14f * scale;
@@ -380,24 +407,26 @@ internal sealed class TableBrowser
         var textLeft = origin.X + pad + icon + pad;
         var textWidth = MathF.Max(1f, origin.X + width - pad * 2f - 12f * scale - textLeft);
         var titleHeight = Typography.LineHeight(TextStyles.Headline);
-        var line = Loc.T(L.Tables.HostCtaLine);
         var lineHeight = Typography.MeasureWrappedBlock(line, TextStyles.Subheadline, textWidth).Y;
         var height = MathF.Max(icon + pad * 2f, titleHeight + lineHeight + pad * 2f);
         var card = new Rect(origin, new Vector2(origin.X + width, origin.Y + height));
         var radius = Metrics.Radius.Grouped * scale;
         var hovered = UiInteract.Hover(card.Min, card.Max);
         ui.Card(drawList, card.Min, card.Max, radius);
-        Squircle.Fill(drawList, card.Min, card.Max, radius,
-            ImGui.GetColorU32(ui.Accent with { W = hovered ? AccentFillAlpha * 1.6f : AccentFillAlpha }));
-        Squircle.Stroke(drawList, card.Min, card.Max, radius, ImGui.GetColorU32(ui.Accent with { W = AccentRimAlpha }),
-            1.2f * scale);
+        if (accent)
+        {
+            Squircle.Fill(drawList, card.Min, card.Max, radius,
+                ImGui.GetColorU32(ui.Accent with { W = hovered ? AccentFillAlpha * 1.6f : AccentFillAlpha }));
+            Squircle.Stroke(drawList, card.Min, card.Max, radius,
+                ImGui.GetColorU32(ui.Accent with { W = AccentRimAlpha }), 1.2f * scale);
+        }
+
         var iconCenter = new Vector2(origin.X + pad + icon * 0.5f, card.Center.Y);
         drawList.AddCircleFilled(iconCenter, icon * 0.5f, ImGui.GetColorU32(ui.Accent), 32);
-        ProgressRing.CenterIcon(drawList, iconCenter, FontAwesomeIcon.Plus, CasinoArt.White, icon * 0.42f);
+        ProgressRing.CenterIcon(drawList, iconCenter, glyph, CasinoArt.White, icon * 0.42f);
         var top = card.Center.Y - (titleHeight + lineHeight) * 0.5f;
-        Typography.Draw(drawList, new Vector2(textLeft, top),
-            Typography.FitText(Loc.T(L.Tables.HostCta), textWidth, TextStyles.Headline), ui.TitleInk,
-            TextStyles.Headline);
+        Typography.Draw(drawList, new Vector2(textLeft, top), Typography.FitText(title, textWidth, TextStyles.Headline),
+            ui.TitleInk, TextStyles.Headline);
         Typography.DrawWrappedLeft(new Vector2(textLeft, top + titleHeight), line, ui.BodyInk, TextStyles.Subheadline,
             textWidth);
         CasinoArt.Chevron(drawList, new Vector2(card.Max.X - pad - 6f * scale, card.Center.Y), ui.MutedInk);
@@ -406,13 +435,10 @@ internal sealed class TableBrowser
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
         }
 
-        if (UiInteract.Click(card.Min, card.Max, hovered))
-        {
-            OpenHost();
-        }
-
+        var clicked = UiInteract.Click(card.Min, card.Max, hovered);
         ImGui.SetCursorScreenPos(origin);
         ImGui.Dummy(new Vector2(width, height));
+        return clicked;
     }
 
     private void OpenHost()

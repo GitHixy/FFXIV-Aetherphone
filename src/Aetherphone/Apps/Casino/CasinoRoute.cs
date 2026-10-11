@@ -26,6 +26,7 @@ internal enum CasinoScreen
     VenueRoom,
     Broadcast,
     Fame,
+    GilLedger,
 }
 
 internal readonly record struct CasinoRoute(

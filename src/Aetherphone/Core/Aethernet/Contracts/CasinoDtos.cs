@@ -744,6 +744,16 @@ internal sealed record CasinoLedgerResultDto(bool Granted = false, string Reason
 
 internal sealed record CasinoLedgerListDto(CasinoLedgerEntryDto[]? Entries = null, long ServerNowUnixMs = 0);
 
+internal sealed record CasinoLedgerTradeMatchRequest(string[]? Names = null, long Received = 0, long Sent = 0);
+
+internal sealed record CasinoLedgerTradeMatchDto(
+    bool Granted = false,
+    string Reason = "",
+    bool Matched = false,
+    string CounterpartyUserId = "",
+    string CounterpartyName = "",
+    bool HostSide = false);
+
 internal sealed record CasinoVenueActRequest(
     string ClientActionId = "",
     string Action = "",

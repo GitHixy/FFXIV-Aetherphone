@@ -39,6 +39,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
     private readonly BlackjackSeatFlow seatFlow;
     private readonly Action leaveRoom;
     private readonly Action<string> openLedger;
+    private readonly Action openGilLedger;
     private readonly BlackjackHostedText hostedText = new();
     private readonly CasinoTextCache text = new();
     private readonly BlackjackProjection projection = new();
@@ -61,7 +62,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
     public BlackjackTable(CasinoStore chips, CasinoRoomsStore rooms, CasinoTablesStore tables,
         CasinoHistoryStore history, CasinoTurnNotifier turns, RemoteImageCache images, LodestoneService lodestone,
-        Action leaveRoom, Action<string> openLedger)
+        Action leaveRoom, Action<string> openLedger, Action openGilLedger)
     {
         this.chips = chips;
         this.rooms = rooms;
@@ -72,6 +73,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         this.lodestone = lodestone;
         this.leaveRoom = leaveRoom;
         this.openLedger = openLedger;
+        this.openGilLedger = openGilLedger;
         seatFlow = new BlackjackSeatFlow(tables);
         composer = new BetComposer("##blackjackBet");
         gilComposer = new ClassicBetComposer("##blackjackGilBet");
@@ -324,10 +326,16 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         var knock = tables.KnockFor(roomId, closedReason);
         tables.EnsureKnockFresh(roomId);
         var action = TableDoorCard.Draw(drawList, ui, closedReason, knock, L.Casino.BlackjackClosedTitle,
-            L.Casino.BlackjackClosedHint, safe, scale);
+            L.Casino.BlackjackClosedHint, safe, scale, Currency == CasinoCurrencies.Gil);
         if (action == TableDoorAction.Knock)
         {
             tables.Knock(roomId);
+            return;
+        }
+
+        if (action == TableDoorAction.GilLedger)
+        {
+            openGilLedger();
             return;
         }
 

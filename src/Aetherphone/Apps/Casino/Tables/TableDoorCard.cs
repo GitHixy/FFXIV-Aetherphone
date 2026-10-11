@@ -12,6 +12,7 @@ internal enum TableDoorAction : byte
     None,
     Knock,
     Leave,
+    GilLedger,
 }
 
 internal readonly record struct TableDoorContent(LocString Title, LocString Hint, LocString Action,
@@ -20,13 +21,30 @@ internal readonly record struct TableDoorContent(LocString Title, LocString Hint
 internal static class TableDoorCard
 {
     public static TableDoorAction Draw(ImDrawListPtr drawList, AppSkin ui, string reason, CasinoKnockStatus knock,
-        LocString closedTitle, LocString closedHint, Rect safe, float scale)
+        LocString closedTitle, LocString closedHint, Rect safe, float scale, bool offerGilLedger = false)
     {
         var content = ContentFor(reason, knock, closedTitle, closedHint);
-        CasinoNotice.DrawWithAction(drawList, ui, CasinoNoticeKind.Card, Loc.T(content.Title), Loc.T(content.Hint),
-            Loc.T(content.Action), safe.Min.X, safe.Min.Y + Metrics.Space.Lg * scale, safe.Width, scale,
-            out var pressed);
-        return pressed ? content.Pressed : TableDoorAction.None;
+        var bottom = CasinoNotice.DrawWithAction(drawList, ui, CasinoNoticeKind.Card, Loc.T(content.Title),
+            Loc.T(content.Hint), Loc.T(content.Action), safe.Min.X, safe.Min.Y + Metrics.Space.Lg * scale,
+            safe.Width, scale, out var pressed);
+        if (pressed)
+        {
+            return content.Pressed;
+        }
+
+        if (!offerGilLedger)
+        {
+            return TableDoorAction.None;
+        }
+
+        var label = Loc.T(L.Tables.MyLedgerTitle);
+        var width = MathF.Min(Button.WidthFor(label, ButtonSize.Large), safe.Width);
+        var top = bottom + Metrics.Space.Sm * scale;
+        var left = safe.Min.X + (safe.Width - width) * 0.5f;
+        var rect = new Rect(new Vector2(left, top), new Vector2(left + width, top + Button.LargeHeight * scale));
+        return Button.Draw(drawList, rect, label, ui.Ink, ButtonStyle.Gray, id: "casino.door.gilLedger")
+            ? TableDoorAction.GilLedger
+            : TableDoorAction.None;
     }
 
     internal static TableDoorContent ContentFor(string reason, CasinoKnockStatus knock, LocString closedTitle,

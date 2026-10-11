@@ -1,10 +1,11 @@
 using System.Globalization;
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Core.Casino;
 using Aetherphone.Core.Net;
 
 namespace Aetherphone.Core.Aethernet.Clients;
 
-internal sealed partial class CasinoClient
+internal sealed partial class CasinoClient : ITradeMatchSource
 {
     internal const string StatePath = "/casino";
     internal const string BuyChipsPath = "/casino/chips/buy";
@@ -43,6 +44,7 @@ internal sealed partial class CasinoClient
     internal const string TournamentLeaf = "tournament";
     internal const string TournamentStopLeaf = "tournament/stop";
     internal const string LedgerLeaf = "ledger";
+    internal const string LedgerMatchLeaf = "ledger/match";
     internal const string CloseLeaf = "close";
 
     internal static string BonusClaimPath(string kind)
@@ -462,6 +464,14 @@ internal sealed partial class CasinoClient
         return net.PostAsync(TablePath(roomId, LedgerLeaf), request,
             AethernetJsonContext.Default.CasinoLedgerProposeRequest,
             AethernetJsonContext.Default.CasinoLedgerResultDto, token, null, onFailure);
+    }
+
+    public Task<CasinoLedgerTradeMatchDto?> MatchTradeAsync(string roomId, CasinoLedgerTradeMatchRequest request,
+        CancellationToken token, Action<AepFailure>? onFailure = null)
+    {
+        return net.PostAsync(TablePath(roomId, LedgerMatchLeaf), request,
+            AethernetJsonContext.Default.CasinoLedgerTradeMatchRequest,
+            AethernetJsonContext.Default.CasinoLedgerTradeMatchDto, token, null, onFailure);
     }
 
     public Task<CasinoLedgerResultDto?> ConfirmLedgerEntryAsync(string entryId, CancellationToken token,

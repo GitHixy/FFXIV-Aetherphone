@@ -425,7 +425,7 @@ internal sealed class PhoneServices : IDisposable
         var casinoVenue = new Casino.CasinoVenueStore(aethernetSession, casinoApi.Casino, casinoApi.Safety, casinoRooms,
             casinoTables, new Casino.HousingPositionReader(), Aetherphone.Core.Maps.LocationShare.WorldName);
         var casinoTrade = new Casino.CasinoTradeSync(configuration, aethernetSession, new Casino.TradeWindowReader(),
-            casinoRooms, casinoTables, casinoVenue, notifications, Apps.AppAccents.For("casino"));
+            casinoApi.Casino, casinoRooms, casinoTables, casinoVenue, notifications, Apps.AppAccents.For("casino"));
         var casinoFloor = new Casino.CasinoFloorStore(aethernetSession, casinoApi.Casino, casino, realtimeSignals);
         var gameRooms = new Games.GameRoomsStore(aethernetSession, aethernet.Games, visibility,
             realtimeSignals);
