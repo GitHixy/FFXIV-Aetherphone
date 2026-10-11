@@ -12646,7 +12646,7 @@ internal static class L
             new("conduct.zero.8", "A new account or alt after a suspension or block, harassing staff, or organizing mass reports"),
         };
         public static readonly LocString LadderTitle = new("conduct.ladder.title", "How moderation works");
-        public static readonly LocString LadderLead = new("conduct.ladder.lead", "Moderators follow this ladder:");
+        public static readonly LocString LadderLead = new("conduct.ladder.lead", "All reports are user submitted by the community. Most of what Moderation acts on is done using these reports, there is no AI/Bot managing moderation. Human error can happen, please make an appeal if you don't agree with a decision. Moderators follow this ladder:");
         public static readonly LocString LadderVeil = new("conduct.ladder.veil", "Forgot to mark a post as sensitive? A moderator marks it for you and locks it. Three of those in 30 days count as a removal.");
         public static readonly LocString[] LadderItems =
         {

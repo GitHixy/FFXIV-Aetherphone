@@ -89,7 +89,7 @@
   "conduct.zero.7": "Partager des mods payants ou privés, ou renvoyer vers des sites de fuites",
   "conduct.zero.8": "Un nouveau compte ou un compte secondaire après une suspension ou un blocage, le harcèlement du staff, ou l'organisation de signalements en masse",
   "conduct.ladder.title": "Comment fonctionne la modération",
-  "conduct.ladder.lead": "Les modérateurs appliquent cette échelle :",
+  "conduct.ladder.lead": "Tous les signalements sont envoyés par la communauté. L'essentiel de ce que fait la modération repose sur ces signalements, aucune IA ni aucun bot ne gère la modération. L'erreur humaine reste possible, faites appel si vous n'êtes pas d'accord avec une décision. Les modérateurs appliquent cette échelle :",
   "conduct.ladder.veil": "Vous avez oublié de marquer une publication comme sensible ? Un modérateur la marque pour vous et la verrouille. Trois de ces marquages en 30 jours comptent comme un retrait.",
   "conduct.ladder.1": "Premier retrait : la publication est retirée et vous recevez un avertissement qui indique la règle concernée.",
   "conduct.ladder.2": "Deuxième retrait dans les 30 jours : une suspension de 3 jours.",
