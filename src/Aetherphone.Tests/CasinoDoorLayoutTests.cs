@@ -133,6 +133,19 @@ public sealed class CasinoDoorLayoutTests
     }
 
     [Fact]
+    public void AVenueDoorListsTheRoomInsteadOfSeatsAndTheHostIsNeverRemovable()
+    {
+        Assert.False(TableDoor.HasSeats(new CasinoTableRowDto(TableId: "t1", GameKind: VenueKinds.Raffle)));
+        Assert.False(TableDoor.HasSeats(new CasinoTableRowDto(TableId: "t1", GameKind: VenueKinds.DiceTable)));
+        Assert.True(TableDoor.HasSeats(new CasinoTableRowDto(TableId: "t1", GameKind: CasinoWire.BlackjackKind)));
+        Assert.True(TableDoor.HasSeats(null));
+
+        var card = new CasinoTableRowDto(TableId: "t1", OwnerUserId: "host");
+        Assert.False(TableDoor.Removable("host", card));
+        Assert.True(TableDoor.Removable("guest", card));
+    }
+
+    [Fact]
     public void TheDoorPrefersItsOwnCodeOverTheCard()
     {
         var door = new CasinoTableDoorDto(RoomId: "t1", JoinCode: "ABCDEF");

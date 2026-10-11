@@ -10708,11 +10708,16 @@ internal static class L
         public static readonly LocString DoorNoKnocks = new("casino.door.noKnocks", "Nobody is at the door. Share the invite and they will show up here.");
         public static readonly LocString DoorSeatedHeading = new("casino.door.seatedHeading", "At the table");
         public static readonly LocString DoorNobodySeated = new("casino.door.nobodySeated", "The seats are empty for now.");
+        public static readonly LocString DoorRoomHeading = new("casino.door.roomHeading", "In the room");
+        public static readonly LocString DoorNobodyInRoom = new("casino.door.nobodyInRoom", "Nobody else is in the room right now.");
+        public static readonly LocString DoorInRoom = new("casino.door.inRoom", "Here now");
+        public static readonly LocString DoorCoDealerAway = new("casino.door.coDealerAway", "Co-dealer, not here");
         public static readonly LocString DoorApprove = new("casino.door.approve", "Let in");
         public static readonly LocString DoorDeny = new("casino.door.deny", "Not now");
         public static readonly LocString DoorRemove = new("casino.door.remove", "Remove");
         public static readonly LocString DoorRemoveConfirmTitle = new("casino.door.removeConfirmTitle", "Remove {0}?");
         public static readonly LocString DoorRemoveConfirmBody = new("casino.door.removeConfirmBody", "Their hand ends and their chips go straight back to their wallet. They cannot rejoin this table.");
+        public static readonly LocString DoorRemoveMemberConfirmBody = new("casino.door.removeMemberConfirmBody", "They are taken out of the room and cannot come back to this table.");
         public static readonly LocString SitDownAction = new("casino.seat.sitDown", "Sit down");
         public static readonly LocString StandAction = new("casino.seat.stand", "Leave the table");
         public static readonly LocString StandQueued = new("casino.seat.standQueued", "Leaving after this hand");

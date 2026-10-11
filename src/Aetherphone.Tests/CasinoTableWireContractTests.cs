@@ -215,6 +215,31 @@ public sealed class CasinoTableWireContractTests
     }
 
     [Fact]
+    public void TheDoorListsTheRoomBesideTheSeats()
+    {
+        const string json = """
+        {
+          "roomId": "table-4f2a",
+          "owner": true,
+          "seated": [],
+          "present": [
+            {"userId":"u3","displayName":"Krile","attached":true},
+            {"userId":"u4","displayName":"Alisaie","attached":false}
+          ]
+        }
+        """;
+
+        var door = JsonSerializer.Deserialize(json, AethernetJsonContext.Default.CasinoTableDoorDto);
+        Assert.Equal(2, door!.Present!.Length);
+        Assert.Equal("u3", door.Present[0].UserId);
+        Assert.Equal("Krile", door.Present[0].DisplayName);
+        Assert.True(door.Present[0].Attached);
+        Assert.False(door.Present[1].Attached);
+        Assert.Null(JsonSerializer.Deserialize("{\"roomId\":\"t1\"}",
+            AethernetJsonContext.Default.CasinoTableDoorDto)!.Present);
+    }
+
+    [Fact]
     public void CreatingATableComesBackWithSomethingShareable()
     {
         const string json = """

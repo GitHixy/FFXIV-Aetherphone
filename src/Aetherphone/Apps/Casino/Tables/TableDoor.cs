@@ -20,7 +20,7 @@ internal enum DoorControl : byte
     Close,
 }
 
-internal sealed class TableDoor
+internal sealed partial class TableDoor
 {
     private const int ControlCapacity = 5;
     private const float SectionGap = 18f;
@@ -150,24 +150,12 @@ internal sealed class TableDoor
             }
         }
 
-        Gap(SectionGap, scale);
-        ui.SectionHeading(Loc.T(L.Casino.DoorSeatedHeading), 0f);
-        var seated = door?.Seated;
-        if (seated is null || seated.Length == 0)
+        if (HasSeats(card))
         {
-            DrawNote(ui, width, Loc.T(L.Casino.DoorNobodySeated), scale);
-        }
-        else
-        {
-            for (var index = 0; index < seated.Length; index++)
-            {
-                using (ImRaii.PushId(index))
-                {
-                    DrawSeated(ui, seated[index], card, width, scale);
-                }
-            }
+            DrawSeatedSection(ui, door, card, width, scale);
         }
 
+        DrawRoom(ui, door, card, width, scale);
         if (card is not null && card.Config is not null)
         {
             ledger.Draw(ui, tables.AccountId, card.OwnerUserId, scale);
@@ -511,77 +499,37 @@ internal sealed class TableDoor
         ImGui.Dummy(new Vector2(width, KnockCard.Height(width, scale) + DoorLayout.RowGap * scale));
     }
 
+    private void DrawSeatedSection(AppSkin ui, CasinoTableDoorDto? door, CasinoTableRowDto? card, float width,
+        float scale)
+    {
+        Gap(SectionGap, scale);
+        ui.SectionHeading(Loc.T(L.Casino.DoorSeatedHeading), 0f);
+        var seated = door?.Seated;
+        if (seated is null || seated.Length == 0)
+        {
+            DrawNote(ui, width, Loc.T(L.Casino.DoorNobodySeated), scale);
+            return;
+        }
+
+        for (var index = 0; index < seated.Length; index++)
+        {
+            using (ImRaii.PushId(index))
+            {
+                DrawSeated(ui, seated[index], card, width, scale);
+            }
+        }
+    }
+
     private void DrawSeated(AppSkin ui, CasinoTableSeatedDto occupant, CasinoTableRowDto? card, float width,
         float scale)
     {
-        var origin = ImGui.GetCursorScreenPos();
-        var drawList = ImGui.GetWindowDrawList();
-        var nameHeight = Typography.LineHeight(TextStyles.Headline);
-        var lineHeight = Typography.LineHeight(TextStyles.Subheadline);
-        var height = DoorLayout.PlayerHeight(scale, nameHeight, lineHeight);
-        var row = new Rect(origin, new Vector2(origin.X + width, origin.Y + height));
-        var radius = Metrics.Radius.Grouped * scale;
-        ui.Card(drawList, row.Min, row.Max, radius);
         var config = card?.Config;
         var coDealer = config is not null && IsCoDealer(config, occupant.UserId);
-        if (coDealer)
-        {
-            Squircle.Fill(drawList, row.Min, row.Max, radius, ImGui.GetColorU32(ui.Accent with { W = ActiveFillAlpha }));
-        }
-
-        KnockCard.DrawAvatar(drawList, ui, DoorLayout.AvatarCenter(row, scale), occupant.DisplayName, scale);
-        var dealerMode = coDealerMode && config is not null;
-        var label = dealerMode
-            ? Loc.T(coDealer ? L.Tables.CoDealerOn : L.Tables.CoDealerOff)
-            : Loc.T(L.Casino.DoorRemove);
-        var button = DoorLayout.TrailingButton(row, Button.WidthFor(label, ButtonSize.Large), scale);
-        var textLeft = DoorLayout.TextLeft(row, scale);
-        var textWidth = MathF.Max(1f, button.Min.X - DoorLayout.TextGap * scale - textLeft);
-        var top = row.Center.Y - (nameHeight + lineHeight) * 0.5f;
-        Typography.Draw(drawList, new Vector2(textLeft, top),
-            Typography.FitText(occupant.DisplayName, textWidth, TextStyles.Headline), ui.TitleInk, TextStyles.Headline);
         var line = coDealer
             ? Loc.T(L.Tables.CoDealerOn)
             : occupant.Leaving
                 ? Loc.T(L.Casino.StandQueued)
                 : texts.Count(L.Tables.SeatLabel, occupant.SeatIndex + 1);
-        Typography.Draw(drawList, new Vector2(textLeft, top + nameHeight),
-            Typography.FitText(line, textWidth, TextStyles.Subheadline), coDealer ? ui.Accent : ui.BodyInk,
-            TextStyles.Subheadline);
-        var busy = tables.IntentInFlight;
-        if (dealerMode)
-        {
-            var full = !coDealer && (config!.CoDealers?.Length ?? 0) >= CasinoHostingRules.MaxCoDealers;
-            if (Button.Draw(drawList, button, label, ui.Ink, coDealer ? ButtonStyle.Prominent : ButtonStyle.Tinted,
-                    enabled: !busy && !full, id: "casino.door.codealer"))
-            {
-                inlineReason = string.Empty;
-                tables.SetCoDealers(roomId, Toggled(config!.CoDealers, occupant.UserId));
-            }
-        }
-        else if (Button.Draw(drawList, button, label, ui.Ink, ButtonStyle.Gray, ButtonRole.Destructive,
-                     !busy && !occupant.Leaving, id: "casino.door.remove"))
-        {
-            AskRemove(occupant.UserId, occupant.DisplayName);
-        }
-
-        ImGui.SetCursorScreenPos(origin);
-        ImGui.Dummy(new Vector2(width, height + DoorLayout.RowGap * scale));
-    }
-
-    private void AskRemove(string userId, string name)
-    {
-        var targetRoom = roomId;
-        var targetUser = userId;
-        confirm.Ask(new ConfirmRequest
-        {
-            Title = texts.Named(L.Casino.DoorRemoveConfirmTitle, name),
-            Message = Loc.T(L.Casino.DoorRemoveConfirmBody),
-            ConfirmLabel = Loc.T(L.Casino.DoorRemove),
-            CancelLabel = Loc.T(L.Common.Cancel),
-            Sheet = true,
-            Danger = true,
-            Confirm = () => tables.Kick(targetRoom, targetUser),
-        });
+        DrawMemberRow(ui, occupant.UserId, occupant.DisplayName, line, occupant.Leaving, false, card, width, scale);
     }
 }

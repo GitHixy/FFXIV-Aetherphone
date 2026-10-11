@@ -874,6 +874,11 @@ internal sealed record CasinoTableSeatedDto(
     int SeatIndex = -1,
     bool Leaving = false);
 
+internal sealed record CasinoTablePresentDto(
+    string UserId = "",
+    string DisplayName = "",
+    bool Attached = false);
+
 internal sealed record CasinoTableDoorDto(
     string RoomId = "",
     bool Owner = false,
@@ -881,7 +886,8 @@ internal sealed record CasinoTableDoorDto(
     CasinoTableKnockDto[]? Knocks = null,
     CasinoTableSeatedDto[]? Seated = null,
     long ServerNowUnixMs = 0,
-    string JoinCode = "");
+    string JoinCode = "",
+    CasinoTablePresentDto[]? Present = null);
 
 internal sealed record CasinoTableDoorRequest(string UserId, bool Approve);
 
