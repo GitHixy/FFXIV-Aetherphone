@@ -7760,6 +7760,7 @@
   "changelog.r1300.50": "Se cambió cada saldo de fichas para mostrar su valor en monedas",
   "changelog.r1300.77": "Se cambió el sorteo del bote de la sala: una tirada cuenta como máximo 10 monedas en boletos, así que toda tirada de 10 monedas o más tiene la misma probabilidad",
   "changelog.r1300.58": "Añadido el ajuste «Mostrar en escenas», que mantiene el teléfono en pantalla mientras se reproduce una escena, útil con un segundo monitor",
+  "changelog.r1300.81": "Se añadió un contador de FPS al teléfono pequeño, desactivado por defecto en Ajustes > Teléfono minimizado, contribuido por t3sco",
   "changelog.r1300.51": "Corregida la barra de desplazamiento, que al arrastrarla con la posición del teléfono bloqueada se movía al revés y demasiado despacio, contribuido por jambalong",
   "changelog.r1300.57": "Corregido que los filtros de Linkpearl y las proporciones del editor de fotos cortaran sus etiquetas",
   "changelog.r1300.76": "Corregida la indicación del nombre de usuario, que decía letras cuando solo se aceptan letras minúsculas",

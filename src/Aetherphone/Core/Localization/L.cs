@@ -2341,6 +2341,8 @@ internal static class L
         {
             new("changelog.r1300.58",
                 "Added a Show in cutscenes setting that keeps the phone on screen while a cutscene plays, for a second monitor"),
+            new("changelog.r1300.81",
+                "Added an FPS counter to the mini phone, off by default under Settings > Minimized phone, contributed by t3sco"),
             new("changelog.r1300.51",
                 "Fixed the scrollbar moving the wrong way and too slowly when dragged while the phone position is locked, contributed by jambalong"),
             new("changelog.r1300.57",

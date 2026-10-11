@@ -7760,6 +7760,7 @@
   "changelog.r1300.50": "Mudamos cada saldo de fichas para mostrar o valor em moedas",
   "changelog.r1300.77": "Mudamos o sorteio do jackpot do salão: uma rodada conta no máximo 10 moedas em bilhetes, então toda rodada de 10 moedas ou mais tem a mesma chance",
   "changelog.r1300.58": "Adicionada a opção Mostrar em cutscenes, que mantém o telefone na tela enquanto uma cutscene é exibida, útil com um segundo monitor",
+  "changelog.r1300.81": "Adicionamos um contador de FPS ao telefone pequeno, desligado por padrão em Ajustes > Telefone minimizado, contribuição de t3sco",
   "changelog.r1300.51": "Corrigida a barra de rolagem, que ao ser arrastada com a posição do telefone bloqueada ia na direção errada e devagar demais, contribuição de jambalong",
   "changelog.r1300.57": "Corrigimos os filtros do Linkpearl e as proporções do editor de fotos que cortavam seus rótulos",
   "changelog.r1300.76": "Corrigimos a dica do nome de usuário, que falava em letras quando só letras minúsculas são aceitas",

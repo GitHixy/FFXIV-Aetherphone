@@ -7760,6 +7760,7 @@
   "changelog.r1300.50": "Chipguthaben geändert: Jedes zeigt jetzt seinen Wert in Münzen",
   "changelog.r1300.77": "Ziehung des Floor-Jackpots geändert: Eine Drehung zählt höchstens 10 Münzen als Lose, also hat jede Drehung ab 10 Münzen dieselbe Chance",
   "changelog.r1300.58": "Einstellung „In Zwischensequenzen anzeigen“ hinzugefügt, die das Handy während einer Zwischensequenz auf dem Bildschirm hält, praktisch für einen zweiten Monitor",
+  "changelog.r1300.81": "FPS-Zähler für das Mini-Telefon hinzugefügt, standardmäßig aus unter Einstellungen > Minimiertes Telefon, beigetragen von t3sco",
   "changelog.r1300.51": "Scrollleiste behoben, die sich bei gesperrter Telefonposition beim Ziehen in die falsche Richtung und zu langsam bewegte, beigetragen von jambalong",
   "changelog.r1300.57": "Behoben, dass die Filter in Linkpearl und die Seitenverhältnisse im Fotoeditor ihre Beschriftungen abschnitten",
   "changelog.r1300.76": "Behoben, dass der Hinweis zum Handle Buchstaben nannte, obwohl nur Kleinbuchstaben erlaubt sind",

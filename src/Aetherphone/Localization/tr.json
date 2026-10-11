@@ -7760,6 +7760,7 @@
   "changelog.r1300.50": "Fiş bakiyeleri değiştirildi: her biri artık Coin değerini gösteriyor",
   "changelog.r1300.77": "Salon ikramiyesi çekilişi değiştirildi: bir dönüş en fazla 10 Coin'lik bilet sayılır, bu yüzden 10 Coin ve üzeri her dönüşün şansı aynı",
   "changelog.r1300.58": "Ara sahne oynarken telefonu ekranda tutan, ikinci monitörde işe yarayan Ara sahnelerde göster ayarı eklendi",
+  "changelog.r1300.81": "Mini telefona FPS sayacı eklendi, Ayarlar > Küçültülmüş telefon altında varsayılan olarak kapalı, katkı: t3sco",
   "changelog.r1300.51": "Telefon konumu kilitliyken kaydırma çubuğunun sürüklenince ters yöne ve çok yavaş hareket etmesi düzeltildi, katkı: jambalong",
   "changelog.r1300.57": "Linkpearl filtrelerinin ve fotoğraf düzenleyicideki en boy oranlarının etiketlerini kesmesi düzeltildi",
   "changelog.r1300.76": "Kullanıcı adı ipucunun, yalnızca küçük harf kabul edildiği hâlde harf demesi düzeltildi",

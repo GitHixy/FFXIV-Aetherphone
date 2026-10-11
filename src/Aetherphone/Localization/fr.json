@@ -7760,6 +7760,7 @@
   "changelog.r1300.50": "Modification des soldes de jetons : chacun affiche maintenant sa valeur en pièces",
   "changelog.r1300.77": "Modification du tirage du jackpot de la salle : un tour compte au plus 10 pièces de tickets, donc tout tour à partir de 10 pièces a la même chance",
   "changelog.r1300.58": "Ajout du réglage « Afficher pendant les cinématiques », qui garde le téléphone à l'écran pendant une cinématique, pratique sur un second écran",
+  "changelog.r1300.81": "Ajout d'un compteur de FPS sur le mini téléphone, désactivé par défaut dans Réglages > Téléphone réduit, contribution de t3sco",
   "changelog.r1300.51": "Correction de la barre de défilement qui, glissée avec la position du téléphone verrouillée, allait dans le mauvais sens et trop lentement, contribution de jambalong",
   "changelog.r1300.57": "Correction des filtres de Linkpearl et des formats de l'éditeur photo qui coupaient leurs libellés",
   "changelog.r1300.76": "Correction de l'aide sur l'identifiant, qui parlait de lettres alors que seules les lettres minuscules sont acceptées",
