@@ -70,7 +70,8 @@ internal sealed class VenueContextCard
     {
         nearby.Poll();
         var own = OwnTable();
-        var hasDraft = preferences.TryLoadHostDraft(out var memory);
+        var hasDraft = preferences.TryLoadHostDraft(out var memory)
+                       && HostDraft.Reopens(memory, chips.HasFeature(CasinoFeatures.VenueBook));
         Kind = VenueSectionState.Pick(own is not null, nearby.Count, hasDraft);
         switch (Kind)
         {

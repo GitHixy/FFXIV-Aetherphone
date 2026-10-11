@@ -394,4 +394,16 @@ public sealed class CasinoHostSheetTests
         Assert.Equal(draft.Build(null), restored.Build(null));
         Assert.Equal("Book, Gil, bank " + NumberText.Compact(5_000_000), HostDraftSummary.Of(restored));
     }
+
+    [Fact]
+    public void ARememberedBookDraftStaysPutWhileTheServerDoesNotListTheBook()
+    {
+        var book = new HostDraft();
+        book.SelectGame(HostGame.Book, true);
+        var blackjack = new HostDraft();
+
+        Assert.True(HostDraft.Reopens(book.Snapshot(true), true));
+        Assert.False(HostDraft.Reopens(book.Snapshot(true), false));
+        Assert.True(HostDraft.Reopens(blackjack.Snapshot(true), false));
+    }
 }

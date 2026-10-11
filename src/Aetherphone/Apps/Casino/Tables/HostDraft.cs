@@ -222,6 +222,9 @@ internal sealed class HostDraft
     public static HostGame GameOf(CasinoHostDraftMemory memory) =>
         (HostGame)Math.Clamp(memory.Game, 0, HostGames.All.Length - 1);
 
+    public static bool Reopens(CasinoHostDraftMemory memory, bool bookOpen) =>
+        bookOpen || !HostGames.IsBook(GameOf(memory));
+
     public void Restore(CasinoHostDraftMemory memory)
     {
         Reset(GameOf(memory));

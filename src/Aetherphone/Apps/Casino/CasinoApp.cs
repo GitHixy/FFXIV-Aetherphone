@@ -1240,7 +1240,8 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
 
     private void OpenHostDraft()
     {
-        if (router.Current.Screen == CasinoScreen.HostTable || !preferences.TryLoadHostDraft(out var saved))
+        if (router.Current.Screen == CasinoScreen.HostTable || !preferences.TryLoadHostDraft(out var saved)
+            || !Tables.HostDraft.Reopens(saved, casino.HasFeature(Core.Casino.CasinoFeatures.VenueBook)))
         {
             return;
         }
