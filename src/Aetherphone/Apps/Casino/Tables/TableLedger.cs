@@ -116,7 +116,7 @@ internal sealed class TableLedger
         }
 
         ui.SectionHeading(Loc.T(L.Tables.GilLedgerHeading), Metrics.Space.Md);
-        TradeSyncCard.Draw(ui, trade, scale, false);
+        TradeSyncCard.Draw(ui, trade, scale, false, ledger.Owner);
         DrawMiss(ui, scale);
         if (waitingNote.Length > 0)
         {

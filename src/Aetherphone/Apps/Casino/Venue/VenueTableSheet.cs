@@ -152,7 +152,9 @@ internal sealed class VenueTableSheet
 
         if (target.Gil)
         {
-            Tables.TradeSyncCard.Draw(ui, trade, scale, true);
+            var host = string.Equals(venue.Tables.CardFor(target.TableId)?.OwnerUserId, venue.AccountId,
+                StringComparison.Ordinal);
+            Tables.TradeSyncCard.Draw(ui, trade, scale, true, host);
         }
 
         if (target.CanBroadcast)

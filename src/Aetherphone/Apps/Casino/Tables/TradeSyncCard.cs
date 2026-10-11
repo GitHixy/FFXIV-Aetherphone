@@ -7,13 +7,14 @@ namespace Aetherphone.Apps.Casino.Tables;
 
 internal static class TradeSyncCard
 {
-    private const int Rows = 2;
+    private const int HostRows = 1;
+    private const int PlayerRows = 2;
     private const string SyncId = "casino.trade.sync";
     private const string AutoId = "casino.trade.auto";
 
-    public static void Draw(AppSkin ui, CasinoTradeSync trade, float scale, bool overlay)
+    public static void Draw(AppSkin ui, CasinoTradeSync trade, float scale, bool overlay, bool host)
     {
-        var card = GroupCard.Begin(ui, Rows, VenueFields.RowUnits);
+        var card = GroupCard.Begin(ui, host ? HostRows : PlayerRows, VenueFields.RowUnits);
         var enabled = VenueFields.ToggleRow(ui, card.NextRow(VenueFields.RowUnits), SyncId,
             Loc.T(L.Venue.TradeSync), trade.Enabled, scale, overlay);
         if (enabled != trade.Enabled)
@@ -21,11 +22,14 @@ internal static class TradeSyncCard
             trade.Enabled = enabled;
         }
 
-        var auto = VenueFields.ToggleRow(ui, card.NextRow(VenueFields.RowUnits), AutoId,
-            Loc.T(L.Venue.TradeAutoConfirm), trade.AutoConfirm, scale, overlay);
-        if (auto != trade.AutoConfirm)
+        if (!host)
         {
-            trade.AutoConfirm = auto;
+            var auto = VenueFields.ToggleRow(ui, card.NextRow(VenueFields.RowUnits), AutoId,
+                Loc.T(L.Venue.TradeAutoConfirm), trade.AutoConfirm, scale, overlay);
+            if (auto != trade.AutoConfirm)
+            {
+                trade.AutoConfirm = auto;
+            }
         }
 
         card.End();
