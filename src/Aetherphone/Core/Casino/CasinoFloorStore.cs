@@ -220,12 +220,20 @@ internal sealed class CasinoFloorStore : IDisposable
         }, () => Interlocked.Exchange(ref fameFetching[slot], 0));
     }
 
-    public void ResetFame()
+    public void RefreshFame() => ExpireFame(false);
+
+    public void ResetFame() => ExpireFame(true);
+
+    private void ExpireFame(bool forget)
     {
         Interlocked.Increment(ref fameGeneration);
         for (var index = 0; index < fame.Length; index++)
         {
-            Volatile.Write(ref fame[index], null);
+            if (forget)
+            {
+                Volatile.Write(ref fame[index], null);
+            }
+
             Interlocked.Exchange(ref fameLoadedAt[index], 0);
         }
     }

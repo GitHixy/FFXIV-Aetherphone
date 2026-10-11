@@ -87,7 +87,7 @@ internal sealed class CasinoFameChoiceStore : IDisposable
 
             answered.Add(reply.Id);
             session.SetUser(reply);
-            floor.ResetFame();
+            floor.RefreshFame();
             return true;
         }, succeeded =>
         {
