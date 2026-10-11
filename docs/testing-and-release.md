@@ -203,6 +203,10 @@ Both scrub em and en dashes from the text they post (the changelog pages in rele
 
 Maintainers now bump the dropdown by hand inside the release commit (see the checklist), so on a normal release the job finds nothing to change. It remains as a safety net and as a backfill: dispatch it manually with a version input.
 
+## Staff post
+
+.github/workflows/staff-post.yml posts a note written by a maintainer, such as what changed in a beta build and the QA checklist for it, to a channel on the staff server as the same bot. Dispatch it with a `title` and a markdown `body`; .github/scripts/staff-post.mjs splits a long body into numbered embeds and never pings anyone. The channel id lives in the `DISCORD_STAFF_POST_CHANNEL_ID` secret, and the public log only says how many messages were posted. From a shell, `gh workflow run staff-post.yml --json` with `{"title": "...", "body": "..."}` on stdin keeps the line breaks.
+
 ## Uptime workflow
 
 .github/workflows/uptime.yml probes the backend's public health endpoint every five minutes and posts failures to an alert webhook; it lives in this repo only because public repositories get free Actions minutes, and it monitors the backend, not the plugin.
