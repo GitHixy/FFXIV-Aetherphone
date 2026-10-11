@@ -26,6 +26,17 @@ public sealed class CasinoTableLedgerTests
     }
 
     [Fact]
+    public void AGuestEntrySaysTheHostRecordedIt()
+    {
+        var entry = new CasinoLedgerEntryDto(EntryId: "g1", Kind: CasinoLedgerKinds.BuyIn, Amount: 50_000,
+            PayerName: "Chea Thorne", PayeeUserId: "h", PayeeName: "Rhan", PayerConfirmed: true,
+            PayeeConfirmed: true, Settled: true, Guest: true, GuestName: "Chea Thorne");
+
+        Assert.Equal(Loc.T(L.Book.GuestRecorded), TableLedger.StateText(entry));
+        Assert.Equal(Loc.T(L.Tables.EntrySettled), TableLedger.StateText(entry with { Guest = false }));
+    }
+
+    [Fact]
     public void GilAmountsReadAsGilWithTheFullNumber()
     {
         Assert.Equal(Loc.T(L.Tables.GilAmount, NumberText.Group(20_000_000)),
@@ -78,7 +89,7 @@ public sealed class CasinoTableLedgerTests
             "Ciri", Settled: true, PayerConfirmed: true, PayeeConfirmed: true);
 
         Assert.Equal(Loc.T(L.Tables.CopyEntry, Loc.T(L.Tables.KindBuyIn), "Chea Thorne (guest)", "Ciri",
-            TableLedger.AmountText(50_000, CasinoCurrencies.Gil), Loc.T(L.Tables.EntrySettled)),
+            TableLedger.AmountText(50_000, CasinoCurrencies.Gil), Loc.T(L.Book.GuestRecorded)),
             TableLedger.EntryLine(buyIn, CasinoCurrencies.Gil));
         Assert.Contains("Ciri to Chea Thorne (guest)", TableLedger.EntryLine(payout, CasinoCurrencies.Gil),
             StringComparison.Ordinal);

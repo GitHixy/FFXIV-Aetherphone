@@ -254,5 +254,9 @@ public sealed class CasinoDoorLayoutTests
         Assert.Equal(L.Casino.DoorTitle.Key, TableDoor.TitleFor(blackjack).Key);
         Assert.Equal(L.Casino.DoorOpenTable.Key, TableDoor.OpenLabelFor(blackjack).Key);
         Assert.Equal(L.Casino.DoorTitle.Key, TableDoor.TitleFor(null).Key);
+        Assert.Equal(L.Book.CloseTitle.Key, TableDoor.CloseTitleFor(book).Key);
+        Assert.Equal(L.Book.CloseBody.Key, TableDoor.CloseBodyFor(book).Key);
+        Assert.Equal(L.Tables.CloseConfirmTitle.Key, TableDoor.CloseTitleFor(blackjack).Key);
+        Assert.Equal(L.Tables.CloseConfirmBody.Key, TableDoor.CloseBodyFor(blackjack).Key);
     }
 }

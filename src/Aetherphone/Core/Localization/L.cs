@@ -11783,6 +11783,9 @@ internal static class L
         public static readonly LocString GuestNameHint = new("casino.book.guestNameHint", "Character name");
         public static readonly LocString DoorTitle = new("casino.book.doorTitle", "Your book");
         public static readonly LocString OpenLedger = new("casino.book.openLedger", "Open the ledger");
+        public static readonly LocString GuestRecorded = new("casino.book.guestRecorded", "Recorded by the host");
+        public static readonly LocString CloseTitle = new("casino.book.closeTitle", "Close this book?");
+        public static readonly LocString CloseBody = new("casino.book.closeBody", "The ledger stays readable for 30 days, and entries still waiting can be confirmed or disputed after it closes.");
     }
 
     internal static class Catalogs

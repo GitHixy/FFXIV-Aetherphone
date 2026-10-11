@@ -474,13 +474,20 @@ internal sealed partial class TableDoor
         ImGui.Dummy(new Vector2(width, height));
     }
 
+    internal static LocString CloseTitleFor(CasinoTableRowDto? card) =>
+        card is not null && CasinoBookRules.IsBook(card.GameKind) ? L.Book.CloseTitle : L.Tables.CloseConfirmTitle;
+
+    internal static LocString CloseBodyFor(CasinoTableRowDto? card) =>
+        card is not null && CasinoBookRules.IsBook(card.GameKind) ? L.Book.CloseBody : L.Tables.CloseConfirmBody;
+
     private void AskClose()
     {
         var target = roomId;
+        var card = tables.CardFor(target);
         confirm.Ask(new ConfirmRequest
         {
-            Title = Loc.T(L.Tables.CloseConfirmTitle),
-            Message = Loc.T(L.Tables.CloseConfirmBody),
+            Title = Loc.T(CloseTitleFor(card)),
+            Message = Loc.T(CloseBodyFor(card)),
             ConfirmLabel = Loc.T(L.Tables.CloseTable),
             CancelLabel = Loc.T(L.Common.Cancel),
             Sheet = true,

@@ -183,6 +183,11 @@ internal sealed class TableLedger
 
     internal static string StateText(CasinoLedgerEntryDto entry)
     {
+        if (entry.Guest)
+        {
+            return Loc.T(L.Book.GuestRecorded);
+        }
+
         switch (ToneOf(entry))
         {
             case LedgerTone.Settled:
