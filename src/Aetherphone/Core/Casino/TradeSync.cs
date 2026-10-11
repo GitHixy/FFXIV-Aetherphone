@@ -86,10 +86,10 @@ internal sealed class TradeSyncTracker
                 partnerRead = false;
                 myOffer = 0;
                 theirOffer = 0;
+                baseline = sample.WalletGil;
             }
 
             Stage = TradeTrackerStage.Open;
-            baseline = sample.WalletGil;
             if (sample.NameCandidates.Length > 0)
             {
                 candidates = sample.NameCandidates;

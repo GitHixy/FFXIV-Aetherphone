@@ -39,6 +39,17 @@ public sealed class TradeSyncTests
     }
 
     [Fact]
+    public void GilThatLandsBeforeTheWindowClosesStillCounts()
+    {
+        var tracker = new TradeSyncTracker();
+        Assert.Null(tracker.Observe(Open(MiraWindow, 0, 500_000, 1_000_000), 0));
+        Assert.Null(tracker.Observe(Open(MiraWindow, 0, 500_000, 1_500_000), 10));
+        var done = tracker.Observe(Closed(1_500_000), 20);
+        Assert.NotNull(done);
+        Assert.Equal(500_000, done!.Value.Received);
+    }
+
+    [Fact]
     public void SwappedOfferSidesStillMatchTheWallet()
     {
         var tracker = new TradeSyncTracker();
