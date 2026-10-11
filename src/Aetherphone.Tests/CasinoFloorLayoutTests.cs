@@ -78,6 +78,32 @@ public sealed class CasinoFloorLayoutTests
         Assert.True(art.Y + glyphHalf <= tile.Max.Y - block + 0.01f);
     }
 
+    [Theory]
+    [InlineData(0.75f)]
+    [InlineData(1f)]
+    [InlineData(1.5f)]
+    public void HeroButtonsSitSideBySideOnlyWhenBothLabelsFitWhole(float scale)
+    {
+        var row = (PhoneWidth - StripHero.Pad * 2f) * scale;
+        var gap = 8f * scale;
+        var button = 44f * scale;
+        Assert.False(StripHero.StacksButtons(row, 120f * scale, 110f * scale, gap));
+        Assert.True(StripHero.StacksButtons(row, 200f * scale, 150f * scale, gap));
+        Assert.Equal(button, StripHero.ButtonsHeight(true, false, button, gap));
+        Assert.Equal(button * 2f + gap, StripHero.ButtonsHeight(true, true, button, gap));
+        Assert.Equal(button, StripHero.ButtonsHeight(false, true, button, gap));
+    }
+
+    [Fact]
+    public void TheStreakLabelGetsItsOwnLineAboveTheDots()
+    {
+        var label = 18f;
+        var dot = StripHero.StreakDot;
+        Assert.Equal(label + StripHero.StreakLabelGap + dot, StripHero.StreakHeight(label, dot, StripHero.StreakLabelGap));
+        Assert.True(StripHero.StreakDays * StripHero.StreakDot + (StripHero.StreakDays - 1) * StripHero.StreakGap
+                    <= PhoneWidth - StripHero.Pad * 2f);
+    }
+
     [Fact]
     public void HeroCardsScaleWithTheWidthAndClamp()
     {
