@@ -8911,6 +8911,7 @@
   "casino.tables.reasonRaffleLive": "この部屋ではすでに抽選会が開かれています。",
   "casino.tables.reasonNoRaffle": "現在開催中の抽選会はありません。",
   "casino.tables.reasonTicketLimit": "この抽選会で持てるチケットの上限に達しています。",
+  "casino.tables.reasonHostTicket": "ホストは自分のギル抽選会のチケットを取れません。",
   "casino.tables.reasonRoundLive": "最高出目ラウンドがすでに始まっています。",
   "casino.tables.reasonBankLimit": "そのベットはホストのバンクか最大払い戻しを超える可能性があります。少ない額でお試しください。",
   "casino.tables.reasonHostFrozen": "異議申し立ての確認中のため、このホストのギルテーブル開催は停止されています。",

@@ -8911,6 +8911,7 @@
   "casino.tables.reasonRaffleLive": "В этой комнате уже открыт розыгрыш.",
   "casino.tables.reasonNoRaffle": "Сейчас нет открытого розыгрыша.",
   "casino.tables.reasonTicketLimit": "У вас уже максимум билетов для этого розыгрыша.",
+  "casino.tables.reasonHostTicket": "Хозяин не может брать билеты в собственном розыгрыше на гил.",
   "casino.tables.reasonRoundLive": "Раунд на самый высокий бросок уже открыт.",
   "casino.tables.reasonBankLimit": "Эта ставка может выиграть больше, чем покрывают банк или максимальная выплата хозяина. Попробуйте меньше.",
   "casino.tables.reasonHostFrozen": "Гиловые столы этого хозяина приостановлены, пока рассматриваются споры.",

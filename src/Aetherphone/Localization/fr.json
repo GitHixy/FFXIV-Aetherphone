@@ -8911,6 +8911,7 @@
   "casino.tables.reasonRaffleLive": "Une tombola est déjà ouverte dans cette salle.",
   "casino.tables.reasonNoRaffle": "Aucune tombola n'est ouverte pour le moment.",
   "casino.tables.reasonTicketLimit": "Tu as déjà le nombre maximal de tickets pour cette tombola.",
+  "casino.tables.reasonHostTicket": "L'hôte ne peut pas prendre de tickets dans sa propre tombola en gils.",
   "casino.tables.reasonRoundLive": "Une manche au plus haut lancer est déjà ouverte.",
   "casino.tables.reasonBankLimit": "Cette mise pourrait rapporter plus que ce que couvrent la banque ou le gain maximal de l'hôte. Essaie une mise plus petite.",
   "casino.tables.reasonHostFrozen": "Les tables de gils de cet hôte sont suspendues pendant l'examen des litiges.",

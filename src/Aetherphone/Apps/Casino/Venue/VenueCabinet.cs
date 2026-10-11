@@ -133,6 +133,13 @@ internal sealed class VenueCabinet : ICabinetIdle
             || (card.Config is not null && Tables.TableDoor.IsCoDealer(card.Config, me));
     }
 
+    private bool Owning()
+    {
+        var me = venue.AccountId;
+        var card = venue.Tables.CardFor(roomId);
+        return card is not null && me.Length > 0 && string.Equals(card.OwnerUserId, me, StringComparison.Ordinal);
+    }
+
     public void Draw(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui)
     {
         var scale = UiScale.Current;
@@ -167,7 +174,7 @@ internal sealed class VenueCabinet : ICabinetIdle
             world = new Rect(world.Min, new Vector2(safe.Max.X, safe.Max.Y - height - VenueArt.LineGap * scale));
         }
 
-        var room = new VenueRoomFrame(stage, frame, ui, view, drawList, world, venue.AccountId, Hosting(),
+        var room = new VenueRoomFrame(stage, frame, ui, view, drawList, world, venue.AccountId, Hosting(), Owning(),
             venue.ActInFlight, now, scale);
         switch (view.Kind)
         {

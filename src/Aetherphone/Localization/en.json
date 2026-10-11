@@ -8911,6 +8911,7 @@
   "casino.tables.reasonRaffleLive": "A raffle is already open in this room.",
   "casino.tables.reasonNoRaffle": "There is no raffle open right now.",
   "casino.tables.reasonTicketLimit": "You already hold the most tickets this raffle allows.",
+  "casino.tables.reasonHostTicket": "Hosts cannot take tickets in their own gil raffle.",
   "casino.tables.reasonRoundLive": "A highest roll round is already open.",
   "casino.tables.reasonBankLimit": "That bet could pay more than the host's bank or max payout covers. Try a smaller bet.",
   "casino.tables.reasonHostFrozen": "Gil hosting is on hold for this host while disputes are reviewed.",

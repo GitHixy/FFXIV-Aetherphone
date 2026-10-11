@@ -8911,6 +8911,7 @@
   "casino.tables.reasonRaffleLive": "Bu odada zaten açık bir çekiliş var.",
   "casino.tables.reasonNoRaffle": "Şu anda açık bir çekiliş yok.",
   "casino.tables.reasonTicketLimit": "Bu çekilişin izin verdiği en fazla bileti zaten aldın.",
+  "casino.tables.reasonHostTicket": "Ev sahibi kendi gil çekilişinden bilet alamaz.",
   "casino.tables.reasonRoundLive": "En yüksek atış turu zaten açık.",
   "casino.tables.reasonBankLimit": "Bu bahis, ev sahibinin kasasının veya en yüksek ödemesinin karşılayabileceğinden fazla kazandırabilir. Daha küçük bir bahis dene.",
   "casino.tables.reasonHostFrozen": "İtirazlar incelenirken bu ev sahibinin gil masaları askıda.",

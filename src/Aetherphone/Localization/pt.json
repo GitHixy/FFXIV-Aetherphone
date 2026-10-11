@@ -8911,6 +8911,7 @@
   "casino.tables.reasonRaffleLive": "Já há uma rifa aberta nesta sala.",
   "casino.tables.reasonNoRaffle": "Não há rifa aberta agora.",
   "casino.tables.reasonTicketLimit": "Você já tem o máximo de bilhetes que esta rifa permite.",
+  "casino.tables.reasonHostTicket": "O anfitrião não pode pegar bilhetes na própria rifa de gil.",
   "casino.tables.reasonRoundLive": "Já há uma rodada de maior rolagem aberta.",
   "casino.tables.reasonBankLimit": "Essa aposta pode pagar mais do que a banca ou o pagamento máximo do anfitrião cobrem. Tente uma aposta menor.",
   "casino.tables.reasonHostFrozen": "As mesas de gil deste anfitrião estão suspensas enquanto as disputas são analisadas.",

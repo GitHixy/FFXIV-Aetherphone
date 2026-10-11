@@ -8911,6 +8911,7 @@
   "casino.tables.reasonRaffleLive": "此房间已有一场抽奖在进行。",
   "casino.tables.reasonNoRaffle": "当前没有进行中的抽奖。",
   "casino.tables.reasonTicketLimit": "你持有的抽奖券已达本次上限。",
+  "casino.tables.reasonHostTicket": "房主不能在自己的金币抽奖中领取奖券。",
   "casino.tables.reasonRoundLive": "最高点数回合已在进行。",
   "casino.tables.reasonBankLimit": "该投注的可能派彩超过了桌主的庄家资金或最高派彩。请降低金额。",
   "casino.tables.reasonHostFrozen": "争议审核期间，该桌主的金币桌已暂停。",

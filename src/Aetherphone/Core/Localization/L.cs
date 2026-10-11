@@ -11324,6 +11324,7 @@ internal static class L
         public static readonly LocString ReasonRaffleLive = new("casino.tables.reasonRaffleLive", "A raffle is already open in this room.");
         public static readonly LocString ReasonNoRaffle = new("casino.tables.reasonNoRaffle", "There is no raffle open right now.");
         public static readonly LocString ReasonTicketLimit = new("casino.tables.reasonTicketLimit", "You already hold the most tickets this raffle allows.");
+        public static readonly LocString ReasonHostTicket = new("casino.tables.reasonHostTicket", "Hosts cannot take tickets in their own gil raffle.");
         public static readonly LocString ReasonRoundLive = new("casino.tables.reasonRoundLive", "A highest roll round is already open.");
         public static readonly LocString ReasonBankLimit = new("casino.tables.reasonBankLimit", "That bet could pay more than the host's bank or max payout covers. Try a smaller bet.");
         public static readonly LocString ReasonHostFrozen = new("casino.tables.reasonHostFrozen", "Gil hosting is on hold for this host while disputes are reviewed.");

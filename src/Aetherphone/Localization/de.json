@@ -8911,6 +8911,7 @@
   "casino.tables.reasonRaffleLive": "In diesem Raum läuft bereits eine Verlosung.",
   "casino.tables.reasonNoRaffle": "Gerade ist keine Verlosung offen.",
   "casino.tables.reasonTicketLimit": "Du hast schon so viele Lose, wie diese Verlosung erlaubt.",
+  "casino.tables.reasonHostTicket": "Gastgeber können in ihrer eigenen Gil-Verlosung keine Lose nehmen.",
   "casino.tables.reasonRoundLive": "Eine Runde um den höchsten Wurf ist bereits offen.",
   "casino.tables.reasonBankLimit": "Dieser Einsatz könnte mehr auszahlen, als die Bank oder die Höchstauszahlung des Gastgebers deckt. Versuch einen kleineren Einsatz.",
   "casino.tables.reasonHostFrozen": "Gil-Tische dieses Gastgebers sind pausiert, solange Einsprüche geprüft werden.",
