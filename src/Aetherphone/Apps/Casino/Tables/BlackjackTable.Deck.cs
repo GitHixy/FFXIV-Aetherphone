@@ -13,6 +13,7 @@ internal sealed partial class BlackjackTable
 {
     private const int MainTarget = -1;
     private const float SideCaptionGap = 3f;
+    private const string WaitMarquee = "casino.blackjack.deck.wait";
 
     private static readonly int[] MainActions =
     {
@@ -222,14 +223,23 @@ internal sealed partial class BlackjackTable
     {
         if (canBet || (BlackjackRules.IsSeat(mySeat) && board.InsuranceOpen))
         {
-            var status = board.InsuranceOpen && seat is { Insurance: > 0 }
-                ? text.Compact(L.Blackjack.Insured, seat.Insurance)
-                : Loc.T(board.InsuranceOpen ? L.Blackjack.InsuranceWaiting : L.Blackjack.BetIn);
-            StageText.Status(ImGui.GetWindowDrawList(), BlackjackDeckLayout.UpperRow(row, scale).Center, status,
-                row.Width, scale);
+            StageText.Status(ImGui.GetWindowDrawList(), BlackjackDeckLayout.UpperRow(row, scale).Center,
+                WaitStatus(board, seat), row.Width, WaitMarquee);
         }
 
         DrawStand(stage, ui, state, draining, banked);
+    }
+
+    private string WaitStatus(CasinoBlackjackRoomStateDto board, CasinoBlackjackSeatDto? seat)
+    {
+        if (board.InsuranceOpen)
+        {
+            return seat is { Insurance: > 0 }
+                ? text.Compact(L.Blackjack.Insured, seat.Insurance)
+                : Loc.T(L.Blackjack.InsuranceWaiting);
+        }
+
+        return BlackjackHosting.AwaitsDeal(board) ? hostedText.WaitingDeal(board.DealerName) : Loc.T(L.Blackjack.BetIn);
     }
 
     private void DrawStand(CasinoStage stage, AppSkin ui, CasinoStateDto state, bool draining, bool banked)

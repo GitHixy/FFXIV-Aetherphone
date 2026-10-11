@@ -8960,7 +8960,7 @@
   "casino.tables.dealerMode": "Kim dağıtır",
   "casino.tables.dealerHouse": "Saat",
   "casino.tables.dealerHost": "Ben dağıtırım",
-  "casino.tables.autoDeal": "Ben yokken saatle dağıt",
+  "casino.tables.autoDeal": "Bahis saati dolunca otomatik dağıt",
   "casino.tables.coDealersNote": "Oyuncular oturunca kapıdan en fazla 3 yardımcı krupiye seç. Onlar da Dağıt ve Duraklat düğmelerini kullanır.",
   "casino.tables.dealerChipNote": "Fiş masalarında kartları saatle ev dağıtır. Kendin dağıtmak ve yardımcı krupiye eklemek için alıştırma ya da gil için oyna.",
   "casino.tables.rulesPays": "Blackjack öder",

@@ -8960,7 +8960,7 @@
   "casino.tables.dealerMode": "ディーラー役",
   "casino.tables.dealerHouse": "自動",
   "casino.tables.dealerHost": "自分で配る",
-  "casino.tables.autoDeal": "不在時はタイマーで配る",
+  "casino.tables.autoDeal": "ベットのタイマーで自動的に配る",
   "casino.tables.coDealersNote": "プレイヤーが着席したら、ドアから最大3人をサブディーラーにできます。配る・一時停止の操作を共有します。",
   "casino.tables.dealerChipNote": "チップテーブルはハウスが時計に合わせて配ります。自分で配って共同ディーラーを置くには、練習かギルで遊んでください。",
   "casino.tables.rulesPays": "ブラックジャックの配当",

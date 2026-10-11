@@ -8960,7 +8960,7 @@
   "casino.tables.dealerMode": "Кто раздаёт",
   "casino.tables.dealerHouse": "Таймер",
   "casino.tables.dealerHost": "Раздаю я",
-  "casino.tables.autoDeal": "Раздавать по таймеру, если меня нет",
+  "casino.tables.autoDeal": "Раздавать автоматически по таймеру ставок",
   "casino.tables.coDealersNote": "Когда игроки сядут, назначьте у двери до 3 содилеров. У них будут те же кнопки раздачи и паузы.",
   "casino.tables.dealerChipNote": "За столами с фишками раздаёт казино по таймеру. Играйте на тренировку или на гил, чтобы раздавать самому и назначать содилеров.",
   "casino.tables.rulesPays": "Блэкджек платит",

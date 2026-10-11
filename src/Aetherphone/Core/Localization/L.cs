@@ -11346,7 +11346,7 @@ internal static class L
         public static readonly LocString DealerMode = new("casino.tables.dealerMode", "Who deals");
         public static readonly LocString DealerHouse = new("casino.tables.dealerHouse", "The clock");
         public static readonly LocString DealerHost = new("casino.tables.dealerHost", "I deal");
-        public static readonly LocString AutoDeal = new("casino.tables.autoDeal", "Deal on the clock when I am away");
+        public static readonly LocString AutoDeal = new("casino.tables.autoDeal", "Deal automatically on the betting clock");
         public static readonly LocString CoDealersNote = new("casino.tables.coDealersNote", "Once players sit, promote up to 3 co-dealers from the table door. They get the same Deal and Pause controls.");
         public static readonly LocString DealerChipNote = new("casino.tables.dealerChipNote", "Chip tables are dealt by the house on the clock. Play for practice or gil to deal yourself and add co-dealers.");
         public static readonly LocString RulesPays = new("casino.tables.rulesPays", "Blackjack pays");
