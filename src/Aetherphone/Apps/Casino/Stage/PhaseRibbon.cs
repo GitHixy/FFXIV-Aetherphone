@@ -2,6 +2,7 @@ using Aetherphone.Apps.Games.Framework;
 using Aetherphone.Core;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 
 namespace Aetherphone.Apps.Casino.Stage;
 
@@ -10,16 +11,7 @@ internal static class PhaseRibbon
     private const float SideInset = 12f;
     private const float VerticalInset = 4f;
     private const float RingRadius = 12f;
-    private const float AvatarRadius = 7f;
-    private const float AvatarStep = 9f;
-    private const int MaxAvatars = 3;
-
-    private static readonly Vector4[] AvatarTints =
-    {
-        CasinoColors.LightA,
-        CasinoColors.LightB,
-        CasinoColors.Money,
-    };
+    private const float CrowdGlyph = 13f;
 
     public static void Draw(ImDrawListPtr drawList, Rect rect, string label, long remainingMs, int windowSeconds,
         int crowd, Vector4 accent, float scale)
@@ -50,22 +42,15 @@ internal static class PhaseRibbon
         if (crowd > 0)
         {
             var count = GameNumber.Label(crowd);
-            var countSize = Typography.Measure(count, TextStyles.Footnote);
-            var avatars = Math.Min(MaxAvatars, crowd);
-            crowdWidth = AvatarRadius * 2f * scale + (avatars - 1) * AvatarStep * scale + Metrics.Space.Xs * scale
-                + countSize.X;
+            var countSize = Typography.Measure(count, TextStyles.FootnoteEmphasized);
+            var glyph = CrowdGlyph * scale;
+            var gap = Metrics.Space.Xs * scale;
+            crowdWidth = glyph + gap + countSize.X;
             var right = max.X - radius * 0.6f;
             Typography.Draw(drawList, new Vector2(right - countSize.X, centerY - countSize.Y * 0.5f), count,
-                CasinoColors.InkTitle, TextStyles.Footnote);
-            var avatarRight = right - countSize.X - Metrics.Space.Xs * scale - AvatarRadius * scale;
-            for (var avatar = 0; avatar < avatars; avatar++)
-            {
-                var center = new Vector2(avatarRight - avatar * AvatarStep * scale, centerY);
-                drawList.AddCircleFilled(center, AvatarRadius * scale,
-                    ImGui.GetColorU32(AvatarTints[avatar] with { W = 0.85f }), 16);
-                drawList.AddCircle(center, AvatarRadius * scale, ImGui.GetColorU32(new Vector4(0f, 0f, 0f, 0.5f)), 16,
-                    MathF.Max(1f, scale));
-            }
+                CasinoColors.InkTitle, TextStyles.FootnoteEmphasized);
+            ProgressRing.CenterIcon(drawList, new Vector2(right - countSize.X - gap - glyph * 0.5f, centerY),
+                FontAwesomeIcon.Users, CasinoColors.InkBody, glyph);
         }
 
         var labelWidth = MathF.Max(0f, max.X - radius * 0.6f - crowdWidth - Metrics.Space.Sm * scale - cursor);
