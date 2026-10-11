@@ -1012,16 +1012,28 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
 
     private void LeaveClosedTable()
     {
-        var closed = casinoTables.TakeClosedTable();
-        if (closed.Length == 0)
+        PopRoutesHolding(casinoTables.TakeClosedTable());
+        if (PopRoutesHolding(casinoTables.TakeVanishedTable()))
         {
-            return;
+            ShellToast.Show(Loc.T(L.Casino.ReasonEnded));
+        }
+    }
+
+    private bool PopRoutesHolding(string tableId)
+    {
+        if (tableId.Length == 0)
+        {
+            return false;
         }
 
-        while (routes.Holds(closed))
+        var popped = false;
+        while (routes.Holds(tableId))
         {
             PopNow(true);
+            popped = true;
         }
+
+        return popped;
     }
 
     private void ToastQuickSeatRefusal()

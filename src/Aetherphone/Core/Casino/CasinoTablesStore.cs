@@ -32,8 +32,10 @@ internal sealed class CasinoTablesStore : IDisposable
     private volatile CasinoTableDoorDto? door;
     private volatile CasinoTableLedgerDto? ledger;
     private volatile CasinoTableRowDto? card;
-    private readonly Action<int> cardStatusSink = static _ => { };
+    private readonly Action<int> cardStatusSink;
     private int fetchingCard;
+    private int cardMissing;
+    private string vanishedTableId = string.Empty;
     private volatile string ledgerRoomId = string.Empty;
     private CasinoTableConfigDto? createIntentConfig;
     private string ledgerIntentId = string.Empty;
@@ -75,6 +77,7 @@ internal sealed class CasinoTablesStore : IDisposable
         this.chips = chips;
         cadence = new PollCadence(visibility, ForegroundPollInterval, BackgroundPollInterval);
         tableStatusSink = OnTableStatus;
+        cardStatusSink = OnCardStatus;
         session.Changed += OnSessionChanged;
     }
 
@@ -109,14 +112,41 @@ internal sealed class CasinoTablesStore : IDisposable
             return;
         }
 
+        Interlocked.Exchange(ref cardMissing, 0);
         work.Run("table card", async token =>
         {
             var fresh = await casino.TableAsync(roomId, cardStatusSink, token).ConfigureAwait(false);
             if (fresh is not null)
             {
                 card = fresh;
+                return;
             }
+
+            if (Interlocked.Exchange(ref cardMissing, 0) == 0)
+            {
+                return;
+            }
+
+            Vanished(roomId);
         }, () => Interlocked.Exchange(ref fetchingCard, 0));
+    }
+
+    internal static bool LostOwnership(CasinoTableDoorDto fresh, CasinoTableRowDto? held, string accountId)
+    {
+        return !fresh.Owner && held is not null && accountId.Length > 0
+            && string.Equals(held.OwnerUserId, accountId, StringComparison.Ordinal);
+    }
+
+    private void Vanished(string roomId)
+    {
+        var held = card;
+        if (held is not null && string.Equals(held.TableId, roomId, StringComparison.Ordinal))
+        {
+            card = null;
+        }
+
+        Interlocked.Exchange(ref vanishedTableId, roomId);
+        RefreshNow();
     }
 
     public string AccountId => session.CurrentUser?.Id ?? string.Empty;
@@ -173,6 +203,11 @@ internal sealed class CasinoTablesStore : IDisposable
     public string TakeClosedTable()
     {
         return Interlocked.Exchange(ref closedTableId, string.Empty);
+    }
+
+    public string TakeVanishedTable()
+    {
+        return Interlocked.Exchange(ref vanishedTableId, string.Empty);
     }
 
     public string TakeQuickSeatRefusal()
@@ -366,8 +401,11 @@ internal sealed class CasinoTablesStore : IDisposable
             if (answer.Granted)
             {
                 Interlocked.Exchange(ref closedTableId, roomId);
+                RefreshNow();
+                return;
             }
 
+            RefreshCard(roomId);
             RefreshNow();
         }, EndIntent);
     }
@@ -882,6 +920,14 @@ internal sealed class CasinoTablesStore : IDisposable
         }
     }
 
+    private void OnCardStatus(int statusCode)
+    {
+        if (statusCode == NotFoundStatus)
+        {
+            Interlocked.Exchange(ref cardMissing, 1);
+        }
+    }
+
     private void OnSessionChanged()
     {
         var accountId = session.CurrentUser?.Id;
@@ -902,6 +948,8 @@ internal sealed class CasinoTablesStore : IDisposable
         Interlocked.Exchange(ref seatOutcome, null);
         Interlocked.Exchange(ref noticeOutcome, null);
         Interlocked.Exchange(ref closedTableId, string.Empty);
+        Interlocked.Exchange(ref vanishedTableId, string.Empty);
+        Interlocked.Exchange(ref cardMissing, 0);
         Interlocked.Exchange(ref quickSeatRefusal, string.Empty);
         Interlocked.Exchange(ref tablesFailed, 0);
         Interlocked.Exchange(ref intentFailed, 0);
@@ -984,6 +1032,10 @@ internal sealed class CasinoTablesStore : IDisposable
 
             door = fresh;
             Interlocked.Exchange(ref doorLoadedAtTick, Environment.TickCount64);
+            if (LostOwnership(fresh, CardFor(roomId), AccountId))
+            {
+                RefreshCard(roomId);
+            }
         }, () => Interlocked.Exchange(ref fetchingDoor, 0));
     }
 

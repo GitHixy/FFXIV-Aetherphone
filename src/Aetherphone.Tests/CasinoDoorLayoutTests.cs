@@ -143,6 +143,21 @@ public sealed class CasinoDoorLayoutTests
     }
 
     [Fact]
+    public void AnEmptyDoorOnATableTheHostHoldsSendsThemToCheckWhetherItClosed()
+    {
+        var mine = new CasinoTableRowDto(TableId: "t1", OwnerUserId: "me");
+        var theirs = new CasinoTableRowDto(TableId: "t1", OwnerUserId: "them");
+        var shut = new CasinoTableDoorDto(RoomId: "t1", Owner: false);
+        var open = new CasinoTableDoorDto(RoomId: "t1", Owner: true);
+
+        Assert.True(CasinoTablesStore.LostOwnership(shut, mine, "me"));
+        Assert.False(CasinoTablesStore.LostOwnership(open, mine, "me"));
+        Assert.False(CasinoTablesStore.LostOwnership(shut, theirs, "me"));
+        Assert.False(CasinoTablesStore.LostOwnership(shut, null, "me"));
+        Assert.False(CasinoTablesStore.LostOwnership(shut, mine, string.Empty));
+    }
+
+    [Fact]
     public void TheHostedAnswerShowsTheCodeBeforeTheDoorOrListingLoads()
     {
         var hosted = new CasinoTableRowDto(TableId: "t1", JoinCode: "ABCDEF");
