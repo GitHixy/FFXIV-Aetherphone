@@ -128,18 +128,23 @@ internal readonly struct RaceDeckLayout
     public const float SegmentHeight = DeckActions.SecondaryHeight;
     public const float AmountHeight = DeckActions.SecondaryHeight;
     public const float ActionHeight = DeckActions.PrimaryHeight;
+    public const float CaptionHeight = 22f;
+    public const float CaptionGap = 4f;
     public const float PrimaryMinWidth = 120f;
-    public const float Height = Pad * 2f + SegmentHeight + AmountHeight + ActionHeight + Gap * 2f;
+    public const float Height = Pad * 2f + SegmentHeight + AmountHeight + CaptionHeight + ActionHeight + Gap * 2f
+        + CaptionGap;
 
     public readonly Rect Segment;
     public readonly DeckAmountRow Amount;
+    public readonly Rect Caption;
     public readonly Rect Ride;
     public readonly Rect Primary;
 
-    private RaceDeckLayout(Rect segment, in DeckAmountRow amount, Rect ride, Rect primary)
+    private RaceDeckLayout(Rect segment, in DeckAmountRow amount, Rect caption, Rect ride, Rect primary)
     {
         Segment = segment;
         Amount = amount;
+        Caption = caption;
         Ride = ride;
         Primary = primary;
     }
@@ -159,8 +164,12 @@ internal readonly struct RaceDeckLayout
         var amountTop = segment.Max.Y + gap;
         var amountRow = new Rect(new Vector2(left, amountTop), new Vector2(right, amountTop + AmountHeight * scale));
         var amount = DeckAmountRow.Compute(amountRow, quick, scale);
-        var actionTop = MathF.Max(amountRow.Max.Y + gap, deck.Max.Y - pad - ActionHeight * scale);
+        var captionTop = amountRow.Max.Y + gap;
+        var actionTop = MathF.Max(captionTop + (CaptionHeight + CaptionGap) * scale,
+            deck.Max.Y - pad - ActionHeight * scale);
         var actionBottom = actionTop + ActionHeight * scale;
+        var caption = new Rect(new Vector2(left, actionTop - (CaptionGap + CaptionHeight) * scale),
+            new Vector2(right, actionTop - CaptionGap * scale));
         var rideRight = left;
         if (rideWidth > 0f)
         {
@@ -171,7 +180,7 @@ internal readonly struct RaceDeckLayout
         var ride = new Rect(new Vector2(left, actionTop), new Vector2(rideRight, actionBottom));
         var primaryLeft = ride.Width > 0f ? ride.Max.X + gap : left;
         var primary = new Rect(new Vector2(primaryLeft, actionTop), new Vector2(right, actionBottom));
-        return new RaceDeckLayout(segment, amount, ride, primary);
+        return new RaceDeckLayout(segment, amount, caption, ride, primary);
     }
 }
 

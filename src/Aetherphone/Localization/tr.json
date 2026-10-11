@@ -9811,6 +9811,7 @@
   "casino.strip.introSkip": "Geç",
   "casino.strip.introStart": "Oynamaya başla",
   "casino.race.betOn": "{1} için {0} bahis yap ({2})",
+  "casino.race.betCaption": "{0} · {1}",
   "casino.race.noWin": "Bu yarışta kazanç yok",
   "casino.race.allDividends": "Tüm ikramiyeler",
   "casino.dealerholdem.game": "Krupiyeye Karşı Hold'em",

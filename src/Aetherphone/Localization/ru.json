@@ -9811,6 +9811,7 @@
   "casino.strip.introSkip": "Пропустить",
   "casino.strip.introStart": "Начать игру",
   "casino.race.betOn": "Поставить {0} на {1} ({2})",
+  "casino.race.betCaption": "{0} · {1}",
   "casino.race.noWin": "В этом забеге без выигрыша",
   "casino.race.allDividends": "Все выплаты",
   "casino.dealerholdem.game": "Холдем против дилера",

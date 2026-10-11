@@ -9811,6 +9811,7 @@
   "casino.strip.introSkip": "スキップ",
   "casino.strip.introStart": "プレイ開始",
   "casino.race.betOn": "{1}に{0}を賭ける（{2}）",
+  "casino.race.betCaption": "{0}・{1}",
   "casino.race.noWin": "このレースは当たりなし",
   "casino.race.allDividends": "すべての配当",
   "casino.dealerholdem.game": "ディーラー・ホールデム",

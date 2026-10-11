@@ -9811,6 +9811,7 @@
   "casino.strip.introSkip": "Saltar",
   "casino.strip.introStart": "Empezar a jugar",
   "casino.race.betOn": "Apostar {0} a {1} ({2})",
+  "casino.race.betCaption": "{0} · {1}",
   "casino.race.noWin": "Sin premio en esta carrera",
   "casino.race.allDividends": "Todos los dividendos",
   "casino.dealerholdem.game": "Hold'em con crupier",

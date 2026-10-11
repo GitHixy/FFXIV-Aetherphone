@@ -1,5 +1,7 @@
 using Aetherphone.Apps.Casino.Stage;
+using Aetherphone.Apps.Games.Framework;
 using Aetherphone.Core;
+using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Notifications;
@@ -21,7 +23,7 @@ internal readonly record struct RaceDeckModel(
     long MaximumBet,
     long Stack,
     int Kind,
-    string Primary,
+    string Caption,
     bool Ready,
     bool Enabled,
     string Ride,
@@ -31,10 +33,19 @@ internal sealed class RaceDeck
 {
     private const float FlashSeconds = 0.5f;
     private const string PrimaryId = "casino.race.bet";
+    private const string CaptionId = "casino.race.caption";
 
     private long amount = RaceRules.MinBet;
     private float flash;
     private ChipsPending pending;
+    private string betLabel = string.Empty;
+    private long betAmount = -1;
+    private LanguageInfo? betLanguage;
+    private string caption = string.Empty;
+    private int captionKey = int.MinValue;
+    private long captionPay = -1;
+    private CasinoRaceRunnerDto[]? captionRunners;
+    private LanguageInfo? captionLanguage;
 
     public long Amount => amount;
 
@@ -44,6 +55,32 @@ internal sealed class RaceDeck
     {
         amount = value;
         flash = 0f;
+    }
+
+    public string Caption(int kind, int first, int second, CasinoRaceRunnerDto[] runners)
+    {
+        if (!RaceRules.IsRunner(first) || first >= runners.Length)
+        {
+            return string.Empty;
+        }
+
+        var key = RaceRules.TicketKey(kind, first, second);
+        var pay = RaceTexts.PayOf(kind, first, second, runners);
+        if (key == captionKey && pay == captionPay && ReferenceEquals(runners, captionRunners)
+            && ReferenceEquals(captionLanguage, Loc.Current))
+        {
+            return caption;
+        }
+
+        captionKey = key;
+        captionPay = pay;
+        captionRunners = runners;
+        captionLanguage = Loc.Current;
+        var target = RaceRules.IsPair(kind)
+            ? string.Concat(GameNumber.Label(first + 1), "-", GameNumber.Label(second + 1))
+            : runners[first].Name;
+        caption = Loc.T(L.Race.BetCaption, target, CasinoMultiples.Label((int)Math.Min(int.MaxValue, pay)));
+        return caption;
     }
 
     public RaceDeckAction Draw(ChipsDesk? chips, AppSkin ui, Rect deck, string[] kindLabels, in RaceDeckModel model,
@@ -77,6 +114,7 @@ internal sealed class RaceDeck
         }
 
         DrawAmount(drawList, ui, layout, model, scale);
+        DrawCaption(drawList, layout.Caption, model.Caption, model.Ready);
         if (layout.HasRide && DeckActions.DrawPill(layout.Ride, model.Ride, ui.Ink, ButtonStyle.Gray,
                 model.Enabled && model.Ready))
         {
@@ -85,9 +123,10 @@ internal sealed class RaceDeck
 
         var ready = model.Enabled && model.Ready && amount >= RaceRules.MinBet;
         var canBet = ready && amount <= model.Stack;
+        var label = BetLabel();
         var pressed = chips is null || !model.Ready
-            ? Button.Draw(layout.Primary, model.Primary, ui.Ink, ButtonStyle.Prominent, enabled: canBet, id: PrimaryId)
-            : chips.Primary(layout.Primary, model.Primary, amount, model.Stack, ready, ui.Ink, PrimaryId, ref pending)
+            ? Button.Draw(layout.Primary, label, ui.Ink, ButtonStyle.Prominent, enabled: canBet, id: PrimaryId)
+            : chips.Primary(layout.Primary, label, amount, model.Stack, ready, ui.Ink, PrimaryId, ref pending)
               == ChipsPress.Place;
         if (pressed || (model.Repeat && canBet))
         {
@@ -95,6 +134,43 @@ internal sealed class RaceDeck
         }
 
         return result;
+    }
+
+    private string BetLabel()
+    {
+        if (amount == betAmount && ReferenceEquals(betLanguage, Loc.Current))
+        {
+            return betLabel;
+        }
+
+        betAmount = amount;
+        betLanguage = Loc.Current;
+        betLabel = Loc.T(L.Strip.BetFor, RaceAmounts.Text(amount));
+        return betLabel;
+    }
+
+    private static void DrawCaption(ImDrawListPtr drawList, Rect rect, string text, bool strong)
+    {
+        if (text.Length == 0 || rect.Width <= 0f || rect.Height <= 0f)
+        {
+            return;
+        }
+
+        var preferred = strong ? TextStyles.SubheadlineEmphasized : TextStyles.Subheadline;
+        var fitScale = Typography.FitScale(text, rect.Width, preferred.Scale, TextStyles.Footnote.Scale,
+            preferred.Weight);
+        var style = new TextStyle(fitScale, preferred.Weight);
+        var size = Typography.Measure(text, style);
+        var ink = strong ? CasinoColors.InkTitle : CasinoColors.InkBody;
+        if (size.X <= rect.Width)
+        {
+            Typography.Draw(drawList, new Vector2(rect.Center.X - size.X * 0.5f, rect.Center.Y - size.Y * 0.5f), text,
+                ink, style);
+            return;
+        }
+
+        Marquee.DrawCenteredAuto(drawList, CaptionId, text, rect.Center.X, rect.Center.Y - size.Y * 0.5f, rect.Width,
+            style, ink);
     }
 
     private void DrawAmount(ImDrawListPtr drawList, AppSkin ui, in RaceDeckLayout layout, in RaceDeckModel model,

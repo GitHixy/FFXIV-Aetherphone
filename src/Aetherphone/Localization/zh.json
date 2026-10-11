@@ -9811,6 +9811,7 @@
   "casino.strip.introSkip": "跳过",
   "casino.strip.introStart": "开始游戏",
   "casino.race.betOn": "在 {1} 上下注 {0}（{2}）",
+  "casino.race.betCaption": "{0} · {1}",
   "casino.race.noWin": "本场未中奖",
   "casino.race.allDividends": "全部派彩",
   "casino.dealerholdem.game": "庄家德州扑克",

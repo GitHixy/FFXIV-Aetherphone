@@ -9811,6 +9811,7 @@
   "casino.strip.introSkip": "Überspringen",
   "casino.strip.introStart": "Los geht's",
   "casino.race.betOn": "{0} auf {1} setzen ({2})",
+  "casino.race.betCaption": "{0} · {1}",
   "casino.race.noWin": "Kein Gewinn in diesem Rennen",
   "casino.race.allDividends": "Alle Auszahlungen",
   "casino.dealerholdem.game": "Dealer Hold'em",

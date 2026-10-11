@@ -9811,6 +9811,7 @@
   "casino.strip.introSkip": "Pular",
   "casino.strip.introStart": "Começar a jogar",
   "casino.race.betOn": "Apostar {0} em {1} ({2})",
+  "casino.race.betCaption": "{0} · {1}",
   "casino.race.noWin": "Sem prêmio nesta corrida",
   "casino.race.allDividends": "Todos os dividendos",
   "casino.dealerholdem.game": "Hold'em contra o dealer",
