@@ -9566,6 +9566,7 @@
   "casino.slots.machine.floorJackpot": "全场大奖",
   "casino.slots.bird.expanding": "扩展符号",
   "casino.slots.cascade.featureTotal": "宝珠总计 {0}倍",
+  "casino.slots.cascade.tumbleLadder": "连续掉落倍数",
   "casino.slots.machine.introFreeSpins": "{0}次免费旋转",
   "casino.slots.moogle.introFreeGames": "{0}次免费游戏",
   "casino.slots.moogle.introHold": "保持旋转",

@@ -11241,6 +11241,7 @@ internal static class L
         public static readonly LocString FloorJackpot = new("casino.slots.machine.floorJackpot", "Floor jackpot");
         public static readonly LocString Expanding = new("casino.slots.bird.expanding", "Expanding symbol");
         public static readonly LocString FeatureTotal = new("casino.slots.cascade.featureTotal", "Orb total {0}x");
+        public static readonly LocString TumbleLadder = new("casino.slots.cascade.tumbleLadder", "Tumble multiplier");
         public static readonly LocString IntroFreeSpins = new("casino.slots.machine.introFreeSpins", "{0} FREE SPINS");
         public static readonly LocString IntroFreeGames = new("casino.slots.moogle.introFreeGames", "{0} FREE GAMES");
         public static readonly LocString IntroHold = new("casino.slots.moogle.introHold", "HOLD AND SPIN");

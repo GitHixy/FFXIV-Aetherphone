@@ -235,7 +235,7 @@ internal sealed partial class MachineCabinet
         MachineArt.SceneTint(drawList, frame.Full, machineId, sceneAmount, frame.Phase, scale);
         var lit = stage.Celebration.Active || playback.InFeature ? 1f : 0.55f;
         MachineArt.Chassis(drawList, chassis, machineId, frame.Phase, lit, playback.InFeature, scale);
-        DrawGlass(drawList, ui, frame, scale);
+        DrawGlass(drawList, frame, scale);
         MachineArt.ReelWindow(drawList, window, machineId, scale);
         drawList.PushClipRect(window.Min, window.Max, true);
         reels.Draw(drawList, window, playback, machineId, frame.Phase, frame.DeltaSeconds, scale);

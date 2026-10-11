@@ -9566,6 +9566,7 @@
   "casino.slots.machine.floorJackpot": "フロアジャックポット",
   "casino.slots.bird.expanding": "拡張シンボル",
   "casino.slots.cascade.featureTotal": "オーブ合計 {0}倍",
+  "casino.slots.cascade.tumbleLadder": "連続落下の倍率",
   "casino.slots.machine.introFreeSpins": "フリースピン{0}回",
   "casino.slots.moogle.introFreeGames": "フリーゲーム{0}回",
   "casino.slots.moogle.introHold": "ホールド＆スピン",

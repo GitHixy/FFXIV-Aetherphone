@@ -9566,6 +9566,7 @@
   "casino.slots.machine.floorJackpot": "Jackpot de la salle",
   "casino.slots.bird.expanding": "Symbole extensible",
   "casino.slots.cascade.featureTotal": "Total des orbes {0}x",
+  "casino.slots.cascade.tumbleLadder": "Multiplicateur de chute",
   "casino.slots.machine.introFreeSpins": "{0} TOURS GRATUITS",
   "casino.slots.moogle.introFreeGames": "{0} JEUX GRATUITS",
   "casino.slots.moogle.introHold": "MAINTIEN ET RELANCE",
