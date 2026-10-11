@@ -35,7 +35,7 @@ internal enum StripHeroRow : byte
 {
     Inline,
     Stacked,
-    Rail,
+    Tall,
 }
 
 internal readonly record struct StripHeroModel(
@@ -69,16 +69,13 @@ internal sealed class StripHero
     private const float GlassOpacity = 0.94f;
     private const float SubAlpha = 0.86f;
     private const float IdleAlpha = 0.6f;
-    private const float PillRailPad = 4f;
     private const float FitSlack = 0.5f;
-    private const string PillRailId = "##casino.hero.pills";
 
     private static readonly TextStyle AmountStyle = TextStyles.LargeTitle;
 
     private readonly CasinoTextCache texts = new();
     private readonly string[] dayLabels = new string[StreakDays];
     private readonly ChipValueText worth = new();
-    private readonly TileRail pillRail = new();
     private RollingAmount balance;
     private LevelCapsule level;
     private Vector2 timedCenter;
@@ -92,8 +89,6 @@ internal sealed class StripHero
     public Rect SpinSource => spinSource;
 
     public void Snap(long value) => balance.Snap(value);
-
-    public void Reset() => pillRail.Reset();
 
     public static StripHeroClaims ClaimsOf(in StripHeroModel model)
     {
@@ -119,18 +114,28 @@ internal sealed class StripHero
     public static int RowPills(StripHeroClaims claims) =>
         1 + ((claims & StripHeroClaims.Timed) != 0 ? 1 : 0) + ((claims & StripHeroClaims.Spin) != 0 ? 1 : 0);
 
-    public static StripHeroRow RowLayout(int pills, float rowWidth, float pillsWidth)
+    public static StripHeroRow RowLayout(int pills, float rowWidth, float pillsWidth, float claimsWidth)
     {
         if (pills <= 1 || pillsWidth <= rowWidth + FitSlack)
         {
             return StripHeroRow.Inline;
         }
 
-        return pills >= 3 ? StripHeroRow.Rail : StripHeroRow.Stacked;
+        return pills >= 3 && claimsWidth > rowWidth + FitSlack ? StripHeroRow.Tall : StripHeroRow.Stacked;
     }
 
-    public static float ButtonsHeight(StripHeroRow row, float buttonHeight, float gap) =>
-        row == StripHeroRow.Stacked ? buttonHeight * 2f + gap : buttonHeight;
+    public static float ButtonsHeight(StripHeroRow row, float buttonHeight, float gap) => row switch
+    {
+        StripHeroRow.Stacked => buttonHeight * 2f + gap,
+        StripHeroRow.Tall => buttonHeight * 3f + gap * 2f,
+        _ => buttonHeight,
+    };
+
+    public static float SharedClaimSplit(float rowWidth, float timedWidth, float spinWidth, float gap)
+    {
+        var half = (rowWidth - gap) * 0.5f;
+        return MathF.Max(timedWidth, spinWidth) <= half ? half : MathF.Min(timedWidth, rowWidth - gap - spinWidth);
+    }
 
     public static float StreakHeight(float labelHeight, float dot, float labelGap) => labelHeight + labelGap + dot;
 
@@ -170,9 +175,9 @@ internal sealed class StripHero
         getWidth = GetChipsWidth(scale);
         timedWidth = (claims & StripHeroClaims.Timed) != 0 ? TimedWidth(model, scale) : 0f;
         spinWidth = (claims & StripHeroClaims.Spin) != 0 ? SpinWidth(scale) : 0f;
-        var pillsWidth = getWidth + (timedWidth > 0f ? buttonGap + timedWidth : 0f)
-                         + (spinWidth > 0f ? buttonGap + spinWidth : 0f);
-        return RowLayout(RowPills(claims), rowWidth, pillsWidth);
+        var claimsWidth = timedWidth + spinWidth + (timedWidth > 0f && spinWidth > 0f ? buttonGap : 0f);
+        var pillsWidth = getWidth + (claimsWidth > 0f ? buttonGap + claimsWidth : 0f);
+        return RowLayout(RowPills(claims), rowWidth, pillsWidth, claimsWidth);
     }
 
     private float TimedWidth(in StripHeroModel model, float scale)
@@ -272,10 +277,8 @@ internal sealed class StripHero
         var row = PlanRow(model, right - left, buttonGap, scale, out var getWidth, out var timedWidth,
             out var spinWidth);
         var rowRect = new Rect(new Vector2(left, top), new Vector2(right, top + buttonHeight));
-        var rowAction = row == StripHeroRow.Rail
-            ? DrawPillRail(drawList, ui, model, rowRect, getWidth, timedWidth, spinWidth, buttonGap, surface, scale)
-            : DrawPillRow(drawList, ui, model, row, rowRect, getWidth, timedWidth, spinWidth, buttonGap, surface,
-                scale);
+        var rowAction = DrawPillRow(drawList, ui, model, row, rowRect, getWidth, timedWidth, spinWidth, buttonGap,
+            surface, scale);
         if (rowAction != StripHeroAction.None)
         {
             action = rowAction;
@@ -300,29 +303,9 @@ internal sealed class StripHero
         var action = StripHeroAction.None;
         var hasTimed = timedWidth > 0f;
         var hasSpin = spinWidth > 0f;
-        if (row == StripHeroRow.Stacked)
+        if (row != StripHeroRow.Inline)
         {
-            if (DrawWhitePill(drawList, ui, rowRect, Loc.T(L.Strip.GetChips), surface, true))
-            {
-                action = StripHeroAction.GetChips;
-            }
-
-            var second = new Rect(new Vector2(rowRect.Min.X, rowRect.Max.Y + gap),
-                new Vector2(rowRect.Max.X, rowRect.Max.Y + gap + rowRect.Height));
-            if (hasTimed)
-            {
-                UiAnchors.Report("casino.bonus", second);
-                if (DrawTimed(drawList, ui, second, model.Timed!, model.Claiming, model.NowUnix, scale, true))
-                {
-                    action = StripHeroAction.ClaimTimed;
-                }
-            }
-            else if (DrawSpin(drawList, ui, second, true))
-            {
-                action = StripHeroAction.FreeSpin;
-            }
-
-            return action;
+            return DrawPillStack(drawList, ui, model, row, rowRect, timedWidth, spinWidth, gap, surface, scale);
         }
 
         var getRight = hasTimed || hasSpin ? rowRect.Min.X + getWidth : rowRect.Max.X;
@@ -354,40 +337,53 @@ internal sealed class StripHero
         return action;
     }
 
-    private StripHeroAction DrawPillRail(ImDrawListPtr drawList, AppSkin ui, in StripHeroModel model, Rect rowRect,
-        float getWidth, float timedWidth, float spinWidth, float gap, Vector4 surface, float scale)
+    private StripHeroAction DrawPillStack(ImDrawListPtr drawList, AppSkin ui, in StripHeroModel model, StripHeroRow row,
+        Rect rowRect, float timedWidth, float spinWidth, float gap, Vector4 surface, float scale)
     {
         var action = StripHeroAction.None;
-        var contentWidth = getWidth + gap + timedWidth + gap + spinWidth;
-        var pad = new Vector2(PillRailPad * scale, PillRailPad * scale);
-        var rail = new Rect(rowRect.Min - pad, rowRect.Max + pad);
-        pillRail.Begin(drawList, PillRailId, rail, rail, contentWidth);
-        var interactive = pillRail.TapAllowed;
-        var left = rowRect.Min.X - pillRail.Offset;
-        var getRect = new Rect(new Vector2(left, rowRect.Min.Y), new Vector2(left + getWidth, rowRect.Max.Y));
-        if (DrawWhitePill(drawList, ui, getRect, Loc.T(L.Strip.GetChips), surface, interactive))
+        if (DrawWhitePill(drawList, ui, rowRect, Loc.T(L.Strip.GetChips), surface, true))
         {
             action = StripHeroAction.GetChips;
         }
 
-        left = getRect.Max.X + gap;
-        var timedRect = new Rect(new Vector2(left, rowRect.Min.Y), new Vector2(left + timedWidth, rowRect.Max.Y));
-        UiAnchors.Report("casino.bonus", timedRect);
-        if (DrawTimed(drawList, ui, timedRect, model.Timed!, model.Claiming, model.NowUnix, scale, interactive))
+        var second = RowBelow(rowRect, gap);
+        var hasTimed = timedWidth > 0f;
+        var hasSpin = spinWidth > 0f;
+        var timedRect = second;
+        var spinRect = second;
+        if (hasTimed && hasSpin)
         {
-            action = StripHeroAction.ClaimTimed;
+            if (row == StripHeroRow.Tall)
+            {
+                spinRect = RowBelow(second, gap);
+            }
+            else
+            {
+                var split = second.Min.X + SharedClaimSplit(second.Width, timedWidth, spinWidth, gap);
+                timedRect = new Rect(second.Min, new Vector2(split, second.Max.Y));
+                spinRect = new Rect(new Vector2(split + gap, second.Min.Y), second.Max);
+            }
         }
 
-        left = timedRect.Max.X + gap;
-        var spinRect = new Rect(new Vector2(left, rowRect.Min.Y), new Vector2(left + spinWidth, rowRect.Max.Y));
-        if (DrawSpin(drawList, ui, spinRect, interactive))
+        if (hasTimed)
+        {
+            UiAnchors.Report("casino.bonus", timedRect);
+            if (DrawTimed(drawList, ui, timedRect, model.Timed!, model.Claiming, model.NowUnix, scale, true))
+            {
+                action = StripHeroAction.ClaimTimed;
+            }
+        }
+
+        if (hasSpin && DrawSpin(drawList, ui, spinRect, true))
         {
             action = StripHeroAction.FreeSpin;
         }
 
-        pillRail.End(drawList, rail, contentWidth, ui);
         return action;
     }
+
+    private static Rect RowBelow(Rect row, float gap) =>
+        new(new Vector2(row.Min.X, row.Max.Y + gap), new Vector2(row.Max.X, row.Max.Y + gap + row.Height));
 
     private static bool DrawWhitePill(ImDrawListPtr drawList, AppSkin ui, Rect rect, string label, Vector4 surface,
         bool interactive)

@@ -271,17 +271,18 @@ internal static class TableRow
             right = chipMin.X - ChipGap * scale;
         }
 
-        if (view.Room == VenueRoomKind.None && view.SeatCount > 0)
-        {
-            var seatInk = view.Seated > 0 ? CasinoColors.Money : ui.MutedInk;
-            var dotsWidth = CasinoArt.SeatDots(drawList, new Vector2(left, centerY), view.Seated,
-                Math.Min(view.SeatCount, SeatDotLimit), seatInk, Palette.WithAlpha(ui.TitleInk, EmptySeatAlpha),
-                scale);
-            left += dotsWidth + Metrics.Space.Sm * scale;
-        }
-
         var text = view.Spectators.Length > 0 ? view.Spectators : view.Room == VenueRoomKind.None ? view.Seats
             : view.HostLine;
+        var dots = view.Room == VenueRoomKind.None ? Math.Min(view.SeatCount, SeatDotLimit) : 0;
+        var dotsSpan = dots > 0 ? CasinoArt.SeatDotsWidth(dots, scale) + Metrics.Space.Sm * scale : 0f;
+        if (ShowsSeatDots(dotsSpan, Typography.Measure(text, TextStyles.Footnote).X, right - left))
+        {
+            var seatInk = view.Seated > 0 ? CasinoColors.Money : ui.MutedInk;
+            CasinoArt.SeatDots(drawList, new Vector2(left, centerY), view.Seated, dots, seatInk,
+                Palette.WithAlpha(ui.TitleInk, EmptySeatAlpha), scale);
+            left += dotsSpan;
+        }
+
         if (text.Length == 0 || right - left <= 0f)
         {
             return;
@@ -290,6 +291,9 @@ internal static class TableRow
         Typography.Draw(drawList, new Vector2(left, centerY - Typography.LineHeight(TextStyles.Footnote) * 0.5f),
             Typography.FitText(text, right - left, TextStyles.Footnote), ui.BodyInk, TextStyles.Footnote);
     }
+
+    public static bool ShowsSeatDots(float dotsSpan, float textWidth, float available) =>
+        dotsSpan > 0f && (textWidth <= 0f || dotsSpan + textWidth <= available);
 
     private static float ChipHeight(float scale) =>
         Typography.LineHeight(TextStyles.FootnoteEmphasized) + PillPadY * 2f * scale;

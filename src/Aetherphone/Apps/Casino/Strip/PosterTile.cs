@@ -46,6 +46,12 @@ internal static class PosterTile
 
     public static float SignBandTop(float scale) => (Pad * 0.6f + CrowdHeight + CapsuleGap) * scale;
 
+    public static float SignBandBottom(float scale) => SignBandTop(scale) + (SignHeight + CapsuleGap) * scale;
+
+    public static Rect PreviewArt(Rect tile, float scale) =>
+        new(new Vector2(tile.Min.X, tile.Min.Y + SignBandBottom(scale)),
+            new Vector2(tile.Max.X, MathF.Max(tile.Min.Y + SignBandBottom(scale), tile.Max.Y - TextBlock(scale))));
+
     public static Vector2 ArtCenter(Rect tile, float textBlock, float scale)
     {
         var signBottom = tile.Min.Y + SignBandTop(scale) + SignHeight * scale;
