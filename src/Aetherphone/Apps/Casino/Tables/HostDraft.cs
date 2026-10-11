@@ -29,7 +29,7 @@ internal sealed class HostDraft
     public int TurnSeconds = CasinoHostingRules.DefaultTurnSeconds;
     public bool TimeBank = true;
     public int DealerMode = CasinoDealerModes.House;
-    public bool AutoDeal = true;
+    public bool AutoDeal;
     public int Pays = CasinoRuleSheet.PaysThreeToTwo;
     public bool HitsSoft17;
     public int Decks = DefaultDecks;
@@ -101,7 +101,7 @@ internal sealed class HostDraft
         TurnSeconds = CasinoHostingRules.DefaultTurnSeconds;
         TimeBank = true;
         DealerMode = CasinoDealerModes.House;
-        AutoDeal = true;
+        AutoDeal = false;
         Pays = CasinoRuleSheet.PaysThreeToTwo;
         HitsSoft17 = false;
         Decks = DefaultDecks;

@@ -4,6 +4,15 @@ using Aetherphone.Core.Localization;
 
 namespace Aetherphone.Apps.Casino.Tables;
 
+internal enum DealerDeck : byte
+{
+    Deal,
+    WaitingBets,
+    HandLive,
+    HandOver,
+    Paused,
+}
+
 internal static class BlackjackHosting
 {
     public static bool SeatBanked(CasinoBlackjackRoomStateDto board)
@@ -48,19 +57,75 @@ internal static class BlackjackHosting
 
     public static bool AwaitsDeal(CasinoBlackjackRoomStateDto board)
     {
-        return HostDeals(board) && board.Phase == BlackjackPhases.Betting && board.DeadlineUnixMs == 0
-               && !board.Paused;
+        return HostDeals(board) && !board.AutoDeal && board.Phase == BlackjackPhases.Betting
+               && board.DeadlineUnixMs == 0 && !board.Paused;
     }
 
-    public static bool CanRebuy(CasinoBlackjackRoomStateDto board, long seatChips)
+    public static bool IsDealingHost(CasinoBlackjackRoomStateDto board, string me, string ownerId)
     {
-        if (CasinoCurrencies.Of(board) != CasinoCurrencies.Practice || !board.PracticeRebuy)
+        if (me.Length == 0 || !HostDeals(board))
+        {
+            return false;
+        }
+
+        return string.Equals(me, ownerId, StringComparison.Ordinal)
+               || string.Equals(me, board.DealerUserId, StringComparison.Ordinal);
+    }
+
+    public static bool DealsFromDeck(CasinoBlackjackRoomStateDto board, string me, string ownerId, bool seated)
+    {
+        return !seated && IsDealingHost(board, me, ownerId);
+    }
+
+    public static DealerDeck DealerDeckOf(CasinoBlackjackRoomStateDto board)
+    {
+        if (board.Paused)
+        {
+            return DealerDeck.Paused;
+        }
+
+        if (BlackjackPhases.Over(board.Phase))
+        {
+            return DealerDeck.HandOver;
+        }
+
+        if (board.Phase != BlackjackPhases.Betting)
+        {
+            return DealerDeck.HandLive;
+        }
+
+        return AnyBet(board) ? DealerDeck.Deal : DealerDeck.WaitingBets;
+    }
+
+    public static bool AnyBet(CasinoBlackjackRoomStateDto board)
+    {
+        var seats = board.Seats;
+        if (seats is null)
+        {
+            return false;
+        }
+
+        for (var index = 0; index < seats.Length; index++)
+        {
+            if (seats[index].Committed > 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static bool CanRebuy(CasinoBlackjackRoomStateDto board, long seatChips, long committed)
+    {
+        if (CasinoCurrencies.Of(board) != CasinoCurrencies.Practice || !board.PracticeRebuy
+            || board.Tournament is { Live: true })
         {
             return false;
         }
 
         var floor = Math.Max(1, board.MinBet);
-        return seatChips < floor && (board.Phase == BlackjackPhases.Betting || BlackjackPhases.Over(board.Phase));
+        return seatChips < floor && committed == 0 && board.Phase == BlackjackPhases.Betting;
     }
 
     public static long NaturalPayout(CasinoBlackjackRoomStateDto board, long bet)
@@ -71,12 +136,35 @@ internal static class BlackjackHosting
 
 internal sealed class BlackjackHostedText
 {
+    private const string InfoSeparator = " · ";
+
     private static readonly LocString[] PaysLabels = { L.Tables.Pays32, L.Tables.Pays21, L.Tables.Pays11 };
 
     private readonly CasinoTextCache texts = new();
     private CasinoBlackjackRuleSheetDto? rulesSource;
     private LanguageInfo? rulesLanguage;
     private string rules = string.Empty;
+    private string infoFirst = string.Empty;
+    private string infoSecond = string.Empty;
+    private string info = string.Empty;
+
+    public string Info(string first, string second)
+    {
+        if (second.Length == 0)
+        {
+            return first;
+        }
+
+        if (ReferenceEquals(first, infoFirst) && ReferenceEquals(second, infoSecond))
+        {
+            return info;
+        }
+
+        infoFirst = first;
+        infoSecond = second;
+        info = string.Concat(first, InfoSeparator, second);
+        return info;
+    }
 
     public string Rules(CasinoBlackjackRoomStateDto board)
     {
@@ -118,6 +206,11 @@ internal sealed class BlackjackHostedText
     public string Gil(long amount)
     {
         return texts.Number(L.Tables.GilAmount, amount);
+    }
+
+    public string GilCompact(long amount)
+    {
+        return texts.Compact(L.Tables.GilAmount, amount);
     }
 
     public string Rebuy(long stack)

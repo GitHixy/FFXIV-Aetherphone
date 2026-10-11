@@ -11301,10 +11301,12 @@ internal static class L
         public static readonly LocString ReasonConfigInvalid = new("casino.tables.reasonConfigInvalid", "Some of those table settings do not work together. Check the stakes and limits, then try again.");
         public static readonly LocString ReasonPracticeOnly = new("casino.tables.reasonPracticeOnly", "That option is only for practice and gil tables, not house chip tables.");
         public static readonly LocString ReasonNotDealer = new("casino.tables.reasonNotDealer", "Only the host or a co-dealer can do that.");
+        public static readonly LocString ReasonDealerCannotSit = new("casino.tables.reasonDealerCannotSit", "You deal at this table, so you cannot also take a seat at it.");
         public static readonly LocString ReasonRebuyOff = new("casino.tables.reasonRebuyOff", "The host turned rebuys off at this table.");
         public static readonly LocString ReasonTournamentLive = new("casino.tables.reasonTournamentLive", "A tournament is running. Wait for it to finish first.");
         public static readonly LocString ReasonNoTournament = new("casino.tables.reasonNoTournament", "There is no tournament running at this table.");
         public static readonly LocString ReasonNothingToDeal = new("casino.tables.reasonNothingToDeal", "Nothing to deal yet. Wait for at least one bet.");
+        public static readonly LocString ReasonTablePaused = new("casino.tables.reasonTablePaused", "The host paused the table. Play picks up when they resume.");
         public static readonly LocString ReasonNoSpectators = new("casino.tables.reasonNoSpectators", "This table does not take spectators. Take a seat to watch.");
         public static readonly LocString ReasonDuelLive = new("casino.tables.reasonDuelLive", "A duel is already running in this room.");
         public static readonly LocString ReasonNoDuel = new("casino.tables.reasonNoDuel", "There is no duel to join right now.");
@@ -11346,7 +11348,7 @@ internal static class L
         public static readonly LocString DealerMode = new("casino.tables.dealerMode", "Who deals");
         public static readonly LocString DealerHouse = new("casino.tables.dealerHouse", "The clock");
         public static readonly LocString DealerHost = new("casino.tables.dealerHost", "I deal");
-        public static readonly LocString AutoDeal = new("casino.tables.autoDeal", "Deal on the clock when I am away");
+        public static readonly LocString AutoDeal = new("casino.tables.autoDeal", "Deal automatically on the betting clock");
         public static readonly LocString CoDealersNote = new("casino.tables.coDealersNote", "Once players sit, promote up to 3 co-dealers from the table door. They get the same Deal and Pause controls.");
         public static readonly LocString DealerChipNote = new("casino.tables.dealerChipNote", "Chip tables are dealt by the house on the clock. Play for practice or gil to deal yourself and add co-dealers.");
         public static readonly LocString RulesPays = new("casino.tables.rulesPays", "Blackjack pays");
@@ -11374,6 +11376,7 @@ internal static class L
         public static readonly LocString ReputationDisputes = new("casino.tables.reputationDisputes", "Host: {0} gil tables, {1} payouts confirmed, {2} disputes open");
         public static readonly LocString ReputationFrozen = new("casino.tables.reputationFrozen", "Host's gil tables are on hold while disputes are reviewed");
         public static readonly LocString PausedBadge = new("casino.tables.pausedBadge", "Paused");
+        public static readonly LocString PausedByHost = new("casino.tables.pausedByHost", "The host paused the table");
         public static readonly LocString HostPanelHeading = new("casino.tables.hostPanelHeading", "Host controls");
         public static readonly LocString ChipHostNote = new("casino.tables.chipHostNote", "Pause, Deal and co-dealers are for practice and gil tables. A chip table deals on the house clock so every seat can always play its chips out.");
         public static readonly LocString Rename = new("casino.tables.rename", "Rename");
@@ -11426,6 +11429,9 @@ internal static class L
         public static readonly LocString Resume = new("casino.tables.resume", "Resume");
         public static readonly LocString WaitingDeal = new("casino.tables.waitingDeal", "Bets are open. {0} deals when ready.");
         public static readonly LocString DealtBy = new("casino.tables.dealtBy", "Dealer: {0}");
+        public static readonly LocString DealerWaitingBets = new("casino.tables.dealerWaitingBets", "Waiting for the first bet");
+        public static readonly LocString DealerHandLive = new("casino.tables.dealerHandLive", "The hand is playing out");
+        public static readonly LocString DealerPaused = new("casino.tables.dealerPaused", "Paused. Tap Resume when you are ready.");
         public static readonly LocString RulesLineStands = new("casino.tables.rulesLineStands", "Blackjack pays {0}, dealer stands on soft 17, {1} decks");
         public static readonly LocString RulesLineHits = new("casino.tables.rulesLineHits", "Blackjack pays {0}, dealer hits soft 17, {1} decks");
         public static readonly LocString GilLimits = new("casino.tables.gilLimits", "Bank {0} gil, max payout {1} gil");
