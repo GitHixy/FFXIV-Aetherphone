@@ -29,10 +29,11 @@ public sealed class CasinoHostedBlackjackTests
     public void AHostDealtTableWaitsForTheDealTap()
     {
         var waiting = new CasinoBlackjackRoomStateDto(Currency: CasinoCurrencies.Gil, DealerMode: CasinoDealerModes.Host,
-            Phase: BlackjackPhases.Betting, DeadlineUnixMs: 0);
+            Phase: BlackjackPhases.Betting, DeadlineUnixMs: 0, AutoDeal: false);
 
         Assert.True(BlackjackHosting.HostDeals(waiting));
         Assert.True(BlackjackHosting.AwaitsDeal(waiting));
+        Assert.False(BlackjackHosting.AwaitsDeal(waiting with { AutoDeal = true }));
         Assert.False(BlackjackHosting.AwaitsDeal(waiting with { DeadlineUnixMs = 1 }));
         Assert.False(BlackjackHosting.AwaitsDeal(waiting with { Paused = true }));
         Assert.False(BlackjackHosting.AwaitsDeal(waiting with { Phase = BlackjackPhases.PlayerTurns }));

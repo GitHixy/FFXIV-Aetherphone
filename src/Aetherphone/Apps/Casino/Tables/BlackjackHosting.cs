@@ -57,8 +57,8 @@ internal static class BlackjackHosting
 
     public static bool AwaitsDeal(CasinoBlackjackRoomStateDto board)
     {
-        return HostDeals(board) && board.Phase == BlackjackPhases.Betting && board.DeadlineUnixMs == 0
-               && !board.Paused;
+        return HostDeals(board) && !board.AutoDeal && board.Phase == BlackjackPhases.Betting
+               && board.DeadlineUnixMs == 0 && !board.Paused;
     }
 
     public static bool IsDealingHost(CasinoBlackjackRoomStateDto board, string me, string ownerId)
