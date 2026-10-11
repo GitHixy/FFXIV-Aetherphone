@@ -377,33 +377,34 @@ internal sealed class MachineReels
     private void DrawTraces(ImDrawListPtr drawList, Rect window, CasinoSlotsStepDto step, SlotsMachineInfo info,
         float cellWidth, float cellHeight, float scale)
     {
-        if (info.Layout == SlotsLayout.Cluster || step.Wins is not { } wins || !traces.TryActive(wins, out var active))
+        if (info.Layout == SlotsLayout.Cluster || step.Wins is not { } wins || traces.Count == 0)
         {
             return;
         }
 
-        var win = wins[active];
-        var rows = SlotsRules.Paylines[win.Line];
-        var count = Math.Clamp(win.Count, 2, SlotsRules.ReelCount);
-        Span<Vector2> points = stackalloc Vector2[SlotsRules.ReelCount];
-        for (var reel = 0; reel < count; reel++)
+        if (traces.Overview)
         {
-            points[reel] = new Vector2(window.Min.X + (reel + 0.5f) * cellWidth,
-                window.Min.Y + (rows[reel] + 0.5f) * cellHeight);
+            var reveal = traces.OverviewProgress / MachineTraceArt.RevealShare;
+            for (var slot = 0; slot < traces.Count; slot++)
+            {
+                var index = traces.WinAt(slot);
+                if (index < wins.Length)
+                {
+                    MachineTraceArt.Line(drawList, window, cellWidth, cellHeight, wins[index],
+                        MachineTraceArt.OverviewAlpha, reveal, false, scale);
+                }
+            }
+
+            return;
         }
 
-        var glow = ImGui.GetColorU32(Gold with { W = 0.25f });
-        var core = ImGui.GetColorU32(Gold);
-        for (var segment = 0; segment < count - 1; segment++)
+        if (!traces.TryActive(wins, out var active))
         {
-            drawList.AddLine(points[segment], points[segment + 1], glow, 9f * scale);
-            drawList.AddLine(points[segment], points[segment + 1], core, 3f * scale);
+            return;
         }
 
-        for (var reel = 0; reel < count; reel++)
-        {
-            drawList.AddCircleFilled(points[reel], 4f * scale, core, 12);
-        }
+        MachineTraceArt.Line(drawList, window, cellWidth, cellHeight, wins[active], 1f,
+            traces.ActiveProgress / MachineTraceArt.RevealShare, true, scale);
     }
 
     private static void DrawCoinLabel(ImDrawListPtr drawList, CasinoSlotsStepDto? step, int cell, Vector2 center,

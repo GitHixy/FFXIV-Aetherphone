@@ -6,7 +6,8 @@ namespace Aetherphone.Apps.Casino.Machines;
 internal sealed class MachineTraceCycle
 {
     public const int Capacity = 64;
-    public const float SlotSeconds = 0.8f;
+    public const float SlotSeconds = 1.1f;
+    public const float OverviewSeconds = 0.9f;
 
     private readonly int[] order = new int[Capacity];
 
@@ -18,6 +19,10 @@ internal sealed class MachineTraceCycle
     public int Count => count;
 
     public float Seconds => seconds;
+
+    public bool Overview => count > 1 && seconds < OverviewSeconds;
+
+    public float OverviewProgress => Overview ? seconds / OverviewSeconds : 1f;
 
     public int WinAt(int slot) => order[slot];
 
@@ -72,12 +77,13 @@ internal sealed class MachineTraceCycle
     public bool TryActive(CasinoSlotsWinDto[]? wins, out int winIndex)
     {
         winIndex = -1;
-        if (count == 0 || wins is null)
+        if (count == 0 || wins is null || Overview)
         {
             return false;
         }
 
-        var candidate = order[(int)(seconds / SlotSeconds) % count];
+        var cycled = count > 1 ? seconds - OverviewSeconds : seconds;
+        var candidate = order[(int)(cycled / SlotSeconds) % count];
         if (candidate >= wins.Length)
         {
             return false;
@@ -85,6 +91,21 @@ internal sealed class MachineTraceCycle
 
         winIndex = candidate;
         return true;
+    }
+
+    public float ActiveProgress
+    {
+        get
+        {
+            if (count <= 1)
+            {
+                return Math.Clamp(seconds / SlotSeconds, 0f, 1f);
+            }
+
+            var cycled = seconds - OverviewSeconds;
+            var within = cycled - MathF.Floor(cycled / SlotSeconds) * SlotSeconds;
+            return Math.Clamp(within / SlotSeconds, 0f, 1f);
+        }
     }
 
     public static bool Traceable(CasinoSlotsWinDto win)

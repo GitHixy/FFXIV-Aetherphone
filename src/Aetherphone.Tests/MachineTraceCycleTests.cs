@@ -37,6 +37,10 @@ public sealed class MachineTraceCycleTests
         var cycle = new MachineTraceCycle();
         var wins = new[] { Line(0, 3, 100), Line(1, 5, 500), Line(2, 4, 200) };
         cycle.Track(1, 0, wins);
+        Assert.True(cycle.Overview);
+        Assert.False(cycle.TryActive(wins, out _));
+        cycle.Advance(MachineTraceCycle.OverviewSeconds + MachineTraceCycle.SlotSeconds * 0.5f);
+        Assert.False(cycle.Overview);
         var seen = new int[wins.Length];
         for (var slot = 0; slot < wins.Length; slot++)
         {
@@ -114,6 +118,9 @@ public sealed class MachineTraceCycleTests
         var wins = spin.Steps[step].Wins!;
         var cycle = new MachineTraceCycle();
         cycle.Track(1, step, wins);
+        cycle.Advance((cycle.Count > 1 ? MachineTraceCycle.OverviewSeconds : 0f)
+            + MachineTraceCycle.SlotSeconds * 0.5f);
+
         var shown = new bool[wins.Length];
         for (var slot = 0; slot < cycle.Count; slot++)
         {
