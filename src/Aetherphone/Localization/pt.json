@@ -9002,6 +9002,7 @@
   "casino.tables.copyRow": "{0}: entrou {1}, pilha {2}, líquido {3}, {4} mãos",
   "casino.tables.copyEntry": "{0}: {1} para {2}, {3}, {4}",
   "casino.tables.gilLedgerHeading": "Registro de gil",
+  "casino.tables.ledgerUpdated": "Registro de gil atualizado",
   "casino.tables.gilAmount": "{0} gil",
   "casino.tables.kindBuyIn": "Entrada",
   "casino.tables.kindRebuy": "Recompra",

@@ -9002,6 +9002,7 @@
   "casino.tables.copyRow": "{0}: giriş {1}, yığın {2}, net {3}, {4} el",
   "casino.tables.copyEntry": "{0}: {1}, {2} kişisine, {3}, {4}",
   "casino.tables.gilLedgerHeading": "Gil defteri",
+  "casino.tables.ledgerUpdated": "Gil defteri güncellendi",
   "casino.tables.gilAmount": "{0} gil",
   "casino.tables.kindBuyIn": "Giriş",
   "casino.tables.kindRebuy": "Yeniden alım",

@@ -94,6 +94,12 @@ internal sealed class TableLedger
         }
 
         tables.EnsureLedgerFresh(roomId);
+        if (tables.TakeIntentFailure())
+        {
+            Toast(new CasinoStakeOutcome(false, CasinoReasons.Unreachable));
+        }
+
+        Toast(tables.TakeNoticeOutcome());
         var ledger = tables.LedgerFor(roomId);
         if (ledger is null)
         {
@@ -119,6 +125,18 @@ internal sealed class TableLedger
 
         DrawEntries(ui, scale);
         DrawPropose(ui, ledger, myUserId, hostUserId, scale);
+    }
+
+    public static void Toast(CasinoStakeOutcome? outcome)
+    {
+        if (outcome is null)
+        {
+            return;
+        }
+
+        ShellToast.Show(outcome.Granted
+            ? Loc.T(L.Tables.LedgerUpdated)
+            : Loc.T(CasinoReasons.MessageFor(outcome.Reason)));
     }
 
     internal static LedgerTone ToneOf(CasinoLedgerEntryDto entry)

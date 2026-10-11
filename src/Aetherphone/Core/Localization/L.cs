@@ -11388,6 +11388,7 @@ internal static class L
         public static readonly LocString CopyRow = new("casino.tables.copyRow", "{0}: in {1}, stack {2}, net {3}, {4} hands");
         public static readonly LocString CopyEntry = new("casino.tables.copyEntry", "{0}: {1} to {2}, {3}, {4}");
         public static readonly LocString GilLedgerHeading = new("casino.tables.gilLedgerHeading", "Gil ledger");
+        public static readonly LocString LedgerUpdated = new("casino.tables.ledgerUpdated", "Gil ledger updated");
         public static readonly LocString GilAmount = new("casino.tables.gilAmount", "{0} gil");
         public static readonly LocString KindBuyIn = new("casino.tables.kindBuyIn", "Buy-in");
         public static readonly LocString KindRebuy = new("casino.tables.kindRebuy", "Rebuy");

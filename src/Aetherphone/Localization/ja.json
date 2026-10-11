@@ -9002,6 +9002,7 @@
   "casino.tables.copyRow": "{0}：入金 {1}、スタック {2}、収支 {3}、{4}手",
   "casino.tables.copyEntry": "{0}：{1}から{2}へ、{3}、{4}",
   "casino.tables.gilLedgerHeading": "ギル台帳",
+  "casino.tables.ledgerUpdated": "ギル台帳を更新しました",
   "casino.tables.gilAmount": "{0}ギル",
   "casino.tables.kindBuyIn": "バイイン",
   "casino.tables.kindRebuy": "リバイ",

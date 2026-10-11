@@ -9002,6 +9002,7 @@
   "casino.tables.copyRow": "{0}: rein {1}, Stapel {2}, netto {3}, {4} Hände",
   "casino.tables.copyEntry": "{0}: {1} an {2}, {3}, {4}",
   "casino.tables.gilLedgerHeading": "Gil-Buch",
+  "casino.tables.ledgerUpdated": "Gil-Buch aktualisiert",
   "casino.tables.gilAmount": "{0} Gil",
   "casino.tables.kindBuyIn": "Einkauf",
   "casino.tables.kindRebuy": "Nachkauf",

@@ -9002,6 +9002,7 @@
   "casino.tables.copyRow": "{0}: вход {1}, стек {2}, итог {3}, {4} раздач",
   "casino.tables.copyEntry": "{0}: {1} → {2}, {3}, {4}",
   "casino.tables.gilLedgerHeading": "Журнал гилов",
+  "casino.tables.ledgerUpdated": "Журнал гилов обновлён",
   "casino.tables.gilAmount": "{0} гил",
   "casino.tables.kindBuyIn": "Вход",
   "casino.tables.kindRebuy": "Докупка",

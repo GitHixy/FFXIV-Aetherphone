@@ -9002,6 +9002,7 @@
   "casino.tables.copyRow": "{0} : entré {1}, tapis {2}, net {3}, {4} mains",
   "casino.tables.copyEntry": "{0} : {1} à {2}, {3}, {4}",
   "casino.tables.gilLedgerHeading": "Registre des gils",
+  "casino.tables.ledgerUpdated": "Registre des gils mis à jour",
   "casino.tables.gilAmount": "{0} gils",
   "casino.tables.kindBuyIn": "Cave",
   "casino.tables.kindRebuy": "Recave",

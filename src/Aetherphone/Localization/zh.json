@@ -9002,6 +9002,7 @@
   "casino.tables.copyRow": "{0}：买入 {1}，筹码 {2}，净额 {3}，{4} 手",
   "casino.tables.copyEntry": "{0}：{1} 付给 {2}，{3}，{4}",
   "casino.tables.gilLedgerHeading": "金币账本",
+  "casino.tables.ledgerUpdated": "金币账本已更新",
   "casino.tables.gilAmount": "{0} 金币",
   "casino.tables.kindBuyIn": "买入",
   "casino.tables.kindRebuy": "补码",

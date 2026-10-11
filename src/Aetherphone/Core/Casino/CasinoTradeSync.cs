@@ -87,6 +87,11 @@ internal sealed class CasinoTradeSync : IDisposable
 
     public bool Busy => venue.HostInFlight;
 
+    public CasinoStakeOutcome? TakeOutcome()
+    {
+        return venue.TakeTradeOutcome();
+    }
+
     public void Accept()
     {
         if (queue.TryTake(out var proposal))
