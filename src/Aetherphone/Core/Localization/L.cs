@@ -2341,6 +2341,8 @@ internal static class L
         {
             new("changelog.r1300.58",
                 "Added a Show in cutscenes setting that keeps the phone on screen while a cutscene plays, for a second monitor"),
+            new("changelog.r1300.81",
+                "Added an FPS counter to the mini phone, off by default under Settings > Minimized phone, contributed by t3sco"),
             new("changelog.r1300.51",
                 "Fixed the scrollbar moving the wrong way and too slowly when dragged while the phone position is locked, contributed by jambalong"),
             new("changelog.r1300.57",
@@ -9905,6 +9907,8 @@ internal static class L
         public static readonly LocString ShapeHint = new("minimized.shapeHint", "Choose what the phone collapses into. The minimap draws the zone map around you, so it can sit where the game minimap does.");
         public static readonly LocString Wallpaper = new("minimized.wallpaper", "Show wallpaper");
         public static readonly LocString WallpaperHint = new("minimized.wallpaperHint", "Paints your home wallpaper behind the mini phone, dimmed so the clock stays readable.");
+        public static readonly LocString Fps = new("minimized.fps", "FPS");
+        public static readonly LocString FpsValue = new("minimized.fpsValue", "{0} FPS");
         public static readonly LocString MinimapHint = new("minimized.minimapHint", "The map faces north and shows your heading, the zone name and your coordinates. Tap it to open the phone.");
         public static readonly LocString MinimapZoomHint = new("minimized.minimapZoomHint", "Scroll the wheel over the map to zoom, or use the plus and minus buttons that fade in when you hover it.");
         public static readonly LocString NoMap = new("minimized.noMap", "No map here");
