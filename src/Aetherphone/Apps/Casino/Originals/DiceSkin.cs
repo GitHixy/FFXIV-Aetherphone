@@ -158,10 +158,11 @@ internal sealed class DiceSkin : IOriginalsSkin
         var gap = FieldGap * scale;
         var overLabel = Loc.T(L.Originals.RollOver);
         var underLabel = Loc.T(L.Originals.RollUnder);
+        var capsule = SearchBar.Capsule(rect);
         var toggleWidth = MathF.Min(rect.Width * ToggleMaxShare,
-            MathF.Max(OriginalsControls.TogglePillWidth(overLabel, rect.Height, scale),
-                OriginalsControls.TogglePillWidth(underLabel, rect.Height, scale)));
-        var toggle = new Rect(rect.Min, new Vector2(rect.Min.X + toggleWidth, rect.Max.Y));
+            MathF.Max(OriginalsControls.TogglePillWidth(overLabel, capsule.Height, scale),
+                OriginalsControls.TogglePillWidth(underLabel, capsule.Height, scale)));
+        var toggle = new Rect(capsule.Min, new Vector2(capsule.Min.X + toggleWidth, capsule.Max.Y));
         if (OriginalsControls.TogglePill(drawList, "casino.originals.dice.side", toggle, over ? overLabel : underLabel,
                 FontAwesomeIcon.ExchangeAlt, ui, changeable))
         {
