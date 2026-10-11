@@ -28,6 +28,8 @@ internal sealed partial class CasinoApp
     private const float RecordsTileHeight = 84f;
     private const float RecordsIcon = 34f;
 
+    internal static readonly string[] LiveRooms = { CasinoGames.Race, CasinoGames.Wheel, CasinoGames.Bingo };
+
     private readonly LiveNowItem[] liveNow = new LiveNowItem[LiveNowCapacity];
     private readonly TileRail liveNowRail = new();
     private readonly Dictionary<int, string> returnLabels = new();
@@ -213,13 +215,6 @@ internal sealed partial class CasinoApp
         }
 
         var open = CasinoGameGate.IsOpen(features, entry.GameId);
-        if (string.Equals(entry.GameId, CasinoGames.DailySpin, StringComparison.Ordinal))
-        {
-            var ready = DailySpinStatus.OffersWheel(DailySpinStatus.Of(casinoSpin.Answer));
-            return new PosterInfo(open, 0, Loc.T(L.Strip.DailySpinMeta), string.Empty,
-                ready ? Loc.T(L.Casino.SpinReadyBadge) : string.Empty);
-        }
-
         var room = RoomOf(entry.GameId);
         var meta = room.Length > 0 ? RoomPhaseLine(entry.GameId, room, out _) : string.Empty;
         if (meta.Length == 0)
@@ -228,7 +223,7 @@ internal sealed partial class CasinoApp
         }
 
         return new PosterInfo(open, CrowdAt(entry.GameId), meta, ReturnLabel(ReturnTenthsOf(entry.GameId)),
-            string.Empty);
+            StripCatalog.WearsSkillBadge(entry.GameId) ? Loc.T(L.Floor.SkillBadge) : string.Empty);
     }
 
     public ICabinetIdle? IdleFor(string gameId) => machines.IdleFor(gameId);

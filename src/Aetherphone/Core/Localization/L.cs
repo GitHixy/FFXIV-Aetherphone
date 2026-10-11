@@ -11096,14 +11096,7 @@ internal static class L
         public static readonly LocString FromChips = new("casino.strip.fromChips", "From {0}");
         public static readonly LocString HostMeta = new("casino.strip.hostMeta", "Your table, your rules");
         public static readonly LocString VenueMeta = new("casino.strip.venueMeta", "Host it at your venue");
-        public static readonly LocString DailySpinMeta = new("casino.strip.dailySpinMeta", "Free once a day");
-        public static readonly LocString ShelfTables = new("casino.strip.shelfTables", "Tables");
         public static readonly LocString ShelfMachines = new("casino.strip.shelfMachines", "Machines");
-        public static readonly LocString ShelfOriginals = new("casino.strip.shelfOriginals", "Originals");
-        public static readonly LocString ShelfLive = new("casino.strip.shelfLive", "Live floor");
-        public static readonly LocString ShelfInstant = new("casino.strip.shelfInstant", "Instant");
-        public static readonly LocString ShelfSkill = new("casino.strip.shelfSkill", "Skill");
-        public static readonly LocString ShelfVenue = new("casino.strip.shelfVenue", "For venues");
         public static readonly LocString TickerEyebrow = new("casino.strip.tickerEyebrow", "BIG WINS");
         public static readonly LocString TickWin = new("casino.strip.tickWin", "{0} hit {1} on {2}");
         public static readonly LocString TickJackpot = new("casino.strip.tickJackpot", "{0} won the jackpot: {1} chips");
@@ -11114,7 +11107,7 @@ internal static class L
         public static readonly LocString TourBonusTitle = new("casino.strip.tourBonusTitle", "Free chips");
         public static readonly LocString TourBonusBody = new("casino.strip.tourBonusBody", "The timed bonus refills every 3 hours. Tap it when the ring is full.");
         public static readonly LocString TourShelvesTitle = new("casino.strip.tourShelvesTitle", "Every game, one tap");
-        public static readonly LocString TourShelvesBody = new("casino.strip.tourShelvesBody", "Swipe a shelf and tap a poster to play. Tables, machines, originals and live rooms all sit on the Floor.");
+        public static readonly LocString TourShelvesBody = new("casino.strip.tourShelvesBody", "Swipe a shelf and tap a poster to play. Cards, machines and quick bets all sit on the Floor.");
         public static readonly LocString TourLiveTitle = new("casino.strip.tourLiveTitle", "Live now");
         public static readonly LocString TourLiveBody = new("casino.strip.tourLiveBody", "The Live tab lists every room and table running right now, with seats and countdowns.");
         public static readonly LocString TourRecordsTitle = new("casino.strip.tourRecordsTitle", "On the record");
@@ -11137,6 +11130,13 @@ internal static class L
         public static readonly LocString IntroNext = new("casino.strip.introNext", "Next");
         public static readonly LocString IntroSkip = new("casino.strip.introSkip", "Skip");
         public static readonly LocString IntroStart = new("casino.strip.introStart", "Start playing");
+    }
+
+    internal static class Floor
+    {
+        public static readonly LocString ShelfCards = new("casino.floor.shelfCards", "Cards");
+        public static readonly LocString ShelfQuickBets = new("casino.floor.shelfQuickBets", "Quick bets");
+        public static readonly LocString SkillBadge = new("casino.floor.skillBadge", "Skill");
     }
 
     internal static class Chips

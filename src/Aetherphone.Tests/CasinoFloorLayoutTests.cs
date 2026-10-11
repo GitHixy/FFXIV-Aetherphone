@@ -1,8 +1,10 @@
+using System.Reflection;
 using Aetherphone.Apps.Casino;
 using Aetherphone.Apps.Casino.Strip;
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
+using Aetherphone.Core.Localization;
 using Xunit;
 
 namespace Aetherphone.Tests;
@@ -192,15 +194,21 @@ public sealed class CasinoFloorLayoutTests
     [InlineData(CasinoGames.Limbo)]
     [InlineData(CasinoGames.Keno)]
     [InlineData(CasinoGames.HiLo)]
-    [InlineData(CasinoGames.Race)]
-    [InlineData(CasinoGames.Wheel)]
-    [InlineData(CasinoGames.Bingo)]
     [InlineData(CasinoGames.Scratch)]
-    [InlineData(CasinoGames.DailySpin)]
     [InlineData(CasinoGames.Barkeep)]
-    public void EveryGameIsOneTapFromTheFloor(string gameId)
+    public void EveryShelfGameIsOneTapFromTheFloor(string gameId)
     {
         Assert.True(StripCatalog.Reaches(gameId));
+    }
+
+    [Fact]
+    public void TheClockedRoomsLiveInTheLiveRailInsteadOfAShelf()
+    {
+        Assert.Equal(new[] { CasinoGames.Race, CasinoGames.Wheel, CasinoGames.Bingo }, CasinoApp.LiveRooms);
+        for (var index = 0; index < CasinoApp.LiveRooms.Length; index++)
+        {
+            Assert.False(StripCatalog.Reaches(CasinoApp.LiveRooms[index]));
+        }
     }
 
     [Fact]
@@ -210,17 +218,64 @@ public sealed class CasinoFloorLayoutTests
     }
 
     [Fact]
+    public void TheDailySpinTileIsGone()
+    {
+        Assert.False(StripCatalog.Reaches(CasinoGames.DailySpin));
+        for (var index = 0; index < StripCatalog.Playable.Length; index++)
+        {
+            Assert.Equal(StripAction.Game, StripCatalog.Playable[index].Action);
+        }
+    }
+
+    [Fact]
+    public void TheShelvesAndTheLiveRoomsReachEveryPlayableGameExactlyOnce()
+    {
+        string[] unlisted =
+        {
+            CasinoGames.DailySpin, CasinoGames.Slots, CasinoGames.SlotsGamble, CasinoGames.DiceTable,
+            CasinoGames.Deathroll, CasinoGames.Raffle,
+        };
+        var fields = typeof(CasinoGames).GetFields(BindingFlags.Public | BindingFlags.Static);
+        var shelved = 0;
+        for (var fieldIndex = 0; fieldIndex < fields.Length; fieldIndex++)
+        {
+            var gameId = (string)fields[fieldIndex].GetValue(null)!;
+            var listed = Array.IndexOf(unlisted, gameId) < 0;
+            var inLiveRail = Array.IndexOf(CasinoApp.LiveRooms, gameId) >= 0;
+            Assert.Equal(listed ? 1 : 0, Occurrences(gameId) + (inLiveRail ? 1 : 0));
+            shelved += listed && !inLiveRail ? 1 : 0;
+        }
+
+        Assert.Equal(shelved, StripCatalog.Playable.Length);
+        Assert.Equal(shelved, StripCatalog.PlayableIds.Length);
+        Assert.Equal(shelved, StripCatalog.EntryCount);
+    }
+
+    [Fact]
     public void ShelvesFollowTheStandardOrder()
     {
-        Assert.Equal(new[]
-        {
-            StripShelf.Tables, StripShelf.Machines, StripShelf.Originals, StripShelf.LiveFloor, StripShelf.Instant,
-            StripShelf.Skill, StripShelf.Venue,
-        }, StripCatalog.Shelves);
+        Assert.Equal(new[] { StripShelf.Cards, StripShelf.Machines, StripShelf.QuickBets }, StripCatalog.Shelves);
+        Assert.Equal(3, StripCatalog.EntriesOf(StripShelf.Cards).Length);
         Assert.Equal(3, StripCatalog.EntriesOf(StripShelf.Machines).Length);
-        Assert.Equal(6, StripCatalog.EntriesOf(StripShelf.Originals).Length);
-        Assert.Equal(4, StripCatalog.EntriesOf(StripShelf.Tables).Length);
-        Assert.Equal(22, StripCatalog.EntryCount);
+        Assert.Equal(8, StripCatalog.EntriesOf(StripShelf.QuickBets).Length);
+        Assert.Equal(14, StripCatalog.EntryCount);
+        Assert.Equal(CasinoGames.Blackjack, StripCatalog.EntriesOf(StripShelf.Cards)[0].GameId);
+        Assert.Equal(CasinoGames.Plinko, StripCatalog.EntriesOf(StripShelf.QuickBets)[0].GameId);
+        Assert.Equal(CasinoGames.Scratch, StripCatalog.EntriesOf(StripShelf.QuickBets)[6].GameId);
+        Assert.Equal(CasinoGames.Barkeep, StripCatalog.EntriesOf(StripShelf.QuickBets)[7].GameId);
+        Assert.Equal(L.Floor.ShelfCards.Key, StripCatalog.TitleOf(StripShelf.Cards).Key);
+        Assert.Equal(L.Strip.ShelfMachines.Key, StripCatalog.TitleOf(StripShelf.Machines).Key);
+        Assert.Equal(L.Floor.ShelfQuickBets.Key, StripCatalog.TitleOf(StripShelf.QuickBets).Key);
+    }
+
+    [Fact]
+    public void OnlyBarkeepWearsTheSkillBadge()
+    {
+        for (var index = 0; index < StripCatalog.PlayableIds.Length; index++)
+        {
+            var gameId = StripCatalog.PlayableIds[index];
+            Assert.Equal(gameId == CasinoGames.Barkeep, StripCatalog.WearsSkillBadge(gameId));
+        }
     }
 
     [Fact]
@@ -232,7 +287,7 @@ public sealed class CasinoFloorLayoutTests
             Assert.True(machines[index].LiveIdle);
         }
 
-        Assert.False(StripCatalog.EntriesOf(StripShelf.Tables)[0].LiveIdle);
+        Assert.False(StripCatalog.EntriesOf(StripShelf.Cards)[0].LiveIdle);
     }
 
     [Fact]
@@ -253,19 +308,9 @@ public sealed class CasinoFloorLayoutTests
     [Fact]
     public void EveryPaidGamePosterPrintsAMinimumBet()
     {
-        for (var shelfIndex = 0; shelfIndex < StripCatalog.Shelves.Length; shelfIndex++)
+        for (var index = 0; index < StripCatalog.PlayableIds.Length; index++)
         {
-            var entries = StripCatalog.EntriesOf(StripCatalog.Shelves[shelfIndex]);
-            for (var index = 0; index < entries.Length; index++)
-            {
-                var entry = entries[index];
-                if (entry.Action != StripAction.Game || entry.GameId == CasinoGames.DailySpin)
-                {
-                    continue;
-                }
-
-                Assert.True(CasinoApp.MinimumStakeOf(entry.GameId) > 0, entry.GameId);
-            }
+            Assert.True(CasinoApp.MinimumStakeOf(StripCatalog.PlayableIds[index]) > 0, StripCatalog.PlayableIds[index]);
         }
     }
 
@@ -361,6 +406,17 @@ public sealed class CasinoFloorLayoutTests
     }
 
     private static int CasinoAppReturns(string gameId) => CasinoApp.ReturnTenthsOf(gameId);
+
+    private static int Occurrences(string gameId)
+    {
+        var count = 0;
+        for (var index = 0; index < StripCatalog.Playable.Length; index++)
+        {
+            count += StripCatalog.Playable[index].GameId == gameId ? 1 : 0;
+        }
+
+        return count;
+    }
 
     private static CasinoFloorTickDto Win(string roundId, int tenths) =>
         new(Kind: CasinoTickKinds.Win, RoundId: roundId, GameKind: "casino.plinko", MultiplierTenths: tenths,
