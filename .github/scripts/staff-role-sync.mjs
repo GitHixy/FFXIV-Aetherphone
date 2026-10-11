@@ -364,10 +364,16 @@ async function main() {
     try {
         await synchronize(config);
     } catch (error) {
-        console.log(`::error::${redact(error.message)}`);
         if (!(error instanceof ReportedError)) {
             await postReport(config, `Staff role sync aborted: ${error.message}`, []).catch(() => {});
         }
+        // An unarmed scheduled run applies nothing, so a setup problem there is a warning; once armed
+        // (or when dispatched by hand) it fails the run so GitHub's failure notice reaches a maintainer.
+        if (!config.apply && !config.reportDryRun) {
+            console.log(`::warning::${redact(error.message)}`);
+            return;
+        }
+        console.log(`::error::${redact(error.message)}`);
         process.exitCode = 1;
     }
 }
