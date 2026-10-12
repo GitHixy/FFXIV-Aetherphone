@@ -1,5 +1,6 @@
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
+using Aetherphone.Core.Localization;
 using Xunit;
 
 namespace Aetherphone.Tests;
@@ -11,8 +12,9 @@ public sealed class GuestLedgerTests
 
     private static readonly string[] PartnerWindow = { "Chea Thorne", "Trade", "Confirm" };
 
-    private static TradeMiss Miss(long amount = 50_000, bool incoming = true, string name = "Chea Thorne") =>
-        new(Table, amount, 1_000, name, incoming);
+    private static TradeMiss Miss(long amount = 50_000, bool incoming = true, string name = "Chea Thorne",
+        TradeMissKind kind = TradeMissKind.NotAtTable) =>
+        new(Table, amount, 1_000, name, incoming, kind);
 
     private static CasinoLedgerEntryDto GuestBuyIn(string name, string kind = CasinoLedgerKinds.BuyIn) =>
         new("g1", Table, kind, 20_000, string.Empty, name, Host, "Ciri", "host", CasinoLedgerKinds.Trade, true, true,
@@ -34,28 +36,50 @@ public sealed class GuestLedgerTests
     public void OnlyTheHostIsOfferedAGuestEntryAndOnlyWhileTheServerHasTheFeature()
     {
         var entries = Array.Empty<CasinoLedgerEntryDto>();
-        var offer = GuestLedger.Offer(Miss(), true, true, entries);
+        var offer = GuestLedger.Offer(Miss(), true, entries);
         Assert.NotNull(offer);
         Assert.Equal(Table, offer!.TableId);
         Assert.Equal("Chea Thorne", offer.GuestName);
         Assert.Equal(50_000, offer.Amount);
 
-        Assert.Null(GuestLedger.Offer(Miss(), false, true, entries));
-        Assert.Null(GuestLedger.Offer(Miss(), true, false, entries));
-        Assert.Null(GuestLedger.Offer(null, true, true, entries));
-        Assert.Null(GuestLedger.Offer(Miss(name: string.Empty), true, true, entries));
-        Assert.Null(GuestLedger.Offer(Miss(amount: 0), true, true, entries));
+        Assert.Null(GuestLedger.Offer(Miss(), false, entries));
+        Assert.Null(GuestLedger.Offer(null, true, entries));
+        Assert.Null(GuestLedger.Offer(Miss(name: string.Empty), true, entries));
+        Assert.Null(GuestLedger.Offer(Miss(amount: 0), true, entries));
+        Assert.Null(GuestLedger.Shown(offer, false));
+        Assert.Same(offer, GuestLedger.Shown(offer, true));
+    }
+
+    [Fact]
+    public void AGuestIsOfferedOnlyWhenNobodyRegisteredWasFound()
+    {
+        var entries = Array.Empty<CasinoLedgerEntryDto>();
+        Assert.False(GuestLedger.Offer(Miss(), true, entries)!.Unchecked);
+        Assert.True(GuestLedger.Offer(Miss(kind: TradeMissKind.Unread), true, entries)!.Unchecked);
+        Assert.Null(GuestLedger.Offer(Miss(kind: TradeMissKind.Registered), true, entries));
+        Assert.Null(GuestLedger.Offer(Miss(kind: TradeMissKind.Unchecked), true, entries));
+    }
+
+    [Fact]
+    public void TheGuestButtonNamesTheDirection()
+    {
+        Assert.Equal(L.Book.RecordGuestBuyIn.Key, GuestLedger.RecordLabel(CasinoLedgerKinds.BuyIn).Key);
+        Assert.Equal(L.Book.RecordGuestRebuy.Key, GuestLedger.RecordLabel(CasinoLedgerKinds.Rebuy).Key);
+        Assert.Equal(L.Book.RecordGuestPayout.Key, GuestLedger.RecordLabel(CasinoLedgerKinds.Payout).Key);
+        Assert.Equal(CasinoLedgerKinds.Rebuy, GuestLedger.KindOf(Miss(), new[] { GuestBuyIn("Chea Thorne") }));
+        Assert.Equal(CasinoLedgerKinds.Payout,
+            GuestLedger.KindOf(Miss(incoming: false), Array.Empty<CasinoLedgerEntryDto>()));
     }
 
     [Fact]
     public void ReceivedGilIsABuyInAndSentGilIsAPayout()
     {
         var entries = Array.Empty<CasinoLedgerEntryDto>();
-        var received = GuestLedger.Offer(Miss(incoming: true), true, true, entries)!;
+        var received = GuestLedger.Offer(Miss(incoming: true), true, entries)!;
         Assert.Equal(CasinoLedgerKinds.BuyIn, received.LedgerKind);
         Assert.True(received.Incoming);
 
-        var sent = GuestLedger.Offer(Miss(incoming: false), true, true, entries)!;
+        var sent = GuestLedger.Offer(Miss(incoming: false), true, entries)!;
         Assert.Equal(CasinoLedgerKinds.Payout, sent.LedgerKind);
         Assert.False(sent.Incoming);
     }
@@ -66,7 +90,7 @@ public sealed class GuestLedgerTests
         var entries = new[] { GuestBuyIn("Chea Thorne") };
         Assert.Equal(CasinoLedgerKinds.Rebuy, GuestLedger.BuyInKindFor(entries, "Chea Thorne"));
         Assert.Equal(CasinoLedgerKinds.BuyIn, GuestLedger.BuyInKindFor(entries, "Mira Rhan"));
-        Assert.Equal(CasinoLedgerKinds.Rebuy, GuestLedger.Offer(Miss(), true, true, entries)!.LedgerKind);
+        Assert.Equal(CasinoLedgerKinds.Rebuy, GuestLedger.Offer(Miss(), true, entries)!.LedgerKind);
         Assert.Equal(CasinoLedgerKinds.Rebuy,
             GuestLedger.BuyInKindFor(new[] { GuestBuyIn("Chea Thorne", CasinoLedgerKinds.Rebuy) }, "Chea Thorne"));
 

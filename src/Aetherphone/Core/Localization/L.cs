@@ -11830,8 +11830,11 @@ internal static class L
     internal static class Book
     {
         public static readonly LocString ReasonGuestEntry = new("casino.book.reasonGuestEntry", "A guest entry settles at once, so there is nothing to confirm or dispute.");
-        public static readonly LocString RecordGuest = new("casino.book.recordGuest", "Record as guest");
+        public static readonly LocString RecordGuestBuyIn = new("casino.book.recordGuestBuyIn", "Record guest buy-in");
+        public static readonly LocString RecordGuestRebuy = new("casino.book.recordGuestRebuy", "Record guest rebuy");
+        public static readonly LocString RecordGuestPayout = new("casino.book.recordGuestPayout", "Record guest payout");
         public static readonly LocString GuestHint = new("casino.book.guestHint", "Nobody at this table matched that name. A guest entry is settled on the spot and cannot be disputed.");
+        public static readonly LocString GuestHintUnchecked = new("casino.book.guestHintUnchecked", "This trade could not be checked against this table. A guest entry is settled on the spot and cannot be disputed.");
         public static readonly LocString GuestTag = new("casino.book.guestTag", "Guest");
         public static readonly LocString GuestNamed = new("casino.book.guestNamed", "{0} (guest)");
         public static readonly LocString NightTotals = new("casino.book.nightTotals", "Tonight: {0} gil in, {1} gil out");

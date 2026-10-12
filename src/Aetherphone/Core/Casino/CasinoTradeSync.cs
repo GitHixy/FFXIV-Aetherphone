@@ -9,6 +9,8 @@ namespace Aetherphone.Core.Casino;
 internal sealed class CasinoTradeSync : IDisposable
 {
     private const long LocateEveryMilliseconds = 1_000;
+    private const long ProbeMilliseconds = 30_000;
+    private const long ProbeEveryMilliseconds = 5_000;
 
     private readonly Configuration configuration;
     private readonly AethernetSession session;
@@ -33,6 +35,11 @@ internal sealed class CasinoTradeSync : IDisposable
     private int matching;
     private bool wasOpen;
     private long locatedAtTick;
+    private TradeCompletion? heldCompletion;
+    private TradeMiss? probedMiss;
+    private CasinoTableLedgerDto? probedLedger;
+    private string probeHost = string.Empty;
+    private long probedAtTick;
 
     public CasinoTradeSync(Configuration configuration, AethernetSession session, ITradeWindowReader reader,
         ITradeMatchSource source, CasinoRoomsStore rooms, CasinoTablesStore tables, CasinoVenueStore venue,
@@ -88,7 +95,7 @@ internal sealed class CasinoTradeSync : IDisposable
 
     public TradeMiss? LastMiss => lastMiss;
 
-    public GuestOffer? PendingGuest => pendingGuest;
+    public GuestOffer? PendingGuest => GuestLedger.Shown(pendingGuest, chips.HasFeature(CasinoFeatures.VenueBook));
 
     public bool Busy => venue.HostInFlight;
 
@@ -153,6 +160,8 @@ internal sealed class CasinoTradeSync : IDisposable
     {
         if (!configuration.CasinoTradeSync || !session.IsSignedIn)
         {
+            heldCompletion = null;
+            probedMiss = null;
             return;
         }
 
@@ -175,6 +184,14 @@ internal sealed class CasinoTradeSync : IDisposable
             Answered(answered);
         }
 
+        if (heldCompletion is { } held && Volatile.Read(ref matching) == 0)
+        {
+            heldCompletion = null;
+            AepLog.Info("[TradeSync] The server match finished, matching the trade that waited for it");
+            Match(held);
+        }
+
+        Probe(now);
         var completion = tracker.Observe(sample, now);
         if (completion is { } done)
         {
@@ -186,6 +203,11 @@ internal sealed class CasinoTradeSync : IDisposable
     {
         AepLog.Info($"[TradeSync] Trade completed: net {completion.Net} gil, "
             + $"{completion.NameCandidates.Length} name candidates, partner read {completion.PartnerRead}");
+        Match(completion);
+    }
+
+    private void Match(TradeCompletion completion)
+    {
         var context = Context();
         var local = TradeMatchFlow.Local(completion, context);
         if (local.Route == TradeMatchRoute.NoTable)
@@ -204,9 +226,16 @@ internal sealed class CasinoTradeSync : IDisposable
         var partner = GuestLedger.PartnerNameOf(completion);
         if (Interlocked.Exchange(ref matching, 1) != 0)
         {
-            AepLog.Info("[TradeSync] A server match is still in flight, this trade is left to the ledger");
+            if (heldCompletion is null)
+            {
+                AepLog.Info("[TradeSync] A server match is still in flight, this trade waits for it");
+                heldCompletion = completion;
+                return;
+            }
+
+            AepLog.Info("[TradeSync] A server match is in flight and a trade already waits, this one is not matched");
             Missed(new TradeMiss(context.TableId, Math.Abs(completion.Net), Environment.TickCount64, partner,
-                completion.Net > 0), context);
+                completion.Net > 0, TradeMissKind.Unread), context);
             return;
         }
 
@@ -221,18 +250,18 @@ internal sealed class CasinoTradeSync : IDisposable
 
     private void Answered(TradeMatchHolder answered)
     {
+        if (!string.Equals(answered.AccountId, session.CurrentUser?.Id, StringComparison.Ordinal))
+        {
+            AepLog.Info("[TradeSync] Server match arrived after the account changed, dropped");
+            return;
+        }
+
         var result = answered.Result;
         if (result.Route != TradeMatchRoute.Server)
         {
             AepLog.Info(MissNote(result));
             Missed(new TradeMiss(answered.TableId, Math.Abs(answered.Net), Environment.TickCount64,
-                answered.PartnerName, answered.Net > 0), Context());
-            return;
-        }
-
-        if (!string.Equals(answered.AccountId, session.CurrentUser?.Id, StringComparison.Ordinal))
-        {
-            AepLog.Info("[TradeSync] Server match arrived after the account changed, dropped");
+                answered.PartnerName, answered.Net > 0, TradeMatchFlow.MissKindOf(result.Route)), Context());
             return;
         }
 
@@ -254,19 +283,75 @@ internal sealed class CasinoTradeSync : IDisposable
     private void Missed(TradeMiss miss, in TradeTableContext context)
     {
         lastMiss = miss;
-        var offer = GuestLedger.Offer(miss, context.Hosting, chips.HasFeature(CasinoFeatures.VenueBook),
-            context.Entries);
+        var offer = GuestLedger.Offer(miss, context.Hosting, context.Entries);
         pendingGuest = offer;
-        if (offer is not null)
+        if (context.Hosting)
         {
-            AepLog.Info($"[TradeSync] Offering a guest {offer.LedgerKind} of {offer.Amount} gil to the host");
+            Arm(miss, context.MyUserId);
         }
+
+        if (offer is null)
+        {
+            return;
+        }
+
+        AepLog.Info($"[TradeSync] Offering a guest {offer.LedgerKind} of {offer.Amount} gil to the host");
+        Notify(offer.TableId, offer.Incoming, offer.GuestName, offer.Amount);
+    }
+
+    private void Arm(TradeMiss miss, string hostUserId)
+    {
+        probedMiss = miss;
+        probeHost = hostUserId;
+        probedLedger = tables.LedgerFor(miss.TableId);
+        probedAtTick = 0;
+    }
+
+    private void Probe(long now)
+    {
+        var miss = probedMiss;
+        if (miss is null)
+        {
+            return;
+        }
+
+        if (!ReferenceEquals(lastMiss, miss) || now - miss.AtTick > ProbeMilliseconds)
+        {
+            probedMiss = null;
+            probedLedger = null;
+            return;
+        }
+
+        var ledger = tables.LedgerFor(miss.TableId);
+        if (ledger is not null && !ReferenceEquals(ledger, probedLedger))
+        {
+            probedLedger = ledger;
+            var waiting = TradeMatchFlow.WaitingOnHost(miss, probeHost,
+                ledger.Entries ?? Array.Empty<CasinoLedgerEntryDto>());
+            if (waiting.Kind != TradeProposalKind.None)
+            {
+                AepLog.Info("[TradeSync] The ledger now holds an entry for that trade waiting on the host");
+                probedMiss = null;
+                Offer(waiting);
+                return;
+            }
+        }
+
+        if (now - probedAtTick < ProbeEveryMilliseconds
+            || !string.Equals(tables.LedgerRoomId, miss.TableId, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        probedAtTick = now;
+        tables.RefreshLedgerNow(miss.TableId);
     }
 
     private void Offer(in TradeProposal proposal)
     {
         lastMiss = null;
         pendingGuest = null;
+        probedMiss = null;
         var automatic = !proposal.HostSide && configuration.CasinoTradeAutoConfirm;
         AepLog.Info($"[TradeSync] {proposal.Kind} {proposal.LedgerKind} for {proposal.Amount} gil, "
             + $"host side {proposal.HostSide}, incoming {proposal.Incoming}, automatic {automatic}");
@@ -281,10 +366,14 @@ internal sealed class CasinoTradeSync : IDisposable
             AepLog.Info("[TradeSync] Prompt queue full, the oldest unanswered prompt was dropped");
         }
 
+        Notify(proposal.TableId, proposal.Incoming, proposal.CounterpartyName, proposal.Amount);
+    }
+
+    private void Notify(string tableId, bool incoming, string name, long amount)
+    {
         notifications.Notify(new PhoneNotification(CasinoTurnNotifier.AppId, Loc.T(L.Venue.TradeNotifyTitle),
-            Loc.T(proposal.Incoming ? L.Venue.TradeReceivedFrom : L.Venue.TradeSentTo, proposal.CounterpartyName,
-                NumberText.Group(proposal.Amount)), DateTime.Now, accent,
-            string.Concat(CasinoTurnNotifier.GroupPrefix, proposal.TableId))
+            Loc.T(incoming ? L.Venue.TradeReceivedFrom : L.Venue.TradeSentTo, name, NumberText.Group(amount)),
+            DateTime.Now, accent, string.Concat(CasinoTurnNotifier.GroupPrefix, tableId))
         {
             CreatedAtUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
         });
