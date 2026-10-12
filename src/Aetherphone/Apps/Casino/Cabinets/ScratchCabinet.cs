@@ -81,6 +81,8 @@ internal sealed class ScratchCabinet : ICabinetIdle
 
     public static float DeckHeight => BetComposer.DeckHeightFor(true, true);
 
+    public long DisplayStack(long stack) => Math.Max(0, stack - playback.PrizeStillUnderFoil);
+
     public void OpenOdds()
     {
         oddsSheet.Open();

@@ -690,6 +690,12 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         }
 
         var stack = state?.Sitting?.Stack ?? 0;
+        if (route.Screen == CasinoScreen.Cabinet
+            && string.Equals(route.GameId, CasinoGames.Scratch, StringComparison.Ordinal))
+        {
+            return scratch.DisplayStack(stack);
+        }
+
         if (route.Screen == CasinoScreen.Cabinet && Originals.OriginalsCabinet.Owns(route.GameId))
         {
             return originals.DisplayStack(stack);
