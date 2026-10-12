@@ -33,29 +33,69 @@ internal sealed partial class CasinoApp
 
     private float DrawFloorExtras(ImDrawListPtr drawList, Vector2 origin, float width, float scale)
     {
-        var top = origin.Y;
         var missions = floor.Missions;
-        if (casino.HasFeature(CasinoFeatures.Missions) && MissionsCard.Count(missions) > 0)
+        var showsMissions = casino.HasFeature(CasinoFeatures.Missions) && MissionsCard.Count(missions) > 0;
+        var club = casino.HasFeature(CasinoFeatures.Club) ? casino.Club : null;
+        var gap = CardGap * scale;
+        if (showsMissions && club is not null
+            && DrawFloorStatusPair(drawList, missions!, club, origin, width, scale, out var pairBottom))
         {
-            if (missionsCapsule.Draw(drawList, ui, missions!, new Vector2(origin.X, top), width, scale, out var bottom))
+            return pairBottom + gap;
+        }
+
+        var top = origin.Y;
+        if (showsMissions)
+        {
+            if (FloorCapsule.Draw(drawList, ui, missionsCapsule.Content(ui, missions!, false),
+                    new Vector2(origin.X, top), width, scale, out var bottom))
             {
                 missionsSheet.Open();
             }
 
-            top = bottom + CardGap * scale;
+            top = bottom + gap;
         }
 
-        if (casino.HasFeature(CasinoFeatures.Club) && casino.Club is { } club)
+        if (club is not null)
         {
-            if (clubCapsule.Draw(drawList, ui, club, new Vector2(origin.X, top), width, scale, out var bottom))
+            if (FloorCapsule.Draw(drawList, ui, clubCapsule.Content(ui, club, false), new Vector2(origin.X, top), width,
+                    scale, out var bottom))
             {
                 clubSheet.Open(club.Tier);
             }
 
-            top = bottom + CardGap * scale;
+            top = bottom + gap;
         }
 
         return top;
+    }
+
+    private bool DrawFloorStatusPair(ImDrawListPtr drawList, CasinoMissionsDto missions, CasinoClubDto club,
+        Vector2 origin, float width, float scale, out float bottom)
+    {
+        var gap = CardGap * scale;
+        var half = (width - gap) * 0.5f;
+        var missionsTile = missionsCapsule.Content(ui, missions, true);
+        var clubTile = clubCapsule.Content(ui, club, true);
+        if (!FloorCapsule.FitsHalf(missionsTile, half, scale) || !FloorCapsule.FitsHalf(clubTile, half, scale))
+        {
+            bottom = origin.Y;
+            return false;
+        }
+
+        var height = MathF.Max(FloorCapsule.HalfHeight(missionsTile, scale), FloorCapsule.HalfHeight(clubTile, scale));
+        if (FloorCapsule.DrawHalf(drawList, ui, missionsTile, origin, half, height, scale))
+        {
+            missionsSheet.Open();
+        }
+
+        if (FloorCapsule.DrawHalf(drawList, ui, clubTile, new Vector2(origin.X + half + gap, origin.Y), half, height,
+                scale))
+        {
+            clubSheet.Open(club.Tier);
+        }
+
+        bottom = origin.Y + height;
+        return true;
     }
 
     private float DrawFloorTail(ImDrawListPtr drawList, Vector2 origin, float width, float scale)

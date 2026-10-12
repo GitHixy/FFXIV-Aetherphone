@@ -1,10 +1,8 @@
 using Aetherphone.Apps.Casino.Stage;
-using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
-using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 
 namespace Aetherphone.Apps.Casino.Strip;
@@ -42,16 +40,24 @@ internal sealed class MissionsCapsule
     public static float Fraction(in MissionsTally tally) =>
         tally.Total <= 0 ? 0f : (float)tally.Done / tally.Total;
 
-    public bool Draw(ImDrawListPtr drawList, AppSkin ui, CasinoMissionsDto missions, Vector2 origin, float width,
-        float scale, out float bottom)
+    public FloorCapsuleContent Content(AppSkin ui, CasinoMissionsDto missions, bool half)
     {
         var tally = Tally(missions);
         var ready = ShowsReady(tally);
-        var line = ready
-            ? texts.Count(L.Floor.MissionsReady, tally.Ready)
-            : texts.Counts(L.Floor.MissionsProgress, tally.Done, tally.Total);
-        return FloorCapsule.Draw(drawList, ui, "casino.missions.capsule", origin, width, scale,
-            ready ? CasinoColors.Money : AccentRing.Azure, FontAwesomeIcon.Bullseye, Loc.T(L.Floor.MissionsTitle),
-            Fraction(tally), line, ready ? CasinoColors.Money : ui.BodyInk, out bottom);
+        string line;
+        if (half)
+        {
+            line = texts.Counts(L.Club.MissionProgress, tally.Done, tally.Total);
+        }
+        else
+        {
+            line = ready
+                ? texts.Count(L.Floor.MissionsReady, tally.Ready)
+                : texts.Counts(L.Floor.MissionsProgress, tally.Done, tally.Total);
+        }
+
+        return new FloorCapsuleContent("casino.missions.capsule", FontAwesomeIcon.Bullseye,
+            ready ? CasinoColors.Money : AccentRing.Azure, Loc.T(L.Floor.MissionsTitle), Fraction(tally), line,
+            ready ? CasinoColors.Money : ui.BodyInk);
     }
 }

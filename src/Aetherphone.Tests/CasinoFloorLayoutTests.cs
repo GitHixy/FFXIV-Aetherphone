@@ -11,7 +11,7 @@ namespace Aetherphone.Tests;
 
 public sealed class CasinoFloorLayoutTests
 {
-    private const float PhoneWidth = 330f;
+    private const float FloorWidth = 296f;
     private const float HeadlineHeight = 22f;
     private const float FootnoteHeight = 18f;
     private const float TitleHeight = 25f;
@@ -20,8 +20,8 @@ public sealed class CasinoFloorLayoutTests
     public void PostersShowAboutTwoAndAQuarterTilesAcrossThePhone()
     {
         var gap = StripShelves.TileGap;
-        var width = PosterTile.Width(PhoneWidth, gap, 1f);
-        var visible = (PhoneWidth + gap) / (width + gap);
+        var width = PosterTile.Width(FloorWidth, gap, 1f);
+        var visible = (FloorWidth + gap) / (width + gap);
         Assert.InRange(visible, 2f, 2.5f);
         Assert.True(PosterTile.Height(width, PosterTile.TextBlock(1f, HeadlineHeight, FootnoteHeight)) > width);
     }
@@ -39,7 +39,7 @@ public sealed class CasinoFloorLayoutTests
     [Fact]
     public void PostersLeaveRoomForTheTitleBlockAndATouchTarget()
     {
-        var width = PosterTile.Width(PhoneWidth, StripShelves.TileGap, 1f);
+        var width = PosterTile.Width(FloorWidth, StripShelves.TileGap, 1f);
         var block = PosterTile.TextBlock(1f, HeadlineHeight, FootnoteHeight);
         var height = PosterTile.Height(width, block);
         Assert.True(height - block >= 88f);
@@ -66,7 +66,7 @@ public sealed class CasinoFloorLayoutTests
     [InlineData(1.5f)]
     public void PosterSignClearsTheCornerCapsulesAndTheArtSitsBetweenSignAndText(float scale)
     {
-        var width = PosterTile.Width(PhoneWidth * scale, StripShelves.TileGap * scale, scale);
+        var width = PosterTile.Width(FloorWidth * scale, StripShelves.TileGap * scale, scale);
         var block = PosterTile.TextBlock(scale, HeadlineHeight * scale, FootnoteHeight * scale);
         var tile = new Rect(System.Numerics.Vector2.Zero,
             new System.Numerics.Vector2(width, PosterTile.Height(width, block)));
@@ -90,31 +90,40 @@ public sealed class CasinoFloorLayoutTests
         Assert.Equal(StripHeroClaims.Spin, StripHero.ClaimsOf(Hero(null, null, true)));
         Assert.Equal(StripHeroClaims.Timed | StripHeroClaims.Streak | StripHeroClaims.Spin,
             StripHero.ClaimsOf(Hero(bonus, bonus, true)));
-        Assert.Equal(1, StripHero.RowPills(StripHeroClaims.None));
-        Assert.Equal(1, StripHero.RowPills(StripHeroClaims.Streak));
-        Assert.Equal(2, StripHero.RowPills(StripHeroClaims.Timed));
-        Assert.Equal(2, StripHero.RowPills(StripHeroClaims.Spin));
-        Assert.Equal(3, StripHero.RowPills(StripHeroClaims.Timed | StripHeroClaims.Streak | StripHeroClaims.Spin));
+        Assert.Equal(0f, StripHero.ClaimsHeight(StripHeroClaims.None, 44f));
+        Assert.Equal(0f, StripHero.ClaimsHeight(StripHeroClaims.Streak, 44f));
+        Assert.Equal(44f, StripHero.ClaimsHeight(StripHeroClaims.Timed, 44f));
+        Assert.Equal(44f, StripHero.ClaimsHeight(StripHeroClaims.Spin, 44f));
+        Assert.Equal(44f, StripHero.ClaimsHeight(StripHeroClaims.Timed | StripHeroClaims.Streak | StripHeroClaims.Spin,
+            44f));
     }
 
     [Theory]
     [InlineData(0.75f)]
     [InlineData(1f)]
     [InlineData(1.5f)]
-    public void HeroPillsSitInlineThenGiveGetChipsItsOwnRow(float scale)
+    public void GetChipsSitsBesideTheBalanceUntilItNeedsItsOwnRow(float scale)
     {
-        var row = (PhoneWidth - StripHero.Pad * 2f) * scale;
+        var row = (FloorWidth - StripHero.Pad * 2f) * scale;
         var gap = 8f * scale;
-        var button = 44f * scale;
-        Assert.Equal(StripHeroRow.Inline, StripHero.RowLayout(1, row, row * 2f, 0f));
-        Assert.Equal(StripHeroRow.Inline, StripHero.RowLayout(2, row, 120f * scale + gap + 110f * scale, 110f * scale));
-        Assert.Equal(StripHeroRow.Stacked, StripHero.RowLayout(2, row, 200f * scale + gap + 150f * scale, 150f * scale));
-        Assert.Equal(StripHeroRow.Inline, StripHero.RowLayout(3, row, row, row * 0.6f));
-        Assert.Equal(StripHeroRow.Stacked, StripHero.RowLayout(3, row, row + 1f, row * 0.6f));
-        Assert.Equal(StripHeroRow.Tall, StripHero.RowLayout(3, row, row * 2f, row + 1f));
-        Assert.Equal(button, StripHero.ButtonsHeight(StripHeroRow.Inline, button, gap));
-        Assert.Equal(button * 2f + gap, StripHero.ButtonsHeight(StripHeroRow.Stacked, button, gap));
-        Assert.Equal(button * 3f + gap * 2f, StripHero.ButtonsHeight(StripHeroRow.Tall, button, gap));
+        var getChips = 110f * scale;
+        Assert.True(StripHero.GetChipsInline(row, 90f * scale, getChips, gap));
+        Assert.True(StripHero.GetChipsInline(row, row - gap - getChips, getChips, gap));
+        Assert.False(StripHero.GetChipsInline(row, row - gap - getChips + 2f, getChips, gap));
+        Assert.Equal(34f * scale, StripHero.BalanceRowHeight(34f * scale, 34f * scale));
+        Assert.Equal(34f * scale, StripHero.BalanceRowHeight(34f * scale, 0f));
+        Assert.Equal(24f * scale, StripHero.DetailRowHeight(17f * scale, 24f * scale));
+        Assert.Equal(17f * scale, StripHero.DetailRowHeight(17f * scale, 0f));
+    }
+
+    [Fact]
+    public void MissionsAndClubShareARowOfHalfTilesOnAPhone()
+    {
+        var half = (FloorWidth - StripCarousel.CardGap) * 0.5f;
+        Assert.Equal(half - (FloorCapsule.HalfPad * 2f + FloorCapsule.HalfTile + 8f),
+            FloorCapsule.HalfTextWidth(half, 1f), 3);
+        Assert.True(FloorCapsule.HalfTextWidth(half, 1f) >= 80f);
+        Assert.Equal(1f, FloorCapsule.HalfTextWidth(10f, 1f));
     }
 
     [Theory]
@@ -137,7 +146,7 @@ public sealed class CasinoFloorLayoutTests
         var dot = StripHero.StreakDot;
         Assert.Equal(label + StripHero.StreakLabelGap + dot, StripHero.StreakHeight(label, dot, StripHero.StreakLabelGap));
         Assert.True(StripHero.StreakDays * StripHero.StreakDot + (StripHero.StreakDays - 1) * StripHero.StreakGap
-                    <= PhoneWidth - StripHero.Pad * 2f);
+                    <= FloorWidth - StripHero.Pad * 2f);
     }
 
     [Theory]
@@ -154,7 +163,7 @@ public sealed class CasinoFloorLayoutTests
         Assert.True(one >= MissionsCard.RowHeight * scale - 0.01f);
         Assert.True(three > two);
         Assert.True(three >= line * 3f + footnote + MissionsCard.BarHeight * scale);
-        Assert.True(MissionsCard.TextWidth(PhoneWidth * scale, 90f * scale, scale) > 100f * scale);
+        Assert.True(MissionsCard.TextWidth(FloorWidth * scale, 90f * scale, scale) > 100f * scale);
         Assert.Equal(0f, MissionsCard.Height(0, 20f, 100f, scale));
         Assert.True(MissionsCard.Height(2, 20f, one + two, scale) > one + two);
     }
@@ -193,7 +202,7 @@ public sealed class CasinoFloorLayoutTests
         var three = CasinoApp.RecordsTileHeightFor(3, line, scale);
         Assert.True(three - one >= line * 2f - 0.01f || one > 84f * scale);
         Assert.True(three >= line * 3f + 34f * scale);
-        var tile = (PhoneWidth * scale - 24f * scale) / 3f;
+        var tile = (FloorWidth * scale - 24f * scale) / 3f;
         Assert.True(CasinoApp.RecordsLabelWidth(tile, scale) < tile);
         Assert.True(CasinoApp.RecordsLabelWidth(tile, scale) > 60f * scale);
     }
@@ -210,9 +219,10 @@ public sealed class CasinoFloorLayoutTests
     {
         Assert.Equal(196f, StripCarousel.CardHeight(200f, 1f));
         Assert.Equal(260f, StripCarousel.CardHeight(1000f, 1f));
-        var phone = StripCarousel.CardHeight(PhoneWidth, 1f);
+        var phone = StripCarousel.CardHeight(FloorWidth, 1f);
         Assert.InRange(phone, 196f, 260f);
-        Assert.True(StripCarousel.BlockHeight(PhoneWidth, 1f) > phone);
+        Assert.True(StripCarousel.BlockHeight(FloorWidth, 2, 1f) > phone);
+        Assert.Equal(phone, StripCarousel.BlockHeight(FloorWidth, 1, 1f));
     }
 
     [Fact]
@@ -236,8 +246,8 @@ public sealed class CasinoFloorLayoutTests
         Assert.Equal(0f, StripShelves.RailContentWidth(0, 120f, 12f, 4f));
         Assert.Equal(392f, StripShelves.RailContentWidth(3, 120f, 12f, 4f));
         var block = PosterTile.TextBlock(1f, HeadlineHeight, FootnoteHeight);
-        Assert.True(StripShelves.ShelfHeight(PhoneWidth, 1f, TitleHeight, block)
-                    > PosterTile.Height(PosterTile.Width(PhoneWidth, 12f, 1f), block) + TitleHeight);
+        Assert.True(StripShelves.ShelfHeight(FloorWidth, 1f, TitleHeight, block)
+                    > PosterTile.Height(PosterTile.Width(FloorWidth, 12f, 1f), block) + TitleHeight);
     }
 
     [Theory]
