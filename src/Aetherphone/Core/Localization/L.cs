@@ -11828,6 +11828,7 @@ internal static class L
         public static readonly LocString GuestNamed = new("casino.book.guestNamed", "{0} (guest)");
         public static readonly LocString NightTotals = new("casino.book.nightTotals", "Tonight: {0} gil in, {1} gil out");
         public static readonly LocString Game = new("casino.book.game", "Book");
+        public static readonly LocString HostedBy = new("casino.book.hostedBy", "{0}'s book");
         public static readonly LocString Line = new("casino.book.line", "A gil ledger with trade sync for any game you run yourself.");
         public static readonly LocString Plays = new("casino.book.plays", "Gil, any game");
         public static readonly LocString RowLine = new("casino.book.rowLine", "Book, {0} entries tonight");

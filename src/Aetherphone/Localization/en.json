@@ -9841,6 +9841,7 @@
   "casino.book.guestNamed": "{0} (guest)",
   "casino.book.nightTotals": "Tonight: {0} gil in, {1} gil out",
   "casino.book.game": "Book",
+  "casino.book.hostedBy": "{0}'s book",
   "casino.book.line": "A gil ledger with trade sync for any game you run yourself.",
   "casino.book.plays": "Gil, any game",
   "casino.book.rowLine": "Book, {0} entries tonight",

@@ -322,7 +322,7 @@ internal sealed partial class CasinoApp
         var next = namedNext;
         namedNext = (namedNext + 1) % NamedTableSlots;
         namedTables[next] = row;
-        namedTableTexts[next] = Tables.TableBrowser.ViewOf(row, string.Empty).Name;
+        namedTableTexts[next] = Tables.TableBrowser.NameOf(row);
         return namedTableTexts[next];
     }
 }

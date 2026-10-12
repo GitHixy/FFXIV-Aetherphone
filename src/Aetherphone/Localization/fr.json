@@ -9841,6 +9841,7 @@
   "casino.book.guestNamed": "{0} (invité)",
   "casino.book.nightTotals": "Ce soir : {0} gils reçus, {1} gils versés",
   "casino.book.game": "Livre",
+  "casino.book.hostedBy": "Livre de {0}",
   "casino.book.line": "Un registre en gils avec synchronisation des échanges, pour tout jeu que vous animez vous-même.",
   "casino.book.plays": "Gils, tout jeu",
   "casino.book.rowLine": "Livre, {0} entrées ce soir",

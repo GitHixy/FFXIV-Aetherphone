@@ -9841,6 +9841,7 @@
   "casino.book.guestNamed": "{0} (Gast)",
   "casino.book.nightTotals": "Heute Abend: {0} Gil eingenommen, {1} Gil ausgezahlt",
   "casino.book.game": "Buch",
+  "casino.book.hostedBy": "Buch von {0}",
   "casino.book.line": "Ein Gil-Kassenbuch mit Handelsabgleich für jedes Spiel, das du selbst leitest.",
   "casino.book.plays": "Gil, jedes Spiel",
   "casino.book.rowLine": "Buch, {0} Einträge heute Abend",

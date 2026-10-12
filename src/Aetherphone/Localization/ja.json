@@ -9841,6 +9841,7 @@
   "casino.book.guestNamed": "{0}（ゲスト）",
   "casino.book.nightTotals": "今夜：受取 {0} ギル、支払 {1} ギル",
   "casino.book.game": "帳簿",
+  "casino.book.hostedBy": "{0}の帳簿",
   "casino.book.line": "自分で運営するどんなゲームにも使える、トレード同期付きのギル帳簿。",
   "casino.book.plays": "ギル、どのゲームでも",
   "casino.book.rowLine": "帳簿、今夜 {0} 件",

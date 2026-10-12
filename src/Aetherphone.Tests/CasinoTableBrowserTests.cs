@@ -167,6 +167,17 @@ public sealed class CasinoTableBrowserTests
     }
 
     [Fact]
+    public void AnUnnamedHostedTableOrBookIsNamedForItsHostInTheReadersLanguage()
+    {
+        var table = Row(owner: true) with { Name = string.Empty };
+        Assert.Equal(Loc.T(L.Casino.TableHostedBy, table.OwnerName), TableBrowser.NameOf(table));
+        var book = table with { GameKind = CasinoWire.BookKind };
+        Assert.Equal(Loc.T(L.Book.HostedBy, table.OwnerName), TableBrowser.NameOf(book));
+        Assert.Equal("Mist Lounge", TableBrowser.NameOf(book with { Name = "Mist Lounge" }));
+        Assert.Equal(TableBrowser.NameOf(book), TableBrowser.ViewOf(book, Me).Name);
+    }
+
+    [Fact]
     public void ABookIsListedUnderAllGilAndMineButNeverUnderRooms()
     {
         var book = Row(owner: true, gameKind: CasinoWire.BookKind, currency: CasinoCurrencies.Gil);
