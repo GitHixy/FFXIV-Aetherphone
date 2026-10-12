@@ -7778,7 +7778,7 @@
   "changelog.r1300.58": "Ajout du réglage « Afficher pendant les cinématiques », qui garde le téléphone à l'écran pendant une cinématique, pratique sur un second écran",
   "changelog.r1300.81": "Ajout d'un compteur de FPS sur le mini téléphone, désactivé par défaut dans Réglages > Téléphone réduit, contribution de t3sco",
   "changelog.r1300.82": "Ajout du collage et du glisser-déposer d'images dans les chirps, les réponses, les publications et les stories : appuie sur Ctrl+V, touche Coller l'image ou fais glisser un fichier depuis l'Explorateur de fichiers, contribution de t3sco",
-  "changelog.r1300.95": "Ajout d'un écran J'aime dans le menu du profil qui rassemble les publications que tu as aimées, contribution de t3sco",
+  "changelog.r1300.95": "Ajout d'un écran J'aime dans le menu du profil qui rassemble les publications que tu as aimées, contribution de t3sco pour Aethergram",
   "changelog.r1300.83": "Ajout du collage et du glisser-déposer d'images dans les discussions : l'image attend au-dessus du champ de message et part avec ce que tu écris comme légende, contribution de t3sco",
   "changelog.r1300.51": "Correction de la barre de défilement qui, glissée avec la position du téléphone verrouillée, allait dans le mauvais sens et trop lentement, contribution de jambalong",
   "changelog.r1300.57": "Correction des filtres de Linkpearl et des formats de l'éditeur photo qui coupaient leurs libellés",
