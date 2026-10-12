@@ -169,6 +169,9 @@ internal static class L
         public static readonly LocString ArchiveTitle = new("social.archiveTitle", "Archive");
         public static readonly LocString ArchiveEmpty = new("social.archiveEmpty", "Nothing archived");
         public static readonly LocString ArchiveEmptyHint = new("social.archiveEmptyHint", "Posts you archive leave your profile and wait here until you show them again.");
+        public static readonly LocString LikedTitle = new("social.likedTitle", "Liked");
+        public static readonly LocString LikedEmpty = new("social.likedEmpty", "No liked posts yet");
+        public static readonly LocString LikedEmptyHint = new("social.likedEmptyHint", "Posts you like will show up here");
         public static readonly LocString ArchivedToast = new("social.archivedToast", "Post archived");
         public static readonly LocString UnarchivedToast = new("social.unarchivedToast", "Shown on your profile");
         public static readonly LocString ArchiveFailed = new("social.archiveFailed", "Couldn't archive the post");
