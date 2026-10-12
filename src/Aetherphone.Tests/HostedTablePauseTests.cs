@@ -20,7 +20,7 @@ public sealed class HostedTablePauseTests
     public void APauseStillLetsABrokeSeatRebuyAndANewcomerSit()
     {
         Assert.Equal(BlackjackDeck.Rebuy, Pick(paused: true, canRebuy: true));
-        Assert.Equal(BlackjackDeck.Ledger, Pick(paused: true, gilBroke: true));
+        Assert.Equal(BlackjackDeck.Broke, Pick(paused: true, broke: true));
         Assert.Equal(BlackjackDeck.Sit, Pick(onBoard: false, holdsSeat: false, paused: true));
         Assert.Equal(BlackjackDeck.Dealer, Pick(dealing: true, onBoard: false, holdsSeat: false, paused: true));
     }
@@ -55,8 +55,8 @@ public sealed class HostedTablePauseTests
     }
 
     private static BlackjackDeck Pick(bool dealing = false, bool onBoard = true, bool holdsSeat = true,
-        bool canRebuy = false, bool gilBroke = false, bool paused = false, bool insurance = false,
+        bool canRebuy = false, bool broke = false, bool paused = false, bool insurance = false,
         bool canBet = false, bool committed = false, bool canAct = false) =>
-        BlackjackDeckFlow.Pick(BlackjackDealerDeckTests.Facts(dealing, true, onBoard, holdsSeat, canRebuy, gilBroke,
+        BlackjackDeckFlow.Pick(BlackjackDealerDeckTests.Facts(dealing, true, onBoard, holdsSeat, canRebuy, broke,
             paused, insurance, canBet, committed, canAct));
 }

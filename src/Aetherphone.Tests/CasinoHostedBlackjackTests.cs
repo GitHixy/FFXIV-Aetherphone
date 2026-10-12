@@ -1,6 +1,7 @@
 using Aetherphone.Apps.Casino.Tables;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
+using Aetherphone.Core.Localization;
 using Xunit;
 
 namespace Aetherphone.Tests;
@@ -51,6 +52,29 @@ public sealed class CasinoHostedBlackjackTests
         Assert.False(BlackjackHosting.CanRebuy(board with { PracticeRebuy = false }, 0, 0));
         Assert.False(BlackjackHosting.CanRebuy(board with { Phase = BlackjackPhases.PlayerTurns }, 0, 0));
         Assert.False(BlackjackHosting.CanRebuy(board with { Currency = CasinoCurrencies.Gil, Practice = false }, 0, 0));
+    }
+
+    [Fact]
+    public void ABrokeSeatIsToldWhyItCannotRebuy()
+    {
+        var board = new CasinoBlackjackRoomStateDto(Practice: true, Currency: CasinoCurrencies.Practice,
+            PracticeRebuy: false, MinBet: 500, Phase: BlackjackPhases.Betting, PracticeStack: 100_000);
+
+        Assert.True(BlackjackHosting.Broke(board, 400, 0));
+        Assert.False(BlackjackHosting.Broke(board, 500, 0));
+        Assert.False(BlackjackHosting.Broke(board, 400, 100));
+        Assert.True(BlackjackHosting.Broke(board with { Currency = CasinoCurrencies.Gil, Practice = false }, 0, 0));
+        Assert.False(BlackjackHosting.Broke(board with { Currency = CasinoCurrencies.Chips, Practice = false }, 0, 0));
+        Assert.Equal(L.Tables.ReasonRebuyOff.Key, BlackjackHosting.BrokeStatus(board, "me").Key);
+
+        var standings = new[] { new CasinoBlackjackStandingDto("me", "Mira", 0, true, 2) };
+        var tournament = board with
+        {
+            PracticeRebuy = true,
+            Tournament = new CasinoBlackjackTournamentDto(Live: true, Standings: standings),
+        };
+        Assert.Equal(L.Venue.TournamentYouAreOut.Key, BlackjackHosting.BrokeStatus(tournament, "me").Key);
+        Assert.Equal(L.Tables.RebuysTournamentNote.Key, BlackjackHosting.BrokeStatus(tournament, "late").Key);
     }
 
     [Fact]
