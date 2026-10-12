@@ -117,6 +117,16 @@ public sealed class CasinoFloorLayoutTests
         Assert.Equal(button * 3f + gap * 2f, StripHero.ButtonsHeight(StripHeroRow.Tall, button, gap));
     }
 
+    [Fact]
+    public void MissionsAndClubShareARowOfHalfTilesOnAPhone()
+    {
+        var half = (FloorWidth - StripCarousel.CardGap) * 0.5f;
+        Assert.Equal(half - (FloorCapsule.HalfPad * 2f + FloorCapsule.HalfTile + 8f),
+            FloorCapsule.HalfTextWidth(half, 1f), 3);
+        Assert.True(FloorCapsule.HalfTextWidth(half, 1f) >= 80f);
+        Assert.Equal(1f, FloorCapsule.HalfTextWidth(10f, 1f));
+    }
+
     [Theory]
     [InlineData(300f, 120f, 100f, 8f, 146f)]
     [InlineData(300f, 180f, 100f, 8f, 180f)]
