@@ -54,6 +54,7 @@ internal sealed class CasinoTablesStore : IDisposable
     private string ledgerIntentId = string.Empty;
     private LedgerIntent ledgerIntentKey;
     private int fetchingLedger;
+    private int ledgerRefetch;
     private long ledgerAttemptedAtTick;
     private long ledgerLoadedAtTick;
     private volatile CasinoLedgerEntryDto[] myEntries = Array.Empty<CasinoLedgerEntryDto>();
@@ -502,6 +503,7 @@ internal sealed class CasinoTablesStore : IDisposable
 
         ledgerRoomId = roomId;
         Interlocked.Exchange(ref ledgerAttemptedAtTick, 0);
+        Interlocked.Exchange(ref ledgerRefetch, 1);
         RefreshLedger(roomId);
     }
 
@@ -734,6 +736,7 @@ internal sealed class CasinoTablesStore : IDisposable
             return;
         }
 
+        Interlocked.Exchange(ref ledgerRefetch, 0);
         Interlocked.Exchange(ref ledgerAttemptedAtTick, Environment.TickCount64);
         work.Run("table ledger", async token =>
         {
@@ -751,7 +754,19 @@ internal sealed class CasinoTablesStore : IDisposable
             }
 
             ledger = fresh.TableId.Length > 0 ? fresh : fresh with { TableId = roomId };
-        }, () => Interlocked.Exchange(ref fetchingLedger, 0));
+        }, LedgerFetched);
+    }
+
+    private void LedgerFetched()
+    {
+        Interlocked.Exchange(ref fetchingLedger, 0);
+        var roomId = ledgerRoomId;
+        if (Interlocked.Exchange(ref ledgerRefetch, 0) == 0 || roomId.Length == 0)
+        {
+            return;
+        }
+
+        RefreshLedger(roomId);
     }
 
     public void ResolveToken(string tableId)
