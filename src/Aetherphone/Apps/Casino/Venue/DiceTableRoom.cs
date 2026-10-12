@@ -53,13 +53,16 @@ internal sealed class DiceTableRoom
         if (!answer.Granted)
         {
             playback.CancelMine();
+            return;
         }
+
+        playback.Confirm(answer.Seq);
     }
 
     public void Draw(in VenueRoomFrame room, Rect deck)
     {
         var board = room.View.Dice;
-        playback.Update(board, room.Frame.DeltaSeconds, room.Frame.SnapToTruth || room.Frame.Instant);
+        playback.Update(board, room.Me, room.Frame.DeltaSeconds, room.Frame.SnapToTruth || room.Frame.Instant);
         if (board is null)
         {
             return;
@@ -237,9 +240,10 @@ internal sealed class DiceTableRoom
             act(new VenueActDraft(VenueActions.RoundOpen));
         }
 
-        var ready = room.Enabled && !playback.AwaitingMine;
-        if (room.Stage.PrimaryAction(texts.Number(L.Venue.RollAction, board.Sides), ready, room.Ui.Ink)
-            || (ready && room.Stage.RepeatPressed()))
+        var rolledThisRound = DiceRounds.Rolled(round, room.Me);
+        var ready = room.Enabled && !playback.AwaitingMine && !rolledThisRound;
+        var label = rolledThisRound ? Loc.T(L.Venue.RolledThisRound) : texts.Number(L.Venue.RollAction, board.Sides);
+        if (room.Stage.PrimaryAction(label, ready, room.Ui.Ink) || (ready && room.Stage.RepeatPressed()))
         {
             playback.BeginMine(board.Sides);
             CasinoSfx.Play(UiSound.ChipSlide);
@@ -250,6 +254,12 @@ internal sealed class DiceTableRoom
 
 internal static class DiceRounds
 {
+    public static bool Rolled(CasinoDiceRoundDto? round, string userId)
+    {
+        return round is { Closed: false, Rollers: not null } && userId.Length > 0
+            && Array.IndexOf(round.Rollers, userId) >= 0;
+    }
+
     public static CasinoVenueRollDto? Leader(CasinoVenueRollDto[]? rolls, CasinoDiceRoundDto round)
     {
         if (rolls is null)

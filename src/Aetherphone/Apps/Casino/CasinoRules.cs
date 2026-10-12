@@ -146,7 +146,7 @@ internal static class CasinoRules
     private static readonly LocString[] DiceTableSteps =
     {
         L.Venue.HighestRollWins,
-        L.Venue.RoundFirstRollCounts,
+        L.Venue.RoundOneRollEach,
     };
 
     private static readonly LocString[] RaffleSteps =
