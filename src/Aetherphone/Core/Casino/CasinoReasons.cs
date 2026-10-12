@@ -77,6 +77,8 @@ internal static class CasinoReasons
     public const string RebuyOff = "rebuy_off";
     public const string TournamentLive = "tournament_live";
     public const string NoTournament = "no_tournament";
+    public const string TournamentPlayers = "tournament_players";
+    public const string TournamentStack = "tournament_stack";
     public const string NothingToDeal = "nothing_to_deal";
     public const string TablePaused = "table_paused";
     public const string NoSpectators = "no_spectators";
@@ -116,6 +118,8 @@ internal static class CasinoReasons
         RebuyOff,
         TournamentLive,
         NoTournament,
+        TournamentPlayers,
+        TournamentStack,
         NothingToDeal,
         TablePaused,
         NoSpectators,
@@ -209,6 +213,8 @@ internal static class CasinoReasons
         [RebuyOff] = L.Tables.ReasonRebuyOff,
         [TournamentLive] = L.Tables.ReasonTournamentLive,
         [NoTournament] = L.Tables.ReasonNoTournament,
+        [TournamentPlayers] = L.Tables.ReasonTournamentPlayers,
+        [TournamentStack] = L.Tables.ReasonTournamentStack,
         [NothingToDeal] = L.Tables.ReasonNothingToDeal,
         [TablePaused] = L.Tables.ReasonTablePaused,
         [NoSpectators] = L.Tables.ReasonNoSpectators,

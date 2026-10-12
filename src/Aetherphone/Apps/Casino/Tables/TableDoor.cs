@@ -129,7 +129,7 @@ internal sealed partial class TableDoor
                 DrawNote(ui, width, Loc.T(L.Tables.CoDealersNote), scale);
             }
 
-            tournament.Draw(ui, card, roomId);
+            tournament.Draw(ui, card, door, roomId);
         }
 
         var knocks = door?.Knocks;

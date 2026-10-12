@@ -200,6 +200,18 @@ public sealed class TournamentPlaybackTests
     }
 
     [Fact]
+    public void TheDoorHoldsATournamentUntilItCanStart()
+    {
+        Assert.Equal(TournamentGate.NeedsPlayers, TournamentDoorCard.GateOf(false, 1, 0, 500));
+        Assert.Equal(TournamentGate.DealerOut, TournamentDoorCard.GateOf(true, 1, 0, 500));
+        Assert.Equal(TournamentGate.BadStack, TournamentDoorCard.GateOf(false, 2, 999, 500));
+        Assert.Equal(TournamentGate.BadStack, TournamentDoorCard.GateOf(false, 2, 2_000, 5_000));
+        Assert.Equal(TournamentGate.BadStack, TournamentDoorCard.GateOf(false, 2, 1_000_000_001, 500));
+        Assert.Equal(TournamentGate.Ready, TournamentDoorCard.GateOf(false, 2, 0, 500));
+        Assert.Equal(TournamentGate.Ready, TournamentDoorCard.GateOf(true, 2, 50_000, 500));
+    }
+
+    [Fact]
     public void TournamentHandsClampToTheServerBand()
     {
         Assert.Equal(10, TournamentDoorCard.HandsFrom("3"));
