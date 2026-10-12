@@ -1,4 +1,5 @@
 using System.Text;
+using Aetherphone.Core.Game;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Arrays;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -16,6 +17,11 @@ internal sealed unsafe class TradeWindowReader
 
     public TradeWindowSample Sample()
     {
+        if (!GameMemory.Attached)
+        {
+            return new TradeWindowSample(false, string.Empty, string.Empty, 0, 0, 0, false);
+        }
+
         var inventory = InventoryManager.Instance();
         var walletRead = inventory != null && Plugin.ClientState.IsLoggedIn;
         var walletGil = walletRead ? (long)inventory->GetGil() : 0L;
