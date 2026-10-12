@@ -113,12 +113,13 @@ internal sealed class VenueContextCard
         CasinoTableRowDto row)
     {
         RefreshOwn(row);
+        var book = ownView.Book;
         var layout = VenueContextLayout.Table(origin, width, scale, Typography.LineHeight(TextStyles.Headline),
-            Typography.LineHeight(TextStyles.Footnote));
+            Typography.LineHeight(TextStyles.Footnote), book);
         var card = layout.Card;
         var radius = Metrics.Radius.Grouped * scale;
         var overButton = UiInteract.Hover(layout.Door.Min, layout.Door.Max)
-                         || UiInteract.Hover(layout.Ledger.Min, layout.Ledger.Max);
+                         || (!book && UiInteract.Hover(layout.Ledger.Min, layout.Ledger.Max));
         var hovered = !overButton && UiInteract.Hover(card.Min, card.Max);
         ui.Card(drawList, card.Min, card.Max, radius);
         if (hovered)
@@ -138,15 +139,7 @@ internal sealed class VenueContextCard
             Typography.FitText(ownCurrencyLine, layout.TextWidth, TextStyles.Footnote),
             TableRow.CurrencyTint(ownView.Currency, ui.Accent), TextStyles.Footnote);
         DrawCode(drawList, ui, layout, CodeOf(row), scale);
-        if (Button.Draw(drawList, layout.Door, Loc.T(L.VenueHub.Door), ui.Ink, ButtonStyle.Prominent, id: doorId))
-        {
-            actions.OpenDoor(row.TableId);
-        }
-
-        if (Button.Draw(drawList, layout.Ledger, Loc.T(L.Tables.OpenLedger), ui.Ink, ButtonStyle.Gray, id: ledgerId))
-        {
-            actions.OpenLedger(row.TableId);
-        }
+        DrawButtons(drawList, ui, layout, row.TableId, book);
 
         if (!overButton && UiInteract.Click(card.Min, card.Max, hovered))
         {
@@ -154,6 +147,31 @@ internal sealed class VenueContextCard
         }
 
         return card.Max.Y;
+    }
+
+    private void DrawButtons(ImDrawListPtr drawList, AppSkin ui, in VenueTableCardLayout layout, string tableId,
+        bool book)
+    {
+        if (book)
+        {
+            if (Button.Draw(drawList, layout.Door, Loc.T(L.Book.OpenLedger), ui.Ink, ButtonStyle.Prominent,
+                    id: ledgerId))
+            {
+                actions.OpenLedger(tableId);
+            }
+
+            return;
+        }
+
+        if (Button.Draw(drawList, layout.Door, Loc.T(L.VenueHub.Door), ui.Ink, ButtonStyle.Prominent, id: doorId))
+        {
+            actions.OpenDoor(tableId);
+        }
+
+        if (Button.Draw(drawList, layout.Ledger, Loc.T(L.Tables.OpenLedger), ui.Ink, ButtonStyle.Gray, id: ledgerId))
+        {
+            actions.OpenLedger(tableId);
+        }
     }
 
     private void DrawArt(ImDrawListPtr drawList, in Rect art)

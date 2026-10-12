@@ -22,7 +22,7 @@ public sealed class VenueContextLayoutTests
         var origin = new Vector2(40f, 120f);
         var headline = HeadlineUnits * scale;
         var footnote = FootnoteUnits * scale;
-        var layout = VenueContextLayout.Table(origin, width, scale, headline, footnote);
+        var layout = VenueContextLayout.Table(origin, width, scale, headline, footnote, false);
         var card = layout.Card;
         var pad = VenueContextLayout.Pad * scale;
         var touch = VenueContextLayout.Touch * scale;
@@ -64,6 +64,24 @@ public sealed class VenueContextLayoutTests
         Assert.True(layout.Ledger.Max.X <= card.Max.X - pad + Epsilon);
         Assert.True(layout.Door.Max.Y <= card.Max.Y - pad + Epsilon);
         Assert.True(layout.Ledger.Max.Y <= card.Max.Y - pad + Epsilon);
+    }
+
+    [Theory]
+    [MemberData(nameof(Scales))]
+    public void ABookCardSpansOneButtonAcrossTheCard(float scale)
+    {
+        var width = PhoneWidth * scale;
+        var origin = new Vector2(40f, 120f);
+        var layout = VenueContextLayout.Table(origin, width, scale, HeadlineUnits * scale, FootnoteUnits * scale,
+            true);
+        var card = layout.Card;
+        var pad = VenueContextLayout.Pad * scale;
+
+        Assert.Equal(card.Min.X + pad, layout.Door.Min.X, 2);
+        Assert.Equal(card.Max.X - pad, layout.Door.Max.X, 2);
+        Assert.True(layout.Door.Height >= VenueContextLayout.Touch * scale - Epsilon);
+        Assert.True(layout.Door.Min.Y >= layout.Cell(0).Max.Y);
+        Assert.Equal(0f, layout.Ledger.Width);
     }
 
     [Theory]

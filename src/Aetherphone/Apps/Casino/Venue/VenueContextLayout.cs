@@ -59,7 +59,8 @@ internal static class VenueContextLayout
     public static float TextBlock(float headline, float footnote, float scale) =>
         headline + footnote * 2f + LineGap * 2f * scale;
 
-    public static VenueTableCardLayout Table(Vector2 origin, float width, float scale, float headline, float footnote)
+    public static VenueTableCardLayout Table(Vector2 origin, float width, float scale, float headline, float footnote,
+        bool single)
     {
         var pad = Pad * scale;
         var art = Art * scale;
@@ -76,11 +77,13 @@ internal static class VenueContextLayout
         var codeTop = origin.Y + pad + band + Gap * scale;
         var buttonsTop = codeTop + cellHeight + Gap * scale;
         var touch = Touch * scale;
-        var buttonWidth = (Inner(width, scale) - ButtonGap * scale) * 0.5f;
+        var buttonWidth = single ? Inner(width, scale) : (Inner(width, scale) - ButtonGap * scale) * 0.5f;
         var door = new Rect(new Vector2(origin.X + pad, buttonsTop),
             new Vector2(origin.X + pad + buttonWidth, buttonsTop + touch));
-        var ledger = new Rect(new Vector2(origin.X + width - pad - buttonWidth, buttonsTop),
-            new Vector2(origin.X + width - pad, buttonsTop + touch));
+        var ledger = single
+            ? default
+            : new Rect(new Vector2(origin.X + width - pad - buttonWidth, buttonsTop),
+                new Vector2(origin.X + width - pad, buttonsTop + touch));
         var card = new Rect(origin, new Vector2(origin.X + width, buttonsTop + touch + pad));
         return new VenueTableCardLayout(card, artRect, textLeft, textWidth, nameTop, seatsTop, currencyTop,
             origin.X + pad, codeTop, cellWidth, cellHeight, CellGapUnits * scale, door, ledger);
