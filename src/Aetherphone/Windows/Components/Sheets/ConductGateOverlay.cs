@@ -530,6 +530,11 @@ internal sealed class ConductGateOverlay
 
     private void TrackReading()
     {
+        if (ImGui.GetFrameCount() == openedFrame)
+        {
+            return;
+        }
+
         var maxScroll = ImGui.GetScrollMaxY();
         if (maxScroll <= 0.001f)
         {
