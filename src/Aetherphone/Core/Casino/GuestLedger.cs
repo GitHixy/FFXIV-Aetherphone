@@ -1,8 +1,10 @@
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Core.Localization;
 
 namespace Aetherphone.Core.Casino;
 
-internal sealed record GuestOffer(string TableId, string GuestName, string LedgerKind, long Amount, bool Incoming);
+internal sealed record GuestOffer(string TableId, string GuestName, string LedgerKind, long Amount, bool Incoming,
+    bool Unchecked = false);
 
 internal static class GuestLedger
 {
@@ -17,16 +19,29 @@ internal static class GuestLedger
         return CasinoBookRules.IsGuestName(name) ? name : string.Empty;
     }
 
-    public static GuestOffer? Offer(TradeMiss? miss, bool hosting, bool open, CasinoLedgerEntryDto[] entries)
+    public static GuestOffer? Offer(TradeMiss? miss, bool hosting, CasinoLedgerEntryDto[] entries)
     {
-        if (miss is null || !open || !hosting || miss.Amount <= 0 || !CasinoBookRules.IsGuestName(miss.PartnerName))
+        if (miss is null || !hosting || !miss.GuestEligible || miss.Amount <= 0
+            || !CasinoBookRules.IsGuestName(miss.PartnerName))
         {
             return null;
         }
 
-        var kind = miss.Incoming ? BuyInKindFor(entries, miss.PartnerName) : CasinoLedgerKinds.Payout;
-        return new GuestOffer(miss.TableId, miss.PartnerName, kind, miss.Amount, miss.Incoming);
+        return new GuestOffer(miss.TableId, miss.PartnerName, KindOf(miss, entries), miss.Amount, miss.Incoming,
+            miss.Kind != TradeMissKind.NotAtTable);
     }
+
+    public static GuestOffer? Shown(GuestOffer? offer, bool open) => open ? offer : null;
+
+    public static string KindOf(TradeMiss miss, CasinoLedgerEntryDto[] entries) =>
+        miss.Incoming ? BuyInKindFor(entries, miss.PartnerName) : CasinoLedgerKinds.Payout;
+
+    public static LocString RecordLabel(string ledgerKind) => ledgerKind switch
+    {
+        CasinoLedgerKinds.Rebuy => L.Book.RecordGuestRebuy,
+        CasinoLedgerKinds.Payout => L.Book.RecordGuestPayout,
+        _ => L.Book.RecordGuestBuyIn,
+    };
 
     public static GuestOffer? Typed(string tableId, string rawName, bool payout, long amount,
         CasinoLedgerEntryDto[] entries)

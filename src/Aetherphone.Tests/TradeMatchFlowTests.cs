@@ -2,7 +2,9 @@ using System.Text.Json;
 using Aetherphone.Core.Aethernet;
 using Aetherphone.Core.Aethernet.Clients;
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Apps.Casino.Tables;
 using Aetherphone.Core.Casino;
+using Aetherphone.Core.Localization;
 using Aetherphone.Core.Net;
 using Xunit;
 
@@ -163,6 +165,67 @@ public sealed class TradeMatchFlowTests
         Assert.False(queue.Add(second));
         Assert.Equal(TradeProposalQueue.Capacity, queue.Count);
         Assert.Equal(2, queue.Head.Amount);
+    }
+
+    [Fact]
+    public void EachMissRouteKeepsItsKind()
+    {
+        Assert.Equal(TradeMissKind.NotAtTable, TradeMatchFlow.MissKindOf(TradeMatchRoute.NoMatch));
+        Assert.Equal(TradeMissKind.Unread, TradeMatchFlow.MissKindOf(TradeMatchRoute.NoNames));
+        Assert.Equal(TradeMissKind.Registered, TradeMatchFlow.MissKindOf(TradeMatchRoute.Mismatch));
+        Assert.Equal(TradeMissKind.Registered, TradeMatchFlow.MissKindOf(TradeMatchRoute.Unrecordable));
+        Assert.Equal(TradeMissKind.Unchecked, TradeMatchFlow.MissKindOf(TradeMatchRoute.Unreachable));
+        Assert.Equal(TradeMissKind.Unchecked, TradeMatchFlow.MissKindOf(TradeMatchRoute.Refused));
+        Assert.Equal(TradeMissKind.NotAtTable, new TradeMiss(Table, 50_000, 1_000).Kind);
+    }
+
+    [Fact]
+    public void AnEntryThePatronRecordedAfterAMissBecomesAConfirmPrompt()
+    {
+        var received = new TradeMiss(Table, 50_000, 1_000, "Chea Thorne", true);
+        var waiting = new CasinoLedgerEntryDto("e1", Table, CasinoLedgerKinds.BuyIn, 50_000, Player, "Xeldar Al", Host,
+            "Ciri", Player, CasinoLedgerKinds.Trade, true, false);
+        var proposal = TradeMatchFlow.WaitingOnHost(received, Host, new[] { waiting });
+        Assert.Equal(TradeProposalKind.Confirm, proposal.Kind);
+        Assert.Equal("e1", proposal.EntryId);
+        Assert.Equal(Player, proposal.CounterpartyUserId);
+        Assert.Equal("Xeldar Al", proposal.CounterpartyName);
+        Assert.True(proposal.HostSide);
+        Assert.True(proposal.Incoming);
+
+        var sent = received with { Incoming = false };
+        var payout = waiting with { Kind = CasinoLedgerKinds.Payout, PayerUserId = Host, PayerName = "Ciri",
+            PayeeUserId = Player, PayeeName = "Xeldar Al", PayerConfirmed = false, PayeeConfirmed = true };
+        Assert.Equal("e1", TradeMatchFlow.WaitingOnHost(sent, Host, new[] { payout }).EntryId);
+
+        Assert.Equal(TradeProposalKind.None, TradeMatchFlow.WaitingOnHost(received, Host,
+            new[] { waiting with { Amount = 40_000 } }).Kind);
+        Assert.Equal(TradeProposalKind.None, TradeMatchFlow.WaitingOnHost(received, Host,
+            new[] { waiting with { PayeeConfirmed = true } }).Kind);
+        Assert.Equal(TradeProposalKind.None, TradeMatchFlow.WaitingOnHost(received, Host,
+            new[] { waiting with { PayerConfirmed = false } }).Kind);
+        Assert.Equal(TradeProposalKind.None, TradeMatchFlow.WaitingOnHost(received, Host,
+            new[] { waiting with { Settled = true } }).Kind);
+        Assert.Equal(TradeProposalKind.None, TradeMatchFlow.WaitingOnHost(sent, Host, new[] { waiting }).Kind);
+    }
+
+    [Fact]
+    public void TheAmberLineNamesTheDirectionOnlyWhenTheServerFoundNobody()
+    {
+        var received = new TradeMiss(Table, 50_000, 1_000, Incoming: true);
+        Assert.Equal(L.Venue.TradeMissReceived.Key, TableLedger.MissLine(received).Key);
+        Assert.Equal(L.Venue.TradeMissSent.Key, TableLedger.MissLine(received with { Incoming = false }).Key);
+        Assert.Equal(L.Venue.TradeMissUnchecked.Key,
+            TableLedger.MissLine(received with { Kind = TradeMissKind.Unchecked }).Key);
+        Assert.Equal(L.Venue.TradeMissUnchecked.Key,
+            TableLedger.MissLine(received with { Kind = TradeMissKind.Unread }).Key);
+
+        Assert.True(TableLedger.OffersGuest(received, true, true));
+        Assert.True(TableLedger.OffersGuest(received with { Kind = TradeMissKind.Unread }, true, true));
+        Assert.False(TableLedger.OffersGuest(received, false, true));
+        Assert.False(TableLedger.OffersGuest(received, true, false));
+        Assert.False(TableLedger.OffersGuest(received with { Kind = TradeMissKind.Registered }, true, true));
+        Assert.False(TableLedger.OffersGuest(received with { Kind = TradeMissKind.Unchecked }, true, true));
     }
 
     [Fact]

@@ -81,10 +81,20 @@ internal sealed class TradeProposalQueue
     }
 }
 
+internal enum TradeMissKind : byte
+{
+    NotAtTable,
+    Unread,
+    Unchecked,
+    Registered,
+}
+
 internal sealed record TradeMiss(string TableId, long Amount, long AtTick, string PartnerName = "",
-    bool Incoming = false)
+    bool Incoming = false, TradeMissKind Kind = TradeMissKind.NotAtTable)
 {
     public const long ShownMilliseconds = 10 * 60 * 1000;
+
+    public bool GuestEligible => Kind is TradeMissKind.NotAtTable or TradeMissKind.Unread;
 
     public bool ShownAt(string tableId, long nowTick) =>
         string.Equals(TableId, tableId, StringComparison.Ordinal) && nowTick - AtTick <= ShownMilliseconds;
@@ -135,5 +145,40 @@ internal static class TradeMatchFlow
                 ? failure.StatusCode.ToString(CultureInfo.InvariantCulture)
                 : failure.Kind.ToString(),
         };
+    }
+
+    public static TradeMissKind MissKindOf(TradeMatchRoute route) => route switch
+    {
+        TradeMatchRoute.NoMatch => TradeMissKind.NotAtTable,
+        TradeMatchRoute.NoNames => TradeMissKind.Unread,
+        TradeMatchRoute.Mismatch or TradeMatchRoute.Unrecordable => TradeMissKind.Registered,
+        _ => TradeMissKind.Unchecked,
+    };
+
+    public static TradeProposal WaitingOnHost(TradeMiss miss, string hostUserId, CasinoLedgerEntryDto[] entries)
+    {
+        for (var index = 0; index < entries.Length; index++)
+        {
+            var entry = entries[index];
+            if (entry.Settled || entry.Guest || entry.Amount != miss.Amount)
+            {
+                continue;
+            }
+
+            var hostSide = miss.Incoming ? entry.PayeeUserId : entry.PayerUserId;
+            var counterpartyId = miss.Incoming ? entry.PayerUserId : entry.PayeeUserId;
+            var hostStamped = miss.Incoming ? entry.PayeeConfirmed : entry.PayerConfirmed;
+            var counterpartyStamped = miss.Incoming ? entry.PayerConfirmed : entry.PayeeConfirmed;
+            if (!string.Equals(hostSide, hostUserId, StringComparison.Ordinal) || string.IsNullOrEmpty(counterpartyId)
+                || hostStamped || !counterpartyStamped)
+            {
+                continue;
+            }
+
+            return new TradeProposal(TradeProposalKind.Confirm, miss.TableId, entry.Kind, counterpartyId,
+                miss.Incoming ? entry.PayerName : entry.PayeeName, miss.Amount, entry.EntryId, true, miss.Incoming);
+        }
+
+        return TradeProposal.None;
     }
 }

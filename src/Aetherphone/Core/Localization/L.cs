@@ -11776,7 +11776,9 @@ internal static class L
         public static readonly LocString TradeSync = new("casino.venue.tradeSync", "Trade sync");
         public static readonly LocString TradeAutoConfirm = new("casino.venue.tradeAutoConfirm", "Confirm my side automatically");
         public static readonly LocString TradeSyncHint = new("casino.venue.tradeSyncHint", "Reads the in-game trade window only to suggest the matching ledger entry. The trade partner's name is checked against this table on the server and is never shown to anyone. Nothing in the game is clicked for you.");
-        public static readonly LocString TradeUnmatched = new("casino.venue.tradeUnmatched", "Your last trade of {0} gil matched nobody at this table. Record it below if it belongs here.");
+        public static readonly LocString TradeMissReceived = new("casino.venue.tradeMissReceived", "You received {0} gil from someone not at this table. Record it below if it belongs here.");
+        public static readonly LocString TradeMissSent = new("casino.venue.tradeMissSent", "You sent {0} gil to someone not at this table. Record it below if it belongs here.");
+        public static readonly LocString TradeMissUnchecked = new("casino.venue.tradeMissUnchecked", "Your last trade of {0} gil could not be matched to this table. Record it below if it belongs here.");
         public static readonly LocString TradeNotifyTitle = new("casino.venue.tradeNotifyTitle", "Record this trade?");
         public static readonly LocString TradeReceivedFrom = new("casino.venue.tradeReceivedFrom", "You received {1} gil from {0}");
         public static readonly LocString TradeSentTo = new("casino.venue.tradeSentTo", "You sent {1} gil to {0}");
@@ -11839,8 +11841,11 @@ internal static class L
     internal static class Book
     {
         public static readonly LocString ReasonGuestEntry = new("casino.book.reasonGuestEntry", "A guest entry settles at once, so there is nothing to confirm or dispute.");
-        public static readonly LocString RecordGuest = new("casino.book.recordGuest", "Record as guest");
+        public static readonly LocString RecordGuestBuyIn = new("casino.book.recordGuestBuyIn", "Record guest buy-in");
+        public static readonly LocString RecordGuestRebuy = new("casino.book.recordGuestRebuy", "Record guest rebuy");
+        public static readonly LocString RecordGuestPayout = new("casino.book.recordGuestPayout", "Record guest payout");
         public static readonly LocString GuestHint = new("casino.book.guestHint", "Nobody at this table matched that name. A guest entry is settled on the spot and cannot be disputed.");
+        public static readonly LocString GuestHintUnchecked = new("casino.book.guestHintUnchecked", "This trade could not be checked against this table. A guest entry is settled on the spot and cannot be disputed.");
         public static readonly LocString GuestTag = new("casino.book.guestTag", "Guest");
         public static readonly LocString GuestNamed = new("casino.book.guestNamed", "{0} (guest)");
         public static readonly LocString NightTotals = new("casino.book.nightTotals", "Tonight: {0} gil in, {1} gil out");
