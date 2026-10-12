@@ -7778,6 +7778,7 @@
   "changelog.r1300.58": "Adicionada a opção Mostrar em cutscenes, que mantém o telefone na tela enquanto uma cutscene é exibida, útil com um segundo monitor",
   "changelog.r1300.81": "Adicionamos um contador de FPS ao telefone pequeno, desligado por padrão em Ajustes > Telefone minimizado, contribuição de t3sco",
   "changelog.r1300.82": "Adicionado colar e arrastar imagens em chirps, respostas, publicações e stories: pressione Ctrl+V, toque em Colar imagem ou arraste um arquivo do Explorador de Arquivos, contribuição de t3sco",
+  "changelog.r1300.95": "Adicionada uma tela Curtidos ao menu do perfil com as publicações que você curtiu, contribuição de t3sco",
   "changelog.r1300.83": "Adicionado colar e arrastar imagens nas conversas: a imagem espera acima da caixa de mensagem e é enviada com o que você escrever como legenda, contribuição de t3sco",
   "changelog.r1300.51": "Corrigida a barra de rolagem, que ao ser arrastada com a posição do telefone bloqueada ia na direção errada e devagar demais, contribuição de jambalong",
   "changelog.r1300.57": "Corrigimos os filtros do Linkpearl e as proporções do editor de fotos que cortavam seus rótulos",

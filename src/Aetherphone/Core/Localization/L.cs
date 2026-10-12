@@ -2384,6 +2384,12 @@ internal static class L
                 "Added pasting and dragging images into chirps, replies, posts and stories: press Ctrl+V, tap Paste image, or drag a file in from File Explorer, contributed by t3sco"),
         };
 
+        public static readonly LocString[] Release1300Aethergram =
+        {
+            new("changelog.r1300.95",
+                "Added a Liked screen to the profile menu that lists the posts you liked, contributed by t3sco"),
+        };
+
         public static readonly LocString[] Release1300Messaging =
         {
             new("changelog.r1300.83",

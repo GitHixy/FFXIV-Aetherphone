@@ -13,6 +13,7 @@ internal static class ChangelogData
             new(L.Apps.Linkpearl, L.Changelog.Release1300Linkpearl),
             new(L.Changelog.SectionPhone, L.Changelog.Release1300Phone),
             new(L.Changelog.SectionChirperAethergramVelvet, L.Changelog.Release1300ChirperAethergramVelvet),
+            new(L.Apps.Aethergram, L.Changelog.Release1300Aethergram),
             new(L.Changelog.SectionMessaging, L.Changelog.Release1300Messaging),
             new(L.Apps.Housing, L.Changelog.Release1300Housing),
             new(L.Apps.Hunts, L.Changelog.Release1300Hunts),
