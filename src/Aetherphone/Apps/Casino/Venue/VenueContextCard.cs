@@ -114,8 +114,11 @@ internal sealed class VenueContextCard
     {
         RefreshOwn(row);
         var book = ownView.Book;
-        var layout = VenueContextLayout.Table(origin, width, scale, Typography.LineHeight(TextStyles.Headline),
-            Typography.LineHeight(TextStyles.Footnote), book);
+        var textWidth = VenueContextLayout.TextWidth(width, scale);
+        var layout = VenueContextLayout.Table(origin, width, scale,
+            PitText.Height(ownView.Name, TextStyles.Headline, textWidth),
+            PitText.Height(ownLine, TextStyles.Footnote, textWidth),
+            PitText.Height(ownCurrencyLine, TextStyles.Footnote, textWidth), book);
         var card = layout.Card;
         var radius = Metrics.Radius.Grouped * scale;
         var overButton = UiInteract.Hover(layout.Door.Min, layout.Door.Max)
@@ -131,13 +134,12 @@ internal sealed class VenueContextCard
         Squircle.Stroke(drawList, card.Min, card.Max, radius, ImGui.GetColorU32(Palette.WithAlpha(ui.Accent, RimAlpha)),
             1.2f * scale);
         DrawArt(drawList, layout.Art);
-        Typography.Draw(drawList, new Vector2(layout.TextLeft, layout.NameTop),
-            Typography.FitText(ownView.Name, layout.TextWidth, TextStyles.Headline), ui.TitleInk, TextStyles.Headline);
-        Typography.Draw(drawList, new Vector2(layout.TextLeft, layout.SeatsTop),
-            Typography.FitText(ownLine, layout.TextWidth, TextStyles.Footnote), ui.BodyInk, TextStyles.Footnote);
-        Typography.Draw(drawList, new Vector2(layout.TextLeft, layout.CurrencyTop),
-            Typography.FitText(ownCurrencyLine, layout.TextWidth, TextStyles.Footnote),
-            TableRow.CurrencyTint(ownView.Currency, ui.Accent), TextStyles.Footnote);
+        PitText.Draw(drawList, ownView.Name, TextStyles.Headline, ui.TitleInk, layout.TextLeft, layout.NameTop,
+            layout.TextWidth, false);
+        PitText.Draw(drawList, ownLine, TextStyles.Footnote, ui.BodyInk, layout.TextLeft, layout.SeatsTop,
+            layout.TextWidth, false);
+        PitText.Draw(drawList, ownCurrencyLine, TextStyles.Footnote, TableRow.CurrencyTint(ownView.Currency, ui.Accent),
+            layout.TextLeft, layout.CurrencyTop, layout.TextWidth, false);
         DrawCode(drawList, ui, layout, CodeOf(row), scale);
         DrawButtons(drawList, ui, layout, row.TableId, book);
 
