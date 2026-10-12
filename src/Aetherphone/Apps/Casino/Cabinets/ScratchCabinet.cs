@@ -60,7 +60,6 @@ internal sealed class ScratchCabinet : ICabinetIdle
     private float idleTime;
     private float stampSeconds = -1f;
     private int rasp;
-    private bool stroked;
 
     public ScratchCabinet(CasinoStore store, CasinoPlayStore play)
     {
@@ -119,7 +118,6 @@ internal sealed class ScratchCabinet : ICabinetIdle
         settledRoundId = string.Empty;
         autoPause = 0f;
         stampSeconds = -1f;
-        stroked = false;
     }
 
     public void Draw(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui)
@@ -187,7 +185,6 @@ internal sealed class ScratchCabinet : ICabinetIdle
                 inlineReason = string.Empty;
                 roundId = card.RoundId;
                 roundCapped = card.Capped;
-                stroked = false;
                 stampSeconds = -1f;
                 stage.Celebration.Clear();
                 autoRevealClock = 0f;
@@ -350,7 +347,6 @@ internal sealed class ScratchCabinet : ICabinetIdle
             }
 
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-            stroked = true;
             playback.Rub(cellIndex, frame.DeltaSeconds * RubHoldPerSecond + drag / MathF.Max(cell, 1f) * RubDragFactor);
             if (rubTick <= 0f)
             {
@@ -429,7 +425,7 @@ internal sealed class ScratchCabinet : ICabinetIdle
 
         if (playback.Phase == ScratchPhase.Scratching)
         {
-            return stroked && !composer.Auto.Running ? ScratchStatusLine.RevealAll : ScratchStatusLine.Hint;
+            return composer.Auto.Running ? ScratchStatusLine.Hint : ScratchStatusLine.RevealAll;
         }
 
         return playback.RevealComplete && playback.PrizeOnceRevealed <= 0
@@ -486,8 +482,7 @@ internal sealed class ScratchCabinet : ICabinetIdle
             case ScratchStatusLine.RevealAll:
                 if (SmallButton(drawList, ui, Loc.T(L.Casino.ScratchRevealAll), centerX, top, area.Width, scale))
                 {
-                    playback.RevealAll();
-                    CasinoSfx.Play(UiSound.TileSafe);
+                    RevealAll();
                 }
 
                 return;
@@ -545,6 +540,12 @@ internal sealed class ScratchCabinet : ICabinetIdle
         composer.Reset(price);
         var blocked = state.StakesPaused || state.Draining || frame.Blocked;
         var scratching = playback.Phase == ScratchPhase.Scratching;
+        var repeat = stage.RepeatPressed();
+        if (repeat && scratching && !composer.Auto.Running && !frame.Blocked)
+        {
+            RevealAll();
+        }
+
         if (autoPause > 0f)
         {
             autoPause -= frame.DeltaSeconds;
@@ -552,7 +553,7 @@ internal sealed class ScratchCabinet : ICabinetIdle
 
         var enabled = !play.RoundInFlight && !scratching && !blocked;
         var model = new BetComposerModel(price, price, sitting.Stack, L.Strip.BuyFor, enabled, AutoAvailable: true,
-            FixedAmount: true, Knob: true, Repeat: stage.RepeatPressed(), Busy: play.RoundInFlight || scratching);
+            FixedAmount: true, Knob: true, Repeat: repeat, Busy: play.RoundInFlight || scratching);
         var action = composer.Draw(stage, ui, frame.Deck, model, frame.DeltaSeconds);
         DrawTierKnob(ui, composer.KnobRect, !scratching && !play.RoundInFlight && !composer.Auto.Running, scale);
         if (blocked && composer.Auto.Running)
@@ -566,6 +567,12 @@ internal sealed class ScratchCabinet : ICabinetIdle
         {
             Buy(stage);
         }
+    }
+
+    private void RevealAll()
+    {
+        playback.RevealAll();
+        CasinoSfx.Play(UiSound.TileSafe);
     }
 
     private void Buy(CasinoStage stage)
