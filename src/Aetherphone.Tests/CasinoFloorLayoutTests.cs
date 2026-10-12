@@ -212,7 +212,8 @@ public sealed class CasinoFloorLayoutTests
         Assert.Equal(260f, StripCarousel.CardHeight(1000f, 1f));
         var phone = StripCarousel.CardHeight(FloorWidth, 1f);
         Assert.InRange(phone, 196f, 260f);
-        Assert.True(StripCarousel.BlockHeight(FloorWidth, 1f) > phone);
+        Assert.True(StripCarousel.BlockHeight(FloorWidth, 2, 1f) > phone);
+        Assert.Equal(phone, StripCarousel.BlockHeight(FloorWidth, 1, 1f));
     }
 
     [Fact]

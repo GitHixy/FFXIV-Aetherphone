@@ -67,7 +67,7 @@ internal sealed partial class CasinoApp
             heroCards.DrawDots(drawList, dotsCenter, width, ui.TitleInk);
         }
 
-        return origin.Y + StripCarousel.BlockHeight(width, scale) + CardGap * scale;
+        return origin.Y + StripCarousel.BlockHeight(width, heroCards.Count, scale) + CardGap * scale;
     }
 
     private void BuildHeroPages()
