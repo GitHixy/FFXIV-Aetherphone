@@ -66,6 +66,8 @@ internal static class StatusTitle
 
     public static Vector4 Tint(BalanceTitle title) => Tints[(int)title];
 
+    public static float PillHeight(BalanceTitle title, float scale) => title == BalanceTitle.None ? 0f : Height * scale;
+
     public static float Width(BalanceTitle title, float maxWidth, float scale)
     {
         if (title == BalanceTitle.None)

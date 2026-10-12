@@ -90,31 +90,30 @@ public sealed class CasinoFloorLayoutTests
         Assert.Equal(StripHeroClaims.Spin, StripHero.ClaimsOf(Hero(null, null, true)));
         Assert.Equal(StripHeroClaims.Timed | StripHeroClaims.Streak | StripHeroClaims.Spin,
             StripHero.ClaimsOf(Hero(bonus, bonus, true)));
-        Assert.Equal(1, StripHero.RowPills(StripHeroClaims.None));
-        Assert.Equal(1, StripHero.RowPills(StripHeroClaims.Streak));
-        Assert.Equal(2, StripHero.RowPills(StripHeroClaims.Timed));
-        Assert.Equal(2, StripHero.RowPills(StripHeroClaims.Spin));
-        Assert.Equal(3, StripHero.RowPills(StripHeroClaims.Timed | StripHeroClaims.Streak | StripHeroClaims.Spin));
+        Assert.Equal(0f, StripHero.ClaimsHeight(StripHeroClaims.None, 44f));
+        Assert.Equal(0f, StripHero.ClaimsHeight(StripHeroClaims.Streak, 44f));
+        Assert.Equal(44f, StripHero.ClaimsHeight(StripHeroClaims.Timed, 44f));
+        Assert.Equal(44f, StripHero.ClaimsHeight(StripHeroClaims.Spin, 44f));
+        Assert.Equal(44f, StripHero.ClaimsHeight(StripHeroClaims.Timed | StripHeroClaims.Streak | StripHeroClaims.Spin,
+            44f));
     }
 
     [Theory]
     [InlineData(0.75f)]
     [InlineData(1f)]
     [InlineData(1.5f)]
-    public void HeroPillsSitInlineThenGiveGetChipsItsOwnRow(float scale)
+    public void GetChipsSitsBesideTheBalanceUntilItNeedsItsOwnRow(float scale)
     {
         var row = (FloorWidth - StripHero.Pad * 2f) * scale;
         var gap = 8f * scale;
-        var button = 44f * scale;
-        Assert.Equal(StripHeroRow.Inline, StripHero.RowLayout(1, row, row * 2f, 0f));
-        Assert.Equal(StripHeroRow.Inline, StripHero.RowLayout(2, row, 120f * scale + gap + 110f * scale, 110f * scale));
-        Assert.Equal(StripHeroRow.Stacked, StripHero.RowLayout(2, row, 200f * scale + gap + 150f * scale, 150f * scale));
-        Assert.Equal(StripHeroRow.Inline, StripHero.RowLayout(3, row, row, row * 0.6f));
-        Assert.Equal(StripHeroRow.Stacked, StripHero.RowLayout(3, row, row + 1f, row * 0.6f));
-        Assert.Equal(StripHeroRow.Tall, StripHero.RowLayout(3, row, row * 2f, row + 1f));
-        Assert.Equal(button, StripHero.ButtonsHeight(StripHeroRow.Inline, button, gap));
-        Assert.Equal(button * 2f + gap, StripHero.ButtonsHeight(StripHeroRow.Stacked, button, gap));
-        Assert.Equal(button * 3f + gap * 2f, StripHero.ButtonsHeight(StripHeroRow.Tall, button, gap));
+        var getChips = 110f * scale;
+        Assert.True(StripHero.GetChipsInline(row, 90f * scale, getChips, gap));
+        Assert.True(StripHero.GetChipsInline(row, row - gap - getChips, getChips, gap));
+        Assert.False(StripHero.GetChipsInline(row, row - gap - getChips + 2f, getChips, gap));
+        Assert.Equal(34f * scale, StripHero.BalanceRowHeight(34f * scale, 34f * scale));
+        Assert.Equal(34f * scale, StripHero.BalanceRowHeight(34f * scale, 0f));
+        Assert.Equal(24f * scale, StripHero.DetailRowHeight(17f * scale, 24f * scale));
+        Assert.Equal(17f * scale, StripHero.DetailRowHeight(17f * scale, 0f));
     }
 
     [Fact]

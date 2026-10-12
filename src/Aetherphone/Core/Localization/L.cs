@@ -11131,7 +11131,6 @@ internal static class L
         public static readonly LocString ClubPointsTo = new("casino.strip.clubPointsTo", "{1} points to {0}");
         public static readonly LocString SeatSit = new("casino.strip.seatSit", "Sit");
         public static readonly LocString TabFloor = new("casino.strip.tabFloor", "Floor");
-        public static readonly LocString YourChips = new("casino.strip.yourChips", "Your chips");
         public static readonly LocString ResumeTitle = new("casino.strip.resumeTitle", "Back to your seat");
         public static readonly LocString ResumeAction = new("casino.strip.resumeAction", "Rejoin");
         public static readonly LocString ResumeStack = new("casino.strip.resumeStack", "{0} chips on the table");
