@@ -463,9 +463,8 @@ internal sealed partial class BlackjackTable
             var outcomeText = OutcomeLabel(hand);
             if (hand.Outcome != BlackjackOutcomes.Pending && outcomeText.Length > 0)
             {
-                var won = hand.Delta > 0;
-                BlackjackTableArt.DrawOutcomeBadge(drawList, fanCenter, outcomeText,
-                    won ? CasinoColors.Money : ui.TitleInk, won ? CasinoColors.Money : ui.BodyInk,
+                var ink = hand.Delta > 0 ? CasinoColors.Money : StageText.Strong;
+                BlackjackTableArt.DrawOutcomeBadge(drawList, fanCenter, outcomeText, ink, ink,
                     BadgeEntrance(mySeat), slotWidth, scale);
             }
         }
