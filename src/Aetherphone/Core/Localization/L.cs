@@ -11387,6 +11387,7 @@ internal static class L
         public static readonly LocString ReasonTicketLimit = new("casino.tables.reasonTicketLimit", "You already hold the most tickets this raffle allows.");
         public static readonly LocString ReasonHostTicket = new("casino.tables.reasonHostTicket", "Hosts cannot take tickets in their own gil raffle.");
         public static readonly LocString ReasonRoundLive = new("casino.tables.reasonRoundLive", "A highest roll round is already open.");
+        public static readonly LocString ReasonAlreadyRolled = new("casino.tables.reasonAlreadyRolled", "You already rolled this round. Wait for the next one.");
         public static readonly LocString ReasonBankLimit = new("casino.tables.reasonBankLimit", "That bet could pay more than the host's bank or max payout covers. Try a smaller bet.");
         public static readonly LocString ReasonHostFrozen = new("casino.tables.reasonHostFrozen", "Gil hosting is on hold for this host while disputes are reviewed.");
         public static readonly LocString ReasonNotParty = new("casino.tables.reasonNotParty", "Only the host and that player can record this payment.");
@@ -11693,9 +11694,10 @@ internal static class L
         public static readonly LocString RoundWinner = new("casino.venue.roundWinner", "{0} won the round with {1}");
         public static readonly LocString YouWonRound = new("casino.venue.youWonRound", "You won the round");
         public static readonly LocString RoundOpen = new("casino.venue.roundOpen", "Start round");
-        public static readonly LocString RoundFirstRollCounts = new("casino.venue.roundFirstRollCounts", "Only your first roll this round counts");
+        public static readonly LocString RoundOneRollEach = new("casino.venue.roundOneRollEach", "Each player rolls once per round");
         public static readonly LocString DiceHint = new("casino.venue.diceHint", "Everyone rolls on the same shared log");
         public static readonly LocString RollAction = new("casino.venue.rollAction", "Roll 1 to {0}");
+        public static readonly LocString RolledThisRound = new("casino.venue.rolledThisRound", "You rolled this round");
         public static readonly LocString NoDuel = new("casino.venue.noDuel", "No duel yet");
         public static readonly LocString ChallengeOpen = new("casino.venue.challengeOpen", "{0} wants a duel");
         public static readonly LocString YouRolledOne = new("casino.venue.youRolledOne", "You rolled a 1");

@@ -87,6 +87,7 @@ internal static class CasinoReasons
     public const string TicketLimit = "ticket_limit";
     public const string HostTicket = "host_ticket";
     public const string RoundLive = "round_live";
+    public const string AlreadyRolled = "already_rolled";
     public const string BankLimit = "bank_limit";
     public const string HostFrozen = "host_frozen";
     public const string NotParty = "not_party";
@@ -126,6 +127,7 @@ internal static class CasinoReasons
         TicketLimit,
         HostTicket,
         RoundLive,
+        AlreadyRolled,
         BankLimit,
         HostFrozen,
         NotParty,
@@ -219,6 +221,7 @@ internal static class CasinoReasons
         [TicketLimit] = L.Tables.ReasonTicketLimit,
         [HostTicket] = L.Tables.ReasonHostTicket,
         [RoundLive] = L.Tables.ReasonRoundLive,
+        [AlreadyRolled] = L.Tables.ReasonAlreadyRolled,
         [BankLimit] = L.Tables.ReasonBankLimit,
         [HostFrozen] = L.Tables.ReasonHostFrozen,
         [NotParty] = L.Tables.ReasonNotParty,
