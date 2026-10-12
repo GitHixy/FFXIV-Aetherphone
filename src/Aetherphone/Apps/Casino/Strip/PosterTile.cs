@@ -118,39 +118,33 @@ internal static class PosterTile
         var titleCount = Math.Min(titleLines.Length, TitleLines);
         var titleHeight = Typography.LineHeight(titleStyle);
         var footnoteHeight = Typography.LineHeight(TextStyles.Footnote);
-        var metaLines = info.Meta.Length > 0 && info.Return.Length == 0
+        var detailBudget = DetailLines + TitleLines - titleCount;
+        var returnLines = info.Return.Length > 0
+            ? Typography.WrapText(info.Return, TextStyles.FootnoteEmphasized, width)
+            : Array.Empty<string>();
+        var returnCount = Math.Min(returnLines.Length, detailBudget);
+        var metaLines = info.Meta.Length > 0
             ? Typography.WrapText(info.Meta, TextStyles.Footnote, width)
             : Array.Empty<string>();
-        var metaCount = info.Return.Length > 0
-            ? (info.Meta.Length > 0 ? 1 : 0) + 1
-            : Math.Min(metaLines.Length, DetailLines);
-        var top = tile.Max.Y - pad - titleCount * titleHeight - metaCount * footnoteHeight;
+        var metaCount = Math.Min(metaLines.Length, detailBudget - returnCount);
+        var top = tile.Max.Y - pad - titleCount * titleHeight - (metaCount + returnCount) * footnoteHeight;
         for (var line = 0; line < titleCount; line++)
         {
             Typography.Draw(drawList, new Vector2(left, top), titleLines[line], CasinoColors.InkTitle, titleStyle);
             top += titleHeight;
         }
 
-        if (info.Return.Length > 0)
-        {
-            if (info.Meta.Length > 0)
-            {
-                Typography.Draw(drawList, new Vector2(left, top),
-                    Typography.FitText(info.Meta, width, TextStyles.Footnote), CasinoColors.InkBody,
-                    TextStyles.Footnote);
-                top += footnoteHeight;
-            }
-
-            Typography.Draw(drawList, new Vector2(left, top),
-                Typography.FitText(info.Return, width, TextStyles.FootnoteEmphasized), CasinoColors.Money,
-                TextStyles.FootnoteEmphasized);
-            return;
-        }
-
         for (var line = 0; line < metaCount; line++)
         {
             Typography.Draw(drawList, new Vector2(left, top), metaLines[line], CasinoColors.InkBody,
                 TextStyles.Footnote);
+            top += footnoteHeight;
+        }
+
+        for (var line = 0; line < returnCount; line++)
+        {
+            Typography.Draw(drawList, new Vector2(left, top), returnLines[line], CasinoColors.Money,
+                TextStyles.FootnoteEmphasized);
             top += footnoteHeight;
         }
     }
