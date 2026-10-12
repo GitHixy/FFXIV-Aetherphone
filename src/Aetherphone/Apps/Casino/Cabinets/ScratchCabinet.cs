@@ -2,6 +2,7 @@ using Aetherphone.Apps.Casino.Stage;
 using Aetherphone.Apps.Games.Framework;
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Core.Animation;
 using Aetherphone.Core.Casino;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Notifications;
@@ -38,6 +39,7 @@ internal sealed class ScratchCabinet : ICabinetIdle
     private const float IdleThemeSeconds = 3f;
     private const int FlakesPerTick = 3;
     private const int RevealSparkles = 6;
+    private const float OutOfReachAlpha = 0.4f;
     private const string MalformedReason = "malformed";
 
     private readonly CasinoStore store;
@@ -536,10 +538,17 @@ internal sealed class ScratchCabinet : ICabinetIdle
     private void DrawDeck(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui, CasinoStateDto state,
         CasinoSittingDto sitting, float scale)
     {
+        var scratching = playback.Phase == ScratchPhase.Scratching;
+        var changeable = !scratching && !play.RoundInFlight && !composer.Auto.Running;
+        var ceiling = TierCeiling(store.Ceiling.MaxBet);
+        if (changeable)
+        {
+            tierIndex = ClampTier(tierIndex, ceiling);
+        }
+
         var price = CurrentPrice;
         composer.Reset(price);
         var blocked = state.StakesPaused || state.Draining || frame.Blocked;
-        var scratching = playback.Phase == ScratchPhase.Scratching;
         var repeat = stage.RepeatPressed();
         if (repeat && scratching && !composer.Auto.Running && !frame.Blocked)
         {
@@ -555,7 +564,7 @@ internal sealed class ScratchCabinet : ICabinetIdle
         var model = new BetComposerModel(price, price, sitting.Stack, L.Strip.BuyFor, enabled, AutoAvailable: true,
             FixedAmount: true, Knob: true, Repeat: repeat, Busy: play.RoundInFlight || scratching);
         var action = composer.Draw(stage, ui, frame.Deck, model, frame.DeltaSeconds);
-        DrawTierKnob(ui, composer.KnobRect, !scratching && !play.RoundInFlight && !composer.Auto.Running, scale);
+        DrawTierKnob(ui, composer.KnobRect, changeable, ceiling, scale);
         if (blocked && composer.Auto.Running)
         {
             composer.Auto.Stop(AutoStop.Manual);
@@ -585,7 +594,22 @@ internal sealed class ScratchCabinet : ICabinetIdle
         CasinoSfx.Play(UiSound.ChipSlide);
     }
 
-    private void DrawTierKnob(AppSkin ui, Rect rect, bool changeable, float scale)
+    internal static long TierCeiling(long maxBet) => Math.Max(maxBet, ScratchRules.Prices[0]);
+
+    internal static bool TierReachable(int tier, long ceiling) => ScratchRules.Prices[tier] <= ceiling;
+
+    internal static int ClampTier(int tier, long ceiling)
+    {
+        var clamped = tier;
+        while (clamped > 0 && !TierReachable(clamped, ceiling))
+        {
+            clamped--;
+        }
+
+        return clamped;
+    }
+
+    private void DrawTierKnob(AppSkin ui, Rect rect, bool changeable, long ceiling, float scale)
     {
         if (rect.Width <= 0f)
         {
@@ -599,7 +623,9 @@ internal sealed class ScratchCabinet : ICabinetIdle
         {
             var chipMin = new Vector2(rect.Min.X + tier * (chipWidth + gap), rect.Min.Y);
             var chipRect = new Rect(chipMin, new Vector2(chipMin.X + chipWidth, rect.Max.Y));
-            var hovered = changeable && UiInteract.Hover(chipRect.Min, chipRect.Max);
+            var reachable = TierReachable(tier, ceiling);
+            var hovered = changeable && reachable && UiInteract.Hover(chipRect.Min, chipRect.Max);
+            var firstVertex = drawList.VtxBuffer.Size;
             ChipRail.PaintChip(drawList, chipRect, NumberText.Compact(ScratchRules.Prices[tier]), tier == tierIndex,
                 hovered, ui.Ink);
             var underline = chipRect.Height * 0.5f;
@@ -607,9 +633,15 @@ internal sealed class ScratchCabinet : ICabinetIdle
                 new Vector2(chipRect.Max.X - underline, chipRect.Max.Y - scale),
                 ImGui.GetColorU32(ScratchTicketArt.For(tier).Accent with { W = tier == tierIndex ? 1f : 0.45f }),
                 MathF.Max(1f, 2f * scale));
+            if (!reachable)
+            {
+                LayerCompositor.Fade(drawList, firstVertex, OutOfReachAlpha);
+            }
+
             if (UiInteract.Click(chipRect.Min, chipRect.Max, hovered) && tier != tierIndex)
             {
                 tierIndex = tier;
+                inlineReason = string.Empty;
                 playback.Clear();
                 stampSeconds = -1f;
                 CasinoSfx.Play(UiSound.ChipSlide);
