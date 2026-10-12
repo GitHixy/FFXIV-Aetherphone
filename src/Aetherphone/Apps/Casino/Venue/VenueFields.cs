@@ -24,23 +24,40 @@ internal static class VenueFields
     }
 
     public static void DrawLabel(ImDrawListPtr drawList, float left, float centerY, string label, float width,
-        Vector4 ink)
+        Vector4 ink) =>
+        DrawLines(drawList, left, centerY, label, width, ink, false);
+
+    private static void DrawLines(ImDrawListPtr drawList, float left, float centerY, string text, float width,
+        Vector4 ink, bool alignRight)
     {
-        var style = TextStyles.Body;
-        var lines = Typography.WrapText(label, style, MathF.Max(1f, width));
-        if (lines.Length > MaxLabelLines)
+        var lines = FitLines(text, MathF.Max(1f, width), out var style);
+        var lineHeight = Typography.LineHeight(style);
+        var top = centerY - lines.Length * lineHeight * 0.5f;
+        for (var line = 0; line < lines.Length; line++)
         {
-            style = TextStyles.Subheadline;
-            lines = Typography.WrapText(label, style, MathF.Max(1f, width));
+            var x = alignRight ? left + width - Typography.Measure(lines[line], style).X : left;
+            Typography.Draw(drawList, new Vector2(x, top + line * lineHeight), lines[line], ink, style);
+        }
+    }
+
+    private static string[] FitLines(string text, float width, out TextStyle style)
+    {
+        style = TextStyles.Body;
+        var lines = Typography.WrapText(text, style, width);
+        if (lines.Length <= MaxLabelLines)
+        {
+            return lines;
         }
 
-        var count = Math.Min(lines.Length, MaxLabelLines);
-        var lineHeight = Typography.LineHeight(style);
-        var top = centerY - count * lineHeight * 0.5f;
-        for (var line = 0; line < count; line++)
+        style = TextStyles.Subheadline;
+        lines = Typography.WrapText(text, style, width);
+        if (lines.Length <= MaxLabelLines)
         {
-            Typography.Draw(drawList, new Vector2(left, top + line * lineHeight), lines[line], ink, style);
+            return lines;
         }
+
+        style = TextStyles.Footnote;
+        return Typography.WrapText(text, style, width);
     }
 
     public static void TextRow(AppSkin ui, in Rect row, string id, string label, string hint, ref string buffer,
@@ -98,10 +115,7 @@ internal static class VenueFields
     {
         Label(ui, row, label, scale);
         var width = row.Width * FieldWidthFraction;
-        var fitted = Typography.FitText(value, width, TextStyles.Body);
-        var size = Typography.Measure(fitted, TextStyles.Body);
-        Typography.Draw(ImGui.GetWindowDrawList(), new Vector2(row.Max.X - size.X, row.Center.Y - size.Y * 0.5f),
-            fitted, ui.BodyInk, TextStyles.Body);
+        DrawLines(ImGui.GetWindowDrawList(), row.Max.X - width, row.Center.Y, value, width, ui.BodyInk, true);
     }
 
     public static float Hint(AppSkin ui, string text, float scale)
