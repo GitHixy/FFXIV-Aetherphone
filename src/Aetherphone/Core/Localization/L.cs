@@ -2414,6 +2414,8 @@ internal static class L
         {
             new("changelog.r1300.96",
                 "Fixed long item names in search results, the watchlist and price alerts staying cut short: hovering a row now scrolls the full name, contributed by Haydooners"),
+            new("changelog.r1300.97",
+                "Fixed long retainer and buyer names hiding the world in listings and recent sales: the world now shows before the name, contributed by Haydooners"),
         };
 
         public static readonly LocString[] Release1200Chirper =

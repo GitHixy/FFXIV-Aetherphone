@@ -7787,6 +7787,7 @@
   "changelog.r1300.53": "Correction du compte à rebours de la loterie et de son widget qui affichaient une loterie terminée au lieu de la période d'indisponibilité en cours, contribution de YozoraCho",
   "changelog.r1300.54": "Correction des marqueurs de chasse sur la carte et la minicarte qui recouvraient toute la carte dans les zones avec beaucoup de points d'apparition, contribution de YozoraCho",
   "changelog.r1300.96": "Correction des noms d'objets longs dans les résultats de recherche, la liste de suivi et les alertes de prix qui restaient coupés : survoler une ligne fait désormais défiler le nom complet, contribution de Haydooners",
+  "changelog.r1300.97": "Correction des noms longs de servants et d'acheteurs qui masquaient le monde dans les offres et les ventes récentes : le monde s'affiche désormais avant le nom, contribution de Haydooners",
   "changelog.r1200.70": "Refonte de Jeux autour de quatre onglets, Accueil, Ensemble, Bibliothèque et Profil, avec le jeu du jour en direct en haut d'Accueil, au-dessus de Reprendre, Nouveautés et Top de la semaine",
   "changelog.r1200.71": "Ajout de Bibliothèque : tous les jeux dans une grille avec recherche, filtres par genre et tri",
   "changelog.r1200.72": "Ajout d'une icône peinte pour chaque jeu, et chaque jeu s'ouvre en zoomant depuis son icône",

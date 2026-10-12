@@ -7787,6 +7787,7 @@
   "changelog.r1300.53": "Çekiliş geri sayımının ve widget'ının şu an süren kapalı dönem yerine sona ermiş bir çekilişi göstermesi düzeltildi, katkı: YozoraCho",
   "changelog.r1300.54": "Av işaretlerinin, çok sayıda doğma noktası olan bölgelerde haritayı ve mini haritayı tamamen kaplaması düzeltildi, katkı: YozoraCho",
   "changelog.r1300.96": "Arama sonuçlarında, izleme listesinde ve fiyat alarmlarında uzun eşya adlarının kesik kalması düzeltildi: bir satırın üzerine gelince adın tamamı kayar, katkı: Haydooners",
+  "changelog.r1300.97": "İlanlarda ve son satışlarda uzun hizmetkâr ve alıcı adlarının dünya adını gizlemesi düzeltildi: dünya artık addan önce görünüyor, katkı: Haydooners",
   "changelog.r1200.70": "Oyunlar yenilendi: Ana Sayfa, Birlikte, Kitaplık ve Profil olmak üzere dört sekme, Ana Sayfa'nın en üstünde canlı oynayan günün oyunu, altında Oynamaya Devam Et, Yeni eklenenler ve Haftanın en iyileri",
   "changelog.r1200.71": "Kitaplık eklendi: tüm oyunlar arama, türe göre süzme ve sıralama ile tek bir ızgarada",
   "changelog.r1200.72": "Her oyuna boyanmış bir simge eklendi, her oyun da simgesinden yakınlaşarak açılıyor",
