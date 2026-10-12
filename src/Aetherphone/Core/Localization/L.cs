@@ -2384,6 +2384,8 @@ internal static class L
         {
             new("changelog.r1300.82",
                 "Added pasting and dragging images into chirps, replies, posts and stories: press Ctrl+V, tap Paste image, or drag a file in from File Explorer, contributed by t3sco"),
+            new("changelog.r1300.98",
+                "Added gliding to the previous or next post with the Up and Down arrow keys while the phone is focused, on by default under Settings > General, contributed by t3sco"),
         };
 
         public static readonly LocString[] Release1300AethergramVelvet =
@@ -2418,6 +2420,12 @@ internal static class L
                 "Fixed long item names in search results, the watchlist and price alerts staying cut short: hovering a row now scrolls the full name, contributed by Haydooners"),
             new("changelog.r1300.97",
                 "Fixed long retainer and buyer names hiding the world in listings and recent sales: the world now shows before the name, contributed by Haydooners"),
+        };
+
+        public static readonly LocString[] Release1300Music =
+        {
+            new("changelog.r1300.99",
+                "Fixed long song titles and artist names in song lists staying cut short: hovering a row now scrolls the full text, contributed by hellovvn"),
         };
 
         public static readonly LocString[] Release1200Chirper =
