@@ -152,7 +152,9 @@ internal sealed partial class BlackjackTable
 
         if (!CasinoRoomIds.IsBlackjackHouse(roomId))
         {
-            var name = board.Name.Length > 0 ? board.Name : Loc.T(L.Casino.TableUnnamed);
+            var card = tables.CardFor(roomId);
+            var name = card is not null ? TableBrowser.NameOf(card)
+                : board.Name.Length > 0 ? board.Name : Loc.T(L.Casino.TableUnnamed);
             history.RecordTableHand(roomId, board.HandIndex, name, currency, recap.Net, now);
         }
 
