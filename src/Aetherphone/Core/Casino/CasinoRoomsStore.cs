@@ -458,6 +458,11 @@ internal sealed class CasinoRoomsStore : IDisposable
             Interlocked.Exchange(ref stakeResult, new CasinoStakeOutcome(result.Granted, result.Reason));
             if (!result.Granted)
             {
+                lock (stakeGate)
+                {
+                    chipRoundId = RoundAfterRefusal(chipRoundId, clientRoundId);
+                }
+
                 chips.RefreshNow();
                 InvalidatePersonal();
                 return;
@@ -471,6 +476,9 @@ internal sealed class CasinoRoomsStore : IDisposable
             InvalidatePersonal();
         }, () => stakeInFlight = false);
     }
+
+    internal static string RoundAfterRefusal(string heldRoundId, string refusedRoundId) =>
+        string.Equals(heldRoundId, refusedRoundId, StringComparison.Ordinal) ? string.Empty : heldRoundId;
 
     public void SendBlackjackAction(int action)
     {
