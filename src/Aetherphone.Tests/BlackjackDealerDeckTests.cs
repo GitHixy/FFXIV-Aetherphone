@@ -70,9 +70,9 @@ public sealed class BlackjackDealerDeckTests
     public void ThePlayerDeckKeepsItsOrder()
     {
         Assert.Equal(BlackjackDeck.Sit, BlackjackDeckFlow.Pick(Facts(bought: false, canRebuy: true, canAct: true)));
-        Assert.Equal(BlackjackDeck.Rebuy, BlackjackDeckFlow.Pick(Facts(canRebuy: true, gilBroke: true,
+        Assert.Equal(BlackjackDeck.Rebuy, BlackjackDeckFlow.Pick(Facts(canRebuy: true, broke: true,
             insurance: true)));
-        Assert.Equal(BlackjackDeck.Ledger, BlackjackDeckFlow.Pick(Facts(gilBroke: true, insurance: true)));
+        Assert.Equal(BlackjackDeck.Broke, BlackjackDeckFlow.Pick(Facts(broke: true, insurance: true)));
         Assert.Equal(BlackjackDeck.Insurance, BlackjackDeckFlow.Pick(Facts(insurance: true, canBet: true)));
         Assert.Equal(BlackjackDeck.Act, BlackjackDeckFlow.Pick(Facts(canBet: true, committed: true, canAct: true)));
         Assert.Equal(BlackjackDeck.Wait, BlackjackDeckFlow.Pick(Facts(canBet: true, committed: true)));
@@ -88,7 +88,7 @@ public sealed class BlackjackDealerDeckTests
     }
 
     internal static BlackjackDeckFacts Facts(bool dealing = false, bool bought = true, bool onBoard = true,
-        bool holdsSeat = true, bool canRebuy = false, bool gilBroke = false, bool paused = false,
+        bool holdsSeat = true, bool canRebuy = false, bool broke = false, bool paused = false,
         bool insurance = false, bool canBet = false, bool committed = false, bool canAct = false) =>
-        new(dealing, bought, onBoard, holdsSeat, canRebuy, gilBroke, paused, insurance, canBet, committed, canAct);
+        new(dealing, bought, onBoard, holdsSeat, canRebuy, broke, paused, insurance, canBet, committed, canAct);
 }

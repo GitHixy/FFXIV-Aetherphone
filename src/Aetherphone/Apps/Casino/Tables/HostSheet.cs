@@ -745,6 +745,11 @@ internal sealed class HostSheet
                 draft.FaceUp = Venue.VenueFields.ToggleRow(ui, card.NextRow(RowUnits), "host.faceup",
                     Loc.T(L.Tables.FaceUp), draft.FaceUp, scale);
                 card.End();
+                if (draft.Game == HostGame.Blackjack)
+                {
+                    Venue.VenueFields.Hint(ui, Loc.T(L.Tables.RebuysTournamentNote), scale);
+                }
+
                 Gap(HostFlowLayout.CardGap, scale);
             }
         }

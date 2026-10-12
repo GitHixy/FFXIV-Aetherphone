@@ -5,7 +5,7 @@ internal enum BlackjackDeck : byte
     Sit,
     Dealer,
     Rebuy,
-    Ledger,
+    Broke,
     Paused,
     Insurance,
     Bet,
@@ -19,7 +19,7 @@ internal readonly record struct BlackjackDeckFacts(
     bool OnBoard,
     bool HoldsSeat,
     bool CanRebuy,
-    bool GilBroke,
+    bool Broke,
     bool Paused,
     bool InsuranceOffered,
     bool CanBet,
@@ -45,9 +45,9 @@ internal static class BlackjackDeckFlow
             return BlackjackDeck.Rebuy;
         }
 
-        if (facts.OnBoard && facts.GilBroke)
+        if (facts.OnBoard && facts.Broke)
         {
-            return BlackjackDeck.Ledger;
+            return BlackjackDeck.Broke;
         }
 
         if (facts.OnBoard && facts.Paused)

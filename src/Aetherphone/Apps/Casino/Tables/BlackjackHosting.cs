@@ -118,14 +118,48 @@ internal static class BlackjackHosting
 
     public static bool CanRebuy(CasinoBlackjackRoomStateDto board, long seatChips, long committed)
     {
-        if (CasinoCurrencies.Of(board) != CasinoCurrencies.Practice || !board.PracticeRebuy
-            || board.Tournament is { Live: true })
+        return CasinoCurrencies.Of(board) == CasinoCurrencies.Practice && board.PracticeRebuy
+            && board.Tournament is not { Live: true } && Broke(board, seatChips, committed);
+    }
+
+    public static bool Broke(CasinoBlackjackRoomStateDto board, long seatChips, long committed)
+    {
+        var currency = CasinoCurrencies.Of(board);
+        if (currency != CasinoCurrencies.Practice && currency != CasinoCurrencies.Gil)
         {
             return false;
         }
 
-        var floor = Math.Max(1, board.MinBet);
-        return seatChips < floor && committed == 0 && board.Phase == BlackjackPhases.Betting;
+        return seatChips < Math.Max(1, board.MinBet) && committed == 0 && board.Phase == BlackjackPhases.Betting;
+    }
+
+    public static LocString BrokeStatus(CasinoBlackjackRoomStateDto board, string me)
+    {
+        if (board.Tournament is { Live: true } tournament && IsEntrant(tournament, me))
+        {
+            return L.Venue.TournamentYouAreOut;
+        }
+
+        return board.PracticeRebuy ? L.Tables.RebuysTournamentNote : L.Tables.ReasonRebuyOff;
+    }
+
+    private static bool IsEntrant(CasinoBlackjackTournamentDto tournament, string me)
+    {
+        var standings = tournament.Standings;
+        if (standings is null || me.Length == 0)
+        {
+            return false;
+        }
+
+        for (var index = 0; index < standings.Length; index++)
+        {
+            if (string.Equals(standings[index].UserId, me, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static long NaturalPayout(CasinoBlackjackRoomStateDto board, long bet)

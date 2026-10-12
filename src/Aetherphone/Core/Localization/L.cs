@@ -11377,6 +11377,9 @@ internal static class L
         public static readonly LocString ReasonRebuyOff = new("casino.tables.reasonRebuyOff", "The host turned rebuys off at this table.");
         public static readonly LocString ReasonTournamentLive = new("casino.tables.reasonTournamentLive", "A tournament is running. Wait for it to finish first.");
         public static readonly LocString ReasonNoTournament = new("casino.tables.reasonNoTournament", "There is no tournament running at this table.");
+        public static readonly LocString ReasonTournamentPlayers = new("casino.tables.reasonTournamentPlayers", "A tournament needs at least two seated players.");
+        public static readonly LocString ReasonTournamentStack = new("casino.tables.reasonTournamentStack", "That starting stack does not fit this table. Leave it blank to use the table's own stack.");
+        public static readonly LocString RebuysTournamentNote = new("casino.tables.rebuysTournamentNote", "Rebuys pause while a tournament runs.");
         public static readonly LocString ReasonNothingToDeal = new("casino.tables.reasonNothingToDeal", "Nothing to deal yet. Wait for at least one bet.");
         public static readonly LocString ReasonTablePaused = new("casino.tables.reasonTablePaused", "The host paused the table. Play picks up when they resume.");
         public static readonly LocString ReasonNoSpectators = new("casino.tables.reasonNoSpectators", "This table does not take spectators. Take a seat to watch.");
@@ -11798,6 +11801,9 @@ internal static class L
         public static readonly LocString TournamentEliminated = new("casino.venue.tournamentEliminated", "Out");
         public static readonly LocString TournamentOut = new("casino.venue.tournamentOut", "{0} is out");
         public static readonly LocString TournamentWinner = new("casino.venue.tournamentWinner", "{0} wins the tournament");
+        public static readonly LocString TournamentNeedsPlayers = new("casino.venue.tournamentNeedsPlayers", "Needs two seated players. Take a seat yourself to play in it.");
+        public static readonly LocString TournamentDealerOut = new("casino.venue.tournamentDealerOut", "You deal at this table, so you cannot enter. Two other players need a seat.");
+        public static readonly LocString TournamentYouAreOut = new("casino.venue.tournamentYouAreOut", "You're out of the tournament.");
     }
 
     internal static class VenueHub

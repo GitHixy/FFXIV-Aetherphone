@@ -197,6 +197,30 @@ public sealed class TournamentPlaybackTests
         playback.Update(Tournament(false, 6, "u1"), 0.016f, false);
         Assert.Equal(TournamentEvent.Won, playback.TakeEvent());
         Assert.Equal("u1", playback.WinnerUserId);
+        Assert.Equal("Mira", playback.WinnerName);
+    }
+
+    [Fact]
+    public void TheLastEliminationDoesNotTalkOverTheWinner()
+    {
+        var playback = new TournamentPlayback();
+        var alive = new CasinoBlackjackStandingDto("u2", "Rhan", 10_000, false, 2);
+        playback.Update(Tournament(true, 5, string.Empty, alive), 0.016f, false);
+        playback.Update(Tournament(false, 6, "u1", alive with { Chips = 0, Eliminated = true }), 0.016f, false);
+        Assert.Equal(TournamentEvent.Won, playback.TakeEvent());
+        Assert.False(playback.NoticeShowing);
+    }
+
+    [Fact]
+    public void TheDoorHoldsATournamentUntilItCanStart()
+    {
+        Assert.Equal(TournamentGate.NeedsPlayers, TournamentDoorCard.GateOf(false, 1, 0, 500));
+        Assert.Equal(TournamentGate.DealerOut, TournamentDoorCard.GateOf(true, 1, 0, 500));
+        Assert.Equal(TournamentGate.BadStack, TournamentDoorCard.GateOf(false, 2, 999, 500));
+        Assert.Equal(TournamentGate.BadStack, TournamentDoorCard.GateOf(false, 2, 2_000, 5_000));
+        Assert.Equal(TournamentGate.BadStack, TournamentDoorCard.GateOf(false, 2, 1_000_000_001, 500));
+        Assert.Equal(TournamentGate.Ready, TournamentDoorCard.GateOf(false, 2, 0, 500));
+        Assert.Equal(TournamentGate.Ready, TournamentDoorCard.GateOf(true, 2, 50_000, 500));
     }
 
     [Fact]

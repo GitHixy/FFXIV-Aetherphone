@@ -178,7 +178,7 @@ internal sealed partial class BlackjackTable
             onBoard,
             CasinoSeatMachine.Holds(seatFlow.Stage),
             banked && BlackjackHosting.CanRebuy(board, seatStack, seat?.Committed ?? 0),
-            banked && GilBroke(board, seatStack),
+            banked && BlackjackHosting.Broke(board, seatStack, seat?.Committed ?? 0),
             banked && board.Paused,
             BlackjackRecap.InsuranceOffered(board, mask),
             canBet,
@@ -196,9 +196,8 @@ internal sealed partial class BlackjackTable
                 DrawStand(stage, ui, state, draining, banked);
                 DrawRebuy(stage, ui, board);
                 return;
-            case BlackjackDeck.Ledger:
-                DrawStand(stage, ui, state, draining, banked);
-                DrawLedgerAction(stage, ui);
+            case BlackjackDeck.Broke:
+                DrawBroke(stage, ui, state, board, draining, row, scale);
                 return;
             case BlackjackDeck.Paused:
                 StageText.Status(ImGui.GetWindowDrawList(), BlackjackDeckLayout.UpperRow(row, scale).Center,
@@ -399,10 +398,18 @@ internal sealed partial class BlackjackTable
         }
     }
 
-    private static bool GilBroke(CasinoBlackjackRoomStateDto board, long seatStack)
+    private void DrawBroke(CasinoStage stage, AppSkin ui, CasinoStateDto state, CasinoBlackjackRoomStateDto board,
+        bool draining, Rect row, float scale)
     {
-        return CasinoCurrencies.Of(board) == CasinoCurrencies.Gil && seatStack <= 0
-               && board.Phase == BlackjackPhases.Betting;
+        DrawStand(stage, ui, state, draining, true);
+        if (CasinoCurrencies.Of(board) == CasinoCurrencies.Gil)
+        {
+            DrawLedgerAction(stage, ui);
+            return;
+        }
+
+        StageText.Status(ImGui.GetWindowDrawList(), BlackjackDeckLayout.UpperRow(row, scale).Center,
+            Loc.T(BlackjackHosting.BrokeStatus(board, rooms.AccountId)), row.Width, scale);
     }
 
     private void DrawRebuy(CasinoStage stage, AppSkin ui, CasinoBlackjackRoomStateDto board)

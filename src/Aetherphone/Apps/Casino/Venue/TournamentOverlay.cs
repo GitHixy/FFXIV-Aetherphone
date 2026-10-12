@@ -4,7 +4,6 @@ using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Notifications;
-using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
 
@@ -79,11 +78,9 @@ internal sealed class TournamentOverlay
 
         if (playback.NoticeShowing)
         {
-            var text = Typography.FitText(texts.Named(L.Venue.TournamentOut, playback.NoticeName),
-                safe.Width * BannerShare, TextStyles.Title2);
-            GameBanner.Draw(drawList, new Vector2(safe.Center.X, safe.Min.Y + safe.Height * 0.45f), text,
-                CasinoColors.LightB, PhoneTheme.Default, MathF.Max(0.001f, playback.NoticeProgress),
-                TextStyles.Title2);
+            GameBanner.DrawWrapped(drawList, new Vector2(safe.Center.X, safe.Min.Y + safe.Height * 0.45f),
+                texts.Named(L.Venue.TournamentOut, playback.NoticeName), safe.Width * BannerShare,
+                CasinoColors.LightB, MathF.Max(0.001f, playback.NoticeProgress), TextStyles.Title2);
         }
 
         cheer.Draw(drawList, safe, frame.DeltaSeconds);
@@ -98,7 +95,7 @@ internal sealed class TournamentOverlay
                 break;
             case TournamentEvent.Won:
                 expanded = true;
-                var winner = texts.Named(L.Venue.TournamentWinner, playback.NoticeName);
+                var winner = texts.Named(L.Venue.TournamentWinner, playback.WinnerName);
                 if (me.Length > 0 && string.Equals(playback.WinnerUserId, me, StringComparison.Ordinal))
                 {
                     cheer.Show(stage, winner, safe.Center, frame.Instant);
@@ -121,7 +118,7 @@ internal sealed class TournamentOverlay
         var left = tournament.Live
             ? texts.Count(L.Venue.HandsLeft, Math.Max(0, tournament.Hands - tournament.HandsPlayed))
             : Loc.T(L.Venue.TournamentOver);
-        var leader = Leader(tournament);
+        var leader = tournament.Live ? Leader(tournament) : null;
         var right = leader is null ? string.Empty : texts.NamedNumber(L.Venue.TournamentLeader, leader.DisplayName,
             leader.Chips);
         var rightWidth = Typography.Measure(right, TextStyles.SubheadlineEmphasized).X;
