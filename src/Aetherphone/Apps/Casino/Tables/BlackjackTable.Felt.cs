@@ -617,7 +617,9 @@ internal sealed partial class BlackjackTable
 
         if (hand.Outcome == BlackjackOutcomes.Blackjack)
         {
-            return Loc.T(L.Casino.BlackjackSeatNatural);
+            return hand.Delta > 0
+                ? text.Number(L.Blackjack.NaturalPays, hand.Delta)
+                : Loc.T(L.Casino.BlackjackSeatNatural);
         }
 
         if (hand.Outcome == BlackjackOutcomes.Push)

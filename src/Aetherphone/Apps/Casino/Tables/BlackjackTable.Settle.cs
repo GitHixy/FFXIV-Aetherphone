@@ -165,7 +165,7 @@ internal sealed partial class BlackjackTable
         }
 
         QueueSideAnnouncements(recap);
-        if (recap.Net <= 0)
+        if (recap.MainNet <= 0)
         {
             if (HeroBusted())
             {
@@ -176,7 +176,10 @@ internal sealed partial class BlackjackTable
         }
 
         var origin = new Vector2(layout.Felt.Center.X, layout.HeroFanY);
-        stage.Celebration.Celebrate(recap.Staked, returned, origin, frame.Instant);
+        var mainReturned = capped
+            ? Math.Min(recap.MainReturned, recap.MainStaked + chips.MaxWinPerBet)
+            : recap.MainReturned;
+        stage.Celebration.Celebrate(recap.MainStaked, mainReturned, origin, frame.Instant);
     }
 
     private void QueueSideAnnouncements(in BlackjackSeatRecap recap)
@@ -184,14 +187,16 @@ internal sealed partial class BlackjackTable
         if (recap.PairsPaid && recap.PairsKind < PairNames.Length)
         {
             Announce(Loc.T(L.Blackjack.SideWin, Loc.T(PairNames[recap.PairsKind]),
-                GameNumber.Label(BlackjackSideBets.PaysFor(BlackjackSideBet.PerfectPairs, recap.PairsKind))));
+                GameNumber.Label(BlackjackSideBets.PaysFor(BlackjackSideBet.PerfectPairs, recap.PairsKind)),
+                NumberText.Signed(recap.PairsNet)));
         }
 
         if (recap.ThreePaid && recap.ThreeKind < ThreeNames.Length)
         {
             Announce(Loc.T(L.Blackjack.SideWin, Loc.T(ThreeNames[recap.ThreeKind]),
                 GameNumber.Label(BlackjackSideBets.PaysFor(BlackjackSideBet.TwentyOnePlusThree,
-                    recap.ThreeKind))));
+                    recap.ThreeKind)),
+                NumberText.Signed(recap.ThreeNet)));
         }
 
         if (recap.InsurancePaid)

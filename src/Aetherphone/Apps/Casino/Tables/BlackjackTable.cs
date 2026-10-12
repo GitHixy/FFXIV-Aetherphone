@@ -695,7 +695,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
             {
                 motion.SettleStarted = true;
                 motion.SettleClock = 0f;
-                motion.SettleSign = recaps[seatIndex].Sign;
+                motion.SettleSign = recaps[seatIndex].MainSign;
                 continue;
             }
 

@@ -11641,7 +11641,7 @@ internal static class L
         public static readonly LocString SidePairs = new("casino.blackjack.sidePairs", "Pairs");
         public static readonly LocString SideThree = new("casino.blackjack.sideThree", "21+3");
         public static readonly LocString SideStake = new("casino.blackjack.sideStake", "Stake {0}");
-        public static readonly LocString SideWin = new("casino.blackjack.sideWin", "{0}, {1} to 1");
+        public static readonly LocString SideWin = new("casino.blackjack.sideWin", "{0}, {1} to 1: {2}");
         public static readonly LocString PairMixed = new("casino.blackjack.pairMixed", "Mixed pair");
         public static readonly LocString PairColoured = new("casino.blackjack.pairColoured", "Coloured pair");
         public static readonly LocString PairPerfect = new("casino.blackjack.pairPerfect", "Perfect pair");
@@ -11659,6 +11659,7 @@ internal static class L
         public static readonly LocString BetIn = new("casino.blackjack.betIn", "Your bet is in");
         public static readonly LocString SurrenderPill = new("casino.blackjack.surrenderPill", "Surrender");
         public static readonly LocString OutcomeSurrender = new("casino.blackjack.outcomeSurrender", "Surrendered");
+        public static readonly LocString NaturalPays = new("casino.blackjack.naturalPays", "Blackjack +{0}");
         public static readonly LocString SoftTotal = new("casino.blackjack.softTotal", "Soft {0}");
         public static readonly LocString DealerBusts = new("casino.blackjack.dealerBusts", "Dealer busts");
         public static readonly LocString TableHandsHeading = new("casino.blackjack.tableHandsHeading", "Table hands");

@@ -81,6 +81,7 @@ internal sealed partial class BlackjackTable
         var staking = CanStakeSides(board);
         var seat = projection.SeatAt(mySeat);
         var recap = recaps[mySeat];
+        var revealed = BadgeEntrance(mySeat) > 0f;
         for (var index = 0; index < SideBets.Length; index++)
         {
             var bet = SideBets[index];
@@ -89,34 +90,40 @@ internal sealed partial class BlackjackTable
                 ? seat?.SideBets?.PerfectPairs ?? 0
                 : seat?.SideBets?.TwentyOnePlusThree ?? 0;
             var amount = placed > 0 ? placed : staking ? pendingSides[index] : 0;
-            var paid = bet == BlackjackSideBet.PerfectPairs ? recap.PairsPaid : recap.ThreePaid;
-            if (DrawSideSpot(drawList, center, bet, amount, staking, sideTarget == index, paid, scale) && staking)
+            var result = revealed ? BlackjackRecap.SideResult(recap, bet, placed) : SideSpotResult.Open;
+            var label = result == SideSpotResult.Paid
+                ? text.Compact(L.Stage.Plus, BlackjackRecap.SideNet(recap, bet))
+                : amount > 0 ? NumberText.Compact(amount) : string.Empty;
+            if (DrawSideSpot(drawList, center, bet, label, result, staking, sideTarget == index, scale) && staking)
             {
                 TapSideSpot(index);
             }
         }
     }
 
-    private bool DrawSideSpot(ImDrawListPtr drawList, Vector2 center, BlackjackSideBet bet, long amount,
-        bool interactive, bool targeted, bool paid, float scale)
+    private bool DrawSideSpot(ImDrawListPtr drawList, Vector2 center, BlackjackSideBet bet, string label,
+        SideSpotResult result, bool interactive, bool targeted, float scale)
     {
         var radius = layout.BetSpotPixels;
         var corner = new Vector2(radius, radius);
         var hovered = interactive && UiInteract.Hover(center - corner, center + corner);
-        var lit = paid ? 1f : targeted ? 0.9f : hovered ? 0.7f : 0.4f;
-        var fill = amount > 0 ? CasinoColors.LightA with { W = 0.20f + 0.2f * lit } : CasinoColors.LightB with { W = 0.06f + 0.1f * lit };
+        var paid = result == SideSpotResult.Paid;
+        var lost = result == SideSpotResult.Lost;
+        var lit = paid ? 1f : lost ? 0f : targeted ? 0.9f : hovered ? 0.7f : 0.4f;
+        var fill = label.Length > 0 && !lost
+            ? CasinoColors.LightA with { W = 0.20f + 0.2f * lit }
+            : CasinoColors.LightB with { W = 0.06f + 0.1f * lit };
         drawList.AddCircleFilled(center, radius, ImGui.GetColorU32(fill), 32);
-        var ink = paid ? CasinoColors.Money : targeted ? CasinoColors.LightB : StageText.Strong;
+        var ink = paid ? CasinoColors.Money : targeted ? CasinoColors.LightB : lost ? StageText.Muted : StageText.Strong;
         drawList.AddCircle(center, radius, ImGui.GetColorU32(ink with { W = 0.5f + 0.5f * lit }), 32,
             MathF.Max(1.2f, (targeted ? 2.2f : 1.4f) * scale));
         var style = TextStyles.FootnoteEmphasized;
-        if (amount > 0)
+        if (label.Length > 0)
         {
-            var stake = NumberText.Compact(amount);
             var inner = radius * 1.8f;
-            var fit = StageText.FitScale(stake, inner, style, StageTextRole.Label);
-            Typography.DrawCentered(drawList, center, Typography.FitText(stake, inner, fit, style.Weight),
-                CasinoColors.Money, fit, style.Weight);
+            var fit = StageText.FitScale(label, inner, style, StageTextRole.Label);
+            Typography.DrawCentered(drawList, center, Typography.FitText(label, inner, fit, style.Weight),
+                lost ? StageText.Muted : CasinoColors.Money, fit, style.Weight);
         }
         else if (interactive)
         {
