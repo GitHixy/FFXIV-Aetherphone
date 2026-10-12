@@ -233,6 +233,8 @@ public sealed class CasinoFloorLayoutTests
         Assert.Equal(0f, StripShelves.RowWidth(0, 120f, 12f));
         Assert.Equal(120f, StripShelves.RowWidth(1, 120f, 12f));
         Assert.Equal(384f, StripShelves.RowWidth(3, 120f, 12f));
+        Assert.Equal(0f, StripShelves.RailContentWidth(0, 120f, 12f, 4f));
+        Assert.Equal(392f, StripShelves.RailContentWidth(3, 120f, 12f, 4f));
         var block = PosterTile.TextBlock(1f, HeadlineHeight, FootnoteHeight);
         Assert.True(StripShelves.ShelfHeight(PhoneWidth, 1f, TitleHeight, block)
                     > PosterTile.Height(PosterTile.Width(PhoneWidth, 12f, 1f), block) + TitleHeight);

@@ -143,17 +143,11 @@ internal sealed class TableBrowser
         var currency = CasinoCurrencies.Of(row);
         var hosted = CasinoTableFilters.IsPrivate(row);
         var mine = myUserId.Length > 0 && string.Equals(row.OwnerUserId, myUserId, StringComparison.Ordinal);
-        var hostNamed = hosted && row.OwnerName.Length > 0;
         var holdem = string.Equals(row.GameKind, HoldemRules.Kind, StringComparison.Ordinal);
         var book = CasinoBookRules.IsBook(row.GameKind);
+        var hostNamed = hosted && row.OwnerName.Length > 0;
         var blindsNamed = holdem && row.Name.Length == 0 && !hostNamed;
-        var name = row.Name.Length > 0
-            ? row.Name
-            : hostNamed
-                ? Loc.T(L.Casino.TableHostedBy, row.OwnerName)
-                : blindsNamed
-                    ? Loc.T(L.Holdem.TableName, NumberText.Compact(row.MinBet), NumberText.Compact(row.MaxBet))
-                    : Loc.T(L.Casino.TableUnnamed);
+        var name = NameOf(row);
         var room = VenueKinds.Of(row.GameKind);
         var hostLine = hosted && row.OwnerName.Length > 0 ? Loc.T(L.Tables.HostedBy, row.OwnerName) : string.Empty;
         var stakes = book ? BookLine(bookEntries, hostLine) : StakesOf(row, room, currency, holdem, blindsNamed);
@@ -177,6 +171,24 @@ internal sealed class TableBrowser
             mine, draining, currency, Loc.T(CurrencyNames[currency]), reputation, warns, row.Paused,
             GameIdOf(row.GameKind), hostLine, monogram, room == VenueRoomKind.None ? row.SeatedCount : row.Occupancy,
             row.MaxSeats, room, Book: book);
+    }
+
+    internal static string NameOf(CasinoTableRowDto row)
+    {
+        if (row.Name.Length > 0)
+        {
+            return row.Name;
+        }
+
+        if (CasinoTableFilters.IsPrivate(row) && row.OwnerName.Length > 0)
+        {
+            return Loc.T(CasinoBookRules.IsBook(row.GameKind) ? L.Book.HostedBy : L.Casino.TableHostedBy,
+                row.OwnerName);
+        }
+
+        return string.Equals(row.GameKind, HoldemRules.Kind, StringComparison.Ordinal)
+            ? Loc.T(L.Holdem.TableName, NumberText.Compact(row.MinBet), NumberText.Compact(row.MaxBet))
+            : Loc.T(L.Casino.TableUnnamed);
     }
 
     internal static string BookLine(int entries, string hostLine)
@@ -542,7 +554,7 @@ internal sealed class TableBrowser
             }
 
             var origin = ImGui.GetCursorScreenPos();
-            var height = TableRow.HeightOf(views[index]) * scale;
+            var height = TableRow.HeightOf(views[index], width) * scale;
             var rect = new Rect(origin, new Vector2(origin.X + width, origin.Y + height));
             using (ImRaii.PushId(index))
             {

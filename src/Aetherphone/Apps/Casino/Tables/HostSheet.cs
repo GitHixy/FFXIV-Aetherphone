@@ -247,17 +247,19 @@ internal sealed class HostSheet
         var tileWidth = HostFlowLayout.TileWidth(width, scale);
         var textWidth = HostFlowLayout.TileTextWidth(tileWidth, scale);
         var count = HostGames.Count(chips.HasFeature(CasinoFeatures.VenueBook));
+        var titleBlock = 0f;
         var lineBlock = 0f;
         for (var index = 0; index < count; index++)
         {
+            titleBlock = MathF.Max(titleBlock,
+                PitText.Height(Loc.T(HostGames.All[index].Title), TextStyles.Headline, textWidth));
             lineBlock = MathF.Max(lineBlock,
                 Typography.MeasureWrappedBlock(Loc.T(HostGames.All[index].Line), TextStyles.Footnote, textWidth).Y);
         }
 
-        var headline = Typography.LineHeight(TextStyles.Headline);
-        var tileHeight = HostFlowLayout.TileHeight(scale, headline, lineBlock);
+        var tileHeight = HostFlowLayout.TileHeight(scale, titleBlock, lineBlock);
         var pad = HostFlowLayout.RailPad * scale;
-        var contentWidth = HostFlowLayout.RailWidth(count, tileWidth, scale);
+        var contentWidth = StripShelves.RailContentWidth(count, tileWidth, HostFlowLayout.TileGap * scale, pad);
         var row = new Rect(new Vector2(origin.X - pad, origin.Y - pad),
             new Vector2(origin.X + width + pad, origin.Y + tileHeight + pad));
         rail.Begin(drawList, RailId, row, row, contentWidth);
@@ -265,7 +267,7 @@ internal sealed class HostSheet
         {
             revealGame = false;
             var selected = HostFlowLayout.Tile(0f, 0f, (int)draft.Game, tileWidth, tileHeight, scale);
-            rail.SettleTo(MathF.Max(0f, MathF.Min(selected.Max.X - width, contentWidth - width)));
+            rail.SettleTo(MathF.Max(0f, MathF.Min(selected.Max.X - width, contentWidth - row.Width)));
         }
 
         var interactive = rail.TapAllowed;
@@ -325,11 +327,8 @@ internal sealed class HostSheet
         Squircle.Fill(drawList, face.Min, face.Max, radius, ImGui.GetColorU32(Night with { W = ScrimAlpha }));
         drawList.PopClipRect();
         var pad = HostFlowLayout.CardPad * scale;
-        var top = art.Max.Y + pad;
-        Typography.Draw(drawList, new Vector2(face.Min.X + pad, top),
-            Typography.FitText(Loc.T(info.Title), textWidth, TextStyles.Headline), CasinoColors.InkTitle,
-            TextStyles.Headline);
-        top += Typography.LineHeight(TextStyles.Headline) + HostFlowLayout.LineGap * scale;
+        var top = PitText.Draw(drawList, Loc.T(info.Title), TextStyles.Headline, CasinoColors.InkTitle,
+            face.Min.X + pad, art.Max.Y + pad, textWidth, false) + HostFlowLayout.LineGap * scale;
         Typography.DrawWrappedLeft(new Vector2(face.Min.X + pad, top), Loc.T(info.Line),
             CasinoColors.InkBody, TextStyles.Footnote, textWidth);
         var rim = selected ? ui.Accent with { W = SelectedRimAlpha } : info.Tint with { W = RestRimAlpha };

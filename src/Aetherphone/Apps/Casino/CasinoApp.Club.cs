@@ -168,21 +168,16 @@ internal sealed partial class CasinoApp
         RefreshChallengeText(challenge);
         var pad = HeroOverlayPad * scale;
         var width = card.Width - pad * 2f;
+        var left = card.Min.X + pad;
         var top = card.Min.Y + pad * 1.4f;
-        Typography.Draw(drawList, new Vector2(card.Min.X + pad, top),
-            Typography.FitText(Loc.T(L.Club.ChallengeEyebrow), width, TextStyles.FootnoteEmphasized), CasinoColors.LightB,
-            TextStyles.FootnoteEmphasized);
-        top += Typography.LineHeight(TextStyles.FootnoteEmphasized);
-        Marquee.DrawLeftAuto(drawList, "casino.hero.challenge", challenge.Title, card.Min.X + pad, top, width,
-            TextStyles.Title2, CasinoColors.InkTitle);
-        top += Typography.LineHeight(TextStyles.Title2) + Metrics.Space.Sm * scale;
-        Typography.Draw(drawList, new Vector2(card.Min.X + pad, top),
-            Typography.FitText(challengeLeader, width, TextStyles.Subheadline), CasinoColors.InkTitle,
-            TextStyles.Subheadline);
-        top += Typography.LineHeight(TextStyles.Subheadline);
-        Typography.Draw(drawList, new Vector2(card.Min.X + pad, top),
-            Typography.FitText(challengeReward, width, TextStyles.SubheadlineEmphasized), CasinoColors.Money,
-            TextStyles.SubheadlineEmphasized);
+        top = Tables.PitText.Draw(drawList, Loc.T(L.Club.ChallengeEyebrow), TextStyles.FootnoteEmphasized,
+            CasinoColors.LightB, left, top, width, false);
+        top = Tables.PitText.Draw(drawList, challenge.Title, TextStyles.Title2, CasinoColors.InkTitle, left, top, width,
+            false) + Metrics.Space.Sm * scale;
+        top = Tables.PitText.Draw(drawList, challengeLeader, TextStyles.Subheadline, CasinoColors.InkTitle, left, top,
+            width, false);
+        Tables.PitText.Draw(drawList, challengeReward, TextStyles.SubheadlineEmphasized, CasinoColors.Money, left, top,
+            width, false);
         var remaining = Math.Max(0, challenge.EndsAtUnix - floor.ServerNowUnix);
         var ends = texts.Duration(L.Club.ChallengeEndsIn, (int)Math.Min(remaining, int.MaxValue));
         StageText.Plate(drawList, new Vector2(card.Center.X, card.Max.Y - pad - 14f * scale), ends, width,

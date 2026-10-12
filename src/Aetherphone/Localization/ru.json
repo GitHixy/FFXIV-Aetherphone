@@ -9849,6 +9849,7 @@
   "casino.book.guestNamed": "{0} (гость)",
   "casino.book.nightTotals": "Сегодня: получено {0} гил, выплачено {1} гил",
   "casino.book.game": "Книга",
+  "casino.book.hostedBy": "Книга игрока {0}",
   "casino.book.line": "Гил-журнал с синхронизацией обменов для любой игры, которую вы ведёте сами.",
   "casino.book.plays": "Гил, любая игра",
   "casino.book.rowLine": "Книга, записей за вечер: {0}",

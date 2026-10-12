@@ -73,9 +73,6 @@ internal static class HostFlowLayout
         return new Rect(new Vector2(x, top), new Vector2(x + tileWidth, top + tileHeight));
     }
 
-    public static float RailWidth(int count, float tileWidth, float scale) =>
-        count <= 0 ? 0f : count * tileWidth + (count - 1) * TileGap * scale;
-
     public static float ChoiceTextLeft(float left, float scale) => left + CardPad * scale + ChoiceIcon * scale + CardPad * scale;
 
     public static float ChoiceTextWidth(float width, float scale) =>
