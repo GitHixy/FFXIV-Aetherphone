@@ -9415,6 +9415,7 @@
   "casino.blackjack.verdictMismatch": "不一致",
   "casino.blackjack.verdictPending": "まだです",
   "casino.blackjack.rulesSideBets": "サイドベットは100チップから本ベット額まで。ペアは最大25対1、21+3は最大100対1です。",
+  "casino.blackjack.rulesPairsRank": "ペアには同じランクのカードが2枚必要です。ジャックとクイーンはペアになりません。",
   "casino.blackjack.rulesInsurance": "ディーラーがエースを見せたら、ベットの半額でインシュランスをかけられます。ディーラーがブラックジャックなら2対1です。",
   "casino.blackjack.rulesSurrender": "最初の2枚のときにサレンダーすると、ベットの半額が戻ります。",
   "casino.blackjack.factSideBets": "サイドベットの払い戻し",

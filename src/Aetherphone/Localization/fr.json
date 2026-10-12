@@ -9415,6 +9415,7 @@
   "casino.blackjack.verdictMismatch": "Non conforme",
   "casino.blackjack.verdictPending": "Pas encore",
   "casino.blackjack.rulesSideBets": "Les paris annexes vont de 100 jetons jusqu'à votre mise : Paires paie jusqu'à 25 contre 1 et 21+3 jusqu'à 100 contre 1.",
+  "casino.blackjack.rulesPairsRank": "Paires demande deux cartes de même rang : un valet et une dame ne forment pas une paire.",
   "casino.blackjack.rulesInsurance": "Quand le croupier montre un as, assurez-vous pour la moitié de votre mise. Cela paie 2 contre 1 s'il a un blackjack.",
   "casino.blackjack.rulesSurrender": "Sur vos deux premières cartes, vous pouvez abandonner et récupérer la moitié de votre mise.",
   "casino.blackjack.factSideBets": "Les paris annexes rendent",

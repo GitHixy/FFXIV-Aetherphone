@@ -9415,6 +9415,7 @@
   "casino.blackjack.verdictMismatch": "No coincide",
   "casino.blackjack.verdictPending": "Aún no",
   "casino.blackjack.rulesSideBets": "Las apuestas laterales van de 100 fichas hasta tu apuesta: Parejas paga hasta 25 a 1 y 21+3 hasta 100 a 1.",
+  "casino.blackjack.rulesPairsRank": "Parejas necesita dos cartas del mismo valor: una jota y una reina no son pareja.",
   "casino.blackjack.rulesInsurance": "Si el crupier muestra un as, asegura por la mitad de tu apuesta. Paga 2 a 1 si el crupier tiene blackjack.",
   "casino.blackjack.rulesSurrender": "Con tus dos primeras cartas puedes rendirte y recuperar la mitad de tu apuesta.",
   "casino.blackjack.factSideBets": "Las apuestas laterales devuelven",

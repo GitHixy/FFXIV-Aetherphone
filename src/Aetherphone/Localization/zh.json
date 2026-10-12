@@ -9415,6 +9415,7 @@
   "casino.blackjack.verdictMismatch": "不一致",
   "casino.blackjack.verdictPending": "尚未公开",
   "casino.blackjack.rulesSideBets": "边注从 100 筹码起，最高不超过你的主注：对子最高 1 赔 25，21+3 最高 1 赔 100。",
+  "casino.blackjack.rulesPairsRank": "对子需要两张点数相同的牌：J 和 Q 不算对子。",
   "casino.blackjack.rulesInsurance": "庄家明牌为 A 时，可用主注的一半买保险。若庄家是黑杰克，保险 1 赔 2。",
   "casino.blackjack.rulesSurrender": "在你的前两张牌时可以投降，取回一半下注。",
   "casino.blackjack.factSideBets": "边注平均返还",

@@ -9415,6 +9415,7 @@
   "casino.blackjack.verdictMismatch": "No match",
   "casino.blackjack.verdictPending": "Not yet",
   "casino.blackjack.rulesSideBets": "Side bets ride from 100 chips up to your bet: Pairs pays up to 25 to 1 and 21+3 up to 100 to 1.",
+  "casino.blackjack.rulesPairsRank": "Pairs needs two cards of the same rank: a jack and a queen are not a pair.",
   "casino.blackjack.rulesInsurance": "When the dealer shows an ace, insure for half your bet. It pays 2 to 1 if the dealer has blackjack.",
   "casino.blackjack.rulesSurrender": "On your first two cards you may surrender and take half your bet back.",
   "casino.blackjack.factSideBets": "Side bets pay back",

@@ -9415,6 +9415,7 @@
   "casino.blackjack.verdictMismatch": "Não confere",
   "casino.blackjack.verdictPending": "Ainda não",
   "casino.blackjack.rulesSideBets": "Apostas laterais vão de 100 fichas até a sua aposta: Pares paga até 25 para 1 e 21+3 até 100 para 1.",
+  "casino.blackjack.rulesPairsRank": "Pares exige duas cartas do mesmo valor: um valete e uma dama não formam par.",
   "casino.blackjack.rulesInsurance": "Quando o crupiê mostra um ás, faça seguro com metade da aposta. Paga 2 para 1 se o crupiê tiver blackjack.",
   "casino.blackjack.rulesSurrender": "Nas suas duas primeiras cartas você pode desistir e receber metade da aposta de volta.",
   "casino.blackjack.factSideBets": "Apostas laterais devolvem",

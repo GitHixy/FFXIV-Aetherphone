@@ -11671,6 +11671,7 @@ internal static class L
         public static readonly LocString VerdictMismatch = new("casino.blackjack.verdictMismatch", "No match");
         public static readonly LocString VerdictPending = new("casino.blackjack.verdictPending", "Not yet");
         public static readonly LocString RulesSideBets = new("casino.blackjack.rulesSideBets", "Side bets ride from 100 chips up to your bet: Pairs pays up to 25 to 1 and 21+3 up to 100 to 1.");
+        public static readonly LocString RulesPairsRank = new("casino.blackjack.rulesPairsRank", "Pairs needs two cards of the same rank: a jack and a queen are not a pair.");
         public static readonly LocString RulesInsurance = new("casino.blackjack.rulesInsurance", "When the dealer shows an ace, insure for half your bet. It pays 2 to 1 if the dealer has blackjack.");
         public static readonly LocString RulesSurrender = new("casino.blackjack.rulesSurrender", "On your first two cards you may surrender and take half your bet back.");
         public static readonly LocString FactSideBets = new("casino.blackjack.factSideBets", "Side bets pay back");

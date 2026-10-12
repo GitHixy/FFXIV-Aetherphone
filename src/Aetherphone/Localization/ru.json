@@ -9415,6 +9415,7 @@
   "casino.blackjack.verdictMismatch": "Не совпадает",
   "casino.blackjack.verdictPending": "Пока нет",
   "casino.blackjack.rulesSideBets": "Побочные ставки от 100 фишек до размера вашей ставки: Пары платят до 25 к 1, 21+3 до 100 к 1.",
+  "casino.blackjack.rulesPairsRank": "Для Пар нужны две карты одного ранга: валет и дама не пара.",
   "casino.blackjack.rulesInsurance": "Если у дилера открыт туз, застрахуйтесь на половину ставки. Страховка платит 2 к 1, если у дилера блэкджек.",
   "casino.blackjack.rulesSurrender": "На первых двух картах можно сдаться и вернуть половину ставки.",
   "casino.blackjack.factSideBets": "Побочные ставки возвращают",
