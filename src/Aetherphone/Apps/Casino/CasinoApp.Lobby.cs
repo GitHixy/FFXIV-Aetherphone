@@ -56,6 +56,7 @@ internal sealed partial class CasinoApp
 
             cursorY = DrawHeroBlock(drawList, new Vector2(origin.X, cursorY), width, delta, scale) + gap;
             cursorY = DrawResume(drawList, new Vector2(origin.X, cursorY), width, scale);
+            cursorY = DrawFloorExtras(drawList, new Vector2(origin.X, cursorY), width, scale);
             cursorY = DrawCarousel(drawList, new Vector2(origin.X, cursorY), width, delta, scale);
             var tickerBottom = winsTicker.Draw(drawList, floor.Ticker, floor.TickerVersion,
                 new Vector2(origin.X, cursorY), width, scale);
@@ -63,7 +64,6 @@ internal sealed partial class CasinoApp
             cursorY = venueSection.Draw(drawList, ui, new Vector2(origin.X, cursorY), width, scale);
             cursorY = DrawLiveNow(drawList, new Vector2(origin.X, cursorY), width, scale);
             cursorY = DrawRecentGames(drawList, new Vector2(origin.X, cursorY), width, delta, scale);
-            cursorY = DrawFloorExtras(drawList, new Vector2(origin.X, cursorY), width, scale);
             cursorY += FloorSectionGap * scale * 0.5f;
             var shelvesBottom = shelves.Draw(drawList, ui, this, new Vector2(origin.X, cursorY), width, stage.Phase,
                 delta, !router.IsTransitioning && !LaunchActive, scale, out var tapped, out var source);
