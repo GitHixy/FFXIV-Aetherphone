@@ -1363,7 +1363,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
 
     private void OpenBook(Core.Aethernet.Contracts.CasinoTableRowDto card)
     {
-        if (casinoTables.Owns(card))
+        if (casinoTables.Owns(card) && !router.Current.Is(CasinoScreen.TableDoor, card.TableId))
         {
             OpenDoor(card.TableId, card.InviteToken);
             return;

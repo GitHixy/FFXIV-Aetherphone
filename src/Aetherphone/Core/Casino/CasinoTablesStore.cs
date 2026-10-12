@@ -71,6 +71,7 @@ internal sealed class CasinoTablesStore : IDisposable
     private CasinoStakeOutcome? noticeOutcome;
     private CasinoStakeOutcome? guestOutcome;
     private string closedTableId = string.Empty;
+    private string retiredTableId = string.Empty;
     private string quickSeatRefusal = string.Empty;
     private string seatIntentId = string.Empty;
     private string createIntentId = string.Empty;
@@ -176,6 +177,13 @@ internal sealed class CasinoTablesStore : IDisposable
         ForgetCard(roomId);
         Interlocked.Exchange(ref vanishedTableId, roomId);
         RefreshNow();
+    }
+
+    private void Retire(string roomId)
+    {
+        Interlocked.Exchange(ref retiredTableId, roomId);
+        listed = CasinoTableFilters.Without(listed, roomId);
+        tables = CasinoTableFilters.Without(tables, roomId);
     }
 
     private void ForgetCard(string roomId)
@@ -444,6 +452,7 @@ internal sealed class CasinoTablesStore : IDisposable
             if (answer.Granted)
             {
                 ForgetCard(roomId);
+                Retire(roomId);
                 Interlocked.Exchange(ref closedTableId, roomId);
                 RefreshNow();
                 return;
@@ -1235,6 +1244,7 @@ internal sealed class CasinoTablesStore : IDisposable
         Interlocked.Exchange(ref noticeOutcome, null);
         Interlocked.Exchange(ref guestOutcome, null);
         Interlocked.Exchange(ref closedTableId, string.Empty);
+        Interlocked.Exchange(ref retiredTableId, string.Empty);
         Interlocked.Exchange(ref vanishedTableId, string.Empty);
         Interlocked.Exchange(ref cardMissing, 0);
         Interlocked.Exchange(ref knockMissing, 0);
@@ -1288,7 +1298,8 @@ internal sealed class CasinoTablesStore : IDisposable
             }
 
             Interlocked.Exchange(ref tablesAttemptedAtTick, 0);
-            var rows = directory.Tables ?? Array.Empty<CasinoTableRowDto>();
+            var rows = CasinoTableFilters.Without(directory.Tables ?? Array.Empty<CasinoTableRowDto>(),
+                Volatile.Read(ref retiredTableId));
             listed = rows;
             Interlocked.Exchange(ref listedAtTick, Environment.TickCount64);
             tables = CasinoTableFilters.OfKind(rows, CasinoWire.BlackjackKind);

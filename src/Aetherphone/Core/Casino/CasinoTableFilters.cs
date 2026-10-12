@@ -126,6 +126,26 @@ internal static class CasinoTableFilters
         return kept;
     }
 
+    public static CasinoTableRowDto[] Without(CasinoTableRowDto[] rows, string tableId)
+    {
+        if (tableId.Length == 0 || !Contains(rows, tableId))
+        {
+            return rows;
+        }
+
+        var kept = new CasinoTableRowDto[rows.Length - 1];
+        var next = 0;
+        for (var index = 0; index < rows.Length; index++)
+        {
+            if (!string.Equals(rows[index].TableId, tableId, StringComparison.Ordinal))
+            {
+                kept[next++] = rows[index];
+            }
+        }
+
+        return kept;
+    }
+
     public static CasinoTableRowDto[] Floor(CasinoTableRowDto[] listed, CasinoTableRowDto[] holdem,
         CasinoTableRowDto? houseLead)
     {

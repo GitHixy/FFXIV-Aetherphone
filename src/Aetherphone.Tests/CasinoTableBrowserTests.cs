@@ -103,6 +103,19 @@ public sealed class CasinoTableBrowserTests
     }
 
     [Fact]
+    public void AClosedTableDropsOutOfTheCachedList()
+    {
+        var rows = new[] { Row() with { TableId = "private-a" }, Row() with { TableId = "private-b" } };
+
+        var kept = CasinoTableFilters.Without(rows, "private-a");
+
+        Assert.Single(kept);
+        Assert.Equal("private-b", kept[0].TableId);
+        Assert.Same(rows, CasinoTableFilters.Without(rows, "private-c"));
+        Assert.Same(rows, CasinoTableFilters.Without(rows, string.Empty));
+    }
+
+    [Fact]
     public void ACardCarriesItsCurrencyAndTheHostRecord()
     {
         var gil = Row(currency: CasinoCurrencies.Gil) with
