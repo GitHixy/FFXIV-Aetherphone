@@ -71,4 +71,32 @@ public sealed class ScratchStatusLayoutTests
         Assert.True(ticket.Max.X + kiosk <= safe.Max.X + 0.001f);
         Assert.True(ScratchCabinet.StatusTop(ticket, kiosk, gap) >= ticket.Max.Y + kiosk + gap - 0.001f);
     }
+
+    [Fact]
+    public void TheCheapestTicketIsAlwaysWithinReachLikeTheServerAllows()
+    {
+        var ceiling = ScratchCabinet.TierCeiling(0);
+
+        Assert.True(ScratchCabinet.TierReachable(0, ceiling));
+        Assert.False(ScratchCabinet.TierReachable(1, ceiling));
+    }
+
+    [Fact]
+    public void ATierAboveTheMaxBetIsOutOfReach()
+    {
+        var ceiling = ScratchCabinet.TierCeiling(10_000);
+
+        Assert.True(ScratchCabinet.TierReachable(2, ceiling));
+        Assert.False(ScratchCabinet.TierReachable(3, ceiling));
+        Assert.False(ScratchCabinet.TierReachable(4, ceiling));
+    }
+
+    [Fact]
+    public void ASelectedTierAboveTheMaxBetStepsDownToTheHighestReachableOne()
+    {
+        Assert.Equal(2, ScratchCabinet.ClampTier(4, ScratchCabinet.TierCeiling(10_000)));
+        Assert.Equal(0, ScratchCabinet.ClampTier(4, ScratchCabinet.TierCeiling(0)));
+        Assert.Equal(4, ScratchCabinet.ClampTier(4, ScratchCabinet.TierCeiling(100_000)));
+        Assert.Equal(1, ScratchCabinet.ClampTier(1, ScratchCabinet.TierCeiling(100_000)));
+    }
 }
