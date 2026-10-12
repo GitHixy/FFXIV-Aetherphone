@@ -270,14 +270,14 @@ internal sealed partial class MarketApp
         }
 
         var result = MarketText.Format(L.Market.Quantity, quantity);
-        if (detail.Length > 0)
-        {
-            result = string.Concat(result, " · ", detail);
-        }
-
         if (world.Length > 0)
         {
             result = string.Concat(result, " · ", world);
+        }
+        
+        if (detail.Length > 0)
+        {
+            result = string.Concat(result, " · ", detail);
         }
 
         SubCache[key] = result;
