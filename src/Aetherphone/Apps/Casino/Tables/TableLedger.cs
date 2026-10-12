@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
@@ -49,7 +50,9 @@ internal sealed class TableLedger
     private LanguageInfo? viewLanguage;
     private TradeMiss? missSource;
     private LanguageInfo? missLanguage;
+    private CasinoTableLedgerDto? missLedger;
     private string missText = string.Empty;
+    private string missAction = string.Empty;
     private string totalsText = string.Empty;
     private string viewMe = string.Empty;
     private bool viewGuests;
@@ -64,6 +67,7 @@ internal sealed class TableLedger
     private string guestBuffer = string.Empty;
     private int proposeKind;
     private int playerIndex;
+    private bool revealRecord;
 
     public TableLedger(CasinoTablesStore tables, CasinoStore chips, ConfirmService confirm, CasinoTradeSync trade)
     {
@@ -130,7 +134,7 @@ internal sealed class TableLedger
 
         ui.SectionHeading(Loc.T(L.Tables.GilLedgerHeading), Metrics.Space.Md);
         TradeSyncCard.Draw(ui, trade, scale, false, ledger.Owner);
-        DrawMiss(ui, scale);
+        DrawMiss(ui, ledger, scale);
         if (waitingNote.Length > 0)
         {
             Note(ui, waitingNote, Amber, scale);
@@ -315,7 +319,22 @@ internal sealed class TableLedger
         totalsText = totals.Settled > 0 ? TotalsText(totals) : string.Empty;
     }
 
-    private void DrawMiss(AppSkin ui, float scale)
+    internal static LocString MissLine(TradeMiss miss)
+    {
+        if (miss.Kind != TradeMissKind.NotAtTable)
+        {
+            return L.Venue.TradeMissUnchecked;
+        }
+
+        return miss.Incoming ? L.Venue.TradeMissReceived : L.Venue.TradeMissSent;
+    }
+
+    internal static bool OffersGuest(TradeMiss miss, bool owner, bool guestsOpen)
+    {
+        return owner && guestsOpen && miss.GuestEligible;
+    }
+
+    private void DrawMiss(AppSkin ui, CasinoTableLedgerDto ledger, float scale)
     {
         var miss = trade.LastMiss;
         if (miss is null || !trade.Enabled || !miss.ShownAt(roomId, Environment.TickCount64))
@@ -323,14 +342,49 @@ internal sealed class TableLedger
             return;
         }
 
-        if (!ReferenceEquals(miss, missSource) || !ReferenceEquals(missLanguage, Loc.Current))
+        if (!ReferenceEquals(miss, missSource) || !ReferenceEquals(missLanguage, Loc.Current)
+            || !ReferenceEquals(ledger, missLedger))
         {
             missSource = miss;
             missLanguage = Loc.Current;
-            missText = Loc.T(L.Venue.TradeUnmatched, NumberText.Group(miss.Amount));
+            missLedger = ledger;
+            missText = Loc.T(MissLine(miss), NumberText.Group(miss.Amount));
+            missAction = Loc.T(GuestLedger.RecordLabel(GuestLedger.KindOf(miss,
+                ledger.Entries ?? Array.Empty<CasinoLedgerEntryDto>())));
         }
 
         Note(ui, missText, Amber, scale);
+        if (!OffersGuest(miss, ledger.Owner, viewGuests))
+        {
+            return;
+        }
+
+        var width = ScrollLayout.StableContentWidth();
+        var origin = ImGui.GetCursorScreenPos();
+        var buttonHeight = Button.RegularHeight * scale;
+        var buttonWidth = MathF.Min(width, Button.WidthFor(missAction, ButtonSize.Regular));
+        var rect = new Rect(origin, new Vector2(origin.X + buttonWidth, origin.Y + buttonHeight));
+        if (Button.Draw(ImGui.GetWindowDrawList(), rect, missAction, ui.Ink, ButtonStyle.Tinted,
+                enabled: !tables.IntentInFlight, id: "ledger.missGuest"))
+        {
+            Prefill(miss);
+        }
+
+        ImGui.SetCursorScreenPos(origin);
+        ImGui.Dummy(new Vector2(width, buttonHeight + Metrics.Space.Sm * scale));
+    }
+
+    internal void Prefill(TradeMiss miss)
+    {
+        playerIndex = playerIds.Length;
+        proposeKind = miss.Incoming ? 0 : 1;
+        amountBuffer = miss.Amount.ToString(CultureInfo.InvariantCulture);
+        if (miss.PartnerName.Length > 0)
+        {
+            guestBuffer = miss.PartnerName;
+        }
+
+        revealRecord = true;
     }
 
     internal static bool CanCopy(CasinoTableLedgerDto ledger, bool book)
@@ -560,8 +614,23 @@ internal sealed class TableLedger
 
         ImGui.SetCursorScreenPos(origin);
         ImGui.Dummy(new Vector2(width, FieldHeight * scale + Metrics.Space.Sm * scale));
+        RevealRecord();
         var hint = guest ? L.Book.ReasonGuestEntry : host ? L.Tables.RecordHostHint : L.Tables.RecordPlayerHint;
         Note(ui, Loc.T(hint), ui.MutedInk, scale);
+    }
+
+    private void RevealRecord()
+    {
+        if (!revealRecord)
+        {
+            return;
+        }
+
+        revealRecord = false;
+        if (ImGui.GetCursorScreenPos().Y > ImGui.GetWindowPos().Y + ImGui.GetWindowHeight())
+        {
+            ImGui.SetScrollHereY(1f);
+        }
     }
 
     private void DrawGuestName(AppSkin ui, float width, float scale)
