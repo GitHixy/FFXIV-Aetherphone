@@ -257,7 +257,7 @@ internal sealed class HostSheet
         var headline = Typography.LineHeight(TextStyles.Headline);
         var tileHeight = HostFlowLayout.TileHeight(scale, headline, lineBlock);
         var pad = HostFlowLayout.RailPad * scale;
-        var contentWidth = HostFlowLayout.RailWidth(count, tileWidth, scale);
+        var contentWidth = StripShelves.RailContentWidth(count, tileWidth, HostFlowLayout.TileGap * scale, pad);
         var row = new Rect(new Vector2(origin.X - pad, origin.Y - pad),
             new Vector2(origin.X + width + pad, origin.Y + tileHeight + pad));
         rail.Begin(drawList, RailId, row, row, contentWidth);
@@ -265,7 +265,7 @@ internal sealed class HostSheet
         {
             revealGame = false;
             var selected = HostFlowLayout.Tile(0f, 0f, (int)draft.Game, tileWidth, tileHeight, scale);
-            rail.SettleTo(MathF.Max(0f, MathF.Min(selected.Max.X - width, contentWidth - width)));
+            rail.SettleTo(MathF.Max(0f, MathF.Min(selected.Max.X - width, contentWidth - row.Width)));
         }
 
         var interactive = rail.TapAllowed;

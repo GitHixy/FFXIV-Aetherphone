@@ -267,8 +267,8 @@ internal sealed partial class CasinoApp
         var cardWidth = LiveNowWidth * scale;
         var cardHeight = LiveNowHeight * scale;
         var gap = CardGap * scale;
-        var contentWidth = Strip.StripShelves.RowWidth(count, cardWidth, gap);
         var pad = Strip.StripShelves.RailPad * scale;
+        var contentWidth = Strip.StripShelves.RailContentWidth(count, cardWidth, gap, pad);
         var row = new Rect(new Vector2(origin.X - pad, top - pad), new Vector2(origin.X + width + pad, top + cardHeight + pad));
         liveNowRail.Begin(drawList, "##casino.livenow", row, row, contentWidth);
         var interactive = liveNowRail.TapAllowed;

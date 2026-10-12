@@ -67,6 +67,9 @@ internal sealed class StripShelves
     public static float RowWidth(int count, float tileWidth, float gap) =>
         count <= 0 ? 0f : count * tileWidth + (count - 1) * gap;
 
+    public static float RailContentWidth(int count, float tileWidth, float gap, float pad) =>
+        count <= 0 ? 0f : RowWidth(count, tileWidth, gap) + pad * 2f;
+
     public float Draw(ImDrawListPtr drawList, AppSkin ui, IStripFloor floor, Vector2 origin, float width, float phase,
         float deltaSeconds, bool live, float scale, out StripEntry tapped, out Rect source)
     {
@@ -115,9 +118,10 @@ internal sealed class StripShelves
         Typography.Draw(drawList, origin, Typography.FitText(title, width, TextStyles.Title3), CasinoColors.InkTitle,
             TextStyles.Title3);
         var top = origin.Y + Typography.LineHeight(TextStyles.Title3) + TitleGap * scale;
-        var contentWidth = RowWidth(entries.Length, tileWidth, gap);
-        var row = new Rect(new Vector2(origin.X - RailPad * scale, top - RailPad * scale),
-            new Vector2(origin.X + width + RailPad * scale, top + tileHeight + RailPad * scale));
+        var pad = RailPad * scale;
+        var contentWidth = RailContentWidth(entries.Length, tileWidth, gap, pad);
+        var row = new Rect(new Vector2(origin.X - pad, top - pad),
+            new Vector2(origin.X + width + pad, top + tileHeight + pad));
         rail.Begin(drawList, railId, row, row, contentWidth);
         var interactive = rail.TapAllowed;
         for (var index = 0; index < entries.Length; index++)

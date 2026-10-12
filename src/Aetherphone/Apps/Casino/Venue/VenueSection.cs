@@ -53,8 +53,8 @@ internal sealed class VenueSection
         var tileHeight = PosterTile.Height(tileWidth, PosterTile.TextBlock(scale));
         var games = VenuePosters.Games;
         var count = VenuePosters.Count(chips.HasFeature(CasinoFeatures.VenueBook));
-        var contentWidth = StripShelves.RowWidth(count, tileWidth, gap);
         var pad = StripShelves.RailPad * scale;
+        var contentWidth = StripShelves.RailContentWidth(count, tileWidth, gap, pad);
         var row = new Rect(new Vector2(origin.X - pad, origin.Y - pad),
             new Vector2(origin.X + width + pad, origin.Y + tileHeight + pad));
         rail.Begin(drawList, RailId, row, row, contentWidth);
