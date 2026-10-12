@@ -19,7 +19,9 @@ internal sealed unsafe class TradeWindowReader
     {
         if (!GameMemory.Attached)
         {
-            return new TradeWindowSample(false, string.Empty, string.Empty, 0, 0, 0, false);
+            var simulated = GameMemory.Simulated;
+            return new TradeWindowSample(false, string.Empty, string.Empty, 0, 0, simulated?.Gil ?? 0L,
+                simulated is not null);
         }
 
         var inventory = InventoryManager.Instance();
