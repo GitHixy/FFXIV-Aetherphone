@@ -2410,6 +2410,12 @@ internal static class L
                 "Fixed hunt markers on the map and minimap covering the whole map in zones with many spawn points, contributed by YozoraCho"),
         };
 
+        public static readonly LocString[] Release1300Market =
+        {
+            new("changelog.r1300.96",
+                "Fixed long item names in search results, the watchlist and price alerts staying cut short: hovering a row now scrolls the full name, contributed by Haydooners"),
+        };
+
         public static readonly LocString[] Release1200Chirper =
         {
             new("changelog.r1200.73",

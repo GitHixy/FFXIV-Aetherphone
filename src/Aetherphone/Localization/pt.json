@@ -7786,6 +7786,7 @@
   "changelog.r1300.52": "Corrigidas as conversas na mensagem mais recente, que voltavam para o fim ao serem arrastadas para cima, contribuição de jambalong",
   "changelog.r1300.53": "Corrigida a contagem regressiva da loteria e seu widget, que mostravam uma loteria já encerrada em vez do período indisponível atual, contribuição de YozoraCho",
   "changelog.r1300.54": "Corrigidos os marcadores de caça no mapa e no minimapa, que cobriam o mapa inteiro em zonas com muitos pontos de surgimento, contribuição de YozoraCho",
+  "changelog.r1300.96": "Corrigidos os nomes longos de itens nos resultados da busca, na lista de observação e nos alertas de preço, que ficavam cortados: passar o cursor sobre uma linha agora rola o nome completo, contribuição de Haydooners",
   "changelog.r1200.70": "Reformulamos Jogos em torno de quatro abas, Início, Juntos, Biblioteca e Perfil, com o jogo do dia ao vivo no topo de Início, acima de Continuar jogando, Recém-chegados e Destaques da semana",
   "changelog.r1200.71": "Adicionamos Biblioteca: todos os jogos em uma grade com busca, filtros por gênero e ordenação",
   "changelog.r1200.72": "Adicionamos um ícone pintado para cada jogo, e cada jogo abre com um zoom a partir do seu ícone",

@@ -7786,6 +7786,7 @@
   "changelog.r1300.52": "Fixed chats at the newest message snapping back to the bottom when you drag to scroll up, contributed by jambalong",
   "changelog.r1300.53": "Fixed the lottery countdown and its widget showing an ended lottery instead of the unavailable period running now, contributed by YozoraCho",
   "changelog.r1300.54": "Fixed hunt markers on the map and minimap covering the whole map in zones with many spawn points, contributed by YozoraCho",
+  "changelog.r1300.96": "Fixed long item names in search results, the watchlist and price alerts staying cut short: hovering a row now scrolls the full name, contributed by Haydooners",
   "changelog.r1200.70": "Overhauled the Games app around four tabs, Home, Together, Library and Profile, with today's game playing live at the top of Home above Continue Playing, Just Added and Top This Week",
   "changelog.r1200.71": "Added Library: every game in one grid with search, genre filters and sorting",
   "changelog.r1200.72": "Added a painted icon for every game, and each game zooms open from its icon",
