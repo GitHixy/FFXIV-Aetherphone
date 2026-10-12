@@ -11641,7 +11641,7 @@ internal static class L
         public static readonly LocString SidePairs = new("casino.blackjack.sidePairs", "Pairs");
         public static readonly LocString SideThree = new("casino.blackjack.sideThree", "21+3");
         public static readonly LocString SideStake = new("casino.blackjack.sideStake", "Stake {0}");
-        public static readonly LocString SideWin = new("casino.blackjack.sideWin", "{0}, {1} to 1");
+        public static readonly LocString SideWin = new("casino.blackjack.sideWin", "{0}, {1} to 1: {2}");
         public static readonly LocString PairMixed = new("casino.blackjack.pairMixed", "Mixed pair");
         public static readonly LocString PairColoured = new("casino.blackjack.pairColoured", "Coloured pair");
         public static readonly LocString PairPerfect = new("casino.blackjack.pairPerfect", "Perfect pair");
@@ -11659,6 +11659,14 @@ internal static class L
         public static readonly LocString BetIn = new("casino.blackjack.betIn", "Your bet is in");
         public static readonly LocString SurrenderPill = new("casino.blackjack.surrenderPill", "Surrender");
         public static readonly LocString OutcomeSurrender = new("casino.blackjack.outcomeSurrender", "Surrendered");
+        public static readonly LocString NaturalPays = new("casino.blackjack.naturalPays", "Blackjack +{0}");
+        public static readonly LocString HistoryTitle = new("casino.blackjack.historyTitle", "Recent hands");
+        public static readonly LocString HistoryEmpty = new("casino.blackjack.historyEmpty", "Your last 10 hands at this table show up here.");
+        public static readonly LocString HistoryDealer = new("casino.blackjack.historyDealer", "Dealer");
+        public static readonly LocString HistoryYou = new("casino.blackjack.historyYou", "You");
+        public static readonly LocString HistorySideWon = new("casino.blackjack.historySideWon", "{0}: {1}, {2}");
+        public static readonly LocString HistorySideLost = new("casino.blackjack.historySideLost", "{0}: lost {1}");
+        public static readonly LocString HistoryInsurance = new("casino.blackjack.historyInsurance", "Insurance: {0}");
         public static readonly LocString SoftTotal = new("casino.blackjack.softTotal", "Soft {0}");
         public static readonly LocString DealerBusts = new("casino.blackjack.dealerBusts", "Dealer busts");
         public static readonly LocString TableHandsHeading = new("casino.blackjack.tableHandsHeading", "Table hands");
@@ -11670,6 +11678,7 @@ internal static class L
         public static readonly LocString VerdictMismatch = new("casino.blackjack.verdictMismatch", "No match");
         public static readonly LocString VerdictPending = new("casino.blackjack.verdictPending", "Not yet");
         public static readonly LocString RulesSideBets = new("casino.blackjack.rulesSideBets", "Side bets ride from 100 chips up to your bet: Pairs pays up to 25 to 1 and 21+3 up to 100 to 1.");
+        public static readonly LocString RulesPairsRank = new("casino.blackjack.rulesPairsRank", "Pairs needs two cards of the same rank: a jack and a queen are not a pair.");
         public static readonly LocString RulesInsurance = new("casino.blackjack.rulesInsurance", "When the dealer shows an ace, insure for half your bet. It pays 2 to 1 if the dealer has blackjack.");
         public static readonly LocString RulesSurrender = new("casino.blackjack.rulesSurrender", "On your first two cards you may surrender and take half your bet back.");
         public static readonly LocString FactSideBets = new("casino.blackjack.factSideBets", "Side bets pay back");

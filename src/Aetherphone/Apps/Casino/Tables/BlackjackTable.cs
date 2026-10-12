@@ -43,6 +43,8 @@ internal sealed partial class BlackjackTable : ICabinetIdle
     private readonly Action openGilLedger;
     private readonly BlackjackHostedText hostedText = new();
     private readonly CasinoTextCache text = new();
+    private readonly BlackjackHandLog handLog = new();
+    private readonly BlackjackHistorySheet historySheet;
     private readonly BlackjackProjection projection = new();
     private readonly BlackjackDealPlayback playback = new();
     private readonly BlackjackDealer dealer = new();
@@ -81,6 +83,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         seatFlow = new BlackjackSeatFlow(tables);
         composer = new BetComposer("##blackjackBet");
         gilComposer = new ClassicBetComposer("##blackjackGilBet");
+        historySheet = new BlackjackHistorySheet(handLog, text);
     }
 
     public Backdrop IdleBackdrop => Backdrop.Strip;
@@ -126,6 +129,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
         entered = true;
         roomId = nextRoomId;
+        handLog.Follow(roomId);
         inlineReason = string.Empty;
         mySeat = -1;
         dealing = false;
@@ -177,6 +181,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         }
 
         entered = false;
+        historySheet.Close();
         mySeat = -1;
         dealing = false;
         projection.Reset();
@@ -189,6 +194,21 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         ResetSettlement();
         motionsPrimed = false;
         Array.Clear(motions);
+    }
+
+    public void OpenHistory()
+    {
+        historySheet.Open();
+    }
+
+    public void Gate()
+    {
+        historySheet.Gate();
+    }
+
+    public void DrawOverlay(Rect screen, AppSkin ui)
+    {
+        historySheet.Draw(screen, ui);
     }
 
     public void Draw(CasinoStage stage, in CasinoStageFrame frame, AppSkin ui)
@@ -695,7 +715,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
             {
                 motion.SettleStarted = true;
                 motion.SettleClock = 0f;
-                motion.SettleSign = recaps[seatIndex].Sign;
+                motion.SettleSign = recaps[seatIndex].MainSign;
                 continue;
             }
 

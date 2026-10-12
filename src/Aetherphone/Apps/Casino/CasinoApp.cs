@@ -379,6 +379,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         plinko.Gate();
         dealerHoldem.Gate();
         holdem.Gate();
+        blackjack.Gate();
         rulesSheet.Gate();
         fameConsent.Gate();
         venueRoom.Gate();
@@ -416,6 +417,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         plinko.DrawOverlay(screenArea, ui);
         dealerHoldem.DrawOverlay(screenArea, ui);
         holdem.DrawOverlay(screenArea, ui);
+        blackjack.DrawOverlay(screenArea, ui);
         if (IsStage(router.Current))
         {
             stage.DrawOverlays(screenArea, ui);
@@ -628,7 +630,8 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
                 DeckHeight: blackjack.DeckHeight,
                 Practice: blackjack.Currency == Core.Casino.CasinoCurrencies.Practice,
                 ReturnTenths: Core.Casino.BlackjackRules.ReturnTenths, Extra: L.Venue.TableSheet,
-                HouseBanked: blackjack.Currency == Core.Casino.CasinoCurrencies.Chips);
+                HouseBanked: blackjack.Currency == Core.Casino.CasinoCurrencies.Chips,
+                History: L.Blackjack.HistoryTitle);
         }
 
         if (route.Screen == CasinoScreen.VenueRoom)
@@ -738,6 +741,9 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
                 break;
             case CasinoInfoRequest.Extra when current.Screen is CasinoScreen.Table or CasinoScreen.VenueRoom:
                 OpenVenueSheet(current);
+                break;
+            case CasinoInfoRequest.History when current.Screen == CasinoScreen.Table && !IsHoldem(current):
+                blackjack.OpenHistory();
                 break;
             case CasinoInfoRequest.Fairness:
                 OpenFairness();

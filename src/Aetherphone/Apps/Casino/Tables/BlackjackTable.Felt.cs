@@ -463,9 +463,8 @@ internal sealed partial class BlackjackTable
             var outcomeText = OutcomeLabel(hand);
             if (hand.Outcome != BlackjackOutcomes.Pending && outcomeText.Length > 0)
             {
-                var won = hand.Delta > 0;
-                BlackjackTableArt.DrawOutcomeBadge(drawList, fanCenter, outcomeText,
-                    won ? CasinoColors.Money : ui.TitleInk, won ? CasinoColors.Money : ui.BodyInk,
+                var ink = hand.Delta > 0 ? CasinoColors.Money : StageText.Strong;
+                BlackjackTableArt.DrawOutcomeBadge(drawList, fanCenter, outcomeText, ink, ink,
                     BadgeEntrance(mySeat), slotWidth, scale);
             }
         }
@@ -617,7 +616,9 @@ internal sealed partial class BlackjackTable
 
         if (hand.Outcome == BlackjackOutcomes.Blackjack)
         {
-            return Loc.T(L.Casino.BlackjackSeatNatural);
+            return hand.Delta > 0
+                ? text.Number(L.Blackjack.NaturalPays, hand.Delta)
+                : Loc.T(L.Casino.BlackjackSeatNatural);
         }
 
         if (hand.Outcome == BlackjackOutcomes.Push)
