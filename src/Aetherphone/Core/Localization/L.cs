@@ -11660,6 +11660,13 @@ internal static class L
         public static readonly LocString SurrenderPill = new("casino.blackjack.surrenderPill", "Surrender");
         public static readonly LocString OutcomeSurrender = new("casino.blackjack.outcomeSurrender", "Surrendered");
         public static readonly LocString NaturalPays = new("casino.blackjack.naturalPays", "Blackjack +{0}");
+        public static readonly LocString HistoryTitle = new("casino.blackjack.historyTitle", "Recent hands");
+        public static readonly LocString HistoryEmpty = new("casino.blackjack.historyEmpty", "Your last 10 hands at this table show up here.");
+        public static readonly LocString HistoryDealer = new("casino.blackjack.historyDealer", "Dealer");
+        public static readonly LocString HistoryYou = new("casino.blackjack.historyYou", "You");
+        public static readonly LocString HistorySideWon = new("casino.blackjack.historySideWon", "{0}: {1}, {2}");
+        public static readonly LocString HistorySideLost = new("casino.blackjack.historySideLost", "{0}: lost {1}");
+        public static readonly LocString HistoryInsurance = new("casino.blackjack.historyInsurance", "Insurance: {0}");
         public static readonly LocString SoftTotal = new("casino.blackjack.softTotal", "Soft {0}");
         public static readonly LocString DealerBusts = new("casino.blackjack.dealerBusts", "Dealer busts");
         public static readonly LocString TableHandsHeading = new("casino.blackjack.tableHandsHeading", "Table hands");

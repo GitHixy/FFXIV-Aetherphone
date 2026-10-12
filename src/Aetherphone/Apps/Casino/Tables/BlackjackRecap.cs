@@ -1,5 +1,6 @@
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
+using Aetherphone.Core.Localization;
 
 namespace Aetherphone.Apps.Casino.Tables;
 
@@ -68,6 +69,26 @@ internal readonly struct BlackjackSeatRecap
 
 internal static class BlackjackRecap
 {
+    private static readonly LocString[] PairNames =
+    {
+        default, L.Blackjack.PairMixed, L.Blackjack.PairColoured, L.Blackjack.PairPerfect,
+    };
+
+    private static readonly LocString[] ThreeNames =
+    {
+        default, L.Blackjack.ThreeFlush, L.Blackjack.ThreeStraight, L.Blackjack.ThreeTrips,
+        L.Blackjack.ThreeStraightFlush, L.Blackjack.ThreeSuitedTrips,
+    };
+
+    public static bool HasKindName(BlackjackSideBet bet, int kind) =>
+        kind > 0 && kind < (bet == BlackjackSideBet.PerfectPairs ? PairNames.Length : ThreeNames.Length);
+
+    public static LocString KindName(BlackjackSideBet bet, int kind) =>
+        bet == BlackjackSideBet.PerfectPairs ? PairNames[kind] : ThreeNames[kind];
+
+    public static LocString BetName(BlackjackSideBet bet) =>
+        bet == BlackjackSideBet.PerfectPairs ? L.Blackjack.SidePairs : L.Blackjack.SideThree;
+
     public static BlackjackSeatRecap Of(CasinoBlackjackSeatDto? seat, CasinoBlackjackHandDto[] hands)
     {
         if (seat is null || hands.Length == 0)
