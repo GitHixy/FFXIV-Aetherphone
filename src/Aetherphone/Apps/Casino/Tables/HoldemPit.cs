@@ -290,7 +290,7 @@ internal sealed class HoldemPit
         for (var index = 0; index < hosted.Length; index++)
         {
             var origin = ImGui.GetCursorScreenPos();
-            var height = TableRow.HeightOf(hostedViews[index]) * scale;
+            var height = TableRow.HeightOf(hostedViews[index], width) * scale;
             var rect = new Rect(origin, new Vector2(origin.X + width, origin.Y + height));
             if (TableRow.Draw(drawList, rect, ui, hostedViews[index], scale))
             {

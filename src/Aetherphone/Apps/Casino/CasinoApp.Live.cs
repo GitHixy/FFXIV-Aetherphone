@@ -115,7 +115,7 @@ internal sealed partial class CasinoApp
             }
 
             var view = LiveView(index, liveShown[index]);
-            var height = TableRow.HeightOf(view) * scale;
+            var height = TableRow.HeightOf(view, width) * scale;
             var card = new Rect(new Vector2(origin.X, top), new Vector2(origin.X + width, top + height));
             using (ImRaii.PushId(index))
             {

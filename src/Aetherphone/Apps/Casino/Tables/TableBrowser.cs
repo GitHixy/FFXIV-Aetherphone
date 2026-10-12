@@ -542,7 +542,7 @@ internal sealed class TableBrowser
             }
 
             var origin = ImGui.GetCursorScreenPos();
-            var height = TableRow.HeightOf(views[index]) * scale;
+            var height = TableRow.HeightOf(views[index], width) * scale;
             var rect = new Rect(origin, new Vector2(origin.X + width, origin.Y + height));
             using (ImRaii.PushId(index))
             {

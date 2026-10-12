@@ -52,15 +52,61 @@ internal static class TableRow
 
     private static readonly Vector4 GilTint = new(1f, 0.788f, 0.290f, 1f);
 
-    public static float HeightOf(in TableRowView view)
+    private readonly record struct RowMeasure(
+        string Phase,
+        bool Live,
+        bool IconBadge,
+        FontAwesomeIcon Icon,
+        float PillWidth,
+        float NameWidth,
+        float LineWidth,
+        float NameHeight,
+        float StakesHeight,
+        float ReputationHeight);
+
+    public static float HeightOf(in TableRowView view, float width)
     {
         var scale = MathF.Max(UiScale.Current, 0.0001f);
-        var footnote = Typography.LineHeight(TextStyles.Footnote);
-        var reputation = view.Reputation.Length > 0 ? footnote + TableCardLayout.LineGap * scale : 0f;
-        var row = MathF.Max(footnote, ChipHeight(scale));
-        return TableCardLayout.Height(scale, Typography.LineHeight(TextStyles.Headline), footnote, row, reputation)
-               / scale;
+        var measure = Measure(view, new Rect(Vector2.Zero, new Vector2(width, 0f)), scale);
+        return TableCardLayout.Height(scale, measure.NameHeight, measure.StakesHeight, SeatRowHeight(scale),
+            measure.ReputationHeight) / scale;
     }
+
+    private static RowMeasure Measure(in TableRowView view, in Rect row, float scale)
+    {
+        var phase = PhaseOf(view);
+        var live = Live(view) && phase.Length > 0;
+        var column = TableCardLayout.TextColumn(row, scale);
+        var cap = PhaseCap(column);
+        var pillWidth = phase.Length > 0 ? PillWidth(phase, live, scale) : 0f;
+        var iconBadge = TryBadgeIcon(view, out var icon) && pillWidth > cap;
+        if (iconBadge)
+        {
+            pillWidth = ChipHeight(scale);
+        }
+        else if (pillWidth > cap)
+        {
+            pillWidth = cap;
+        }
+
+        var nameWidth = MathF.Max(1f, column - pillWidth - TableCardLayout.PhaseGap * scale);
+        var lineWidth = MathF.Max(1f, column);
+        var reputation = view.Reputation.Length > 0
+            ? Tables.PitText.Height(view.Reputation, TextStyles.Footnote, lineWidth) + TableCardLayout.LineGap * scale
+            : 0f;
+        return new RowMeasure(phase, live, iconBadge, icon, pillWidth, nameWidth, lineWidth,
+            MathF.Max(Typography.LineHeight(TextStyles.Headline),
+                Tables.PitText.Height(view.Name, TextStyles.Headline, nameWidth)),
+            MathF.Max(Typography.LineHeight(TextStyles.Footnote),
+                Tables.PitText.Height(StakesLine(view), TextStyles.Footnote, lineWidth)),
+            reputation);
+    }
+
+    private static string StakesLine(in TableRowView view) =>
+        view.HostLine.Length > 0 && view.Stakes.Length == 0 ? view.HostLine : view.Stakes;
+
+    private static float SeatRowHeight(float scale) =>
+        MathF.Max(Typography.LineHeight(TextStyles.Footnote), ChipHeight(scale));
 
     public static Vector4 CurrencyTint(int currency, Vector4 accent) => currency switch
     {
@@ -178,50 +224,29 @@ internal static class TableRow
                 ImGui.GetColorU32(Palette.WithAlpha(ui.Accent, RimAlpha)), 1.2f * scale);
         }
 
-        var phase = PhaseOf(view);
-        var live = Live(view) && phase.Length > 0;
-        var headline = Typography.LineHeight(TextStyles.Headline);
-        var footnote = Typography.LineHeight(TextStyles.Footnote);
-        var rowHeight = MathF.Max(footnote, ChipHeight(scale));
-        var cap = PhaseCap(TableCardLayout.TextColumn(row, scale));
-        var pillWidth = phase.Length > 0 ? PillWidth(phase, live, scale) : 0f;
-        var iconBadge = TryBadgeIcon(view, out var icon) && pillWidth > cap;
-        if (iconBadge)
+        var measure = Measure(view, row, scale);
+        var rowHeight = SeatRowHeight(scale);
+        var layout = TableCardLayout.Compute(row, scale, measure.NameHeight, measure.StakesHeight, rowHeight,
+            measure.PillWidth, ChipHeight(scale));
+        DrawArt(drawList, ui, view, layout, scale);
+        var pillInk = measure.Live ? ui.Accent : ui.BodyInk;
+        if (measure.IconBadge)
         {
-            pillWidth = ChipHeight(scale);
+            DrawIconPill(drawList, layout.Phase, measure.Icon, pillInk);
         }
-        else if (pillWidth > cap)
+        else if (measure.Phase.Length > 0)
         {
-            pillWidth = cap;
+            DrawPill(drawList, layout.Phase, measure.Phase, pillInk, measure.Live, scale);
         }
 
-        var layout = TableCardLayout.Compute(row, scale, headline, footnote, rowHeight, pillWidth, ChipHeight(scale));
-        DrawArt(drawList, ui, view, layout, scale);
-        var pillInk = live ? ui.Accent : ui.BodyInk;
-        if (iconBadge)
-        {
-            DrawIconPill(drawList, layout.Phase, icon, pillInk);
-        }
-        else if (phase.Length > 0)
-        {
-            DrawPill(drawList, layout.Phase, phase, pillInk, live, scale);
-        }
         CasinoArt.Chevron(drawList, layout.Chevron, ui.MutedInk);
-        var nameWidth = MathF.Max(1f, layout.NameRight - layout.TextLeft);
-        Typography.Draw(drawList, new Vector2(layout.TextLeft, layout.NameTop),
-            Typography.FitText(view.Name, nameWidth, TextStyles.Headline), view.Draining ? ui.MutedInk : ui.TitleInk,
-            TextStyles.Headline);
-        var lineWidth = MathF.Max(1f, layout.LineRight - layout.TextLeft);
-        var line = view.HostLine.Length > 0 && view.Stakes.Length == 0 ? view.HostLine : view.Stakes;
-        Typography.Draw(drawList, new Vector2(layout.TextLeft, layout.LineTop),
-            Typography.FitText(line, lineWidth, TextStyles.Footnote), ui.BodyInk, TextStyles.Footnote);
+        Tables.PitText.Draw(drawList, view.Name, TextStyles.Headline, view.Draining ? ui.MutedInk : ui.TitleInk,
+            layout.TextLeft, layout.NameTop, measure.NameWidth, false);
+        Tables.PitText.Draw(drawList, StakesLine(view), TextStyles.Footnote, ui.BodyInk, layout.TextLeft,
+            layout.LineTop, measure.LineWidth, false);
         DrawSeatRow(drawList, ui, view, layout, rowHeight, scale);
-        if (view.Reputation.Length > 0)
-        {
-            Typography.Draw(drawList, new Vector2(layout.TextLeft, layout.ReputationTop + TableCardLayout.LineGap * scale),
-                Typography.FitText(view.Reputation, lineWidth, TextStyles.Footnote),
-                view.ReputationWarns ? ui.Accent : GilTint, TextStyles.Footnote);
-        }
+        Tables.PitText.Draw(drawList, view.Reputation, TextStyles.Footnote, view.ReputationWarns ? ui.Accent : GilTint,
+            layout.TextLeft, layout.ReputationTop + TableCardLayout.LineGap * scale, measure.LineWidth, false);
 
         return UiInteract.Click(row.Min, row.Max, hovered);
     }
