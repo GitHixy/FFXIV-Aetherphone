@@ -47,7 +47,9 @@ internal sealed partial class MinimizedPhone
         MinimizedPhoneRenderer.DrawIsland(drawList, line.Center, liveCall, musicPlaying, clock,
             heroAlpha * Math.Clamp(island.Value, 0f, 1f), scale);
         var showDate = layout.IsEnabled(MinimizedPart.Date);
-        MinimizedPhoneRenderer.DrawHero(drawList, screen, screen.Min.Y + HeroTop * scale,
+        var hero = new Rect(new Vector2(screen.Min.X + HeroInset * scale, screen.Min.Y + HeroTop * scale),
+            new Vector2(screen.Max.X - HeroInset * scale, screen.Max.Y - (SlotBottom + SlotHeight) * scale));
+        MinimizedPhoneRenderer.DrawHero(drawList, hero,
             showDate ? dateLabel : string.Empty, showDate ? dateSize : Vector2.Zero,
             layout.IsEnabled(MinimizedPart.Clock) ? timeLabel : string.Empty, clockScale,
             layout.IsEnabled(MinimizedPart.Fps) ? fpsLabel : string.Empty, frameInk, heroAlpha);
