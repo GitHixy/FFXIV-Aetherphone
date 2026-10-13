@@ -2427,6 +2427,8 @@ internal static class L
                 "Added a Show in cutscenes setting that keeps the phone on screen while a cutscene plays, for a second monitor"),
             new("changelog.r1300.81",
                 "Added an FPS counter to the mini phone, off by default under Settings > Minimized phone, contributed by t3sco"),
+            new("changelog.r1300.118",
+                "Added reordering inside folders: in edit mode, drag an app to a new spot, contributed by hellovvn"),
             new("changelog.r1300.51",
                 "Fixed the scrollbar moving the wrong way and too slowly when dragged while the phone position is locked, contributed by jambalong"),
             new("changelog.r1300.57",
@@ -2463,14 +2465,42 @@ internal static class L
                 "Fixed chats at the newest message snapping back to the bottom when you drag to scroll up, contributed by jambalong"),
         };
 
+        public static readonly LocString[] Release1300Coin =
+        {
+            new("changelog.r1300.107",
+                "Added a hint under every daily quest saying exactly what counts"),
+            new("changelog.r1300.108",
+                "Changed daily quests to pay on their own once finished, with no Claim button to find"),
+            new("changelog.r1300.109",
+                "Changed game sessions to pay for the same game again, up to five sessions a day"),
+            new("changelog.r1300.110",
+                "Changed radio listening to count toward the quest while you listen instead of after you stop"),
+            new("changelog.r1300.111",
+                "Changed the explore quest to swap to one you can still do when every poll already has your vote or no public meetup is open"),
+            new("changelog.r1300.112",
+                "Fixed a finished quest paying nothing without a word: the reason now shows on the card"),
+            new("changelog.r1300.113",
+                "Fixed radio listening not counting when the station had only just gone live"),
+        };
+
+        public static readonly LocString[] Release1300Games =
+        {
+            new("changelog.r1300.114",
+                "Fixed the featured game switching at the wrong hour and lagging behind the day"),
+        };
+
         public static readonly LocString[] Release1300Housing =
         {
             new("changelog.r1300.105",
                 "Redesigned the Housing overview to fit on one screen: a ring counts down the lottery phase, a card counts open plots by size, and each district gets a tile with its loading screen art, contributed by YozoraCho"),
             new("changelog.r1300.106",
                 "Added a night sky with the district's art behind every Housing screen, contributed by YozoraCho"),
-            new("changelog.r1300.53",
-                "Fixed the lottery countdown and its widget showing an ended lottery instead of the unavailable period running now, contributed by YozoraCho"),
+            new("changelog.r1300.115",
+                "Fixed the lottery countdown and its widget showing a past phase as expired instead of the one running now, contributed by YozoraCho"),
+            new("changelog.r1300.116",
+                "Fixed empty map screens being hard to read: the map now dims behind them, contributed by YozoraCho"),
+            new("changelog.r1300.117",
+                "Fixed buttons on empty screens cutting off longer labels, contributed by YozoraCho"),
         };
 
         public static readonly LocString[] Release1300Hunts =
@@ -2747,46 +2777,6 @@ internal static class L
         {
             new("changelog.r1200.98",
                 "Fixed crackling and gaps in sounds and music while the game is busy"),
-        };
-
-        public static readonly LocString[] Release1201Coin =
-        {
-            new("changelog.r1201.0",
-                "Added a hint under every daily quest saying exactly what counts"),
-            new("changelog.r1201.1",
-                "Changed daily quests to pay on their own once finished, with no Claim button to find"),
-            new("changelog.r1201.2",
-                "Changed game sessions to pay for the same game again, up to five sessions a day"),
-            new("changelog.r1201.3",
-                "Changed radio listening to count toward the quest while you listen instead of after you stop"),
-            new("changelog.r1201.4",
-                "Changed the explore quest to swap to one you can still do when every poll already has your vote or no public meetup is open"),
-            new("changelog.r1201.5",
-                "Fixed a finished quest paying nothing without a word: the reason now shows on the card"),
-            new("changelog.r1201.6",
-                "Fixed radio listening not counting when the station had only just gone live"),
-        };
-
-        public static readonly LocString[] Release1201Games =
-        {
-            new("changelog.r1201.7",
-                "Fixed the featured game switching at the wrong hour and lagging behind the day"),
-        };
-
-        public static readonly LocString[] Release1201Housing =
-        {
-            new("changelog.r1201.8",
-                "Fixed the lottery countdown and its widget showing a past phase as expired instead of the one running now, contributed by YozoraCho"),
-            new("changelog.r1201.9",
-                "Fixed empty map screens being hard to read: the map now dims behind them, contributed by YozoraCho"),
-            new("changelog.r1201.10",
-                "Fixed buttons on empty screens cutting off longer labels, contributed by YozoraCho"),
-        };
-
-        public static readonly LocString[] Release1201Phone =
-        {
-            new("changelog.r1201.11",
-                "Added reordering inside folders: in edit mode, drag an app to a new spot, contributed by hellovvn"),
         };
 
         public static readonly LocString[] Release1104Music =
