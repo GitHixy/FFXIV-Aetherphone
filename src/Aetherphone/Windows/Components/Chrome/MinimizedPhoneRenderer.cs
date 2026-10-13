@@ -70,6 +70,7 @@ internal static partial class MinimizedPhoneRenderer
     private const float IslandEqualizerHeight = 6f;
     private const float IslandDot = 2.6f;
     private const float DateScale = 0.6f;
+    private const float TextFitStep = 0.05f;
     private const float ArtRadiusFactor = 0.24f;
     private const float ArtTransportGap = 4f;
     private const float TransportSmall = 8f;
@@ -153,10 +154,11 @@ internal static partial class MinimizedPhoneRenderer
             playing);
     }
 
-    public static void DrawHero(ImDrawListPtr drawList, Rect screen, float top, string date, Vector2 dateSize,
+    public static void DrawHero(ImDrawListPtr drawList, Rect hero, string date, Vector2 dateSize,
         string time, float clockScale, string fps, in FaceInk ink, float alpha)
     {
-        var centerX = screen.Center.X;
+        var centerX = hero.Center.X;
+        var top = hero.Min.Y;
         if (date.Length > 0)
         {
             Typography.Draw(drawList, new Vector2(centerX - dateSize.X * 0.5f, top), date,
@@ -177,9 +179,28 @@ internal static partial class MinimizedPhoneRenderer
             return;
         }
 
-        var fpsSize = Typography.Measure(fps, DateStyle());
-        Typography.Draw(drawList, new Vector2(centerX - fpsSize.X * 0.5f, y), fps,
-            Palette.WithAlpha(ink.Muted, ink.Muted.W * alpha), DateStyle());
+        var fpsStyle = FitFpsStyle(fps, new Vector2(hero.Width, hero.Max.Y - y));
+        var fitted = Typography.FitText(fps, hero.Width, fpsStyle);
+        var fpsSize = Typography.Measure(fitted, fpsStyle);
+        Typography.Draw(drawList, new Vector2(centerX - fpsSize.X * 0.5f, y), fitted,
+            Palette.WithAlpha(ink.Strong, alpha), fpsStyle);
+    }
+
+    private static TextStyle FitFpsStyle(string label, Vector2 available)
+    {
+        var minimum = DateStyle();
+        var preferred = TextStyles.FootnoteEmphasized;
+        for (var scale = Text(preferred.Scale); scale > minimum.Scale; scale -= TextFitStep)
+        {
+            var style = new TextStyle(scale, preferred.Weight);
+            var size = Typography.Measure(label, style);
+            if (size.X <= available.X && size.Y <= available.Y)
+            {
+                return style;
+            }
+        }
+
+        return minimum;
     }
 
     public static Rect MusicArtRect(Rect inner, float scale)

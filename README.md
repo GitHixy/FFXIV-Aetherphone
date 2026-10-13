@@ -182,7 +182,7 @@ Gamba's Book hosting flow uses Open the ledger for its final action. Opening a B
 
 ## Built like the phone in your pocket
 
-**Lives in your HUD.** Drag it anywhere, resize it, or shrink it to a mini phone with the clock, widgets, music, calls and an optional FPS counter. Keep it on screen through Group Pose and cutscenes if it lives on a second monitor.
+**Lives in your HUD.** Drag it anywhere, resize it, or shrink it to a mini phone with the clock, widgets, music, calls and an optional FPS counter. The counter uses larger, brighter text, with a compact fallback for large text settings. Keep it on screen through Group Pose and cutscenes if it lives on a second monitor.
 
 **Widgets and Smart Stacks.** Widgets for most apps, resized from the corner and stacked by dropping one onto another.
 
