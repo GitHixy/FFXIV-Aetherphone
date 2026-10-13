@@ -39,6 +39,7 @@ internal sealed class BlackjackTableLayout
     public const float SideStakeOverlap = 1f;
     public const float SideStakeSlide = 4f;
     public const float TimeBankPipLift = 4f;
+    public const float RailTitleDrop = 6f;
 
     public const float RaiseReserve = 8f;
     public const float CardsTotalGap = 4f;
@@ -212,7 +213,10 @@ internal sealed class BlackjackTableLayout
     }
 
     public static Vector2 TimeBankPips(Vector2 puck, float puckRadius, float scale) =>
-        new(puck.X, puck.Y + puckRadius - TimeBankPipLift * scale);
+        new(puck.X, puck.Y - puckRadius + TimeBankPipLift * scale);
+
+    public static Vector2 RailTitleCenter(Vector2 puck, float puckRadius, float scale) =>
+        new(puck.X, puck.Y + puckRadius - RailTitleDrop * scale);
 
     public Rect DealerZone()
     {

@@ -20,7 +20,6 @@ internal sealed partial class BlackjackTable
     private const float SettleFlightSeconds = 0.55f;
     private const float BadgePopSeconds = 0.25f;
     private const float HeroRaiseSmoothing = 0.12f;
-    private const float TitleDrop = 6f;
     private const float StateRingRadius = 11f;
     private const float HeroColumnSink = 3f;
     private const float StateLineShare = 0.84f;
@@ -355,7 +354,7 @@ internal sealed partial class BlackjackTable
             return;
         }
 
-        StatusTitle.Draw(drawList, new Vector2(puck.X, puck.Y + puckRadius - TitleDrop * scale), title, maxWidth,
+        StatusTitle.Draw(drawList, BlackjackTableLayout.RailTitleCenter(puck, puckRadius, scale), title, maxWidth,
             scale);
     }
 
