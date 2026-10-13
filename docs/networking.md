@@ -246,6 +246,8 @@ Uploads are a three-step dance, visible end to end in `AvatarUpload.RunAsync` (s
 
 Server limits (backend `MediaContentTypes` and `MediaEndpoints`): PNG, JPEG, WebP, and GIF images up to 8 MB, with an unencrypted GIF capped at 4 MB, and WAV audio up to 6 MB. An unknown upload scope fails with 400. The client uploads GIFs as-is and voice notes as `audio/wav`.
 
+Static Chirper, Aethergram and Velvet post images, stories, and social comment attachments use `ImageProcessor.BakeUpload` or `BakeCroppedUpload`. After the same crop, edit, and resize processing, images with transparent pixels become RGBA PNGs with their source metadata removed, so their clear regions blend with the app surface like the preview. Opaque images keep the scalar JPEG path. The returned `BakedImage.ContentType` is used for both the upload ticket and the PUT request. PNGs above the 8 MiB server limit are resized until they fit, and the result reports the final pixel dimensions. Explicit JPEG callers, including avatars and local thumbnails, still flatten transparency onto black.
+
 For end-to-end encrypted attachments, `MessageCipher.PrepareOutboundMedia` seals the bytes before step 2, so the storage layer only ever holds ciphertext.
 
 Every JPEG the client uploads comes out of `ScalarJpegEncoder` (src/Aetherphone/Core/Media/ScalarJpegEncoder.cs), a baseline encoder written as plain loops; ImageSharp only decodes, crops, and resizes. It exists because ImageSharp's SIMD encoder produced red, blue, and white dashes (a skipped -128 level shift) on machines where an injected overlay drops the upper AVX lanes across a thread suspension, and the server stores whatever bytes it receives. Keep the encoder free of `Vector<T>` and intrinsics, or that guarantee goes away.
