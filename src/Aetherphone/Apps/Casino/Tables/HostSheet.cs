@@ -898,7 +898,8 @@ internal sealed class HostSheet
         }
 
         var button = HostFlowLayout.FooterButton(footer, scale);
-        if (Button.Draw(drawList, button, Loc.T(L.Tables.OpenTable), ui.Ink, ButtonStyle.Prominent,
+        var label = draft.Game == HostGame.Book ? L.Book.OpenLedger : L.Tables.OpenTable;
+        if (Button.Draw(drawList, button, Loc.T(label), ui.Ink, ButtonStyle.Prominent,
                 enabled: !tables.IntentInFlight, id: "casino.host.open"))
         {
             Submit();

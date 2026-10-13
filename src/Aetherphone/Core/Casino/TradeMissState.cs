@@ -37,27 +37,48 @@ internal sealed class TradeMissState
         return Interlocked.Exchange(ref pendingGuest, null);
     }
 
+    public void DeferGuest(long nowTick)
+    {
+        var offer = TakeGuest();
+        if (offer is not null)
+        {
+            Handled(offer, null, nowTick);
+        }
+    }
+
     public bool Handled(GuestOffer offer, TradeMiss? answered, long nowTick)
     {
         handledGuest = offer;
         handledAtTick = nowTick;
-        if (ReferenceEquals(pendingGuest, offer))
-        {
-            pendingGuest = null;
-        }
+        Interlocked.CompareExchange(ref pendingGuest, null, offer);
 
         return answered is not null && Answered(answered);
     }
 
-    public bool Answered(TradeMiss miss)
+    public bool TryRecord(GuestOffer offer, TradeMiss? answered, long nowTick)
     {
-        if (!ReferenceEquals(lastMiss, miss))
+        if (answered is not null && !Answered(answered))
         {
             return false;
         }
 
-        lastMiss = null;
-        pendingGuest = null;
+        Handled(offer, null, nowTick);
+        return true;
+    }
+
+    public bool Answered(TradeMiss miss)
+    {
+        var offer = pendingGuest;
+        if (!ReferenceEquals(Interlocked.CompareExchange(ref lastMiss, null, miss), miss))
+        {
+            return false;
+        }
+
+        if (offer is not null)
+        {
+            Interlocked.CompareExchange(ref pendingGuest, null, offer);
+        }
+
         return true;
     }
 

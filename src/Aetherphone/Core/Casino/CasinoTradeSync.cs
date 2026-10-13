@@ -132,41 +132,49 @@ internal sealed class CasinoTradeSync : IDisposable
             return;
         }
 
-        Handle(offer, misses.LastMiss);
-        Record(offer, CasinoLedgerKinds.Trade);
+        if (Handle(offer, misses.LastMiss))
+        {
+            Record(offer, CasinoLedgerKinds.Trade);
+        }
     }
 
     public void RecordGuest(GuestOffer offer, TradeMiss? answered)
     {
-        Handle(offer, answered);
-        Record(offer, answered is null ? CasinoLedgerKinds.Manual : CasinoLedgerKinds.Trade);
+        if (Handle(offer, answered))
+        {
+            Record(offer, answered is null ? CasinoLedgerKinds.Manual : CasinoLedgerKinds.Trade);
+        }
     }
 
     public void DismissGuest()
     {
-        var offer = misses.TakeGuest();
-        if (offer is null)
-        {
-            return;
-        }
-
-        Handle(offer, misses.LastMiss);
+        misses.DeferGuest(Environment.TickCount64);
     }
 
-    public void Answered(TradeMiss miss)
+    public bool Answered(TradeMiss miss)
     {
-        if (misses.Answered(miss))
+        if (!misses.Answered(miss))
+        {
+            return false;
+        }
+
+        DropProbe();
+        return true;
+    }
+
+    private bool Handle(GuestOffer offer, TradeMiss? answered)
+    {
+        if (!misses.TryRecord(offer, answered, Environment.TickCount64))
+        {
+            return false;
+        }
+
+        if (answered is not null)
         {
             DropProbe();
         }
-    }
 
-    private void Handle(GuestOffer offer, TradeMiss? answered)
-    {
-        if (misses.Handled(offer, answered, Environment.TickCount64))
-        {
-            DropProbe();
-        }
+        return true;
     }
 
     private void Record(GuestOffer offer, string source)
