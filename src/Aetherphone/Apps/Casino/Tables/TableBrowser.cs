@@ -532,11 +532,31 @@ internal sealed class TableBrowser
             filterActive[index] = index == filterIndex;
         }
 
-        var tapped = rail.Draw(ui, filterLabels, filterActive);
+        var scale = UiScale.Current;
+        var origin = ImGui.GetCursorScreenPos();
+        var width = ScrollLayout.StableContentWidth();
+        var height = ChipRail.RowHeight * scale;
+        var radius = RoundButton.SmallRadius * scale;
+        var railWidth = MathF.Max(1f, width - radius * 2f - Metrics.Space.Sm * scale);
+        ImGui.InvisibleButton("##casinoFilterRail", new Vector2(railWidth, height));
+        var row = new Rect(new Vector2(ImGui.GetWindowPos().X, origin.Y),
+            new Vector2(origin.X + railWidth, origin.Y + height));
+        var tapped = rail.Draw(row, ui, filterLabels, filterActive);
         if (tapped >= 0)
         {
             filterIndex = tapped;
         }
+
+        var refreshCenter = new Vector2(origin.X + width - radius, origin.Y + height * 0.5f);
+        if (RoundButton.Icon(ImGui.GetWindowDrawList(), refreshCenter, radius, PhoneIcons.Refresh, ui.Ink,
+                tooltip: Loc.T(L.Common.Refresh), enabled: !tables.Loading && !holdemTables.Loading))
+        {
+            tables.RefreshNow();
+            holdemTables.RefreshTables();
+        }
+
+        ImGui.SetCursorScreenPos(origin);
+        ImGui.Dummy(new Vector2(width, height));
     }
 
     private void DrawRows(AppSkin ui, float width, float scale)
