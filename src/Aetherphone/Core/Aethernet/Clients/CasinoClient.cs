@@ -45,6 +45,7 @@ internal sealed partial class CasinoClient : ITradeMatchSource
     internal const string TournamentStopLeaf = "tournament/stop";
     internal const string LedgerLeaf = "ledger";
     internal const string LedgerMatchLeaf = "ledger/match";
+    internal const string LedgerJoinLeaf = "ledger/join";
     internal const string CloseLeaf = "close";
 
     internal static string BonusClaimPath(string kind)
@@ -389,6 +390,13 @@ internal sealed partial class CasinoClient : ITradeMatchSource
         return net.PostAsync(JoinTablePath, new CasinoTableJoinRequest(code),
             AethernetJsonContext.Default.CasinoTableJoinRequest,
             AethernetJsonContext.Default.CasinoTableJoinDto, token, null, onFailure);
+    }
+
+    public Task<CasinoTableActionDto?> JoinBookLedgerAsync(string roomId, CancellationToken token,
+        Action<AepFailure>? onFailure = null)
+    {
+        return net.RequestAsync(HttpMethod.Post, TablePath(roomId, LedgerJoinLeaf),
+            AethernetJsonContext.Default.CasinoTableActionDto, token, null, onFailure);
     }
 
     public Task<CasinoTableListDto?> NearbyTablesAsync(int world, int territory, int ward, CancellationToken token,

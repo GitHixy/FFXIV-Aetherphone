@@ -27,6 +27,7 @@ internal sealed class CasinoTablesStore : IDisposable
     private readonly CasinoStore chips;
     private readonly PollCadence cadence;
     private readonly StoreWork work = new("CasinoTables");
+    private readonly BookLedgerAdmission bookLedgerAdmission = new();
     private readonly object intentGate = new();
     private readonly Action<int> tableStatusSink;
 
@@ -494,6 +495,38 @@ internal sealed class CasinoTablesStore : IDisposable
 
     public string LedgerRoomId => ledgerRoomId;
 
+    public CasinoTableActionDto? JoinBookLedger(string roomId, bool retry = false)
+    {
+        var accountId = AccountId;
+        var attempt = bookLedgerAdmission.Begin(roomId, accountId, retry);
+        if (attempt is not null)
+        {
+            work.Run("join book ledger", async token =>
+            {
+                var answer = await casino.JoinBookLedgerAsync(roomId, token).ConfigureAwait(false);
+                if (!string.Equals(accountId, AccountId, StringComparison.Ordinal)
+                    || !bookLedgerAdmission.Complete(attempt, answer))
+                {
+                    return;
+                }
+
+                if (answer is { Granted: true }
+                    && string.Equals(ledgerRoomId, roomId, StringComparison.Ordinal))
+                {
+                    RefreshCard(roomId);
+                    RefreshLedgerNow(roomId);
+                }
+            }, () => bookLedgerAdmission.Complete(attempt, null));
+        }
+
+        return bookLedgerAdmission.For(roomId, accountId);
+    }
+
+    public void ForgetBookLedgerAdmission()
+    {
+        bookLedgerAdmission.Reset();
+    }
+
     public void RefreshLedgerNow(string roomId)
     {
         if (roomId.Length == 0)
@@ -579,6 +612,7 @@ internal sealed class CasinoTablesStore : IDisposable
 
     public void ForgetLedger()
     {
+        bookLedgerAdmission.Reset();
         ledgerRoomId = string.Empty;
         ledger = null;
         Interlocked.Exchange(ref ledgerAttemptedAtTick, 0);
@@ -1247,6 +1281,7 @@ internal sealed class CasinoTablesStore : IDisposable
         }
 
         lastAccountId = accountId;
+        bookLedgerAdmission.Reset();
         tables = Array.Empty<CasinoTableRowDto>();
         listed = Array.Empty<CasinoTableRowDto>();
         loaded = false;

@@ -1153,6 +1153,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             return;
         }
 
+        casinoTables.ForgetBookLedgerAdmission();
         playerLedger.Enter(tableId);
         casinoTables.RefreshCard(tableId);
         router.Push(new CasinoRoute(CasinoScreen.TableLedger, CasinoGames.Blackjack, string.Empty, tableId));
@@ -1179,6 +1180,12 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             return;
         }
 
+        if (card is not null && Core.Casino.BookLedgerAdmission.Required(card, casinoTables.Owns(card))
+            && !DrawBookLedgerAdmission(body, card, scale))
+        {
+            return;
+        }
+
         using (AppSurface.Begin(body))
         {
             playerLedger.Draw(ui, casinoTables.AccountId, card?.OwnerUserId ?? string.Empty, scale);
@@ -1186,21 +1193,57 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         }
     }
 
-    private void DrawLedgerDoor(Rect body, Core.Aethernet.Contracts.CasinoTableRowDto card, float scale)
+    private bool DrawBookLedgerAdmission(Rect body, Core.Aethernet.Contracts.CasinoTableRowDto card, float scale)
+    {
+        var answer = casinoTables.JoinBookLedger(card.TableId);
+        if (answer is { Granted: true })
+        {
+            return true;
+        }
+
+        if (answer is null)
+        {
+            using var surface = AppSurface.Begin(body);
+            Tables.TableLedger.Note(ui, Loc.T(L.Tables.LedgerLoading), ui.MutedInk, scale);
+            return false;
+        }
+
+        if (!string.Equals(answer.Reason, Core.Casino.CasinoReasons.Unreachable, StringComparison.Ordinal))
+        {
+            DrawLedgerDoor(body, card, scale, answer.Reason);
+            return false;
+        }
+
+        var pad = AppSurface.SidePadding * scale;
+        CasinoNotice.DrawWithAction(ImGui.GetWindowDrawList(), ui, CasinoNoticeKind.Card, Loc.T(L.Book.OpenLedger),
+            Loc.T(Core.Casino.CasinoReasons.MessageFor(answer.Reason)), Loc.T(L.Common.Retry), body.Min.X + pad,
+            body.Min.Y + Metrics.Space.Lg * scale, body.Width - pad * 2f, scale, out var retry);
+        if (retry)
+        {
+            casinoTables.JoinBookLedger(card.TableId, true);
+        }
+
+        return false;
+    }
+
+    private void DrawLedgerDoor(Rect body, Core.Aethernet.Contracts.CasinoTableRowDto card, float scale,
+        string? refusal = null)
     {
         var tableId = card.TableId;
         if (casinoTables.TakeKnockAdmitted(tableId))
         {
+            casinoTables.ForgetBookLedgerAdmission();
             casinoTables.RefreshCard(tableId);
             casinoTables.RefreshLedgerNow(tableId);
             return;
         }
 
-        var knock = casinoTables.KnockFor(tableId, card.Reason);
+        var reason = refusal ?? card.Reason;
+        var knock = casinoTables.KnockFor(tableId, reason);
         casinoTables.EnsureKnockFresh(tableId);
         var pad = AppSurface.SidePadding * scale;
         var safe = new Rect(new Vector2(body.Min.X + pad, body.Min.Y), new Vector2(body.Max.X - pad, body.Max.Y));
-        var action = Tables.TableDoorCard.Draw(ImGui.GetWindowDrawList(), ui, card.Reason, knock,
+        var action = Tables.TableDoorCard.Draw(ImGui.GetWindowDrawList(), ui, reason, knock,
             L.Casino.BlackjackClosedTitle, L.Casino.BlackjackClosedHint, safe, scale,
             Core.Casino.CasinoCurrencies.Of(card) == Core.Casino.CasinoCurrencies.Gil);
         switch (action)
