@@ -467,6 +467,14 @@ internal sealed class HostSheet
             case HostGame.DiceTable:
                 LadderSingle(ui, "##hostSides", Loc.T(L.Venue.Sides), texts.Compact(L.Tables.DiceRange,
                     draft.SidesValue), HostLadders.All(HostLadders.DiceSides), ref draft.Sides, width, scale);
+                if (draft.Gil && draft.HighestWins)
+                {
+                    Gap(HostFlowLayout.CardGap, scale);
+                    LadderSingle(ui, "##hostStake", Loc.T(L.Venue.RoundStake), DiceStakeText(), draft.DiceStakeSpan,
+                        ref draft.DiceStake, width, scale);
+                    Venue.VenueFields.Hint(ui, Loc.T(L.Venue.RoundStakeHint), scale);
+                }
+
                 break;
             case HostGame.Deathroll:
                 LadderSingle(ui, "##hostStart", Loc.T(L.Venue.StartNumber), NumberText.Compact(draft.StartAtValue),
@@ -847,6 +855,12 @@ internal sealed class HostSheet
             Loc.T(L.Venue.RoundSeconds), roundOptions, draft.RoundSeconds, scale);
         card.End();
         Gap(HostFlowLayout.CardGap, scale);
+    }
+
+    private string DiceStakeText()
+    {
+        var stake = draft.DiceStakeValue;
+        return stake == 0 ? Loc.T(L.Venue.NoStake) : TableAmounts.Amount(texts, stake, draft.Currency);
     }
 
     private void DrawFooter(AppSkin ui, Rect footer, string line, float summaryHeight, float scale)

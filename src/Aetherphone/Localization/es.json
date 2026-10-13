@@ -9713,6 +9713,10 @@
   "casino.venue.tournamentYouAreOut": "Has quedado fuera del torneo.",
   "casino.venue.tournamentHandsPlaceholder": "10 a 50",
   "casino.venue.tournamentPending": "Empieza después de esta mano. Detener lo cancela.",
+
+  "casino.venue.roundStake": "Apuesta por ronda",
+  "casino.venue.roundStakeHint": "Cuando cierra una ronda, todos los que sacaron menos deben la apuesta al ganador. Cada deuda queda en el registro de gil hasta que ambas partes la confirmen.",
+  "casino.venue.noStake": "Sin apuesta",
   "casino.strip.seatSit": "Sentarse",
   "casino.strip.tabFloor": "Sala",
   "casino.strip.resumeTitle": "Vuelve a tu asiento",

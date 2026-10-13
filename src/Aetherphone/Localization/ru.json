@@ -9713,6 +9713,10 @@
   "casino.venue.tournamentYouAreOut": "Вы выбыли из турнира.",
   "casino.venue.tournamentHandsPlaceholder": "от 10 до 50",
   "casino.venue.tournamentPending": "Начнётся после этой раздачи. Остановить отменяет запуск.",
+
+  "casino.venue.roundStake": "Ставка за раунд",
+  "casino.venue.roundStakeHint": "Когда раунд закрывается, все, кто выбросил меньше, должны победителю ставку. Каждый долг остаётся в журнале гилов, пока обе стороны его не подтвердят.",
+  "casino.venue.noStake": "Без ставки",
   "casino.strip.seatSit": "Сесть",
   "casino.strip.tabFloor": "Зал",
   "casino.strip.resumeTitle": "Вернуться за стол",

@@ -9713,6 +9713,10 @@
   "casino.venue.tournamentYouAreOut": "You're out of the tournament.",
   "casino.venue.tournamentHandsPlaceholder": "10 to 50",
   "casino.venue.tournamentPending": "Starts after this hand. Stop takes it back.",
+
+  "casino.venue.roundStake": "Stake per round",
+  "casino.venue.roundStakeHint": "When a round closes, everyone who rolled lower owes the winner the stake. Each debt goes on the gil ledger for both sides to confirm.",
+  "casino.venue.noStake": "No stake",
   "casino.strip.seatSit": "Sit",
   "casino.strip.tabFloor": "Floor",
   "casino.strip.resumeTitle": "Back to your seat",

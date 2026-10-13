@@ -9713,6 +9713,10 @@
   "casino.venue.tournamentYouAreOut": "Du bist aus dem Turnier ausgeschieden.",
   "casino.venue.tournamentHandsPlaceholder": "10 bis 50",
   "casino.venue.tournamentPending": "Beginnt nach dieser Hand. Beenden nimmt es zurück.",
+
+  "casino.venue.roundStake": "Einsatz pro Runde",
+  "casino.venue.roundStakeHint": "Wenn eine Runde endet, schuldet jeder, der niedriger gewürfelt hat, dem Gewinner den Einsatz. Jede Schuld steht im Gil-Buch, bis beide Seiten sie bestätigen.",
+  "casino.venue.noStake": "Kein Einsatz",
   "casino.strip.seatSit": "Setzen",
   "casino.strip.tabFloor": "Floor",
   "casino.strip.resumeTitle": "Zurück an deinen Platz",

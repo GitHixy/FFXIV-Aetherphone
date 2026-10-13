@@ -9713,6 +9713,10 @@
   "casino.venue.tournamentYouAreOut": "Tu es éliminé du tournoi.",
   "casino.venue.tournamentHandsPlaceholder": "10 à 50",
   "casino.venue.tournamentPending": "Commence après cette main. Arrêter l'annule.",
+
+  "casino.venue.roundStake": "Mise par manche",
+  "casino.venue.roundStakeHint": "À la fin d'une manche, tous ceux qui ont fait un jet inférieur doivent la mise au gagnant. Chaque dette est inscrite au registre des gils jusqu'à ce que les deux parties la confirment.",
+  "casino.venue.noStake": "Sans mise",
   "casino.strip.seatSit": "S'asseoir",
   "casino.strip.tabFloor": "Salle",
   "casino.strip.resumeTitle": "Retour à ta place",

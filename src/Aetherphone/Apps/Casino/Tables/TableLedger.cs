@@ -123,9 +123,10 @@ internal sealed class TableLedger
         }
 
         Refresh(ledger, myUserId, chips.HasFeature(CasinoFeatures.VenueBook));
-        var book = CasinoBookRules.IsBook(tables.CardFor(roomId)?.GameKind);
-        DrawHeading(ui, ledger, book, scale);
-        if (!book)
+        var gameKind = tables.CardFor(roomId)?.GameKind ?? string.Empty;
+        var seatless = CasinoBookRules.IsBook(gameKind) || VenueKinds.IsVenue(gameKind);
+        DrawHeading(ui, ledger, seatless, scale);
+        if (!seatless)
         {
             DrawRows(ui, ledger.Currency, scale);
         }

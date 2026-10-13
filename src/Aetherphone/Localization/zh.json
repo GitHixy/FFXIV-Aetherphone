@@ -9713,6 +9713,10 @@
   "casino.venue.tournamentYouAreOut": "你已被淘汰出锦标赛。",
   "casino.venue.tournamentHandsPlaceholder": "10到50",
   "casino.venue.tournamentPending": "本手结束后开始。点按停止可取消。",
+
+  "casino.venue.roundStake": "每轮赌注",
+  "casino.venue.roundStakeHint": "一轮结束时，掷出较低点数的所有人都欠胜者赌注。每笔欠款都会记入金币账本，直到双方确认。",
+  "casino.venue.noStake": "无赌注",
   "casino.strip.seatSit": "入座",
   "casino.strip.tabFloor": "大厅",
   "casino.strip.resumeTitle": "回到你的座位",

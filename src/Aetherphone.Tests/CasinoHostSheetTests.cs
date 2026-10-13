@@ -263,6 +263,32 @@ public sealed class CasinoHostSheetTests
     }
 
     [Fact]
+    public void AGilDiceTableStakesEachRoundFromANoStakeRung()
+    {
+        var draft = new HostDraft();
+        draft.SelectGame(HostGame.DiceTable, true);
+        draft.SelectCurrency(CasinoCurrencies.Gil, true);
+        draft.Normalize(true);
+        Assert.Equal(0, draft.DiceStake);
+        Assert.Equal(0, draft.Build(null).Dice!.Stake);
+
+        draft.DiceStake = Array.IndexOf(HostLadders.DiceStakes, 50_000L);
+        draft.Normalize(true);
+        var staked = draft.Build(null);
+        Assert.Equal(50_000, staked.Dice!.Stake);
+        Assert.Equal(string.Empty, VenueRules.Check(staked));
+
+        draft.HighestWins = false;
+        Assert.Equal(0, draft.Build(null).Dice!.Stake);
+
+        draft.HighestWins = true;
+        draft.SelectCurrency(CasinoCurrencies.Practice, true);
+        draft.Normalize(true);
+        Assert.Equal(0, draft.DiceStake);
+        Assert.Equal(0, draft.Build(null).Dice!.Stake);
+    }
+
+    [Fact]
     public void LadderIndexesSnapToTheNearestRungBelowOrAbove()
     {
         long[] rungs = { 10, 100, 1_000 };

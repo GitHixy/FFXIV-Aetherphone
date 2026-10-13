@@ -69,6 +69,24 @@ public sealed class VenueRulesTests
     }
 
     [Fact]
+    public void ADiceStakeNeedsGilAndHighestRollRounds()
+    {
+        var staked = new CasinoTableConfigDto(GameKind: VenueKinds.DiceTable, Currency: CasinoCurrencies.Gil,
+            Dice: new CasinoDiceTableOptionsDto(HighestWins: true, Stake: 50_000));
+        Assert.Equal(string.Empty, VenueRules.Check(staked));
+        Assert.Equal(string.Empty, VenueRules.Check(staked with { Dice = new CasinoDiceTableOptionsDto(Stake: 0) }));
+        Assert.Equal(CasinoReasons.ConfigInvalid, VenueRules.Check(staked with { Currency = CasinoCurrencies.Practice }));
+        Assert.Equal(CasinoReasons.ConfigInvalid,
+            VenueRules.Check(staked with { Dice = new CasinoDiceTableOptionsDto(Stake: 50_000) }));
+        Assert.Equal(CasinoReasons.ConfigInvalid,
+            VenueRules.Check(staked with { Dice = new CasinoDiceTableOptionsDto(HighestWins: true, Stake: -1) }));
+        Assert.Equal(CasinoReasons.ConfigInvalid, VenueRules.Check(staked with
+        {
+            Dice = new CasinoDiceTableOptionsDto(HighestWins: true, Stake: CasinoHostingRules.MaxGil + 1),
+        }));
+    }
+
+    [Fact]
     public void APracticeDeathrollStakeMustFitTheStack()
     {
         var config = new CasinoTableConfigDto(GameKind: VenueKinds.Deathroll, Currency: CasinoCurrencies.Practice,

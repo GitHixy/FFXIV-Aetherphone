@@ -11893,6 +11893,10 @@ internal static class L
         public static readonly LocString TournamentYouAreOut = new("casino.venue.tournamentYouAreOut", "You're out of the tournament.");
         public static readonly LocString TournamentHandsPlaceholder = new("casino.venue.tournamentHandsPlaceholder", "10 to 50");
         public static readonly LocString TournamentPending = new("casino.venue.tournamentPending", "Starts after this hand. Stop takes it back.");
+
+        public static readonly LocString RoundStake = new("casino.venue.roundStake", "Stake per round");
+        public static readonly LocString RoundStakeHint = new("casino.venue.roundStakeHint", "When a round closes, everyone who rolled lower owes the winner the stake. Each debt goes on the gil ledger for both sides to confirm.");
+        public static readonly LocString NoStake = new("casino.venue.noStake", "No stake");
     }
 
     internal static class VenueHub

@@ -9713,6 +9713,10 @@
   "casino.venue.tournamentYouAreOut": "トーナメントから脱落しました。",
   "casino.venue.tournamentHandsPlaceholder": "10から50",
   "casino.venue.tournamentPending": "このハンドの後に始まります。終了で取り消せます。",
+
+  "casino.venue.roundStake": "ラウンドごとの賭け金",
+  "casino.venue.roundStakeHint": "ラウンドが終了すると、勝者より低い目を出した全員が勝者に賭け金を支払います。各債務は双方が確認するまでギル台帳に記録されます。",
+  "casino.venue.noStake": "賭け金なし",
   "casino.strip.seatSit": "着席",
   "casino.strip.tabFloor": "フロア",
   "casino.strip.resumeTitle": "席に戻る",
