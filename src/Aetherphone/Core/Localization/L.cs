@@ -11917,7 +11917,7 @@ internal static class L
         public static readonly LocString LocationPlot = new("casino.venue.locationPlot", "{0}, ward {1}, plot {2}");
         public static readonly LocString LocationWard = new("casino.venue.locationWard", "{0}, ward {1}");
         public static readonly LocString PinLocation = new("casino.venue.pinLocation", "List at this venue");
-        public static readonly LocString LocationHint = new("casino.venue.locationHint", "Taken from where you stand, so players in the same ward see your table first.");
+        public static readonly LocString LocationHint = new("casino.venue.locationHint", "Taken from where you stand. Players in the same ward see the table once Who can join is Ask to join or Open.");
         public static readonly LocString TournamentHeading = new("casino.venue.tournamentHeading", "Tournament");
         public static readonly LocString TournamentHands = new("casino.venue.tournamentHands", "Hands");
         public static readonly LocString TournamentStack = new("casino.venue.tournamentStack", "Starting stack");
@@ -11948,6 +11948,9 @@ internal static class L
         public static readonly LocString RaffleEntrantsCap = new("casino.venue.raffleEntrantsCap", "Entrants");
         public static readonly LocString RaffleCapsHint = new("casino.venue.raffleCapsHint", "You set each raffle's title, tickets a person, winners and clock when you open it from the room, within these limits.");
         public static readonly LocString ReasonTicketCount = new("casino.venue.reasonTicketCount", "Fewer tickets than that are left to you in this raffle. Take what is left or wait for the next one.");
+
+        public static readonly LocString PinInviteOnlyNote = new("casino.venue.pinInviteOnlyNote", "Not listed at this venue while Who can join is Invite only. Pick Ask to join or Open to list it.");
+        public static readonly LocString PinNoPlotNote = new("casino.venue.pinNoPlotNote", "Stand on the venue's plot so the Venues app can show your table. The Floor still shows it for this ward.");
     }
 
     internal static class VenueHub

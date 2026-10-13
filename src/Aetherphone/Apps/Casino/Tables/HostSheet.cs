@@ -142,8 +142,11 @@ internal sealed class HostSheet
         var gilOpen = chips.HasFeature(CasinoFeatures.GilTables);
         draft.Normalize(gilOpen);
         var line = Summary();
+        var note = (venueOptions.Notes(draft.Listing) & Venue.VenuePinNotes.InviteOnly) != 0
+            ? Loc.T(L.Venue.PinInviteOnlyNote)
+            : string.Empty;
         var footerWidth = body.Width;
-        var summaryHeight = SummaryBlock(line, footerWidth, scale);
+        var summaryHeight = SummaryBlock(line, note, footerWidth, scale);
         var footerHeight = HostFlowLayout.FooterHeight(scale, summaryHeight);
         var scroll = new Rect(body.Min, new Vector2(body.Max.X, body.Max.Y - footerHeight));
         using (ImRaii.PushId("casino.host"))
@@ -154,7 +157,8 @@ internal sealed class HostSheet
                 SettleToEnd();
             }
 
-            DrawFooter(ui, new Rect(new Vector2(body.Min.X, scroll.Max.Y), body.Max), line, summaryHeight, scale);
+            DrawFooter(ui, new Rect(new Vector2(body.Min.X, scroll.Max.Y), body.Max), line, note, summaryHeight,
+                scale);
         }
     }
 
@@ -714,7 +718,7 @@ internal sealed class HostSheet
         card.End();
         Gap(HostFlowLayout.CardGap, scale);
         DrawGameOptions(ui, scale);
-        venueOptions.DrawLocation(ui, scale);
+        venueOptions.DrawLocation(ui, draft.Listing, scale);
     }
 
     private void NameRow(AppSkin ui, in Rect row, float scale)
@@ -875,7 +879,7 @@ internal sealed class HostSheet
         return stake == 0 ? Loc.T(L.Venue.NoStake) : TableAmounts.Amount(texts, stake, draft.Currency);
     }
 
-    private void DrawFooter(AppSkin ui, Rect footer, string line, float summaryHeight, float scale)
+    private void DrawFooter(AppSkin ui, Rect footer, string line, string note, float summaryHeight, float scale)
     {
         var drawList = ImGui.GetWindowDrawList();
         var bandMin = new Vector2(footer.Min.X - AppSurface.SidePadding * scale, footer.Min.Y);
@@ -884,8 +888,15 @@ internal sealed class HostSheet
         drawList.AddLine(bandMin, new Vector2(bandMax.X, bandMin.Y),
             ImGui.GetColorU32(Palette.WithAlpha(ui.TitleInk, FooterHairlineAlpha)), MathF.Max(1f, 0.5f * scale));
         var pad = HostFlowLayout.FooterPad * scale;
-        Typography.DrawWrappedLeft(new Vector2(footer.Min.X, footer.Min.Y + pad), line, ui.BodyInk,
+        var lineHeight = Typography.DrawWrappedLeft(new Vector2(footer.Min.X, footer.Min.Y + pad), line, ui.BodyInk,
             TextStyles.Subheadline, footer.Width);
+        if (note.Length > 0)
+        {
+            Typography.DrawWrappedLeft(
+                new Vector2(footer.Min.X, footer.Min.Y + pad + lineHeight + HostFlowLayout.LineGap * scale), note,
+                ui.BodyInk, TextStyles.Footnote, footer.Width);
+        }
+
         var button = HostFlowLayout.FooterButton(footer, scale);
         if (Button.Draw(drawList, button, Loc.T(L.Tables.OpenTable), ui.Ink, ButtonStyle.Prominent,
                 enabled: !tables.IntentInFlight, id: "casino.host.open"))
@@ -894,8 +905,17 @@ internal sealed class HostSheet
         }
     }
 
-    private static float SummaryBlock(string line, float width, float scale) =>
-        Typography.MeasureWrappedBlock(line, TextStyles.Subheadline, width).Y;
+    private static float SummaryBlock(string line, string note, float width, float scale)
+    {
+        var height = Typography.MeasureWrappedBlock(line, TextStyles.Subheadline, width).Y;
+        if (note.Length == 0)
+        {
+            return height;
+        }
+
+        return height + HostFlowLayout.LineGap * scale
+            + Typography.MeasureWrappedBlock(note, TextStyles.Footnote, width).Y;
+    }
 
     private string Summary()
     {
