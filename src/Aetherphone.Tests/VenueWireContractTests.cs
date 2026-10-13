@@ -214,20 +214,27 @@ public sealed class TournamentPlaybackTests
     [Fact]
     public void TheDoorHoldsATournamentUntilItCanStart()
     {
-        Assert.Equal(TournamentGate.NeedsPlayers, TournamentDoorCard.GateOf(false, 1, 0, 500));
-        Assert.Equal(TournamentGate.DealerOut, TournamentDoorCard.GateOf(true, 1, 0, 500));
-        Assert.Equal(TournamentGate.BadStack, TournamentDoorCard.GateOf(false, 2, 999, 500));
-        Assert.Equal(TournamentGate.BadStack, TournamentDoorCard.GateOf(false, 2, 2_000, 5_000));
-        Assert.Equal(TournamentGate.BadStack, TournamentDoorCard.GateOf(false, 2, 1_000_000_001, 500));
-        Assert.Equal(TournamentGate.Ready, TournamentDoorCard.GateOf(false, 2, 0, 500));
-        Assert.Equal(TournamentGate.Ready, TournamentDoorCard.GateOf(true, 2, 50_000, 500));
+        Assert.Equal(TournamentGate.NeedsPlayers, TournamentDoorCard.GateOf(false, 1, 20, 0, 500));
+        Assert.Equal(TournamentGate.DealerOut, TournamentDoorCard.GateOf(true, 1, 20, 0, 500));
+        Assert.Equal(TournamentGate.BadHands, TournamentDoorCard.GateOf(false, 2, 9, 0, 500));
+        Assert.Equal(TournamentGate.BadHands, TournamentDoorCard.GateOf(false, 2, 51, 999, 500));
+        Assert.Equal(TournamentGate.BadStack, TournamentDoorCard.GateOf(false, 2, 20, 999, 500));
+        Assert.Equal(TournamentGate.BadStack, TournamentDoorCard.GateOf(false, 2, 20, 2_000, 5_000));
+        Assert.Equal(TournamentGate.BadStack, TournamentDoorCard.GateOf(false, 2, 20, 1_000_000_001, 500));
+        Assert.Equal(TournamentGate.Ready, TournamentDoorCard.GateOf(false, 2, 10, 0, 500));
+        Assert.Equal(TournamentGate.Ready, TournamentDoorCard.GateOf(true, 2, 50, 50_000, 500));
     }
 
     [Fact]
-    public void TournamentHandsClampToTheServerBand()
+    public void TournamentHandsAreTakenAsTypedAndGatedOnTheServerBand()
     {
-        Assert.Equal(10, TournamentDoorCard.HandsFrom("3"));
-        Assert.Equal(50, TournamentDoorCard.HandsFrom("99"));
-        Assert.Equal(20, TournamentDoorCard.HandsFrom(string.Empty));
+        Assert.Equal(3, TournamentDoorCard.HandsFrom("3"));
+        Assert.Equal(99, TournamentDoorCard.HandsFrom("99"));
+        Assert.Equal(TournamentDoorCard.DefaultHands, TournamentDoorCard.HandsFrom(string.Empty));
+        Assert.Equal(20, TournamentDoorCard.DefaultHands);
+        Assert.False(TournamentDoorCard.HandsFit(9));
+        Assert.True(TournamentDoorCard.HandsFit(CasinoHostingRules.TournamentMinHands));
+        Assert.True(TournamentDoorCard.HandsFit(CasinoHostingRules.TournamentMaxHands));
+        Assert.False(TournamentDoorCard.HandsFit(51));
     }
 }

@@ -9215,6 +9215,9 @@
   "casino.tables.renameSave": "Сохранить",
   "casino.tables.dealNow": "Раздать сейчас",
   "casino.tables.dealerClockDeals": "Стол раздаёт по таймеру",
+
+  "casino.tables.reasonTournamentHands": "Турнир длится от 10 до 50 раздач. Укажите число в этом диапазоне или оставьте поле пустым, чтобы было 20.",
+  "casino.tables.reasonTournamentPending": "Начнётся после этой раздачи.",
   "casino.race.title": "Скачки чокобо",
   "casino.race.pitch": "Восемь птиц, минута на ставки, забег каждые две минуты",
   "casino.race.rules1": "В каждом забеге восемь птиц. Табло показывает для каждой коэффициент, коэффициент на призовое место, пять последних финишей и сколько игроков на неё ставят.",
@@ -9708,6 +9711,8 @@
   "casino.venue.tournamentNeedsPlayers": "Нужны два игрока за столом. Займите место, чтобы участвовать.",
   "casino.venue.tournamentDealerOut": "Вы раздаёте за этим столом, поэтому не можете участвовать. Нужны два других игрока за столом.",
   "casino.venue.tournamentYouAreOut": "Вы выбыли из турнира.",
+  "casino.venue.tournamentHandsPlaceholder": "от 10 до 50",
+  "casino.venue.tournamentPending": "Начнётся после этой раздачи. Остановить отменяет запуск.",
   "casino.strip.seatSit": "Сесть",
   "casino.strip.tabFloor": "Зал",
   "casino.strip.resumeTitle": "Вернуться за стол",

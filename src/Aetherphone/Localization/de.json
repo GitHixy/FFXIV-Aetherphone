@@ -9215,6 +9215,9 @@
   "casino.tables.renameSave": "Speichern",
   "casino.tables.dealNow": "Jetzt geben",
   "casino.tables.dealerClockDeals": "Der Tisch gibt nach der Uhr",
+
+  "casino.tables.reasonTournamentHands": "Ein Turnier läuft über 10 bis 50 Hände. Wähle eine Zahl in diesem Bereich oder lass das Feld leer für 20.",
+  "casino.tables.reasonTournamentPending": "Beginnt nach dieser Hand.",
   "casino.race.title": "Chocobo-Rennen",
   "casino.race.pitch": "Acht Vögel, eine Minute zum Wetten, alle zwei Minuten ein Rennen",
   "casino.race.rules1": "Jedes Rennen hat acht Vögel. Die Tafel zeigt für jeden Vogel Quote, Platzquote, die letzten fünf Platzierungen und wie viele Spieler auf ihn setzen.",
@@ -9708,6 +9711,8 @@
   "casino.venue.tournamentNeedsPlayers": "Braucht zwei Spieler am Tisch. Setz dich selbst hin, um mitzuspielen.",
   "casino.venue.tournamentDealerOut": "Du gibst an diesem Tisch und kannst nicht mitspielen. Zwei andere Spieler müssen sitzen.",
   "casino.venue.tournamentYouAreOut": "Du bist aus dem Turnier ausgeschieden.",
+  "casino.venue.tournamentHandsPlaceholder": "10 bis 50",
+  "casino.venue.tournamentPending": "Beginnt nach dieser Hand. Beenden nimmt es zurück.",
   "casino.strip.seatSit": "Setzen",
   "casino.strip.tabFloor": "Floor",
   "casino.strip.resumeTitle": "Zurück an deinen Platz",

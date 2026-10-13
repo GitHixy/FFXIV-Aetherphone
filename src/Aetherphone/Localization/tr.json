@@ -9215,6 +9215,9 @@
   "casino.tables.renameSave": "Kaydet",
   "casino.tables.dealNow": "Şimdi dağıt",
   "casino.tables.dealerClockDeals": "Masa saate göre dağıtır",
+
+  "casino.tables.reasonTournamentHands": "Bir turnuva 10 ile 50 el arasında sürer. Bu aralıkta bir sayı seç ya da 20 için boş bırak.",
+  "casino.tables.reasonTournamentPending": "Bu elden sonra başlar.",
   "casino.race.title": "Chocobo yarışı",
   "casino.race.pitch": "Sekiz kuş, bahis için bir dakika, her iki dakikada bir yarış",
   "casino.race.rules1": "Her yarışta sekiz kuş koşar. Tabela her kuşun oranını, plase oranını, son beş derecesini ve ona kaç oyuncunun oynadığını gösterir.",
@@ -9708,6 +9711,8 @@
   "casino.venue.tournamentNeedsPlayers": "Oturan iki oyuncu gerekir. Katılmak için sen de otur.",
   "casino.venue.tournamentDealerOut": "Bu masada sen dağıtıyorsun, bu yüzden katılamazsın. Başka iki oyuncunun oturması gerekir.",
   "casino.venue.tournamentYouAreOut": "Turnuvadan elendin.",
+  "casino.venue.tournamentHandsPlaceholder": "10 ile 50 arası",
+  "casino.venue.tournamentPending": "Bu elden sonra başlar. Durdur geri alır.",
   "casino.strip.seatSit": "Otur",
   "casino.strip.tabFloor": "Salon",
   "casino.strip.resumeTitle": "Koltuğuna dön",

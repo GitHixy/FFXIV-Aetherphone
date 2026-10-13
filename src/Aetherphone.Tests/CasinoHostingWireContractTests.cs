@@ -147,6 +147,39 @@ public sealed class CasinoHostingWireContractTests
     }
 
     [Fact]
+    public void TheDoorCarriesAPendingTournamentStart()
+    {
+        const string pending = """
+        {
+          "roomId": "table-a1b2", "owner": true, "inviteToken": "", "knocks": [], "seated": [],
+          "serverNowUnixMs": 0, "joinCode": "ABCDEF", "present": [], "tournamentPending": true
+        }
+        """;
+        const string older = """
+        { "roomId": "table-a1b2", "owner": true, "inviteToken": "", "knocks": [], "seated": [], "serverNowUnixMs": 0 }
+        """;
+
+        var door = JsonSerializer.Deserialize(pending, AethernetJsonContext.Default.CasinoTableDoorDto);
+        var legacy = JsonSerializer.Deserialize(older, AethernetJsonContext.Default.CasinoTableDoorDto);
+
+        Assert.True(door!.TournamentPending);
+        Assert.False(legacy!.TournamentPending);
+    }
+
+    [Fact]
+    public void TheTournamentLifecycleReasonsHaveTheirOwnMessages()
+    {
+        Assert.Equal("tournament_hands", CasinoReasons.TournamentHands);
+        Assert.Equal("tournament_pending", CasinoReasons.TournamentPending);
+        Assert.Contains(CasinoReasons.TournamentHands, CasinoReasons.All);
+        Assert.Contains(CasinoReasons.TournamentPending, CasinoReasons.All);
+        Assert.True(CasinoReasons.TryMessage(CasinoReasons.TournamentHands, out var hands));
+        Assert.Equal(L.Tables.ReasonTournamentHands.Key, hands.Key);
+        Assert.True(CasinoReasons.TryMessage(CasinoReasons.TournamentPending, out var pending));
+        Assert.Equal(L.Tables.ReasonTournamentPending.Key, pending.Key);
+    }
+
+    [Fact]
     public void TheGilLedgerReadsBothSidesOfEveryEntry()
     {
         const string json = """

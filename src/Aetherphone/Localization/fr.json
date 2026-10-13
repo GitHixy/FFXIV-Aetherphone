@@ -9215,6 +9215,9 @@
   "casino.tables.renameSave": "Enregistrer",
   "casino.tables.dealNow": "Distribuer maintenant",
   "casino.tables.dealerClockDeals": "La table distribue à l'horloge",
+
+  "casino.tables.reasonTournamentHands": "Un tournoi se joue en 10 à 50 mains. Choisis un nombre dans cette plage ou laisse le champ vide pour 20.",
+  "casino.tables.reasonTournamentPending": "Commence après cette main.",
   "casino.race.title": "Course de chocobos",
   "casino.race.pitch": "Huit oiseaux, une minute pour parier, une course toutes les deux minutes",
   "casino.race.rules1": "Chaque course aligne huit oiseaux. Le tableau affiche pour chacun sa cote, sa cote placé, ses cinq dernières arrivées et combien de joueurs le soutiennent.",
@@ -9708,6 +9711,8 @@
   "casino.venue.tournamentNeedsPlayers": "Il faut deux joueurs assis. Assieds-toi pour y participer.",
   "casino.venue.tournamentDealerOut": "Tu distribues à cette table, tu ne peux donc pas participer. Deux autres joueurs doivent s'asseoir.",
   "casino.venue.tournamentYouAreOut": "Tu es éliminé du tournoi.",
+  "casino.venue.tournamentHandsPlaceholder": "10 à 50",
+  "casino.venue.tournamentPending": "Commence après cette main. Arrêter l'annule.",
   "casino.strip.seatSit": "S'asseoir",
   "casino.strip.tabFloor": "Salle",
   "casino.strip.resumeTitle": "Retour à ta place",

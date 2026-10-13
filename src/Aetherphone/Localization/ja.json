@@ -9215,6 +9215,9 @@
   "casino.tables.renameSave": "保存",
   "casino.tables.dealNow": "今すぐ配る",
   "casino.tables.dealerClockDeals": "テーブルはタイマーで配ります",
+
+  "casino.tables.reasonTournamentHands": "トーナメントは10から50ハンドで行います。その範囲の数を入力するか、空欄にすると20になります。",
+  "casino.tables.reasonTournamentPending": "このハンドの後に始まります。",
   "casino.race.title": "チョコボレース",
   "casino.race.pitch": "8羽の鳥、ベットは1分、レースは2分ごと",
   "casino.race.rules1": "各レースは8羽で走ります。オッズボードには各鳥の単勝オッズ、複勝オッズ、直近5走の着順、応援しているプレイヤー数が表示されます。",
@@ -9708,6 +9711,8 @@
   "casino.venue.tournamentNeedsPlayers": "着席したプレイヤーが2人必要です。参加するにはあなたも席に着いてください。",
   "casino.venue.tournamentDealerOut": "このテーブルではあなたが配るため参加できません。ほかに2人の着席が必要です。",
   "casino.venue.tournamentYouAreOut": "トーナメントから脱落しました。",
+  "casino.venue.tournamentHandsPlaceholder": "10から50",
+  "casino.venue.tournamentPending": "このハンドの後に始まります。終了で取り消せます。",
   "casino.strip.seatSit": "着席",
   "casino.strip.tabFloor": "フロア",
   "casino.strip.resumeTitle": "席に戻る",
