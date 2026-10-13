@@ -101,6 +101,8 @@ internal static class CasinoReasons
     public const string NotOwner = "not_owner";
     public const string CodeUnknown = "code_unknown";
     public const string GuestEntry = "guest_entry";
+    public const string TournamentHands = "tournament_hands";
+    public const string TournamentPending = "tournament_pending";
 
     public static readonly string[] All =
     {
@@ -199,6 +201,8 @@ internal static class CasinoReasons
         NoTables,
         InvalidMove,
         MachineUnknown,
+        TournamentHands,
+        TournamentPending,
     };
 
     private static readonly FrozenDictionary<string, LocString> Messages = new Dictionary<string, LocString>
@@ -298,6 +302,8 @@ internal static class CasinoReasons
         [NoTables] = L.Casino.ReasonNoTables,
         [InvalidMove] = L.Originals.ReasonInvalidMove,
         [MachineUnknown] = L.Machines.ReasonMachineUnknown,
+        [TournamentHands] = L.Tables.ReasonTournamentHands,
+        [TournamentPending] = L.Tables.ReasonTournamentPending,
     }.ToFrozenDictionary(StringComparer.Ordinal);
 
     private static long ceilingTextValue;

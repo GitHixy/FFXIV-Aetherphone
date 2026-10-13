@@ -11639,6 +11639,8 @@ internal static class L
         public static readonly LocString ColumnStack = new("casino.tables.columnStack", "Stack");
         public static readonly LocString ColumnNet = new("casino.tables.columnNet", "Net");
         public static readonly LocString RenameSave = new("casino.tables.renameSave", "Save");
+        public static readonly LocString ReasonTournamentHands = new("casino.tables.reasonTournamentHands", "A tournament runs 10 to 50 hands. Pick a number in that band, or leave it blank for 20.");
+        public static readonly LocString ReasonTournamentPending = new("casino.tables.reasonTournamentPending", "Starts after this hand.");
     }
 
     internal static class Race
@@ -11882,6 +11884,8 @@ internal static class L
         public static readonly LocString TournamentNeedsPlayers = new("casino.venue.tournamentNeedsPlayers", "Needs two seated players. Take a seat yourself to play in it.");
         public static readonly LocString TournamentDealerOut = new("casino.venue.tournamentDealerOut", "You deal at this table, so you cannot enter. Two other players need a seat.");
         public static readonly LocString TournamentYouAreOut = new("casino.venue.tournamentYouAreOut", "You're out of the tournament.");
+        public static readonly LocString TournamentHandsPlaceholder = new("casino.venue.tournamentHandsPlaceholder", "10 to 50");
+        public static readonly LocString TournamentPending = new("casino.venue.tournamentPending", "Starts after this hand. Stop takes it back.");
     }
 
     internal static class VenueHub

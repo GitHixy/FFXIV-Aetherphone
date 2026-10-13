@@ -897,7 +897,8 @@ internal sealed record CasinoTableDoorDto(
     CasinoTableSeatedDto[]? Seated = null,
     long ServerNowUnixMs = 0,
     string JoinCode = "",
-    CasinoTablePresentDto[]? Present = null);
+    CasinoTablePresentDto[]? Present = null,
+    bool TournamentPending = false);
 
 internal sealed record CasinoTableDoorRequest(string UserId, bool Approve);
 
