@@ -10418,6 +10418,10 @@ internal static class L
         public static readonly LocString QuestExploreMusterHint = new("coin.questExploreMusterHint", "Say you're going to someone else's public meetup");
         public static readonly LocString QuestLimitReached = new("coin.questLimitReached", "Three quests paid today");
         public static readonly LocString QuestUnavailable = new("coin.questUnavailable", "Could not pay yet, trying again soon");
+        public static readonly LocString FrozenUntil = new("coin.frozenUntil", "Earning and spending are on hold until {0}.");
+        public static readonly LocString FrozenTicket = new("coin.frozenTicket", "Open a ticket on the Discord to restore access.");
+        public static readonly LocString UnfrozenTitle = new("coin.unfrozenTitle", "Your wallet is no longer frozen");
+        public static readonly LocString UnfrozenBody = new("coin.unfrozenBody", "Earning and spending work again.");
     }
 
     internal static class Originals

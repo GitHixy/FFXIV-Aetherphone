@@ -22,6 +22,8 @@ internal static class ModerationNoticeKinds
     public const int FrameGranted = 11;
     public const int FrameRevoked = 12;
     public const int NameReset = 13;
+    public const int WalletFrozen = 14;
+    public const int WalletUnfrozen = 15;
 }
 
 internal static class ModerationNoticeText
@@ -49,7 +51,8 @@ internal static class ModerationNoticeText
             && notice.Kind != ModerationNoticeKinds.FrameGranted
             && notice.Kind != ModerationNoticeKinds.FrameRevoked
             && notice.Kind != ModerationNoticeKinds.EconomyAction
-            && notice.Kind != ModerationNoticeKinds.MarkedSensitive;
+            && notice.Kind != ModerationNoticeKinds.MarkedSensitive
+            && notice.Kind != ModerationNoticeKinds.WalletUnfrozen;
     }
 
     // The phone is holding a name the server has just replaced, so it has to pull the
@@ -59,6 +62,13 @@ internal static class ModerationNoticeText
         return IsCosmeticGrant(notice)
             || notice.Kind == ModerationNoticeKinds.EconomyAction
             || notice.Kind == ModerationNoticeKinds.NameReset;
+    }
+
+    public static bool RefreshesWallet(ModerationNoticeDto notice)
+    {
+        return notice.Kind == ModerationNoticeKinds.EconomyAction
+            || notice.Kind == ModerationNoticeKinds.WalletFrozen
+            || notice.Kind == ModerationNoticeKinds.WalletUnfrozen;
     }
 
     public static bool IsCosmeticGrant(ModerationNoticeDto notice)
@@ -86,6 +96,8 @@ internal static class ModerationNoticeText
             ModerationNoticeKinds.EconomyAction => Loc.T(L.Moderation.NoticeCoinTitle),
             ModerationNoticeKinds.MarkedSensitive => Loc.T(L.Moderation.NoticeSensitiveTitle),
             ModerationNoticeKinds.NameReset => Loc.T(L.Moderation.NoticeNameResetTitle),
+            ModerationNoticeKinds.WalletFrozen => Loc.T(L.Coin.FrozenTitle),
+            ModerationNoticeKinds.WalletUnfrozen => Loc.T(L.Coin.UnfrozenTitle),
             _ => Loc.T(L.Moderation.NoticeThanksTitle),
         };
     }
@@ -115,6 +127,16 @@ internal static class ModerationNoticeText
         if (notice.Kind == ModerationNoticeKinds.EconomyAction)
         {
             return notice.Detail.Length > 0 ? notice.Detail : Loc.T(L.Moderation.NoticeCoinBody);
+        }
+
+        if (notice.Kind == ModerationNoticeKinds.WalletFrozen)
+        {
+            return WalletFrozenBody(notice);
+        }
+
+        if (notice.Kind == ModerationNoticeKinds.WalletUnfrozen)
+        {
+            return Loc.T(L.Coin.UnfrozenBody);
         }
 
         if (notice.Kind == ModerationNoticeKinds.MarkedSensitive)
@@ -181,6 +203,16 @@ internal static class ModerationNoticeText
 
     public static ConfirmSection[] Sections(ModerationNoticeDto notice)
     {
+        if (notice.Kind == ModerationNoticeKinds.WalletFrozen)
+        {
+            return WalletFrozenSections(notice);
+        }
+
+        if (notice.Kind == ModerationNoticeKinds.WalletUnfrozen)
+        {
+            return new[] { ConfirmSection.Paragraph(Loc.T(L.Coin.UnfrozenBody)) };
+        }
+
         var sections = new List<ConfirmSection>(9);
         AddIntro(sections, notice);
         AddRule(sections, notice);
@@ -380,6 +412,47 @@ internal static class ModerationNoticeText
             "verified" => L.Social.RoleVerified,
             _ => null,
         };
+    }
+
+    private static string WalletFrozenBody(ModerationNoticeDto notice)
+    {
+        var body = new StringBuilder();
+        Append(body, Loc.T(L.Coin.FrozenAlertBody));
+        if (notice.BanUntilUnix is { } until)
+        {
+            Append(body, Loc.T(L.Coin.FrozenUntil, LiftMoment(until)));
+        }
+
+        if (notice.ModeratorNote.Length > 0)
+        {
+            Append(body, Loc.T(L.Moderation.NoticeModeratorNote, notice.ModeratorNote));
+        }
+
+        Append(body, Loc.T(L.Moderation.RemovedFooter));
+        return body.ToString();
+    }
+
+    private static ConfirmSection[] WalletFrozenSections(ModerationNoticeDto notice)
+    {
+        var sections = new List<ConfirmSection>(7)
+        {
+            ConfirmSection.Paragraph(Loc.T(L.Coin.FrozenAlertBody)),
+        };
+        if (notice.BanUntilUnix is { } until)
+        {
+            sections.Add(ConfirmSection.Divider());
+            sections.Add(ConfirmSection.Paragraph(Loc.T(L.Coin.FrozenUntil, LiftMoment(until))));
+        }
+
+        if (notice.ModeratorNote.Length > 0)
+        {
+            sections.Add(ConfirmSection.Divider());
+            sections.Add(ConfirmSection.Labeled(Loc.T(L.Moderation.NoticeModeratorNoteLabel), notice.ModeratorNote));
+        }
+
+        sections.Add(ConfirmSection.Divider());
+        sections.Add(ConfirmSection.Paragraph(Loc.T(L.Moderation.RemovedFooter)));
+        return sections.ToArray();
     }
 
     private static void AppendRule(StringBuilder body, ModerationNoticeDto notice)
