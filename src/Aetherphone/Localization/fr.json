@@ -9209,6 +9209,8 @@
   "casino.tables.columnStack": "Tapis",
   "casino.tables.columnNet": "Net",
   "casino.tables.renameSave": "Enregistrer",
+  "casino.tables.dealNow": "Distribuer maintenant",
+  "casino.tables.dealerClockDeals": "La table distribue à l'horloge",
   "casino.race.title": "Course de chocobos",
   "casino.race.pitch": "Huit oiseaux, une minute pour parier, une course toutes les deux minutes",
   "casino.race.rules1": "Chaque course aligne huit oiseaux. Le tableau affiche pour chacun sa cote, sa cote placé, ses cinq dernières arrivées et combien de joueurs le soutiennent.",

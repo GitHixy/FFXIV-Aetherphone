@@ -11639,6 +11639,8 @@ internal static class L
         public static readonly LocString ColumnStack = new("casino.tables.columnStack", "Stack");
         public static readonly LocString ColumnNet = new("casino.tables.columnNet", "Net");
         public static readonly LocString RenameSave = new("casino.tables.renameSave", "Save");
+        public static readonly LocString DealNow = new("casino.tables.dealNow", "Deal now");
+        public static readonly LocString DealerClockDeals = new("casino.tables.dealerClockDeals", "The table deals on the clock");
     }
 
     internal static class Race

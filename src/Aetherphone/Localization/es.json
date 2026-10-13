@@ -9209,6 +9209,8 @@
   "casino.tables.columnStack": "Pila",
   "casino.tables.columnNet": "Neto",
   "casino.tables.renameSave": "Guardar",
+  "casino.tables.dealNow": "Repartir ahora",
+  "casino.tables.dealerClockDeals": "La mesa reparte con el reloj",
   "casino.race.title": "Carrera de chocobos",
   "casino.race.pitch": "Ocho aves, un minuto para apostar, una carrera cada dos minutos",
   "casino.race.rules1": "Cada carrera tiene ocho aves. El tablero muestra la cuota de cada ave, su cuota de colocado, sus últimas cinco llegadas y cuántos jugadores la respaldan.",

@@ -9209,6 +9209,8 @@
   "casino.tables.columnStack": "Stapel",
   "casino.tables.columnNet": "Netto",
   "casino.tables.renameSave": "Speichern",
+  "casino.tables.dealNow": "Jetzt geben",
+  "casino.tables.dealerClockDeals": "Der Tisch gibt nach der Uhr",
   "casino.race.title": "Chocobo-Rennen",
   "casino.race.pitch": "Acht Vögel, eine Minute zum Wetten, alle zwei Minuten ein Rennen",
   "casino.race.rules1": "Jedes Rennen hat acht Vögel. Die Tafel zeigt für jeden Vogel Quote, Platzquote, die letzten fünf Platzierungen und wie viele Spieler auf ihn setzen.",

@@ -9209,6 +9209,8 @@
   "casino.tables.columnStack": "Stack",
   "casino.tables.columnNet": "Net",
   "casino.tables.renameSave": "Save",
+  "casino.tables.dealNow": "Deal now",
+  "casino.tables.dealerClockDeals": "The table deals on the clock",
   "casino.race.title": "Chocobo race",
   "casino.race.pitch": "Eight birds, a minute to bet, a race every two minutes",
   "casino.race.rules1": "Every race runs eight birds. The tote board shows each bird's odds, place odds, last five finishes and how many players back it.",

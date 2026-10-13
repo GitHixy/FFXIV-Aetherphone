@@ -9209,6 +9209,8 @@
   "casino.tables.columnStack": "Стек",
   "casino.tables.columnNet": "Итог",
   "casino.tables.renameSave": "Сохранить",
+  "casino.tables.dealNow": "Раздать сейчас",
+  "casino.tables.dealerClockDeals": "Стол раздаёт по таймеру",
   "casino.race.title": "Скачки чокобо",
   "casino.race.pitch": "Восемь птиц, минута на ставки, забег каждые две минуты",
   "casino.race.rules1": "В каждом забеге восемь птиц. Табло показывает для каждой коэффициент, коэффициент на призовое место, пять последних финишей и сколько игроков на неё ставят.",
