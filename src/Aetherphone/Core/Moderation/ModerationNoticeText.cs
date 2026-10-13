@@ -69,6 +69,14 @@ internal static class ModerationNoticeText
             || notice.Kind == ModerationNoticeKinds.FrameRevoked;
     }
 
+    private static bool IsRemoveTier(ModerationNoticeDto notice)
+    {
+        return notice.Kind is ModerationNoticeKinds.Warning
+            or ModerationNoticeKinds.ContentRemoved
+            or ModerationNoticeKinds.ProfileMediaRemoved
+            or ModerationNoticeKinds.ProfileTextCleared;
+    }
+
     public static string Title(ModerationNoticeDto notice)
     {
         return notice.Kind switch
@@ -170,7 +178,7 @@ internal static class ModerationNoticeText
             Append(body, Loc.T(L.Moderation.NoticeModeratorNote, notice.ModeratorNote));
         }
 
-        if (notice.Kind == ModerationNoticeKinds.Warning)
+        if (IsRemoveTier(notice))
         {
             Append(body, Loc.T(L.Moderation.NoticeWarningConsequence));
         }
@@ -200,7 +208,7 @@ internal static class ModerationNoticeText
             sections.Add(ConfirmSection.Labeled(Loc.T(L.Moderation.NoticeModeratorNoteLabel), notice.ModeratorNote));
         }
 
-        if (notice.Kind == ModerationNoticeKinds.Warning)
+        if (IsRemoveTier(notice))
         {
             sections.Add(ConfirmSection.Divider());
             sections.Add(ConfirmSection.Paragraph(Loc.T(L.Moderation.NoticeWarningConsequence)));
