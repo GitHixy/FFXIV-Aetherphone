@@ -2361,6 +2361,8 @@ internal static class L
                 "Added every seat's Pairs and 21+3 stakes under its name plate on the blackjack felt, with the result once the hand is revealed"),
             new("changelog.r1300.121",
                 "Added the time bank to blackjack: the seat on its turn shows its longer turns left as pips, as Hold'em does"),
+            new("changelog.r1300.136",
+                "Added buying several raffle tickets at once: type a count and see the total, with the per-person limit shown in the room and on the host sheet"),
             new("changelog.r1300.36",
                 "Overhauled the Floor: your chips, level, bonuses and the free daily spin up top, then Venues, the live rooms, Jump back in, missions, and three shelves: Cards, Machines and Quick bets"),
             new("changelog.r1300.37",
@@ -2399,6 +2401,8 @@ internal static class L
                 "Changed the tournament Hands field to name its 10 to 50 band instead of quietly changing your number"),
             new("changelog.r1300.124",
                 "Changed Start pressed during a hand to queue the tournament: it begins when that hand settles"),
+            new("changelog.r1300.137",
+                "Changed gil raffle tickets to one ledger entry per purchase, so one trade settles the lot instead of one trade per ticket"),
             new("changelog.r1300.47",
                 "Fixed Barkeep practice shifts needing chips to open"),
             new("changelog.r1300.125",
@@ -2425,6 +2429,8 @@ internal static class L
                 "Fixed Lodestone searches waiting behind portrait downloads, which could leave Searching up for a minute"),
             new("changelog.r1300.80",
                 "Fixed the Lodestone chip in People wrapping onto two lines at larger UI scales"),
+            new("changelog.r1300.135",
+                "Fixed a friend's Lodestone profile showing the first friend you opened: each profile now loads by name and home world"),
         };
 
         public static readonly LocString[] Release1300Guidelines =
