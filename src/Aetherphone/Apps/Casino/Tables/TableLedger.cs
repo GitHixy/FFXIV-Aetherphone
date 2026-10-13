@@ -669,13 +669,18 @@ internal sealed class TableLedger
             return;
         }
 
+        if (ledger.Owner && playerIds.Length == 0)
+        {
+            return;
+        }
+
+        if (answered is not null)
+        {
+            trade.Answered(answered);
+        }
+
         if (ledger.Owner)
         {
-            if (playerIds.Length == 0)
-            {
-                return;
-            }
-
             var kind = proposeKind == 0 ? BuyInKindFor(ledger, playerIds[playerIndex]) : CasinoLedgerKinds.Payout;
             tables.ProposeLedgerEntry(roomId, kind, playerIds[playerIndex], amount);
             amountBuffer = string.Empty;

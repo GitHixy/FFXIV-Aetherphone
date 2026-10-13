@@ -153,6 +153,14 @@ internal sealed class CasinoTradeSync : IDisposable
         Handle(offer, misses.LastMiss);
     }
 
+    public void Answered(TradeMiss miss)
+    {
+        if (misses.Answered(miss))
+        {
+            DropProbe();
+        }
+    }
+
     private void Handle(GuestOffer offer, TradeMiss? answered)
     {
         if (misses.Handled(offer, answered, Environment.TickCount64))

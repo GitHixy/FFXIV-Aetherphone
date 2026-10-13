@@ -2,7 +2,7 @@ namespace Aetherphone.Core.Casino;
 
 internal sealed class TradeMissState
 {
-    public const long RepeatWindowMilliseconds = 60_000;
+    public const long RepeatWindowMilliseconds = 15_000;
 
     private volatile TradeMiss? lastMiss;
     private volatile GuestOffer? pendingGuest;
@@ -41,13 +41,23 @@ internal sealed class TradeMissState
     {
         handledGuest = offer;
         handledAtTick = nowTick;
-        pendingGuest = null;
-        if (answered is null || !ReferenceEquals(lastMiss, answered))
+        if (ReferenceEquals(pendingGuest, offer))
+        {
+            pendingGuest = null;
+        }
+
+        return answered is not null && Answered(answered);
+    }
+
+    public bool Answered(TradeMiss miss)
+    {
+        if (!ReferenceEquals(lastMiss, miss))
         {
             return false;
         }
 
         lastMiss = null;
+        pendingGuest = null;
         return true;
     }
 
