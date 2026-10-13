@@ -164,6 +164,11 @@ internal sealed class VenueCabinet : ICabinetIdle
         DrawRibbon(drawList, frame, view, now, session.Attached, scale);
         var knockHeight = Tables.HostKnockBanner.Reserve(venue.Tables, roomId, safe.Width, scale);
         var world = new Rect(new Vector2(safe.Min.X, safe.Min.Y + knockHeight), safe.Max);
+        if (view.Gil)
+        {
+            world = DrawLedgerShortcut(drawList, ui, world, !frame.Blocked, scale);
+        }
+
         if (inlineReason.Length > 0)
         {
             var message = CasinoReasons.Text(inlineReason, 0);
@@ -203,6 +208,23 @@ internal sealed class VenueCabinet : ICabinetIdle
     }
 
     public VenueRoomView? View => venue.ViewFor(roomId);
+
+    private Rect DrawLedgerShortcut(ImDrawListPtr drawList, AppSkin ui, Rect world, bool enabled, float scale)
+    {
+        var label = Loc.T(L.Tables.MyLedgerTitle);
+        var height = Button.RegularHeight * scale;
+        var width = MathF.Min(world.Width, Button.WidthFor(label, ButtonSize.Regular));
+        var rect = new Rect(new Vector2(world.Max.X - width, world.Min.Y),
+            new Vector2(world.Max.X, world.Min.Y + height));
+        if (Button.Draw(drawList, rect, label, ui.Ink, ButtonStyle.Tinted, enabled: enabled,
+                id: "venue.gil.ledger"))
+        {
+            openGilLedger();
+        }
+
+        var top = MathF.Min(world.Max.Y, rect.Max.Y + Metrics.Space.Sm * scale);
+        return new Rect(new Vector2(world.Min.X, top), world.Max);
+    }
 
     private void Act(VenueActDraft draft)
     {

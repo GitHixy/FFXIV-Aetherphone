@@ -238,6 +238,8 @@ The app has four tabs (`CasinoTab`: Floor, Live, Venues (the `Tables` member, ti
 - **Venues** (`TableBrowser`): the venue context card (Your table, At this venue or Host again), Join with a code, My gil ledger, At this venue, then the browser with its filter rail, refresh button and quick seat; the pushed `CasinoScreen.Tables` route carries the same title. Refresh fetches both the hosted-table and Hold'em directories. The session ledger also has a refresh button beside Copy to fetch its latest entries.
 - **Cashier** (`CashierPanel`, shared by the tab and `CashierDrawer`): both balances (wallet coins, bankroll chips and their coin value, the rate), Buy chips (`CashierBuyIn`: any whole number of coins up to the wallet, three one-tap amounts sized to the wallet by `ChipsAmounts.Quick`) and Cash out (`CashierCashOut`: one tap converts every chip, with a check only while a round is still in play). The chips capsule on every stage opens the same drawer and prints the stack's coin value beside it.
 
+Gil venue rooms show a My gil ledger button above the game. It pushes the existing personal ledger without leaving the room, and Back returns to the same room. Practice rooms omit this action.
+
 Missions, challenges, the Hall of Fame and the feed only count real-chip rounds. Hall of Fame boards only name players who opted in through the existing leaderboard flag.
 
 ## Adding a game
