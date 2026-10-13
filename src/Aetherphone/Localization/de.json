@@ -2387,6 +2387,7 @@
   "music.unlove": "Aus Lieblingen entfernen",
   "music.addToLibrary": "Zur Mediathek hinzufügen",
   "music.removeFromLibrary": "Aus Mediathek entfernen",
+  "music.removeFromPlaylist": "Aus Playlist entfernen",
   "music.download": "Herunterladen",
   "music.removeDownload": "Download entfernen",
   "music.goToArtist": "Zum Künstler",

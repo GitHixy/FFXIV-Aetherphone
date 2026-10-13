@@ -2387,6 +2387,7 @@
   "music.unlove": "Sevilenlerden çıkar",
   "music.addToLibrary": "Kitaplığa ekle",
   "music.removeFromLibrary": "Kitaplıktan kaldır",
+  "music.removeFromPlaylist": "Çalma listesinden kaldır",
   "music.download": "İndir",
   "music.removeDownload": "İndirmeyi kaldır",
   "music.goToArtist": "Sanatçıya git",
