@@ -68,6 +68,7 @@ internal sealed class TableLedger
     private int proposeKind;
     private int playerIndex;
     private bool revealRecord;
+    private TradeMiss? prefilledMiss;
 
     public TableLedger(CasinoTablesStore tables, CasinoStore chips, ConfirmService confirm, CasinoTradeSync trade)
     {
@@ -85,6 +86,7 @@ internal sealed class TableLedger
         proposeKind = 0;
         playerIndex = 0;
         viewSource = null;
+        prefilledMiss = null;
         playerRail.Reset();
         tables.RefreshLedgerNow(tableId);
     }
@@ -94,6 +96,7 @@ internal sealed class TableLedger
         roomId = string.Empty;
         viewSource = null;
         amountBuffer = string.Empty;
+        prefilledMiss = null;
         tables.ForgetLedger();
     }
 
@@ -376,6 +379,7 @@ internal sealed class TableLedger
 
     internal void Prefill(TradeMiss miss)
     {
+        prefilledMiss = miss;
         playerIndex = playerIds.Length;
         proposeKind = miss.Incoming ? 0 : 1;
         amountBuffer = miss.Amount.ToString(CultureInfo.InvariantCulture);
@@ -656,9 +660,11 @@ internal sealed class TableLedger
 
     private void Propose(CasinoTableLedgerDto ledger, string myUserId, string hostUserId, long amount, bool guest)
     {
+        var answered = prefilledMiss;
+        prefilledMiss = null;
         if (guest)
         {
-            ProposeGuest(ledger, amount);
+            ProposeGuest(ledger, amount, answered);
             return;
         }
 
@@ -679,7 +685,7 @@ internal sealed class TableLedger
         amountBuffer = string.Empty;
     }
 
-    private void ProposeGuest(CasinoTableLedgerDto ledger, long amount)
+    private void ProposeGuest(CasinoTableLedgerDto ledger, long amount, TradeMiss? answered)
     {
         var offer = GuestLedger.Typed(roomId, guestBuffer, proposeKind != 0, amount,
             ledger.Entries ?? Array.Empty<CasinoLedgerEntryDto>());
@@ -688,8 +694,7 @@ internal sealed class TableLedger
             return;
         }
 
-        tables.ProposeGuestEntry(offer.TableId, offer.LedgerKind, offer.GuestName, offer.Amount,
-            CasinoLedgerKinds.Manual);
+        trade.RecordGuest(offer, answered);
         amountBuffer = string.Empty;
     }
 

@@ -92,12 +92,15 @@ public sealed class TradeContextTests
     [Fact]
     public void TheHostsDoorPageIsTheirTable()
     {
-        var door = new CasinoTableDoorDto(Table, true, Seated: new[] { new CasinoTableSeatedDto(Player, "Xeldar", 0) });
+        var door = new CasinoTableDoorDto(Table, true, Seated: new[] { new CasinoTableSeatedDto(Player, "Xeldar", 0) },
+            Present: new[] { new CasinoTablePresentDto("u-chea", "Chea", true) });
         var view = View(Host, door: door);
         var table = TradeContexts.Locate(view);
         Assert.Equal(Table, table.TableId);
         Assert.Equal(Host, table.HostUserId);
-        Assert.Contains(TradeContexts.Build(table, view).Seats, seat => seat.UserId == Player);
+        var seats = TradeContexts.Build(table, view).Seats;
+        Assert.Contains(seats, seat => seat.UserId == Player);
+        Assert.Contains(seats, seat => seat.UserId == "u-chea" && seat.DisplayName == "Chea");
         Assert.False(TradeContexts.Locate(View(Player, door: door with { Owner = false })).Located);
     }
 
