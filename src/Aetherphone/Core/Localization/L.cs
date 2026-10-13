@@ -2355,6 +2355,12 @@ internal static class L
                 "Added night totals to gil ledgers: gil in and gil out for the session, in the copied text too"),
             new("changelog.r1300.91",
                 "Added Jump back in: a rail of the games you played last"),
+            new("changelog.r1300.119",
+                "Added a stake to dice tables: on a gil dice table, each closed round books what every losing roller owes the winner on the ledger"),
+            new("changelog.r1300.120",
+                "Added every seat's Pairs and 21+3 stakes under its name plate on the blackjack felt, with the result once the hand is revealed"),
+            new("changelog.r1300.121",
+                "Added the time bank to blackjack: the seat on its turn shows its longer turns left as pips, as Hold'em does"),
             new("changelog.r1300.36",
                 "Overhauled the Floor: your chips, level, bonuses and the free daily spin up top, then Venues, the live rooms, Jump back in, missions, and three shelves: Cards, Machines and Quick bets"),
             new("changelog.r1300.37",
@@ -2387,8 +2393,24 @@ internal static class L
                 "Changed the live rail to keep the race, the wheel and bingo on it between rounds"),
             new("changelog.r1300.94",
                 "Changed missions to a capsule that opens a sheet"),
+            new("changelog.r1300.122",
+                "Changed the host's Deal button to Deal now while auto deal is on, with the dealer's deck saying the table deals on the clock"),
+            new("changelog.r1300.123",
+                "Changed the tournament Hands field to name its 10 to 50 band instead of quietly changing your number"),
+            new("changelog.r1300.124",
+                "Changed Start pressed during a hand to queue the tournament: it begins when that hand settles"),
             new("changelog.r1300.47",
                 "Fixed Barkeep practice shifts needing chips to open"),
+            new("changelog.r1300.125",
+                "Fixed a finished tournament staying on the table for good: it clears with the next hand or Stop, and closing the standings dismisses it"),
+            new("changelog.r1300.126",
+                "Fixed the room code card in the table sheet resizing while the sheet scrolls"),
+            new("changelog.r1300.127",
+                "Fixed registered players at a Book or a venue room being offered as guests before their first entry"),
+            new("changelog.r1300.128",
+                "Fixed Record as guest staying on screen after the entry was made, so a second tap could book it twice"),
+            new("changelog.r1300.129",
+                "Fixed gil dice tables refusing buy-ins because a venue room seats nobody"),
         };
 
         public static readonly LocString[] Release1300Linkpearl =
@@ -2418,7 +2440,7 @@ internal static class L
             new("changelog.r1300.74",
                 "Changed the suspension screen and the frozen wallet notice to point to a ticket on the Discord"),
             new("changelog.r1300.75",
-                "Changed moderation warnings to say what a second and a third removal lead to"),
+                "Changed moderation warnings and every removal notice to say what a second and a third removal lead to"),
         };
 
         public static readonly LocString[] Release1300Phone =
@@ -2441,6 +2463,8 @@ internal static class L
                 "Fixed tooltips near the edge of the screen being cut off by the rounded corners and the frame, contributed by t3sco"),
             new("changelog.r1300.100",
                 "Fixed uploaded images with transparent or see-through areas getting harsh glowing edges and black fringes: they now blend smoothly, contributed by Haydooners"),
+            new("changelog.r1300.133",
+                "Fixed the glow around a full-width button, such as Wear on a badge, being cut flat at the sides"),
         };
 
         public static readonly LocString[] Release1300ChirperAethergramVelvet =
@@ -2469,6 +2493,8 @@ internal static class L
         {
             new("changelog.r1300.107",
                 "Added a hint under every daily quest saying exactly what counts"),
+            new("changelog.r1300.130",
+                "Added a wallet freeze notice: a freeze opens on the phone with when it lifts, the moderator's reason and how to open a ticket on the Discord, and the wallet banner says the same"),
             new("changelog.r1300.108",
                 "Changed daily quests to pay on their own once finished, with no Claim button to find"),
             new("changelog.r1300.109",
@@ -2481,12 +2507,14 @@ internal static class L
                 "Fixed a finished quest paying nothing without a word: the reason now shows on the card"),
             new("changelog.r1300.113",
                 "Fixed radio listening not counting when the station had only just gone live"),
+            new("changelog.r1300.131",
+                "Fixed the wallet balance waiting up to a minute to show a freeze or a lift"),
         };
 
         public static readonly LocString[] Release1300Games =
         {
             new("changelog.r1300.114",
-                "Fixed the featured game switching at the wrong hour and lagging behind the day"),
+                "Fixed the featured game, the daily challenge, its countdown and the streak turning over at different hours: they all switch together at 15:00 UTC"),
         };
 
         public static readonly LocString[] Release1300Housing =
@@ -2507,6 +2535,8 @@ internal static class L
         {
             new("changelog.r1300.54",
                 "Fixed hunt markers on the map and minimap covering the whole map in zones with many spawn points, contributed by YozoraCho"),
+            new("changelog.r1300.132",
+                "Fixed the spawn markers being too faint to see since the shrink: each state has a full-size icon, tracked spots get a larger disc, and zones with few spawn points get a bigger one"),
         };
 
         public static readonly LocString[] Release1300Market =
@@ -2523,6 +2553,12 @@ internal static class L
                 "Added Remove from playlist to the song menu inside a playlist, contributed by hellovvn"),
             new("changelog.r1300.99",
                 "Fixed long song titles and artist names in song lists staying cut short: hovering a row now scrolls the full text, contributed by hellovvn"),
+        };
+
+        public static readonly LocString[] Release1300Activity =
+        {
+            new("changelog.r1300.134",
+                "Fixed the Streaks and Trends cards clipping their text at larger text sizes: the cards grow with the text and long labels wrap"),
         };
 
         public static readonly LocString[] Release1200Chirper =

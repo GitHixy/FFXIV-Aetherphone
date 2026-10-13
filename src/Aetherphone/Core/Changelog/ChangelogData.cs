@@ -22,6 +22,7 @@ internal static class ChangelogData
             new(L.Apps.Hunts, L.Changelog.Release1300Hunts),
             new(L.Apps.Market, L.Changelog.Release1300Market),
             new(L.Apps.Music, L.Changelog.Release1300Music),
+            new(L.Character.Activity, L.Changelog.Release1300Activity),
         }),
         new ChangelogEntry("1.2.0.0", "2026-10-08", new ChangelogSection[]
         {
