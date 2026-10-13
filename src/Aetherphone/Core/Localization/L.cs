@@ -2253,6 +2253,17 @@ internal static class L
         public static readonly LocString SectionWidgets = new("changelog.sectionWidgets", "Widgets");
         public static readonly LocString SectionTours = new("changelog.sectionTours", "Setup and tours");
         public static readonly LocString SectionSounds = new("changelog.sectionSounds", "Sounds");
+        public static readonly LocString SectionHalloween = new("changelog.sectionHalloween", "Halloween");
+
+        public static readonly LocString[] Release1300Halloween =
+        {
+            new("changelog.r1300.101",
+                "Added a Halloween theme: night scenes in Chirper, Aethergram and Velvet, bats and mist on the Home Screen, and Halloween icons, wallpapers and sounds, contributed by t3sco"),
+            new("changelog.r1300.102",
+                "Added a treat hunt from 15 October to 2 November: 13 treats hide around the phone, one a day, and finding them all sets your name in Witchfire, contributed by t3sco"),
+            new("changelog.r1300.103",
+                "Added Seasonal Theme under Settings > Appearance: Automatic shows Halloween from 15 October to 2 November, Halloween keeps it all year, and Off turns it off, contributed by t3sco"),
+        };
 
         public static readonly LocString[] Release1300Gamba =
         {
@@ -2454,6 +2465,10 @@ internal static class L
 
         public static readonly LocString[] Release1300Housing =
         {
+            new("changelog.r1300.105",
+                "Redesigned the Housing overview to fit on one screen: a ring counts down the lottery phase, a card counts open plots by size, and each district gets a tile with its loading screen art, contributed by YozoraCho"),
+            new("changelog.r1300.106",
+                "Added a night sky with the district's art behind every Housing screen, contributed by YozoraCho"),
             new("changelog.r1300.53",
                 "Fixed the lottery countdown and its widget showing an ended lottery instead of the unavailable period running now, contributed by YozoraCho"),
         };
@@ -2474,6 +2489,8 @@ internal static class L
 
         public static readonly LocString[] Release1300Music =
         {
+            new("changelog.r1300.104",
+                "Added Remove from playlist to the song menu inside a playlist, contributed by hellovvn"),
             new("changelog.r1300.99",
                 "Fixed long song titles and artist names in song lists staying cut short: hovering a row now scrolls the full text, contributed by hellovvn"),
         };
