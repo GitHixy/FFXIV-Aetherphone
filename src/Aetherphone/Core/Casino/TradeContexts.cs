@@ -123,7 +123,10 @@ internal static class TradeContexts
         if (view.Door is not null && string.Equals(view.Door.RoomId, table.TableId, StringComparison.Ordinal))
         {
             AddSeated(seats, view.Door.Seated);
-            AddPresent(seats, view.Door.Present);
+            if (Seatless(table, view))
+            {
+                AddPresent(seats, view.Door.Present);
+            }
         }
 
         var ledger = view.LedgerFor(table.TableId);
@@ -174,6 +177,11 @@ internal static class TradeContexts
         {
             Add(seats, seated[index].UserId, seated[index].DisplayName);
         }
+    }
+
+    private static bool Seatless(in TradeTableRef table, in TradeTableView view)
+    {
+        return table.Venue || CasinoBookRules.IsBook(view.CardFor(table.TableId)?.GameKind);
     }
 
     private static void AddPresent(List<TradeSeat> seats, CasinoTablePresentDto[]? present)

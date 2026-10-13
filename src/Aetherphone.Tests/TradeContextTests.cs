@@ -100,8 +100,19 @@ public sealed class TradeContextTests
         Assert.Equal(Host, table.HostUserId);
         var seats = TradeContexts.Build(table, view).Seats;
         Assert.Contains(seats, seat => seat.UserId == Player);
-        Assert.Contains(seats, seat => seat.UserId == "u-chea" && seat.DisplayName == "Chea");
+        Assert.DoesNotContain(seats, seat => seat.UserId == "u-chea");
         Assert.False(TradeContexts.Locate(View(Player, door: door with { Owner = false })).Located);
+
+        var bookView = View(Host, door: door with { RoomId = Book });
+        var book = TradeContexts.Locate(bookView);
+        Assert.Equal(Book, book.TableId);
+        Assert.Contains(TradeContexts.Build(book, bookView).Seats,
+            seat => seat.UserId == "u-chea" && seat.DisplayName == "Chea");
+
+        var raffleView = View(Host, door: door with { RoomId = Raffle });
+        var raffle = TradeContexts.Locate(raffleView);
+        Assert.True(raffle.Venue);
+        Assert.Contains(TradeContexts.Build(raffle, raffleView).Seats, seat => seat.UserId == "u-chea");
     }
 
     [Fact]

@@ -240,6 +240,8 @@ public sealed class TradeMatchFlowTests
     [Fact]
     public void RecordingOrDismissingAGuestClearsTheMissAndHoldsOffARepeat()
     {
+        Assert.Equal(15_000, TradeMissState.RepeatWindowMilliseconds);
+        Assert.True(TradeMissState.RepeatWindowMilliseconds > TradeSyncTracker.SettleWindowMilliseconds);
         var misses = new TradeMissState();
         var miss = new TradeMiss(Table, 50_000, 1_000, "Chea Thorne", true);
         var offer = GuestLedger.Offer(miss, true, Array.Empty<CasinoLedgerEntryDto>());
@@ -280,9 +282,14 @@ public sealed class TradeMatchFlowTests
         var typed = new GuestOffer(Table, "Rhan Oda", CasinoLedgerKinds.Payout, 20_000, false);
         Assert.False(misses.Handled(typed, null, 1_500));
         Assert.Same(miss, misses.LastMiss);
-        Assert.Null(misses.PendingGuest);
-        Assert.False(misses.Handled(offer, new TradeMiss(Table, 50_000, 900, "Chea Thorne", true), 1_600));
+        Assert.Same(offer, misses.PendingGuest);
+        Assert.False(misses.Handled(offer with { Amount = 45_000 },
+            new TradeMiss(Table, 50_000, 900, "Chea Thorne", true), 1_600));
         Assert.Same(miss, misses.LastMiss);
+        Assert.Same(offer, misses.PendingGuest);
+        Assert.False(misses.Handled(offer, null, 1_650));
+        Assert.Same(miss, misses.LastMiss);
+        Assert.Null(misses.PendingGuest);
         Assert.True(misses.Handled(offer with { Amount = 45_000 }, miss, 1_700));
         Assert.Null(misses.LastMiss);
 
@@ -290,6 +297,27 @@ public sealed class TradeMatchFlowTests
         misses.Clear();
         Assert.Null(misses.LastMiss);
         Assert.Null(misses.PendingGuest);
+    }
+
+    [Fact]
+    public void RecordingTheMissAgainstARegisteredPlayerClearsTheMissAndItsOffer()
+    {
+        var misses = new TradeMissState();
+        var miss = new TradeMiss(Table, 50_000, 1_000, "Chea Thorne", true);
+        var offer = GuestLedger.Offer(miss, true, Array.Empty<CasinoLedgerEntryDto>());
+        Assert.True(misses.Miss(miss, offer, miss.AtTick));
+
+        Assert.False(misses.Answered(new TradeMiss(Table, 50_000, 900, "Chea Thorne", true)));
+        Assert.Same(miss, misses.LastMiss);
+        Assert.Same(offer, misses.PendingGuest);
+        Assert.True(misses.Answered(miss));
+        Assert.Null(misses.LastMiss);
+        Assert.Null(misses.PendingGuest);
+        Assert.False(misses.Answered(miss));
+
+        var again = miss with { AtTick = 2_000 };
+        Assert.True(misses.Miss(again, offer, again.AtTick));
+        Assert.Same(again, misses.LastMiss);
     }
 
     [Fact]
