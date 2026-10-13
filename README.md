@@ -109,6 +109,8 @@ Aethernet opened on 2 July 2026. By the end of the season, players on 113 worlds
 
 One Aethernet account signs you in to every social app, and each app can keep its own display name and username.
 
+Transparent images shared in Chirper, Aethergram and Velvet posts keep their clear backgrounds and soft edges. Stories and social comment attachments preserve transparency too.
+
 ## Watch, listen and play together
 
 <table>
