@@ -58,6 +58,17 @@ internal sealed class TradeMissState
         return answered is not null && Answered(answered);
     }
 
+    public bool TryRecord(GuestOffer offer, TradeMiss? answered, long nowTick)
+    {
+        if (answered is not null && !ReferenceEquals(lastMiss, answered))
+        {
+            return false;
+        }
+
+        Handled(offer, answered, nowTick);
+        return true;
+    }
+
     public bool Answered(TradeMiss miss)
     {
         if (!ReferenceEquals(lastMiss, miss))

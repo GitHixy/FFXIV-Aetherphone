@@ -301,6 +301,35 @@ public sealed class TradeMatchFlowTests
     }
 
     [Fact]
+    public void AGuestFormPrefilledBeforeALateRegisteredMatchCannotRecordTheTradeAgain()
+    {
+        var misses = new TradeMissState();
+        var miss = new TradeMiss(Table, 50_000, 1_000, "Chea Thorne", true);
+        var offer = GuestLedger.Offer(miss, true, Array.Empty<CasinoLedgerEntryDto>())!;
+        Assert.True(misses.Miss(miss, offer, miss.AtTick));
+        misses.DeferGuest(2_000);
+        var prefilled = misses.LastMiss;
+
+        var waiting = new CasinoLedgerEntryDto("late", Table, CasinoLedgerKinds.BuyIn, 50_000,
+            Player, "Chea Thorne", Host, "Ciri", PayerConfirmed: true);
+        Assert.Equal(TradeProposalKind.Confirm,
+            TradeMatchFlow.WaitingOnHost(prefilled!, Host, new[] { waiting }).Kind);
+        misses.Clear();
+        Assert.False(misses.TryRecord(offer, prefilled, 3_000));
+        Assert.False(misses.Answered(prefilled!));
+
+        var nextMiss = miss with { Amount = 60_000, AtTick = 4_000 };
+        var nextOffer = GuestLedger.Offer(nextMiss, true, Array.Empty<CasinoLedgerEntryDto>())!;
+        Assert.True(misses.Miss(nextMiss, nextOffer, nextMiss.AtTick));
+        Assert.False(misses.TryRecord(offer, prefilled, 5_000));
+        Assert.Same(nextMiss, misses.LastMiss);
+        Assert.Same(nextOffer, misses.PendingGuest);
+        Assert.True(misses.TryRecord(nextOffer, nextMiss, 6_000));
+        Assert.Null(misses.LastMiss);
+        Assert.True(misses.TryRecord(offer, null, 7_000));
+    }
+
+    [Fact]
     public void TheLedgerButtonClearsOnlyTheMissItWasFilledFrom()
     {
         var misses = new TradeMissState();

@@ -107,6 +107,7 @@ internal sealed class TableLedger
             return;
         }
 
+        DiscardResolvedPrefill();
         tables.EnsureLedgerFresh(roomId);
         if (tables.TakeIntentFailure())
         {
@@ -392,6 +393,20 @@ internal sealed class TableLedger
         revealRecord = true;
     }
 
+    private bool DiscardResolvedPrefill()
+    {
+        if (prefilledMiss is null || ReferenceEquals(prefilledMiss, trade.LastMiss))
+        {
+            return false;
+        }
+
+        prefilledMiss = null;
+        amountBuffer = string.Empty;
+        guestBuffer = string.Empty;
+        revealRecord = false;
+        return true;
+    }
+
     internal static bool CanCopy(CasinoTableLedgerDto ledger, bool book)
     {
         return (ledger.Rows?.Length ?? 0) > 0 || (book && (ledger.Entries?.Length ?? 0) > 0);
@@ -661,6 +676,11 @@ internal sealed class TableLedger
 
     private void Propose(CasinoTableLedgerDto ledger, string myUserId, string hostUserId, long amount, bool guest)
     {
+        if (DiscardResolvedPrefill())
+        {
+            return;
+        }
+
         var answered = prefilledMiss;
         prefilledMiss = null;
         if (guest)
@@ -674,9 +694,10 @@ internal sealed class TableLedger
             return;
         }
 
-        if (answered is not null)
+        if (answered is not null && !trade.Answered(answered))
         {
-            trade.Answered(answered);
+            amountBuffer = string.Empty;
+            return;
         }
 
         if (ledger.Owner)
