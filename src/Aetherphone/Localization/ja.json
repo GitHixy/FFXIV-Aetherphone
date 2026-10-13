@@ -9213,6 +9213,8 @@
   "casino.tables.columnStack": "スタック",
   "casino.tables.columnNet": "収支",
   "casino.tables.renameSave": "保存",
+  "casino.tables.dealNow": "今すぐ配る",
+  "casino.tables.dealerClockDeals": "テーブルはタイマーで配ります",
   "casino.race.title": "チョコボレース",
   "casino.race.pitch": "8羽の鳥、ベットは1分、レースは2分ごと",
   "casino.race.rules1": "各レースは8羽で走ります。オッズボードには各鳥の単勝オッズ、複勝オッズ、直近5走の着順、応援しているプレイヤー数が表示されます。",

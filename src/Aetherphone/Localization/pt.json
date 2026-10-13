@@ -9213,6 +9213,8 @@
   "casino.tables.columnStack": "Pilha",
   "casino.tables.columnNet": "Líquido",
   "casino.tables.renameSave": "Salvar",
+  "casino.tables.dealNow": "Dar cartas agora",
+  "casino.tables.dealerClockDeals": "A mesa dá as cartas pelo relógio",
   "casino.race.title": "Corrida de chocobos",
   "casino.race.pitch": "Oito aves, um minuto para apostar, uma corrida a cada dois minutos",
   "casino.race.rules1": "Cada corrida tem oito aves. O quadro mostra a cotação de cada ave, a cotação de colocado, as últimas cinco chegadas e quantos jogadores apostam nela.",

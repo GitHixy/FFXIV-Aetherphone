@@ -9213,6 +9213,8 @@
   "casino.tables.columnStack": "筹码",
   "casino.tables.columnNet": "净值",
   "casino.tables.renameSave": "保存",
+  "casino.tables.dealNow": "立即发牌",
+  "casino.tables.dealerClockDeals": "本桌按计时自动发牌",
   "casino.race.title": "陆行鸟赛跑",
   "casino.race.pitch": "八只鸟，一分钟下注，每两分钟一场比赛",
   "casino.race.rules1": "每场比赛有八只鸟出赛。赔率板显示每只鸟的独赢赔率、位置赔率、最近五场名次以及支持它的玩家人数。",

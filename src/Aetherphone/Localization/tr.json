@@ -9213,6 +9213,8 @@
   "casino.tables.columnStack": "Yığın",
   "casino.tables.columnNet": "Net",
   "casino.tables.renameSave": "Kaydet",
+  "casino.tables.dealNow": "Şimdi dağıt",
+  "casino.tables.dealerClockDeals": "Masa saate göre dağıtır",
   "casino.race.title": "Chocobo yarışı",
   "casino.race.pitch": "Sekiz kuş, bahis için bir dakika, her iki dakikada bir yarış",
   "casino.race.rules1": "Her yarışta sekiz kuş koşar. Tabela her kuşun oranını, plase oranını, son beş derecesini ve ona kaç oyuncunun oynadığını gösterir.",
