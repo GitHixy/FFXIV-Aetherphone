@@ -50,34 +50,35 @@ internal sealed class TradeMissState
     {
         handledGuest = offer;
         handledAtTick = nowTick;
-        if (ReferenceEquals(pendingGuest, offer))
-        {
-            pendingGuest = null;
-        }
+        Interlocked.CompareExchange(ref pendingGuest, null, offer);
 
         return answered is not null && Answered(answered);
     }
 
     public bool TryRecord(GuestOffer offer, TradeMiss? answered, long nowTick)
     {
-        if (answered is not null && !ReferenceEquals(lastMiss, answered))
+        if (answered is not null && !Answered(answered))
         {
             return false;
         }
 
-        Handled(offer, answered, nowTick);
+        Handled(offer, null, nowTick);
         return true;
     }
 
     public bool Answered(TradeMiss miss)
     {
-        if (!ReferenceEquals(lastMiss, miss))
+        var offer = pendingGuest;
+        if (!ReferenceEquals(Interlocked.CompareExchange(ref lastMiss, null, miss), miss))
         {
             return false;
         }
 
-        lastMiss = null;
-        pendingGuest = null;
+        if (offer is not null)
+        {
+            Interlocked.CompareExchange(ref pendingGuest, null, offer);
+        }
+
         return true;
     }
 
