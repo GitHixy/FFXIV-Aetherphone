@@ -37,6 +37,15 @@ internal sealed class TradeMissState
         return Interlocked.Exchange(ref pendingGuest, null);
     }
 
+    public void DeferGuest(long nowTick)
+    {
+        var offer = TakeGuest();
+        if (offer is not null)
+        {
+            Handled(offer, null, nowTick);
+        }
+    }
+
     public bool Handled(GuestOffer offer, TradeMiss? answered, long nowTick)
     {
         handledGuest = offer;

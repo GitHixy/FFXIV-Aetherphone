@@ -144,13 +144,7 @@ internal sealed class CasinoTradeSync : IDisposable
 
     public void DismissGuest()
     {
-        var offer = misses.TakeGuest();
-        if (offer is null)
-        {
-            return;
-        }
-
-        Handle(offer, misses.LastMiss);
+        misses.DeferGuest(Environment.TickCount64);
     }
 
     public void Answered(TradeMiss miss)
