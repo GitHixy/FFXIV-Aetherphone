@@ -75,6 +75,33 @@ public sealed class HuntsMapMarkerRadiusTests
     }
 
     [Fact]
+    public void AFateBesideASparseCandidateDoesNotShrinkTheDisc()
+    {
+        var points = new[]
+        {
+            Candidate(100f, 100f),
+            new HuntsMapMarkerPoint(110f, 100f, HuntsMapMarkerState.FateActive),
+            new HuntsMapMarkerPoint(400f, 95f, HuntsMapMarkerState.FateInactive),
+            Candidate(400f, 100f),
+        };
+
+        Assert.Equal(120, HuntsMapMarkerRadius.CandidateFor(points, FullScale));
+    }
+
+    [Fact]
+    public void FatesAloneLeaveTheLargestDisc()
+    {
+        var points = new[]
+        {
+            new HuntsMapMarkerPoint(100f, 100f, HuntsMapMarkerState.FateActive),
+            new HuntsMapMarkerPoint(120f, 100f, HuntsMapMarkerState.FateInactive),
+            Candidate(900f, 900f),
+        };
+
+        Assert.Equal(HuntsMapMarkerRadius.CandidateMaximum, HuntsMapMarkerRadius.CandidateFor(points, FullScale));
+    }
+
+    [Fact]
     public void OverlappingPointsStayAtTheFloor()
     {
         var points = new[] { Candidate(700f, 700f), Candidate(700f, 700f) };
