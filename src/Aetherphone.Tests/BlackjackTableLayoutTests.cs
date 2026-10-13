@@ -399,7 +399,7 @@ public sealed class BlackjackTableLayoutTests
 
     [Theory]
     [MemberData(nameof(ScaleData))]
-    public void TimeBankPipsSitInsideTheTurnRingAtTheFootOfThePuck(float scale)
+    public void TimeBankPipsSitInsideTheTurnRingAtTheCrownOfThePuck(float scale)
     {
         var puck = new Vector2(100f, 200f);
         var pucks = new[]
@@ -415,12 +415,31 @@ public sealed class BlackjackTableLayoutTests
             var halfHeight = BlackjackTableArt.TimeBankPipHalfHeight(scale);
             var halfWidth = BlackjackTableArt.TimeBankPipHalfWidth(CasinoHostingRules.TimeBankUses, scale);
             Assert.Equal(puck.X, center.X, 3);
-            Assert.True(center.Y - halfHeight > puck.Y);
-            Assert.True(center.Y + halfHeight <= puck.Y + radius + Epsilon);
-            var cornerDrop = center.Y + halfHeight - puck.Y;
-            Assert.True(MathF.Sqrt(halfWidth * halfWidth + cornerDrop * cornerDrop) <= ring + Epsilon);
+            Assert.True(center.Y + halfHeight < puck.Y);
+            Assert.True(center.Y - halfHeight >= puck.Y - radius - Epsilon);
+            var cornerRise = puck.Y - (center.Y - halfHeight);
+            Assert.True(MathF.Sqrt(halfWidth * halfWidth + cornerRise * cornerRise) <= ring + Epsilon);
             Assert.True(halfWidth * 2f <= radius * 2f);
         }
+    }
+
+    [Theory]
+    [MemberData(nameof(ScaleData))]
+    public void TimeBankPipsClearTheBalanceTitleOfASharkSeat(float scale)
+    {
+        var puck = new Vector2(100f, 200f);
+        var radius = BlackjackTableLayout.RailPuckRadius * scale;
+        var title = StatusTitle.For(StatusTitle.Shark);
+        Assert.NotEqual(BalanceTitle.None, title);
+        var badgeHalf = StatusTitle.PillHeight(title, scale) * 0.5f;
+        Assert.True(badgeHalf > 0f);
+        var badgeCenter = BlackjackTableLayout.RailTitleCenter(puck, radius, scale);
+        var badgeTop = badgeCenter.Y - badgeHalf;
+        Assert.True(badgeCenter.Y + badgeHalf > puck.Y + radius);
+        var pips = BlackjackTableLayout.TimeBankPips(puck, radius, scale);
+        var pipBottom = pips.Y + BlackjackTableArt.TimeBankPipHalfHeight(scale);
+        Assert.True(pipBottom < badgeTop);
+        Assert.True(pipBottom < puck.Y);
     }
 
     [Fact]
