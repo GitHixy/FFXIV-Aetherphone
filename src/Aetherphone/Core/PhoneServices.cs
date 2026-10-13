@@ -416,7 +416,7 @@ internal sealed class PhoneServices : IDisposable
         var accountState = new AccountStateService(aethernetSession, aethernet.Account, framework, visibility,
             realtimeSignals);
         var moderationPresenter = new ModerationNoticePresenter(moderationNotices, confirm, notifications,
-            accountState, framework);
+            accountState, coins, framework);
         var moderationArchive = new ModerationNoticeArchive(aethernetSession, aethernet.Account);
         var safetyLauncher = new SafetyLauncher();
         var casinoRooms = new Casino.CasinoRoomsStore(aethernetSession, casinoApi.Casino, casino, visibility,
