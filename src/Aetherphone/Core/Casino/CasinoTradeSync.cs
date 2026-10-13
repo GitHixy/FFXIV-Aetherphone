@@ -24,14 +24,13 @@ internal sealed class CasinoTradeSync : IDisposable
     private readonly TradeSyncTracker tracker = new();
     private readonly TradeTableMemory memory = new();
     private readonly TradeProposalQueue queue = new();
+    private readonly TradeMatchState matchState = new();
     private readonly TradeMissState misses = new();
     private readonly ITradeMatchSource source;
     private readonly StoreWork work = new("CasinoTradeSync");
     private readonly Func<string, CasinoTableRowDto?> cardFor;
     private readonly Func<string, CasinoTableLedgerDto?> ledgerFor;
 
-    private volatile TradeMatchHolder? serverAnswer;
-    private int matching;
     private bool wasOpen;
     private long locatedAtTick;
     private TradeCompletion? heldCompletion;
@@ -218,13 +217,13 @@ internal sealed class CasinoTradeSync : IDisposable
         }
 
         wasOpen = sample.Open;
-        var answered = Interlocked.Exchange(ref serverAnswer, null);
+        var answered = matchState.TakeAnswer();
         if (answered is not null)
         {
             Answered(answered);
         }
 
-        if (heldCompletion is { } held && Volatile.Read(ref matching) == 0)
+        if (heldCompletion is { } held && !matchState.Busy)
         {
             heldCompletion = null;
             AepLog.Info("[TradeSync] The server match finished, matching the trade that waited for it");
@@ -264,7 +263,7 @@ internal sealed class CasinoTradeSync : IDisposable
         }
 
         var partner = GuestLedger.PartnerNameOf(completion);
-        if (Interlocked.Exchange(ref matching, 1) != 0)
+        if (!matchState.TryBegin())
         {
             if (heldCompletion is null)
             {
@@ -280,15 +279,10 @@ internal sealed class CasinoTradeSync : IDisposable
         }
 
         AepLog.Info($"[TradeSync] No display name matched at table {context.TableId}, asking the server");
-        work.Run("trade match", async token =>
-        {
-            var result = await TradeMatchFlow.ServerAsync(source, completion, context, token).ConfigureAwait(false);
-            Interlocked.Exchange(ref serverAnswer,
-                new TradeMatchHolder(result, context.MyUserId, context.TableId, completion.Net, partner));
-        }, () => Interlocked.Exchange(ref matching, 0));
+        work.Run("trade match", token => matchState.RunAsync(source, completion, context, token));
     }
 
-    private void Answered(TradeMatchHolder answered)
+    private void Answered(TradeMatchAnswer answered)
     {
         if (!string.Equals(answered.AccountId, session.CurrentUser?.Id, StringComparison.Ordinal))
         {
@@ -447,7 +441,4 @@ internal sealed class CasinoTradeSync : IDisposable
         work.Dispose();
         reader.Dispose();
     }
-
-    private sealed record TradeMatchHolder(TradeMatchResult Result, string AccountId, string TableId, long Net,
-        string PartnerName);
 }

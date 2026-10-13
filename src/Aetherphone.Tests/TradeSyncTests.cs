@@ -50,6 +50,152 @@ public sealed class TradeSyncTests
     }
 
     [Fact]
+    public void OpeningTheNextTradeDoesNotDiscardThePreviousWalletUpdate()
+    {
+        var tracker = new TradeSyncTracker();
+        tracker.Observe(new TradeWindowSample(true, MiraWindow, 0, 500_000, 1_000_000, true), 0);
+        Assert.Null(tracker.Observe(Closed(1_000_000), 100));
+
+        var first = tracker.Observe(Open(HostWindow, 100_000, 0, 1_500_000), 200);
+        Assert.NotNull(first);
+        Assert.Equal(500_000, first.Value.Received);
+        Assert.Equal(0, first.Value.Sent);
+        Assert.Same(MiraWindow, first.Value.NameCandidates);
+        Assert.True(first.Value.PartnerRead);
+        Assert.Equal(TradeTrackerStage.Open, tracker.Stage);
+
+        var second = tracker.Observe(Closed(1_400_000), 300);
+        Assert.NotNull(second);
+        Assert.Equal(0, second.Value.Received);
+        Assert.Equal(100_000, second.Value.Sent);
+        Assert.Same(HostWindow, second.Value.NameCandidates);
+        Assert.False(second.Value.PartnerRead);
+        Assert.Equal(TradeTrackerStage.Idle, tracker.Stage);
+    }
+
+    [Fact]
+    public void OpeningAfterACancelledOrExpiredTradeDoesNotCreateAPreviousCompletion()
+    {
+        var tracker = new TradeSyncTracker();
+        tracker.Observe(Open(MiraWindow, 0, 500_000, 1_000_000), 0);
+        tracker.Observe(Closed(1_000_000), 100);
+        Assert.Null(tracker.Observe(Open(HostWindow, 100_000, 0, 1_000_000), 200));
+        Assert.Equal(100_000, tracker.Observe(Closed(900_000), 300)!.Value.Sent);
+
+        tracker.Observe(Open(MiraWindow, 0, 500_000, 900_000), 400);
+        tracker.Observe(Closed(900_000), 500);
+        Assert.Null(tracker.Observe(Open(HostWindow, 100_000, 0, 1_400_000),
+            501 + TradeSyncTracker.SettleWindowMilliseconds));
+        Assert.Equal(100_000, tracker.Observe(Closed(1_300_000),
+            600 + TradeSyncTracker.SettleWindowMilliseconds)!.Value.Sent);
+    }
+
+    [Fact]
+    public void ThePreviousWalletUpdateCanArriveWhileTheNextTradeIsAlreadyOpen()
+    {
+        var tracker = new TradeSyncTracker();
+        tracker.Observe(new TradeWindowSample(true, MiraWindow, 0, 500_000, 1_000_000, true), 0);
+        Assert.Null(tracker.Observe(Closed(1_000_000), 100));
+        Assert.Null(tracker.Observe(Open(HostWindow, 100_000, 0, 1_000_000), 200));
+
+        var first = tracker.Observe(Open(HostWindow, 100_000, 0, 1_500_000), 300);
+        Assert.NotNull(first);
+        Assert.Equal(500_000, first.Value.Received);
+        Assert.Same(MiraWindow, first.Value.NameCandidates);
+        Assert.True(first.Value.PartnerRead);
+        Assert.Equal(TradeTrackerStage.Open, tracker.Stage);
+
+        var second = tracker.Observe(Closed(1_400_000), 400);
+        Assert.NotNull(second);
+        Assert.Equal(100_000, second.Value.Sent);
+        Assert.Equal(0, second.Value.Received);
+        Assert.Same(HostWindow, second.Value.NameCandidates);
+        Assert.Equal(TradeTrackerStage.Idle, tracker.Stage);
+    }
+
+    [Fact]
+    public void CombinedWalletUpdatesDoNotBecomeTheNextPlayersTradeAfterThePreviousOneExpires()
+    {
+        var tracker = new TradeSyncTracker();
+        tracker.Observe(Open(MiraWindow, 0, 500_000, 1_000_000), 0);
+        tracker.Observe(Closed(1_000_000), 100);
+        tracker.Observe(Open(HostWindow, 100_000, 0, 1_000_000), 200);
+
+        Assert.Null(tracker.Observe(Closed(1_400_000), 300));
+        Assert.Null(tracker.Observe(Closed(1_400_000), 101 + TradeSyncTracker.SettleWindowMilliseconds));
+        Assert.Null(tracker.Observe(Closed(1_400_000), 301 + TradeSyncTracker.SettleWindowMilliseconds));
+        Assert.Equal(TradeTrackerStage.Idle, tracker.Stage);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(500_000)]
+    public void IdenticalOffersCannotAttributeTheNextPaymentToACancelledPreviousTrade(long initialOffer)
+    {
+        var tracker = new TradeSyncTracker();
+        tracker.Observe(Open(MiraWindow, 0, 500_000, 1_000_000), 0);
+        tracker.Observe(Closed(1_000_000), 100);
+        tracker.Observe(Open(HostWindow, 0, initialOffer, 1_000_000), 200);
+
+        Assert.Null(tracker.Observe(Open(HostWindow, 0, 500_000, 1_500_000), 300));
+        Assert.Null(tracker.Observe(Closed(1_500_000), 400));
+        Assert.Null(tracker.Observe(Closed(1_500_000), 101 + TradeSyncTracker.SettleWindowMilliseconds));
+        Assert.Null(tracker.Observe(Closed(1_500_000), 401 + TradeSyncTracker.SettleWindowMilliseconds));
+        Assert.Equal(TradeTrackerStage.Idle, tracker.Stage);
+    }
+
+    [Fact]
+    public void CompletingAnOlderTradeAsAnotherOpensPreservesTheInterveningTrade()
+    {
+        var tracker = new TradeSyncTracker();
+        var thirdNames = new[] { "Third Player" };
+        tracker.Observe(Open(MiraWindow, 0, 500_000, 1_000_000), 0);
+        tracker.Observe(Closed(1_000_000), 100);
+        tracker.Observe(Open(HostWindow, 100_000, 0, 1_000_000), 200);
+        tracker.Observe(Closed(1_000_000), 300);
+
+        var first = tracker.Observe(Open(thirdNames, 0, 200_000, 1_500_000), 400);
+        Assert.NotNull(first);
+        Assert.Same(MiraWindow, first.Value.NameCandidates);
+        Assert.Equal(500_000, first.Value.Received);
+
+        var second = tracker.Observe(Open(thirdNames, 0, 200_000, 1_400_000), 500);
+        Assert.NotNull(second);
+        Assert.Same(HostWindow, second.Value.NameCandidates);
+        Assert.Equal(100_000, second.Value.Sent);
+
+        var third = tracker.Observe(Closed(1_600_000), 600);
+        Assert.NotNull(third);
+        Assert.Same(thirdNames, third.Value.NameCandidates);
+        Assert.Equal(200_000, third.Value.Received);
+    }
+
+    [Fact]
+    public void MoreThanTwoUnresolvedTradesCannotAssignAnOlderPaymentToTheLatestPlayer()
+    {
+        var tracker = new TradeSyncTracker();
+        var thirdNames = new[] { "Third Player" };
+        tracker.Observe(Open(MiraWindow, 0, 500_000, 1_000_000), 0);
+        tracker.Observe(Closed(1_000_000), 100);
+        tracker.Observe(Open(HostWindow, 100_000, 0, 1_000_000), 200);
+        tracker.Observe(Closed(1_000_000), 300);
+        tracker.Observe(Open(thirdNames, 0, 200_000, 1_000_000), 400);
+
+        Assert.Null(tracker.Observe(Open(thirdNames, 0, 200_000, 1_500_000), 500));
+        Assert.Null(tracker.Observe(Closed(1_600_000), 600));
+        Assert.Null(tracker.Observe(Closed(1_600_000), 601 + TradeSyncTracker.SettleWindowMilliseconds));
+        Assert.Equal(TradeTrackerStage.Idle, tracker.Stage);
+
+        tracker.Observe(Open(MiraWindow, 0, 100_000, 1_600_000),
+            700 + TradeSyncTracker.SettleWindowMilliseconds);
+        var recovered = tracker.Observe(Closed(1_700_000),
+            800 + TradeSyncTracker.SettleWindowMilliseconds);
+        Assert.NotNull(recovered);
+        Assert.Same(MiraWindow, recovered.Value.NameCandidates);
+        Assert.Equal(100_000, recovered.Value.Received);
+    }
+
+    [Fact]
     public void SwappedOfferSidesStillMatchTheWallet()
     {
         var tracker = new TradeSyncTracker();

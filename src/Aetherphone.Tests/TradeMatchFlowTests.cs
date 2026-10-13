@@ -416,6 +416,61 @@ public sealed class TradeMatchFlowTests
         Assert.Equal("Ciri", answer.CounterpartyName);
     }
 
+    [Fact]
+    public async Task ASecondMatchWaitsUntilTheFirstAnswerHasBeenConsumed()
+    {
+        var state = new TradeMatchState();
+        Assert.True(state.TryBegin());
+        Assert.True(state.Busy);
+        Assert.Null(state.TakeAnswer());
+        Assert.False(state.TryBegin());
+        await state.RunAsync(new FakeMatchSource(Matched(Player, "Xeldar", true)),
+            new TradeCompletion(CharacterWindow, 50_000, 0, true), HostContext(), CancellationToken.None);
+
+        Assert.True(state.Busy);
+        Assert.False(state.TryBegin());
+        var first = state.TakeAnswer();
+        Assert.NotNull(first);
+        Assert.Equal(50_000, first.Result.Proposal.Amount);
+        Assert.Equal(Host, first.AccountId);
+        Assert.Equal(Table, first.TableId);
+        Assert.False(state.Busy);
+        Assert.Null(state.TakeAnswer());
+
+        Assert.True(state.TryBegin());
+        await state.RunAsync(new FakeMatchSource(Matched(Player, "Xeldar", true)),
+            new TradeCompletion(CharacterWindow, 0, 25_000), HostContext(), CancellationToken.None);
+        Assert.False(state.TryBegin());
+        var second = state.TakeAnswer();
+        Assert.NotNull(second);
+        Assert.Equal(25_000, second.Result.Proposal.Amount);
+        Assert.Equal(CasinoLedgerKinds.Payout, second.Result.Proposal.LedgerKind);
+        Assert.False(state.Busy);
+    }
+
+    [Fact]
+    public async Task AFailedMatchStillProducesAnAnswerAndReleasesTheNextTradeWhenConsumed()
+    {
+        var state = new TradeMatchState();
+        Assert.True(state.TryBegin());
+        await Assert.ThrowsAsync<InvalidOperationException>(() => state.RunAsync(new ThrowingMatchSource(),
+            new TradeCompletion(CharacterWindow, 50_000, 0), HostContext(), CancellationToken.None));
+        Assert.True(state.Busy);
+        Assert.False(state.TryBegin());
+        Assert.Equal(TradeMatchRoute.Unreachable, state.TakeAnswer()!.Result.Route);
+        Assert.False(state.Busy);
+        Assert.True(state.TryBegin());
+    }
+
+    private sealed class ThrowingMatchSource : ITradeMatchSource
+    {
+        public Task<CasinoLedgerTradeMatchDto?> MatchTradeAsync(string roomId, CasinoLedgerTradeMatchRequest request,
+            CancellationToken token, Action<AepFailure>? onFailure = null)
+        {
+            throw new InvalidOperationException("Match failed");
+        }
+    }
+
     private sealed class FakeMatchSource : ITradeMatchSource
     {
         private readonly CasinoLedgerTradeMatchDto? answer;
