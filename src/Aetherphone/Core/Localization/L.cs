@@ -2401,6 +2401,8 @@ internal static class L
                 "Changed the tournament Hands field to name its 10 to 50 band instead of quietly changing your number"),
             new("changelog.r1300.124",
                 "Changed Start pressed during a hand to queue the tournament: it begins when that hand settles"),
+            new("changelog.r1300.139",
+                "Changed the Venues app to pick up a table newly hosted at a venue within half a minute instead of up to a minute later"),
             new("changelog.r1300.137",
                 "Changed gil raffle tickets to one ledger entry per purchase, so one trade settles the lot instead of one trade per ticket"),
             new("changelog.r1300.47",
@@ -2415,6 +2417,8 @@ internal static class L
                 "Fixed Record as guest staying on screen after the entry was made, so a second tap could book it twice"),
             new("changelog.r1300.129",
                 "Fixed gil dice tables refusing buy-ins because a venue room seats nobody"),
+            new("changelog.r1300.138",
+                "Fixed a table pinned to a venue staying hidden while Who can join was Invite only: the host sheet now says it will not be listed until you pick Ask to join or Open, and asks you to stand on the plot"),
         };
 
         public static readonly LocString[] Release1300Linkpearl =

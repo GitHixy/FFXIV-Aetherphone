@@ -7890,6 +7890,8 @@
   "changelog.r1300.134": "Seriler ve Eğilimler kartlarının büyük yazı boyutlarında metni kesmesi düzeltildi: kartlar metinle büyür ve uzun etiketler alt satıra kayar",
   "changelog.r1300.136": "Tek seferde birden fazla çekiliş bileti alma eklendi: bir sayı yazıp toplamı görün; kişi başı sınır odada ve ev sahibi sayfasında gösterilir",
   "changelog.r1300.137": "Gil çekiliş biletleri değiştirildi: her alım defterde tek kayıt olur, böylece bilet başına bir takas yerine tek takas hepsini kapatır",
+  "changelog.r1300.138": "Bir mekana sabitlenen masanın, Kimler katılabilir Yalnızca kodla olduğu sürece gizli kalması düzeltildi: ev sahibi sayfası artık Katılma isteği veya Açık seçilene kadar listelenmeyeceğini söyler ve arsada durmanızı ister",
+  "changelog.r1300.139": "Mekanlar uygulaması değiştirildi: bir mekanda yeni açılan masa en fazla bir dakika sonra yerine yarım dakika içinde görünür",
   "changelog.r1300.135": "Bir arkadaşın Lodestone profilinin ilk açılan arkadaşı göstermesi düzeltildi: her profil artık ad ve ana dünyaya göre yüklenir",
   "changelog.r1200.81": "Makrolar için /phone komutları eklendi: bir uygulamayı ya da ayarları aç, fotoğraf çek, Rahatsız etme ya da sessizi aç kapat, müziği yönet, fısıltı ya da arama başlat ve telefonu mini, tam ya da gizli yap",
   "changelog.r1200.82": "Ayarlar > Komutlar artık her eğik çizgi komutunu listeliyor, /phone help de aynı listeyi sohbete yazıyor",

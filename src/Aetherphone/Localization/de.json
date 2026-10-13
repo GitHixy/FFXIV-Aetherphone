@@ -7890,6 +7890,8 @@
   "changelog.r1300.134": "Behoben, dass die Karten Serien und Trends bei größerer Textgröße ihren Text abschnitten: Die Karten wachsen mit dem Text, und lange Beschriftungen brechen um",
   "changelog.r1300.136": "Kauf mehrerer Lostickets auf einmal hinzugefügt: Anzahl eintippen und den Gesamtpreis sehen, mit dem Limit pro Person im Raum und auf dem Gastgeberblatt",
   "changelog.r1300.137": "Gil-Lostickets geändert: Ein Kauf ergibt einen Bucheintrag, sodass ein Handel alle Tickets begleicht statt einer pro Ticket",
+  "changelog.r1300.138": "Behoben, dass ein an eine Location gehefteter Tisch unsichtbar blieb, solange unter Wer darf dazu Nur mit Code gewählt war: Das Gastgeberblatt sagt jetzt, dass er erst mit Anfragen oder Offen gelistet wird, und bittet dich, auf dem Grundstück zu stehen",
+  "changelog.r1300.139": "Locations-App geändert: Ein neu an einer Location eröffneter Tisch erscheint jetzt innerhalb einer halben Minute statt bis zu einer Minute später",
   "changelog.r1300.135": "Behoben, dass das Lodestone-Profil eines Freundes den zuerst geöffneten Freund zeigte: Jedes Profil lädt jetzt über Name und Heimatwelt",
   "changelog.r1200.81": "/phone-Befehle für Makros hinzugefügt: eine App oder die Einstellungen öffnen, ein Foto machen, Nicht stören oder Stumm umschalten, Musik steuern, eine Tell oder einen Anruf starten und das Telefon auf Mini, Voll oder Ausgeblendet stellen",
   "changelog.r1200.82": "Einstellungen > Befehle listet jetzt jeden Slash-Befehl, und /phone help gibt dieselbe Liste im Chat aus",

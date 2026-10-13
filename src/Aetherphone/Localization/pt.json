@@ -7890,6 +7890,8 @@
   "changelog.r1300.134": "Corrigidos os cartões Sequências e Tendências, que cortavam o texto em tamanhos de texto maiores: os cartões crescem com o texto e os rótulos longos quebram linha",
   "changelog.r1300.136": "Adicionamos a compra de vários bilhetes de rifa de uma vez: digite a quantidade e veja o total, com o limite por pessoa mostrado na sala e na folha do anfitrião",
   "changelog.r1300.137": "Mudamos os bilhetes de rifa em gil para um lançamento no registro por compra, de modo que uma troca liquida o lote em vez de uma por bilhete",
+  "changelog.r1300.138": "Corrigida uma mesa fixada num local que continuava oculta enquanto Quem pode entrar estava em Só com código: a folha do anfitrião agora avisa que ela não será listada até escolher Pedir para entrar ou Aberta, e pede que você fique no lote",
+  "changelog.r1300.139": "Mudamos o app Locais para mostrar uma mesa recém-aberta num local em menos de meio minuto em vez de até um minuto depois",
   "changelog.r1300.135": "Corrigido o perfil da Lodestone de um amigo, que mostrava o primeiro amigo aberto: cada perfil agora carrega pelo nome e pelo mundo de origem",
   "changelog.r1200.81": "Adicionamos comandos /phone para macros: abrir um app ou os ajustes, tirar uma foto, ligar Não perturbe ou o mudo, controlar a música, começar um tell ou uma ligação e deixar o telefone pequeno, completo ou oculto",
   "changelog.r1200.82": "Ajustes > Comandos agora lista todos os comandos de barra, e /phone help mostra a mesma lista no chat",

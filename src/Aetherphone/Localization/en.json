@@ -7890,6 +7890,8 @@
   "changelog.r1300.134": "Fixed the Streaks and Trends cards clipping their text at larger text sizes: the cards grow with the text and long labels wrap",
   "changelog.r1300.136": "Added buying several raffle tickets at once: type a count and see the total, with the per-person limit shown in the room and on the host sheet",
   "changelog.r1300.137": "Changed gil raffle tickets to one ledger entry per purchase, so one trade settles the lot instead of one trade per ticket",
+  "changelog.r1300.138": "Fixed a table pinned to a venue staying hidden while Who can join was Invite only: the host sheet now says it will not be listed until you pick Ask to join or Open, and asks you to stand on the plot",
+  "changelog.r1300.139": "Changed the Venues app to pick up a table newly hosted at a venue within half a minute instead of up to a minute later",
   "changelog.r1300.135": "Fixed a friend's Lodestone profile showing the first friend you opened: each profile now loads by name and home world",
   "changelog.r1200.81": "Added /phone commands for macros: open an app or Settings, take a photo, toggle Do Not Disturb or mute, control music, start a tell or a call, and set the phone to mini, full or hidden",
   "changelog.r1200.82": "Settings > Commands now lists every slash command, and /phone help prints the same list in chat",

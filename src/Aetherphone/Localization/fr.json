@@ -7890,6 +7890,8 @@
   "changelog.r1300.134": "Correction des cartes Séries et Tendances qui coupaient leur texte aux grandes tailles de texte : les cartes grandissent avec le texte et les libellés longs passent à la ligne",
   "changelog.r1300.136": "Ajout de l'achat de plusieurs tickets de tombola à la fois : saisissez un nombre et voyez le total, avec la limite par personne affichée dans la salle et sur la fiche de l'hôte",
   "changelog.r1300.137": "Modification des tickets de tombola en gils : une écriture au registre par achat, si bien qu'un seul échange règle le lot au lieu d'un échange par ticket",
+  "changelog.r1300.138": "Correction d'une table épinglée à un lieu qui restait invisible tant que Qui peut venir était sur Sur code : la fiche de l'hôte indique désormais qu'elle ne sera listée qu'avec Sur demande ou Ouverte, et demande de se tenir sur la parcelle",
+  "changelog.r1300.139": "Modification de l'appli Lieux, qui affiche désormais une table nouvellement ouverte dans un lieu en moins d'une demi-minute au lieu d'une minute au plus",
   "changelog.r1300.135": "Correction du profil Lodestone d'un ami qui affichait le premier ami ouvert : chaque profil se charge désormais par nom et monde d'origine",
   "changelog.r1200.81": "Ajout de commandes /phone pour les macros : ouvrir une app ou les réglages, prendre une photo, basculer Ne pas déranger ou le silencieux, contrôler la musique, lancer un tell ou un appel, et passer le téléphone en mini, complet ou masqué",
   "changelog.r1200.82": "Réglages > Commandes liste désormais toutes les commandes slash, et /phone help affiche la même liste dans le chat",
