@@ -407,9 +407,12 @@ internal sealed class TableLedger
         var height = MathF.Max(titleHeight, buttonHeight);
         var copyLabel = Loc.T(L.Tables.CopyLedger);
         var buttonWidth = Button.WidthFor(copyLabel, ButtonSize.Large);
+        var refreshRadius = RoundButton.SmallRadius * scale;
+        var refreshReserve = refreshRadius * 2f + Metrics.Space.Sm * scale;
         var top = origin.Y + Metrics.Space.Lg * scale;
         Typography.Draw(drawList, new Vector2(origin.X, top + (height - titleHeight) * 0.5f),
-            Typography.FitText(Loc.T(L.Tables.LedgerHeading), width - buttonWidth - Metrics.Space.Md * scale,
+            Typography.FitText(Loc.T(L.Tables.LedgerHeading),
+                MathF.Max(1f, width - buttonWidth - refreshReserve - Metrics.Space.Md * scale),
                 TextStyles.Title3), ui.TitleInk, TextStyles.Title3);
         var buttonTop = top + (height - buttonHeight) * 0.5f;
         var rect = new Rect(new Vector2(origin.X + width - buttonWidth, buttonTop),
@@ -419,6 +422,14 @@ internal sealed class TableLedger
         {
             ImGui.SetClipboardText(CopyText());
             ShellToast.Show();
+        }
+
+        var refreshCenter = new Vector2(rect.Min.X - Metrics.Space.Sm * scale - refreshRadius,
+            top + height * 0.5f);
+        if (RoundButton.Icon(drawList, refreshCenter, refreshRadius, PhoneIcons.Refresh, ui.Ink,
+                tooltip: Loc.T(L.Common.Refresh)))
+        {
+            tables.RefreshLedgerNow(roomId);
         }
 
         ImGui.SetCursorScreenPos(origin);
