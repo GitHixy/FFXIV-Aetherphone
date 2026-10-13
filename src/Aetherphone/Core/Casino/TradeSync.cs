@@ -73,20 +73,48 @@ internal sealed class TradeSyncTracker
     private long theirOffer;
     private long baseline;
     private long closedAtTick;
+    private PendingTrade? pendingTrade;
+    private long? precedingOfferMagnitude;
+    private bool discardCompletion;
+
+    private readonly record struct PendingTrade(string[] Candidates, bool PartnerRead, long MyOffer,
+        long TheirOffer, long Baseline, long ClosedAtTick);
 
     public TradeTrackerStage Stage { get; private set; }
 
     public TradeCompletion? Observe(in TradeWindowSample sample, long nowTick)
     {
+        var completed = ObservePending(sample, nowTick);
         if (sample.Open)
         {
             if (Stage != TradeTrackerStage.Open)
             {
+                var nextBaseline = sample.WalletGil;
+                var overflow = false;
+                if (Stage == TradeTrackerStage.Settling
+                    && nowTick - closedAtTick <= SettleWindowMilliseconds)
+                {
+                    if (pendingTrade is null && precedingOfferMagnitude is null && !discardCompletion)
+                    {
+                        pendingTrade = new PendingTrade(candidates, partnerRead, myOffer, theirOffer, baseline,
+                            closedAtTick);
+                        nextBaseline = baseline;
+                    }
+                    else
+                    {
+                        pendingTrade = null;
+                        overflow = true;
+                    }
+                }
+
                 candidates = Array.Empty<string>();
                 partnerRead = false;
                 myOffer = 0;
                 theirOffer = 0;
-                baseline = sample.WalletGil;
+                baseline = nextBaseline;
+                precedingOfferMagnitude = pendingTrade is { } pending
+                    ? Math.Abs(pending.TheirOffer - pending.MyOffer) : null;
+                discardCompletion = overflow;
             }
 
             Stage = TradeTrackerStage.Open;
@@ -99,7 +127,7 @@ internal sealed class TradeSyncTracker
 
             myOffer = Math.Max(0, sample.MyOffer);
             theirOffer = Math.Max(0, sample.TheirOffer);
-            return null;
+            return completed ?? ObservePending(sample, nowTick);
         }
 
         if (Stage == TradeTrackerStage.Open)
@@ -110,12 +138,17 @@ internal sealed class TradeSyncTracker
 
         if (Stage != TradeTrackerStage.Settling)
         {
-            return null;
+            return completed;
         }
 
         var delta = sample.WalletGil - baseline;
-        if (delta != 0)
+        if (delta != 0 && CanSettle(delta))
         {
+            if (pendingTrade is { } pending)
+            {
+                pendingTrade = pending with { Baseline = pending.Baseline + delta };
+            }
+
             Stage = TradeTrackerStage.Idle;
             return Settle(delta);
         }
@@ -125,7 +158,72 @@ internal sealed class TradeSyncTracker
             Stage = TradeTrackerStage.Idle;
         }
 
-        return null;
+        return completed;
+    }
+
+    private bool CanSettle(long delta)
+    {
+        if (discardCompletion)
+        {
+            return false;
+        }
+
+        if (precedingOfferMagnitude is not { } preceding)
+        {
+            return true;
+        }
+
+        var magnitude = Math.Abs(theirOffer - myOffer);
+        return preceding != 0 && magnitude != preceding && Math.Abs(delta) == magnitude;
+    }
+
+    private TradeCompletion? ObservePending(in TradeWindowSample sample, long nowTick)
+    {
+        if (pendingTrade is not { } pending)
+        {
+            return null;
+        }
+
+        if (nowTick - pending.ClosedAtTick > SettleWindowMilliseconds)
+        {
+            pendingTrade = null;
+            return null;
+        }
+
+        var delta = sample.WalletGil - pending.Baseline;
+        if (delta == 0 || Math.Abs(delta) != Math.Abs(pending.TheirOffer - pending.MyOffer))
+        {
+            return null;
+        }
+
+        if (Stage != TradeTrackerStage.Idle)
+        {
+            var currentMagnitude = Math.Abs(theirOffer - myOffer);
+            var sampledMagnitude = sample.Open ? Math.Abs(sample.TheirOffer - sample.MyOffer) : currentMagnitude;
+            if (Stage == TradeTrackerStage.Open && sample.Open)
+            {
+                currentMagnitude = sampledMagnitude;
+            }
+
+            if (currentMagnitude == 0 || currentMagnitude == Math.Abs(delta))
+            {
+                return null;
+            }
+
+            if (sample.Open && (sampledMagnitude == 0 || sampledMagnitude == Math.Abs(delta)))
+            {
+                return null;
+            }
+        }
+
+        pendingTrade = null;
+        if (Stage != TradeTrackerStage.Idle)
+        {
+            baseline += delta;
+            precedingOfferMagnitude = null;
+        }
+
+        return Settle(pending.Candidates, pending.PartnerRead, pending.MyOffer, pending.TheirOffer, delta);
     }
 
     public void Reset()
@@ -137,9 +235,18 @@ internal sealed class TradeSyncTracker
         theirOffer = 0;
         baseline = 0;
         closedAtTick = 0;
+        pendingTrade = null;
+        precedingOfferMagnitude = null;
+        discardCompletion = false;
     }
 
     private TradeCompletion Settle(long delta)
+    {
+        return Settle(candidates, partnerRead, myOffer, theirOffer, delta);
+    }
+
+    private static TradeCompletion Settle(string[] candidates, bool partnerRead, long myOffer, long theirOffer,
+        long delta)
     {
         if (theirOffer - myOffer == delta)
         {
