@@ -38,6 +38,17 @@ public sealed class VenueWireContractTests
     }
 
     [Fact]
+    public void ATicketActCarriesItsCountOnTheExistingField()
+    {
+        var json = JsonSerializer.Serialize(new CasinoVenueActRequest("x2", VenueActions.RaffleTicket, 5),
+            AethernetJsonContext.Default.CasinoVenueActRequest);
+        using var document = JsonDocument.Parse(json);
+        Assert.Equal("raffle.ticket", document.RootElement.GetProperty("action").GetString());
+        Assert.Equal(5, document.RootElement.GetProperty("count").GetInt32());
+        Assert.Equal(5, RaffleTicketPicker.Build(5).Count);
+    }
+
+    [Fact]
     public void ATradeProposalCarriesTheTradeSource()
     {
         var json = JsonSerializer.Serialize(new CasinoLedgerProposeRequest("c1", CasinoLedgerKinds.BuyIn, "u-host",

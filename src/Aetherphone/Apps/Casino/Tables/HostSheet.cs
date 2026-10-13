@@ -489,14 +489,26 @@ internal sealed class HostSheet
                     TableAmounts.Amount(texts, draft.BankValue, draft.Currency), HostLadders.All(HostLadders.Gil),
                     ref draft.Bank, width, scale);
                 break;
+            case HostGame.Raffle:
+                DrawRaffleCaps(ui, scale);
+                break;
         }
 
-        if (draft.Game != HostGame.Raffle)
-        {
-            Gap(HostFlowLayout.CardGap, scale);
-        }
-
+        Gap(HostFlowLayout.CardGap, scale);
         DrawJoin(ui, width, scale);
+    }
+
+    private void DrawRaffleCaps(AppSkin ui, float scale)
+    {
+        var card = GroupCard.Begin(ui, 3, Venue.VenueFields.RowUnits);
+        Venue.VenueFields.ValueRow(ui, card.NextRow(Venue.VenueFields.RowUnits), Loc.T(L.Venue.TicketsEach),
+            texts.Count(L.Venue.UpTo, VenueRules.MaxTicketsPerPerson), scale);
+        Venue.VenueFields.ValueRow(ui, card.NextRow(Venue.VenueFields.RowUnits), Loc.T(L.Venue.WinnerCount),
+            texts.Count(L.Venue.UpTo, VenueRules.MaxWinners), scale);
+        Venue.VenueFields.ValueRow(ui, card.NextRow(Venue.VenueFields.RowUnits), Loc.T(L.Venue.RaffleEntrantsCap),
+            texts.Count(L.Venue.UpTo, VenueRules.MaxEntrants), scale);
+        card.End();
+        Venue.VenueFields.Hint(ui, Loc.T(L.Venue.RaffleCapsHint), scale);
     }
 
     private static void LadderSingle(AppSkin ui, string id, string label, string value, LadderSpan span, ref int index,
