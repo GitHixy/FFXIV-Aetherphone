@@ -118,6 +118,23 @@ public sealed class VenueWireContractTests
     }
 
     [Fact]
+    public void ANearbyTableTheListingLacksAsksForOneRefresh()
+    {
+        var nearby = new[] { new CasinoTableRowDto(TableId: "t1", Listing: CasinoListings.Open) };
+        var listedElsewhere = new[] { new CasinoTableRowDto(TableId: "t9", Listing: CasinoListings.Open) };
+
+        Assert.Equal("t1", CasinoVenueStore.UnlistedNearby(nearby, listedElsewhere, string.Empty));
+        Assert.Equal(string.Empty, CasinoVenueStore.UnlistedNearby(nearby, listedElsewhere, "t1"));
+        Assert.Equal(string.Empty, CasinoVenueStore.UnlistedNearby(nearby, nearby, string.Empty));
+        Assert.Equal(string.Empty,
+            CasinoVenueStore.UnlistedNearby(Array.Empty<CasinoTableRowDto>(), listedElsewhere, string.Empty));
+
+        var second = new[] { nearby[0], new CasinoTableRowDto(TableId: "t2", Listing: CasinoListings.Knock) };
+        Assert.Equal("t2", CasinoVenueStore.UnlistedNearby(second, nearby, "t1"));
+        Assert.Equal(string.Empty, CasinoVenueStore.UnlistedNearby(second, nearby, "t2"));
+    }
+
+    [Fact]
     public void TheVenueFilterShowsRoomsOnTheRail()
     {
         var room = new CasinoTableRowDto(GameKind: VenueKinds.Raffle);

@@ -1,4 +1,5 @@
 using Aetherphone.Apps.Casino.Tables;
+using Aetherphone.Apps.Casino.Venue;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
 using Aetherphone.Core.Localization;
@@ -431,5 +432,34 @@ public sealed class CasinoHostSheetTests
         Assert.True(HostDraft.Reopens(book.Snapshot(true), true));
         Assert.False(HostDraft.Reopens(book.Snapshot(true), false));
         Assert.True(HostDraft.Reopens(blackjack.Snapshot(true), false));
+    }
+
+    [Fact]
+    public void ThePinRowSaysWhyTheVenueWouldNotShowTheTable()
+    {
+        var onPlot = new CasinoHousingPosition(74, 339, 5, 12, 0, 0);
+        var onStreet = new CasinoHousingPosition(74, 339, 5, 0, 0, 0);
+        var outside = new CasinoHousingPosition(74, 339, 0, 0, 0, 0);
+
+        Assert.Equal(VenuePinNotes.None, VenueHostOptions.NotesFor(true, CasinoListings.Open, onPlot));
+        Assert.Equal(VenuePinNotes.None, VenueHostOptions.NotesFor(true, CasinoListings.Knock, onPlot));
+        Assert.Equal(VenuePinNotes.InviteOnly, VenueHostOptions.NotesFor(true, CasinoListings.Private, onPlot));
+        Assert.Equal(VenuePinNotes.NoPlot, VenueHostOptions.NotesFor(true, CasinoListings.Knock, onStreet));
+        Assert.Equal(VenuePinNotes.InviteOnly | VenuePinNotes.NoPlot,
+            VenueHostOptions.NotesFor(true, CasinoListings.Private, onStreet));
+        Assert.Equal(VenuePinNotes.None, VenueHostOptions.NotesFor(false, CasinoListings.Private, onStreet));
+        Assert.Equal(VenuePinNotes.None, VenueHostOptions.NotesFor(true, CasinoListings.Private, outside));
+    }
+
+    [Fact]
+    public void ANewDraftKeepsInviteOnlyAndThePinAndOnlyNotesTheClash()
+    {
+        var draft = new HostDraft();
+        var onPlot = new CasinoHousingPosition(74, 339, 5, 12, 0, 0);
+
+        Assert.Equal(CasinoListings.Private, draft.Listing);
+        Assert.Equal(VenuePinNotes.InviteOnly, VenueHostOptions.NotesFor(true, draft.Listing, onPlot));
+        Assert.Equal(CasinoListings.Private, draft.Listing);
+        Assert.Same(Ward, draft.Build(Ward).Location);
     }
 }
