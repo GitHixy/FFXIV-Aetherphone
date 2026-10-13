@@ -199,7 +199,7 @@ public sealed class TradeContextTests
     }
 
     [Fact]
-    public void AVenueTableConfirmsATicketButNeverProposesABuyIn()
+    public void AVenueTableConfirmsATicketAndProposesAnUnmatchedBuyIn()
     {
         var ticket = new CasinoLedgerEntryDto("t1", Raffle, CasinoLedgerKinds.Ticket, 30_000, Player, "Xeldar", Host,
             "Ciri");
@@ -210,7 +210,9 @@ public sealed class TradeContextTests
         Assert.Equal("t1", paid.EntryId);
 
         var unknown = TradeLedgerMatcher.Match(new TradeCompletion(new[] { "Xeldar" }, 45_000, 0), context);
-        Assert.Equal(TradeProposalKind.None, unknown.Kind);
+        Assert.Equal(TradeProposalKind.Propose, unknown.Kind);
+        Assert.Equal(CasinoLedgerKinds.BuyIn, unknown.LedgerKind);
+        Assert.True(unknown.HostSide);
 
         var prize = TradeLedgerMatcher.Match(new TradeCompletion(new[] { "Xeldar" }, 0, 45_000), context);
         Assert.Equal(TradeProposalKind.Propose, prize.Kind);

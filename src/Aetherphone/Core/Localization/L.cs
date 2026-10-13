@@ -11882,6 +11882,9 @@ internal static class L
         public static readonly LocString TournamentNeedsPlayers = new("casino.venue.tournamentNeedsPlayers", "Needs two seated players. Take a seat yourself to play in it.");
         public static readonly LocString TournamentDealerOut = new("casino.venue.tournamentDealerOut", "You deal at this table, so you cannot enter. Two other players need a seat.");
         public static readonly LocString TournamentYouAreOut = new("casino.venue.tournamentYouAreOut", "You're out of the tournament.");
+        public static readonly LocString RoundStake = new("casino.venue.roundStake", "Stake per round");
+        public static readonly LocString RoundStakeHint = new("casino.venue.roundStakeHint", "When a round closes, everyone who rolled lower owes the winner the stake. Each debt goes on the gil ledger for both sides to confirm.");
+        public static readonly LocString NoStake = new("casino.venue.noStake", "No stake");
     }
 
     internal static class VenueHub
