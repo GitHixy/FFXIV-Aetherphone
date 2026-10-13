@@ -108,6 +108,26 @@ public sealed class VenueRulesTests
     }
 
     [Fact]
+    public void TicketCountsAreBoundedByWhatIsLeft()
+    {
+        Assert.Equal(3, VenueRules.TicketsLeft(2, 5));
+        Assert.Equal(0, VenueRules.TicketsLeft(5, 5));
+        Assert.Equal(0, VenueRules.TicketsLeft(7, 5));
+        Assert.True(VenueRules.IsTicketCount(3, 2, 5));
+        Assert.True(VenueRules.IsTicketCount(1, 4, 5));
+        Assert.False(VenueRules.IsTicketCount(4, 2, 5));
+        Assert.False(VenueRules.IsTicketCount(0, 0, 5));
+        Assert.False(VenueRules.IsTicketCount(1, 5, 5));
+        Assert.Equal(1, VenueRules.ClampTicketCount(0, 0, 5));
+        Assert.Equal(3, VenueRules.ClampTicketCount(9, 2, 5));
+        Assert.Equal(2, VenueRules.ClampTicketCount(2, 2, 5));
+        Assert.Equal(0, VenueRules.ClampTicketCount(1, 5, 5));
+        Assert.Equal(5_000, VenueRules.TicketsTotal(5, 1_000));
+        Assert.Equal(0, VenueRules.TicketsTotal(5, 0));
+        Assert.Equal(0, VenueRules.TicketsTotal(0, 1_000));
+    }
+
+    [Fact]
     public void OnlyAOneLosesTheDuel()
     {
         Assert.True(VenueRules.Loses(1));

@@ -189,6 +189,27 @@ internal static class VenueRules
             && durationSeconds >= MinRaffleSeconds && durationSeconds <= MaxRaffleSeconds;
     }
 
+    public static int TicketsLeft(int held, int ticketsPerPerson)
+    {
+        return Math.Max(0, ticketsPerPerson - held);
+    }
+
+    public static bool IsTicketCount(int count, int held, int ticketsPerPerson)
+    {
+        return count >= 1 && count <= TicketsLeft(held, ticketsPerPerson);
+    }
+
+    public static int ClampTicketCount(int count, int held, int ticketsPerPerson)
+    {
+        var left = TicketsLeft(held, ticketsPerPerson);
+        return left == 0 ? 0 : Math.Clamp(count, 1, left);
+    }
+
+    public static long TicketsTotal(int count, long ticketPrice)
+    {
+        return count <= 0 || ticketPrice <= 0 ? 0 : count * ticketPrice;
+    }
+
     public static bool Loses(long value)
     {
         return value == LosingRoll;

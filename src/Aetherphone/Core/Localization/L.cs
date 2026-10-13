@@ -11933,6 +11933,15 @@ internal static class L
         public static readonly LocString RoundStake = new("casino.venue.roundStake", "Stake per round");
         public static readonly LocString RoundStakeHint = new("casino.venue.roundStakeHint", "When a round closes, everyone who rolled lower owes the winner the stake. Each debt goes on the gil ledger for both sides to confirm.");
         public static readonly LocString NoStake = new("casino.venue.noStake", "No stake");
+
+        public static readonly LocString TicketCap = new("casino.venue.ticketCap", "Up to {0} tickets a person");
+        public static readonly LocString TicketCountLabel = new("casino.venue.ticketCountLabel", "Tickets");
+        public static readonly LocString TakeTickets = new("casino.venue.takeTickets", "Take {0} tickets");
+        public static readonly LocString TicketsTotalGil = new("casino.venue.ticketsTotalGil", "{0} tickets for {1} gil, paid to the host in one trade");
+        public static readonly LocString UpTo = new("casino.venue.upTo", "Up to {0}");
+        public static readonly LocString RaffleEntrantsCap = new("casino.venue.raffleEntrantsCap", "Entrants");
+        public static readonly LocString RaffleCapsHint = new("casino.venue.raffleCapsHint", "You set each raffle's title, tickets a person, winners and clock when you open it from the room, within these limits.");
+        public static readonly LocString ReasonTicketCount = new("casino.venue.reasonTicketCount", "Fewer tickets than that are left to you in this raffle. Take what is left or wait for the next one.");
     }
 
     internal static class VenueHub
