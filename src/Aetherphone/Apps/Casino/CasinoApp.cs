@@ -93,6 +93,8 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private readonly CasinoNavigation routes;
     private readonly RouterDraw<CasinoRoute> drawView;
     private readonly Action popRoute;
+    private readonly Action popResigned;
+    private readonly Action leaveDoor;
     private readonly Action openLimits;
     private readonly Action refreshFloor;
     private readonly Action<string> openTable;
@@ -103,6 +105,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private Rect screenArea;
     private Rect frameArea;
     private string pendingTableId = string.Empty;
+    private CasinoRoute resigningRoute;
     private bool historyLoadFailed;
 
     public CasinoApp(AethernetSession session, CoinStore coins, Core.Casino.CasinoStore casino,
@@ -151,8 +154,8 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         race = new Race.RaceCabinet(casino, casinoRooms, PopRoute);
         plinko = new Plinko.PlinkoCabinet(casino, casinoPlay.Plinko, preferences);
         dealerHoldem = new DealerHoldem.DealerHoldemCabinet(casino, casinoPlay.DealerHoldem);
-        blackjack = new Tables.BlackjackTable(casino, casinoRooms, casinoTables, history, casinoTurns, remoteImages,
-            lodestone, tournament, PopRoute, OpenLedger, OpenGilLedger);
+        blackjack = new Tables.BlackjackTable(casino, casinoRooms, casinoTables, history, casinoTurns, confirm,
+            remoteImages, lodestone, tournament, PopRoute, OpenLedger, OpenGilLedger);
         playerLedger = new Tables.TableLedger(casinoTables, casino, confirm, tradeSync);
         gilLedger = new Tables.GilLedgerView(casinoTables);
         openTable = OpenTable;
@@ -187,6 +190,8 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         routes = new CasinoNavigation(router);
         drawView = DrawView;
         popRoute = PopRoute;
+        popResigned = PopResigned;
+        leaveDoor = LeaveDoor;
         openLimits = OpenLimits;
         refreshFloor = RefreshFloor;
     }
@@ -514,7 +519,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             var action = stage.End(ui);
             if (action == CasinoStageAction.Back)
             {
-                PopRoute();
+                LeaveStage(route);
             }
             else if (action == CasinoStageAction.Cashier)
             {
@@ -797,7 +802,8 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         }
 
         AppHeader.EndLargeTitle(in navBar, context, "casino.page.nav", RouteTitle(route), NavBarStyle.From(ui),
-            ReadOnlySpan<NavBarButton>.Empty, BackTitle(depth), popRoute);
+            ReadOnlySpan<NavBarButton>.Empty, BackTitle(depth),
+            route.Screen == CasinoScreen.TableDoor ? leaveDoor : popRoute);
     }
 
     private void DrawRoot(in PhoneContext context, Rect area)
@@ -903,6 +909,47 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         }
 
         PopNow(true);
+    }
+
+    private void LeaveStage(CasinoRoute route)
+    {
+        if (route.Screen == CasinoScreen.Table && !IsHoldem(route) && !CasinoRoute.KeepsSeat(route, RouteBelow())
+            && blackjack.ForfeitsTournament)
+        {
+            AskResign(route);
+            return;
+        }
+
+        PopRoute();
+    }
+
+    private void LeaveDoor()
+    {
+        var door = router.Current;
+        if (door.Screen == CasinoScreen.TableDoor && door.TableId.Length > 0
+            && !CasinoRoute.ReturnsToTable(door, RouteBelow())
+            && string.Equals(blackjack.RoomId, door.TableId, StringComparison.Ordinal)
+            && blackjack.ForfeitsTournament)
+        {
+            AskResign(door);
+            return;
+        }
+
+        PopRoute();
+    }
+
+    private void AskResign(CasinoRoute leaving)
+    {
+        resigningRoute = leaving;
+        blackjack.ConfirmResign(popResigned);
+    }
+
+    private void PopResigned()
+    {
+        if (router.Current == resigningRoute)
+        {
+            PopRoute();
+        }
     }
 
     private void PopNow(bool animate)

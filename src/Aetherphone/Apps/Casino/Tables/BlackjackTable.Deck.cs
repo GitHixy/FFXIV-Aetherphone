@@ -103,18 +103,22 @@ internal sealed partial class BlackjackTable
                 TapSideSpot(index);
             }
 
-            DrawSpotCaption(drawList, center,
-                Loc.T(bet == BlackjackSideBet.PerfectPairs ? L.Blackjack.SidePairs : L.Blackjack.SideThree),
-                sideTarget == index);
+            if (label.Length == 0)
+            {
+                DrawSpotCaption(drawList, center,
+                    Loc.T(bet == BlackjackSideBet.PerfectPairs ? L.Blackjack.SidePairs : L.Blackjack.SideThree),
+                    sideTarget == index);
+            }
         }
     }
 
     private void DrawSpotCaption(ImDrawListPtr drawList, Vector2 center, string name, bool targeted)
     {
-        var style = TextStyles.Caption2;
-        Typography.DrawCentered(drawList, new Vector2(center.X, layout.BetPlateY),
-            Typography.FitText(name, layout.SideCaptionWidth, style), targeted ? CasinoColors.LightB : StageText.Body,
-            style);
+        var width = layout.SpotCaptionWidth;
+        var weight = TextStyles.Caption2.Weight;
+        var fit = Typography.FitScale(name, width, TextStyles.Caption1.Scale, TextStyles.Caption2.Scale, weight);
+        Typography.DrawCentered(drawList, center, Typography.FitText(name, width, fit, weight),
+            targeted ? CasinoColors.LightB : StageText.Body, fit, weight);
     }
 
     private bool DrawSideSpot(ImDrawListPtr drawList, Vector2 center, BlackjackSideBet bet, string label,
@@ -265,13 +269,41 @@ internal sealed partial class BlackjackTable
             return;
         }
 
-        var stakeBlocked = draining || (!banked && (state.Draining || state.StakesPaused));
-        var standLabel = stakeBlocked ? Loc.T(L.Casino.CashOut) : Loc.T(L.Casino.StandAction);
-        if (stage.SecondaryAction(standLabel, !seatFlow.Busy, ui.Ink))
+        var forfeits = ForfeitsTournament;
+        if (!stage.SecondaryAction(StandLabel(state, draining, banked, forfeits), !seatFlow.Busy, ui.Ink))
         {
-            inlineReason = string.Empty;
-            seatFlow.Stand(roomId);
+            return;
         }
+
+        if (forfeits)
+        {
+            ConfirmResign(resignSeat);
+            return;
+        }
+
+        StandUp();
+    }
+
+    private static string StandLabel(CasinoStateDto state, bool draining, bool banked, bool forfeits)
+    {
+        if (forfeits)
+        {
+            return Loc.T(L.Venue.TournamentResign);
+        }
+
+        var stakeBlocked = draining || (!banked && (state.Draining || state.StakesPaused));
+        return stakeBlocked ? Loc.T(L.Casino.CashOut) : Loc.T(L.Casino.StandAction);
+    }
+
+    private void StandUp()
+    {
+        if (!entered || seatFlow.StandQueued || seatFlow.Busy)
+        {
+            return;
+        }
+
+        inlineReason = string.Empty;
+        seatFlow.Stand(roomId);
     }
 
     private void DrawDealerDeck(AppSkin ui, CasinoBlackjackRoomStateDto board, Rect row, float scale)

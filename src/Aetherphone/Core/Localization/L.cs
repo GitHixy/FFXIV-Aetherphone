@@ -2405,6 +2405,8 @@ internal static class L
                 "Changed the tournament Hands field to name its 10 to 50 band instead of quietly changing your number"),
             new("changelog.r1300.124",
                 "Changed Start pressed during a hand to queue the tournament: it begins when that hand settles"),
+            new("changelog.r1300.151",
+                "Changed leaving a blackjack tournament to ask first: the leave button reads Resign while you are still in, and the back button warns before taking you out"),
             new("changelog.r1300.139",
                 "Changed the Venues app to pick up a table newly hosted at a venue within half a minute instead of up to a minute later"),
             new("changelog.r1300.137",
@@ -2413,6 +2415,8 @@ internal static class L
                 "Fixed Barkeep practice shifts needing chips to open"),
             new("changelog.r1300.125",
                 "Fixed a finished tournament staying on the table for good: it clears with the next hand or Stop, and closing the standings dismisses it"),
+            new("changelog.r1300.152",
+                "Fixed blackjack cards, seats and bet spots overlapping on shorter screens, such as during a tournament: the felt switches to a compact layout instead"),
             new("changelog.r1300.126",
                 "Fixed the room code card in the table sheet resizing while the sheet scrolls"),
             new("changelog.r1300.129",
@@ -2424,7 +2428,7 @@ internal static class L
             new("changelog.r1300.141",
                 "Changed dice rounds to close as soon as everyone in the room has rolled instead of waiting out the clock"),
             new("changelog.r1300.142",
-                "Changed the blackjack bet spots to name themselves under the circles (Pairs, Bet, 21+3) instead of floating captions above them into the seat rail"),
+                "Changed the blackjack bet spots to print their names inside the circles (Pairs, Bet, 21+3) instead of floating captions into the seat rail"),
             new("changelog.r1300.143",
                 "Changed a new Book to be open to all by default, and named the setting to change when table settings conflict"),
             new("changelog.r1300.144",
@@ -11949,6 +11953,9 @@ internal static class L
         public static readonly LocString TournamentYouAreOut = new("casino.venue.tournamentYouAreOut", "You're out of the tournament.");
         public static readonly LocString TournamentHandsPlaceholder = new("casino.venue.tournamentHandsPlaceholder", "10 to 50");
         public static readonly LocString TournamentPending = new("casino.venue.tournamentPending", "Starts after this hand. Stop takes it back.");
+        public static readonly LocString TournamentResign = new("casino.venue.tournamentResign", "Resign");
+        public static readonly LocString TournamentResignTitle = new("casino.venue.tournamentResignTitle", "Resign from the tournament?");
+        public static readonly LocString TournamentResignBody = new("casino.venue.tournamentResignBody", "Leaving the table takes you out of this tournament, and you can't sit back down until it ends.");
 
         public static readonly LocString RoundStake = new("casino.venue.roundStake", "Stake per round");
         public static readonly LocString RoundStakeHint = new("casino.venue.roundStakeHint", "When a round closes, everyone who rolled lower owes the house the stake, and the house pays the winner. Each line goes on the gil ledger.");
