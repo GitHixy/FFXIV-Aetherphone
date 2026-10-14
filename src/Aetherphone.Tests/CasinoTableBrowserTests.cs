@@ -183,6 +183,15 @@ public sealed class CasinoTableBrowserTests
     }
 
     [Fact]
+    public void AnUnnamedTableWithoutAHostNameIsNamedForItsOwnGame()
+    {
+        var blackjack = Row() with { Name = string.Empty, OwnerName = string.Empty };
+        Assert.Equal(Loc.T(L.Casino.TableUnnamed), TableRowViews.NameOf(blackjack));
+        Assert.Equal(Loc.T(L.Venue.GameRaffle), TableRowViews.NameOf(blackjack with { GameKind = "casino.raffle" }));
+        Assert.Equal(Loc.T(L.Book.Game), TableRowViews.NameOf(blackjack with { GameKind = CasinoWire.BookKind }));
+    }
+
+    [Fact]
     public void ABookIsListedUnderAllGilAndMineButNeverUnderRooms()
     {
         var book = Row(owner: true, gameKind: CasinoWire.BookKind, currency: CasinoCurrencies.Gil);

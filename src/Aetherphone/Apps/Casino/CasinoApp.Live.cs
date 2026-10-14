@@ -184,7 +184,7 @@ internal sealed partial class CasinoApp
 
         liveOwnSource = row;
         liveOwnLanguage = Loc.Current;
-        liveOwnName = LiveBoard.NameOf(row, LiveBoard.TableGameOf(row.GameKind));
+        liveOwnName = Tables.TableRowViews.NameOf(row, LiveBoard.TableGameOf(row.GameKind));
         return liveOwnName;
     }
 

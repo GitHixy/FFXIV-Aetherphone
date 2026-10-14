@@ -1,3 +1,4 @@
+using Aetherphone.Apps.Casino.Tables;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
 using Aetherphone.Core.Localization;
@@ -242,31 +243,8 @@ internal static class LiveBoard
         var room = VenueKinds.IsVenue(row.GameKind);
         var book = CasinoBookRules.IsBook(row.GameKind);
         var currency = CasinoCurrencies.Of(row);
-        return new LiveTableView(NameOf(row, gameId), LineOf(row, gameId, currency, room, book), currency,
+        return new LiveTableView(TableRowViews.NameOf(row, gameId), LineOf(row, gameId, currency, room, book), currency,
             KnocksOf(row), row.Paused, !room && !book && !CasinoTableFilters.HasOpenSeat(row));
-    }
-
-    public static string NameOf(CasinoTableRowDto row, string gameId)
-    {
-        if (row.Name.Length > 0)
-        {
-            return row.Name;
-        }
-
-        if (CasinoTableFilters.IsPrivate(row) && row.OwnerName.Length > 0)
-        {
-            return Loc.T(CasinoBookRules.IsBook(row.GameKind) ? L.Book.HostedBy : L.Casino.TableHostedBy,
-                row.OwnerName);
-        }
-
-        if (string.Equals(gameId, CasinoGames.Holdem, StringComparison.Ordinal))
-        {
-            return Loc.T(L.Holdem.TableName, NumberText.Compact(row.MinBet), NumberText.Compact(row.MaxBet));
-        }
-
-        return string.Equals(gameId, CasinoGames.Blackjack, StringComparison.Ordinal)
-            ? Loc.T(L.Casino.TableUnnamed)
-            : Loc.T(CasinoGameNames.Of(gameId));
     }
 
     public static string LineOf(CasinoTableRowDto row, string gameId, int currency, bool room, bool book)

@@ -61,7 +61,9 @@ internal static class TableRowViews
             row.MaxSeats, room, Book: book);
     }
 
-    public static string NameOf(CasinoTableRowDto row)
+    public static string NameOf(CasinoTableRowDto row) => NameOf(row, GameIdOf(row.GameKind));
+
+    public static string NameOf(CasinoTableRowDto row, string gameId)
     {
         if (row.Name.Length > 0)
         {
@@ -74,9 +76,14 @@ internal static class TableRowViews
                 row.OwnerName);
         }
 
-        return string.Equals(row.GameKind, HoldemRules.Kind, StringComparison.Ordinal)
-            ? Loc.T(L.Holdem.TableName, NumberText.Compact(row.MinBet), NumberText.Compact(row.MaxBet))
-            : Loc.T(L.Casino.TableUnnamed);
+        if (string.Equals(gameId, CasinoGames.Holdem, StringComparison.Ordinal))
+        {
+            return Loc.T(L.Holdem.TableName, NumberText.Compact(row.MinBet), NumberText.Compact(row.MaxBet));
+        }
+
+        return string.Equals(gameId, CasinoGames.Blackjack, StringComparison.Ordinal)
+            ? Loc.T(L.Casino.TableUnnamed)
+            : Loc.T(CasinoGameNames.Of(gameId));
     }
 
     public static string BookLine(int entries, string hostLine)
