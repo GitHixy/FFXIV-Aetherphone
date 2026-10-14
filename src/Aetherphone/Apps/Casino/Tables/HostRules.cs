@@ -29,7 +29,7 @@ internal readonly record struct HostRulesKey(
     bool HighestWins,
     int RoundSeconds,
     long DiceStake,
-    int Stack,
+    long Stack,
     long Payout,
     bool PayoutCapped,
     bool Pinned,
@@ -37,7 +37,7 @@ internal readonly record struct HostRulesKey(
 {
     public static HostRulesKey Of(HostDraft draft, bool pinned) => new(draft.Game, draft.Currency,
         draft.DealerMode, draft.TurnSeconds, draft.Pays, draft.Decks, draft.Ante, draft.HighestWins,
-        draft.RoundSeconds, draft.DiceStakeValue, draft.Stack, draft.PayoutValue, draft.PayoutCapped, pinned,
+        draft.RoundSeconds, draft.DiceStakeValue, draft.TableStackValue, draft.PayoutValue, draft.PayoutCapped, pinned,
         Loc.Current);
 }
 
@@ -168,7 +168,7 @@ internal static class HostRules
 
         if (draft.Practice)
         {
-            Append(builder, Loc.T(L.HostSetup.PartStack, NumberText.Compact(draft.StackValue)));
+            Append(builder, Loc.T(L.HostSetup.PartStack, NumberText.Compact(draft.TableStackValue)));
         }
 
         if ((Sections(draft.Game, draft.Currency) & HostRuleSection.Gil) != 0 && draft.PayoutCapped)

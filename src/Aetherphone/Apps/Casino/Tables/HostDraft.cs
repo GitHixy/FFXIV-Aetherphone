@@ -61,6 +61,13 @@ internal sealed class HostDraft
 
     public long StackValue => HostLadders.PracticeStacks[Stack];
 
+    public long StackFloor => Game == HostGame.Holdem ? BigBlindValue * HoldemRules.HostedMinBuyInBigBlinds : 0;
+
+    public LadderSpan StackSpan =>
+        new(HostLadders.CeilIndex(HostLadders.PracticeStacks, StackFloor), HostLadders.PracticeStacks.Length - 1);
+
+    public long TableStackValue => Math.Max(StackValue, StackFloor);
+
     public long BankValue => HostLadders.Gil[Bank];
 
     public long MinBetValue => BetRungs[MinBet];
@@ -168,6 +175,8 @@ internal sealed class HostDraft
         }
 
         Seats = Math.Clamp(Seats, CasinoHostingRules.MinSeats, HostGames.MaxSeats(Game));
+        BigBlind = HostLadders.BigBlinds.Clamp(BigBlind);
+        Stack = StackSpan.Clamp(Stack);
         var span = BetSpan;
         MaxBet = span.Clamp(MaxBet);
         MinBet = Math.Clamp(MinBet, span.First, MaxBet);
@@ -177,8 +186,6 @@ internal sealed class HostDraft
         {
             MaxPayout = PayoutSpan.Clamp(MaxPayout);
         }
-
-        BigBlind = HostLadders.BigBlinds.Clamp(BigBlind);
     }
 
     public CasinoTableConfigDto Build(CasinoTableLocationDto? location)
@@ -248,7 +255,7 @@ internal sealed class HostDraft
         Listing = Math.Clamp(memory.Listing, 0, CasinoListings.All.Length - 1);
         Spectators = memory.Spectators;
         FaceUp = memory.FaceUp;
-        Name = memory.Name;
+        Name = FitName(memory.Name);
         var rungs = BetRungs;
         MinBet = LastIndexAtMost(memory.MinBet, rungs.Length);
         MaxBet = LastIndexAtMost(memory.MaxBet, rungs.Length);
@@ -259,13 +266,13 @@ internal sealed class HostDraft
         Bank = LastIndexAtMost(memory.Bank, HostLadders.Gil.Length);
         MaxPayout = LastIndexAtMost(memory.MaxPayout, HostLadders.Gil.Length);
         PayoutCapped = memory.PayoutCapped;
-        TurnSeconds = memory.TurnSeconds;
+        TurnSeconds = Nearest(CasinoHostingRules.TurnSeconds, memory.TurnSeconds);
         TimeBank = memory.TimeBank;
         DealerMode = Math.Clamp(memory.DealerMode, CasinoDealerModes.House, CasinoDealerModes.Host);
         AutoDeal = memory.AutoDeal;
         Pays = Math.Clamp(memory.Pays, CasinoRuleSheet.PaysThreeToTwo, CasinoRuleSheet.PaysEven);
         HitsSoft17 = memory.HitsSoft17;
-        Decks = memory.Decks;
+        Decks = Nearest(CasinoRuleSheet.Decks, memory.Decks);
         Splits = Math.Clamp(memory.Splits, CasinoRuleSheet.SplitsOff, CasinoRuleSheet.SplitsToFour);
         Doubles = Math.Clamp(memory.Doubles, CasinoRuleSheet.DoublesAny, CasinoRuleSheet.DoublesOff);
         Charlie = memory.Charlie;
@@ -279,6 +286,28 @@ internal sealed class HostDraft
     }
 
     private static int LastIndexAtMost(int index, int length) => Math.Clamp(index, 0, length - 1);
+
+    internal static int Nearest(int[] allowed, int value)
+    {
+        var best = allowed[0];
+        for (var index = 1; index < allowed.Length; index++)
+        {
+            if (Math.Abs((long)allowed[index] - value) < Math.Abs((long)best - value))
+            {
+                best = allowed[index];
+            }
+        }
+
+        return best;
+    }
+
+    internal static string FitName(string? name)
+    {
+        var trimmed = name?.Trim() ?? string.Empty;
+        return trimmed.Length > CasinoHostingRules.NameMaxLength
+            ? trimmed[..CasinoHostingRules.NameMaxLength].TrimEnd()
+            : trimmed;
+    }
 
     private void ResetStakes()
     {
@@ -339,8 +368,7 @@ internal sealed class HostDraft
             MinBuyIn: 0,
             MaxBuyIn: 0,
             Practice: Practice,
-            PracticeStack: Practice ? Math.Max(StackValue, bigBlind * HoldemRules.HostedMinBuyInBigBlinds)
-                : CasinoHostingRules.DefaultPracticeStack,
+            PracticeStack: Practice ? TableStackValue : CasinoHostingRules.DefaultPracticeStack,
             PracticeRebuy: Practice && PracticeRebuy,
             TurnSeconds: TurnSeconds,
             TimeBankUses: TimeBank ? CasinoHostingRules.TimeBankUses : CasinoHostingRules.TimeBankOff,

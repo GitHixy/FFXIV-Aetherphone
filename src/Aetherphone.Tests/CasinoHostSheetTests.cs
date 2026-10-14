@@ -416,6 +416,63 @@ public sealed class CasinoHostSheetTests
     }
 
     [Fact]
+    public void HostAgainSnapsOffListValuesSoTheTableStillOpens()
+    {
+        var draft = new HostDraft();
+        draft.SelectCurrency(CasinoCurrencies.Practice, true);
+        var memory = draft.Snapshot(true);
+        memory.TurnSeconds = 25;
+        memory.Decks = 5;
+        memory.Name = "  " + new string('x', 40) + "  ";
+
+        var restored = new HostDraft();
+        restored.Restore(memory);
+        restored.Normalize(true);
+
+        Assert.Contains(restored.TurnSeconds, CasinoHostingRules.TurnSeconds);
+        Assert.Contains(restored.Decks, CasinoRuleSheet.Decks);
+        Assert.Equal(CasinoHostingRules.NameMaxLength, restored.Name.Length);
+        Assert.Equal(string.Empty, CasinoHostingRules.Check(restored.Build(null)));
+    }
+
+    [Fact]
+    public void AHoldemDraftWithAnOffListTurnClockStillOpensAfterHostAgain()
+    {
+        var draft = new HostDraft();
+        draft.SelectGame(HostGame.Holdem, true);
+        var memory = draft.Snapshot(false);
+        memory.TurnSeconds = 0;
+
+        var restored = new HostDraft();
+        restored.Restore(memory);
+        restored.Normalize(true);
+
+        Assert.Equal(CasinoHostingRules.TurnSeconds[0], restored.TurnSeconds);
+        Assert.Equal(string.Empty, CasinoHostingRules.Check(restored.Build(null)));
+    }
+
+    [Theory]
+    [InlineData(0, 1)]
+    [InlineData(3, 2)]
+    [InlineData(6, 6)]
+    [InlineData(7, 6)]
+    [InlineData(99, 8)]
+    [InlineData(int.MinValue, 1)]
+    [InlineData(int.MaxValue, 8)]
+    public void RestoredDeckCountsSnapToTheNearestAllowedShoe(int saved, int expected)
+    {
+        Assert.Equal(expected, HostDraft.Nearest(CasinoRuleSheet.Decks, saved));
+    }
+
+    [Fact]
+    public void ARestoredNameIsTrimmedAndCappedAndNeverNull()
+    {
+        Assert.Equal(string.Empty, HostDraft.FitName(null));
+        Assert.Equal("Mist Lounge", HostDraft.FitName("  Mist Lounge "));
+        Assert.Equal(CasinoHostingRules.NameMaxLength, HostDraft.FitName(new string('a', 60)).Length);
+    }
+
+    [Fact]
     public void ThePinRowSaysWhyTheVenueWouldNotShowTheTable()
     {
         var onPlot = new CasinoHousingPosition(74, 339, 5, 12, 0, 0);
