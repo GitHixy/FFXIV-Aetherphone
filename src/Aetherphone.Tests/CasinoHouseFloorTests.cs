@@ -62,7 +62,7 @@ public sealed class CasinoHouseFloorTests
     {
         var row = new CasinoTableRowDto("holdem-low", HoldemRules.Kind, CasinoTableKinds.House, MinBet: 50,
             MaxBet: 100, MinBuyIn: 2_000, MaxBuyIn: 10_000, MaxSeats: 6);
-        var view = TableBrowser.ViewOf(row, Me);
+        var view = TableRowViews.ViewOf(row, Me);
         Assert.Equal(Loc.T(L.Holdem.TableName, NumberText.Compact(50), NumberText.Compact(100)), view.Name);
         Assert.Equal(Loc.T(L.Holdem.BuyInValue, NumberText.Compact(2_000), NumberText.Compact(10_000)), view.Stakes);
         Assert.Equal(CasinoGames.Holdem, view.GameId);
@@ -73,7 +73,7 @@ public sealed class CasinoHouseFloorTests
     {
         var row = new CasinoTableRowDto("holdem-ada", HoldemRules.Kind, CasinoTableKinds.Private,
             OwnerName: "Ada Moon", MinBet: 500, MaxBet: 1_000, Name: "Ada's table");
-        var view = TableBrowser.ViewOf(row, Me);
+        var view = TableRowViews.ViewOf(row, Me);
         Assert.Equal("Ada's table", view.Name);
         Assert.Equal(Loc.T(L.Holdem.BlindsValue, NumberText.Compact(500), NumberText.Compact(1_000)), view.Stakes);
     }
@@ -82,13 +82,13 @@ public sealed class CasinoHouseFloorTests
     public void TheHouseBlackjackRowQuotesThePlayersRangeAndTheWholeFloorsHeadcount()
     {
         var lead = Table("blackjack-pit", CasinoTableKinds.House, seated: 2);
-        var view = TableBrowser.HouseView(new HouseBlackjackFloor(lead, 5, true), 250_000);
+        var view = TableRowViews.HouseView(new HouseBlackjackFloor(lead, 5, true), 250_000);
         Assert.Equal(Loc.T(L.Casino.GameBlackjack), view.Name);
         Assert.Equal(Loc.T(L.Casino.TableStakes, NumberText.Compact(500), NumberText.Compact(250_000)), view.Stakes);
         Assert.Equal(5, view.Seated);
         Assert.Equal(CasinoGames.Blackjack, view.GameId);
         Assert.False(view.Full);
-        Assert.True(TableBrowser.HouseView(new HouseBlackjackFloor(lead, 24, false), 250_000).Full);
+        Assert.True(TableRowViews.HouseView(new HouseBlackjackFloor(lead, 24, false), 250_000).Full);
     }
 
     private static CasinoTableRowDto Table(string id, int kind, int seated = 0,

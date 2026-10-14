@@ -92,32 +92,9 @@ internal sealed class VenueSection
     private bool DrawPoster(ImDrawListPtr drawList, HostGame game, int index, Rect tile, CasinoFeatureSet features,
         bool gilOpen, float phase, bool interactive, float scale)
     {
-        ref readonly var info = ref HostGames.Of(game);
-        var hovered = CasinoArt.PressCard(ImGui.GetID("poster"), tile.Min, tile.Max, out var pressedMin,
-            out var pressedMax, interactive);
-        var pressed = new Rect(pressedMin, pressedMax);
-        PosterTile.DrawFrame(drawList, pressed, info.Tint, scale);
-        if (info.HasGlyph)
-        {
-            PosterTile.DrawGlyph(drawList, pressed, info.GameId, scale);
-        }
-        else
-        {
-            PosterTile.DrawIcon(drawList, pressed, info.Icon, scale);
-        }
-
-        PosterTile.DrawSign(drawList, pressed, info.Sign, phase, scale, PosterTile.SignBandTop(scale));
-        var poster = new PosterInfo(CasinoGameGate.IsOpen(features, info.GameId), 0, metas[index], string.Empty,
-            VenuePosters.ShowsGilBadge(game, gilOpen) ? badge : string.Empty);
-        PosterTile.DrawText(drawList, pressed, Loc.T(info.Title), poster, scale);
-        PosterTile.DrawBadge(drawList, pressed, poster.Badge, scale);
-        if (!poster.Open)
-        {
-            PosterTile.DrawClosed(drawList, pressed, scale);
-        }
-
-        PosterTile.DrawRim(drawList, pressed, info.Tint, hovered, scale);
-        return interactive && UiInteract.Click(tile.Min, tile.Max, hovered);
+        return HostGameGrid.DrawPoster(drawList, game, tile, metas[index],
+            VenuePosters.ShowsGilBadge(game, gilOpen) ? badge : string.Empty,
+            CasinoGameGate.IsOpen(features, HostGames.Of(game).GameId), phase, interactive, scale);
     }
 
     private void RefreshTexts(bool gilOpen)

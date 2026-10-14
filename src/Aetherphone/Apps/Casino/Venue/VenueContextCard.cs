@@ -245,8 +245,8 @@ internal sealed class VenueContextCard
         ownRow = row;
         ownLedger = ledger;
         ownLanguage = Loc.Current;
-        var entries = TableBrowser.BookEntriesOf(row, ledger);
-        ownView = TableBrowser.ViewOf(row, tables.AccountId, entries);
+        var entries = TableRowViews.BookEntriesOf(row, ledger);
+        ownView = TableRowViews.ViewOf(row, tables.AccountId, entries);
         ownLine = OwnLineOf(ownView, entries);
         var bank = row.Config?.Bank ?? 0;
         var payout = row.Config?.MaxPayout ?? 0;

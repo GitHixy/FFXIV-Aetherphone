@@ -77,7 +77,7 @@ internal sealed class NearbyTablesCard
         count = Math.Min(rows.Length, MaxRows);
         for (var index = 0; index < count; index++)
         {
-            views[index] = Tables.TableBrowser.ViewOf(rows[index], string.Empty);
+            views[index] = Tables.TableRowViews.ViewOf(rows[index], string.Empty);
         }
     }
 }

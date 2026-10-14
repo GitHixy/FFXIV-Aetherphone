@@ -10888,9 +10888,6 @@ internal static class L
         public static readonly LocString TableYoursBadge = new("casino.tables.yoursBadge", "Yours");
         public static readonly LocString TableClosingBadge = new("casino.tables.closingBadge", "Closing");
         public static readonly LocString TableFilterAll = new("casino.tables.filterAll", "All");
-        public static readonly LocString TableFilterLowStakes = new("casino.tables.filterLowStakes", "Low stakes");
-        public static readonly LocString TableFilterHighStakes = new("casino.tables.filterHighStakes", "High stakes");
-        public static readonly LocString TableFilterMine = new("casino.tables.filterMine", "Mine");
         public static readonly LocString QuickSeatTitle = new("casino.quickSeat.title", "Quick seat");
         public static readonly LocString QuickSeatAction = new("casino.quickSeat.action", "Find me a seat");
         public static readonly LocString DoorTitle = new("casino.door.title", "Your table");
@@ -11594,8 +11591,6 @@ internal static class L
         public static readonly LocString RulesCharlie = new("casino.tables.rulesCharlie", "Five-card charlie");
         public static readonly LocString RulesPeek = new("casino.tables.rulesPeek", "Dealer peeks for blackjack");
         public static readonly LocString OpenTable = new("casino.tables.openTable", "Open table");
-        public static readonly LocString FilterBlackjack = new("casino.tables.filterBlackjack", "Blackjack");
-        public static readonly LocString FilterHoldem = new("casino.tables.filterHoldem", "Hold'em");
         public static readonly LocString FilterPractice = new("casino.tables.filterPractice", "Practice");
         public static readonly LocString FilterGil = new("casino.tables.filterGil", "Gil");
         public static readonly LocString GilStakes = new("casino.tables.gilStakes", "Bets up to {0} gil, bank {1} gil");
@@ -11692,13 +11687,8 @@ internal static class L
         public static readonly LocString CodeCopied = new("casino.tables.codeCopied", "Copied");
         public static readonly LocString CodeHint = new("casino.tables.codeHint", "Tell friends to enter this code in {0} > {1} > {2}.");
         public static readonly LocString CodePending = new("casino.tables.codePending", "Getting your code");
-        public static readonly LocString JoinHeading = new("casino.tables.joinHeading", "Join with a code");
-        public static readonly LocString JoinFieldHint = new("casino.tables.joinFieldHint", "Enter code");
         public static readonly LocString JoinAction = new("casino.tables.joinAction", "Join");
         public static readonly LocString ReasonCodeUnknown = new("casino.tables.reasonCodeUnknown", "No open table uses that code. Check the letters and try again.");
-        public static readonly LocString EmptyTitle = new("casino.tables.emptyTitle", "No tables open");
-        public static readonly LocString EmptyBody = new("casino.tables.emptyBody", "Host one in a few taps and share the room code with your friends.");
-        public static readonly LocString EmptyFiltered = new("casino.tables.emptyFiltered", "Nothing matches this filter right now.");
         public static readonly LocString HostCta = new("casino.tables.hostCta", "Host a table");
         public static readonly LocString HostCtaLine = new("casino.tables.hostCtaLine", "Pick a game, set the stakes, share the code.");
         public static readonly LocString HostedBy = new("casino.tables.hostedBy", "Hosted by {0}");
@@ -11839,7 +11829,6 @@ internal static class L
         public static readonly LocString GameDeathroll = new("casino.venue.gameDeathroll", "Deathroll");
         public static readonly LocString GameRaffle = new("casino.venue.gameRaffle", "Raffle");
         public static readonly LocString VenueRooms = new("casino.venue.venueRooms", "Venue room");
-        public static readonly LocString FilterRooms = new("casino.venue.filterRooms", "Rooms");
         public static readonly LocString InRoom = new("casino.venue.inRoom", "{0} here");
         public static readonly LocString TableSheet = new("casino.venue.tableSheet", "Table");
         public static readonly LocString RoomClosedTitle = new("casino.venue.roomClosedTitle", "This room has closed");

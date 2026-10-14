@@ -157,7 +157,7 @@ internal sealed partial class CasinoApp
         if (!ReferenceEquals(liveViewSources[slot], item.Table))
         {
             liveViewSources[slot] = item.Table;
-            liveViews[slot] = Tables.TableBrowser.ViewOf(item.Table!, casinoTables.AccountId);
+            liveViews[slot] = Tables.TableRowViews.ViewOf(item.Table!, casinoTables.AccountId);
         }
 
         return liveViews[slot];
@@ -176,7 +176,7 @@ internal sealed partial class CasinoApp
         houseViewSource = source;
         houseViewLanguage = Loc.Current;
         houseViewCeiling = ceiling;
-        houseView = Tables.TableBrowser.HouseView(HouseBlackjack.Of(source), ceiling);
+        houseView = Tables.TableRowViews.HouseView(HouseBlackjack.Of(source), ceiling);
         return houseView;
     }
 

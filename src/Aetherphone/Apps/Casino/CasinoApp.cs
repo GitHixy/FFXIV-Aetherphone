@@ -66,7 +66,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private readonly Core.Casino.HoldemStore holdemStore;
     private readonly Tables.HoldemTable holdem;
     private readonly Tables.HoldemPit holdemPit;
-    private readonly Tables.TableBrowser browser;
     private readonly Tables.BlackjackPit pit;
     private readonly Tables.TableHandsCard tableHands;
     private readonly Tables.HostSheet hostSheet;
@@ -176,10 +175,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             lodestone, PopRoute);
         holdemPit = new Tables.HoldemPit(holdemStore, casino, openTable, openDoorFromRow, OpenHoldemHostSheet);
         holdemPit.Lead = DrawDealerHoldemLead;
-        browser = new Tables.TableBrowser(casinoTables, holdemStore, casino, openTable, openDoorFromRow,
-            EnterHouseBlackjack, OpenHostSheet, OpenGilLedger, nearbyTables,
-            new Venue.VenueContextCard("casino.venue.tab", casinoTables, casino, preferences, nearbyTables,
-                contextActions));
         tableHands = new Tables.TableHandsCard(history);
         pit = new Tables.BlackjackPit(casinoTables, casino, openTable, openDoorFromRow, EnterHouseBlackjack, OpenTables,
             OpenHostSheet);
@@ -240,7 +235,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         broadcast.Reset();
         tournament.Reset();
         venueSheet.Close();
-        browser.Reset();
         tableDoor.Reset();
         pendingTableId = string.Empty;
         rulesSheet.Close();
@@ -285,7 +279,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         broadcast.Reset();
         tournament.Reset();
         venueSheet.Close();
-        browser.Reset();
         tableDoor.Reset();
         pendingTableId = string.Empty;
         rulesSheet.Close();
@@ -790,9 +783,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             case CasinoScreen.Tables when IsHoldem(route):
                 holdemPit.Draw(navBar.Body, ui);
                 break;
-            case CasinoScreen.Tables:
-                browser.Draw(navBar.Body, ui);
-                break;
             case CasinoScreen.Pit:
                 pit.Draw(navBar.Body, ui);
                 break;
@@ -878,7 +868,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private string RouteTitle(CasinoRoute route) => route.Screen switch
     {
         CasinoScreen.Tables or CasinoScreen.Table when IsHoldem(route) => Loc.T(L.Casino.GameHoldem),
-        CasinoScreen.Tables => Loc.T(L.VenueHub.Tab),
         CasinoScreen.Pit => Loc.T(L.Blackjack.PitTitle),
         CasinoScreen.TableDoor => Loc.T(Tables.TableDoor.TitleFor(casinoTables.CardFor(route.TableId))),
         CasinoScreen.HostTable => Loc.T(L.Tables.HostTitle),
@@ -1146,14 +1135,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
 
     private void OpenTables()
     {
-        if (routes.OnRoot)
-        {
-            SelectTab(CasinoTab.Host);
-            return;
-        }
-
-        browser.Enter();
-        routes.Push(new CasinoRoute(CasinoScreen.Tables, CasinoGames.Blackjack));
+        SelectTab(CasinoTab.Live);
     }
 
     private void SelectTab(CasinoTab next)
@@ -1171,7 +1153,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
 
         if (next == CasinoTab.Host)
         {
-            browser.Enter();
+            EnterHostTab();
         }
 
         routes.Select(next);
