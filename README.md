@@ -158,7 +158,7 @@ Transparent images shared in Chirper, Aethergram and Velvet posts keep their cle
   </tr>
 </table>
 
-Gamba's hero shows the coin value under your chips and a tier card with your level ring, current tier, level bar and cap, and a Gamba home screen widget keeps the three-hour coin claim one tap away, with your level and tier on the medium size. Gamba's venue browser and table ledger each have a refresh button to fetch the latest rooms or gil entries without leaving the page. Gil Deathroll, dice and raffle rooms also open My gil ledger directly, with Back returning to the room. A blackjack tournament asks before you leave it: while you are still in, the leave button reads Resign and the back button warns first.
+Gamba's hero shows the coin value under your chips and a tier card with your level ring, current tier, level bar and cap, and a Gamba home screen widget keeps the three-hour coin claim one tap away, with your level and tier on the medium size. Gamba's venue browser and table ledger each have a refresh button to fetch the latest rooms or gil entries without leaving the page. Gil Deathroll, dice and raffle rooms also open My gil ledger directly, with Back returning to the room. The blackjack felt switches to a compact layout on shorter screens, such as during a tournament, so cards, seats and bets never overlap. A blackjack tournament asks before you leave it: while you are still in, the leave button reads Resign and the back button warns first.
 
 The Floor's jackpot and challenge lights animate while browsing, even before opening a game.
 
