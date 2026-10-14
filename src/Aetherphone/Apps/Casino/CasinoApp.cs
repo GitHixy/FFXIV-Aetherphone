@@ -1120,17 +1120,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         AppLandscape.Release(Id);
     }
 
-    private void OpenTables()
-    {
-        if (routes.OnRoot)
-        {
-            SelectTab(CasinoTab.Host);
-            return;
-        }
-
-        browser.Enter();
-        routes.Push(new CasinoRoute(CasinoScreen.Tables, CasinoGames.Blackjack));
-    }
+    private void OpenTables() => SelectTab(CasinoTab.Live);
 
     private void SelectTab(CasinoTab next)
     {
