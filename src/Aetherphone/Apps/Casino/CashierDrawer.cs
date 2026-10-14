@@ -136,7 +136,7 @@ internal sealed class CashierDrawer
             if (closed.Granted)
             {
                 UiFeedback.Play(UiSound.Payout);
-                Announce(panel.CashOutLine(closed.ConvertedCoins));
+                Announce(panel.CashOutLine(closed.ConvertedCoins), closed.ConvertedCoins);
             }
 
             HandleOutcome(closed.Reason, openLimits);
@@ -145,13 +145,18 @@ internal sealed class CashierDrawer
         var partial = store.TakeCashOutResult();
         if (partial is not null)
         {
-            if (partial.Granted)
+            var result = partial.Result;
+            if (result.Granted && partial.Moved)
             {
                 UiFeedback.Play(UiSound.Payout);
-                Announce(panel.CashOutLine(partial.Coins));
+                Announce(panel.CashOutLine(result.Coins), result.Coins);
+            }
+            else if (result.Granted)
+            {
+                Inform(Loc.T(L.CashierDesk.AlreadyCashedOut));
             }
 
-            HandleOutcome(partial.Granted ? string.Empty : ReasonOf(partial.Reason), openLimits, true);
+            HandleOutcome(result.Granted ? string.Empty : ReasonOf(result.Reason), openLimits, true);
         }
 
         if (store.TakeMoneyMoveFailure())
@@ -167,15 +172,26 @@ internal sealed class CashierDrawer
 
     private static string ReasonOf(string reason) => reason.Length > 0 ? reason : CasinoReasons.Unreachable;
 
-    private void Announce(string line)
+    private void Announce(string line, long coinsBack)
     {
         if (open || panel.Visible)
         {
-            panel.CashedOut(line);
+            panel.CashedOut(line, coinsBack);
             return;
         }
 
         ShellToast.Show(line);
+    }
+
+    private void Inform(string message)
+    {
+        if (open || panel.Visible)
+        {
+            panel.ShowNote(message, false);
+            return;
+        }
+
+        ShellToast.Show(message);
     }
 
     private void HandleOutcome(string reason, Action openLimits, bool partial = false)

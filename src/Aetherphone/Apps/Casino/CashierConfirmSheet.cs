@@ -52,6 +52,7 @@ internal sealed class CashierConfirmSheet
     private CashierPreview preview;
     private bool busy;
     private bool confirmed;
+    private bool changed;
 
     public CashierConfirmSheet()
     {
@@ -62,10 +63,11 @@ internal sealed class CashierConfirmSheet
 
     public bool CapturesPointer => sheet.CapturesPointer;
 
-    public void Open(in CashierSheetRequest next, in CashierPreview nextPreview)
+    public void Open(in CashierSheetRequest next, in CashierPreview nextPreview, bool amountChanged)
     {
         request = next;
         preview = nextPreview;
+        changed = amountChanged;
         confirmed = false;
         sheet.Open();
     }
@@ -144,25 +146,31 @@ internal sealed class CashierConfirmSheet
     private float TitleHeight(float width) =>
         Typography.WrapText(Title, TitleStyle, width).Length * Typography.LineHeight(TitleStyle);
 
-    private float RiskHeight(float width, float scale)
+    private static float NoticeHeight(string title, string body, float width, float scale)
     {
-        if (!ShowsRisk)
-        {
-            return 0f;
-        }
-
         var text = width - RiskPad * 2f * scale;
-        return RiskPad * 2f * scale + Typography.LineHeight(TextStyles.SubheadlineEmphasized) + RiskGap * scale +
-               Typography.MeasureWrappedBlock(Loc.T(L.Chips.RoundOpenBody), TextStyles.Footnote, text).Y;
+        var titleBlock = title.Length > 0
+            ? Typography.LineHeight(TextStyles.SubheadlineEmphasized) + RiskGap * scale
+            : 0f;
+        return RiskPad * 2f * scale + titleBlock + Typography.MeasureWrappedBlock(body, TextStyles.Footnote, text).Y;
     }
+
+    private float RiskHeight(float width, float scale) => ShowsRisk
+        ? NoticeHeight(Loc.T(L.Chips.RoundOpenTitle), Loc.T(L.Chips.RoundOpenBody), width, scale)
+        : 0f;
+
+    private float ChangedHeight(float width, float scale) => changed
+        ? NoticeHeight(string.Empty, Loc.T(L.CashierDesk.AmountChanged), width, scale)
+        : 0f;
 
     private float ContentHeight(float width, float scale)
     {
         var gap = SectionGap * scale;
         var risk = RiskHeight(width, scale);
-        return GlyphSize * scale + gap + TitleHeight(width) + gap + RowHeight(scale) * RowCount +
-               (risk > 0f ? risk + gap : 0f) + gap + ConfirmHeight * scale + ButtonGap * scale +
-               CancelHeight * scale + BottomPad * scale;
+        var moved = ChangedHeight(width, scale);
+        return GlyphSize * scale + gap + TitleHeight(width) + gap + (moved > 0f ? moved + gap : 0f) +
+               RowHeight(scale) * RowCount + (risk > 0f ? risk + gap : 0f) + gap + ConfirmHeight * scale +
+               ButtonGap * scale + CancelHeight * scale + BottomPad * scale;
     }
 
     private void DrawBody(Rect content)
@@ -179,21 +187,29 @@ internal sealed class CashierConfirmSheet
             DrawFlow(drawList, new Vector2(origin.X + width * 0.5f, y + GlyphSize * scale * 0.5f), scale);
             y += GlyphSize * scale + gap;
             y = DrawTitle(drawList, origin.X, y, width) + gap;
+            var moved = ChangedHeight(width, scale);
+            if (moved > 0f)
+            {
+                DrawNotice(drawList, new Rect(new Vector2(origin.X, y), new Vector2(origin.X + width, y + moved)),
+                    string.Empty, Loc.T(L.CashierDesk.AmountChanged), scale);
+                y += moved + gap;
+            }
+
             y = DrawRows(drawList, origin.X, y, width, scale) + gap;
             var risk = RiskHeight(width, scale);
             if (risk > 0f)
             {
-                DrawRisk(drawList, new Rect(new Vector2(origin.X, y), new Vector2(origin.X + width, y + risk)), scale);
+                DrawNotice(drawList, new Rect(new Vector2(origin.X, y), new Vector2(origin.X + width, y + risk)),
+                    Loc.T(L.Chips.RoundOpenTitle), Loc.T(L.Chips.RoundOpenBody), scale);
                 y += risk + gap;
             }
 
             var confirm = new Rect(new Vector2(origin.X, y), new Vector2(origin.X + width, y + ConfirmHeight * scale));
             var action = Buying ? Loc.T(L.Chips.BuyHeading) : Loc.T(L.Casino.CashOut);
             if (Button.Draw(drawList, confirm, action, skin.Ink, ButtonStyle.Prominent,
-                    enabled: sheet.IsOpen && !busy, overlay: true, id: "cashier.confirm.go"))
+                    enabled: sheet.IsOpen && !busy && !confirmed, overlay: true, id: "cashier.confirm.go"))
             {
                 confirmed = true;
-                sheet.Close();
             }
 
             var cancelTop = confirm.Max.Y + ButtonGap * scale;
@@ -285,7 +301,7 @@ internal sealed class CashierConfirmSheet
         _ => skin.BodyInk,
     };
 
-    private void DrawRisk(ImDrawListPtr drawList, Rect rect, float scale)
+    private void DrawNotice(ImDrawListPtr drawList, Rect rect, string title, string body, float scale)
     {
         var radius = Metrics.Radius.Grouped * scale;
         Squircle.Fill(drawList, rect.Min, rect.Max, radius,
@@ -294,11 +310,16 @@ internal sealed class CashierConfirmSheet
             ImGui.GetColorU32(Palette.WithAlpha(skin.Accent, RiskStrokeAlpha)), Metrics.Stroke.Hairline);
         var pad = RiskPad * scale;
         var textWidth = rect.Width - pad * 2f;
-        var title = Typography.FitText(Loc.T(L.Chips.RoundOpenTitle), textWidth, TextStyles.SubheadlineEmphasized);
-        Typography.Draw(drawList, new Vector2(rect.Min.X + pad, rect.Min.Y + pad), title, skin.TitleInk,
-            TextStyles.SubheadlineEmphasized);
-        var bodyTop = rect.Min.Y + pad + Typography.LineHeight(TextStyles.SubheadlineEmphasized) + RiskGap * scale;
-        Typography.DrawWrappedLeft(new Vector2(rect.Min.X + pad, bodyTop), Loc.T(L.Chips.RoundOpenBody),
-            skin.BodyInk, TextStyles.Footnote, textWidth);
+        var bodyTop = rect.Min.Y + pad;
+        if (title.Length > 0)
+        {
+            Typography.Draw(drawList, new Vector2(rect.Min.X + pad, bodyTop),
+                Typography.FitText(title, textWidth, TextStyles.SubheadlineEmphasized), skin.TitleInk,
+                TextStyles.SubheadlineEmphasized);
+            bodyTop += Typography.LineHeight(TextStyles.SubheadlineEmphasized) + RiskGap * scale;
+        }
+
+        Typography.DrawWrappedLeft(new Vector2(rect.Min.X + pad, bodyTop), body, skin.BodyInk, TextStyles.Footnote,
+            textWidth);
     }
 }

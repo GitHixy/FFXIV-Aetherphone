@@ -24,6 +24,8 @@ internal readonly record struct CashierView(
     long Stack,
     long Wallet,
     long Rate,
+    long BankrollRate,
+    bool Dust,
     CashOutPlan Plan);
 
 internal sealed class CashierPanel
@@ -79,7 +81,7 @@ internal sealed class CashierPanel
         this.store = store;
         this.coins = coins;
         buyIn = new CashierBuyIn(store);
-        cashOut = new CashierCashOut(store);
+        cashOut = new CashierCashOut(store, coins);
         extras = new CashierExtras(store);
     }
 
@@ -118,11 +120,15 @@ internal sealed class CashierPanel
         error = string.Empty;
     }
 
-    public void CashedOut(string line)
+    public void CashedOut(string line, long coinsBack)
     {
         ClearNote();
         cashOut.Clear();
-        rain.Start(CurrencyKind.Coins);
+        if (coinsBack > 0)
+        {
+            rain.Start(CurrencyKind.Coins);
+        }
+
         ShellToast.Show(line);
     }
 
@@ -168,7 +174,7 @@ internal sealed class CashierPanel
         sheet.Draw(screen, ui, store.MovingMoney);
         if (sheet.TakeConfirmed(out var request))
         {
-            Execute(request);
+            Confirm(request);
         }
 
         rain.Draw(screen, MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds));
@@ -202,8 +208,9 @@ internal sealed class CashierPanel
 
     private CashierView ViewFor(CashierMode shown)
     {
-        var stack = store.State?.Sitting?.Stack ?? 0;
+        var stack = cashOut.Stack;
         var rate = store.Rate;
+        var bankrollRate = cashOut.Rate;
         var wallet = WalletCoins;
         if (shown == CashierMode.Buy)
         {
@@ -211,16 +218,18 @@ internal sealed class CashierPanel
             var state = buyIn.State(bounds);
             var status = buyIn.Status(bounds, state, out var tone);
             return new CashierView(CashierMode.Buy, Loc.T(L.Strip.CoinsFieldHint), buyIn.Field, true, state,
-                buyIn.Tiles(bounds), status, tone, string.Empty, stack, wallet, rate, default);
+                buyIn.Tiles(bounds), status, tone, string.Empty, stack, wallet, rate, bankrollRate, false, default);
         }
 
-        var partial = cashOut.Partial;
-        cashOut.Sync(stack, rate, partial);
-        var tiles = cashOut.Tiles(ChipValue.Coins(stack, rate), partial);
-        var plan = cashOut.Plan(stack, rate, partial);
-        var line = cashOut.Status(plan, stack, rate, out var lineTone);
+        var dust = CashierAmounts.IsDust(stack, bankrollRate);
+        var partial = cashOut.Partial && !dust;
+        cashOut.Sync(stack, bankrollRate, partial);
+        var tiles = cashOut.Tiles(ChipValue.Coins(stack, bankrollRate), partial);
+        var plan = cashOut.Plan(stack, bankrollRate, partial);
+        var line = cashOut.Status(plan, stack, bankrollRate, out var lineTone);
         return new CashierView(CashierMode.CashOut, Loc.T(L.CashierDesk.CashOutHeading), cashOut.Field, partial,
-            plan.State, tiles, line, lineTone, Loc.T(L.CashierDesk.CashOutNote), stack, wallet, rate, plan);
+            plan.State, tiles, line, lineTone, Loc.T(L.CashierDesk.CashOutNote), stack, wallet, rate, bankrollRate,
+            dust, plan);
     }
 
     private void NoticeFor(out string title, out string hint)
@@ -272,7 +281,7 @@ internal sealed class CashierPanel
         var lift = BobLift * scale;
         DrawColumn(drawList, ui, layout.WalletColumn, CurrencyKind.Coins, Loc.T(L.Casino.WalletRow),
             walletRoll.Display, ui.TitleInk, Loc.T(L.CashierDesk.CoinsUnit), -lift * wave, scale);
-        var worth = WorthText(view.Stack, view.Rate, layout.ChipsColumn.Width);
+        var worth = WorthText(view.Stack, view.BankrollRate, layout.ChipsColumn.Width);
         DrawColumn(drawList, ui, layout.ChipsColumn, CurrencyKind.Chips, Loc.T(L.Casino.ChipsRow),
             stackRoll.Display, view.Stack > 0 ? CasinoColors.Money : ui.MutedInk, worth, -lift * (1f - wave), scale);
         var exchange = layout.Exchange;
@@ -465,8 +474,8 @@ internal sealed class CashierPanel
         {
             var rect = layout.Tile(index);
             var tileCoins = view.Mode == CashierMode.Buy ? buyIn.Tile(index) : cashOut.Tile(index);
-            var live = enabled && tileCoins > 0;
-            var on = CashierAmounts.TileOn(tileCoins, fieldCoins);
+            var live = enabled && (tileCoins > 0 || view.Dust);
+            var on = CashierAmounts.TileOn(tileCoins, fieldCoins) || view.Dust;
             var hovered = live && (overlay
                 ? UiInteract.HoverWindowOnly(rect.Min, rect.Max)
                 : UiInteract.Hover(rect.Min, rect.Max));
@@ -556,11 +565,11 @@ internal sealed class CashierPanel
         {
             var bounds = new BuyInBounds(view.Wallet, view.Rate);
             sheet.Open(new CashierSheetRequest(CashierMode.Buy, buyIn.Coins, CashOutRoute.None, false),
-                buyIn.Preview(bounds, view.Stack));
+                buyIn.Preview(bounds, view.Stack), false);
             return;
         }
 
-        cashOut.BeginCheck(view.Plan.Coins);
+        cashOut.BeginCheck(view.Plan);
     }
 
     private void ResolveCheck()
@@ -571,36 +580,62 @@ internal sealed class CashierPanel
             return;
         }
 
-        if (!cashOut.ResolveCheck(out var coinsBack, out var atRisk))
+        if (!cashOut.ResolveCheck(out var route, out var coinsBack, out var atRisk))
         {
             return;
         }
 
-        var stack = store.State?.Sitting?.Stack ?? 0;
-        var rate = store.Rate;
-        var plan = CashierAmounts.PlanCashOut(coinsBack, stack, rate, cashOut.Partial);
-        if (plan.State != CashierAmountState.Ready)
+        var outcome = ReplanCashOut(route, coinsBack, out var plan, out var preview);
+        if (outcome == CashierConfirmOutcome.Gone)
         {
             return;
         }
 
-        sheet.Open(new CashierSheetRequest(CashierMode.CashOut, plan.Coins, plan.Route, atRisk),
-            CashierAmounts.CashOutPreview(plan, rate, WalletCoins, stack));
+        sheet.Open(new CashierSheetRequest(CashierMode.CashOut, plan.Coins, plan.Route, atRisk), preview,
+            outcome == CashierConfirmOutcome.Changed);
     }
 
-    private void Execute(in CashierSheetRequest request)
+    private CashierConfirmOutcome ReplanCashOut(CashOutRoute route, long coinsBack, out CashOutPlan plan,
+        out CashierPreview preview)
+    {
+        var stack = cashOut.Stack;
+        var rate = cashOut.Rate;
+        var partial = cashOut.Partial && !CashierAmounts.IsDust(stack, rate);
+        var outcome = CashierAmounts.Reconfirm(route, coinsBack, stack, rate, partial, out plan);
+        preview = CashierAmounts.CashOutPreview(plan, rate, WalletCoins, stack);
+        return outcome;
+    }
+
+    private void Confirm(in CashierSheetRequest request)
     {
         if (request.Mode == CashierMode.Buy)
         {
-            store.BuyChips(request.Coins);
+            ConfirmBuy(request.Coins);
             return;
         }
 
-        var plan = CashierAmounts.PlanCashOut(request.Coins, store.State?.Sitting?.Stack ?? 0, store.Rate,
-            cashOut.Partial);
-        if (plan.State == CashierAmountState.Ready)
+        var outcome = ReplanCashOut(request.Route, request.Coins, out var plan, out var preview);
+        if (outcome == CashierConfirmOutcome.Changed)
         {
-            cashOut.Execute(plan);
+            var atRisk = (store.State?.AtRisk ?? 0) > 0;
+            sheet.Open(new CashierSheetRequest(CashierMode.CashOut, plan.Coins, plan.Route, atRisk), preview, true);
+            return;
+        }
+
+        sheet.Close();
+        if (outcome == CashierConfirmOutcome.Gone || !cashOut.Execute(plan))
+        {
+            ShowNote(Loc.T(L.CashierDesk.NothingMoved), false);
+        }
+    }
+
+    private void ConfirmBuy(long coinsSpent)
+    {
+        sheet.Close();
+        var ready = CashierAmounts.BuyState(coinsSpent, WalletCoins) == CashierAmountState.Ready;
+        if (!ready || !store.BuyChips(coinsSpent))
+        {
+            ShowNote(Loc.T(L.CashierDesk.NothingMoved), false);
         }
     }
 }
