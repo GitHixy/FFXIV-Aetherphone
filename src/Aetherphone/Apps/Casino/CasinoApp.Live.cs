@@ -37,12 +37,11 @@ internal sealed partial class CasinoApp
     private void DrawLiveTab(Rect body)
     {
         EnterLiveWhenReturning();
-        if (holdemRooms.CapturesPointer)
+        if (!router.IsTransitioning)
         {
-            UiInteract.BlockThisFrame();
+            liveJoin.Consume(casinoTables);
         }
 
-        liveJoin.Consume(casinoTables);
         casinoVenue.EnsureNearby();
         var scale = UiScale.Current;
         using (ImRaii.PushId("casino.live"))
@@ -53,7 +52,9 @@ internal sealed partial class CasinoApp
             var width = ScrollLayout.StableContentWidth();
             var interactive = !router.IsTransitioning && !holdemRooms.CapturesPointer;
             var cursorY = DrawLiveTicker(drawList, origin, width, scale);
-            cursorY = liveJoin.Draw(drawList, ui, casinoTables, new Vector2(origin.X, cursorY), width, scale);
+            cursorY = DrawStakeNotice(new Vector2(origin.X, cursorY), width, scale);
+            cursorY = liveJoin.Draw(drawList, ui, casinoTables, new Vector2(origin.X, cursorY), width,
+                !holdemRooms.CapturesPointer, scale);
             var pinned = PinnedLiveTable(out var owner);
             cursorY = DrawYourTable(drawList, pinned, owner, new Vector2(origin.X, cursorY), width, interactive, scale);
             cursorY = DrawOnTheClock(drawList, new Vector2(origin.X, cursorY), width, interactive, scale);
@@ -142,6 +143,11 @@ internal sealed partial class CasinoApp
 
         var top = LiveArt.Header(drawList, ui, new Vector2(origin.X, origin.Y + LiveArt.SectionGap * scale), width,
             Loc.T(L.LivePage.YourTable), string.Empty, scale) + LiveArt.HeaderGap * scale;
+        if (owner)
+        {
+            casinoTables.EnsureDoorFresh(pinned.TableId);
+        }
+
         var door = owner ? casinoTables.DoorFor(pinned.TableId) : null;
         var here = LiveBoard.HereOf(pinned, door);
         var knocking = LiveBoard.KnockingOf(door);
@@ -324,7 +330,11 @@ internal sealed partial class CasinoApp
         var shown = LiveBoard.Filter(liveTables, collected, liveFilter, liveShown);
         if (shown == 0)
         {
-            var empty = casinoTables.Loaded ? Loc.T(LiveBoard.EmptyOf(liveFilter)) : Loc.T(L.Casino.TablesLoading);
+            var empty = casinoTables.Loaded
+                ? Loc.T(LiveBoard.EmptyOf(liveFilter))
+                : liveJoin.DirectoryFailed
+                    ? Loc.T(CasinoReasons.MessageFor(CasinoReasons.Unreachable))
+                    : Loc.T(L.Casino.TablesLoading);
             LiveArt.Empty(drawList, ui, new Vector2(origin.X, top), width, empty, scale);
             return top + LiveArt.EmptyHeight(empty, width, scale);
         }
@@ -337,6 +347,12 @@ internal sealed partial class CasinoApp
             var slot = liveShown[index];
             var table = liveTables[slot];
             var rect = new Rect(new Vector2(origin.X, top), new Vector2(origin.X + width, top + height));
+            top = rect.Max.Y + gap;
+            if (!ImGui.IsRectVisible(rect.Min, rect.Max))
+            {
+                continue;
+            }
+
             using (ImRaii.PushId(table.Row.TableId))
             {
                 if (LiveArt.TableRow(drawList, ui, rect, table.GameId, liveViews[slot], table.Here, interactive,
@@ -345,8 +361,6 @@ internal sealed partial class CasinoApp
                     OpenTable(table.Row.TableId);
                 }
             }
-
-            top = rect.Max.Y + gap;
         }
 
         return top - gap;

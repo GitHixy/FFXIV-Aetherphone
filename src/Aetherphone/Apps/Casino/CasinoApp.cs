@@ -238,6 +238,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         ResetLaunch();
         clubSheet.Close();
         missionsSheet.Close();
+        holdemRooms.Close();
         winsTicker.Reset();
         RefreshFloor();
         floor.Watch();
@@ -270,6 +271,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         tableDoor.Reset();
         pendingTableId = string.Empty;
         rulesSheet.Close();
+        holdemRooms.Close();
         fameConsent.Close();
         stage.ResetSession();
         ResetLimitsEditor();
@@ -368,6 +370,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         holdem.Gate();
         blackjack.Gate();
         rulesSheet.Gate();
+        holdemRooms.Gate();
         fameConsent.Gate();
         venueRoom.Gate();
         venueSheet.Gate();

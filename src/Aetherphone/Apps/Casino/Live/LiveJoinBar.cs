@@ -32,45 +32,38 @@ internal sealed class LiveJoinBar
     private string checkedBuffer = string.Empty;
     private LiveJoinInput checkedInput;
     private string reason = string.Empty;
-    private bool awaiting;
+
+    public bool DirectoryFailed { get; private set; }
 
     public void Enter()
     {
         reason = string.Empty;
-        awaiting = false;
+        DirectoryFailed = false;
     }
 
     public void Consume(CasinoTablesStore tables)
     {
-        if (!awaiting)
+        var directoryFailed = tables.TakeTablesFailure();
+        var intentFailed = tables.TakeIntentFailure();
+        if (directoryFailed)
         {
-            return;
+            DirectoryFailed = true;
         }
 
-        var inFlight = tables.IntentInFlight;
-        if (tables.TakeIntentFailure())
+        if (directoryFailed || intentFailed)
         {
             reason = CasinoReasons.Unreachable;
-            awaiting = false;
-            return;
         }
 
         var notice = tables.TakeNoticeOutcome();
         if (notice is not null)
         {
             reason = notice.Granted ? string.Empty : notice.Reason;
-            awaiting = false;
-            return;
-        }
-
-        if (!inFlight)
-        {
-            awaiting = false;
         }
     }
 
     public float Draw(ImDrawListPtr drawList, AppSkin ui, CasinoTablesStore tables, Vector2 origin, float width,
-        float scale)
+        bool accepting, float scale)
     {
         var field = new Rect(origin, new Vector2(origin.X + width, origin.Y + Height * scale));
         var radius = field.Height * 0.5f;
@@ -101,7 +94,7 @@ internal sealed class LiveJoinBar
         var ready = kind != LiveJoinInput.None && !tables.IntentInFlight;
         var tapped = Button.Draw(drawList, pill, label, ui.Ink, ready ? ButtonStyle.Prominent : ButtonStyle.Gray,
             enabled: ready, id: JoinId);
-        if ((tapped || submitted) && ready)
+        if ((tapped || (submitted && accepting)) && ready)
         {
             Join(tables, kind);
         }
@@ -139,7 +132,6 @@ internal sealed class LiveJoinBar
         {
             tables.JoinByCode(buffer);
             buffer = string.Empty;
-            awaiting = true;
             return;
         }
 
@@ -150,6 +142,5 @@ internal sealed class LiveJoinBar
 
         tables.ResolveToken(tableId);
         buffer = string.Empty;
-        awaiting = true;
     }
 }

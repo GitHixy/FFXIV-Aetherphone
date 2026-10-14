@@ -48,15 +48,36 @@ public sealed class LivePageTests
     {
         var row = Hosted() with { SeatedCount = 2, Occupancy = 5 };
         var door = new CasinoTableDoorDto("t-1", true,
-            Knocks: new[] { new CasinoTableKnockDto(), new CasinoTableKnockDto() },
-            Seated: new[] { new CasinoTableSeatedDto() },
-            Present: new[] { new CasinoTablePresentDto(), new CasinoTablePresentDto() });
+            Knocks: new[] { new CasinoTableKnockDto("u-knock"), new CasinoTableKnockDto("u-other") },
+            Seated: new[] { new CasinoTableSeatedDto("u-anna") },
+            Present: new[] { new CasinoTablePresentDto("u-bran", Attached: true) });
 
-        Assert.Equal(3, LiveBoard.HereOf(row, door));
+        Assert.Equal(2, LiveBoard.HereOf(row, door));
         Assert.Equal(2, LiveBoard.KnockingOf(door));
         Assert.Equal(5, LiveBoard.HereOf(row, null));
         Assert.Equal(0, LiveBoard.KnockingOf(null));
         Assert.Equal(4, LiveBoard.HereOf(row with { Occupancy = 0, SeatedCount = 4 }, null));
+    }
+
+    [Fact]
+    public void HereCountsEachAttachedPlayerOnceAndNeverTheHost()
+    {
+        var row = Hosted();
+        var door = new CasinoTableDoorDto("t-1", true,
+            Seated: new[]
+            {
+                new CasinoTableSeatedDto(row.OwnerUserId), new CasinoTableSeatedDto("u-anna"),
+                new CasinoTableSeatedDto("u-anna"),
+            },
+            Present: new[]
+            {
+                new CasinoTablePresentDto("u-anna", Attached: true), new CasinoTablePresentDto("u-bran", Attached: true),
+                new CasinoTablePresentDto("u-bran", Attached: true), new CasinoTablePresentDto("u-away"),
+                new CasinoTablePresentDto(row.OwnerUserId, Attached: true),
+            });
+
+        Assert.Equal(2, LiveBoard.HereOf(row, door));
+        Assert.Equal(0, LiveBoard.HereOf(row, new CasinoTableDoorDto("t-1", true)));
     }
 
     [Fact]

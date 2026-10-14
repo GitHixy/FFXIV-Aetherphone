@@ -26,6 +26,8 @@ internal sealed class HoldemRoomsSheet
     private const float ColumnGap = 12f;
     private const float RowStrokeAlpha = 0.06f;
     private const float EmptySeatAlpha = 0.16f;
+    private const float DotsGap = 7f;
+    private const float RoyalRimAlpha = 0.45f;
 
     private static readonly string[] SitIds = BuildIds();
 
@@ -49,6 +51,14 @@ internal sealed class HoldemRoomsSheet
     public void Open() => sheet.Open();
 
     public void Close() => sheet.Close();
+
+    public void Gate()
+    {
+        if (sheet.CapturesPointer)
+        {
+            UiInteract.BlockThisFrame();
+        }
+    }
 
     public string TakePick()
     {
@@ -129,16 +139,17 @@ internal sealed class HoldemRoomsSheet
     private static float ActionWidth(in HoldemRoomView room) => Button.WidthFor(ActionOf(room), ButtonSize.Regular);
 
     private static float TextWidth(in HoldemRoomView room, float width, float scale) =>
-        MathF.Max(1f, width - RowPadX * 2f * scale - CasinoArt.SeatDotsWidth(room.MaxSeats, scale)
-                      - ActionWidth(room) - ColumnGap * 2f * scale);
+        MathF.Max(1f, width - RowPadX * 2f * scale - ActionWidth(room) - ColumnGap * scale);
 
-    private static float RowHeight(in HoldemRoomView room, float width, float scale)
-    {
-        var textWidth = TextWidth(room, width, scale);
-        var text = Typography.LineHeight(TextStyles.Headline) + LineGap * scale
-                   + PitText.Height(DetailOf(room), TextStyles.Footnote, textWidth);
-        return RowPadY * 2f * scale + MathF.Max(Button.RegularHeight * scale, text);
-    }
+    private static float DotsHeight(float scale) => CasinoArt.SeatDotRadius * 2f * scale;
+
+    private static float TextHeight(in HoldemRoomView room, float textWidth, float scale) =>
+        PitText.Height(room.Name, TextStyles.Headline, textWidth) + LineGap * scale
+        + PitText.Height(DetailOf(room), TextStyles.Footnote, textWidth) + DotsGap * scale + DotsHeight(scale);
+
+    private static float RowHeight(in HoldemRoomView room, float width, float scale) =>
+        RowPadY * 2f * scale + MathF.Max(Button.RegularHeight * scale,
+            TextHeight(room, TextWidth(room, width, scale), scale));
 
     private void DrawBody(Rect content)
     {
@@ -185,8 +196,8 @@ internal sealed class HoldemRoomsSheet
             ImGui.GetColorU32(skin.TitleInk with { W = RowStrokeAlpha }), MathF.Max(1f, scale));
         if (tier == HoldemRules.RoyalTier)
         {
-            Squircle.Stroke(drawList, origin, max, radius, ImGui.GetColorU32(CasinoColors.Money with { W = 0.45f }),
-                MathF.Max(1f, scale));
+            Squircle.Stroke(drawList, origin, max, radius,
+                ImGui.GetColorU32(CasinoColors.Money with { W = RoyalRimAlpha }), MathF.Max(1f, scale));
         }
 
         var centerY = origin.Y + height * 0.5f;
@@ -195,20 +206,14 @@ internal sealed class HoldemRoomsSheet
         var actionHeight = Button.RegularHeight * scale;
         var action = new Rect(new Vector2(max.X - padX - actionWidth, centerY - actionHeight * 0.5f),
             new Vector2(max.X - padX, centerY + actionHeight * 0.5f));
-        var dotsWidth = CasinoArt.SeatDotsWidth(room.MaxSeats, scale);
-        var dotsLeft = action.Min.X - ColumnGap * scale - dotsWidth;
-        CasinoArt.SeatDots(drawList, new Vector2(dotsLeft, centerY), room.Seated, room.MaxSeats, skin.Accent,
-            skin.TitleInk with { W = EmptySeatAlpha }, scale);
         var left = origin.X + padX;
         var textWidth = TextWidth(room, width, scale);
-        var detail = DetailOf(room);
-        var nameHeight = Typography.LineHeight(TextStyles.Headline);
-        var detailHeight = PitText.Height(detail, TextStyles.Footnote, textWidth);
-        var top = centerY - (nameHeight + LineGap * scale + detailHeight) * 0.5f;
-        Typography.Draw(drawList, new Vector2(left, top), Typography.FitText(room.Name, textWidth, TextStyles.Headline),
-            CasinoColors.Money, TextStyles.Headline);
-        PitText.Draw(drawList, detail, TextStyles.Footnote, skin.BodyInk, left, top + nameHeight + LineGap * scale,
+        var top = centerY - TextHeight(room, textWidth, scale) * 0.5f;
+        top = PitText.Draw(drawList, room.Name, TextStyles.Headline, CasinoColors.Money, left, top, textWidth, false);
+        top = PitText.Draw(drawList, DetailOf(room), TextStyles.Footnote, skin.BodyInk, left, top + LineGap * scale,
             textWidth, false);
+        CasinoArt.SeatDots(drawList, new Vector2(left, top + DotsGap * scale + DotsHeight(scale) * 0.5f), room.Seated,
+            room.MaxSeats, skin.Accent, skin.TitleInk with { W = EmptySeatAlpha }, scale);
         var seats = Seats(room);
         if (Button.Draw(drawList, action, ActionOf(room), skin.Ink, seats ? ButtonStyle.Prominent : ButtonStyle.Gray,
                 enabled: sheet.IsOpen, overlay: true, id: SitIds[tier]))
