@@ -435,6 +435,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         venueSheet.Draw(screenArea, ui);
         HandleVenueSheet();
         rulesSheet.Draw(screenArea, ui);
+        DrawLiveSheet();
         fameConsent.Draw(screenArea, ui);
         clubSheet.Draw(screenArea, ui);
         missionsSheet.Draw(screenArea, ui, floor.Missions, floor.ClaimingMission,
@@ -1120,17 +1121,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         AppLandscape.Release(Id);
     }
 
-    private void OpenTables()
-    {
-        if (routes.OnRoot)
-        {
-            SelectTab(CasinoTab.Host);
-            return;
-        }
-
-        browser.Enter();
-        routes.Push(new CasinoRoute(CasinoScreen.Tables, CasinoGames.Blackjack));
-    }
+    private void OpenTables() => SelectTab(CasinoTab.Live);
 
     private void SelectTab(CasinoTab next)
     {
