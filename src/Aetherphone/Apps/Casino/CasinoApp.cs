@@ -184,7 +184,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         pit = new Tables.BlackjackPit(casinoTables, casino, openTable, openDoorFromRow, EnterHouseBlackjack, OpenTables,
             OpenHostSheet);
         hostSheet = new Tables.HostSheet(casinoTables, casino, new Venue.VenueHostOptions(casinoVenue), preferences);
-        tableDoor = new Tables.TableDoor(casinoTables, casino, confirm, openTable,
+        tableDoor = new Tables.TableDoor(casinoTables, confirm, openTable, OpenLedger,
             new Venue.TournamentDoorCard(casinoVenue), tradeSync);
         router = new ViewRouter<CasinoRoute>(CasinoRoute.Floor);
         routes = new CasinoNavigation(router);
@@ -391,6 +391,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         fameConsent.Gate();
         venueRoom.Gate();
         venueSheet.Gate();
+        tableDoor.Gate();
         tradeCard.Gate();
         stage.Gate();
         SyncRaceLandscape();
@@ -434,6 +435,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         venueRoom.DrawOverlay(screenArea, ui);
         venueSheet.Draw(screenArea, ui);
         HandleVenueSheet();
+        tableDoor.DrawOverlay(screenArea, ui, router.Current.Screen == CasinoScreen.TableDoor);
         rulesSheet.Draw(screenArea, ui);
         fameConsent.Draw(screenArea, ui);
         clubSheet.Draw(screenArea, ui);
