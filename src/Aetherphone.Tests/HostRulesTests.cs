@@ -211,6 +211,65 @@ public sealed class HostRulesTests
     }
 
     [Fact]
+    public void AFreePlayHoldemStackShowsWhatTheTableDeals()
+    {
+        var draft = new HostDraft();
+        draft.SelectGame(HostGame.Holdem, true);
+        draft.SelectCurrency(CasinoCurrencies.Practice, true);
+        draft.BigBlind = HostLadders.FloorIndex(HostLadders.Bets, 25_000);
+        draft.Normalize(true);
+
+        var config = draft.Build(null);
+
+        Assert.Equal(25_000, draft.BigBlindValue);
+        Assert.Equal(250_000, config.PracticeStack);
+        Assert.Equal(config.PracticeStack, draft.StackValue);
+        Assert.Equal(config.PracticeStack, draft.TableStackValue);
+        Assert.Equal(250_000, HostLadders.PracticeStacks[draft.StackSpan.First]);
+        Assert.Equal("20 s turns, no ante, stack " + NumberText.Compact(250_000) + ", not pinned",
+            HostRules.Summary(draft, false));
+        Assert.Equal(string.Empty, CasinoHostingRules.Check(config));
+    }
+
+    [Fact]
+    public void EveryFreePlayHoldemBlindOpensWithTheStackItShows()
+    {
+        var draft = new HostDraft();
+        draft.SelectGame(HostGame.Holdem, true);
+        draft.SelectCurrency(CasinoCurrencies.Practice, true);
+        var blinds = HostLadders.BigBlinds;
+        for (var index = blinds.First; index <= blinds.Last; index++)
+        {
+            draft.Stack = 0;
+            draft.BigBlind = index;
+            draft.Normalize(true);
+            var config = draft.Build(null);
+            Assert.Equal(draft.StackValue, config.PracticeStack);
+            Assert.True(config.PracticeStack >= draft.BigBlindValue * HoldemRules.HostedMinBuyInBigBlinds);
+            Assert.Equal(string.Empty, CasinoHostingRules.Check(config));
+        }
+    }
+
+    [Fact]
+    public void OnlyHoldemRaisesTheStackFloor()
+    {
+        var blackjack = new HostDraft();
+        blackjack.SelectCurrency(CasinoCurrencies.Practice, true);
+        blackjack.Stack = 0;
+        blackjack.Normalize(true);
+
+        Assert.Equal(0, blackjack.StackFloor);
+        Assert.Equal(HostLadders.All(HostLadders.PracticeStacks), blackjack.StackSpan);
+        Assert.Equal(HostLadders.PracticeStacks[0], blackjack.TableStackValue);
+
+        var dice = new HostDraft();
+        dice.SelectGame(HostGame.DiceTable, true);
+        dice.Stack = 0;
+        dice.Normalize(true);
+        Assert.Equal(HostLadders.PracticeStacks[0], dice.Build(null).PracticeStack);
+    }
+
+    [Fact]
     public void RoundLengthsReadAsSecondsThenMinutes()
     {
         Assert.Equal("30 s", HostRules.RoundText(30));

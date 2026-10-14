@@ -267,8 +267,7 @@ internal sealed class HostRulesPage
         Caption(ui, Loc.T(L.Tables.CurrencyPractice), width, scale);
         var seats = HostGames.HasSeats(draft.Game);
         rows[0] = HostRuleRow.Ladder("##hostStack", Loc.T(L.Tables.PracticeStack),
-            NumberText.Compact(draft.StackValue), Loc.T(L.HostSetup.StackHint),
-            HostLadders.All(HostLadders.PracticeStacks), draft.Stack);
+            NumberText.Compact(draft.TableStackValue), Loc.T(L.HostSetup.StackHint), draft.StackSpan, draft.Stack);
         rows[1] = HostRuleRow.Toggle("host.rebuy", Loc.T(L.Tables.Rebuys), Loc.T(L.HostSetup.RebuysHint),
             draft.PracticeRebuy);
         rows[2] = HostRuleRow.Toggle("host.faceup", Loc.T(L.Tables.FaceUp), Loc.T(L.HostSetup.FaceUpHint),

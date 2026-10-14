@@ -61,6 +61,13 @@ internal sealed class HostDraft
 
     public long StackValue => HostLadders.PracticeStacks[Stack];
 
+    public long StackFloor => Game == HostGame.Holdem ? BigBlindValue * HoldemRules.HostedMinBuyInBigBlinds : 0;
+
+    public LadderSpan StackSpan =>
+        new(HostLadders.CeilIndex(HostLadders.PracticeStacks, StackFloor), HostLadders.PracticeStacks.Length - 1);
+
+    public long TableStackValue => Math.Max(StackValue, StackFloor);
+
     public long BankValue => HostLadders.Gil[Bank];
 
     public long MinBetValue => BetRungs[MinBet];
@@ -168,6 +175,8 @@ internal sealed class HostDraft
         }
 
         Seats = Math.Clamp(Seats, CasinoHostingRules.MinSeats, HostGames.MaxSeats(Game));
+        BigBlind = HostLadders.BigBlinds.Clamp(BigBlind);
+        Stack = StackSpan.Clamp(Stack);
         var span = BetSpan;
         MaxBet = span.Clamp(MaxBet);
         MinBet = Math.Clamp(MinBet, span.First, MaxBet);
@@ -177,8 +186,6 @@ internal sealed class HostDraft
         {
             MaxPayout = PayoutSpan.Clamp(MaxPayout);
         }
-
-        BigBlind = HostLadders.BigBlinds.Clamp(BigBlind);
     }
 
     public CasinoTableConfigDto Build(CasinoTableLocationDto? location)
@@ -339,8 +346,7 @@ internal sealed class HostDraft
             MinBuyIn: 0,
             MaxBuyIn: 0,
             Practice: Practice,
-            PracticeStack: Practice ? Math.Max(StackValue, bigBlind * HoldemRules.HostedMinBuyInBigBlinds)
-                : CasinoHostingRules.DefaultPracticeStack,
+            PracticeStack: Practice ? TableStackValue : CasinoHostingRules.DefaultPracticeStack,
             PracticeRebuy: Practice && PracticeRebuy,
             TurnSeconds: TurnSeconds,
             TimeBankUses: TimeBank ? CasinoHostingRules.TimeBankUses : CasinoHostingRules.TimeBankOff,
