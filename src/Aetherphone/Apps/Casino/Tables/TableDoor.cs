@@ -156,7 +156,7 @@ internal sealed partial class TableDoor
         }
 
         DrawRoom(ui, door, card, width, scale);
-        if (card is not null && card.Config is not null)
+        if (card is not null)
         {
             ledger.Draw(ui, tables.AccountId, card.OwnerUserId, scale);
         }

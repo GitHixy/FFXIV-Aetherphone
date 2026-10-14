@@ -39,6 +39,7 @@ internal sealed class CasinoTablesStore : IDisposable
     private volatile CasinoTableRowDto? card;
     private readonly Action<int> cardStatusSink;
     private int fetchingCard;
+    private string cardRefetchId = string.Empty;
     private long cardAtTick;
     private long listedAtTick;
     private int cardMissing;
@@ -145,8 +146,14 @@ internal sealed class CasinoTablesStore : IDisposable
 
     public void RefreshCard(string roomId)
     {
-        if (roomId.Length == 0 || !session.IsSignedIn || Interlocked.Exchange(ref fetchingCard, 1) != 0)
+        if (roomId.Length == 0 || !session.IsSignedIn)
         {
+            return;
+        }
+
+        if (Interlocked.Exchange(ref fetchingCard, 1) != 0)
+        {
+            Interlocked.Exchange(ref cardRefetchId, roomId);
             return;
         }
 
@@ -166,7 +173,17 @@ internal sealed class CasinoTablesStore : IDisposable
             }
 
             Vanished(roomId);
-        }, () => Interlocked.Exchange(ref fetchingCard, 0));
+        }, CardFetched);
+    }
+
+    private void CardFetched()
+    {
+        Interlocked.Exchange(ref fetchingCard, 0);
+        var queued = Interlocked.Exchange(ref cardRefetchId, string.Empty);
+        if (queued.Length > 0)
+        {
+            RefreshCard(queued);
+        }
     }
 
     internal static bool LostOwnership(CasinoTableDoorDto fresh, CasinoTableRowDto? held, string accountId)
@@ -1303,6 +1320,7 @@ internal sealed class CasinoTablesStore : IDisposable
         Interlocked.Exchange(ref retiredTableId, string.Empty);
         Interlocked.Exchange(ref vanishedTableId, string.Empty);
         Interlocked.Exchange(ref cardMissing, 0);
+        Interlocked.Exchange(ref cardRefetchId, string.Empty);
         Interlocked.Exchange(ref knockMissing, 0);
         knock = CasinoKnockStatus.Idle;
         Interlocked.Exchange(ref quickSeatRefusal, string.Empty);
