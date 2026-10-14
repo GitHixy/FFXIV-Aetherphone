@@ -2429,6 +2429,12 @@ internal static class L
                 "Changed a new Book to be open to all by default, worded the Book's guest prompts and hosting note around how patrons get recognised, and named the setting to change when table settings conflict"),
             new("changelog.r1300.144",
                 "Changed trade sync to read whether the trade window is open from the window itself, so a trade still counts when the game hides the window instead of closing it, and the ledger pages refresh every five seconds and right after a trade"),
+            new("changelog.r1300.145",
+                "Changed the Gamba hero to show the coin value under the balance and a tier card with the level ring, your current tier, the level bar and its cap"),
+            new("changelog.r1300.146",
+                "Added a Gamba home screen widget for the three-hour coin claim, with your level, tier and cap on the medium size"),
+            new("changelog.r1300.147",
+                "Changed raffle tickets bought one at a time to grow one ledger entry until a side confirms it, and trade sync to match a patron by character name with the world only breaking a tie"),
         };
 
         public static readonly LocString[] Release1300Linkpearl =
@@ -11193,6 +11199,7 @@ internal static class L
         public static readonly LocString TitleLegend = new("casino.strip.title.legend", "Legend");
         public static readonly LocString Level = new("casino.strip.level", "Level {0}");
         public static readonly LocString Cap = new("casino.strip.cap", "Cap {0}");
+        public static readonly LocString CurrentTier = new("casino.strip.currentTier", "Current tier");
         public static readonly LocString NiceWin = new("casino.strip.niceWin", "Nice win");
         public static readonly LocString BigWin = new("casino.strip.bigWin", "BIG WIN");
         public static readonly LocString MegaWin = new("casino.strip.megaWin", "MEGA WIN");
@@ -13749,6 +13756,13 @@ internal static class L
         public static readonly LocString NextSpin = new("widgetsUtility.nextSpin", "Next spin");
         public static readonly LocString CoinsWon = new("widgetsUtility.coinsWon", "{0} coins");
         public static readonly LocString SpinUnavailable = new("widgetsUtility.spinUnavailable", "Not available right now");
+        public static readonly LocString CasinoClaimName = new("widgetsUtility.casinoClaimName", "Gamba");
+        public static readonly LocString CasinoClaimDescription = new("widgetsUtility.casinoClaimDescription", "Your three-hour coin claim, with your level and tier on the medium size.");
+        public static readonly LocString CasinoSignInClaim = new("widgetsUtility.casinoSignInClaim", "Sign in to claim");
+        public static readonly LocString NextClaim = new("widgetsUtility.nextClaim", "Next claim");
+        public static readonly LocString ClaimReady = new("widgetsUtility.claimReady", "Coins ready to claim");
+        public static readonly LocString Claiming = new("widgetsUtility.claiming", "Claiming");
+        public static readonly LocString ClaimAmount = new("widgetsUtility.claimAmount", "Claim {0}");
         public static readonly LocString LodestoneName = new("widgetsUtility.lodestoneName", "Lodestone");
         public static readonly LocString NewsDescription = new("widgetsUtility.newsDescription", "The latest headlines from the Lodestone.");
         public static readonly LocString NewsCategoryOption = new("widgetsUtility.newsCategoryOption", "Category");

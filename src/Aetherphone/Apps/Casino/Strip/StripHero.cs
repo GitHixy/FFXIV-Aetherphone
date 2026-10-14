@@ -57,6 +57,7 @@ internal sealed class StripHero
     public const long TimedPeriodSeconds = 3 * 3600;
     public const float StreakLabelGap = 6f;
     public const float LabelSlack = 4f;
+    public const float CoinsGap = 2f;
 
     private const float SurfaceLuminance = 0.07f;
     private const float GlassOpacity = 0.94f;
@@ -113,6 +114,9 @@ internal sealed class StripHero
 
     public static float BalanceRowHeight(float amountLine, float getHeight) => MathF.Max(amountLine, getHeight);
 
+    public static float BalanceBlockHeight(float amountLine, float footnoteLine, float coinsGap) =>
+        amountLine + coinsGap + footnoteLine;
+
     public static float DetailRowHeight(float footnoteLine, float titleHeight) => MathF.Max(footnoteLine, titleHeight);
 
     public static float ClaimsHeight(StripHeroClaims claims, float buttonHeight) =>
@@ -132,17 +136,22 @@ internal sealed class StripHero
         var gap = RowGap * scale;
         var getHeight = Button.RegularHeight * scale;
         var inline = ChipsInline(model.Balance, width - pad * 2f, scale);
-        var height = pad * 2f + BalanceRowHeight(Typography.LineHeight(AmountStyle), inline ? getHeight : 0f)
-                     + DetailRowHeight(Typography.LineHeight(TextStyles.Footnote),
-                         StatusTitle.PillHeight(StatusTitle.For(model.Balance), scale));
+        var block = BalanceBlockHeight(Typography.LineHeight(AmountStyle), Typography.LineHeight(TextStyles.Footnote),
+            CoinsGap * scale);
+        var height = pad * 2f + BalanceRowHeight(block, inline ? getHeight : 0f);
         if (!inline)
         {
             height += gap + getHeight;
         }
 
+        var title = StatusTitle.For(model.Balance);
         if (model.ShowsLevel)
         {
-            height += gap + LevelCapsule.Height * scale;
+            height += gap + MathF.Max(LevelCapsule.Ring * scale, LevelCapsule.TextBlock(title, scale));
+        }
+        else if (title != BalanceTitle.None)
+        {
+            height += gap + DetailRowHeight(0f, StatusTitle.PillHeight(title, scale));
         }
 
         var claims = ClaimsHeight(ClaimsOf(model), Button.LargeHeight * scale);
@@ -211,9 +220,11 @@ internal sealed class StripHero
         var getWidth = GetChipsWidth(scale);
         var getHeight = Button.RegularHeight * scale;
         var inline = ChipsInline(model.Balance, right - left, scale);
-        var balanceRow = BalanceRowHeight(Typography.LineHeight(AmountStyle), inline ? getHeight : 0f);
-        if (DrawBalance(drawList, model, left, inline ? right - getWidth - buttonGap : right, top, balanceRow,
-                deltaSeconds))
+        var block = BalanceBlockHeight(Typography.LineHeight(AmountStyle), Typography.LineHeight(TextStyles.Footnote),
+            CoinsGap * scale);
+        var balanceRow = BalanceRowHeight(block, inline ? getHeight : 0f);
+        if (DrawBalance(drawList, model, left, inline ? right - getWidth - buttonGap : right, top, balanceRow, block,
+                deltaSeconds, scale))
         {
             action = StripHeroAction.Cashier;
         }
@@ -229,7 +240,7 @@ internal sealed class StripHero
             }
         }
 
-        top = DrawDetailRow(drawList, model, left, right, top + balanceRow, scale);
+        top += balanceRow;
         if (!inline)
         {
             top += gap;
@@ -242,13 +253,25 @@ internal sealed class StripHero
             top = getRect.Max.Y;
         }
 
+        var title = StatusTitle.For(model.Balance);
         if (model.ShowsLevel)
         {
             top += gap;
-            var capsule = new Rect(new Vector2(left, top), new Vector2(right, top + LevelCapsule.Height * scale));
-            level.Draw(drawList, capsule, Math.Max(1, model.Level), model.LevelProgress, model.LevelCap,
+            var cardHeight = MathF.Max(LevelCapsule.Ring * scale, LevelCapsule.TextBlock(title, scale));
+            var capsule = new Rect(new Vector2(left, top), new Vector2(right, top + cardHeight));
+            level.Draw(drawList, capsule, Math.Max(1, model.Level), model.LevelProgress, model.LevelCap, title,
                 CasinoColors.Money, scale);
             top = capsule.Max.Y;
+        }
+        else if (title != BalanceTitle.None)
+        {
+            top += gap;
+            var pillHeight = StatusTitle.PillHeight(title, scale);
+            var titleMax = (right - left) * TitleShare;
+            var titleWidth = StatusTitle.Width(title, titleMax, scale);
+            StatusTitle.Draw(drawList, new Vector2(right - titleWidth * 0.5f, top + pillHeight * 0.5f), title, titleMax,
+                scale);
+            top += pillHeight;
         }
 
         var claims = ClaimsOf(model);
@@ -279,23 +302,35 @@ internal sealed class StripHero
     }
 
     private bool DrawBalance(ImDrawListPtr drawList, in StripHeroModel model, float left, float right, float top,
-        float rowHeight, float deltaSeconds)
+        float rowHeight, float block, float deltaSeconds, float scale)
     {
         balance.Update(model.Balance, deltaSeconds);
         var amount = NumberText.Compact(balance.Display);
-        var reserve = CurrencyGlyph.Reserve(Typography.LineHeight(AmountStyle));
+        var amountLine = Typography.LineHeight(AmountStyle);
+        var reserve = CurrencyGlyph.Reserve(amountLine);
         var amountScale = Typography.FitScale(amount, MathF.Max(1f, right - left - reserve),
             AmountStyle.Scale * balance.PopScale, TextStyles.Title2.Scale, AmountStyle.Weight);
         var size = Typography.Measure(amount, amountScale, AmountStyle.Weight);
-        var center = top + rowHeight * 0.5f;
+        var blockTop = top + (rowHeight - block) * 0.5f;
+        var amountCenter = blockTop + amountLine * 0.5f;
         var glyph = size.Y * CurrencyGlyph.GlyphFraction;
-        CurrencyGlyph.Draw(drawList, CurrencyKind.Chips, new Vector2(left + glyph * 0.5f, center), glyph);
+        CurrencyGlyph.Draw(drawList, CurrencyKind.Chips, new Vector2(left + glyph * 0.5f, amountCenter), glyph);
         var textLeft = left + CurrencyGlyph.Reserve(size.Y);
-        Typography.Draw(drawList, new Vector2(textLeft, center - size.Y * 0.5f), amount,
+        Typography.Draw(drawList, new Vector2(textLeft, amountCenter - size.Y * 0.5f), amount,
             model.Balance > 0 ? CasinoColors.Money : Palette.WithAlpha(CasinoArt.White, IdleAlpha), amountScale,
             AmountStyle.Weight);
-        var amountRect = new Rect(new Vector2(left, top),
-            new Vector2(MathF.Min(right, textLeft + size.X), top + rowHeight));
+        var coinsTop = blockTop + amountLine + CoinsGap * scale;
+        var coinsWidth = MathF.Max(1f, right - textLeft);
+        var coins = worth.Full(model.Balance, model.Rate);
+        var coinsText = Typography.Measure(coins, TextStyles.Footnote).X <= coinsWidth
+            ? coins
+            : worth.Compact(model.Balance, model.Rate);
+        Typography.Draw(drawList, new Vector2(textLeft, coinsTop),
+            Typography.FitText(coinsText, coinsWidth, TextStyles.Footnote), Palette.WithAlpha(CasinoArt.White, SubAlpha),
+            TextStyles.Footnote);
+        var amountRect = new Rect(new Vector2(left, blockTop),
+            new Vector2(MathF.Min(right, textLeft + MathF.Max(size.X, Typography.Measure(coinsText, TextStyles.Footnote).X)),
+                blockTop + block));
         var overAmount = UiInteract.Hover(amountRect.Min, amountRect.Max);
         if (overAmount)
         {
@@ -304,31 +339,6 @@ internal sealed class StripHero
         }
 
         return UiInteract.Click(amountRect.Min, amountRect.Max, overAmount);
-    }
-
-    private float DrawDetailRow(ImDrawListPtr drawList, in StripHeroModel model, float left, float right, float top,
-        float scale)
-    {
-        var title = StatusTitle.For(model.Balance);
-        var titleMax = (right - left) * TitleShare;
-        var titleWidth = StatusTitle.Width(title, titleMax, scale);
-        var footnote = Typography.LineHeight(TextStyles.Footnote);
-        var rowHeight = DetailRowHeight(footnote, StatusTitle.PillHeight(title, scale));
-        var center = top + rowHeight * 0.5f;
-        if (titleWidth > 0f)
-        {
-            StatusTitle.Draw(drawList, new Vector2(right - titleWidth * 0.5f, center), title, titleMax, scale);
-        }
-
-        var coinsWidth = MathF.Max(1f, right - (titleWidth > 0f ? titleWidth + Metrics.Space.Sm * scale : 0f) - left);
-        var coins = worth.Full(model.Balance, model.Rate);
-        var coinsText = Typography.Measure(coins, TextStyles.Footnote).X <= coinsWidth
-            ? coins
-            : worth.Compact(model.Balance, model.Rate);
-        Typography.Draw(drawList, new Vector2(left, center - footnote * 0.5f),
-            Typography.FitText(coinsText, coinsWidth, TextStyles.Footnote), Palette.WithAlpha(CasinoArt.White, SubAlpha),
-            TextStyles.Footnote);
-        return top + rowHeight;
     }
 
     private StripHeroAction DrawClaims(ImDrawListPtr drawList, AppSkin ui, in StripHeroModel model,
