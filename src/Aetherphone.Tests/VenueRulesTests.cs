@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Aetherphone.Core.Aethernet.Contracts;
@@ -35,7 +36,9 @@ public sealed class VenueRulesTests
         Assert.Equal(120, VenueRules.ChallengeLapseSeconds);
         Assert.Equal(60, VenueRules.MinRaffleSeconds);
         Assert.Equal(86_400, VenueRules.MaxRaffleSeconds);
-        Assert.Equal(100, VenueRules.MaxTicketsPerPerson);
+        Assert.Equal(1000, VenueRules.MaxTicketsPerPerson);
+        Assert.Equal(VenueRules.TicketDigits,
+            VenueRules.MaxTicketsPerPerson.ToString(CultureInfo.InvariantCulture).Length);
         Assert.Equal(10, VenueRules.MaxWinners);
         Assert.Equal(100, VenueRules.MaxEntrants);
         Assert.Equal(48, VenueRules.TitleMaxLength);
@@ -102,7 +105,9 @@ public sealed class VenueRulesTests
         Assert.True(VenueRules.IsRaffle("Bar tab", 3, 1, 600));
         Assert.False(VenueRules.IsRaffle("  ", 3, 1, 600));
         Assert.False(VenueRules.IsRaffle(new string('a', 49), 3, 1, 600));
-        Assert.False(VenueRules.IsRaffle("Bar tab", 101, 1, 600));
+        Assert.True(VenueRules.IsRaffle("Bar tab", 250, 1, 600));
+        Assert.True(VenueRules.IsRaffle("Bar tab", 1000, 1, 600));
+        Assert.False(VenueRules.IsRaffle("Bar tab", 1001, 1, 600));
         Assert.False(VenueRules.IsRaffle("Bar tab", 3, 11, 600));
         Assert.False(VenueRules.IsRaffle("Bar tab", 3, 1, 59));
     }

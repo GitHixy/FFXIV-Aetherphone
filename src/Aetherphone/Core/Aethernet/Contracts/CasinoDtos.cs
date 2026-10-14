@@ -757,7 +757,8 @@ internal sealed record CasinoVenueActRequest(
     int DurationSeconds = 0,
     string OpponentUserId = "",
     long TicketPrice = 0,
-    long Prize = 0);
+    long Prize = 0,
+    string TargetUserId = "");
 
 internal sealed record CasinoVenueActDto(
     bool Granted = false,

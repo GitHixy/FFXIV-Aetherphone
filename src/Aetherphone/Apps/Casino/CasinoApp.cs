@@ -158,7 +158,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         openTable = OpenTable;
         openDoorFromRow = OpenDoor;
         this.casinoVenue = casinoVenue;
-        venueRoom = new Venue.VenueCabinet(casinoVenue, PopRoute, OpenGilLedger);
+        venueRoom = new Venue.VenueCabinet(casinoVenue, PopRoute, OpenGilLedger, confirm);
         broadcast = new Venue.BroadcastView(casinoRooms);
         venueSheet = new Venue.VenueTableSheet(casinoVenue, tradeSync, report, JoinCodeOf);
         tradeCard = new Venue.TradeRecordedCard(tradeSync);

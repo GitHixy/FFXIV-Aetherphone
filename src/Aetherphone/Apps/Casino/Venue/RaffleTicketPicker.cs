@@ -18,7 +18,7 @@ internal sealed class RaffleTicketPicker
     public const string FewerLabel = "−";
     public const string MoreLabel = "+";
 
-    private const int BufferLength = 4;
+    private const int BufferLength = VenueRules.TicketDigits + 1;
     private const float FlashSeconds = 0.5f;
     private const string FieldId = "##venue.raffle.count";
     private const string TotalMarquee = "venue.raffle.total";
@@ -57,7 +57,12 @@ internal sealed class RaffleTicketPicker
 
     public static float DeckHeightFor(VenueRoomView? view, bool owner, string me)
     {
-        return Offers(view, owner, me) ? DeckHeight : CasinoStageLayout.DeckHeight;
+        return Offers(view, owner, me) || OwnerRow(view, owner) ? DeckHeight : CasinoStageLayout.DeckHeight;
+    }
+
+    public static bool OwnerRow(VenueRoomView? view, bool owner)
+    {
+        return owner && view is { Kind: VenueRoomKind.Raffle, Gil: true, Raffle.Raffle: not null };
     }
 
     internal static VenueActDraft Build(int count)

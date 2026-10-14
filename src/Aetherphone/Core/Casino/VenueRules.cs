@@ -68,6 +68,8 @@ internal static class VenueActions
     public const string RaffleTicket = "raffle.ticket";
 
     public const string RaffleDraw = "raffle.draw";
+
+    public const string RaffleRemove = "raffle.remove";
 }
 
 internal static class DuelPhases
@@ -115,7 +117,9 @@ internal static class VenueRules
 
     public const int MinTicketsPerPerson = 1;
 
-    public const int MaxTicketsPerPerson = 100;
+    public const int MaxTicketsPerPerson = 1000;
+
+    public const int TicketDigits = 4;
 
     public const int MinWinners = 1;
 

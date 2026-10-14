@@ -268,6 +268,15 @@ public sealed class VenuePlaybackTests
     }
 
     [Fact]
+    public void RemovingAnEntrantNamesThemAsTheTarget()
+    {
+        var draft = RaffleEntrantsSheet.Build("u7");
+        Assert.Equal(VenueActions.RaffleRemove, draft.Action);
+        Assert.Equal("u7", draft.TargetUserId);
+        Assert.Equal(0, draft.Count);
+    }
+
+    [Fact]
     public void TheTicketPickerSendsTheCountInOneAct()
     {
         var draft = RaffleTicketPicker.Build(5);
@@ -280,7 +289,7 @@ public sealed class VenuePlaybackTests
     }
 
     [Fact]
-    public void TheRaffleDeckGrowsOnlyWhereATicketCanBeTaken()
+    public void TheRaffleDeckGrowsWhereATicketCanBeTakenAndForTheGilHostsEntrantsRow()
     {
         var live = RoomView(VenueKinds.Raffle,
             "{\"raffle\":{\"seq\":2,\"title\":\"Bar tab\",\"ticketsPerPerson\":3},\"currency\":2}");
@@ -298,7 +307,11 @@ public sealed class VenuePlaybackTests
         Assert.False(RaffleTicketPicker.Offers(dice, false, Me));
         Assert.False(RaffleTicketPicker.Offers(null, false, Me));
         Assert.Equal(RaffleTicketPicker.DeckHeight, RaffleTicketPicker.DeckHeightFor(live, false, Me));
-        Assert.Equal(CasinoStageLayout.DeckHeight, RaffleTicketPicker.DeckHeightFor(live, true, Me));
+        Assert.True(RaffleTicketPicker.OwnerRow(live, true));
+        Assert.Equal(RaffleTicketPicker.DeckHeight, RaffleTicketPicker.DeckHeightFor(live, true, Me));
+        Assert.False(RaffleTicketPicker.OwnerRow(practice, true));
+        Assert.False(RaffleTicketPicker.OwnerRow(idle, true));
+        Assert.Equal(CasinoStageLayout.DeckHeight, RaffleTicketPicker.DeckHeightFor(idle, true, Me));
         Assert.Equal(CasinoStageLayout.DeckHeight, RaffleTicketPicker.DeckHeightFor(maxed, false, Me));
         Assert.Equal(CasinoStageLayout.DeckHeight, RaffleTicketPicker.DeckHeightFor(idle, false, Me));
         Assert.Equal(CasinoStageLayout.DeckHeight + DeckActions.SecondaryHeight + DeckActions.Gap,
