@@ -158,7 +158,7 @@ Transparent images shared in Chirper, Aethergram and Velvet posts keep their cle
   </tr>
 </table>
 
-Gamba's venue browser and table ledger each have a refresh button to fetch the latest rooms or gil entries without leaving the page. Gil Deathroll, dice and raffle rooms also open My gil ledger directly, with Back returning to the room.
+Gamba's hero shows the coin value under your chips and a tier card with your level ring, current tier, level bar and cap, and a Gamba home screen widget keeps the three-hour coin claim one tap away, with your level and tier on the medium size. Gamba's venue browser and table ledger each have a refresh button to fetch the latest rooms or gil entries without leaving the page. Gil Deathroll, dice and raffle rooms also open My gil ledger directly, with Back returning to the room.
 
 The Floor's jackpot and challenge lights animate while browsing, even before opening a game.
 

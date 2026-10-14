@@ -2,7 +2,6 @@ using Aetherphone.Core.Aethernet;
 using Aetherphone.Core.Aethernet.Clients;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Report;
-using Aetherphone.Core.Venues;
 using Dalamud.Plugin.Services;
 
 namespace Aetherphone.Core.Casino;
@@ -32,7 +31,6 @@ internal sealed class CasinoVenueStore : IDisposable
     private readonly CasinoRoomsStore rooms;
     private readonly CasinoTablesStore tables;
     private readonly IHousingPositionSource housing;
-    private readonly Func<uint, string> worldName;
     private readonly StoreWork work = new("CasinoVenue");
     private readonly object intentGate = new();
 
@@ -50,8 +48,6 @@ internal sealed class CasinoVenueStore : IDisposable
     private string heldActionId = string.Empty;
     private volatile CasinoTableLocationDto? nearbyFor;
     private CasinoHousingPosition position;
-    private CasinoTableRowDto[] indexedSource = Array.Empty<CasinoTableRowDto>();
-    private Dictionary<VenueAddress, CasinoTableRowDto> venueIndex = new();
     private int actFailed;
     private int fetchingNearby;
     private int verifying;
@@ -60,7 +56,7 @@ internal sealed class CasinoVenueStore : IDisposable
     private string? lastAccountId;
 
     public CasinoVenueStore(AethernetSession session, CasinoClient casino, SafetyClient safety, CasinoRoomsStore rooms,
-        CasinoTablesStore tables, IHousingPositionSource housing, Func<uint, string> worldName)
+        CasinoTablesStore tables, IHousingPositionSource housing)
     {
         this.session = session;
         this.casino = casino;
@@ -68,7 +64,6 @@ internal sealed class CasinoVenueStore : IDisposable
         this.rooms = rooms;
         this.tables = tables;
         this.housing = housing;
-        this.worldName = worldName;
         session.Changed += OnSessionChanged;
         Plugin.Framework.Update += OnFrameworkUpdate;
     }
@@ -348,50 +343,6 @@ internal sealed class CasinoVenueStore : IDisposable
         }
 
         return false;
-    }
-
-    public CasinoTableRowDto? LiveTableAt(VenueAddress address)
-    {
-        if (!address.IsKnown)
-        {
-            return null;
-        }
-
-        var source = tables.Listed;
-        if (!ReferenceEquals(source, indexedSource))
-        {
-            venueIndex = IndexByAddress(source, worldName);
-            indexedSource = source;
-        }
-
-        return venueIndex.TryGetValue(address, out var row) ? row : null;
-    }
-
-    public void EnsureListed()
-    {
-        tables.EnsureFresh();
-    }
-
-    internal static Dictionary<VenueAddress, CasinoTableRowDto> IndexByAddress(CasinoTableRowDto[] rows,
-        Func<uint, string> worldName)
-    {
-        var index = new Dictionary<VenueAddress, CasinoTableRowDto>();
-        for (var rowIndex = 0; rowIndex < rows.Length; rowIndex++)
-        {
-            var row = rows[rowIndex];
-            if (row.Listing == CasinoListings.Private || row.Paused)
-            {
-                continue;
-            }
-
-            var address = CasinoHousingPosition.AddressOf(row.Config?.Location, worldName);
-            if (address.IsKnown && !index.ContainsKey(address))
-            {
-                index[address] = row;
-            }
-        }
-
-        return index;
     }
 
     private bool BeginVerify(string roomId, long seq)

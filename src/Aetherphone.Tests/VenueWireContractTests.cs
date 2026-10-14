@@ -105,19 +105,6 @@ public sealed class VenueWireContractTests
     }
 
     [Fact]
-    public void ListedTablesIndexByTheVenueAddress()
-    {
-        var located = new CasinoTableRowDto(TableId: "t1", Listing: CasinoListings.Open, MaxSeats: 6, SeatedCount: 4,
-            Config: new CasinoTableConfigDto(Location: new CasinoTableLocationDto(74, 340, 5, 12)));
-        var hidden = located with { TableId = "t2", Listing = CasinoListings.Private };
-        var index = CasinoVenueStore.IndexByAddress(new[] { hidden, located }, _ => "Gilgamesh");
-        var address = VenueAddress.Of("Gilgamesh", "The Lavender Beds", 5, 12);
-        Assert.True(index.TryGetValue(address, out var row));
-        Assert.Equal("t1", row!.TableId);
-        Assert.Single(index);
-    }
-
-    [Fact]
     public void ANearbyTableTheListingLacksAsksForOneRefresh()
     {
         var nearby = new[] { new CasinoTableRowDto(TableId: "t1", Listing: CasinoListings.Open) };
