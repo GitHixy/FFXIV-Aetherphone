@@ -25,8 +25,10 @@ internal sealed class HostGameGrid
         RefreshTexts(gilOpen);
         tapped = -1;
         var top = DrawHeader(drawList, ui, origin, width, scale) + HeaderGap * scale;
+        var layout = PosterTile.Grid;
         var tileWidth = HostHomeLayout.GridTileWidth(width, scale);
-        var tileHeight = PosterTile.Height(tileWidth, PosterTile.TextBlock(scale));
+        var textBlock = PosterTile.TextBlock(layout, scale);
+        var tileHeight = PosterTile.TileHeight(layout, textBlock, scale);
         var count = VenuePosters.Count(bookOpen);
         var phase = (float)ImGui.GetTime();
         var gridOrigin = new Vector2(origin.X, top);
@@ -35,10 +37,11 @@ internal sealed class HostGameGrid
             var game = VenuePosters.Games[index];
             var tile = HostHomeLayout.GridCell(gridOrigin, tileWidth, tileHeight, index, scale);
             var open = CasinoGameGate.IsOpen(features, HostGames.Of(game).GameId);
-            var shownBadge = VenuePosters.ShowsGilBadge(game, gilOpen) ? badge : string.Empty;
+            var poster = new PosterInfo(open, 0, metas[index], string.Empty,
+                VenuePosters.ShowsGilBadge(game, gilOpen) ? badge : string.Empty);
             using (ImRaii.PushId(index))
             {
-                if (DrawPoster(drawList, game, tile, metas[index], shownBadge, open, phase, interactive && open, scale))
+                if (DrawPoster(drawList, game, tile, poster, layout, textBlock, phase, interactive && open, scale))
                 {
                     tapped = index;
                 }
@@ -48,33 +51,33 @@ internal sealed class HostGameGrid
         return top + HostHomeLayout.GridHeight(count, tileHeight, scale);
     }
 
-    private static bool DrawPoster(ImDrawListPtr drawList, HostGame game, Rect tile, string meta, string badge,
-        bool open, float phase, bool interactive, float scale)
+    private static bool DrawPoster(ImDrawListPtr drawList, HostGame game, Rect tile, in PosterInfo poster,
+        in PosterLayout layout, float textBlock, float phase, bool interactive, float scale)
     {
         ref readonly var info = ref HostGames.Of(game);
         var hovered = CasinoArt.PressCard(ImGui.GetID("poster"), tile.Min, tile.Max, out var pressedMin,
             out var pressedMax, interactive);
         var pressed = new Rect(pressedMin, pressedMax);
-        PosterTile.DrawFrame(drawList, pressed, info.Tint, scale);
+        PosterTile.DrawFrame(drawList, pressed, info.Tint, layout, scale);
         if (info.HasGlyph)
         {
-            PosterTile.DrawGlyph(drawList, pressed, info.GameId, scale);
+            PosterTile.DrawGlyph(drawList, pressed, info.GameId, layout, textBlock, scale);
         }
         else
         {
-            PosterTile.DrawIcon(drawList, pressed, info.Icon, scale);
+            AppSkin.Icon(drawList, PosterTile.ArtCenter(pressed, layout, textBlock, scale), IconGlyph.Of(info.Icon),
+                CasinoArt.White, PosterTile.IconScale);
         }
 
-        PosterTile.DrawSign(drawList, pressed, info.Sign, phase, scale, PosterTile.SignBandTop(scale));
-        var poster = new PosterInfo(open, 0, meta, string.Empty, badge);
-        PosterTile.DrawText(drawList, pressed, Loc.T(info.Title), poster, scale);
-        PosterTile.DrawBadge(drawList, pressed, poster.Badge, scale);
-        if (!open)
+        PosterTile.DrawSign(drawList, pressed, CasinoSigns.Text(info.Sign), phase, layout, scale);
+        PosterTile.DrawText(drawList, pressed, Loc.T(info.Title), poster, layout, textBlock, scale);
+        PosterTile.DrawBadge(drawList, pressed, poster.Badge, layout, scale);
+        if (!poster.Open)
         {
-            PosterTile.DrawClosed(drawList, pressed, scale);
+            PosterTile.DrawClosed(drawList, pressed, layout, scale);
         }
 
-        PosterTile.DrawRim(drawList, pressed, info.Tint, hovered, scale);
+        PosterTile.DrawRim(drawList, pressed, info.Tint, hovered, layout, scale);
         return interactive && UiInteract.Click(tile.Min, tile.Max, hovered);
     }
 
