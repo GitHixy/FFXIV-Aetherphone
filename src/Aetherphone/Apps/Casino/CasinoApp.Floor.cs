@@ -147,7 +147,7 @@ internal sealed partial class CasinoApp
 
         var remaining = casinoRooms.Room.RemainingMilliseconds(endsAtUnixMs,
             DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-        return LiveRoomCard.Countdown(remaining, RoomWindow(gameId, phase));
+        return FloorRoomCard.Countdown(remaining, RoomWindow(gameId, phase));
     }
 
     private string MinimumStakeLine(string gameId)
@@ -245,7 +245,7 @@ internal sealed partial class CasinoApp
         }
 
         var cardWidth = StripGrid.CellWidth(width, count, gap);
-        CollectRoomViews(LiveRoomCard.TextWidth(cardWidth, scale), out var nameBlock, out var lineBlock);
+        CollectRoomViews(FloorRoomCard.TextWidth(cardWidth, scale), out var nameBlock, out var lineBlock);
         var top = FloorHeader.DrawWithLink(drawList, ui, origin, width, Loc.T(L.FloorPage.LiveTitle),
             Loc.T(L.FloorPage.AllTables), AllTablesId, scale, out var allTables) + FloorHeaderGap * scale;
         if (allTables)
@@ -253,14 +253,14 @@ internal sealed partial class CasinoApp
             SelectTab(CasinoTab.Live);
         }
 
-        var height = LiveRoomCard.Height(nameBlock, lineBlock, scale);
+        var height = FloorRoomCard.Height(nameBlock, lineBlock, scale);
         for (var index = 0; index < count; index++)
         {
             var left = origin.X + index * (cardWidth + gap);
             var card = new Rect(new Vector2(left, top), new Vector2(left + cardWidth, top + height));
             using (ImRaii.PushId(index))
             {
-                if (LiveRoomCard.Draw(drawList, ui, roomViews[index], card, scale, out var pressed))
+                if (FloorRoomCard.Draw(drawList, ui, roomViews[index], card, scale, out var pressed))
                 {
                     OpenGame(roomViews[index].GameId, pressed);
                 }
@@ -308,7 +308,7 @@ internal sealed partial class CasinoApp
                 line = Loc.T(L.Casino.RoomIdle);
             }
 
-            var name = TileLabel.Fit(Loc.T(CasinoGameNames.Of(gameId)), textWidth, LiveRoomCard.NameLines,
+            var name = TileLabel.Fit(Loc.T(CasinoGameNames.Of(gameId)), textWidth, FloorRoomCard.NameLines,
                 TextStyles.Headline, TextStyles.SubheadlineEmphasized);
             nameBlock = MathF.Max(nameBlock, TileLabel.Height(name));
             lines = Math.Max(lines, RoomLineCount(gameId, textWidth));
@@ -316,7 +316,7 @@ internal sealed partial class CasinoApp
                 live ? RoomCountdown(gameId, roomId) : 0f);
         }
 
-        lineBlock = Math.Min(lines, LiveRoomCard.PhaseLines) * Typography.LineHeight(TextStyles.Footnote);
+        lineBlock = Math.Min(lines, FloorRoomCard.PhaseLines) * Typography.LineHeight(TextStyles.Footnote);
     }
 
     private int RoomLineCount(string gameId, float textWidth)

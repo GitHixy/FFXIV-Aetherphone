@@ -9,7 +9,7 @@ namespace Aetherphone.Apps.Casino.Strip;
 internal readonly record struct LiveRoomView(string GameId, TileLabelFit Name, string Line, int Crowd, bool Live,
     float Countdown);
 
-internal static class LiveRoomCard
+internal static class FloorRoomCard
 {
     public const float MinHeight = 108f;
     public const float Pad = 10f;

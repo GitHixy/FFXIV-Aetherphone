@@ -59,10 +59,10 @@ public sealed class FloorPageTests
     [Fact]
     public void LiveRoomBarsCountDownTheWindowOfTheRoundPhase()
     {
-        Assert.Equal(0.5f, LiveRoomCard.Countdown(12_500, 25), 3);
-        Assert.Equal(0f, LiveRoomCard.Countdown(-5, 25));
-        Assert.Equal(1f, LiveRoomCard.Countdown(90_000, 25));
-        Assert.Equal(0f, LiveRoomCard.Countdown(1_000, 0));
+        Assert.Equal(0.5f, FloorRoomCard.Countdown(12_500, 25), 3);
+        Assert.Equal(0f, FloorRoomCard.Countdown(-5, 25));
+        Assert.Equal(1f, FloorRoomCard.Countdown(90_000, 25));
+        Assert.Equal(0f, FloorRoomCard.Countdown(1_000, 0));
         Assert.Equal(CasinoRoomCadence.BingoOpenSeconds, CasinoApp.RoomWindow(CasinoGames.Bingo, CasinoRoomPhases.Open));
         Assert.Equal(CasinoRoomCadence.RaceLockedSeconds,
             CasinoApp.RoomWindow(CasinoGames.Race, CasinoRoomPhases.Locked));
@@ -71,13 +71,13 @@ public sealed class FloorPageTests
     }
 
     [Fact]
-    public void LiveRoomCardsGrowWithTheirTextButNeverShrinkBelowTheDesign()
+    public void FloorRoomCardsGrowWithTheirTextButNeverShrinkBelowTheDesign()
     {
-        Assert.Equal(LiveRoomCard.MinHeight, LiveRoomCard.Height(20f, 17f, 1f));
-        var tall = LiveRoomCard.Height(44f, 36f, 1f);
-        Assert.True(tall > LiveRoomCard.MinHeight);
-        Assert.Equal(tall * 1.5f, LiveRoomCard.Height(66f, 54f, 1.5f), 3);
-        Assert.Equal(84f, LiveRoomCard.TextWidth(104f, 1f));
+        Assert.Equal(FloorRoomCard.MinHeight, FloorRoomCard.Height(20f, 17f, 1f));
+        var tall = FloorRoomCard.Height(44f, 36f, 1f);
+        Assert.True(tall > FloorRoomCard.MinHeight);
+        Assert.Equal(tall * 1.5f, FloorRoomCard.Height(66f, 54f, 1.5f), 3);
+        Assert.Equal(84f, FloorRoomCard.TextWidth(104f, 1f));
     }
 
     [Fact]
