@@ -11254,9 +11254,7 @@ internal static class L
         public static readonly LocString ReasonClubInsufficient = new("casino.strip.reasonClubInsufficient", "Your Gamba Club tier does not include that bonus yet. Keep playing to climb.");
         public static readonly LocString GetChips = new("casino.strip.getChips", "Get chips");
         public static readonly LocString CoinsFieldHint = new("casino.strip.coinsFieldHint", "How many coins?");
-        public static readonly LocString BecomesChips = new("casino.strip.becomesChips", "Becomes {0} chips");
         public static readonly LocString GetChipsFor = new("casino.strip.getChipsFor", "Get {0} chips");
-        public static readonly LocString BuyInRange = new("casino.strip.buyInRange", "Any amount from {0} to {1} coins");
         public static readonly LocString CoinsAmount = new("casino.strip.coinsAmount", "{0} coins");
         public static readonly LocString CashedOut = new("casino.strip.cashedOut", "{0} coins are in your wallet.");
         public static readonly LocString BonusStreak = new("casino.strip.bonusStreak", "Daily streak");
@@ -11521,6 +11519,31 @@ internal static class L
     internal static class CashierDesk
     {
         public static readonly LocString CashOutHeading = new("casino.cashierDesk.cashOutHeading", "How many coins back?");
+        public static readonly LocString CoinsUnit = new("casino.cashierDesk.coinsUnit", "coins");
+        public static readonly LocString ChipsWorth = new("casino.cashierDesk.chipsWorth", "worth {0} coins");
+        public static readonly LocString RateLine = new("casino.cashierDesk.rateLine", "{0} = {1}, both ways");
+        public static readonly LocString TileMax = new("casino.cashierDesk.tileMax", "Max");
+        public static readonly LocString TileAll = new("casino.cashierDesk.tileAll", "All");
+        public static readonly LocString TilePercent = new("casino.cashierDesk.tilePercent", "{0}%");
+        public static readonly LocString BuyIdle = new("casino.cashierDesk.buyIdle", "Pick an amount or type one. Nothing is spent until you confirm.");
+        public static readonly LocString BuyReady = new("casino.cashierDesk.buyReady", "You get {0} chips");
+        public static readonly LocString BuyOver = new("casino.cashierDesk.buyOver", "You have {0} coins");
+        public static readonly LocString CashOutIdle = new("casino.cashierDesk.cashOutIdle", "Take some or all. Your chips are worth {0} coins.");
+        public static readonly LocString CashOutReady = new("casino.cashierDesk.cashOutReady", "Takes {0} chips from your stack");
+        public static readonly LocString CashOutOver = new("casino.cashierDesk.cashOutOver", "Your chips are worth {0} coins");
+        public static readonly LocString CashOutNote = new("casino.cashierDesk.cashOutNote", "Chips riding on a bet stay with that game until it settles.");
+        public static readonly LocString BuyAction = new("casino.cashierDesk.buyAction", "Buy {0} chips");
+        public static readonly LocString CashOutAction = new("casino.cashierDesk.cashOutAction", "Cash out {0} coins");
+        public static readonly LocString BuyTitle = new("casino.cashierDesk.buyTitle", "Buy {0} chips?");
+        public static readonly LocString CashOutTitle = new("casino.cashierDesk.cashOutTitle", "Cash out {0} coins?");
+        public static readonly LocString YouPay = new("casino.cashierDesk.youPay", "You pay");
+        public static readonly LocString WalletAfter = new("casino.cashierDesk.walletAfter", "Wallet after");
+        public static readonly LocString ChipsAfter = new("casino.cashierDesk.chipsAfter", "Chips after");
+        public static readonly LocString ChipsTaken = new("casino.cashierDesk.chipsTaken", "Chips taken");
+        public static readonly LocString ChipsLeft = new("casino.cashierDesk.chipsLeft", "Chips left");
+        public static readonly LocString ChipsAmount = new("casino.cashierDesk.chipsAmount", "{0} chips");
+        public static readonly LocString LimitsHint = new("casino.cashierDesk.limitsHint", "Set how much you can lose in a day");
+        public static readonly LocString ReasonAmountRange = new("casino.cashierDesk.reasonAmountRange", "That is more than your free chips are worth. Try a smaller amount.");
     }
 
     internal static class Tables
