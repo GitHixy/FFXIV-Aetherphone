@@ -11705,9 +11705,7 @@ internal static class L
         public static readonly LocString CodeCopied = new("casino.tables.codeCopied", "Copied");
         public static readonly LocString CodeHint = new("casino.tables.codeHint", "Tell friends to enter this code in {0} > Live.");
         public static readonly LocString CodePending = new("casino.tables.codePending", "Getting your code");
-        public static readonly LocString JoinAction = new("casino.tables.joinAction", "Join");
         public static readonly LocString ReasonCodeUnknown = new("casino.tables.reasonCodeUnknown", "No open table uses that code. Check the letters and try again.");
-        public static readonly LocString HostCta = new("casino.tables.hostCta", "Host a table");
         public static readonly LocString HostedBy = new("casino.tables.hostedBy", "Hosted by {0}");
         public static readonly LocString ControlCoDealers = new("casino.tables.controlCoDealers", "Co-dealers");
         public static readonly LocString SeatLabel = new("casino.tables.seatLabel", "Seat {0}");
