@@ -57,7 +57,7 @@ internal sealed class TableBrowser
 
     private CasinoTableRowDto[]? viewListed;
     private CasinoTableRowDto[]? viewHoldem;
-    private CasinoTableLedgerDto? viewLedger;
+    private int viewLedgerVersion = -1;
     private CasinoTableRowDto[] viewSource = Array.Empty<CasinoTableRowDto>();
     private TableRowView[] views = Array.Empty<TableRowView>();
     private LanguageInfo? viewLanguage;
@@ -161,14 +161,13 @@ internal sealed class TableBrowser
         var spectators = watching > 0
             ? Loc.T(L.Casino.TableSpectators, watching.ToString(Loc.Culture))
             : string.Empty;
-        var reputation = ReputationOf(row, currency, out var warns);
         var draining = string.Equals(row.Reason, CasinoReasons.Draining, StringComparison.Ordinal)
             || string.Equals(row.Reason, CasinoReasons.TableClosed, StringComparison.Ordinal);
         var inviteOnly = hosted && !mine && row.Listing == CasinoListings.Private;
         var monogram = hosted && row.OwnerName.Length > 0 ? Initials.Of(row.OwnerName) : string.Empty;
         return new TableRowView(name, stakes, seats, spectators,
             room == VenueRoomKind.None && !book && !CasinoTableFilters.HasOpenSeat(row), inviteOnly,
-            mine, draining, currency, Loc.T(CurrencyNames[currency]), reputation, warns, row.Paused,
+            mine, draining, currency, Loc.T(CurrencyNames[currency]), row.Paused,
             GameIdOf(row.GameKind), hostLine, monogram, room == VenueRoomKind.None ? row.SeatedCount : row.Occupancy,
             row.MaxSeats, room, Book: book);
     }
@@ -218,8 +217,8 @@ internal sealed class TableBrowser
             Loc.T(L.Casino.TableStakes, NumberText.Compact(floor.MinBet),
                 NumberText.Compact(floor.TopBetFor(playerMaxBet))),
             Loc.T(L.Casino.LivePlayers, floor.Seated.ToString(Loc.Culture)), string.Empty, !floor.Open, false,
-            false, false, CasinoCurrencies.Chips, Loc.T(CurrencyNames[CasinoCurrencies.Chips]), string.Empty, false,
-            false, CasinoGames.Blackjack, Seated: floor.Seated);
+            false, false, CasinoCurrencies.Chips, Loc.T(CurrencyNames[CasinoCurrencies.Chips]), false,
+            CasinoGames.Blackjack, Seated: floor.Seated);
     }
 
     private static string StakesOf(CasinoTableRowDto row, VenueRoomKind room, int currency, bool holdem,
@@ -266,32 +265,6 @@ internal sealed class TableBrowser
         };
     }
 
-    private static string ReputationOf(CasinoTableRowDto row, int currency, out bool warns)
-    {
-        warns = false;
-        var reputation = row.Reputation;
-        if (currency != CasinoCurrencies.Gil || reputation is null)
-        {
-            return string.Empty;
-        }
-
-        if (reputation.Frozen)
-        {
-            warns = true;
-            return Loc.T(L.Tables.ReputationFrozen);
-        }
-
-        var hosted = reputation.GilTablesHosted.ToString(Loc.Culture);
-        var confirmed = reputation.PayoutsConfirmed.ToString(Loc.Culture);
-        if (reputation.DisputesOpen <= 0)
-        {
-            return Loc.T(L.Tables.Reputation, hosted, confirmed);
-        }
-
-        warns = true;
-        return Loc.T(L.Tables.ReputationDisputes, hosted, confirmed, reputation.DisputesOpen.ToString(Loc.Culture));
-    }
-
     private static void Gap(float units, float scale) => ImGui.Dummy(new Vector2(0f, units * scale));
 
     private void RefreshViews()
@@ -300,9 +273,9 @@ internal sealed class TableBrowser
         var holdem = holdemTables.Tables;
         var account = tables.AccountId;
         var ceiling = chips.Ceiling.MaxBet;
-        var ledger = tables.HeldLedger;
+        var ledgerVersion = tables.LedgerVersion;
         if (ReferenceEquals(listed, viewListed) && ReferenceEquals(holdem, viewHoldem)
-            && ReferenceEquals(ledger, viewLedger)
+            && ledgerVersion == viewLedgerVersion
             && ReferenceEquals(viewLanguage, Loc.Current) && ceiling == viewCeiling
             && string.Equals(account, viewAccount, StringComparison.Ordinal))
         {
@@ -311,7 +284,7 @@ internal sealed class TableBrowser
 
         viewListed = listed;
         viewHoldem = holdem;
-        viewLedger = ledger;
+        viewLedgerVersion = ledgerVersion;
         viewLanguage = Loc.Current;
         viewAccount = account;
         viewCeiling = ceiling;
@@ -322,7 +295,8 @@ internal sealed class TableBrowser
         {
             views[index] = HouseBlackjack.Is(viewSource[index])
                 ? HouseView(floor, ceiling)
-                : ViewOf(viewSource[index], account, BookEntriesOf(viewSource[index], ledger));
+                : ViewOf(viewSource[index], account,
+                    BookEntriesOf(viewSource[index], tables.LedgerFor(viewSource[index].TableId)));
         }
     }
 

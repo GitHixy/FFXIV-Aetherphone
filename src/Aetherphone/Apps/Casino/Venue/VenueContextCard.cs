@@ -235,7 +235,7 @@ internal sealed class VenueContextCard
 
     private void RefreshOwn(CasinoTableRowDto row)
     {
-        var ledger = tables.HeldLedger;
+        var ledger = tables.LedgerFor(row.TableId);
         if (ReferenceEquals(row, ownRow) && ReferenceEquals(ledger, ownLedger)
             && ReferenceEquals(ownLanguage, Loc.Current))
         {

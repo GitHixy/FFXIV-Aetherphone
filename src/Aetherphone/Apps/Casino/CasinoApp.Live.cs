@@ -139,8 +139,7 @@ internal sealed partial class CasinoApp
             var crowd = casinoRooms.OccupancyOf(item.RoomId);
             return new TableRowView(Loc.T(CasinoGameNames.Of(item.GameId)),
                 phase.Length > 0 ? phase : Loc.T(L.Casino.RoomIdle), texts.Count(L.Casino.LivePlayers, crowd),
-                string.Empty, false, false, false, false, CasinoCurrencies.Chips, string.Empty, string.Empty, false,
-                false, item.GameId, string.Empty, string.Empty, crowd, 0, VenueRoomKind.None,
+                string.Empty, false, false, false, false, CasinoCurrencies.Chips, string.Empty, false, item.GameId, string.Empty, string.Empty, crowd, 0, VenueRoomKind.None,
                 Loc.T(open ? L.Strip.LiveJoin : L.Strip.LiveWatch), open);
         }
 

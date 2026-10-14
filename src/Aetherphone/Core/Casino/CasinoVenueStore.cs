@@ -38,7 +38,6 @@ internal sealed class CasinoVenueStore : IDisposable
     private volatile CasinoVenueActDto? actAnswer;
     private volatile CasinoTableRowDto[] nearby = Array.Empty<CasinoTableRowDto>();
     private volatile CasinoStakeOutcome? hostOutcome;
-    private volatile CasinoStakeOutcome? tradeOutcome;
     private volatile bool actInFlight;
     private volatile bool hostInFlight;
     private CasinoRoomState? absorbedState;
@@ -99,11 +98,6 @@ internal sealed class CasinoVenueStore : IDisposable
     public CasinoStakeOutcome? TakeHostOutcome()
     {
         return Interlocked.Exchange(ref hostOutcome, null);
-    }
-
-    public CasinoStakeOutcome? TakeTradeOutcome()
-    {
-        return Interlocked.Exchange(ref tradeOutcome, null);
     }
 
     public VenueRoomView? ViewFor(string roomId)
@@ -201,36 +195,6 @@ internal sealed class CasinoVenueStore : IDisposable
     public void StopTournament(string roomId)
     {
         RunHost("tournament stop", roomId, token => casino.StopTournamentAsync(roomId, token));
-    }
-
-    public void ProposeTrade(in TradeProposal proposal)
-    {
-        if (proposal.Kind == TradeProposalKind.None || proposal.TableId.Length == 0 || hostInFlight
-            || !session.IsSignedIn)
-        {
-            return;
-        }
-
-        hostInFlight = true;
-        var tableId = proposal.TableId;
-        if (proposal.Kind == TradeProposalKind.Confirm)
-        {
-            var entryId = proposal.EntryId;
-            work.Run("trade confirm", async token =>
-            {
-                var answer = await casino.ConfirmLedgerEntryAsync(entryId, token).ConfigureAwait(false);
-                FinishTrade(tableId, answer);
-            }, () => hostInFlight = false);
-            return;
-        }
-
-        var request = new CasinoLedgerProposeRequest(Guid.NewGuid().ToString("N"), proposal.LedgerKind,
-            proposal.CounterpartyUserId, proposal.Amount, CasinoLedgerKinds.Trade);
-        work.Run("trade propose", async token =>
-        {
-            var answer = await casino.ProposeLedgerEntryAsync(tableId, request, token).ConfigureAwait(false);
-            FinishTrade(tableId, answer);
-        }, () => hostInFlight = false);
     }
 
     public void Report(string tableId, ReportReason reason, Action<bool> done)
@@ -374,14 +338,6 @@ internal sealed class CasinoVenueStore : IDisposable
         }, () => hostInFlight = false);
     }
 
-    private void FinishTrade(string tableId, CasinoLedgerResultDto? answer)
-    {
-        Interlocked.Exchange(ref tradeOutcome, answer is null
-            ? new CasinoStakeOutcome(false, CasinoReasons.Unreachable)
-            : new CasinoStakeOutcome(answer.Granted, CasinoTablesStore.Named(answer.Reason)));
-        tables.RefreshLedgerNow(tableId);
-    }
-
     private void OnFrameworkUpdate(IFramework framework)
     {
         var state = rooms.Room.State;
@@ -419,7 +375,6 @@ internal sealed class CasinoVenueStore : IDisposable
         listingAskedFor = string.Empty;
         Interlocked.Exchange(ref actAnswer, null);
         Interlocked.Exchange(ref hostOutcome, null);
-        Interlocked.Exchange(ref tradeOutcome, null);
         Interlocked.Exchange(ref nearbyAtTick, 0);
         lock (intentGate)
         {

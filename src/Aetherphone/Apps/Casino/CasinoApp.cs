@@ -78,7 +78,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private readonly Venue.BroadcastView broadcast;
     private readonly Venue.TournamentOverlay tournament = new();
     private readonly Venue.VenueTableSheet venueSheet;
-    private readonly Venue.TradeSyncPrompt tradePrompt;
+    private readonly Venue.TradeRecordedCard tradeCard;
     private readonly Venue.NearbyTablesCard nearbyTables;
     private readonly Venue.VenueSection venueSection;
     private readonly CasinoStage stage = new();
@@ -154,14 +154,14 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         blackjack = new Tables.BlackjackTable(casino, casinoRooms, casinoTables, history, casinoTurns, remoteImages,
             lodestone, tournament, PopRoute, OpenLedger, OpenGilLedger);
         playerLedger = new Tables.TableLedger(casinoTables, casino, confirm, tradeSync);
-        gilLedger = new Tables.GilLedgerView(casinoTables, confirm);
+        gilLedger = new Tables.GilLedgerView(casinoTables);
         openTable = OpenTable;
         openDoorFromRow = OpenDoor;
         this.casinoVenue = casinoVenue;
         venueRoom = new Venue.VenueCabinet(casinoVenue, PopRoute, OpenGilLedger);
         broadcast = new Venue.BroadcastView(casinoRooms);
         venueSheet = new Venue.VenueTableSheet(casinoVenue, tradeSync, report, JoinCodeOf);
-        tradePrompt = new Venue.TradeSyncPrompt(tradeSync);
+        tradeCard = new Venue.TradeRecordedCard(tradeSync);
         nearbyTables = new Venue.NearbyTablesCard(casinoVenue);
         var contextActions = new Venue.VenueContextActions(openTable, openDoorFromRow, OpenLedger, OpenHostDraft,
             OpenHostSheet);
@@ -386,7 +386,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         fameConsent.Gate();
         venueRoom.Gate();
         venueSheet.Gate();
-        tradePrompt.Gate();
+        tradeCard.Gate();
         stage.Gate();
         SyncRaceLandscape();
         floor.EnsureFresh();
@@ -436,7 +436,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             DateTimeOffset.UtcNow.ToUnixTimeSeconds());
         HandleMissionsSheet();
         cashier.Draw(screenArea, ui, openLimits);
-        tradePrompt.Draw(screenArea, ui);
+        tradeCard.Draw(screenArea, ui);
         if (introShowing && intro.Draw(screenArea, ui, casino.Rate,
                 MathF.Min(ImGui.GetIO().DeltaTime, Core.Animation.TransitionTiming.MaxFrameSeconds))
             == Strip.StripIntroResult.Finished)
@@ -1190,7 +1190,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
 
         using (AppSurface.Begin(body))
         {
-            playerLedger.Draw(ui, casinoTables.AccountId, card?.OwnerUserId ?? string.Empty, scale);
+            playerLedger.Draw(ui, casinoTables.AccountId, scale);
             ImGui.Dummy(new Vector2(0f, Metrics.Space.Lg * scale));
         }
     }

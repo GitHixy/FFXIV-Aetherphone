@@ -9,16 +9,12 @@ using Dalamud.Interface.Utility.Raii;
 
 namespace Aetherphone.Apps.Casino.Tables;
 
-internal enum LedgerEntryPress : byte
-{
-    None,
-    Confirm,
-    Dispute,
-}
+internal readonly record struct LedgerEntryView(string EntryId, string Title, string Parties, string Amount,
+    string State, bool Owed, LedgerEntryOption Option, string OptionLabel, string Tag = "");
 
-internal readonly record struct LedgerEntryAction(LedgerEntryPress Press, string EntryId, string DisputeLabel)
+internal readonly record struct LedgerEntryAction(LedgerEntryOption Option, string EntryId)
 {
-    public static readonly LedgerEntryAction None = new(LedgerEntryPress.None, string.Empty, string.Empty);
+    public static readonly LedgerEntryAction None = new(LedgerEntryOption.None, string.Empty);
 }
 
 internal sealed class LedgerEntryCards
@@ -27,43 +23,45 @@ internal sealed class LedgerEntryCards
     private const float TagPadY = 2f;
     private const float TagGap = 6f;
     private const float TagFillAlpha = 0.18f;
+    private const float OwedRimAlpha = 0.65f;
+    private const float OwedRimWidth = 1.2f;
 
     private CasinoLedgerEntryDto[]? source;
     private LanguageInfo? language;
-    private string me = string.Empty;
+    private bool host;
     private LedgerEntryView[] views = Array.Empty<LedgerEntryView>();
 
     public int Count => views.Length;
 
-    public void Refresh(CasinoLedgerEntryDto[] entries, string myUserId, int currency)
+    public void Refresh(CasinoLedgerEntryDto[] entries, bool hosting, int currency)
     {
-        if (ReferenceEquals(entries, source) && ReferenceEquals(language, Loc.Current)
-            && string.Equals(myUserId, me, StringComparison.Ordinal))
+        if (ReferenceEquals(entries, source) && ReferenceEquals(language, Loc.Current) && hosting == host)
         {
             return;
         }
 
         source = entries;
         language = Loc.Current;
-        me = myUserId;
+        host = hosting;
         views = new LedgerEntryView[entries.Length];
         for (var index = 0; index < entries.Length; index++)
         {
             var entry = entries[index];
-            var side = CasinoGilLedger.SideOf(entry, myUserId);
-            var confirmLabel = side == LedgerSide.Payer ? Loc.T(L.Tables.IPaid) : Loc.T(L.Tables.IReceived);
-            var disputeLabel = entry.Kind is CasinoLedgerKinds.Payout or CasinoLedgerKinds.CashOut
-                or CasinoLedgerKinds.Prize or CasinoLedgerKinds.Stake
-                ? Loc.T(L.Tables.PayoutNotReceived)
-                : Loc.T(L.Tables.GilNotReceived);
-            views[index] = new LedgerEntryView(entry.EntryId, Loc.T(TableLedger.KindLabel(entry.Kind)),
+            var option = CasinoGilLedger.OptionFor(entry, hosting);
+            views[index] = new LedgerEntryView(entry.EntryId, Loc.T(CasinoGilLedger.KindLabel(entry.Kind)),
                 Loc.T(L.Tables.EntryParties, entry.PayerName, entry.PayeeName),
-                TableLedger.AmountText(entry.Amount, currency), TableLedger.StateText(entry),
-                TableLedger.ToneOf(entry), CasinoGilLedger.CanConfirm(entry, myUserId), confirmLabel,
-                CasinoGilLedger.CanDispute(entry, myUserId), disputeLabel,
-                entry.Guest ? Loc.T(L.Book.GuestTag) : string.Empty);
+                TableLedger.AmountText(entry.Amount, currency), TableLedger.StateText(entry), !entry.Settled, option,
+                OptionLabel(option), entry.Guest ? Loc.T(L.Book.GuestTag) : string.Empty);
         }
     }
+
+    internal static string OptionLabel(LedgerEntryOption option) => option switch
+    {
+        LedgerEntryOption.MarkPaid => Loc.T(L.Tables.MarkPaid),
+        LedgerEntryOption.MarkUnpaid => Loc.T(L.Tables.MarkUnpaid),
+        LedgerEntryOption.Remove => Loc.T(L.Tables.RemoveEntry),
+        _ => string.Empty,
+    };
 
     public LedgerEntryAction Draw(AppSkin ui, bool enabled, float scale)
     {
@@ -79,23 +77,16 @@ internal sealed class LedgerEntryCards
             var titleLine = Typography.LineHeight(TextStyles.SubheadlineEmphasized);
             var partiesLine = Typography.LineHeight(TextStyles.Footnote);
             var stateLine = Typography.LineHeight(TextStyles.FootnoteEmphasized);
-            var confirmWidth = view.CanConfirm ? Button.WidthFor(view.ConfirmLabel, ButtonSize.Large) : 0f;
-            var disputeWidth = view.CanDispute ? Button.WidthFor(view.DisputeLabel, ButtonSize.Large) : 0f;
-            var buttonRows = LedgerEntryLayout.ButtonRows(width - pad * 2f, confirmWidth, disputeWidth, scale);
-            var height = LedgerEntryLayout.Height(titleLine, partiesLine, stateLine, buttonRows, scale);
+            var hasButton = view.Option != LedgerEntryOption.None;
+            var height = LedgerEntryLayout.Height(titleLine, partiesLine, stateLine, hasButton, scale);
             var max = new Vector2(origin.X + width, origin.Y + height);
             var card = new Rect(origin, max);
-            var tone = view.Tone switch
-            {
-                LedgerTone.Waiting => TableLedger.Amber,
-                LedgerTone.Disputed => ui.Accent,
-                _ => TableLedger.SettledInk,
-            };
+            var tone = view.Owed ? TableLedger.Amber : TableLedger.SettledInk;
             ui.Card(drawList, origin, max, Metrics.Radius.Grouped * scale);
-            if (view.Tone != LedgerTone.Settled)
+            if (view.Owed)
             {
                 Squircle.Stroke(drawList, origin, max, Metrics.Radius.Grouped * scale,
-                    ImGui.GetColorU32(Palette.WithAlpha(tone, 0.65f)), 1.2f * scale);
+                    ImGui.GetColorU32(Palette.WithAlpha(tone, OwedRimAlpha)), OwedRimWidth * scale);
             }
 
             var top = origin.Y + pad;
@@ -124,10 +115,9 @@ internal sealed class LedgerEntryCards
                 new Vector2(origin.X + pad, LedgerEntryLayout.StateTop(origin.Y, titleLine, partiesLine, scale)),
                 Typography.FitText(view.State, width - pad * 2f, TextStyles.FootnoteEmphasized), tone,
                 TextStyles.FootnoteEmphasized);
-            var press = DrawButtons(drawList, ui, view, card, buttonRows, confirmWidth, disputeWidth, enabled, scale);
-            if (press != LedgerEntryPress.None)
+            if (hasButton && DrawButton(drawList, ui, view, card, enabled, scale))
             {
-                action = new LedgerEntryAction(press, view.EntryId, view.DisputeLabel);
+                action = new LedgerEntryAction(view.Option, view.EntryId);
             }
 
             ImGui.SetCursorScreenPos(origin);
@@ -148,45 +138,18 @@ internal sealed class LedgerEntryCards
         Typography.DrawCentered(drawList, (min + max) * 0.5f, tag, ui.BodyInk, TextStyles.FootnoteEmphasized);
     }
 
-    private static LedgerEntryPress DrawButtons(ImDrawListPtr drawList, AppSkin ui, in LedgerEntryView view,
-        in Rect card, int buttonRows, float confirmWidth, float disputeWidth, bool enabled, float scale)
+    private static bool DrawButton(ImDrawListPtr drawList, AppSkin ui, in LedgerEntryView view, in Rect card,
+        bool enabled, float scale)
     {
-        if (buttonRows == 0)
+        var rect = LedgerEntryLayout.Button(card, Button.WidthFor(view.OptionLabel, ButtonSize.Large), scale);
+        return view.Option switch
         {
-            return LedgerEntryPress.None;
-        }
-
-        var press = LedgerEntryPress.None;
-        var stacked = buttonRows > 1;
-        var right = card.Max.X - LedgerEntryLayout.Pad * scale;
-        if (view.CanDispute)
-        {
-            var rect = stacked
-                ? LedgerEntryLayout.StackedButton(card, 1, buttonRows, scale)
-                : LedgerEntryLayout.RowButton(card, right, disputeWidth, scale);
-            if (Button.Draw(drawList, rect, view.DisputeLabel, ui.Ink, ButtonStyle.Gray, ButtonRole.Destructive,
-                    enabled, id: "ledger.dispute"))
-            {
-                press = LedgerEntryPress.Dispute;
-            }
-
-            right = rect.Min.X - LedgerEntryLayout.ButtonGap * scale;
-        }
-
-        if (!view.CanConfirm)
-        {
-            return press;
-        }
-
-        var confirmRect = stacked
-            ? LedgerEntryLayout.StackedButton(card, 0, buttonRows, scale)
-            : LedgerEntryLayout.RowButton(card, right, confirmWidth, scale);
-        if (Button.Draw(drawList, confirmRect, view.ConfirmLabel, ui.Ink, ButtonStyle.Prominent, enabled: enabled,
-                id: "ledger.confirm"))
-        {
-            press = LedgerEntryPress.Confirm;
-        }
-
-        return press;
+            LedgerEntryOption.MarkPaid => Button.Draw(drawList, rect, view.OptionLabel, ui.Ink, ButtonStyle.Tinted,
+                enabled: enabled, id: "ledger.markPaid"),
+            LedgerEntryOption.MarkUnpaid => Button.Draw(drawList, rect, view.OptionLabel, ui.Ink, ButtonStyle.Gray,
+                enabled: enabled, id: "ledger.markUnpaid"),
+            _ => Button.Draw(drawList, rect, view.OptionLabel, ui.Ink, ButtonStyle.Gray, ButtonRole.Destructive,
+                enabled, id: "ledger.remove"),
+        };
     }
 }

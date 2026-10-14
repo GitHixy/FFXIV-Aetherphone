@@ -429,9 +429,8 @@ internal sealed class PhoneServices : IDisposable
             notifications, Apps.AppAccents.For("casino"));
         var casinoVenue = new Casino.CasinoVenueStore(aethernetSession, casinoApi.Casino, casinoApi.Safety, casinoRooms,
             casinoTables, new Casino.HousingPositionReader());
-        var casinoTrade = new Casino.CasinoTradeSync(configuration, aethernetSession, new Casino.TradeWindowReader(),
-            casinoApi.Casino, casinoRooms, casinoTables, casinoVenue, casino, notifications,
-            Apps.AppAccents.For("casino"));
+        var casinoTrade = new Casino.CasinoTradeSync(configuration, aethernetSession, casinoApi.Casino, casinoTables,
+            casinoVenue, notifications, Apps.AppAccents.For("casino"));
         var casinoFloor = new Casino.CasinoFloorStore(aethernetSession, casinoApi.Casino, casino, realtimeSignals);
         var gameRooms = new Games.GameRoomsStore(aethernetSession, aethernet.Games, visibility,
             realtimeSignals);
