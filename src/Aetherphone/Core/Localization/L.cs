@@ -10756,7 +10756,6 @@ internal static class L
         public static readonly LocString BarkeepNewBest = new("casino.barkeep.newBest", "New best!");
         public static readonly LocString BarkeepExpired = new("casino.barkeep.expired", "The shift ran past close, so the entry stayed behind the bar.");
         public static readonly LocString BarkeepDone = new("casino.barkeep.done", "Done");
-        public static readonly LocString RecordsHeading = new("casino.recordsHeading", "On the record");
         public static readonly LocString HistoryRow = new("casino.historyRow", "Round history");
         public static readonly LocString FairnessRow = new("casino.fairnessRow", "Fair play");
         public static readonly LocString HistoryEmptyTitle = new("casino.history.emptyTitle", "No rounds yet");
@@ -10953,7 +10952,6 @@ internal static class L
         public static readonly LocString JackpotWon = new("casino.jackpot.won", "JACKPOT");
         public static readonly LocString TabLive = new("casino.tabLive", "Live");
         public static readonly LocString TabCashier = new("casino.tabCashier", "Cashier");
-        public static readonly LocString LiveHeading = new("casino.liveHeading", "Live right now");
         public static readonly LocString LiveRoomsHeading = new("casino.liveRoomsHeading", "Rooms on a clock");
         public static readonly LocString LivePlayers = new("casino.livePlayers", "{0} playing");
         public static readonly LocString RoomIdle = new("casino.roomIdle", "Waiting on the next round");
@@ -11263,7 +11261,6 @@ internal static class L
         public static readonly LocString BonusClaim = new("casino.strip.bonusClaim", "Claim {0}");
         public static readonly LocString BonusReadyIn = new("casino.strip.bonusReadyIn", "In {0}");
         public static readonly LocString BonusLanded = new("casino.strip.bonusLanded", "{0} chips landed in your bankroll.");
-        public static readonly LocString ClubTierTitle = new("casino.strip.clubTierTitle", "{0} member");
         public static readonly LocString ClubBronze = new("casino.strip.clubBronze", "Bronze");
         public static readonly LocString ClubSilver = new("casino.strip.clubSilver", "Silver");
         public static readonly LocString ClubGold = new("casino.strip.clubGold", "Gold");
@@ -11273,8 +11270,6 @@ internal static class L
         public static readonly LocString ClubObsidian = new("casino.strip.clubObsidian", "Obsidian");
         public static readonly LocString ClubPerks = new("casino.strip.clubPerks", "Bonuses x{0}, weekly rebate {1}%");
         public static readonly LocString ClubPerksNoRebate = new("casino.strip.clubPerksNoRebate", "Bonuses x{0}, weekly rebate from Silver");
-        public static readonly LocString ClubTop = new("casino.strip.clubTop", "Top tier. Every perk is yours.");
-        public static readonly LocString ClubPointsTo = new("casino.strip.clubPointsTo", "{1} points to {0}");
         public static readonly LocString SeatSit = new("casino.strip.seatSit", "Sit");
         public static readonly LocString TabFloor = new("casino.strip.tabFloor", "Floor");
         public static readonly LocString ResumeTitle = new("casino.strip.resumeTitle", "Back to your seat");
@@ -11283,15 +11278,8 @@ internal static class L
         public static readonly LocString RainLanded = new("casino.strip.rainLanded", "Chip rain: {0} chips landed in your bankroll");
         public static readonly LocString NotOpenYet = new("casino.strip.notOpenYet", "Not open yet");
         public static readonly LocString NotOpenHint = new("casino.strip.notOpenHint", "This game opens once the floor update reaches the server.");
-        public static readonly LocString HeroMachineEyebrow = new("casino.strip.heroMachineEyebrow", "TONIGHT'S MACHINE");
-        public static readonly LocString HeroRaceEyebrow = new("casino.strip.heroRaceEyebrow", "NEXT RACE");
-        public static readonly LocString HeroTableEyebrow = new("casino.strip.heroTableEyebrow", "HOTTEST TABLE");
-        public static readonly LocString HeroJackpotHint = new("casino.strip.heroJackpotHint", "Every paid spin on the machines can hit it");
-        public static readonly LocString HeroRaceIdle = new("casino.strip.heroRaceIdle", "The birds are warming up");
-        public static readonly LocString HeroDealerEyebrow = new("casino.strip.heroDealerEyebrow", "YOU VS THE HOUSE");
         public static readonly LocString RaceBetsClose = new("casino.strip.raceBetsClose", "Bets close in {0}");
         public static readonly LocString FromChips = new("casino.strip.fromChips", "From {0}");
-        public static readonly LocString ShelfMachines = new("casino.strip.shelfMachines", "Machines");
         public static readonly LocString TickerEyebrow = new("casino.strip.tickerEyebrow", "BIG WINS");
         public static readonly LocString TickWin = new("casino.strip.tickWin", "{0} hit {1} on {2}");
         public static readonly LocString TickJackpot = new("casino.strip.tickJackpot", "{0} won the jackpot: {1} chips");
@@ -11301,12 +11289,10 @@ internal static class L
         public static readonly LocString TourHeroBody = new("casino.strip.tourHeroBody", "Your balance, level and max bet live here. Get chips in one tap.");
         public static readonly LocString TourBonusTitle = new("casino.strip.tourBonusTitle", "Free chips");
         public static readonly LocString TourBonusBody = new("casino.strip.tourBonusBody", "The timed bonus refills every 3 hours. Tap it when the ring is full.");
-        public static readonly LocString TourShelvesTitle = new("casino.strip.tourShelvesTitle", "Every game, one tap");
-        public static readonly LocString TourShelvesBody = new("casino.strip.tourShelvesBody", "Swipe a shelf and tap a poster to play. Cards, machines and quick bets all sit on the Floor.");
+        public static readonly LocString TourShelvesTitle = new("casino.strip.tourShelvesTitle", "Every game on one page");
+        public static readonly LocString TourShelvesBody = new("casino.strip.tourShelvesBody", "Cards, slots and quick bets all sit on the Floor. Tap a poster to play.");
         public static readonly LocString TourLiveTitle = new("casino.strip.tourLiveTitle", "Live now");
         public static readonly LocString TourLiveBody = new("casino.strip.tourLiveBody", "The Live tab lists every room and table running right now, with seats and countdowns.");
-        public static readonly LocString TourRecordsTitle = new("casino.strip.tourRecordsTitle", "On the record");
-        public static readonly LocString TourRecordsBody = new("casino.strip.tourRecordsBody", "History, fairness checks and your limits are always one tap away.");
         public static readonly LocString LiveOpenSeats = new("casino.strip.liveOpenSeats", "Open seats");
         public static readonly LocString LiveFriends = new("casino.strip.liveFriends", "Friends");
         public static readonly LocString LiveHighRoller = new("casino.strip.liveHighRoller", "High roller");
@@ -11332,16 +11318,26 @@ internal static class L
         public static readonly LocString ShelfCards = new("casino.floor.shelfCards", "Cards");
         public static readonly LocString ShelfQuickBets = new("casino.floor.shelfQuickBets", "Quick bets");
         public static readonly LocString SkillBadge = new("casino.floor.skillBadge", "Skill");
-        public static readonly LocString JumpBackIn = new("casino.floor.jumpBackIn", "Jump back in");
         public static readonly LocString MissionsTitle = new("casino.floor.missionsTitle", "Missions");
-        public static readonly LocString MissionsProgress = new("casino.floor.missionsProgress", "{0} of {1} done");
-        public static readonly LocString MissionsReady = new("casino.floor.missionsReady", "{0} ready to claim");
         public static readonly LocString FreeSpin = new("casino.floor.freeSpin", "Free spin");
     }
 
     internal static class FloorPage
     {
         public static readonly LocString StreakDay = new("casino.floorPage.streakDay", "Day {0} of {1}");
+        public static readonly LocString CardsSubline = new("casino.floorPage.cardsSubline", "Blackjack and poker");
+        public static readonly LocString SlotsTitle = new("casino.floorPage.slotsTitle", "Slots");
+        public static readonly LocString SlotsSubline = new("casino.floorPage.slotsSubline", "Every paid spin draws the jackpot");
+        public static readonly LocString QuickSubline = new("casino.floorPage.quickSubline", "One tap, one result");
+        public static readonly LocString LiveTitle = new("casino.floorPage.liveTitle", "Live now");
+        public static readonly LocString AllTables = new("casino.floorPage.allTables", "All tables");
+        public static readonly LocString ShortcutClub = new("casino.floorPage.shortcutClub", "Club");
+        public static readonly LocString ShortcutHistory = new("casino.floorPage.shortcutHistory", "History");
+        public static readonly LocString MissionsBadge = new("casino.floorPage.missionsBadge", "{0}/{1}");
+        public static readonly LocString RankBadge = new("casino.floorPage.rankBadge", "#{0}");
+        public static readonly LocString PlayerVersusPlayer = new("casino.floorPage.playerVersusPlayer", "Player vs player");
+        public static readonly LocString TourShortcutsTitle = new("casino.floorPage.tourShortcutsTitle", "Shortcuts");
+        public static readonly LocString TourShortcutsBody = new("casino.floorPage.tourShortcutsBody", "Missions, Club, Hall of Fame and History are one tap away.");
     }
 
     internal static class Chips
@@ -11396,15 +11392,7 @@ internal static class L
         public static readonly LocString TierFloor = new("casino.club.tierFloor", "From {0} points");
         public static readonly LocString PerksWithReload = new("casino.club.perksWithReload", "{0}, daily reload");
         public static readonly LocString YouAreHere = new("casino.club.youAreHere", "You");
-        public static readonly LocString ChallengeEyebrow = new("casino.club.challengeEyebrow", "LIVE CHALLENGE");
-        public static readonly LocString ChallengeLeads = new("casino.club.challengeLeads", "{0} leads at {1}");
-        public static readonly LocString ChallengeLeadsCount = new("casino.club.challengeLeadsCount", "{0} leads with {1} hits");
-        public static readonly LocString ChallengeNoLeader = new("casino.club.challengeNoLeader", "No one has claimed it yet");
-        public static readonly LocString ChallengeEndsIn = new("casino.club.challengeEndsIn", "Ends in {0}");
-        public static readonly LocString ChallengeReward = new("casino.club.challengeReward", "Prize: {0} chips");
         public static readonly LocString FameTitle = new("casino.club.fameTitle", "Hall of Fame");
-        public static readonly LocString FameSeeAll = new("casino.club.fameSeeAll", "See all");
-        public static readonly LocString FamePodiumTitle = new("casino.club.famePodiumTitle", "This week's top winners");
         public static readonly LocString FameProfit = new("casino.club.fameProfit", "Profit");
         public static readonly LocString FameMultiplier = new("casino.club.fameMultiplier", "Multiplier");
         public static readonly LocString FameWin = new("casino.club.fameWin", "Biggest win");
@@ -11415,7 +11403,6 @@ internal static class L
         public static readonly LocString FameYourRank = new("casino.club.fameYourRank", "You are #{0}");
         public static readonly LocString FameNotRanked = new("casino.club.fameNotRanked", "You are not on this board yet");
         public static readonly LocString FameOptIn = new("casino.club.fameOptIn", "Only players who choose to appear are on these boards. You can change your choice any time in Settings > Privacy.");
-        public static readonly LocString FameChampionLine = new("casino.club.fameChampionLine", "Last week's champion: {0}");
         public static readonly LocString FameChampionValue = new("casino.club.fameChampionValue", "Champion with {0} profit");
         public static readonly LocString FameConsentTitle = new("casino.club.fameConsentTitle", "Show up in the Hall of Fame?");
         public static readonly LocString FameConsentBody = new("casino.club.fameConsentBody", "Your name, biggest wins and best multipliers can appear on the weekly Hall of Fame boards that everyone on the floor sees.");

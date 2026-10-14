@@ -33,7 +33,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private readonly Configuration configuration;
     private readonly Core.Casino.CasinoPreferences preferences;
     private readonly Strip.StripHero stripHero = new();
-    private readonly Strip.StripCarousel heroCards = new();
     private readonly Strip.StripLightClock floorLights = new();
     private readonly Strip.StripShelves shelves = new();
     private readonly Strip.WinsTicker winsTicker = new();
@@ -80,7 +79,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private readonly Venue.VenueTableSheet venueSheet;
     private readonly Venue.TradeRecordedCard tradeCard;
     private readonly Venue.NearbyTablesCard nearbyTables;
-    private readonly Venue.VenueSection venueSection;
     private readonly CasinoStage stage = new();
     private readonly GameRulesSheet rulesSheet = new();
     private readonly TabBar bottomNav = new();
@@ -168,9 +166,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         nearbyTables = new Venue.NearbyTablesCard(casinoVenue);
         var contextActions = new Venue.VenueContextActions(openTable, openDoorFromRow, OpenLedger, OpenHostDraft,
             OpenHostSheet);
-        venueSection = new Venue.VenueSection(
-            new Venue.VenueContextCard("casino.venue.floor", casinoTables, casino, preferences, nearbyTables,
-                contextActions), casino, OpenHostGame);
         this.holdemStore = holdemStore;
         holdem = new Tables.HoldemTable(casino, casinoRooms, casinoTables, holdemStore, casinoTurns, remoteImages,
             lodestone, PopRoute);
@@ -253,9 +248,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         ResetLaunch();
         clubSheet.Close();
         missionsSheet.Close();
-        heroCards.Reset();
-        shelves.Reset();
-        venueSection.Reset();
         winsTicker.Reset();
         RefreshFloor();
         floor.Watch();
@@ -298,7 +290,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
 
     private void RefreshFloor()
     {
-        lobbyHistoryFailed = false;
         history.Invalidate();
         coins.RefreshNow();
         casino.RefreshNow();
