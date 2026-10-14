@@ -146,6 +146,19 @@ public sealed class TradeContextTests
     }
 
     [Fact]
+    public void ARememberedTableThatHasClosedIsForgottenInsteadOfTakingTheTrade()
+    {
+        var memory = new TradeTableMemory();
+        Assert.True(memory.Resolve(View(Host, Table, GilBoard), 0).Known);
+        Assert.Equal(Table, memory.Resolve(View(Host), 1_000).TableId);
+
+        var gone = View(Host, listed: Array.Empty<CasinoTableRowDto>());
+        Assert.False(memory.Resolve(gone, 2_000).Known);
+        var others = View(Host, listed: new[] { RaffleCard });
+        Assert.Equal(Raffle, memory.Resolve(others, 3_000).TableId);
+    }
+
+    [Fact]
     public void AnotherLiveGilRoomWinsOverTheRememberedTable()
     {
         var memory = new TradeTableMemory();

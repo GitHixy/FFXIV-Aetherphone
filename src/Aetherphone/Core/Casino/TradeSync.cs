@@ -26,7 +26,8 @@ internal readonly record struct TradeTableContext(
     string HostName,
     TradeSeat[] Seats,
     CasinoLedgerEntryDto[] Entries,
-    bool Venue = false)
+    bool Venue = false,
+    bool Book = false)
 {
     public bool Known => !string.IsNullOrEmpty(TableId) && !string.IsNullOrEmpty(MyUserId)
         && !string.IsNullOrEmpty(HostUserId);

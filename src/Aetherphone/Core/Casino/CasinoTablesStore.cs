@@ -15,7 +15,8 @@ internal sealed class CasinoTablesStore : IDisposable
     private static readonly TimeSpan ForegroundPollInterval = TimeSpan.FromSeconds(60);
     private static readonly TimeSpan BackgroundPollInterval = TimeSpan.FromSeconds(120);
     private const long RetryAfterAttemptMilliseconds = 30_000;
-    private const long LedgerRefreshMilliseconds = 10_000;
+    private const long LedgerRetryMilliseconds = 10_000;
+    private const long LedgerRefreshMilliseconds = 5_000;
     private const long DoorRefreshMilliseconds = 5_000;
     private const long KnockRefreshMilliseconds = 3_000;
     private const long AwayKnockRefreshMilliseconds = 15_000;
@@ -587,7 +588,7 @@ internal sealed class CasinoTablesStore : IDisposable
     private void RefreshMyLedger()
     {
         if (!session.IsSignedIn
-            || CoolingDown(Interlocked.Read(ref myLedgerAttemptedAtTick), Environment.TickCount64)
+            || LedgerCoolingDown(Interlocked.Read(ref myLedgerAttemptedAtTick), Environment.TickCount64)
             || Interlocked.Exchange(ref fetchingMyLedger, 1) != 0)
         {
             return;
@@ -764,7 +765,7 @@ internal sealed class CasinoTablesStore : IDisposable
     private void RefreshLedger(string roomId)
     {
         if (!session.IsSignedIn
-            || CoolingDown(Interlocked.Read(ref ledgerAttemptedAtTick), Environment.TickCount64)
+            || LedgerCoolingDown(Interlocked.Read(ref ledgerAttemptedAtTick), Environment.TickCount64)
             || Interlocked.Exchange(ref fetchingLedger, 1) != 0)
         {
             return;
@@ -1208,6 +1209,11 @@ internal sealed class CasinoTablesStore : IDisposable
     internal static bool CoolingDown(long attemptedAtTick, long nowTick)
     {
         return attemptedAtTick != 0 && nowTick - attemptedAtTick < RetryAfterAttemptMilliseconds;
+    }
+
+    internal static bool LedgerCoolingDown(long attemptedAtTick, long nowTick)
+    {
+        return attemptedAtTick != 0 && nowTick - attemptedAtTick < LedgerRetryMilliseconds;
     }
 
     internal static string Named(string reason)

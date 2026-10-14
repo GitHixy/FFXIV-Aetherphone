@@ -93,7 +93,7 @@ internal sealed class HostDraft
         Game = game;
         Currency = HostGames.DefaultCurrency(game);
         Seats = CasinoHostingRules.DefaultSeats;
-        Listing = CasinoListings.Private;
+        Listing = DefaultListing(game);
         Spectators = true;
         FaceUp = false;
         Name = string.Empty;
@@ -120,6 +120,11 @@ internal sealed class HostDraft
         StartAt = HostLadders.FloorIndex(HostLadders.StartNumbers, VenueRules.DefaultStartAt);
         DiceStake = 0;
         ResetStakes();
+    }
+
+    public static int DefaultListing(HostGame game)
+    {
+        return game == HostGame.Book ? CasinoListings.Open : CasinoListings.Private;
     }
 
     public void SelectGame(HostGame game, bool gilOpen)

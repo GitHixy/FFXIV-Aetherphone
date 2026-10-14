@@ -2419,6 +2419,16 @@ internal static class L
                 "Fixed gil dice tables refusing buy-ins because a venue room seats nobody"),
             new("changelog.r1300.138",
                 "Fixed a table pinned to a venue staying hidden while Who can join was Invite only: the host sheet now says it will not be listed until you pick Ask to join or Open, and asks you to stand on the plot"),
+            new("changelog.r1300.140",
+                "Changed trade sync to recognise a patron with the app while their phone is at the table or in the room, seated or not: gil handed over before sitting becomes their stack when they sit, and whatever is unplayed when the table closes comes back as a cash-out the host owes"),
+            new("changelog.r1300.141",
+                "Changed dice rounds to close as soon as everyone in the room has rolled instead of waiting out the clock"),
+            new("changelog.r1300.142",
+                "Changed the blackjack bet spots to name themselves under the circles (Pairs, Bet, 21+3) instead of floating captions above them into the seat rail"),
+            new("changelog.r1300.143",
+                "Changed a new Book to be open to all by default, worded the Book's guest prompts and hosting note around how patrons get recognised, and named the setting to change when table settings conflict"),
+            new("changelog.r1300.144",
+                "Changed trade sync to read whether the trade window is open from the window itself, so a trade still counts when the game hides the window instead of closing it, and the ledger pages refresh every five seconds and right after a trade"),
         };
 
         public static readonly LocString[] Release1300Linkpearl =
@@ -11488,6 +11498,10 @@ internal static class L
     internal static class Tables
     {
         public static readonly LocString ReasonConfigInvalid = new("casino.tables.reasonConfigInvalid", "Some of those table settings do not work together. Check the stakes and limits, then try again.");
+        public static readonly LocString ReasonMinBetAboveMax = new("casino.tables.reasonMinBetAboveMax", "The minimum bet is above the maximum bet. Lower the minimum or raise the maximum.");
+        public static readonly LocString ReasonMaxBetAboveStack = new("casino.tables.reasonMaxBetAboveStack", "The maximum bet is above the practice stack. Lower the bet or raise the stack under More options.");
+        public static readonly LocString ReasonMaxBetAboveBank = new("casino.tables.reasonMaxBetAboveBank", "The maximum bet is above the bank. Lower the bet or raise the bank.");
+        public static readonly LocString ReasonPayoutBelowMaxBet = new("casino.tables.reasonPayoutBelowMaxBet", "The max payout is below the maximum bet. Raise it under More options or lower the bet.");
         public static readonly LocString ReasonPracticeOnly = new("casino.tables.reasonPracticeOnly", "That option is only for practice and gil tables, not house chip tables.");
         public static readonly LocString ReasonNotDealer = new("casino.tables.reasonNotDealer", "Only the host or a co-dealer can do that.");
         public static readonly LocString ReasonDealerCannotSit = new("casino.tables.reasonDealerCannotSit", "You deal at this table, so you cannot also take a seat at it.");
@@ -11763,6 +11777,7 @@ internal static class L
         public static readonly LocString SidePairs = new("casino.blackjack.sidePairs", "Pairs");
         public static readonly LocString SideThree = new("casino.blackjack.sideThree", "21+3");
         public static readonly LocString SideStake = new("casino.blackjack.sideStake", "Stake {0}");
+        public static readonly LocString MainSpot = new("casino.blackjack.mainSpot", "Bet");
         public static readonly LocString SideWin = new("casino.blackjack.sideWin", "{0}, {1} to 1: {2}");
         public static readonly LocString PairMixed = new("casino.blackjack.pairMixed", "Mixed pair");
         public static readonly LocString PairColoured = new("casino.blackjack.pairColoured", "Coloured pair");
@@ -11954,6 +11969,7 @@ internal static class L
         public static readonly LocString ReasonTicketCount = new("casino.venue.reasonTicketCount", "Fewer tickets than that are left to you in this raffle. Take what is left or wait for the next one.");
 
         public static readonly LocString PinInviteOnlyNote = new("casino.venue.pinInviteOnlyNote", "Not listed at this venue while Who can join is Invite only. Pick Ask to join or Open to list it.");
+        public static readonly LocString GuestHintRoom = new("casino.venue.guestHintRoom", "Nobody in this room matched that name. A patron who uses the app is recognised while their phone is in the room; anyone else is a guest, settled on the spot and never disputed.");
         public static readonly LocString PinNoPlotNote = new("casino.venue.pinNoPlotNote", "Stand on the venue's plot so the Venues app can show your table. The Floor still shows it for this ward.");
     }
 
@@ -11984,7 +12000,7 @@ internal static class L
         public static readonly LocString RecordGuestBuyIn = new("casino.book.recordGuestBuyIn", "Record guest buy-in");
         public static readonly LocString RecordGuestRebuy = new("casino.book.recordGuestRebuy", "Record guest rebuy");
         public static readonly LocString RecordGuestPayout = new("casino.book.recordGuestPayout", "Record guest payout");
-        public static readonly LocString GuestHint = new("casino.book.guestHint", "Nobody at this table matched that name. A guest entry is settled on the spot and cannot be disputed.");
+        public static readonly LocString GuestHint = new("casino.book.guestHint", "Nobody at this table matched that name. A patron who uses the app is recognised while their phone is at the table; anyone else is a guest, settled on the spot and never disputed.");
         public static readonly LocString GuestHintUnchecked = new("casino.book.guestHintUnchecked", "This trade could not be checked against this table. A guest entry is settled on the spot and cannot be disputed.");
         public static readonly LocString GuestTag = new("casino.book.guestTag", "Guest");
         public static readonly LocString GuestNamed = new("casino.book.guestNamed", "{0} (guest)");
@@ -12002,6 +12018,9 @@ internal static class L
         public static readonly LocString GuestRecorded = new("casino.book.guestRecorded", "Recorded by the host");
         public static readonly LocString CloseTitle = new("casino.book.closeTitle", "Close this book?");
         public static readonly LocString CloseBody = new("casino.book.closeBody", "The ledger stays readable for 30 days, and entries still waiting can be confirmed or disputed after it closes.");
+        public static readonly LocString PinInviteOnlyNote = new("casino.book.pinInviteOnlyNote", "This book is not listed at the venue while Who can join is Invite only, so patrons cannot open it or register on it. Pick Ask to join or Open to list it.");
+        public static readonly LocString GuestHintBook = new("casino.book.guestHintBook", "Nobody on this book matched that name. A patron who uses the app gets on the book by opening it from the Venues app or with its code; anyone else is a guest, settled on the spot and never disputed.");
+        public static readonly LocString RecordHostHint = new("casino.book.recordHostHint", "Trade the gil in game first, then record it here. Patrons who use the app appear here once they open this book from the Venues app or with its code; anyone else goes in as a guest.");
     }
 
     internal static class Catalogs
