@@ -9740,7 +9740,6 @@
   "casino.venue.reportHint": "Модераторы получат стол с журналом раздач и бросков и журналом гил.",
   "casino.venue.broadcastOpen": "Режим трансляции",
   "casino.venue.broadcastHint": "Большой горизонтальный вид для второго экрана или бара, без кнопок.",
-  "casino.venue.hostControlsHint": "У двери можно переименовать стол, поставить его на паузу, убрать игроков или закрыть стол. Ваше место сохранится.",
   "casino.venue.broadcastTitle": "Трансляция",
   "casino.venue.broadcastWaiting": "Ждём следующую раздачу",
   "casino.venue.broadcastDealer": "Дилер",

@@ -9740,7 +9740,6 @@
   "casino.venue.reportHint": "管理员会收到此牌桌及其牌局与掷骰记录和金币账本。",
   "casino.venue.broadcastOpen": "直播视图",
   "casino.venue.broadcastHint": "适合副屏或吧台显示的横向大视图，不含操作按钮。",
-  "casino.venue.hostControlsHint": "可在门口重命名、暂停、移出玩家或关闭牌桌。你的座位会保留。",
   "casino.venue.broadcastTitle": "直播",
   "casino.venue.broadcastWaiting": "等待下一手",
   "casino.venue.broadcastDealer": "庄家",

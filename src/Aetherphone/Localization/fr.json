@@ -9740,7 +9740,6 @@
   "casino.venue.reportHint": "Les modérateurs reçoivent la table avec son journal des mains et des lancers et le registre de gils.",
   "casino.venue.broadcastOpen": "Vue diffusion",
   "casino.venue.broadcastHint": "Une grande vue paysage pour un second écran ou l'écran du bar, sans commandes.",
-  "casino.venue.hostControlsHint": "Depuis la porte, renomme, mets en pause, retire des joueurs ou ferme la table. Tu gardes ta place.",
   "casino.venue.broadcastTitle": "Diffusion",
   "casino.venue.broadcastWaiting": "En attente de la prochaine main",
   "casino.venue.broadcastDealer": "Croupier",

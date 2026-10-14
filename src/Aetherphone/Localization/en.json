@@ -9740,7 +9740,6 @@
   "casino.venue.reportHint": "Moderators receive the table with its hand and roll log and the gil ledger.",
   "casino.venue.broadcastOpen": "Broadcast view",
   "casino.venue.broadcastHint": "A large landscape view for a second screen or the bar display, without controls.",
-  "casino.venue.hostControlsHint": "Rename, pause, remove players or close the table from its door. You keep your seat.",
   "casino.venue.broadcastTitle": "Broadcast",
   "casino.venue.broadcastWaiting": "Waiting for the next hand",
   "casino.venue.broadcastDealer": "Dealer",

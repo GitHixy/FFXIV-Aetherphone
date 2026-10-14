@@ -514,7 +514,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private void DrawStage(CasinoRoute route, Rect area)
     {
         var scale = UiScale.Current;
-        var spec = StageSpecFor(route);
+        var spec = WithHostPill(route, StageSpecFor(route));
         using (AppSurface.BeginEdgeToEdge(area, true))
         {
             ImGui.Dummy(new Vector2(area.Width, MathF.Max(1f, area.Height - StageSurfaceSlack * scale)));
@@ -529,7 +529,27 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             {
                 OpenCashier();
             }
+            else if (action == CasinoStageAction.Host)
+            {
+                OpenHostControls(route.TableId);
+            }
         }
+    }
+
+    private CasinoStageSpec WithHostPill(CasinoRoute route, in CasinoStageSpec spec)
+    {
+        if (route.Screen is not (CasinoScreen.Table or CasinoScreen.VenueRoom) || route.TableId.Length == 0)
+        {
+            return spec;
+        }
+
+        var card = casinoTables.CardFor(route.TableId);
+        if (card is null || !casinoTables.Owns(card))
+        {
+            return spec;
+        }
+
+        return spec with { Host = true, HostKnocks = casinoTables.DoorFor(route.TableId)?.Knocks?.Length ?? 0 };
     }
 
     private bool RouteOpen(CasinoRoute route)
@@ -1540,12 +1560,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         if (request == Venue.VenueSheetRequest.GilLedger)
         {
             OpenGilLedger();
-            return;
-        }
-
-        if (request == Venue.VenueSheetRequest.HostControls)
-        {
-            OpenHostControls(router.Current.TableId);
             return;
         }
 

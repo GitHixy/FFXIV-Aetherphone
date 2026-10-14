@@ -9,6 +9,7 @@ using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Keys;
+using Dalamud.Interface;
 
 namespace Aetherphone.Apps.Casino.Stage;
 
@@ -25,8 +26,17 @@ internal sealed class CasinoStage
     private const float CappedSeconds = 4f;
     private const float CappedFadeSeconds = 0.4f;
     private const float CappedPillHeight = 34f;
+    private const float HostPadLeft = 10f;
+    private const float HostIconGap = 6f;
+    private const float HostPadRight = 14f;
+    private const float KnockBadgeHeight = 18f;
+    private const float KnockBadgeOffsetX = 4f;
+    private const float KnockBadgeOffsetY = 5f;
+    private const float KnockHaloGrowth = 0.6f;
+    private const float KnockHaloAlpha = 0.55f;
 
     private static readonly VirtualKey[] RepeatKeys = { VirtualKey.SPACE };
+    private static readonly Vector4 KnockBadgeInk = new(0.141f, 0.082f, 0.012f, 1f);
 
     private readonly StageBackdrop backdrop = new();
     private readonly ScreenFx fx;
@@ -168,6 +178,11 @@ internal sealed class CasinoStage
         backdrop.SetLampPool(next.LampPool);
         backdrop.SetFeltStyle(FeltStyle.Night, next.Rail);
         layout = CasinoStageLayout.Compute(full, content, next.Room, next.Practice, next.DeckHeight, scale);
+        if (next.Host)
+        {
+            layout = layout.WithHost(HostPillWidth(scale), scale);
+        }
+
         actionRow = DeckActions.Row(layout.Deck, scale);
         actionCursor = actionRow.Min.X;
         actionSecondaries = 0;
@@ -236,6 +251,11 @@ internal sealed class CasinoStage
         if (!layout.Landscape && DrawCapsule(drawList, scale))
         {
             action = CasinoStageAction.Cashier;
+        }
+
+        if (layout.HasHost && DrawHostPill(drawList, ui, scale))
+        {
+            action = CasinoStageAction.Host;
         }
 
         var chip = layout.ChipRadiusPixels;
@@ -473,6 +493,68 @@ internal sealed class CasinoStage
         }
 
         return UiInteract.Click(hitMin, hitMax, hovered);
+    }
+
+    private static float HostPillWidth(float scale)
+    {
+        var label = Typography.Measure(Loc.T(L.HostDesk.HostPill), TextStyles.SubheadlineEmphasized).X;
+        return (HostPadLeft + GlyphSize + HostIconGap + HostPadRight) * scale + label;
+    }
+
+    private bool DrawHostPill(ImDrawListPtr drawList, AppSkin ui, float scale)
+    {
+        var pill = layout.HostPill;
+        var key = ImGui.GetID("casino.stage.host");
+        bool pressed;
+        if (layout.HostCollapsed)
+        {
+            pressed = GlassCircle.Draw(drawList, key, pill.Center, pill.Height * 0.5f, scale, GlassTone.Dark,
+                Loc.T(L.Tables.HostPanelHeading), HoverLabelSide.Below, out var grow);
+            ProgressRing.CenterIcon(drawList, pill.Center, FontAwesomeIcon.SlidersH, CasinoColors.InkTitle,
+                GlyphSize * scale * grow);
+        }
+        else
+        {
+            var hovered = UiInteract.Hover(pill.Min, pill.Max);
+            var face = Button.Surface(drawList, pill, ui.Ink, ButtonStyle.Prominent, ButtonRole.Normal, true, hovered,
+                key).Face;
+            var iconCenter = new Vector2(face.Min.X + (HostPadLeft + GlyphSize * 0.5f) * scale, face.Center.Y);
+            ProgressRing.CenterIcon(drawList, iconCenter, FontAwesomeIcon.SlidersH, CasinoArt.White,
+                GlyphSize * scale * face.Height / MathF.Max(1f, pill.Height));
+            var label = Loc.T(L.HostDesk.HostPill);
+            var labelLeft = iconCenter.X + (GlyphSize * 0.5f + HostIconGap) * scale;
+            var room = MathF.Max(1f, face.Max.X - HostPadRight * scale - labelLeft);
+            var fitted = Typography.FitText(label, room, TextStyles.SubheadlineEmphasized);
+            var size = Typography.Measure(fitted, TextStyles.SubheadlineEmphasized);
+            Typography.Draw(drawList, new Vector2(labelLeft, face.Center.Y - size.Y * 0.5f), fitted, CasinoArt.White,
+                TextStyles.SubheadlineEmphasized);
+            pressed = UiInteract.Click(pill.Min, pill.Max, hovered);
+        }
+
+        DrawKnockBadge(drawList, pill, spec.HostKnocks, scale);
+        return pressed;
+    }
+
+    private void DrawKnockBadge(ImDrawListPtr drawList, Rect pill, int knocks, float scale)
+    {
+        if (knocks <= 0)
+        {
+            return;
+        }
+
+        var label = Games.Framework.GameNumber.Label(knocks);
+        var style = TextStyles.FootnoteEmphasized;
+        var size = Typography.Measure(label, style);
+        var height = KnockBadgeHeight * scale;
+        var width = MathF.Max(height, size.X + height * 0.5f);
+        var max = new Vector2(pill.Max.X + KnockBadgeOffsetX * scale, pill.Min.Y - KnockBadgeOffsetY * scale + height);
+        var min = new Vector2(max.X - width, max.Y - height);
+        var wave = Pulse.Wave(Pulse.Calm);
+        var halo = height * 0.5f * (1f + KnockHaloGrowth * wave);
+        drawList.AddCircleFilled((min + max) * 0.5f, halo,
+            ImGui.GetColorU32(CasinoColors.Money with { W = KnockHaloAlpha * (1f - wave) }), 24);
+        Squircle.Fill(drawList, min, max, height * 0.5f, ImGui.GetColorU32(CasinoColors.Money));
+        Typography.Draw(drawList, (min + max) * 0.5f - size * 0.5f, label, KnockBadgeInk, style);
     }
 
     private void DrawCappedPill(ImDrawListPtr drawList, float scale)
