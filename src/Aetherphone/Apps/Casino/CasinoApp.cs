@@ -435,6 +435,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         venueSheet.Draw(screenArea, ui);
         HandleVenueSheet();
         rulesSheet.Draw(screenArea, ui);
+        DrawLiveSheet();
         fameConsent.Draw(screenArea, ui);
         clubSheet.Draw(screenArea, ui);
         missionsSheet.Draw(screenArea, ui, floor.Missions, floor.ClaimingMission,
