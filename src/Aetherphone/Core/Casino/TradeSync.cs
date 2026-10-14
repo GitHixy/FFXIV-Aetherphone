@@ -1,532 +1,254 @@
-using System.Text;
-using Aetherphone.Core.Aethernet.Contracts;
-
 namespace Aetherphone.Core.Casino;
 
 internal readonly record struct TradeWindowSample(
     bool Open,
-    string[] NameCandidates,
+    string PartnerName,
+    string PartnerWorld,
     long MyOffer,
     long TheirOffer,
     long WalletGil,
-    bool PartnerRead = false);
+    bool WalletRead);
 
-internal readonly record struct TradeCompletion(string[] NameCandidates, long Received, long Sent,
-    bool PartnerRead = false)
+internal readonly record struct TradeCompletion(string PartnerName, string PartnerWorld, long Received, long Sent)
 {
     public long Net => Received - Sent;
 }
 
-internal readonly record struct TradeSeat(string UserId, string DisplayName);
-
-internal readonly record struct TradeTableContext(
-    string TableId,
-    string MyUserId,
-    string HostUserId,
-    string HostName,
-    TradeSeat[] Seats,
-    CasinoLedgerEntryDto[] Entries,
-    bool Venue = false,
-    bool Book = false)
-{
-    public bool Known => !string.IsNullOrEmpty(TableId) && !string.IsNullOrEmpty(MyUserId)
-        && !string.IsNullOrEmpty(HostUserId);
-
-    public bool Hosting => Known && string.Equals(MyUserId, HostUserId, StringComparison.Ordinal);
-}
-
-internal enum TradeProposalKind : byte
-{
-    None,
-    Propose,
-    Confirm,
-}
-
-internal readonly record struct TradeProposal(
-    TradeProposalKind Kind,
-    string TableId,
-    string LedgerKind,
-    string CounterpartyUserId,
-    string CounterpartyName,
-    long Amount,
-    string EntryId,
-    bool HostSide,
-    bool Incoming)
-{
-    public static readonly TradeProposal None = new(TradeProposalKind.None, string.Empty, string.Empty, string.Empty,
-        string.Empty, 0, string.Empty, false, false);
-}
-
-internal enum TradeTrackerStage : byte
-{
-    Idle,
-    Open,
-    Settling,
-}
-
 internal sealed class TradeSyncTracker
 {
-    public const long SettleWindowMilliseconds = 4_000;
+    public const long ArmedMilliseconds = 30_000;
+    public const int MaxArmed = 4;
 
-    private string[] candidates = Array.Empty<string>();
-    private bool partnerRead;
-    private long myOffer;
-    private long theirOffer;
-    private long baseline;
-    private long closedAtTick;
-    private PendingTrade? pendingTrade;
-    private long? precedingOfferMagnitude;
-    private bool discardCompletion;
+    private const int NoMatch = -2;
+    private const int OpenSlot = -1;
 
-    private readonly record struct PendingTrade(string[] Candidates, bool PartnerRead, long MyOffer,
-        long TheirOffer, long Baseline, long ClosedAtTick);
+    private readonly TradeSnapshot[] armed = new TradeSnapshot[MaxArmed];
 
-    public TradeTrackerStage Stage { get; private set; }
+    private int armedCount;
+    private TradeSnapshot open;
+    private bool windowOpen;
+    private bool openDone;
+    private long nextSequence;
+    private long lastWallet;
+    private bool walletKnown;
+
+    private readonly record struct TradeSnapshot(string PartnerName, string PartnerWorld, long MyOffer,
+        long TheirOffer, long Sequence, long ClosedAtTick)
+    {
+        public long Net => TheirOffer - MyOffer;
+
+        public bool SamePartner(string partnerName, string partnerWorld) =>
+            string.Equals(PartnerName, partnerName, StringComparison.Ordinal)
+            && string.Equals(PartnerWorld, partnerWorld, StringComparison.Ordinal);
+    }
 
     public TradeCompletion? Observe(in TradeWindowSample sample, long nowTick)
     {
-        var completed = ObservePending(sample, nowTick);
+        Expire(nowTick);
         if (sample.Open)
         {
-            if (Stage != TradeTrackerStage.Open)
-            {
-                var nextBaseline = sample.WalletGil;
-                var overflow = false;
-                if (Stage == TradeTrackerStage.Settling
-                    && nowTick - closedAtTick <= SettleWindowMilliseconds)
-                {
-                    if (pendingTrade is null && precedingOfferMagnitude is null && !discardCompletion)
-                    {
-                        pendingTrade = new PendingTrade(candidates, partnerRead, myOffer, theirOffer, baseline,
-                            closedAtTick);
-                        nextBaseline = baseline;
-                    }
-                    else
-                    {
-                        pendingTrade = null;
-                        overflow = true;
-                    }
-                }
-
-                candidates = Array.Empty<string>();
-                partnerRead = false;
-                myOffer = 0;
-                theirOffer = 0;
-                baseline = nextBaseline;
-                precedingOfferMagnitude = pendingTrade is { } pending
-                    ? Math.Abs(pending.TheirOffer - pending.MyOffer) : null;
-                discardCompletion = overflow;
-            }
-
-            Stage = TradeTrackerStage.Open;
-            if (sample.NameCandidates.Length > 0)
-            {
-                candidates = sample.NameCandidates;
-            }
-
-            partnerRead |= sample.PartnerRead;
-
-            myOffer = Math.Max(0, sample.MyOffer);
-            theirOffer = Math.Max(0, sample.TheirOffer);
-            return completed ?? ObservePending(sample, nowTick);
+            Show(sample, nowTick);
         }
-
-        if (Stage == TradeTrackerStage.Open)
+        else if (windowOpen)
         {
-            Stage = TradeTrackerStage.Settling;
-            closedAtTick = nowTick;
+            Hide(nowTick);
         }
 
-        if (Stage != TradeTrackerStage.Settling)
-        {
-            return completed;
-        }
-
-        var delta = sample.WalletGil - baseline;
-        if (delta != 0 && CanSettle(delta))
-        {
-            if (pendingTrade is { } pending)
-            {
-                pendingTrade = pending with { Baseline = pending.Baseline + delta };
-            }
-
-            Stage = TradeTrackerStage.Idle;
-            return Settle(delta);
-        }
-
-        if (nowTick - closedAtTick > SettleWindowMilliseconds)
-        {
-            Stage = TradeTrackerStage.Idle;
-        }
-
-        return completed;
-    }
-
-    private bool CanSettle(long delta)
-    {
-        if (discardCompletion)
-        {
-            return false;
-        }
-
-        if (precedingOfferMagnitude is not { } preceding)
-        {
-            return true;
-        }
-
-        var magnitude = Math.Abs(theirOffer - myOffer);
-        return preceding != 0 && magnitude != preceding && Math.Abs(delta) == magnitude;
-    }
-
-    private TradeCompletion? ObservePending(in TradeWindowSample sample, long nowTick)
-    {
-        if (pendingTrade is not { } pending)
-        {
-            return null;
-        }
-
-        if (nowTick - pending.ClosedAtTick > SettleWindowMilliseconds)
-        {
-            pendingTrade = null;
-            return null;
-        }
-
-        var delta = sample.WalletGil - pending.Baseline;
-        if (delta == 0 || Math.Abs(delta) != Math.Abs(pending.TheirOffer - pending.MyOffer))
-        {
-            return null;
-        }
-
-        if (Stage != TradeTrackerStage.Idle)
-        {
-            var currentMagnitude = Math.Abs(theirOffer - myOffer);
-            var sampledMagnitude = sample.Open ? Math.Abs(sample.TheirOffer - sample.MyOffer) : currentMagnitude;
-            if (Stage == TradeTrackerStage.Open && sample.Open)
-            {
-                currentMagnitude = sampledMagnitude;
-            }
-
-            if (currentMagnitude == 0 || currentMagnitude == Math.Abs(delta))
-            {
-                return null;
-            }
-
-            if (sample.Open && (sampledMagnitude == 0 || sampledMagnitude == Math.Abs(delta)))
-            {
-                return null;
-            }
-        }
-
-        pendingTrade = null;
-        if (Stage != TradeTrackerStage.Idle)
-        {
-            baseline += delta;
-            precedingOfferMagnitude = null;
-        }
-
-        return Settle(pending.Candidates, pending.PartnerRead, pending.MyOffer, pending.TheirOffer, delta);
+        return Settle(sample);
     }
 
     public void Reset()
     {
-        Stage = TradeTrackerStage.Idle;
-        candidates = Array.Empty<string>();
-        partnerRead = false;
-        myOffer = 0;
-        theirOffer = 0;
-        baseline = 0;
-        closedAtTick = 0;
-        pendingTrade = null;
-        precedingOfferMagnitude = null;
-        discardCompletion = false;
+        Array.Clear(armed);
+        armedCount = 0;
+        open = default;
+        windowOpen = false;
+        openDone = false;
+        lastWallet = 0;
+        walletKnown = false;
     }
 
-    private TradeCompletion Settle(long delta)
+    private void Show(in TradeWindowSample sample, long nowTick)
     {
-        return Settle(candidates, partnerRead, myOffer, theirOffer, delta);
+        if (!windowOpen)
+        {
+            windowOpen = true;
+            openDone = false;
+            open = Fresh();
+        }
+
+        var partnerChanged = sample.PartnerName.Length > 0
+                             && !string.Equals(open.PartnerName, sample.PartnerName, StringComparison.Ordinal);
+        if (openDone)
+        {
+            if (!partnerChanged || open.PartnerName.Length == 0)
+            {
+                return;
+            }
+
+            open = Fresh();
+            openDone = false;
+        }
+        else if (partnerChanged && open.PartnerName.Length > 0)
+        {
+            Arm(open with { ClosedAtTick = nowTick });
+            open = Fresh();
+        }
+
+        if (partnerChanged && TryTakeArmed(sample.PartnerName, sample.PartnerWorld, out var continued))
+        {
+            open = continued with { ClosedAtTick = 0 };
+        }
+
+        if (sample.PartnerName.Length > 0)
+        {
+            open = open with { PartnerName = sample.PartnerName, PartnerWorld = sample.PartnerWorld };
+        }
+
+        open = open with { MyOffer = Math.Max(0, sample.MyOffer), TheirOffer = Math.Max(0, sample.TheirOffer) };
     }
 
-    private static TradeCompletion Settle(string[] candidates, bool partnerRead, long myOffer, long theirOffer,
-        long delta)
+    private void Hide(long nowTick)
     {
-        if (theirOffer - myOffer == delta)
+        windowOpen = false;
+        if (openDone)
         {
-            return new TradeCompletion(candidates, theirOffer, myOffer, partnerRead);
+            openDone = false;
+            return;
         }
 
-        if (myOffer - theirOffer == delta)
-        {
-            return new TradeCompletion(candidates, myOffer, theirOffer, partnerRead);
-        }
-
-        return delta > 0
-            ? new TradeCompletion(candidates, delta, 0, partnerRead)
-            : new TradeCompletion(candidates, 0, -delta, partnerRead);
-    }
-}
-
-internal static class TradeLedgerMatcher
-{
-    public static TradeProposal Match(in TradeCompletion completion, in TradeTableContext context)
-    {
-        var net = completion.Net;
-        if (!context.Known || net == 0)
-        {
-            return TradeProposal.None;
-        }
-
-        return context.Hosting ? MatchHost(completion, context, net) : MatchPlayer(completion, context, net);
+        Arm(open with { ClosedAtTick = nowTick });
     }
 
-    public static TradeMatchResult FromServer(in TradeCompletion completion, in TradeTableContext context,
-        CasinoLedgerTradeMatchDto? answer)
+    private TradeSnapshot Fresh()
     {
-        if (answer is null)
-        {
-            return TradeMatchResult.Of(TradeMatchRoute.Unreachable);
-        }
-
-        if (!answer.Granted)
-        {
-            return new TradeMatchResult(TradeProposal.None, TradeMatchRoute.Refused, answer.Reason ?? string.Empty);
-        }
-
-        if (!answer.Matched || string.IsNullOrEmpty(answer.CounterpartyUserId))
-        {
-            return TradeMatchResult.Of(TradeMatchRoute.NoMatch);
-        }
-
-        var net = completion.Net;
-        if (!context.Known || net == 0 || answer.HostSide != context.Hosting
-            || string.Equals(answer.CounterpartyUserId, context.MyUserId, StringComparison.Ordinal))
-        {
-            return TradeMatchResult.Of(TradeMatchRoute.Mismatch);
-        }
-
-        var counterparty = new TradeSeat(answer.CounterpartyUserId, answer.CounterpartyName ?? string.Empty);
-        var proposal = Resolve(context, counterparty, net, answer.HostSide);
-        return proposal.Kind == TradeProposalKind.None
-            ? TradeMatchResult.Of(TradeMatchRoute.Unrecordable)
-            : new TradeMatchResult(proposal, TradeMatchRoute.Server, string.Empty);
+        nextSequence++;
+        return new TradeSnapshot(string.Empty, string.Empty, 0, 0, nextSequence, 0);
     }
 
-    private static TradeProposal MatchHost(in TradeCompletion completion, in TradeTableContext context, long net)
+    private void Arm(in TradeSnapshot snapshot)
     {
-        var seat = SeatNamed(context.Seats, completion.NameCandidates, context.MyUserId);
-        if (seat.UserId.Length == 0)
+        if (armedCount == MaxArmed)
         {
-            return TradeProposal.None;
+            RemoveArmedAt(0);
         }
 
-        return Resolve(context, seat, net, true);
+        var slot = armedCount;
+        while (slot > 0 && armed[slot - 1].Sequence > snapshot.Sequence)
+        {
+            armed[slot] = armed[slot - 1];
+            slot--;
+        }
+
+        armed[slot] = snapshot;
+        armedCount++;
     }
 
-    private static TradeProposal MatchPlayer(in TradeCompletion completion, in TradeTableContext context, long net)
+    private bool TryTakeArmed(string partnerName, string partnerWorld, out TradeSnapshot snapshot)
     {
-        if (!AnyNamed(completion.NameCandidates, context.HostName))
+        for (var index = 0; index < armedCount; index++)
         {
-            return TradeProposal.None;
-        }
-
-        return Resolve(context, new TradeSeat(context.HostUserId, context.HostName), net, false);
-    }
-
-    private static TradeProposal Resolve(in TradeTableContext context, TradeSeat counterparty, long net, bool hostSide)
-    {
-        var incoming = net > 0;
-        var amount = incoming ? net : -net;
-        var payer = incoming ? counterparty.UserId : context.MyUserId;
-        var payee = incoming ? context.MyUserId : counterparty.UserId;
-        var entry = Unsettled(context.Entries, payer, payee, amount, incoming ? LedgerSide.Payee : LedgerSide.Payer);
-        if (entry is not null)
-        {
-            return new TradeProposal(TradeProposalKind.Confirm, context.TableId, entry.Kind, counterparty.UserId,
-                counterparty.DisplayName, amount, entry.EntryId, hostSide, incoming);
-        }
-
-        if (!hostSide && !string.Equals(counterparty.UserId, context.HostUserId, StringComparison.Ordinal))
-        {
-            return TradeProposal.None;
-        }
-
-        var kind = incoming == hostSide ? CasinoLedgerKinds.BuyIn : CasinoLedgerKinds.Payout;
-        return new TradeProposal(TradeProposalKind.Propose, context.TableId, kind, counterparty.UserId,
-            counterparty.DisplayName, amount, string.Empty, hostSide, incoming);
-    }
-
-    internal static CasinoLedgerEntryDto? Unsettled(CasinoLedgerEntryDto[] entries, string payer, string payee,
-        long amount, LedgerSide mySide)
-    {
-        for (var index = 0; index < entries.Length; index++)
-        {
-            var entry = entries[index];
-            if (entry.Settled || entry.Amount != amount
-                || !string.Equals(entry.PayerUserId, payer, StringComparison.Ordinal)
-                || !string.Equals(entry.PayeeUserId, payee, StringComparison.Ordinal))
+            if (!armed[index].SamePartner(partnerName, partnerWorld))
             {
                 continue;
             }
 
-            var stamped = mySide == LedgerSide.Payer ? entry.PayerConfirmed : entry.PayeeConfirmed;
-            if (!stamped)
-            {
-                return entry;
-            }
+            snapshot = armed[index];
+            RemoveArmedAt(index);
+            return true;
         }
 
-        return null;
-    }
-
-    internal static TradeSeat SeatNamed(TradeSeat[] seats, string[] candidates, string excludedUserId)
-    {
-        for (var seatIndex = 0; seatIndex < seats.Length; seatIndex++)
-        {
-            var seat = seats[seatIndex];
-            if (seat.UserId.Length == 0 || string.Equals(seat.UserId, excludedUserId, StringComparison.Ordinal))
-            {
-                continue;
-            }
-
-            if (AnyNamed(candidates, seat.DisplayName))
-            {
-                return seat;
-            }
-        }
-
-        return new TradeSeat(string.Empty, string.Empty);
-    }
-
-    internal static bool AnyNamed(string[] candidates, string displayName)
-    {
-        var wanted = TradeNames.Normalize(displayName);
-        if (wanted.Length == 0)
-        {
-            return false;
-        }
-
-        for (var index = 0; index < candidates.Length; index++)
-        {
-            if (string.Equals(TradeNames.Normalize(candidates[index]), wanted, StringComparison.Ordinal))
-            {
-                return true;
-            }
-        }
-
+        snapshot = default;
         return false;
     }
-}
 
-internal static class TradeNames
-{
-    private const char PrivateUseFirst = '\uE000';
-    private const char PrivateUseLast = '\uF8FF';
-    private const char NoBreakSpace = '\u00A0';
-    private const char NarrowNoBreakSpace = '\u202F';
-    private const char LeftSingleQuote = '\u2018';
-    private const char RightSingleQuote = '\u2019';
-    private const int MaxAmountDigits = 12;
-
-    public const int MaxServerNames = 16;
-
-    public const int MaxServerNameLength = 96;
-
-    public static string Normalize(string raw)
+    private void RemoveArmedAt(int index)
     {
-        var builder = new StringBuilder(raw.Length);
-        var pendingSpace = false;
-        for (var index = 0; index < raw.Length; index++)
+        for (var next = index + 1; next < armedCount; next++)
         {
-            var character = raw[index];
-            if (character is >= PrivateUseFirst and <= PrivateUseLast or '@' or '(' or '[')
-            {
-                break;
-            }
-
-            if (char.IsWhiteSpace(character))
-            {
-                pendingSpace = builder.Length > 0;
-                continue;
-            }
-
-            if (character is LeftSingleQuote or RightSingleQuote)
-            {
-                character = '\'';
-            }
-
-            if (!char.IsLetter(character) && character != '\'' && character != '-')
-            {
-                continue;
-            }
-
-            if (pendingSpace)
-            {
-                builder.Append(' ');
-                pendingSpace = false;
-            }
-
-            builder.Append(char.ToLowerInvariant(character));
+            armed[next - 1] = armed[next];
         }
 
-        return builder.ToString();
+        armedCount--;
+        armed[armedCount] = default;
     }
 
-    public static string[] ForServer(string[] candidates)
+    private void Expire(long nowTick)
     {
-        var count = 0;
-        for (var index = 0; index < candidates.Length && count < MaxServerNames; index++)
+        var index = 0;
+        while (index < armedCount)
         {
-            if (!string.IsNullOrWhiteSpace(candidates[index]))
+            if (nowTick - armed[index].ClosedAtTick > ArmedMilliseconds)
             {
-                count++;
-            }
-        }
-
-        var names = new string[count];
-        var next = 0;
-        for (var index = 0; index < candidates.Length && next < count; index++)
-        {
-            var candidate = candidates[index];
-            if (string.IsNullOrWhiteSpace(candidate))
-            {
+                RemoveArmedAt(index);
                 continue;
             }
 
-            names[next] = candidate.Length > MaxServerNameLength ? candidate[..MaxServerNameLength] : candidate;
-            next++;
+            index++;
         }
-
-        return names;
     }
 
-    public static bool TryAmount(string text, out long amount)
+    private TradeCompletion? Settle(in TradeWindowSample sample)
     {
-        amount = 0;
-        var digits = 0;
-        for (var index = 0; index < text.Length; index++)
+        if (!sample.WalletRead)
         {
-            var character = text[index];
-            if (character is >= '0' and <= '9')
-            {
-                digits++;
-                if (digits > MaxAmountDigits)
-                {
-                    amount = 0;
-                    return false;
-                }
-
-                amount = amount * 10 + (character - '0');
-                continue;
-            }
-
-            if (character is ',' or '.' or ' ' or '\'' or NoBreakSpace or NarrowNoBreakSpace)
-            {
-                continue;
-            }
-
-            amount = 0;
-            return false;
+            return null;
         }
 
-        return digits > 0;
+        if (!walletKnown)
+        {
+            walletKnown = true;
+            lastWallet = sample.WalletGil;
+            return null;
+        }
+
+        var delta = sample.WalletGil - lastWallet;
+        lastWallet = sample.WalletGil;
+        if (delta == 0)
+        {
+            return null;
+        }
+
+        var matched = OldestMatching(delta, windowOpen && !openDone);
+        if (matched == NoMatch)
+        {
+            return null;
+        }
+
+        TradeSnapshot snapshot;
+        if (matched == OpenSlot)
+        {
+            snapshot = open;
+            openDone = true;
+        }
+        else
+        {
+            snapshot = armed[matched];
+            RemoveArmedAt(matched);
+        }
+
+        return new TradeCompletion(snapshot.PartnerName, snapshot.PartnerWorld, delta > 0 ? delta : 0,
+            delta < 0 ? -delta : 0);
+    }
+
+    private int OldestMatching(long delta, bool openCandidate)
+    {
+        var matched = NoMatch;
+        var sequence = long.MaxValue;
+        for (var index = 0; index < armedCount; index++)
+        {
+            if (armed[index].Net == delta && armed[index].Sequence < sequence)
+            {
+                matched = index;
+                sequence = armed[index].Sequence;
+            }
+        }
+
+        if (openCandidate && open.Net == delta && open.Sequence < sequence)
+        {
+            matched = OpenSlot;
+        }
+
+        return matched;
     }
 }

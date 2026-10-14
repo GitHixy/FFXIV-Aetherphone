@@ -116,14 +116,13 @@ public sealed class CasinoTableBrowserTests
     }
 
     [Fact]
-    public void ACardCarriesItsCurrencyAndTheHostRecord()
+    public void ACardCarriesItsCurrencyAndBank()
     {
         var gil = Row(currency: CasinoCurrencies.Gil) with
         {
             Name = "Rose Room",
             MaxBet = 500_000,
             Config = new CasinoTableConfigDto(Currency: CasinoCurrencies.Gil, Bank: 20_000_000),
-            Reputation = new CasinoHostReputationDto(3, 12, 1),
         };
 
         var view = TableBrowser.ViewOf(gil, Me);
@@ -131,12 +130,9 @@ public sealed class CasinoTableBrowserTests
         Assert.Equal("Rose Room", view.Name);
         Assert.Equal(CasinoCurrencies.Gil, view.Currency);
         Assert.Contains("20,000,000", view.Stakes, StringComparison.Ordinal);
-        Assert.True(view.Reputation.Length > 0);
-        Assert.True(view.ReputationWarns);
 
         var practice = TableBrowser.ViewOf(Row(currency: CasinoCurrencies.Practice), Me);
         Assert.Equal(CasinoCurrencies.Practice, practice.Currency);
-        Assert.Equal(string.Empty, practice.Reputation);
     }
 
     [Fact]

@@ -121,26 +121,26 @@ public sealed class CasinoHostingRulesTests
     }
 
     [Fact]
-    public void TheGilLedgerKnowsWhoseTapIsNext()
+    public void TheGilLedgerOffersTheHostOneActionPerEntry()
     {
-        var entry = new CasinoLedgerEntryDto(EntryId: "e1", Kind: CasinoLedgerKinds.BuyIn, Amount: 500_000,
-            PayerUserId: "player", PayeeUserId: "host", PayerConfirmed: true);
+        var recorded = new CasinoLedgerEntryDto(EntryId: "e1", Kind: CasinoLedgerKinds.BuyIn, Amount: 500_000,
+            PayerUserId: "player", PayeeUserId: "host", ProposedBy: "host", Settled: true);
+        var owed = new CasinoLedgerEntryDto(EntryId: "e2", Kind: CasinoLedgerKinds.CashOut, Amount: 650_000,
+            PayerUserId: "host", PayeeUserId: "player", ProposedBy: CasinoGilLedger.ServerProposer);
 
-        Assert.Equal(LedgerSide.Payer, CasinoGilLedger.SideOf(entry, "player"));
-        Assert.Equal(LedgerSide.Payee, CasinoGilLedger.SideOf(entry, "host"));
-        Assert.Equal(LedgerSide.None, CasinoGilLedger.SideOf(entry, "stranger"));
-        Assert.False(CasinoGilLedger.CanConfirm(entry, "player"));
-        Assert.True(CasinoGilLedger.CanConfirm(entry, "host"));
-        Assert.True(CasinoGilLedger.WaitsOnOtherSide(entry, "player"));
-        Assert.True(CasinoGilLedger.CanDispute(entry, "host"));
-        Assert.False(CasinoGilLedger.CanDispute(entry, "player"));
-        Assert.True(CasinoGilLedger.Unconfirmed(entry));
-
-        var settled = entry with { PayeeConfirmed = true, Settled = true };
-        Assert.False(CasinoGilLedger.CanConfirm(settled, "host"));
-        Assert.False(CasinoGilLedger.CanDispute(settled, "host"));
-        Assert.False(CasinoGilLedger.Unconfirmed(settled));
-        Assert.Equal(1, CasinoGilLedger.UnsettledCount(new[] { entry, settled }));
+        Assert.Equal(LedgerSide.Payer, CasinoGilLedger.SideOf(recorded, "player"));
+        Assert.Equal(LedgerSide.Payee, CasinoGilLedger.SideOf(recorded, "host"));
+        Assert.Equal(LedgerSide.None, CasinoGilLedger.SideOf(recorded, "stranger"));
+        Assert.Equal(LedgerEntryOption.Remove, CasinoGilLedger.OptionFor(recorded, true));
+        Assert.Equal(LedgerEntryOption.MarkPaid, CasinoGilLedger.OptionFor(owed, true));
+        Assert.Equal(LedgerEntryOption.MarkUnpaid, CasinoGilLedger.OptionFor(owed with { Settled = true }, true));
+        Assert.Equal(LedgerEntryOption.None, CasinoGilLedger.OptionFor(recorded, false));
+        Assert.Equal(LedgerEntryOption.None, CasinoGilLedger.OptionFor(owed, false));
+        Assert.Equal(LedgerEntryOption.None, CasinoGilLedger.OptionFor(owed with { EntryId = string.Empty }, true));
+        Assert.True(CasinoGilLedger.IsTableLine(owed));
+        Assert.False(CasinoGilLedger.IsTableLine(recorded));
+        Assert.Equal(1, CasinoGilLedger.UnsettledCount(new[] { recorded, owed }));
+        Assert.Equal(0, CasinoGilLedger.UnsettledCount(null));
 
         Assert.True(CasinoLedgerKinds.Proposable(CasinoLedgerKinds.BuyIn));
         Assert.True(CasinoLedgerKinds.Proposable(CasinoLedgerKinds.Payout));

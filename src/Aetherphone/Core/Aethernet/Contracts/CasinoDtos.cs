@@ -586,7 +586,6 @@ internal sealed record CasinoTableRowDto(
     bool Paused = false,
     CasinoTableConfigDto? Config = null,
     int Currency = 0,
-    CasinoHostReputationDto? Reputation = null,
     string JoinCode = "");
 
 internal sealed record CasinoTableJoinRequest(string Code = "");
@@ -682,12 +681,6 @@ internal sealed record CasinoDiceTableOptionsDto(
 
 internal sealed record CasinoDeathrollOptionsDto(int StartAt = 1000, long Stake = 10000);
 
-internal sealed record CasinoHostReputationDto(
-    int GilTablesHosted = 0,
-    int PayoutsConfirmed = 0,
-    int DisputesOpen = 0,
-    bool Frozen = false);
-
 internal sealed record CasinoTableRenameRequest(string Name = "");
 
 internal sealed record CasinoTablePauseRequest(bool Paused = true);
@@ -728,11 +721,7 @@ internal sealed record CasinoLedgerEntryDto(
     string PayeeName = "",
     string ProposedBy = "",
     string Source = "",
-    bool PayerConfirmed = false,
-    bool PayeeConfirmed = false,
     bool Settled = false,
-    bool Disputed = false,
-    bool DisputeResolved = false,
     long CreatedAtUnixMs = 0,
     long SettledAtUnixMs = 0,
     bool Guest = false,
@@ -751,15 +740,13 @@ internal sealed record CasinoLedgerResultDto(bool Granted = false, string Reason
 
 internal sealed record CasinoLedgerListDto(CasinoLedgerEntryDto[]? Entries = null, long ServerNowUnixMs = 0);
 
-internal sealed record CasinoLedgerTradeMatchRequest(string[]? Names = null, long Received = 0, long Sent = 0);
-
-internal sealed record CasinoLedgerTradeMatchDto(
-    bool Granted = false,
-    string Reason = "",
-    bool Matched = false,
-    string CounterpartyUserId = "",
-    string CounterpartyName = "",
-    bool HostSide = false);
+internal sealed record CasinoLedgerTradeRequest(
+    string ClientTradeId = "",
+    string PartnerName = "",
+    string PartnerWorld = "",
+    long Received = 0,
+    long Sent = 0,
+    string TableId = "");
 
 internal sealed record CasinoVenueActRequest(
     string ClientActionId = "",

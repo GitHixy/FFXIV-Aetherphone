@@ -152,7 +152,7 @@ internal sealed partial class CasinoApp
     private bool FloorIdle() =>
         casino.State is not null && preferences.IntroSeen && routes.OnRoot && routes.Tab == CasinoTab.Floor
         && !router.IsTransitioning && !LaunchActive && !rulesSheet.IsOpen && !clubSheet.IsOpen && !cashier.IsOpen
-        && !missionsSheet.IsOpen && !venueSheet.IsOpen && !tradePrompt.Visible && conduct.Active is null
+        && !missionsSheet.IsOpen && !venueSheet.IsOpen && !tradeCard.Visible && conduct.Active is null
         && confirm.Active is null;
 
     private void HandleMissionsSheet()

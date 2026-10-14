@@ -2312,7 +2312,7 @@ internal static class L
             new("changelog.r1300.21",
                 "Added practice tables: play on practice chips that never touch your bankroll"),
             new("changelog.r1300.22",
-                "Added gil tables: the host banks the table in gil, and every buy-in and payout goes in a ledger both sides confirm"),
+                "Added gil tables: the host banks the table in gil and records every buy-in and payout in its ledger"),
             new("changelog.r1300.23",
                 "Added house rules for practice and gil blackjack: the blackjack payout, soft 17, decks, splits and doubles"),
             new("changelog.r1300.24",
@@ -2320,7 +2320,7 @@ internal static class L
             new("changelog.r1300.25",
                 "Added a session ledger with each seat's buy-ins, stack and net, which the host can copy as text"),
             new("changelog.r1300.26",
-                "Added trade sync: after you trade gil with a seated player, the matching ledger entry waits for one tap"),
+                "Added trade sync for hosts: every gil trade goes straight into the ledger of your open gil table, with Undo on the card and Remove on the entry"),
             new("changelog.r1300.27",
                 "Added nearby tables: tables at the venue you stand in show first, and Venues shows a venue's live table"),
             new("changelog.r1300.28",
@@ -2348,15 +2348,17 @@ internal static class L
             new("changelog.r1300.87",
                 "Added Host again: the host sheet remembers your last table for each character and reopens it on the final step"),
             new("changelog.r1300.88",
-                "Added guest entries to gil ledgers: the host records a buy-in or payout for a patron who has no Aetherphone, from the trade prompt or by typing the name"),
+                "Added guest entries to gil ledgers: a patron without Aetherphone is booked under the name the trade window shows, or the name the host types"),
             new("changelog.r1300.89",
                 "Added the Book: a gil ledger with trade sync and no game, for the games a venue runs by hand"),
             new("changelog.r1300.90",
                 "Added night totals to gil ledgers: gil in and gil out for the session, in the copied text too"),
+            new("changelog.r1300.149",
+                "Added Mark paid to gil ledgers: a cash-out, raffle ticket or stake the table books shows as Owed until a trade or the host settles it"),
             new("changelog.r1300.91",
                 "Added Jump back in: a rail of the games you played last"),
             new("changelog.r1300.119",
-                "Added a stake to dice tables: on a gil dice table, each closed round books what every losing roller owes the winner on the ledger"),
+                "Added a stake to dice tables: on a gil dice table, everyone who rolls lower owes the house the stake, and the house pays the winner, each on the ledger"),
             new("changelog.r1300.120",
                 "Added every seat's Pairs and 21+3 stakes under its name plate on the blackjack felt, with the result once the hand is revealed"),
             new("changelog.r1300.121",
@@ -2411,30 +2413,26 @@ internal static class L
                 "Fixed a finished tournament staying on the table for good: it clears with the next hand or Stop, and closing the standings dismisses it"),
             new("changelog.r1300.126",
                 "Fixed the room code card in the table sheet resizing while the sheet scrolls"),
-            new("changelog.r1300.127",
-                "Fixed registered players at a Book or a venue room being offered as guests before their first entry"),
-            new("changelog.r1300.128",
-                "Fixed Record as guest staying on screen after the entry was made, so a second tap could book it twice"),
             new("changelog.r1300.129",
                 "Fixed gil dice tables refusing buy-ins because a venue room seats nobody"),
             new("changelog.r1300.138",
                 "Fixed a table pinned to a venue staying hidden while Who can join was Invite only: the host sheet now says it will not be listed until you pick Ask to join or Open, and asks you to stand on the plot"),
             new("changelog.r1300.140",
-                "Changed trade sync to recognise a patron with the app while their phone is at the table or in the room, seated or not: gil handed over before sitting becomes their stack when they sit, and whatever is unplayed when the table closes comes back as a cash-out the host owes"),
+                "Changed gil blackjack so gil handed over before sitting becomes the patron's stack when they sit, and whatever is unplayed when they stand or the table closes comes back as a cash-out the host owes"),
             new("changelog.r1300.141",
                 "Changed dice rounds to close as soon as everyone in the room has rolled instead of waiting out the clock"),
             new("changelog.r1300.142",
                 "Changed the blackjack bet spots to name themselves under the circles (Pairs, Bet, 21+3) instead of floating captions above them into the seat rail"),
             new("changelog.r1300.143",
-                "Changed a new Book to be open to all by default, worded the Book's guest prompts and hosting note around how patrons get recognised, and named the setting to change when table settings conflict"),
+                "Changed a new Book to be open to all by default, and named the setting to change when table settings conflict"),
             new("changelog.r1300.144",
-                "Changed trade sync to read whether the trade window is open from the window itself, so a trade still counts when the game hides the window instead of closing it, and the ledger pages refresh every five seconds and right after a trade"),
+                "Changed the gil ledger pages to refresh every five seconds and to show a recorded trade or a removed entry at once"),
             new("changelog.r1300.145",
                 "Changed the Gamba hero to show the coin value under the balance and a tier card with the level ring, your current tier, the level bar and its cap"),
             new("changelog.r1300.146",
                 "Added a Gamba home screen widget for the three-hour coin claim, with your level, tier and cap on the medium size"),
             new("changelog.r1300.147",
-                "Changed raffle tickets bought one at a time to grow one ledger entry until a side confirms it, and trade sync to match a patron by character name with the world only breaking a tie"),
+                "Changed raffle tickets bought one at a time to grow one ledger entry until a trade or the host settles it, and trade sync to match a patron by character name with the world only breaking a tie"),
             new("changelog.r1300.148",
                 "Removed the Gamba pill from venue cards in the Venues app: At this venue on the Gamba Floor lists every table at the plot, and the venue directories carry no Japanese worlds for the pill to sit on"),
         };
@@ -11532,10 +11530,8 @@ internal static class L
         public static readonly LocString ReasonRoundLive = new("casino.tables.reasonRoundLive", "A highest roll round is already open.");
         public static readonly LocString ReasonAlreadyRolled = new("casino.tables.reasonAlreadyRolled", "You already rolled this round. Wait for the next one.");
         public static readonly LocString ReasonBankLimit = new("casino.tables.reasonBankLimit", "That bet could pay more than the host's bank or max payout covers. Try a smaller bet.");
-        public static readonly LocString ReasonHostFrozen = new("casino.tables.reasonHostFrozen", "Gil hosting is on hold for this host while disputes are reviewed.");
         public static readonly LocString ReasonNotParty = new("casino.tables.reasonNotParty", "Only the host and that player can record this payment.");
-        public static readonly LocString ReasonAlreadyConfirmed = new("casino.tables.reasonAlreadyConfirmed", "You already confirmed your side of this payment.");
-        public static readonly LocString ReasonSettled = new("casino.tables.reasonSettled", "This payment is already settled on both sides.");
+        public static readonly LocString ReasonSettled = new("casino.tables.reasonSettled", "This line is already marked paid.");
         public static readonly LocString ReasonGilOnly = new("casino.tables.reasonGilOnly", "That only works at gil tables.");
         public static readonly LocString ReasonNotOwner = new("casino.tables.reasonNotOwner", "Only the host of this table can do that.");
         public static readonly LocString RemovedTitle = new("casino.tables.removedTitle", "Removed from this table");
@@ -11590,9 +11586,6 @@ internal static class L
         public static readonly LocString FilterPractice = new("casino.tables.filterPractice", "Practice");
         public static readonly LocString FilterGil = new("casino.tables.filterGil", "Gil");
         public static readonly LocString GilStakes = new("casino.tables.gilStakes", "Bets up to {0} gil, bank {1} gil");
-        public static readonly LocString Reputation = new("casino.tables.reputation", "Host: {0} gil tables, {1} payouts confirmed");
-        public static readonly LocString ReputationDisputes = new("casino.tables.reputationDisputes", "Host: {0} gil tables, {1} payouts confirmed, {2} disputes open");
-        public static readonly LocString ReputationFrozen = new("casino.tables.reputationFrozen", "Host's gil tables are on hold while disputes are reviewed");
         public static readonly LocString PausedBadge = new("casino.tables.pausedBadge", "Paused");
         public static readonly LocString PausedByHost = new("casino.tables.pausedByHost", "The host paused the table");
         public static readonly LocString HostPanelHeading = new("casino.tables.hostPanelHeading", "Host controls");
@@ -11625,23 +11618,20 @@ internal static class L
         public static readonly LocString KindPrize = new("casino.tables.kindPrize", "Raffle prize");
         public static readonly LocString KindOther = new("casino.tables.kindOther", "Entry");
         public static readonly LocString EntryParties = new("casino.tables.entryParties", "{0} pays {1}");
-        public static readonly LocString EntrySettled = new("casino.tables.entrySettled", "Settled on both sides");
-        public static readonly LocString EntryDisputed = new("casino.tables.entryDisputed", "Disputed, under review");
-        public static readonly LocString EntryWaitingBoth = new("casino.tables.entryWaitingBoth", "Waiting on both sides");
-        public static readonly LocString EntryWaitingOn = new("casino.tables.entryWaitingOn", "Waiting on {0}");
-        public static readonly LocString EntriesWaiting = new("casino.tables.entriesWaiting", "{0} entries still need a tap from one side. Amber means not confirmed yet.");
+        public static readonly LocString EntryRecorded = new("casino.tables.entryRecorded", "Recorded");
+        public static readonly LocString EntryOwed = new("casino.tables.entryOwed", "Owed");
+        public static readonly LocString OwedNote = new("casino.tables.owedNote", "{0} still owed. A trade settles a line, or the host marks it paid.");
+        public static readonly LocString MarkPaid = new("casino.tables.markPaid", "Mark paid");
+        public static readonly LocString MarkUnpaid = new("casino.tables.markUnpaid", "Mark unpaid");
+        public static readonly LocString RemoveEntry = new("casino.tables.removeEntry", "Remove");
+        public static readonly LocString RemoveTitle = new("casino.tables.removeTitle", "Remove this entry?");
+        public static readonly LocString RemoveBody = new("casino.tables.removeBody", "It comes off the ledger. A buy-in or payout for a player still seated comes off or goes back on their stack.");
+        public static readonly LocString PlayerLedgerHint = new("casino.tables.playerLedgerHint", "The host records your buy-ins and payouts as the gil changes hands.");
         public static readonly LocString EntriesEmpty = new("casino.tables.entriesEmpty", "No gil has changed hands yet.");
-        public static readonly LocString IPaid = new("casino.tables.iPaid", "I paid");
-        public static readonly LocString IReceived = new("casino.tables.iReceived", "I received");
-        public static readonly LocString PayoutNotReceived = new("casino.tables.payoutNotReceived", "Payout not received");
-        public static readonly LocString GilNotReceived = new("casino.tables.gilNotReceived", "Gil not received");
-        public static readonly LocString DisputeBody = new("casino.tables.disputeBody", "This marks the entry as disputed against the other side and keeps the signed record for a fraud report. Three open disputes put a host's gil tables on hold.");
         public static readonly LocString RecordHeading = new("casino.tables.recordHeading", "Record gil");
-        public static readonly LocString RecordPaidHeading = new("casino.tables.recordPaidHeading", "I paid the host");
         public static readonly LocString Record = new("casino.tables.record", "Record");
         public static readonly LocString AmountGilHint = new("casino.tables.amountGilHint", "Amount in gil");
-        public static readonly LocString RecordHostHint = new("casino.tables.recordHostHint", "Trade the gil in game first, then record it here. The player confirms their side; until then the entry stays amber.");
-        public static readonly LocString RecordPlayerHint = new("casino.tables.recordPlayerHint", "Trade the gil to the host in game first, then record it here. Your seat gets the chips once the host confirms.");
+        public static readonly LocString RecordHostHint = new("casino.tables.recordHostHint", "Trade the gil in game first, then record it here. It counts at once, and Remove takes it back.");
         public static readonly LocString OpenLedger = new("casino.tables.openLedger", "Ledger");
         public static readonly LocString Pause = new("casino.tables.pause", "Pause");
         public static readonly LocString Resume = new("casino.tables.resume", "Resume");
@@ -11665,7 +11655,7 @@ internal static class L
         public static readonly LocString PlayCoins = new("casino.tables.playCoins", "Coins");
         public static readonly LocString PlayCoinsLine = new("casino.tables.playCoinsLine", "Players bet their own coins and every house rule applies.");
         public static readonly LocString PlayPracticeLine = new("casino.tables.playPracticeLine", "Everyone gets a free practice stack. Nothing to win or lose.");
-        public static readonly LocString PlayGilLine = new("casino.tables.playGilLine", "You are the bank in gil. The app keeps a ledger both sides confirm.");
+        public static readonly LocString PlayGilLine = new("casino.tables.playGilLine", "You are the bank in gil. Every buy-in and payout goes in the table's gil ledger.");
         public static readonly LocString PlayRoomsNoCoins = new("casino.tables.playRoomsNoCoins", "Rooms play for practice or gil.");
         public static readonly LocString PlayHoldemNoGil = new("casino.tables.playHoldemNoGil", "Hold'em tables play for coins or practice.");
         public static readonly LocString PlayGilClosed = new("casino.tables.playGilClosed", "Gil tables are not open yet.");
@@ -11920,18 +11910,14 @@ internal static class L
         public static readonly LocString BroadcastPot = new("casino.venue.broadcastPot", "Pot {0}");
         public static readonly LocString BroadcastBet = new("casino.venue.broadcastBet", "Bet {0}");
         public static readonly LocString TradeSync = new("casino.venue.tradeSync", "Trade sync");
-        public static readonly LocString TradeAutoConfirm = new("casino.venue.tradeAutoConfirm", "Confirm my side automatically");
-        public static readonly LocString TradeSyncHint = new("casino.venue.tradeSyncHint", "Reads the in-game trade window only to suggest the matching ledger entry. The trade partner's name is checked against this table on the server and is never shown to anyone. Nothing in the game is clicked for you.");
-        public static readonly LocString TradeMissReceived = new("casino.venue.tradeMissReceived", "You received {0} gil from someone not at this table. Record it below if it belongs here.");
-        public static readonly LocString TradeMissSent = new("casino.venue.tradeMissSent", "You sent {0} gil to someone not at this table. Record it below if it belongs here.");
-        public static readonly LocString TradeMissUnchecked = new("casino.venue.tradeMissUnchecked", "Your last trade of {0} gil could not be matched to this table. Record it below if it belongs here.");
-        public static readonly LocString TradeNotifyTitle = new("casino.venue.tradeNotifyTitle", "Record this trade?");
+        public static readonly LocString TradeSyncHint = new("casino.venue.tradeSyncHint", "Records every gil trade you make in the ledger of your open gil table. Gil you receive is a buy-in and gil you send is a payout; a trade that pays an owed line settles it. Players are matched by character name, and anyone else is booked as a guest. Nothing in the game is clicked for you.");
         public static readonly LocString TradeReceivedFrom = new("casino.venue.tradeReceivedFrom", "You received {1} gil from {0}");
         public static readonly LocString TradeSentTo = new("casino.venue.tradeSentTo", "You sent {1} gil to {0}");
-        public static readonly LocString TradeRecordBuyIn = new("casino.venue.tradeRecordBuyIn", "Record buy-in");
-        public static readonly LocString TradeRecordPayout = new("casino.venue.tradeRecordPayout", "Record payout");
-        public static readonly LocString TradeConfirmEntry = new("casino.venue.tradeConfirmEntry", "Confirm in ledger");
-        public static readonly LocString NotNow = new("casino.venue.notNow", "Not now");
+        public static readonly LocString TradeRecorded = new("casino.venue.tradeRecorded", "{0} recorded");
+        public static readonly LocString TradeUndo = new("casino.venue.tradeUndo", "Undo");
+        public static readonly LocString TradeOk = new("casino.venue.tradeOk", "OK");
+        public static readonly LocString TradeFailedTitle = new("casino.venue.tradeFailedTitle", "Trade not recorded");
+        public static readonly LocString TradeFailedBody = new("casino.venue.tradeFailedBody", "Your trade of {0} gil could not be recorded. Add it by hand in the gil ledger.");
         public static readonly LocString AtThisVenue = new("casino.venue.atThisVenue", "At this venue");
         public static readonly LocString Sides = new("casino.venue.sides", "Die sides");
         public static readonly LocString HighestWins = new("casino.venue.highestWins", "Highest roll rounds");
@@ -11963,7 +11949,7 @@ internal static class L
         public static readonly LocString TournamentPending = new("casino.venue.tournamentPending", "Starts after this hand. Stop takes it back.");
 
         public static readonly LocString RoundStake = new("casino.venue.roundStake", "Stake per round");
-        public static readonly LocString RoundStakeHint = new("casino.venue.roundStakeHint", "When a round closes, everyone who rolled lower owes the winner the stake. Each debt goes on the gil ledger for both sides to confirm.");
+        public static readonly LocString RoundStakeHint = new("casino.venue.roundStakeHint", "When a round closes, everyone who rolled lower owes the house the stake, and the house pays the winner. Each line goes on the gil ledger.");
         public static readonly LocString NoStake = new("casino.venue.noStake", "No stake");
 
         public static readonly LocString TicketCap = new("casino.venue.ticketCap", "Up to {0} tickets a person");
@@ -11976,7 +11962,6 @@ internal static class L
         public static readonly LocString ReasonTicketCount = new("casino.venue.reasonTicketCount", "Fewer tickets than that are left to you in this raffle. Take what is left or wait for the next one.");
 
         public static readonly LocString PinInviteOnlyNote = new("casino.venue.pinInviteOnlyNote", "Not listed at this venue while Who can join is Invite only. Pick Ask to join or Open to list it.");
-        public static readonly LocString GuestHintRoom = new("casino.venue.guestHintRoom", "Nobody in this room matched that name. A patron who uses the app is recognised while their phone is in the room; anyone else is a guest, settled on the spot and never disputed.");
         public static readonly LocString PinNoPlotNote = new("casino.venue.pinNoPlotNote", "Stand on the venue's plot so the Venues app can show your table. The Floor still shows it for this ward.");
     }
 
@@ -12003,12 +11988,6 @@ internal static class L
 
     internal static class Book
     {
-        public static readonly LocString ReasonGuestEntry = new("casino.book.reasonGuestEntry", "A guest entry settles at once, so there is nothing to confirm or dispute.");
-        public static readonly LocString RecordGuestBuyIn = new("casino.book.recordGuestBuyIn", "Record guest buy-in");
-        public static readonly LocString RecordGuestRebuy = new("casino.book.recordGuestRebuy", "Record guest rebuy");
-        public static readonly LocString RecordGuestPayout = new("casino.book.recordGuestPayout", "Record guest payout");
-        public static readonly LocString GuestHint = new("casino.book.guestHint", "Nobody at this table matched that name. A patron who uses the app is recognised while their phone is at the table; anyone else is a guest, settled on the spot and never disputed.");
-        public static readonly LocString GuestHintUnchecked = new("casino.book.guestHintUnchecked", "This trade could not be checked against this table. A guest entry is settled on the spot and cannot be disputed.");
         public static readonly LocString GuestTag = new("casino.book.guestTag", "Guest");
         public static readonly LocString GuestNamed = new("casino.book.guestNamed", "{0} (guest)");
         public static readonly LocString NightTotals = new("casino.book.nightTotals", "Tonight: {0} gil in, {1} gil out");
@@ -12022,11 +12001,9 @@ internal static class L
         public static readonly LocString GuestNameHint = new("casino.book.guestNameHint", "Character name");
         public static readonly LocString DoorTitle = new("casino.book.doorTitle", "Your book");
         public static readonly LocString OpenLedger = new("casino.book.openLedger", "Open the ledger");
-        public static readonly LocString GuestRecorded = new("casino.book.guestRecorded", "Recorded by the host");
         public static readonly LocString CloseTitle = new("casino.book.closeTitle", "Close this book?");
-        public static readonly LocString CloseBody = new("casino.book.closeBody", "The ledger stays readable for 30 days, and entries still waiting can be confirmed or disputed after it closes.");
+        public static readonly LocString CloseBody = new("casino.book.closeBody", "The ledger stays readable for 30 days after it closes.");
         public static readonly LocString PinInviteOnlyNote = new("casino.book.pinInviteOnlyNote", "This book is not listed at the venue while Who can join is Invite only, so patrons cannot open it or register on it. Pick Ask to join or Open to list it.");
-        public static readonly LocString GuestHintBook = new("casino.book.guestHintBook", "Nobody on this book matched that name. A patron who uses the app gets on the book by opening it from the Venues app or with its code; anyone else is a guest, settled on the spot and never disputed.");
         public static readonly LocString RecordHostHint = new("casino.book.recordHostHint", "Trade the gil in game first, then record it here. Patrons who use the app appear here once they open this book from the Venues app or with its code; anyone else goes in as a guest.");
     }
 
@@ -13155,7 +13132,7 @@ internal static class L
         public static readonly LocString[] CasinoGilTablesItems =
         {
             new("conduct.casino.gilTables.1", "Hosts pay out what the ledger says"),
-            new("conduct.casino.gilTables.2", "Three unresolved payout disputes in 30 days freeze a host's gil tables until a moderator clears them"),
+            new("conduct.casino.gilTables.2", "Report a host who does not pay out; moderators review the table's gil ledger"),
             new("conduct.casino.gilTables.3", "Hosts can remove a player from their table"),
         };
         public static readonly LocString[] CasinoZeroItems =

@@ -14,54 +14,44 @@ public sealed class LedgerEntryLayoutTests
 
     [Theory]
     [MemberData(nameof(Scales))]
-    public void ShortButtonsShareOneRowUnderTheStateLine(float scale)
+    public void TheActionSitsUnderTheStateLineAtTheRightEdge(float scale)
     {
         var width = PageWidth * scale;
         var title = 17f * scale;
         var parties = 15f * scale;
         var state = 15f * scale;
-        var confirm = 110f * scale;
-        var dispute = 120f * scale;
-        var rows = LedgerEntryLayout.ButtonRows(width - LedgerEntryLayout.Pad * 2f * scale, confirm, dispute, scale);
-        Assert.Equal(1, rows);
-
         var card = new Rect(Vector2.Zero,
-            new Vector2(width, LedgerEntryLayout.Height(title, parties, state, rows, scale)));
-        var disputeRect = LedgerEntryLayout.RowButton(card, card.Max.X - LedgerEntryLayout.Pad * scale, dispute, scale);
-        var confirmRect = LedgerEntryLayout.RowButton(card,
-            disputeRect.Min.X - LedgerEntryLayout.ButtonGap * scale, confirm, scale);
+            new Vector2(width, LedgerEntryLayout.Height(title, parties, state, true, scale)));
+        var button = LedgerEntryLayout.Button(card, 110f * scale, scale);
         var stateBottom = LedgerEntryLayout.StateTop(card.Min.Y, title, parties, scale) + state;
 
-        Assert.True(confirmRect.Min.X >= card.Min.X + LedgerEntryLayout.Pad * scale - Epsilon);
-        Assert.True(confirmRect.Max.X <= disputeRect.Min.X + Epsilon);
-        Assert.True(confirmRect.Min.Y >= stateBottom - Epsilon);
-        Assert.True(disputeRect.Max.Y <= card.Max.Y - LedgerEntryLayout.Pad * scale + Epsilon);
-        Assert.True(disputeRect.Height >= LedgerEntryLayout.Touch * scale - Epsilon);
+        Assert.True(button.Min.Y >= stateBottom - Epsilon);
+        Assert.True(button.Max.Y <= card.Max.Y - LedgerEntryLayout.Pad * scale + Epsilon);
+        Assert.Equal(card.Max.X - LedgerEntryLayout.Pad * scale, button.Max.X, 3);
+        Assert.True(button.Height >= LedgerEntryLayout.Touch * scale - Epsilon);
+        Assert.Equal(110f * scale, button.Width, 3);
     }
 
     [Theory]
     [MemberData(nameof(Scales))]
-    public void LongButtonsStackFullWidthAndStayInsideTheCard(float scale)
+    public void AnOverlongActionIsClampedInsideTheCard(float scale)
     {
         var width = PageWidth * scale;
-        var title = 17f * scale;
-        var parties = 15f * scale;
-        var state = 15f * scale;
-        var rows = LedgerEntryLayout.ButtonRows(width - LedgerEntryLayout.Pad * 2f * scale, 120f * scale,
-            260f * scale, scale);
-        Assert.Equal(2, rows);
-
         var card = new Rect(Vector2.Zero,
-            new Vector2(width, LedgerEntryLayout.Height(title, parties, state, rows, scale)));
-        var first = LedgerEntryLayout.StackedButton(card, 0, rows, scale);
-        var second = LedgerEntryLayout.StackedButton(card, 1, rows, scale);
-        var stateBottom = LedgerEntryLayout.StateTop(card.Min.Y, title, parties, scale) + state;
+            new Vector2(width, LedgerEntryLayout.Height(17f * scale, 15f * scale, 15f * scale, true, scale)));
+        var button = LedgerEntryLayout.Button(card, width * 2f, scale);
 
-        Assert.True(first.Min.Y >= stateBottom - Epsilon);
-        Assert.True(first.Max.Y <= second.Min.Y + Epsilon);
-        Assert.True(second.Max.Y <= card.Max.Y + Epsilon);
-        Assert.True(first.Width >= 260f * scale);
-        Assert.Equal(0, LedgerEntryLayout.ButtonRows(width, 0f, 0f, scale));
-        Assert.Equal(1, LedgerEntryLayout.ButtonRows(width, 0f, 300f * scale, scale));
+        Assert.True(button.Min.X >= card.Min.X + LedgerEntryLayout.Pad * scale - Epsilon);
+        Assert.True(button.Max.X <= card.Max.X - LedgerEntryLayout.Pad * scale + Epsilon);
+    }
+
+    [Theory]
+    [MemberData(nameof(Scales))]
+    public void AnEntryWithoutAnActionIsShorterByTheButtonRow(float scale)
+    {
+        var withAction = LedgerEntryLayout.Height(17f * scale, 15f * scale, 15f * scale, true, scale);
+        var withoutAction = LedgerEntryLayout.Height(17f * scale, 15f * scale, 15f * scale, false, scale);
+
+        Assert.Equal((LedgerEntryLayout.ButtonGap + LedgerEntryLayout.Touch) * scale, withAction - withoutAction, 3);
     }
 }

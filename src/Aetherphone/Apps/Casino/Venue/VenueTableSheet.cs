@@ -165,9 +165,11 @@ internal sealed class VenueTableSheet
 
         if (target.Gil)
         {
-            var host = string.Equals(venue.Tables.CardFor(target.TableId)?.OwnerUserId, venue.AccountId,
-                StringComparison.Ordinal);
-            Tables.TradeSyncCard.Draw(ui, trade, scale, true, host);
+            if (target.Hosting)
+            {
+                Tables.TradeSyncCard.Draw(ui, trade, scale, true);
+            }
+
             ActionRow(ui, Loc.T(L.Tables.MyLedgerTitle), Loc.T(L.Tables.MyLedgerLine), ButtonStyle.Tinted,
                 ButtonRole.Normal, "venue.sheet.gilLedger", out var ledgerPressed, scale);
             if (ledgerPressed)
