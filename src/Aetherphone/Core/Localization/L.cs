@@ -2364,7 +2364,9 @@ internal static class L
             new("changelog.r1300.121",
                 "Added the time bank to blackjack: the seat on its turn shows its longer turns left as pips, as Hold'em does"),
             new("changelog.r1300.136",
-                "Added buying several raffle tickets at once: type a count and see the total, with the per-person limit shown in the room and on the host sheet"),
+                "Added buying several raffle tickets at once: type a count and see the total, up to the per-person limit the host sets, as many as 1,000"),
+            new("changelog.r1300.150",
+                "Added removing raffle entrants: the host opens the entrant list from the raffle and takes out anyone who went quiet or dropped, tickets and all, and removing someone from the room takes them out too"),
             new("changelog.r1300.36",
                 "Overhauled the Floor: your chips, level, bonuses and the free daily spin up top, then Venues, the live rooms, Jump back in, missions, and three shelves: Cards, Machines and Quick bets"),
             new("changelog.r1300.37",
@@ -11959,6 +11961,13 @@ internal static class L
         public static readonly LocString UpTo = new("casino.venue.upTo", "Up to {0}");
         public static readonly LocString RaffleEntrantsCap = new("casino.venue.raffleEntrantsCap", "Entrants");
         public static readonly LocString RaffleCapsHint = new("casino.venue.raffleCapsHint", "You set each raffle's title, tickets a person, winners and clock when you open it from the room, within these limits.");
+        public static readonly LocString EntrantsButton = new("casino.venue.entrantsButton", "Entrants ({0})");
+        public static readonly LocString EntrantsTitle = new("casino.venue.entrantsTitle", "Raffle entrants");
+        public static readonly LocString EntrantsHint = new("casino.venue.entrantsHint", "Remove anyone who went quiet or dropped before the draw. Their tickets leave with them, and removing someone from the room takes them out of the raffle too.");
+        public static readonly LocString NoEntrants = new("casino.venue.noEntrants", "Nobody holds a ticket yet.");
+        public static readonly LocPlural TicketCount = new("casino.venue.ticketCount", "{0} ticket", "{0} tickets");
+        public static readonly LocString RemoveEntrantBody = new("casino.venue.removeEntrantBody", "Their tickets leave the raffle. They can take tickets again.");
+        public static readonly LocString RemoveEntrantBodyGil = new("casino.venue.removeEntrantBodyGil", "Their tickets leave the raffle. Tickets they have not paid for come off the gil ledger, and tickets they paid for are owed back to them.");
         public static readonly LocString ReasonTicketCount = new("casino.venue.reasonTicketCount", "Fewer tickets than that are left to you in this raffle. Take what is left or wait for the next one.");
 
         public static readonly LocString PinInviteOnlyNote = new("casino.venue.pinInviteOnlyNote", "Not listed at this venue while Who can join is Invite only. Pick Ask to join or Open to list it.");

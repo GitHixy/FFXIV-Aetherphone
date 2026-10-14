@@ -16,7 +16,8 @@ internal readonly record struct VenueActDraft(
     int DurationSeconds = 0,
     string OpponentUserId = "",
     long TicketPrice = 0,
-    long Prize = 0);
+    long Prize = 0,
+    string TargetUserId = "");
 
 internal sealed class CasinoVenueStore : IDisposable
 {
@@ -129,7 +130,7 @@ internal sealed class CasinoVenueStore : IDisposable
         }
 
         var request = new CasinoVenueActRequest(actionId, draft.Action, draft.Count, draft.Title, draft.Winners,
-            draft.DurationSeconds, draft.OpponentUserId, draft.TicketPrice, draft.Prize);
+            draft.DurationSeconds, draft.OpponentUserId, draft.TicketPrice, draft.Prize, draft.TargetUserId);
         work.Run("venue act", async token =>
         {
             var answer = await casino.VenueActAsync(roomId, request, token).ConfigureAwait(false);

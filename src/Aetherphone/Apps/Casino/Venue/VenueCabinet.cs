@@ -3,6 +3,7 @@ using Aetherphone.Apps.Games.Framework;
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
+using Aetherphone.Core.Confirm;
 using Aetherphone.Core.Localization;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
@@ -28,7 +29,7 @@ internal sealed class VenueCabinet : ICabinetIdle
     private bool entered;
     private float idleClock;
 
-    public VenueCabinet(CasinoVenueStore venue, Action leaveRoom, Action openGilLedger)
+    public VenueCabinet(CasinoVenueStore venue, Action leaveRoom, Action openGilLedger, ConfirmService confirm)
     {
         this.venue = venue;
         this.leaveRoom = leaveRoom;
@@ -36,7 +37,7 @@ internal sealed class VenueCabinet : ICabinetIdle
         Action<VenueActDraft> act = Act;
         dice = new DiceTableRoom(texts, act);
         deathroll = new DeathrollRoom(texts, act);
-        raffle = new RaffleRoom(texts, act);
+        raffle = new RaffleRoom(texts, confirm, act);
     }
 
     public Backdrop IdleBackdrop => Backdrop.Strip;

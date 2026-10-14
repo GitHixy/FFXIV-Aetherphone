@@ -49,6 +49,16 @@ public sealed class VenueWireContractTests
     }
 
     [Fact]
+    public void ARemovalActNamesTheEntrantAsTargetUserId()
+    {
+        var json = JsonSerializer.Serialize(new CasinoVenueActRequest("x3", VenueActions.RaffleRemove,
+            TargetUserId: "u9"), AethernetJsonContext.Default.CasinoVenueActRequest);
+        using var document = JsonDocument.Parse(json);
+        Assert.Equal("raffle.remove", document.RootElement.GetProperty("action").GetString());
+        Assert.Equal("u9", document.RootElement.GetProperty("targetUserId").GetString());
+    }
+
+    [Fact]
     public void ATradeProposalCarriesTheTradeSource()
     {
         var json = JsonSerializer.Serialize(new CasinoLedgerProposeRequest("c1", CasinoLedgerKinds.BuyIn, "u-host",
