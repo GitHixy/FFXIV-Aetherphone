@@ -2435,6 +2435,8 @@ internal static class L
                 "Added a Gamba home screen widget for the three-hour coin claim, with your level, tier and cap on the medium size"),
             new("changelog.r1300.147",
                 "Changed raffle tickets bought one at a time to grow one ledger entry until a side confirms it, and trade sync to match a patron by character name with the world only breaking a tie"),
+            new("changelog.r1300.148",
+                "Removed the Gamba pill from venue cards in the Venues app: At this venue on the Gamba Floor lists every table at the plot, and the venue directories carry no Japanese worlds for the pill to sit on"),
         };
 
         public static readonly LocString[] Release1300Linkpearl =
@@ -11931,8 +11933,6 @@ internal static class L
         public static readonly LocString TradeConfirmEntry = new("casino.venue.tradeConfirmEntry", "Confirm in ledger");
         public static readonly LocString NotNow = new("casino.venue.notNow", "Not now");
         public static readonly LocString AtThisVenue = new("casino.venue.atThisVenue", "At this venue");
-        public static readonly LocString LiveTableSeats = new("casino.venue.liveTableSeats", "Live table, {0} of {1} seats");
-        public static readonly LocString LiveRoomHere = new("casino.venue.liveRoomHere", "Live casino room");
         public static readonly LocString Sides = new("casino.venue.sides", "Die sides");
         public static readonly LocString HighestWins = new("casino.venue.highestWins", "Highest roll rounds");
         public static readonly LocString RoundSeconds = new("casino.venue.roundSeconds", "Round seconds");
