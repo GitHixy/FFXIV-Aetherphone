@@ -392,6 +392,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         venueRoom.Gate();
         venueSheet.Gate();
         tableDoor.Gate();
+        playerLedger.Gate();
         tradeCard.Gate();
         stage.Gate();
         SyncRaceLandscape();
@@ -436,6 +437,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         venueSheet.Draw(screenArea, ui);
         HandleVenueSheet();
         tableDoor.DrawOverlay(screenArea, ui, router.Current.Screen == CasinoScreen.TableDoor);
+        playerLedger.DrawOverlay(screenArea, ui, router.Current.Screen == CasinoScreen.TableLedger);
         rulesSheet.Draw(screenArea, ui);
         fameConsent.Draw(screenArea, ui);
         clubSheet.Draw(screenArea, ui);
@@ -860,7 +862,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         CasinoScreen.Pit => Loc.T(L.Blackjack.PitTitle),
         CasinoScreen.TableDoor => Loc.T(Tables.TableDoor.TitleFor(casinoTables.CardFor(route.TableId))),
         CasinoScreen.HostTable => Loc.T(L.Tables.HostTitle),
-        CasinoScreen.TableLedger => Loc.T(L.Tables.LedgerHeading),
+        CasinoScreen.TableLedger => Loc.T(Tables.TableLedger.TitleFor(casinoTables.CardFor(route.TableId))),
         CasinoScreen.GilLedger => Loc.T(L.Tables.MyLedgerTitle),
         CasinoScreen.Table => Loc.T(L.Casino.GameBlackjack),
         CasinoScreen.VenueRoom => Loc.T(Venue.VenueCabinet.NameOf(venueRoom.Kind)),
