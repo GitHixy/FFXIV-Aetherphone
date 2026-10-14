@@ -105,10 +105,90 @@ public sealed class CasinoCashierAmountTests
     }
 
     [Fact]
-    public void ChipsBelowOneCoinCannotBeCashedOut()
+    public void ChipsBelowOneCoinStillCloseTheBankrollForZeroCoins()
     {
+        Assert.True(CashierAmounts.IsDust(999, Rate));
+        Assert.False(CashierAmounts.IsDust(0, Rate));
+        Assert.False(CashierAmounts.IsDust(1_000, Rate));
+
+        var dust = CashierAmounts.PlanCashOut(0, 999, Rate, true);
+        Assert.Equal(CashierAmountState.Ready, dust.State);
+        Assert.Equal(CashOutRoute.Whole, dust.Route);
+        Assert.Equal(0, dust.Coins);
+        Assert.Equal(CashOutRoute.Whole, CashierAmounts.PlanCashOut(0, 999, Rate, false).Route);
         Assert.Equal(CashierAmountState.Over, CashierAmounts.PlanCashOut(1, 999, Rate, true).State);
-        Assert.Equal(CashierAmountState.Idle, CashierAmounts.PlanCashOut(0, 999, Rate, true).State);
+        Assert.Equal(CashierAmountState.Idle, CashierAmounts.PlanCashOut(0, 0, Rate, true).State);
+
+        var preview = CashierAmounts.CashOutPreview(dust, Rate, 12_480, 999);
+        Assert.Equal(999, preview.Pay);
+        Assert.Equal(0, preview.Get);
+        Assert.Equal(12_480, preview.WalletAfter);
+        Assert.Equal(0, preview.ChipsAfter);
+    }
+
+    [Fact]
+    public void ALegacyBankrollCashesOutAtItsOwnRate()
+    {
+        var legacy = new Core.Aethernet.Contracts.CasinoSittingDto(Id: "s1", Stack: 124_050, RateChipsPerCoin: 100);
+
+        Assert.Equal(100, CashierAmounts.BankrollRate(legacy, Rate));
+        Assert.Equal(Rate, CashierAmounts.BankrollRate(legacy with { RateChipsPerCoin = 0 }, Rate));
+        Assert.Equal(Rate, CashierAmounts.BankrollRate(null, Rate));
+        var whole = CashierAmounts.PlanCashOut(1_240, legacy.Stack, CashierAmounts.BankrollRate(legacy, Rate), true);
+        Assert.Equal(CashOutRoute.Whole, whole.Route);
+    }
+
+    [Fact]
+    public void AFrozenWalletOnlyOffersTheWholeCashOut()
+    {
+        Assert.True(CashierAmounts.PartialAllowed(true, false));
+        Assert.False(CashierAmounts.PartialAllowed(true, true));
+        Assert.False(CashierAmounts.PartialAllowed(false, false));
+    }
+
+    [Fact]
+    public void AnUnchangedStackRunsWhatTheSheetShowed()
+    {
+        var partial = CashierAmounts.Reconfirm(CashOutRoute.Partial, 310, 1_240_500, Rate, true, out var plan);
+        Assert.Equal(CashierConfirmOutcome.Proceed, partial);
+        Assert.Equal(CashOutRoute.Partial, plan.Route);
+
+        var whole = CashierAmounts.Reconfirm(CashOutRoute.Whole, 1_240, 1_240_900, Rate, true, out plan);
+        Assert.Equal(CashierConfirmOutcome.Proceed, whole);
+        Assert.Equal(1_240, plan.Coins);
+
+        var dust = CashierAmounts.Reconfirm(CashOutRoute.Whole, 0, 999, Rate, true, out plan);
+        Assert.Equal(CashierConfirmOutcome.Proceed, dust);
+    }
+
+    [Fact]
+    public void AnAllNeverTurnsIntoAPartialCashOut()
+    {
+        var outcome = CashierAmounts.Reconfirm(CashOutRoute.Whole, 1_240, 2_000_000, Rate, true, out var plan);
+
+        Assert.Equal(CashierConfirmOutcome.Changed, outcome);
+        Assert.Equal(CashOutRoute.Whole, plan.Route);
+        Assert.Equal(2_000, plan.Coins);
+    }
+
+    [Fact]
+    public void APartialThatBecameTheWholeStackAsksAgain()
+    {
+        var outcome = CashierAmounts.Reconfirm(CashOutRoute.Partial, 900, 900_400, Rate, true, out var plan);
+
+        Assert.Equal(CashierConfirmOutcome.Changed, outcome);
+        Assert.Equal(CashOutRoute.Whole, plan.Route);
+    }
+
+    [Fact]
+    public void AnAmountThatNoLongerFitsDoesNothing()
+    {
+        Assert.Equal(CashierConfirmOutcome.Gone,
+            CashierAmounts.Reconfirm(CashOutRoute.Partial, 900, 500_000, Rate, true, out _));
+        Assert.Equal(CashierConfirmOutcome.Gone,
+            CashierAmounts.Reconfirm(CashOutRoute.Whole, 1_240, 0, Rate, true, out _));
+        Assert.Equal(CashierConfirmOutcome.Gone,
+            CashierAmounts.Reconfirm(CashOutRoute.Partial, 310, 1_240_500, Rate, false, out _));
     }
 
     [Fact]

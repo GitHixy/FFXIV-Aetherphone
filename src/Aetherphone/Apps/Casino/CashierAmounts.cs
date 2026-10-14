@@ -1,4 +1,5 @@
 using System.Globalization;
+using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Casino;
 
 namespace Aetherphone.Apps.Casino;
@@ -28,6 +29,13 @@ internal enum CashOutRoute : byte
     None,
     Whole,
     Partial,
+}
+
+internal enum CashierConfirmOutcome : byte
+{
+    Proceed,
+    Changed,
+    Gone,
 }
 
 internal readonly record struct CashOutPlan(CashierAmountState State, CashOutRoute Route, long Coins);
@@ -100,11 +108,20 @@ internal static class CashierAmounts
         return coins > walletCoins ? CashierAmountState.Over : CashierAmountState.Ready;
     }
 
+    public static long BankrollRate(CasinoSittingDto? bankroll, long fallbackRate) =>
+        bankroll is { RateChipsPerCoin: > 0 } ? bankroll.RateChipsPerCoin : fallbackRate;
+
+    public static bool PartialAllowed(bool flagged, bool walletFrozen) => flagged && !walletFrozen;
+
+    public static bool IsDust(long stackChips, long rate) => stackChips > 0 && ChipValue.Coins(stackChips, rate) == 0;
+
     public static CashOutPlan PlanCashOut(long coins, long stackChips, long rate, bool partial)
     {
         if (coins <= 0)
         {
-            return new CashOutPlan(CashierAmountState.Idle, CashOutRoute.None, 0);
+            return IsDust(stackChips, rate)
+                ? new CashOutPlan(CashierAmountState.Ready, CashOutRoute.Whole, 0)
+                : new CashOutPlan(CashierAmountState.Idle, CashOutRoute.None, 0);
         }
 
         var whole = ChipValue.Coins(Math.Max(0, stackChips), rate);
@@ -121,6 +138,23 @@ internal static class CashierAmounts
         return partial
             ? new CashOutPlan(CashierAmountState.Ready, CashOutRoute.Partial, coins)
             : new CashOutPlan(CashierAmountState.Idle, CashOutRoute.None, coins);
+    }
+
+    public static CashierConfirmOutcome Reconfirm(CashOutRoute confirmedRoute, long confirmedCoins, long stackChips,
+        long rate, bool partial, out CashOutPlan plan)
+    {
+        var coins = confirmedRoute == CashOutRoute.Whole
+            ? ChipValue.Coins(Math.Max(0, stackChips), rate)
+            : confirmedCoins;
+        plan = PlanCashOut(coins, stackChips, rate, partial);
+        if (plan.State != CashierAmountState.Ready)
+        {
+            return CashierConfirmOutcome.Gone;
+        }
+
+        return plan.Route == confirmedRoute && plan.Coins == confirmedCoins
+            ? CashierConfirmOutcome.Proceed
+            : CashierConfirmOutcome.Changed;
     }
 
     public static CashierPreview BuyPreview(long coins, long rate, long walletCoins, long stackChips)

@@ -1,4 +1,5 @@
 using Aetherphone.Core.Casino;
+using Aetherphone.Core.Coins;
 using Aetherphone.Core.Localization;
 
 namespace Aetherphone.Apps.Casino;
@@ -8,21 +9,29 @@ internal sealed class CashierCashOut
     private const long RiskCheckTimeoutMilliseconds = 4_000;
 
     private readonly CasinoStore store;
+    private readonly CoinStore coins;
     private readonly CasinoTextCache texts = new();
     private readonly CashierField amount = new("##cashierCashOutCoins");
     private readonly long[] tiles = new long[CashierAmounts.TileCount];
     private int tileCount;
+    private CashOutRoute checkedRoute;
     private long checkedCoins;
     private long riskCheckAtTick;
 
-    public CashierCashOut(CasinoStore store)
+    public CashierCashOut(CasinoStore store, CoinStore coins)
     {
         this.store = store;
+        this.coins = coins;
     }
 
     public CashierField Field => amount;
 
-    public bool Partial => store.HasFeature(CasinoFeatures.PartialCashOut);
+    public bool Partial => CashierAmounts.PartialAllowed(store.HasFeature(CasinoFeatures.PartialCashOut),
+        coins.Wallet?.FrozenUntilUnix is not null);
+
+    public long Rate => CashierAmounts.BankrollRate(store.State?.Sitting, store.Rate);
+
+    public long Stack => store.State?.Sitting?.Stack ?? 0;
 
     public bool Checking => riskCheckAtTick != 0;
 
@@ -93,18 +102,20 @@ internal sealed class CashierCashOut
             : texts.Number(L.CashierDesk.CashOutAction, plan.Coins);
     }
 
-    public string ResultLine(long coins) => texts.Number(L.Strip.CashedOut, coins);
+    public string ResultLine(long coinsBack) => texts.Number(L.Strip.CashedOut, coinsBack);
 
-    public void BeginCheck(long coins)
+    public void BeginCheck(in CashOutPlan plan)
     {
-        checkedCoins = coins;
+        checkedRoute = plan.Route;
+        checkedCoins = plan.Coins;
         riskCheckAtTick = Environment.TickCount64;
         store.RefreshNow();
     }
 
-    public bool ResolveCheck(out long coins, out bool atRisk)
+    public bool ResolveCheck(out CashOutRoute route, out long coinsBack, out bool atRisk)
     {
-        coins = checkedCoins;
+        route = checkedRoute;
+        coinsBack = checkedCoins;
         atRisk = false;
         if (riskCheckAtTick == 0)
         {
@@ -126,9 +137,8 @@ internal sealed class CashierCashOut
     {
         switch (plan.Route)
         {
-            case CashOutRoute.Whole when !store.MovingMoney:
-                store.CloseSitting();
-                return true;
+            case CashOutRoute.Whole:
+                return store.CloseSitting();
             case CashOutRoute.Partial:
                 return store.CashOutChips(plan.Coins);
             default:

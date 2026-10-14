@@ -149,10 +149,50 @@ public sealed class CasinoPartialCashOutTests
     [Fact]
     public void ARetryAfterALostAnswerReusesTheActionId()
     {
-        Assert.True(CasinoStore.KeepsCashOutIntent("c0ffee02", 310, 1_240_500, 310, 1_240_500));
-        Assert.False(CasinoStore.KeepsCashOutIntent("c0ffee02", 310, 1_240_500, 311, 1_240_500));
-        Assert.False(CasinoStore.KeepsCashOutIntent("c0ffee02", 310, 1_240_500, 310, 930_500));
-        Assert.False(CasinoStore.KeepsCashOutIntent(string.Empty, 310, 1_240_500, 310, 1_240_500));
+        var intent = new CashOutIntent("c0ffee02", 310, "s1", 1_240_500, 10_000);
+
+        Assert.True(CasinoStore.KeepsCashOutIntent(intent, 310, "s1", 1_240_500, 15_000));
+        Assert.False(CasinoStore.KeepsCashOutIntent(intent, 311, "s1", 1_240_500, 15_000));
+        Assert.False(CasinoStore.KeepsCashOutIntent(intent, 310, "s1", 930_500, 15_000));
+        Assert.False(CasinoStore.KeepsCashOutIntent(intent, 310, "s2", 1_240_500, 15_000));
+        Assert.False(CasinoStore.KeepsCashOutIntent(CashOutIntent.None, 310, string.Empty, 0, 15_000));
+    }
+
+    [Fact]
+    public void AKeptActionIdExpiresAfterAMinute()
+    {
+        var intent = new CashOutIntent("c0ffee02", 310, "s1", 1_240_500, 10_000);
+
+        Assert.True(CasinoStore.KeepsCashOutIntent(intent, 310, "s1", 1_240_500,
+            10_000 + CasinoStore.CashOutIntentLifetimeMilliseconds - 1));
+        Assert.False(CasinoStore.KeepsCashOutIntent(intent, 310, "s1", 1_240_500,
+            10_000 + CasinoStore.CashOutIntentLifetimeMilliseconds));
+    }
+
+    [Fact]
+    public void ARefreshThatShowsADifferentBankrollDropsTheKeptId()
+    {
+        var intent = new CashOutIntent("c0ffee02", 310, "s1", 1_240_500, 10_000);
+
+        Assert.False(CasinoStore.CashOutIntentStale(intent, new CasinoSittingDto(Id: "s1", Stack: 1_240_500)));
+        Assert.True(CasinoStore.CashOutIntentStale(intent, new CasinoSittingDto(Id: "s1", Stack: 930_500)));
+        Assert.True(CasinoStore.CashOutIntentStale(intent, new CasinoSittingDto(Id: "s2", Stack: 1_240_500)));
+        Assert.True(CasinoStore.CashOutIntentStale(intent, null));
+        Assert.False(CasinoStore.CashOutIntentStale(CashOutIntent.None, null));
+    }
+
+    [Fact]
+    public void AReplayThatMovedNothingIsNotCelebrated()
+    {
+        var replay = new CasinoCashOutChipsDto(true, string.Empty, 310, 310_000, 1_240_500, 12_480,
+            new CasinoSittingDto(Id: "s1", Stack: 1_240_500));
+        var moved = replay with { Stack = 930_500, Sitting = new CasinoSittingDto(Id: "s1", Stack: 930_500) };
+        var closed = replay with { Stack = 0, Sitting = null };
+
+        Assert.False(CasinoStore.CashOutMoved(replay, 1_240_500));
+        Assert.True(CasinoStore.CashOutMoved(moved, 1_240_500));
+        Assert.True(CasinoStore.CashOutMoved(closed, 1_240_500));
+        Assert.False(CasinoStore.CashOutMoved(new CasinoCashOutChipsDto(false, CasinoReasons.Cooldown), 1_240_500));
     }
 
     [Fact]

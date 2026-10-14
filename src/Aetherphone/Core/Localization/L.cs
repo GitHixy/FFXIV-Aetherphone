@@ -11545,6 +11545,9 @@ internal static class L
         public static readonly LocString ChipsAmount = new("casino.cashierDesk.chipsAmount", "{0} chips");
         public static readonly LocString LimitsHint = new("casino.cashierDesk.limitsHint", "Set how much you can lose in a day");
         public static readonly LocString ReasonAmountRange = new("casino.cashierDesk.reasonAmountRange", "That is more than your free chips are worth. Try a smaller amount.");
+        public static readonly LocString AmountChanged = new("casino.cashierDesk.amountChanged", "Your chips changed while this was open. Check the new amounts and confirm again.");
+        public static readonly LocString NothingMoved = new("casino.cashierDesk.nothingMoved", "Your balance changed before this went through, so nothing moved. Check the amount and try again.");
+        public static readonly LocString AlreadyCashedOut = new("casino.cashierDesk.alreadyCashedOut", "That cash out already went through, so nothing more moved.");
     }
 
     internal static class Tables
