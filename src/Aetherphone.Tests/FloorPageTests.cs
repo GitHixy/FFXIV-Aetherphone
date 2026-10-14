@@ -1,4 +1,5 @@
 using Aetherphone.Apps.Casino;
+using Aetherphone.Apps.Casino.Stage;
 using Aetherphone.Apps.Casino.Strip;
 using Aetherphone.Core.Casino;
 using Aetherphone.Core.Localization;
@@ -57,17 +58,17 @@ public sealed class FloorPageTests
     }
 
     [Fact]
-    public void LiveRoomBarsCountDownTheWindowOfTheRoundPhase()
+    public void FloorRoomBarsCountDownTheWindowOfTheRoundPhase()
     {
-        Assert.Equal(0.5f, FloorRoomCard.Countdown(12_500, 25), 3);
-        Assert.Equal(0f, FloorRoomCard.Countdown(-5, 25));
-        Assert.Equal(1f, FloorRoomCard.Countdown(90_000, 25));
-        Assert.Equal(0f, FloorRoomCard.Countdown(1_000, 0));
-        Assert.Equal(CasinoRoomCadence.BingoOpenSeconds, CasinoApp.RoomWindow(CasinoGames.Bingo, CasinoRoomPhases.Open));
+        Assert.Equal(0.5f, LiveBoard.RingFraction(12_500, 25), 3);
+        Assert.Equal(0f, LiveBoard.RingFraction(-5, 25));
+        Assert.Equal(1f, LiveBoard.RingFraction(90_000, 25));
+        Assert.Equal(CasinoRoomCadence.BingoOpenSeconds,
+            LiveBoard.WindowSeconds(CasinoGames.Bingo, CasinoRoomPhases.Open));
         Assert.Equal(CasinoRoomCadence.RaceLockedSeconds,
-            CasinoApp.RoomWindow(CasinoGames.Race, CasinoRoomPhases.Locked));
+            LiveBoard.WindowSeconds(CasinoGames.Race, CasinoRoomPhases.Locked));
         Assert.Equal(CasinoRoomCadence.WheelResultSeconds,
-            CasinoApp.RoomWindow(CasinoGames.Wheel, CasinoRoomPhases.Result));
+            LiveBoard.WindowSeconds(CasinoGames.Wheel, CasinoRoomPhases.Result));
     }
 
     [Fact]
@@ -81,12 +82,53 @@ public sealed class FloorPageTests
     }
 
     [Fact]
+    public void EveryPhaseLineGetsAllItsLinesSoTheTimeNeverDrops()
+    {
+        Assert.Equal(17f, FloorRoomCard.LineBlock(0, 17f));
+        Assert.Equal(17f, FloorRoomCard.LineBlock(1, 17f));
+        Assert.Equal(51f, FloorRoomCard.LineBlock(3, 17f));
+        Assert.Equal(68f, FloorRoomCard.LineBlock(4, 17f));
+        Assert.True(FloorRoomCard.Height(20f, FloorRoomCard.LineBlock(4, 17f), 1f)
+                    > FloorRoomCard.Height(20f, FloorRoomCard.LineBlock(2, 17f), 1f));
+    }
+
+    [Fact]
     public void ShortcutTilesGrowForATwoLineLabel()
     {
-        Assert.Equal(FloorShortcuts.TileHeight, FloorShortcuts.Height(18f, 1f));
-        Assert.Equal(12f + 36f + 7f + 60f, FloorShortcuts.Height(60f, 1f));
+        Assert.Equal(FloorShortcuts.TileHeight, FloorShortcuts.Height(18f, 0f, 1f));
+        Assert.Equal(6f + 36f + 7f + 6f + 60f, FloorShortcuts.Height(60f, 0f, 1f));
         Assert.Equal(72f, FloorShortcuts.LabelWidth(76f, 1f));
         Assert.Equal(1f, FloorShortcuts.LabelWidth(2f, 1f));
+    }
+
+    [Theory]
+    [InlineData(1f)]
+    [InlineData(1.5f)]
+    public void ShortcutBadgesSitInTheirOwnBandAboveTheIcon(float scale)
+    {
+        var badge = FloorShortcuts.BadgeHeight(13f * scale, scale);
+        var band = FloorShortcuts.BadgeBand(badge, scale);
+        Assert.Equal(0f, FloorShortcuts.BadgeBand(0f, scale));
+        Assert.True(FloorShortcuts.BlockTop(band, scale) >= FloorShortcuts.BadgeInset * scale + badge);
+        Assert.Equal(FloorShortcuts.Pad * scale, FloorShortcuts.BlockTop(0f, scale), 3);
+        var label = 34f * scale;
+        Assert.True(FloorShortcuts.Height(label, band, scale) >= band + (FloorShortcuts.Icon + FloorShortcuts.IconGap
+            + FloorShortcuts.Pad) * scale + label - 0.01f);
+    }
+
+    [Fact]
+    public void TheJackpotSnapsToItsFirstLoadedValueThenRolls()
+    {
+        var roll = default(RollingAmount);
+        roll.Snap(0);
+        JackpotMarquee.Follow(ref roll, 48_210, 0.016f);
+        Assert.Equal(48_210, roll.Display);
+        JackpotMarquee.Follow(ref roll, 58_210, 0.016f);
+        Assert.Equal(58_210, roll.Target);
+        Assert.InRange(roll.Display, 48_211, 58_209);
+        var fresh = default(RollingAmount);
+        JackpotMarquee.Follow(ref fresh, 1_000, 0.016f);
+        Assert.Equal(1_000, fresh.Display);
     }
 
     [Fact]

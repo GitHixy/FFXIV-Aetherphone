@@ -16,8 +16,6 @@ namespace Aetherphone.Apps.Casino;
 
 internal sealed partial class CasinoApp
 {
-    private const float RecordRowHeight = 62f;
-    private const float RecordTile = 34f;
     private const float CardGap = 12f;
     private const int RoomSampleSeconds = 119;
     private const string AllTablesId = "casino.live.all";
@@ -131,13 +129,6 @@ internal sealed partial class CasinoApp
         _ => L.Casino.WheelBetsCloseIn,
     };
 
-    internal static int RoomWindow(string gameId, int phase) => gameId switch
-    {
-        CasinoGames.Bingo => CasinoRoomCadence.BingoWindow(phase),
-        CasinoGames.Race => CasinoRoomCadence.RaceWindow(phase),
-        _ => CasinoRoomCadence.WheelWindow(phase),
-    };
-
     private float RoomCountdown(string gameId, string roomId)
     {
         if (!casinoRooms.TryRoomClock(roomId, out var phase, out var endsAtUnixMs) || endsAtUnixMs <= 0)
@@ -147,7 +138,7 @@ internal sealed partial class CasinoApp
 
         var remaining = casinoRooms.Room.RemainingMilliseconds(endsAtUnixMs,
             DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-        return FloorRoomCard.Countdown(remaining, RoomWindow(gameId, phase));
+        return LiveBoard.RingFraction(remaining, LiveBoard.WindowSeconds(gameId, phase));
     }
 
     private string MinimumStakeLine(string gameId)
@@ -311,12 +302,13 @@ internal sealed partial class CasinoApp
             var name = TileLabel.Fit(Loc.T(CasinoGameNames.Of(gameId)), textWidth, FloorRoomCard.NameLines,
                 TextStyles.Headline, TextStyles.SubheadlineEmphasized);
             nameBlock = MathF.Max(nameBlock, TileLabel.Height(name));
-            lines = Math.Max(lines, RoomLineCount(gameId, textWidth));
+            lines = Math.Max(lines, Math.Max(RoomLineCount(gameId, textWidth),
+                Typography.WrapText(line, TextStyles.Footnote, textWidth).Length));
             roomViews[count++] = new LiveRoomView(gameId, name, line, casinoRooms.OccupancyOf(roomId), live,
                 live ? RoomCountdown(gameId, roomId) : 0f);
         }
 
-        lineBlock = Math.Min(lines, FloorRoomCard.PhaseLines) * Typography.LineHeight(TextStyles.Footnote);
+        lineBlock = FloorRoomCard.LineBlock(lines, Typography.LineHeight(TextStyles.Footnote));
     }
 
     private int RoomLineCount(string gameId, float textWidth)
@@ -355,28 +347,6 @@ internal sealed partial class CasinoApp
     {
         var top = min.Y + index * rowHeight;
         return new Rect(new Vector2(min.X, top), new Vector2(right, top + rowHeight));
-    }
-
-    private bool DrawRecordRow(ImDrawListPtr drawList, Rect row, FontAwesomeIcon icon, Vector4 tint, LocString title,
-        LocString hint, bool hairline, float scale)
-    {
-        var pad = Metrics.Space.Lg * scale;
-        if (hairline)
-        {
-            CoinArt.Hairline(drawList, ui, row.Min.X + pad + (RecordTile + CoinArt.TextGap) * scale, row.Max.X,
-                row.Min.Y);
-        }
-
-        var hovered = CoinArt.RowInteraction(drawList, ui, row, scale);
-        var tile = RecordTile * scale;
-        var tileCenter = new Vector2(row.Min.X + pad + tile * 0.5f, row.Center.Y);
-        CasinoArt.IconTileAt(drawList, tileCenter, tile, tint, icon);
-        var chevronCenter = new Vector2(row.Max.X - pad - 4f * scale, row.Center.Y);
-        CasinoArt.Chevron(drawList, chevronCenter, ui.MutedInk);
-        var textLeft = tileCenter.X + tile * 0.5f + CoinArt.TextGap * scale;
-        CoinArt.Labels(drawList, textLeft, chevronCenter.X - CoinArt.ValueGap * scale, row.Center.Y, Loc.T(title),
-            Loc.T(hint), ui.TitleInk, ui.BodyInk, scale);
-        return UiInteract.Click(row.Min, row.Max, hovered);
     }
 
     private static string ClientGameId(string wireKind) => CasinoRecentGames.ClientGameId(wireKind);

@@ -31,15 +31,16 @@ internal sealed class FloorShortcuts
     public const float Pad = 6f;
     public const float IconGap = 7f;
     public const float LabelPad = 2f;
-    public const float BadgeInset = 5f;
-    public const float BadgePadX = 5f;
-    public const float BadgePadY = 1.5f;
-    public const float BadgeRing = 1.5f;
+    public const float BadgeInset = 4f;
+    public const float BadgePadX = 4f;
+    public const float BadgePadY = 0.5f;
+    public const float BadgeGap = 3f;
     public const int LabelLines = 2;
 
     private const string AnchorKey = "casino.shortcuts";
 
     private static readonly TextStyle LabelStyle = TextStyles.FootnoteEmphasized;
+    private static readonly TextStyle BadgeStyle = TextStyles.Caption1;
 
     private readonly TileLabelFit[] fits = new TileLabelFit[Capacity];
 
@@ -63,8 +64,15 @@ internal sealed class FloorShortcuts
         return new MissionsTally(done, total, ready);
     }
 
-    public static float Height(float labelBlock, float scale) =>
-        MathF.Max(TileHeight * scale, (Pad * 2f + Icon + IconGap) * scale + labelBlock);
+    public static float Height(float labelBlock, float band, float scale) =>
+        MathF.Max(TileHeight * scale, BlockTop(band, scale) + (Icon + IconGap + Pad) * scale + labelBlock);
+
+    public static float BlockTop(float band, float scale) => MathF.Max(Pad * scale, band);
+
+    public static float BadgeBand(float badgeHeight, float scale) =>
+        badgeHeight <= 0f ? 0f : (BadgeInset + BadgeGap) * scale + badgeHeight;
+
+    public static float BadgeHeight(float textHeight, float scale) => textHeight + BadgePadY * 2f * scale;
 
     public static float LabelWidth(float tileWidth, float scale) => MathF.Max(1f, tileWidth - LabelPad * 2f * scale);
 
@@ -82,13 +90,16 @@ internal sealed class FloorShortcuts
         var tileWidth = StripGrid.CellWidth(width, count, gap);
         var labelWidth = LabelWidth(tileWidth, scale);
         var labelBlock = 0f;
+        var badges = false;
         for (var index = 0; index < count; index++)
         {
             fits[index] = TileLabel.Fit(items[index].Label, labelWidth, LabelLines, LabelStyle, LabelStyle);
             labelBlock = MathF.Max(labelBlock, TileLabel.Height(fits[index]));
+            badges |= items[index].Badge.Length > 0;
         }
 
-        var height = Height(labelBlock, scale);
+        var band = badges ? BadgeBand(BadgeHeight(Typography.LineHeight(BadgeStyle), scale), scale) : 0f;
+        var height = Height(labelBlock, band, scale);
         bottom = origin.Y + height;
         UiAnchors.Report(AnchorKey, new Rect(origin, new Vector2(origin.X + width, bottom)));
         var tapped = -1;
@@ -98,7 +109,7 @@ internal sealed class FloorShortcuts
             var tile = new Rect(new Vector2(left, origin.Y), new Vector2(left + tileWidth, bottom));
             using (ImRaii.PushId(index))
             {
-                if (DrawTile(drawList, ui, items[index], fits[index], tile, labelBlock, scale))
+                if (DrawTile(drawList, ui, items[index], fits[index], tile, labelBlock, band, scale))
                 {
                     tapped = index;
                 }
@@ -109,13 +120,16 @@ internal sealed class FloorShortcuts
     }
 
     private static bool DrawTile(ImDrawListPtr drawList, AppSkin ui, in FloorShortcut item, in TileLabelFit fit,
-        Rect tile, float labelBlock, float scale)
+        Rect tile, float labelBlock, float band, float scale)
     {
         var hovered = CasinoArt.PressCard(ImGui.GetID("shortcut"), tile.Min, tile.Max, out var min, out var max);
         var radius = Metrics.Radius.Lg * scale;
         ui.Card(drawList, min, max, radius);
         var icon = Icon * scale;
-        var blockTop = (min.Y + max.Y) * 0.5f - (icon + IconGap * scale + labelBlock) * 0.5f;
+        var regionTop = min.Y + BlockTop(band, scale);
+        var regionBottom = max.Y - Pad * scale;
+        var block = icon + IconGap * scale + labelBlock;
+        var blockTop = regionTop + MathF.Max(0f, (regionBottom - regionTop - block) * 0.5f);
         var iconCenter = new Vector2((min.X + max.X) * 0.5f, blockTop + icon * 0.5f);
         CasinoArt.IconTileAt(drawList, iconCenter, icon, item.Tint, item.Icon);
         var lineHeight = Typography.LineHeight(fit.Style);
@@ -128,11 +142,11 @@ internal sealed class FloorShortcuts
             top += lineHeight;
         }
 
-        DrawBadge(drawList, ui, item, new Rect(min, max), scale);
+        DrawBadge(drawList, item, new Rect(min, max), scale);
         return UiInteract.Click(tile.Min, tile.Max, hovered);
     }
 
-    private static void DrawBadge(ImDrawListPtr drawList, AppSkin ui, in FloorShortcut item, Rect tile, float scale)
+    private static void DrawBadge(ImDrawListPtr drawList, in FloorShortcut item, Rect tile, float scale)
     {
         if (item.Badge.Length == 0)
         {
@@ -141,15 +155,12 @@ internal sealed class FloorShortcuts
 
         var inset = BadgeInset * scale;
         var padX = BadgePadX * scale;
-        var label = Typography.FitText(item.Badge, MathF.Max(1f, tile.Width - inset * 2f - padX * 2f), LabelStyle);
-        var size = Typography.Measure(label, LabelStyle);
-        var height = size.Y + BadgePadY * 2f * scale;
+        var label = Typography.FitText(item.Badge, MathF.Max(1f, tile.Width - inset * 2f - padX * 2f), BadgeStyle);
+        var size = Typography.Measure(label, BadgeStyle);
+        var height = BadgeHeight(Typography.LineHeight(BadgeStyle), scale);
         var max = new Vector2(tile.Max.X - inset, tile.Min.Y + inset + height);
         var min = new Vector2(max.X - size.X - padX * 2f, tile.Min.Y + inset);
-        var ring = BadgeRing * scale;
-        Squircle.Fill(drawList, min - new Vector2(ring, ring), max + new Vector2(ring, ring), height * 0.5f + ring,
-            ImGui.GetColorU32(ui.Palette.BackdropTop with { W = 1f }));
         Squircle.Fill(drawList, min, max, height * 0.5f, ImGui.GetColorU32(item.BadgeFill));
-        Typography.Draw(drawList, (min + max) * 0.5f - size * 0.5f, label, CasinoColors.InkOnLight, LabelStyle);
+        Typography.Draw(drawList, (min + max) * 0.5f - size * 0.5f, label, CasinoColors.InkOnLight, BadgeStyle);
     }
 }

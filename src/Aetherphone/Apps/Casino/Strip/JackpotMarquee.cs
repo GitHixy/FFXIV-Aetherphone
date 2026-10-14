@@ -33,10 +33,21 @@ internal static class JackpotMarquee
 
     public static float BlockHeight(float scale) => HeightFor(Typography.LineHeight(AmountStyle), scale);
 
+    public static void Follow(ref RollingAmount roll, long jackpot, float deltaSeconds)
+    {
+        if (roll.Target <= 0 && jackpot > 0)
+        {
+            roll.Snap(jackpot);
+            return;
+        }
+
+        roll.Update(jackpot, deltaSeconds);
+    }
+
     public static bool Draw(ImDrawListPtr drawList, Vector2 origin, float width, ref RollingAmount roll, long jackpot,
         float phase, float deltaSeconds, float scale, out Rect pressed)
     {
-        roll.Update(jackpot, deltaSeconds);
+        Follow(ref roll, jackpot, deltaSeconds);
         var height = BlockHeight(scale);
         var max = new Vector2(origin.X + width, origin.Y + height);
         var hovered = CasinoArt.PressCard(ImGui.GetID(PressId), origin, max, out var min, out var shown);
