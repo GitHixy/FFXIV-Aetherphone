@@ -199,7 +199,7 @@ internal sealed partial class CasinoApp
         Squircle.FillVerticalGradient(drawList, card.Min, card.Max, radius,
             ImGui.GetColorU32(new Vector4(0.08f, 0.05f, 0.22f, 1f)), ImGui.GetColorU32(JackpotBed));
         CasinoLights.BulbChase(drawList, card.Inset(ChallengeBulbInset * scale), radius - ChallengeBulbInset * scale,
-            scale, stage.Phase, CasinoLights.BulbPitch * 1.5f, CasinoColors.LightB, CasinoColors.LightA, 0.7f);
+            scale, floorLights.Phase, CasinoLights.BulbPitch * 1.5f, CasinoColors.LightB, CasinoColors.LightA, 0.7f);
         if (challenge is null)
         {
             return;

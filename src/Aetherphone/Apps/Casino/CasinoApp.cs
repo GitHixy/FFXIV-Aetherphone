@@ -34,6 +34,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private readonly Core.Casino.CasinoPreferences preferences;
     private readonly Strip.StripHero stripHero = new();
     private readonly Strip.StripCarousel heroCards = new();
+    private readonly Strip.StripLightClock floorLights = new();
     private readonly Strip.StripShelves shelves = new();
     private readonly Strip.WinsTicker winsTicker = new();
     private readonly Strip.StripIntro intro = new();
@@ -339,6 +340,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             return;
         }
 
+        floorLights.Advance(ImGui.GetFrameCount(), ImGui.GetIO().DeltaTime);
         if (casino.State is null)
         {
             TourHolds.Hold(Id);

@@ -65,7 +65,7 @@ internal sealed partial class CasinoApp
             cursorY = DrawLiveNow(drawList, new Vector2(origin.X, cursorY), width, scale);
             cursorY = DrawRecentGames(drawList, new Vector2(origin.X, cursorY), width, delta, scale);
             cursorY += FloorSectionGap * scale * 0.5f;
-            var shelvesBottom = shelves.Draw(drawList, ui, this, new Vector2(origin.X, cursorY), width, stage.Phase,
+            var shelvesBottom = shelves.Draw(drawList, ui, this, new Vector2(origin.X, cursorY), width, floorLights.Phase,
                 delta, !router.IsTransitioning && !LaunchActive, scale, out var tapped, out var source);
             if (tapped.GameId is not null)
             {

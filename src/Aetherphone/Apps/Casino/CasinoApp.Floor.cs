@@ -233,7 +233,7 @@ internal sealed partial class CasinoApp
         }
 
         var top = origin.Y + FloorSectionGap * scale * 0.5f;
-        var bottom = shelves.DrawRecent(drawList, ui, this, new Vector2(origin.X, top), width, stage.Phase, delta,
+        var bottom = shelves.DrawRecent(drawList, ui, this, new Vector2(origin.X, top), width, floorLights.Phase, delta,
             !router.IsTransitioning && !LaunchActive, scale, recentEntries.AsSpan(0, recentCount), out var tapped,
             out var source);
         if (tapped.GameId is not null)
