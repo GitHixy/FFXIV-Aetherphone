@@ -12,7 +12,6 @@ namespace Aetherphone.Apps.Casino.Tables;
 internal sealed partial class BlackjackTable
 {
     private const int MainTarget = -1;
-    private const float SideCaptionGap = 3f;
     private const string WaitMarquee = "casino.blackjack.deck.wait";
 
     private static readonly int[] MainActions =
@@ -73,6 +72,11 @@ internal sealed partial class BlackjackTable
         var mainRadius = layout.BetSpotPixels;
         var ring = ImGui.GetColorU32(CasinoColors.Money with { W = sideTarget == MainTarget ? 0.7f : 0.35f });
         drawList.AddCircle(layout.BetSpot, mainRadius, ring, 40, MathF.Max(1.2f, 1.6f * scale));
+        if (motions[mySeat].ShownBet <= 0)
+        {
+            DrawSpotCaption(drawList, layout.BetSpot, Loc.T(L.Blackjack.MainSpot), sideTarget == MainTarget);
+        }
+
         if (!BlackjackRecap.SideBetsOffered(board))
         {
             return;
@@ -98,7 +102,19 @@ internal sealed partial class BlackjackTable
             {
                 TapSideSpot(index);
             }
+
+            DrawSpotCaption(drawList, center,
+                Loc.T(bet == BlackjackSideBet.PerfectPairs ? L.Blackjack.SidePairs : L.Blackjack.SideThree),
+                sideTarget == index);
         }
+    }
+
+    private void DrawSpotCaption(ImDrawListPtr drawList, Vector2 center, string name, bool targeted)
+    {
+        var style = TextStyles.Caption2;
+        Typography.DrawCentered(drawList, new Vector2(center.X, layout.BetPlateY),
+            Typography.FitText(name, layout.SideCaptionWidth, style), targeted ? CasinoColors.LightB : StageText.Body,
+            style);
     }
 
     private bool DrawSideSpot(ImDrawListPtr drawList, Vector2 center, BlackjackSideBet bet, string label,
@@ -124,14 +140,6 @@ internal sealed partial class BlackjackTable
             var fit = StageText.FitScale(label, inner, style, StageTextRole.Label);
             Typography.DrawCentered(drawList, center, Typography.FitText(label, inner, fit, style.Weight),
                 lost ? StageText.Muted : CasinoColors.Money, fit, style.Weight);
-        }
-        else if (interactive)
-        {
-            var name = Loc.T(bet == BlackjackSideBet.PerfectPairs ? L.Blackjack.SidePairs : L.Blackjack.SideThree);
-            var captionHeight = Typography.LineHeight(style);
-            var captionCenter = new Vector2(center.X, center.Y - radius - SideCaptionGap * scale - captionHeight * 0.5f);
-            Typography.DrawCentered(drawList, captionCenter,
-                Typography.FitText(name, layout.SideCaptionWidth, style), StageText.Strong, style);
         }
 
         if (hovered)

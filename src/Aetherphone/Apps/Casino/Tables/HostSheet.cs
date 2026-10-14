@@ -143,7 +143,7 @@ internal sealed class HostSheet
         draft.Normalize(gilOpen);
         var line = Summary();
         var note = (venueOptions.Notes(draft.Listing) & Venue.VenuePinNotes.InviteOnly) != 0
-            ? Loc.T(L.Venue.PinInviteOnlyNote)
+            ? Loc.T(draft.Game == HostGame.Book ? L.Book.PinInviteOnlyNote : L.Venue.PinInviteOnlyNote)
             : string.Empty;
         var footerWidth = body.Width;
         var summaryHeight = SummaryBlock(line, note, footerWidth, scale);

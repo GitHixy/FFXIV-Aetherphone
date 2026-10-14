@@ -255,6 +255,8 @@ internal sealed class CasinoTradeSync : IDisposable
             return;
         }
 
+        tables.RefreshLedgerNow(context.TableId);
+
         if (local.Route == TradeMatchRoute.Local)
         {
             AepLog.Info($"[TradeSync] Matched by display name at table {context.TableId}");
@@ -316,7 +318,7 @@ internal sealed class CasinoTradeSync : IDisposable
 
     private void Missed(TradeMiss miss, in TradeTableContext context)
     {
-        var offer = GuestLedger.Offer(miss, context.Hosting, context.Entries);
+        var offer = GuestLedger.Offer(miss, context.Hosting, context.Entries, GuestLedger.TableOf(context));
         if (!misses.Miss(miss, offer, miss.AtTick))
         {
             AepLog.Info("[TradeSync] The same guest trade was handled moments ago, not offered again");

@@ -83,8 +83,10 @@ public sealed class CasinoHostingRulesTests
         Assert.Equal(string.Empty, CasinoHostingRules.Check(practice));
         Assert.Equal(string.Empty, CasinoHostingRules.Check(practice with { FaceUp = true, AutoDeal = false }));
         Assert.Equal(CasinoReasons.ConfigInvalid, CasinoHostingRules.Check(practice with { PracticeStack = 999 }));
-        Assert.Equal(CasinoReasons.ConfigInvalid,
+        Assert.Equal(CasinoReasons.MaxBetAboveStack,
             CasinoHostingRules.Check(practice with { MaxBet = 200_000, PracticeStack = 100_000 }));
+        Assert.Equal(CasinoReasons.MinBetAboveMax,
+            CasinoHostingRules.Check(practice with { MinBet = 50_000, MaxBet = 20_000 }));
         Assert.Equal(CasinoReasons.ConfigInvalid,
             CasinoHostingRules.Check(practice with { HouseRules = new CasinoBlackjackRuleSheetDto(Decks: 3) }));
     }
@@ -97,8 +99,9 @@ public sealed class CasinoHostingRulesTests
         Assert.Equal(20_000_000, CasinoHostingRules.PayoutCeiling(gil));
         Assert.Equal(CasinoReasons.PracticeOnly, CasinoHostingRules.Check(gil with { FaceUp = true }));
         Assert.Equal(CasinoReasons.ConfigInvalid, CasinoHostingRules.Check(gil with { Bank = 0 }));
-        Assert.Equal(CasinoReasons.ConfigInvalid, CasinoHostingRules.Check(gil with { MaxBet = 30_000_000 }));
-        Assert.Equal(CasinoReasons.ConfigInvalid, CasinoHostingRules.Check(gil with { MaxPayout = 100_000 }));
+        Assert.Equal(CasinoReasons.MaxBetAboveBank, CasinoHostingRules.Check(gil with { MaxBet = 30_000_000 }));
+        Assert.Equal(CasinoReasons.MinBetAboveMax, CasinoHostingRules.Check(gil with { MinBet = 600_000 }));
+        Assert.Equal(CasinoReasons.PayoutBelowMaxBet, CasinoHostingRules.Check(gil with { MaxPayout = 100_000 }));
         Assert.Equal(CasinoReasons.ConfigInvalid, CasinoHostingRules.Check(gil with { MaxPayout = 30_000_000 }));
         Assert.Equal(string.Empty, CasinoHostingRules.Check(gil with { MaxPayout = 5_000_000 }));
     }

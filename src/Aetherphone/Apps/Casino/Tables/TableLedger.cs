@@ -125,7 +125,8 @@ internal sealed class TableLedger
 
         Refresh(ledger, myUserId, chips.HasFeature(CasinoFeatures.VenueBook));
         var gameKind = tables.CardFor(roomId)?.GameKind ?? string.Empty;
-        var seatless = CasinoBookRules.IsBook(gameKind) || VenueKinds.IsVenue(gameKind);
+        var book = CasinoBookRules.IsBook(gameKind);
+        var seatless = book || VenueKinds.IsVenue(gameKind);
         DrawHeading(ui, ledger, seatless, scale);
         if (!seatless)
         {
@@ -146,7 +147,7 @@ internal sealed class TableLedger
         }
 
         DrawEntries(ui, scale);
-        DrawPropose(ui, ledger, myUserId, hostUserId, scale);
+        DrawPropose(ui, ledger, myUserId, hostUserId, book, scale);
     }
 
     public static void Toast(CasinoStakeOutcome? outcome)
@@ -279,49 +280,85 @@ internal sealed class TableLedger
         kindOptions[0] = Loc.T(L.Tables.KindBuyIn);
         kindOptions[1] = Loc.T(L.Tables.KindPayout);
         var source = ledger.Rows ?? Array.Empty<CasinoTableLedgerRowDto>();
+        var gil = ledger.Entries ?? Array.Empty<CasinoLedgerEntryDto>();
         rows = new LedgerRowView[source.Length];
-        var seated = 0;
         for (var index = 0; index < source.Length; index++)
         {
             var row = source[index];
             rows[index] = new LedgerRowView(row.DisplayName, NumberText.Compact(row.BuyIns),
                 NumberText.Compact(row.Stack), SignedCompact(row.Net), row.Hands.ToString(Loc.Culture), row.Net,
                 row.Seated);
-            if (row.Seated || row.BuyIns > 0)
-            {
-                seated++;
-            }
         }
 
-        playerNames = new string[seated];
-        playerIds = new string[seated];
-        var next = 0;
-        for (var index = 0; index < source.Length; index++)
+        var players = Players(source, gil, myUserId);
+        playerNames = new string[players.Count];
+        playerIds = new string[players.Count];
+        for (var index = 0; index < players.Count; index++)
         {
-            if (source[index].Seated || source[index].BuyIns > 0)
-            {
-                playerNames[next] = source[index].DisplayName;
-                playerIds[next] = source[index].UserId;
-                next++;
-            }
+            playerIds[index] = players[index].UserId;
+            playerNames[index] = players[index].DisplayName;
         }
 
-        var choices = ChoiceCount(seated, guestsOpen);
+        var choices = ChoiceCount(players.Count, guestsOpen);
         choiceNames = new string[choices];
         choiceActive = new bool[choices];
-        Array.Copy(playerNames, choiceNames, seated);
+        Array.Copy(playerNames, choiceNames, players.Count);
         if (guestsOpen)
         {
-            choiceNames[seated] = Loc.T(L.Book.GuestTag);
+            choiceNames[players.Count] = Loc.T(L.Book.GuestTag);
         }
 
         playerIndex = Math.Clamp(playerIndex, 0, Math.Max(0, choices - 1));
-        var gil = ledger.Entries ?? Array.Empty<CasinoLedgerEntryDto>();
         cards.Refresh(gil, myUserId, ledger.Currency);
         var unsettled = CasinoGilLedger.UnsettledCount(gil);
         waitingNote = unsettled > 0 ? Loc.T(L.Tables.EntriesWaiting, unsettled.ToString(Loc.Culture)) : string.Empty;
         var totals = GilLedgerTotals.Of(gil, myUserId);
         totalsText = totals.Settled > 0 ? TotalsText(totals) : string.Empty;
+    }
+
+    internal static List<TradeSeat> Players(CasinoTableLedgerRowDto[] rows, CasinoLedgerEntryDto[] entries,
+        string myUserId)
+    {
+        var players = new List<TradeSeat>();
+        for (var index = 0; index < rows.Length; index++)
+        {
+            if (rows[index].Seated || rows[index].BuyIns > 0)
+            {
+                AddPlayer(players, rows[index].UserId, rows[index].DisplayName, myUserId);
+            }
+        }
+
+        for (var index = 0; index < entries.Length; index++)
+        {
+            var entry = entries[index];
+            if (entry.Guest)
+            {
+                continue;
+            }
+
+            AddPlayer(players, entry.PayerUserId, entry.PayerName, myUserId);
+            AddPlayer(players, entry.PayeeUserId, entry.PayeeName, myUserId);
+        }
+
+        return players;
+    }
+
+    private static void AddPlayer(List<TradeSeat> players, string userId, string displayName, string myUserId)
+    {
+        if (userId.Length == 0 || string.Equals(userId, myUserId, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        for (var index = 0; index < players.Count; index++)
+        {
+            if (string.Equals(players[index].UserId, userId, StringComparison.Ordinal))
+            {
+                return;
+            }
+        }
+
+        players.Add(new TradeSeat(userId, displayName));
     }
 
     internal static LocString MissLine(TradeMiss miss)
@@ -578,7 +615,7 @@ internal sealed class TableLedger
     }
 
     private void DrawPropose(AppSkin ui, CasinoTableLedgerDto ledger, string myUserId, string hostUserId,
-        float scale)
+        bool book, float scale)
     {
         var host = ledger.Owner;
         if (!ShowsRecord(host, playerIds.Length, viewGuests, hostUserId))
@@ -646,7 +683,11 @@ internal sealed class TableLedger
         ImGui.SetCursorScreenPos(origin);
         ImGui.Dummy(new Vector2(width, FieldHeight * scale + Metrics.Space.Sm * scale));
         RevealRecord();
-        var hint = guest ? L.Book.ReasonGuestEntry : host ? L.Tables.RecordHostHint : L.Tables.RecordPlayerHint;
+        var hint = guest
+            ? L.Book.ReasonGuestEntry
+            : host
+                ? book ? L.Book.RecordHostHint : L.Tables.RecordHostHint
+                : L.Tables.RecordPlayerHint;
         Note(ui, Loc.T(hint), ui.MutedInk, scale);
     }
 
@@ -742,6 +783,18 @@ internal sealed class TableLedger
         for (var index = 0; index < source.Length; index++)
         {
             if (string.Equals(source[index].UserId, playerId, StringComparison.Ordinal) && source[index].BuyIns > 0)
+            {
+                return CasinoLedgerKinds.Rebuy;
+            }
+        }
+
+        var entries = ledger.Entries ?? Array.Empty<CasinoLedgerEntryDto>();
+        for (var index = 0; index < entries.Length; index++)
+        {
+            var entry = entries[index];
+            if (!entry.Guest && string.Equals(entry.PayerUserId, playerId, StringComparison.Ordinal)
+                && (string.Equals(entry.Kind, CasinoLedgerKinds.BuyIn, StringComparison.Ordinal)
+                    || string.Equals(entry.Kind, CasinoLedgerKinds.Rebuy, StringComparison.Ordinal)))
             {
                 return CasinoLedgerKinds.Rebuy;
             }

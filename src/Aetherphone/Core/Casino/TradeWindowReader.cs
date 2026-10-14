@@ -20,10 +20,12 @@ internal sealed unsafe class TradeWindowReader : ITradeWindowReader
     private const int MaxNameCandidates = 12;
     private const int MaxNodeDepth = 4;
     private const int MinNameLength = 3;
-    private const char MacroBreak = '\uE000';
+    private const char MacroBreak = '';
 
     private readonly List<string> names = new(MaxNameCandidates);
     private string[] candidates = Array.Empty<string>();
+    private string[] nodeNames = Array.Empty<string>();
+    private string partnerName = string.Empty;
     private bool open;
     private bool partnerRead;
     private long leftOffer;
@@ -39,16 +41,25 @@ internal sealed unsafe class TradeWindowReader : ITradeWindowReader
 
     public TradeWindowSample Sample()
     {
+        var visible = WindowVisible();
+        if (visible && !open)
+        {
+            Begin();
+        }
+
+        open = visible;
+        if (open)
+        {
+            ReadArrays();
+        }
+
         return new TradeWindowSample(open, candidates, leftOffer, rightOffer, WalletGil(), partnerRead);
     }
 
     private void OnOpened(AddonEvent type, AddonArgs args)
     {
+        Begin();
         open = true;
-        candidates = Array.Empty<string>();
-        partnerRead = false;
-        leftOffer = 0;
-        rightOffer = 0;
         Read(args);
     }
 
@@ -64,6 +75,16 @@ internal sealed unsafe class TradeWindowReader : ITradeWindowReader
         open = false;
     }
 
+    private void Begin()
+    {
+        candidates = Array.Empty<string>();
+        nodeNames = Array.Empty<string>();
+        partnerName = string.Empty;
+        partnerRead = false;
+        leftOffer = 0;
+        rightOffer = 0;
+    }
+
     private void Read(AddonArgs args)
     {
         var addon = (AtkUnitBase*)args.Addon.Address;
@@ -72,31 +93,54 @@ internal sealed unsafe class TradeWindowReader : ITradeWindowReader
             return;
         }
 
+        ReadArrays();
         names.Clear();
-        var partner = PartnerName();
-        if (partner.Length > 0)
-        {
-            names.Add(partner);
-            partnerRead = true;
-        }
-
         var left = 0L;
         var right = 0L;
         var middle = addon->X + addon->RootNode->Width * addon->Scale * 0.5f;
         Walk(&addon->UldManager, middle, ref left, ref right, 0);
         if (names.Count > 0)
         {
-            candidates = names.ToArray();
+            nodeNames = names.ToArray();
+            Merge();
+        }
+
+        if (!TryOfferedGil(out _, out _) && (left > 0 || right > 0))
+        {
+            leftOffer = left;
+            rightOffer = right;
+        }
+    }
+
+    private void ReadArrays()
+    {
+        var partner = PartnerName();
+        if (partner.Length > 0 && !string.Equals(partner, partnerName, StringComparison.Ordinal))
+        {
+            partnerName = partner;
+            partnerRead = true;
+            Merge();
         }
 
         if (TryOfferedGil(out var sent, out var received))
         {
-            left = sent;
-            right = received;
+            leftOffer = sent;
+            rightOffer = received;
+        }
+    }
+
+    private void Merge()
+    {
+        if (partnerName.Length == 0)
+        {
+            candidates = nodeNames;
+            return;
         }
 
-        leftOffer = left;
-        rightOffer = right;
+        var merged = new string[nodeNames.Length + 1];
+        merged[0] = partnerName;
+        Array.Copy(nodeNames, 0, merged, 1, nodeNames.Length);
+        candidates = merged;
     }
 
     private void Walk(AtkUldManager* manager, float middle, ref long left, ref long right, int depth)
@@ -158,6 +202,12 @@ internal sealed unsafe class TradeWindowReader : ITradeWindowReader
         {
             names.Add(text);
         }
+    }
+
+    private static bool WindowVisible()
+    {
+        var addon = (AtkUnitBase*)Plugin.GameGui.GetAddonByName(TradeAddonName).Address;
+        return addon != null && addon->IsVisible;
     }
 
     private static string PartnerName()

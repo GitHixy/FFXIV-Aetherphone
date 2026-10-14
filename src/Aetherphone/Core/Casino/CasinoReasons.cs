@@ -104,6 +104,10 @@ internal static class CasinoReasons
     public const string TournamentHands = "tournament_hands";
     public const string TournamentPending = "tournament_pending";
     public const string TicketCount = "ticket_count";
+    public const string MinBetAboveMax = "min_bet_above_max";
+    public const string MaxBetAboveStack = "max_bet_above_stack";
+    public const string MaxBetAboveBank = "max_bet_above_bank";
+    public const string PayoutBelowMaxBet = "payout_below_max_bet";
 
     public static readonly string[] All =
     {
@@ -205,6 +209,10 @@ internal static class CasinoReasons
         TournamentHands,
         TournamentPending,
         TicketCount,
+        MinBetAboveMax,
+        MaxBetAboveStack,
+        MaxBetAboveBank,
+        PayoutBelowMaxBet,
     };
 
     private static readonly FrozenDictionary<string, LocString> Messages = new Dictionary<string, LocString>
@@ -307,6 +315,10 @@ internal static class CasinoReasons
         [TournamentHands] = L.Tables.ReasonTournamentHands,
         [TournamentPending] = L.Tables.ReasonTournamentPending,
         [TicketCount] = L.Venue.ReasonTicketCount,
+        [MinBetAboveMax] = L.Tables.ReasonMinBetAboveMax,
+        [MaxBetAboveStack] = L.Tables.ReasonMaxBetAboveStack,
+        [MaxBetAboveBank] = L.Tables.ReasonMaxBetAboveBank,
+        [PayoutBelowMaxBet] = L.Tables.ReasonPayoutBelowMaxBet,
     }.ToFrozenDictionary(StringComparer.Ordinal);
 
     private static long ceilingTextValue;

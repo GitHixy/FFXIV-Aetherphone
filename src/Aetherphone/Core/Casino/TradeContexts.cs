@@ -136,7 +136,8 @@ internal static class TradeContexts
         }
 
         return new TradeTableContext(table.TableId, view.MyUserId, table.HostUserId, table.HostName,
-            seats.ToArray(), ledger?.Entries ?? Array.Empty<CasinoLedgerEntryDto>(), table.Venue);
+            seats.ToArray(), ledger?.Entries ?? Array.Empty<CasinoLedgerEntryDto>(), table.Venue,
+            CasinoBookRules.IsBook(view.CardFor(table.TableId)?.GameKind));
     }
 
     private static TradeTableRef Table(in TradeTableView view, string tableId, bool venue)
@@ -332,7 +333,7 @@ internal sealed class TradeTableMemory
             return live;
         }
 
-        var fresh = Fresh(view.MyUserId, nowTick);
+        var fresh = Fresh(view, nowTick);
         if (live.Located)
         {
             return fresh && string.Equals(live.TableId, held.TableId, StringComparison.Ordinal) ? held : live;
@@ -341,10 +342,21 @@ internal sealed class TradeTableMemory
         return fresh ? held : TradeContexts.Hosted(view);
     }
 
-    private bool Fresh(string myUserId, long nowTick)
+    private bool Fresh(in TradeTableView view, long nowTick)
     {
-        return held.Known && !string.IsNullOrEmpty(myUserId)
-            && string.Equals(heldFor, myUserId, StringComparison.Ordinal)
-            && nowTick - heldAtTick <= KeepMilliseconds;
+        if (!held.Known || string.IsNullOrEmpty(view.MyUserId)
+            || !string.Equals(heldFor, view.MyUserId, StringComparison.Ordinal)
+            || nowTick - heldAtTick > KeepMilliseconds)
+        {
+            return false;
+        }
+
+        if (view.CardFor(held.TableId) is not null)
+        {
+            return true;
+        }
+
+        held = default;
+        return false;
     }
 }

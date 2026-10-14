@@ -302,10 +302,19 @@ internal static class CasinoHostingRules
             return CasinoReasons.ConfigInvalid;
         }
 
-        if (config.MinBet < 0 || config.MaxBet < 0 || config.MaxBet > config.PracticeStack
-            || (config.MaxBet > 0 && config.MinBet > config.MaxBet))
+        if (config.MinBet < 0 || config.MaxBet < 0)
         {
             return CasinoReasons.ConfigInvalid;
+        }
+
+        if (config.MaxBet > config.PracticeStack)
+        {
+            return CasinoReasons.MaxBetAboveStack;
+        }
+
+        if (config.MaxBet > 0 && config.MinBet > config.MaxBet)
+        {
+            return CasinoReasons.MinBetAboveMax;
         }
 
         return CheckRules(config.HouseRules);
@@ -318,14 +327,28 @@ internal static class CasinoHostingRules
             return CasinoReasons.PracticeOnly;
         }
 
-        if (config.Bank < MinGil || config.Bank > MaxGil || config.MaxBet < MinGil || config.MaxBet > config.Bank
-            || config.MinBet < 0 || config.MinBet > config.MaxBet)
+        if (config.Bank < MinGil || config.Bank > MaxGil || config.MaxBet < MinGil || config.MinBet < 0)
         {
             return CasinoReasons.ConfigInvalid;
         }
 
+        if (config.MaxBet > config.Bank)
+        {
+            return CasinoReasons.MaxBetAboveBank;
+        }
+
+        if (config.MinBet > config.MaxBet)
+        {
+            return CasinoReasons.MinBetAboveMax;
+        }
+
         var payout = PayoutCeiling(config);
-        if (payout < config.MaxBet || payout > config.Bank)
+        if (payout < config.MaxBet)
+        {
+            return CasinoReasons.PayoutBelowMaxBet;
+        }
+
+        if (payout > config.Bank)
         {
             return CasinoReasons.ConfigInvalid;
         }

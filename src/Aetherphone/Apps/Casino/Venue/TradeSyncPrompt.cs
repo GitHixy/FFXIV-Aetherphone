@@ -84,7 +84,7 @@ internal sealed class TradeSyncPrompt
     {
         var body = texts.NamedNumber(guest.Incoming ? L.Venue.TradeReceivedFrom : L.Venue.TradeSentTo,
             guest.GuestName, guest.Amount);
-        var hint = Loc.T(guest.Unchecked ? L.Book.GuestHintUnchecked : L.Book.GuestHint);
+        var hint = Loc.T(GuestLedger.HintFor(guest));
         switch (DrawCard(screen, ui, body, hint, Loc.T(GuestLedger.RecordLabel(guest.LedgerKind)), trade.GuestBusy))
         {
             case TradePromptPress.Confirm:

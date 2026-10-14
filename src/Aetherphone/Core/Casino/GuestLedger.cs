@@ -3,11 +3,43 @@ using Aetherphone.Core.Localization;
 
 namespace Aetherphone.Core.Casino;
 
+internal enum GuestTableKind : byte
+{
+    Seats,
+    Room,
+    Book,
+}
+
 internal sealed record GuestOffer(string TableId, string GuestName, string LedgerKind, long Amount, bool Incoming,
-    bool Unchecked = false);
+    bool Unchecked = false, GuestTableKind Table = GuestTableKind.Seats);
 
 internal static class GuestLedger
 {
+    public static GuestTableKind TableOf(in TradeTableContext context)
+    {
+        if (context.Book)
+        {
+            return GuestTableKind.Book;
+        }
+
+        return context.Venue ? GuestTableKind.Room : GuestTableKind.Seats;
+    }
+
+    public static LocString HintFor(GuestOffer offer)
+    {
+        if (offer.Unchecked)
+        {
+            return L.Book.GuestHintUnchecked;
+        }
+
+        return offer.Table switch
+        {
+            GuestTableKind.Book => L.Book.GuestHintBook,
+            GuestTableKind.Room => L.Venue.GuestHintRoom,
+            _ => L.Book.GuestHint,
+        };
+    }
+
     public static string PartnerNameOf(in TradeCompletion completion)
     {
         if (!completion.PartnerRead || completion.NameCandidates.Length == 0)
@@ -19,7 +51,8 @@ internal static class GuestLedger
         return CasinoBookRules.IsGuestName(name) ? name : string.Empty;
     }
 
-    public static GuestOffer? Offer(TradeMiss? miss, bool hosting, CasinoLedgerEntryDto[] entries)
+    public static GuestOffer? Offer(TradeMiss? miss, bool hosting, CasinoLedgerEntryDto[] entries,
+        GuestTableKind table = GuestTableKind.Seats)
     {
         if (miss is null || !hosting || !miss.GuestEligible || miss.Amount <= 0
             || !CasinoBookRules.IsGuestName(miss.PartnerName))
@@ -28,7 +61,7 @@ internal static class GuestLedger
         }
 
         return new GuestOffer(miss.TableId, miss.PartnerName, KindOf(miss, entries), miss.Amount, miss.Incoming,
-            miss.Kind != TradeMissKind.NotAtTable);
+            miss.Kind != TradeMissKind.NotAtTable, table);
     }
 
     public static GuestOffer? Shown(GuestOffer? offer, bool open) => open ? offer : null;
