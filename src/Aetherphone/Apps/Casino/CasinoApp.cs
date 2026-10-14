@@ -799,6 +799,9 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             case CasinoScreen.Fame:
                 fameView.Draw(navBar.Body, ui);
                 break;
+            case CasinoScreen.HostRules:
+                DrawHostRules(navBar.Body);
+                break;
         }
 
         AppHeader.EndLargeTitle(in navBar, context, "casino.page.nav", RouteTitle(route), NavBarStyle.From(ui),
@@ -814,8 +817,8 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             var navBar = AppHeader.BeginLargeTitle(context, false);
             switch (routes.Tab)
             {
-                case CasinoTab.Tables:
-                    browser.Draw(navBar.Body, ui);
+                case CasinoTab.Host:
+                    DrawHostTab(navBar.Body);
                     break;
                 case CasinoTab.Live:
                     DrawLiveTab(navBar.Body);
@@ -842,7 +845,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
 
     private string TabTitle(CasinoTab target) => target switch
     {
-        CasinoTab.Tables => Loc.T(L.VenueHub.Tab),
+        CasinoTab.Host => Loc.T(L.VenueHub.Tab),
         CasinoTab.Live => Loc.T(L.Casino.TabLive),
         CasinoTab.Cashier => Loc.T(L.Casino.Cashier),
         _ => DisplayName,
@@ -865,6 +868,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         CasinoScreen.Fairness => Loc.T(L.Casino.FairnessRow),
         CasinoScreen.RoundDetail => Loc.T(L.Casino.RoundDetailTitle),
         CasinoScreen.Fame => Loc.T(L.Club.FameTitle),
+        CasinoScreen.HostRules => Loc.T(L.HostSetup.RulesTitle),
         CasinoScreen.DailySpin => Loc.T(L.Casino.GameDailySpin),
         CasinoScreen.Cabinet => Loc.T(GameName(route.GameId)),
         _ => TabTitle(routes.Tab),
@@ -1120,7 +1124,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     {
         if (routes.OnRoot)
         {
-            SelectTab(CasinoTab.Tables);
+            SelectTab(CasinoTab.Host);
             return;
         }
 
@@ -1141,7 +1145,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             ResetCabinetOf(router.Current);
         }
 
-        if (next == CasinoTab.Tables)
+        if (next == CasinoTab.Host)
         {
             browser.Enter();
         }

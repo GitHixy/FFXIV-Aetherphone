@@ -132,6 +132,8 @@ internal sealed class HostSheet
         settleFrames = SettleToEndFrames;
     }
 
+    public void DrawRules(Rect body, AppSkin ui) => Draw(body, ui);
+
     public void RememberDraft() => preferences.RememberHostDraft(draft.Snapshot(venueOptions.PinLocation));
 
     public void Draw(Rect body, AppSkin ui)

@@ -11177,6 +11177,11 @@ internal static class L
         public static readonly LocString You = new("casino.holdem.you", "You");
     }
 
+    internal static class LivePage
+    {
+        public static readonly LocString HouseTitle = new("casino.livePage.houseTitle", "House tables");
+    }
+
     internal static class Strip
     {
         public static readonly LocString Practice = new("casino.strip.practice", "Practice");
@@ -11332,6 +11337,11 @@ internal static class L
         public static readonly LocString MissionsProgress = new("casino.floor.missionsProgress", "{0} of {1} done");
         public static readonly LocString MissionsReady = new("casino.floor.missionsReady", "{0} ready to claim");
         public static readonly LocString FreeSpin = new("casino.floor.freeSpin", "Free spin");
+    }
+
+    internal static class FloorPage
+    {
+        public static readonly LocString StreakDay = new("casino.floorPage.streakDay", "Day {0} of {1}");
     }
 
     internal static class Chips
@@ -11506,6 +11516,11 @@ internal static class L
         public static readonly LocString NotOpenTitle = new("casino.slots.machine.notOpenTitle", "Not open yet");
         public static readonly LocString NotOpenHint = new("casino.slots.machine.notOpenHint", "This machine opens once the floor update reaches the server.");
         public static readonly LocString ReasonMachineUnknown = new("casino.slots.machine.reasonUnknown", "That machine is not on the floor.");
+    }
+
+    internal static class CashierDesk
+    {
+        public static readonly LocString CashOutHeading = new("casino.cashierDesk.cashOutHeading", "How many coins back?");
     }
 
     internal static class Tables
@@ -11827,6 +11842,11 @@ internal static class L
         public static readonly LocString FactSideBetsValue = new("casino.blackjack.factSideBetsValue", "Pairs 93.89%, 21+3 95.38%");
     }
 
+    internal static class HostSetup
+    {
+        public static readonly LocString RulesTitle = new("casino.hostSetup.rulesTitle", "Table rules");
+    }
+
     internal static class Venue
     {
         public static readonly LocString GameDiceTable = new("casino.venue.gameDiceTable", "Dice table");
@@ -12000,6 +12020,11 @@ internal static class L
         public static readonly LocString DraftSummaryBets = new("casino.venuehub.draftSummaryBets", "{0}, {1}, {2} to {3}");
         public static readonly LocString DraftSummaryStake = new("casino.venuehub.draftSummaryStake", "{0}, {1}, stake {2}");
         public static readonly LocString DraftSummaryPlain = new("casino.venuehub.draftSummaryPlain", "{0}, {1}");
+    }
+
+    internal static class HostDesk
+    {
+        public static readonly LocString GoToTable = new("casino.hostDesk.goToTable", "Go to table");
     }
 
     internal static class Book
