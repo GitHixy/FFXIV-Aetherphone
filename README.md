@@ -160,7 +160,7 @@ Transparent images shared in Chirper, Aethergram and Velvet posts keep their cle
 
 Gamba's hero shows the coin value under your chips and a tier card with your level ring, current tier, level bar and cap, and a Gamba home screen widget keeps the three-hour coin claim one tap away, with your level and tier on the medium size. Gamba's venue browser and table ledger each have a refresh button to fetch the latest rooms or gil entries without leaving the page. Gil Deathroll, dice and raffle rooms also open My gil ledger directly, with Back returning to the room. The blackjack felt switches to a compact layout on shorter screens, such as during a tournament, so cards, seats and bets never overlap. A blackjack tournament asks before you leave it: while you are still in, the leave button reads Resign and the back button warns first.
 
-The Floor's jackpot and challenge lights animate while browsing, even before opening a game.
+Gamba's Floor shows every game on one page: Cards and Slots as three-column poster grids, the slot posters running their reels live under a bulb-lit jackpot marquee, and Quick bets as a four-column grid. Shortcuts open Missions, Club, Hall of Fame and History in one tap, the chips card spells out your Daily streak as Day 3 of 7 with numbered days, and Live now counts down the race, wheel and bingo rounds.
 
 ## And everything else a phone should do
 
