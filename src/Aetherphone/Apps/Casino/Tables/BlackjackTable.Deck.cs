@@ -265,13 +265,41 @@ internal sealed partial class BlackjackTable
             return;
         }
 
-        var stakeBlocked = draining || (!banked && (state.Draining || state.StakesPaused));
-        var standLabel = stakeBlocked ? Loc.T(L.Casino.CashOut) : Loc.T(L.Casino.StandAction);
-        if (stage.SecondaryAction(standLabel, !seatFlow.Busy, ui.Ink))
+        var forfeits = ForfeitsTournament;
+        if (!stage.SecondaryAction(StandLabel(state, draining, banked, forfeits), !seatFlow.Busy, ui.Ink))
         {
-            inlineReason = string.Empty;
-            seatFlow.Stand(roomId);
+            return;
         }
+
+        if (forfeits)
+        {
+            ConfirmResign(resignSeat);
+            return;
+        }
+
+        StandUp();
+    }
+
+    private static string StandLabel(CasinoStateDto state, bool draining, bool banked, bool forfeits)
+    {
+        if (forfeits)
+        {
+            return Loc.T(L.Venue.TournamentResign);
+        }
+
+        var stakeBlocked = draining || (!banked && (state.Draining || state.StakesPaused));
+        return stakeBlocked ? Loc.T(L.Casino.CashOut) : Loc.T(L.Casino.StandAction);
+    }
+
+    private void StandUp()
+    {
+        if (!entered || seatFlow.StandQueued || seatFlow.Busy)
+        {
+            return;
+        }
+
+        inlineReason = string.Empty;
+        seatFlow.Stand(roomId);
     }
 
     private void DrawDealerDeck(AppSkin ui, CasinoBlackjackRoomStateDto board, Rect row, float scale)

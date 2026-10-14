@@ -7879,6 +7879,7 @@
   "changelog.r1300.122": "Changed the host's Deal button to Deal now while auto deal is on, with the dealer's deck saying the table deals on the clock",
   "changelog.r1300.123": "Changed the tournament Hands field to name its 10 to 50 band instead of quietly changing your number",
   "changelog.r1300.124": "Changed Start pressed during a hand to queue the tournament: it begins when that hand settles",
+  "changelog.r1300.151": "Changed leaving a blackjack tournament to ask first: the leave button reads Resign while you are still in, and the back button warns before taking you out",
   "changelog.r1300.125": "Fixed a finished tournament staying on the table for good: it clears with the next hand or Stop, and closing the standings dismisses it",
   "changelog.r1300.126": "Fixed the room code card in the table sheet resizing while the sheet scrolls",
   "changelog.r1300.129": "Fixed gil dice tables refusing buy-ins because a venue room seats nobody",
@@ -9735,6 +9736,9 @@
   "casino.venue.tournamentYouAreOut": "You're out of the tournament.",
   "casino.venue.tournamentHandsPlaceholder": "10 to 50",
   "casino.venue.tournamentPending": "Starts after this hand. Stop takes it back.",
+  "casino.venue.tournamentResign": "Resign",
+  "casino.venue.tournamentResignTitle": "Resign from the tournament?",
+  "casino.venue.tournamentResignBody": "Leaving the table takes you out of this tournament, and you can't sit back down until it ends.",
 
   "casino.venue.roundStake": "Stake per round",
   "casino.venue.roundStakeHint": "When a round closes, everyone who rolled lower owes the house the stake, and the house pays the winner. Each line goes on the gil ledger.",

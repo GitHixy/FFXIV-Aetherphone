@@ -7879,6 +7879,7 @@
   "changelog.r1300.122": "Ev sahibinin Dağıt düğmesi değiştirildi: otomatik dağıtım açıkken Şimdi dağıt diye okunur ve krupiye destesi masanın saate göre dağıttığını söyler",
   "changelog.r1300.123": "Turnuvanın El sayısı alanı değiştirildi: sayınızı sessizce değiştirmek yerine 10 ile 50 aralığını söyler",
   "changelog.r1300.124": "El sırasında basılan Başlat değiştirildi: turnuva sıraya alınır ve o el sonuçlanınca başlar",
+  "changelog.r1300.151": "Blackjack turnuvasından ayrılmak artık önce soruyor: turnuvada kaldığın sürece ayrılma düğmesi Çekil olarak görünür, geri düğmesi de seni elemeden önce uyarır",
   "changelog.r1300.125": "Biten turnuvanın masada sonsuza dek kalması düzeltildi: sonraki el veya Durdur ile temizlenir, sıralamayı kapatmak da onu kaldırır",
   "changelog.r1300.126": "Masa sayfasındaki oda kodu kartının sayfa kaydırılırken boyut değiştirmesi düzeltildi",
   "changelog.r1300.129": "Gil zar masalarının, mekan odasında kimse koltukta oturmadığı için girişleri reddetmesi düzeltildi",
@@ -9735,6 +9736,9 @@
   "casino.venue.tournamentYouAreOut": "Turnuvadan elendin.",
   "casino.venue.tournamentHandsPlaceholder": "10 ile 50 arası",
   "casino.venue.tournamentPending": "Bu elden sonra başlar. Durdur geri alır.",
+  "casino.venue.tournamentResign": "Çekil",
+  "casino.venue.tournamentResignTitle": "Turnuvadan çekilmek istiyor musun?",
+  "casino.venue.tournamentResignBody": "Masadan kalkarsan bu turnuvadan elenirsin ve turnuva bitene kadar tekrar oturamazsın.",
 
   "casino.venue.roundStake": "Tur başına bahis",
   "casino.venue.roundStakeHint": "Bir tur kapandığında daha düşük atan herkes bahsi kasaya borçlanır, kasa da kazanana öder. Her kayıt gil defterine yazılır.",

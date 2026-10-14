@@ -158,7 +158,7 @@ internal static class BlackjackHosting
 
     public static LocString BrokeStatus(CasinoBlackjackRoomStateDto board, string me)
     {
-        if (board.Tournament is { Live: true } tournament && IsEntrant(tournament, me))
+        if (board.Tournament is { Live: true } tournament && StandingOf(tournament, me) is not null)
         {
             return L.Venue.TournamentYouAreOut;
         }
@@ -166,23 +166,29 @@ internal static class BlackjackHosting
         return board.PracticeRebuy ? L.Tables.RebuysTournamentNote : L.Tables.ReasonRebuyOff;
     }
 
-    private static bool IsEntrant(CasinoBlackjackTournamentDto tournament, string me)
+    public static bool StillInTournament(CasinoBlackjackRoomStateDto board, string me)
+    {
+        return board.Tournament is { Live: true } tournament
+            && StandingOf(tournament, me) is { Eliminated: false };
+    }
+
+    private static CasinoBlackjackStandingDto? StandingOf(CasinoBlackjackTournamentDto tournament, string me)
     {
         var standings = tournament.Standings;
         if (standings is null || me.Length == 0)
         {
-            return false;
+            return null;
         }
 
         for (var index = 0; index < standings.Length; index++)
         {
             if (string.Equals(standings[index].UserId, me, StringComparison.Ordinal))
             {
-                return true;
+                return standings[index];
             }
         }
 
-        return false;
+        return null;
     }
 
     public static long NaturalPayout(CasinoBlackjackRoomStateDto board, long bet)

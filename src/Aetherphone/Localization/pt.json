@@ -7879,6 +7879,7 @@
   "changelog.r1300.122": "Mudamos o botão Dar cartas do anfitrião para Dar cartas agora enquanto a distribuição automática está ligada, e o baralho do crupiê avisa que a mesa dá as cartas pelo relógio",
   "changelog.r1300.123": "Mudamos o campo Mãos do torneio para indicar a faixa de 10 a 50 em vez de alterar o seu número sem avisar",
   "changelog.r1300.124": "Mudamos o Iniciar durante uma mão para enfileirar o torneio: ele começa quando essa mão é liquidada",
+  "changelog.r1300.151": "Mudamos a saída de um torneio de blackjack para perguntar antes: o botão de sair diz Desistir enquanto você ainda está no torneio, e o botão de voltar avisa antes de tirar você dele",
   "changelog.r1300.125": "Corrigido um torneio terminado que ficava na mesa para sempre: ele some com a próxima mão ou com Parar, e fechar a classificação o dispensa",
   "changelog.r1300.126": "Corrigido o cartão do código da sala na folha da mesa, que mudava de tamanho ao rolar",
   "changelog.r1300.129": "Corrigidas as mesas de dados de gil, que recusavam entradas porque numa sala de local ninguém ocupa assento",
@@ -9735,6 +9736,9 @@
   "casino.venue.tournamentYouAreOut": "Você está fora do torneio.",
   "casino.venue.tournamentHandsPlaceholder": "10 a 50",
   "casino.venue.tournamentPending": "Começa depois desta mão. Parar cancela.",
+  "casino.venue.tournamentResign": "Desistir",
+  "casino.venue.tournamentResignTitle": "Desistir do torneio?",
+  "casino.venue.tournamentResignBody": "Sair da mesa tira você deste torneio, e você não poderá se sentar de novo até ele terminar.",
 
   "casino.venue.roundStake": "Aposta por rodada",
   "casino.venue.roundStakeHint": "Quando uma rodada fecha, todos que rolaram menos devem a aposta à casa, e a casa paga o vencedor. Cada lançamento fica no registro de gil.",

@@ -7879,6 +7879,7 @@
   "changelog.r1300.122": "Modification du bouton Distribuer de l'hôte, qui devient Distribuer maintenant quand la distribution automatique est active, le jeu du croupier indiquant que la table distribue à l'horloge",
   "changelog.r1300.123": "Modification du champ Mains du tournoi, qui indique désormais sa plage de 10 à 50 au lieu de changer votre nombre en silence",
   "changelog.r1300.124": "Modification de Lancer pendant une main, qui met désormais le tournoi en attente : il commence au règlement de cette main",
+  "changelog.r1300.151": "Modification de la sortie d'un tournoi de blackjack, qui demande désormais confirmation : le bouton pour partir indique Abandonner tant que tu es en lice, et le bouton retour prévient avant de t'éliminer",
   "changelog.r1300.125": "Correction d'un tournoi terminé qui restait sur la table pour de bon : il s'efface à la main suivante ou avec Arrêter, et fermer le classement le masque",
   "changelog.r1300.126": "Correction de la carte du code de salle dans la fiche de la table, qui changeait de taille pendant le défilement",
   "changelog.r1300.129": "Correction des tables de dés en gils qui refusaient les caves parce qu'une salle de lieu n'a pas de places assises",
@@ -9735,6 +9736,9 @@
   "casino.venue.tournamentYouAreOut": "Tu es éliminé du tournoi.",
   "casino.venue.tournamentHandsPlaceholder": "10 à 50",
   "casino.venue.tournamentPending": "Commence après cette main. Arrêter l'annule.",
+  "casino.venue.tournamentResign": "Abandonner",
+  "casino.venue.tournamentResignTitle": "Abandonner le tournoi ?",
+  "casino.venue.tournamentResignBody": "Quitter la table t'élimine de ce tournoi, et tu ne pourras pas te rasseoir avant qu'il se termine.",
 
   "casino.venue.roundStake": "Mise par manche",
   "casino.venue.roundStakeHint": "À la fin d'une manche, tous ceux qui ont fait un jet inférieur doivent la mise à la maison, et la maison paie le gagnant. Chaque ligne est inscrite au registre des gils.",

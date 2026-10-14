@@ -7879,6 +7879,7 @@
   "changelog.r1300.122": "Se cambió el botón Repartir del anfitrión a Repartir ahora mientras el reparto automático está activo, y la baraja del crupier avisa de que la mesa reparte con el reloj",
   "changelog.r1300.123": "Se cambió el campo Manos del torneo para que indique su rango de 10 a 50 en vez de cambiar tu número sin avisar",
   "changelog.r1300.124": "Se cambió Iniciar durante una mano para que ponga el torneo en cola: empieza cuando esa mano se liquida",
+  "changelog.r1300.151": "Se cambió salir de un torneo de blackjack para que pregunte antes: el botón para irse dice Retirarse mientras sigues dentro, y el botón de volver avisa antes de dejarte fuera",
   "changelog.r1300.125": "Corregido un torneo terminado que se quedaba en la mesa para siempre: desaparece con la siguiente mano o con Detener, y cerrar la clasificación lo oculta",
   "changelog.r1300.126": "Corregida la tarjeta del código de sala en la hoja de la mesa, que cambiaba de tamaño al desplazarse",
   "changelog.r1300.129": "Corregidas las mesas de dados de gil, que rechazaban las entradas porque en una sala de local nadie ocupa asiento",
@@ -9735,6 +9736,9 @@
   "casino.venue.tournamentYouAreOut": "Has quedado fuera del torneo.",
   "casino.venue.tournamentHandsPlaceholder": "10 a 50",
   "casino.venue.tournamentPending": "Empieza después de esta mano. Detener lo cancela.",
+  "casino.venue.tournamentResign": "Retirarse",
+  "casino.venue.tournamentResignTitle": "¿Retirarte del torneo?",
+  "casino.venue.tournamentResignBody": "Si dejas la mesa, quedas fuera de este torneo y no podrás volver a sentarte hasta que termine.",
 
   "casino.venue.roundStake": "Apuesta por ronda",
   "casino.venue.roundStakeHint": "Cuando cierra una ronda, todos los que sacaron menos deben la apuesta a la casa, y la casa paga al ganador. Cada movimiento queda en el registro de gil.",

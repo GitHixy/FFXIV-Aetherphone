@@ -7879,6 +7879,7 @@
   "changelog.r1300.122": "Geben-Schaltfläche des Gastgebers geändert: bei aktivem automatischem Geben heißt sie Jetzt geben, und das Geberdeck sagt, dass der Tisch nach der Uhr gibt",
   "changelog.r1300.123": "Feld Hände im Turnier geändert: Es nennt jetzt den Bereich von 10 bis 50, statt deine Zahl stillschweigend zu ändern",
   "changelog.r1300.124": "Starten während einer Hand geändert: Das Turnier wird vorgemerkt und beginnt, sobald die Hand abgerechnet ist",
+  "changelog.r1300.151": "Das Verlassen eines Blackjack-Turniers fragt jetzt zuerst nach: Solange du noch dabei bist, heißt die Schaltfläche Aufgeben, und die Zurück-Taste warnt, bevor du ausscheidest",
   "changelog.r1300.125": "Behoben, dass ein beendetes Turnier dauerhaft am Tisch blieb: Es verschwindet mit der nächsten Hand oder mit Beenden, und das Schließen der Rangliste blendet es aus",
   "changelog.r1300.126": "Behoben, dass die Raumcode-Karte im Tischblatt beim Scrollen ständig ihre Größe änderte",
   "changelog.r1300.129": "Behoben, dass Gil-Würfeltische Einzahlungen ablehnten, weil in einem Location-Raum niemand einen Platz hat",
@@ -9735,6 +9736,9 @@
   "casino.venue.tournamentYouAreOut": "Du bist aus dem Turnier ausgeschieden.",
   "casino.venue.tournamentHandsPlaceholder": "10 bis 50",
   "casino.venue.tournamentPending": "Beginnt nach dieser Hand. Beenden nimmt es zurück.",
+  "casino.venue.tournamentResign": "Aufgeben",
+  "casino.venue.tournamentResignTitle": "Aus dem Turnier aussteigen?",
+  "casino.venue.tournamentResignBody": "Wenn du den Tisch verlässt, scheidest du aus diesem Turnier aus und kannst dich erst wieder setzen, wenn es vorbei ist.",
 
   "casino.venue.roundStake": "Einsatz pro Runde",
   "casino.venue.roundStakeHint": "Wenn eine Runde endet, schuldet jeder, der niedriger gewürfelt hat, dem Haus den Einsatz, und das Haus zahlt den Gewinner aus. Jeder Posten steht im Gil-Buch.",

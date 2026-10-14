@@ -4,6 +4,7 @@ using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Animation;
 using Aetherphone.Core.Casino;
+using Aetherphone.Core.Confirm;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Lodestone;
 using Aetherphone.Core.Media;
@@ -35,6 +36,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
     private readonly CasinoTablesStore tables;
     private readonly CasinoHistoryStore history;
     private readonly CasinoTurnNotifier turns;
+    private readonly ConfirmService confirm;
     private readonly RemoteImageCache images;
     private readonly LodestoneService lodestone;
     private readonly Venue.TournamentOverlay tournament;
@@ -42,6 +44,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
     private readonly Action leaveRoom;
     private readonly Action<string> openLedger;
     private readonly Action openGilLedger;
+    private readonly Action resignSeat;
     private readonly BlackjackHostedText hostedText = new();
     private readonly CasinoTextCache text = new();
     private readonly BlackjackHandLog handLog = new();
@@ -68,20 +71,23 @@ internal sealed partial class BlackjackTable : ICabinetIdle
     private bool dealing;
 
     public BlackjackTable(CasinoStore chips, CasinoRoomsStore rooms, CasinoTablesStore tables,
-        CasinoHistoryStore history, CasinoTurnNotifier turns, RemoteImageCache images, LodestoneService lodestone,
-        Venue.TournamentOverlay tournament, Action leaveRoom, Action<string> openLedger, Action openGilLedger)
+        CasinoHistoryStore history, CasinoTurnNotifier turns, ConfirmService confirm, RemoteImageCache images,
+        LodestoneService lodestone, Venue.TournamentOverlay tournament, Action leaveRoom, Action<string> openLedger,
+        Action openGilLedger)
     {
         this.chips = chips;
         this.rooms = rooms;
         this.tables = tables;
         this.history = history;
         this.turns = turns;
+        this.confirm = confirm;
         this.images = images;
         this.lodestone = lodestone;
         this.tournament = tournament;
         this.leaveRoom = leaveRoom;
         this.openLedger = openLedger;
         this.openGilLedger = openGilLedger;
+        resignSeat = StandUp;
         seatFlow = new BlackjackSeatFlow(tables);
         composer = new BetComposer("##blackjackBet");
         gilComposer = new ClassicBetComposer("##blackjackGilBet");
@@ -119,6 +125,39 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
         return BlackjackDeckLayout.DeckHeight(MathF.Max(composerHeight,
             ClassicBetComposer.HeightFor(1f) + BetComposer.Pad * 2f));
+    }
+
+    public bool ForfeitsTournament
+    {
+        get
+        {
+            var board = projection.Board;
+            if (board is null || !entered || seatFlow.StandQueued)
+            {
+                return false;
+            }
+
+            if (!BlackjackRules.IsSeat(mySeat) && !CasinoSeatMachine.Holds(seatFlow.Stage))
+            {
+                return false;
+            }
+
+            return BlackjackHosting.StillInTournament(board, rooms.AccountId);
+        }
+    }
+
+    public void ConfirmResign(Action resign)
+    {
+        confirm.Ask(new ConfirmRequest
+        {
+            Title = Loc.T(L.Venue.TournamentResignTitle),
+            Message = Loc.T(L.Venue.TournamentResignBody),
+            ConfirmLabel = Loc.T(L.Venue.TournamentResign),
+            CancelLabel = Loc.T(L.Strip.KeepPlaying),
+            Sheet = true,
+            Danger = true,
+            Confirm = resign,
+        });
     }
 
     public void Enter(string tableId)

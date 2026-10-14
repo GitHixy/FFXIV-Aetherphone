@@ -2405,6 +2405,8 @@ internal static class L
                 "Changed the tournament Hands field to name its 10 to 50 band instead of quietly changing your number"),
             new("changelog.r1300.124",
                 "Changed Start pressed during a hand to queue the tournament: it begins when that hand settles"),
+            new("changelog.r1300.151",
+                "Changed leaving a blackjack tournament to ask first: the leave button reads Resign while you are still in, and the back button warns before taking you out"),
             new("changelog.r1300.139",
                 "Changed the Venues app to pick up a table newly hosted at a venue within half a minute instead of up to a minute later"),
             new("changelog.r1300.137",
@@ -11949,6 +11951,9 @@ internal static class L
         public static readonly LocString TournamentYouAreOut = new("casino.venue.tournamentYouAreOut", "You're out of the tournament.");
         public static readonly LocString TournamentHandsPlaceholder = new("casino.venue.tournamentHandsPlaceholder", "10 to 50");
         public static readonly LocString TournamentPending = new("casino.venue.tournamentPending", "Starts after this hand. Stop takes it back.");
+        public static readonly LocString TournamentResign = new("casino.venue.tournamentResign", "Resign");
+        public static readonly LocString TournamentResignTitle = new("casino.venue.tournamentResignTitle", "Resign from the tournament?");
+        public static readonly LocString TournamentResignBody = new("casino.venue.tournamentResignBody", "Leaving the table takes you out of this tournament, and you can't sit back down until it ends.");
 
         public static readonly LocString RoundStake = new("casino.venue.roundStake", "Stake per round");
         public static readonly LocString RoundStakeHint = new("casino.venue.roundStakeHint", "When a round closes, everyone who rolled lower owes the house the stake, and the house pays the winner. Each line goes on the gil ledger.");

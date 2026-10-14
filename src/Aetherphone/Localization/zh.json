@@ -7879,6 +7879,7 @@
   "changelog.r1300.122": "调整桌主的发牌按钮：自动发牌开启时显示为立即发牌，荷官牌组会提示本桌按计时发牌",
   "changelog.r1300.123": "调整锦标赛的手数栏：现在会说明 10 到 50 的范围，而不是悄悄改掉你的数字",
   "changelog.r1300.124": "调整在一手牌进行中按开始的行为：锦标赛会排队，等这手结算后开始",
+  "changelog.r1300.151": "调整了离开二十一点锦标赛的流程：仍在比赛中时离开按钮显示为弃权，返回按钮也会在让你出局前先提醒",
   "changelog.r1300.125": "修复了已结束的锦标赛一直留在桌上的问题：下一手或点按停止后会清除，关闭排名也会将其收起",
   "changelog.r1300.126": "修复了桌面信息页中的房间码卡片在滚动时不断改变大小的问题",
   "changelog.r1300.129": "修复了金币骰子桌因场馆房间没有座位而拒绝买入的问题",
@@ -9735,6 +9736,9 @@
   "casino.venue.tournamentYouAreOut": "你已被淘汰出锦标赛。",
   "casino.venue.tournamentHandsPlaceholder": "10到50",
   "casino.venue.tournamentPending": "本手结束后开始。点按停止可取消。",
+  "casino.venue.tournamentResign": "弃权",
+  "casino.venue.tournamentResignTitle": "要退出锦标赛吗？",
+  "casino.venue.tournamentResignBody": "离开牌桌会让你退出本场锦标赛，比赛结束前无法再次入座。",
 
   "casino.venue.roundStake": "每轮赌注",
   "casino.venue.roundStakeHint": "一轮结束时，掷出较低点数的所有人都欠庄家赌注，由庄家向胜者派彩。每笔记录都会记入金币账本。",
