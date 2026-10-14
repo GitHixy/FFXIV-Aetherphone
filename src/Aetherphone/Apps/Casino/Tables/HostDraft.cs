@@ -55,6 +55,8 @@ internal sealed class HostDraft
 
     public bool Practice => Currency == CasinoCurrencies.Practice;
 
+    public bool HostDeals => SeatBanked && DealerMode == CasinoDealerModes.Host;
+
     public long[] BetRungs => Gil ? HostLadders.Gil : HostLadders.Bets;
 
     public long StackValue => HostLadders.PracticeStacks[Stack];
@@ -319,7 +321,7 @@ internal sealed class HostDraft
             FaceUp: Practice && FaceUp,
             DealerMode: SeatBanked ? DealerMode : CasinoDealerModes.House,
             CoDealers: null,
-            AutoDeal: !SeatBanked || DealerMode == CasinoDealerModes.House || AutoDeal,
+            AutoDeal: !HostDeals || AutoDeal,
             HouseRules: rules,
             Location: location,
             Currency: Currency,

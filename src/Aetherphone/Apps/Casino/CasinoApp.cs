@@ -1312,7 +1312,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         }
 
         hostSheet.Enter();
-        router.Push(new CasinoRoute(CasinoScreen.HostTable, CasinoGames.Blackjack));
+        PushHostSheet(CasinoGames.Blackjack);
     }
 
     private void OpenHoldemHostSheet()
@@ -1323,7 +1323,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         }
 
         hostSheet.Enter(Core.Casino.HoldemRules.Kind);
-        router.Push(new CasinoRoute(CasinoScreen.HostTable, CasinoGames.Holdem));
+        PushHostSheet(CasinoGames.Holdem);
     }
 
     private void OpenHostGame(Tables.HostGame game, bool preferGil)
@@ -1334,7 +1334,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         }
 
         hostSheet.EnterGame(game, preferGil);
-        routes.Push(new CasinoRoute(CasinoScreen.HostTable, Tables.HostGames.Of(game).GameId));
+        PushHostSheet(Tables.HostGames.Of(game).GameId);
     }
 
     private void OpenHostDraft()
@@ -1346,8 +1346,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         }
 
         hostSheet.EnterDraft(saved);
-        routes.Push(new CasinoRoute(CasinoScreen.HostTable,
-            Tables.HostGames.Of(Tables.HostDraft.GameOf(saved)).GameId));
+        PushHostSheet(Tables.HostGames.Of(Tables.HostDraft.GameOf(saved)).GameId);
     }
 
     private void OpenHoldemPit()
