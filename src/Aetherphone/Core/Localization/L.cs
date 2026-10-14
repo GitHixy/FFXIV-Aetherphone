@@ -12025,6 +12025,65 @@ internal static class L
     internal static class HostDesk
     {
         public static readonly LocString GoToTable = new("casino.hostDesk.goToTable", "Go to table");
+        public static readonly LocString Intro = new("casino.hostDesk.intro", "Run games at your venue. Players join with your code, and every gil trade writes itself into your ledger.");
+        public static readonly LocString TableLine = new("casino.hostDesk.tableLine", "{0}, {1}, {2}");
+        public static readonly LocString StatusOpen = new("casino.hostDesk.statusOpen", "OPEN");
+        public static readonly LocString StatusPaused = new("casino.hostDesk.statusPaused", "PAUSED");
+        public static readonly LocString Here = new("casino.hostDesk.here", "{0} here");
+        public static readonly LocString HereKnocking = new("casino.hostDesk.hereKnocking", "{0} here, {1} knocking");
+        public static readonly LocString OneTable = new("casino.hostDesk.oneTable", "One table at a time. Close this one to host another game.");
+        public static readonly LocString Manage = new("casino.hostDesk.manage", "Manage");
+        public static readonly LocString HostAgainEyebrow = new("casino.hostDesk.hostAgainEyebrow", "HOST AGAIN");
+        public static readonly LocString OpenDraft = new("casino.hostDesk.openDraft", "Open");
+        public static readonly LocString PickGame = new("casino.hostDesk.pickGame", "Pick a game");
+        public static readonly LocString PickGameLine = new("casino.hostDesk.pickGameLine", "One code for any game");
+        public static readonly LocString MyLedgerLine = new("casino.hostDesk.myLedgerLine", "Every gil trade you were part of in the last 30 days");
+        public static readonly LocString CodeCaption = new("casino.hostDesk.codeCaption", "Table code. Read it out or paste it in your venue chat.");
+        public static readonly LocString Knocking = new("casino.hostDesk.knocking", "Knocking");
+        public static readonly LocString WantsToJoin = new("casino.hostDesk.wantsToJoin", "Wants to join");
+        public static readonly LocString Decline = new("casino.hostDesk.decline", "Decline");
+        public static readonly LocString Players = new("casino.hostDesk.players", "Players");
+        public static readonly LocString PlayersCount = new("casino.hostDesk.playersCount", "Players, {0}");
+        public static readonly LocString LiveTag = new("casino.hostDesk.liveTag", "Live");
+        public static readonly LocString WaitingTitle = new("casino.hostDesk.waitingTitle", "Waiting for players");
+        public static readonly LocString WaitingLine = new("casino.hostDesk.waitingLine", "People show up here the second they join or knock.");
+        public static readonly LocString Away = new("casino.hostDesk.away", "Away");
+        public static readonly LocString PlayerOptions = new("casino.hostDesk.playerOptions", "Options for {0}");
+        public static readonly LocString MakeCoDealer = new("casino.hostDesk.makeCoDealer", "Make co-dealer");
+        public static readonly LocString RemoveCoDealer = new("casino.hostDesk.removeCoDealer", "Remove co-dealer");
+        public static readonly LocString RemoveFromTable = new("casino.hostDesk.removeFromTable", "Remove from table");
+        public static readonly LocString CoDealersFull = new("casino.hostDesk.coDealersFull", "All {0} co-dealer spots are taken. Remove one first.");
+        public static readonly LocString TradeSyncLine = new("casino.hostDesk.tradeSyncLine", "Writes every gil trade you make while this table is open.");
+        public static readonly LocString TakenIn = new("casino.hostDesk.takenIn", "Taken in");
+        public static readonly LocString PaidOut = new("casino.hostDesk.paidOut", "Paid out");
+        public static readonly LocString Owed = new("casino.hostDesk.owed", "Owed");
+        public static readonly LocString SessionLine = new("casino.hostDesk.sessionLine", "Buy-ins, stacks and net for every seat.");
+        public static readonly LocString ManageTitle = new("casino.hostDesk.manageTitle", "Manage table");
+        public static readonly LocString PauseTable = new("casino.hostDesk.pauseTable", "Pause table");
+        public static readonly LocString ResumeTable = new("casino.hostDesk.resumeTable", "Resume table");
+        public static readonly LocString PauseLine = new("casino.hostDesk.pauseLine", "Stops new rounds. Everyone keeps their place.");
+        public static readonly LocString ResumeLine = new("casino.hostDesk.resumeLine", "Rounds start again. Nobody lost their place.");
+        public static readonly LocString DealNext = new("casino.hostDesk.dealNext", "Deal next round");
+        public static readonly LocString DealLine = new("casino.hostDesk.dealLine", "Starts the next round and takes you to the table.");
+        public static readonly LocString DealPausedLine = new("casino.hostDesk.dealPausedLine", "Resume the table first to deal.");
+        public static readonly LocString CoDealersLine = new("casino.hostDesk.coDealersLine", "Up to {0} trusted players run the table with you. Pick them from a player's menu.");
+        public static readonly LocString CoDealerCount = new("casino.hostDesk.coDealerCount", "{0} of {1}");
+        public static readonly LocString RenameTitle = new("casino.hostDesk.renameTitle", "Rename table");
+        public static readonly LocString RenameLine = new("casino.hostDesk.renameLine", "Players see the new name right away.");
+        public static readonly LocString CloseTitle = new("casino.hostDesk.closeTitle", "Close table");
+        public static readonly LocString CloseLine = new("casino.hostDesk.closeLine", "Ends it for everyone.");
+        public static readonly LocString CloseGilLine = new("casino.hostDesk.closeGilLine", "Ends it for everyone. Anything still owed stays in My gil ledger.");
+        public static readonly LocString CloseBook = new("casino.hostDesk.closeBook", "Close the book");
+        public static readonly LocString CloseNamed = new("casino.hostDesk.closeNamed", "Close {0}?");
+        public static readonly LocString CloseBody = new("casino.hostDesk.closeBody", "Everyone at the table goes back to Live, and you can host again with the same settings.");
+        public static readonly LocString CloseGilBody = new("casino.hostDesk.closeGilBody", "Everyone at the table goes back to Live. Anything still owed, like a seat's stack, stays in My gil ledger, and you can host again with the same settings.");
+        public static readonly LocString KeepOpen = new("casino.hostDesk.keepOpen", "Keep it open");
+        public static readonly LocString LedgerIntro = new("casino.hostDesk.ledgerIntro", "Trade sync writes these for you. Gil you receive is a buy-in, gil you send is a payout. Tap one to mark it paid or remove it.");
+        public static readonly LocString EntryMeta = new("casino.hostDesk.entryMeta", "{0}, {1}");
+        public static readonly LocString PillRecorded = new("casino.hostDesk.pillRecorded", "RECORDED");
+        public static readonly LocString PillOwed = new("casino.hostDesk.pillOwed", "OWED");
+        public static readonly LocString AddByHand = new("casino.hostDesk.addByHand", "Missed a trade? Add it by hand");
+        public static readonly LocString HostPill = new("casino.hostDesk.hostPill", "Host");
     }
 
     internal static class Book
