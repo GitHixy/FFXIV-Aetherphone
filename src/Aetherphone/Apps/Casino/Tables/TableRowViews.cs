@@ -15,8 +15,8 @@ internal static class TableRowViews
 
     public static LocString ListingWord(int listing) => listing switch
     {
-        CasinoListings.Open => L.Tables.SummaryOpen,
-        CasinoListings.Knock => L.Tables.SummaryKnock,
+        CasinoListings.Open => L.HostSetup.SummaryAnyone,
+        CasinoListings.Knock => L.HostSetup.SummaryKnock,
         _ => L.Tables.SummaryInvite,
     };
 

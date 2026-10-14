@@ -201,8 +201,8 @@ public sealed class HostDeskTests
         };
 
         Assert.Equal(Loc.T(L.HostDesk.TableLine, Loc.T(L.Venue.GameRaffle), Loc.T(L.Tables.CurrencyGil),
-            Loc.T(L.Tables.SummaryKnock)), TableRowViews.HostLine(raffle));
-        Assert.Equal(L.Tables.SummaryOpen.Key, TableRowViews.ListingWord(CasinoListings.Open).Key);
+            Loc.T(L.HostSetup.SummaryKnock)), TableRowViews.HostLine(raffle));
+        Assert.Equal(L.HostSetup.SummaryAnyone.Key, TableRowViews.ListingWord(CasinoListings.Open).Key);
         Assert.Equal(L.Tables.SummaryInvite.Key, TableRowViews.ListingWord(CasinoListings.Private).Key);
     }
 
