@@ -258,12 +258,12 @@ internal sealed partial class CasinoApp
         Squircle.FillVerticalGradient(drawList, card.Min, card.Max, radius, ImGui.GetColorU32(JackpotCrown),
             ImGui.GetColorU32(JackpotBed));
         var inset = card.Inset(6f * scale);
-        CasinoLights.BulbChase(drawList, inset, radius - 6f * scale, scale, stage.Phase, CasinoLights.BulbPitch,
+        CasinoLights.BulbChase(drawList, inset, radius - 6f * scale, scale, floorLights.Phase, CasinoLights.BulbPitch,
             CasinoColors.Money, CasinoColors.LightA, 1f);
         var signHeight = CasinoSigns.HeightToFit(CasinoSign.Jackpot, card.Width * 0.7f, JackpotSignHeight * scale);
         var signCenter = new Vector2(card.Center.X, card.Min.Y + card.Height * 0.24f);
         CasinoSigns.Draw(drawList, CasinoSign.Jackpot, signCenter, signHeight, CasinoColors.LightA,
-            0.85f + 0.15f * MathF.Sin(stage.Phase * 3f));
+            0.85f + 0.15f * MathF.Sin(floorLights.Phase * 3f));
         jackpotRoll.Update(casino.Jackpot, delta);
         var amount = NumberText.Compact(jackpotRoll.Display);
         var style = TextStyles.LargeTitle;

@@ -160,6 +160,8 @@ Transparent images shared in Chirper, Aethergram and Velvet posts keep their cle
 
 Gamba's venue browser and table ledger each have a refresh button to fetch the latest rooms or gil entries without leaving the page. Gil Deathroll, dice and raffle rooms also open My gil ledger directly, with Back returning to the room.
 
+The Floor's jackpot and challenge lights animate while browsing, even before opening a game.
+
 ## And everything else a phone should do
 
 **Plays the game with you**<br>
