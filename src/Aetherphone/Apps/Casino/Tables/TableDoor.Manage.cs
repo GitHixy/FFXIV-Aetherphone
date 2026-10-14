@@ -109,8 +109,6 @@ internal sealed partial class TableDoor
     internal static LocString CloseLabelFor(CasinoTableRowDto? card) =>
         card is not null && CasinoBookRules.IsBook(card.GameKind) ? L.HostDesk.CloseBook : L.HostDesk.CloseTitle;
 
-    internal static bool Tappable(DoorControl control) => control != DoorControl.CoDealers;
-
     private static FontAwesomeIcon IconOf(DoorControl control, CasinoTableRowDto card) => control switch
     {
         DoorControl.Pause => card.Paused ? FontAwesomeIcon.Play : FontAwesomeIcon.Pause,
@@ -233,7 +231,7 @@ internal sealed partial class TableDoor
     private bool DrawRow(ImDrawListPtr drawList, AppSkin ui, DoorControl control, CasinoTableRowDto card, in Rect row,
         bool first, bool last, bool enabled, float scale)
     {
-        var tappable = Tappable(control) && enabled;
+        var tappable = enabled;
         var hovered = tappable && UiInteract.Hover(row.Min, row.Max);
         if (hovered)
         {
@@ -295,6 +293,9 @@ internal sealed partial class TableDoor
                 inlineReason = string.Empty;
                 tables.Deal(roomId);
                 openTable(roomId);
+                break;
+            case DoorControl.CoDealers:
+                scrollToPlayers = true;
                 break;
             case DoorControl.Rename:
                 renaming = !renaming;

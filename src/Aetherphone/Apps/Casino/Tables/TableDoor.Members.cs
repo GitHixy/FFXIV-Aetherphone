@@ -306,6 +306,12 @@ internal sealed partial class TableDoor
     private void DrawMembers(AppSkin ui, CasinoTableDoorDto? door, CasinoTableRowDto card, float width, float scale)
     {
         RefreshMembers(door, card);
+        if (scrollToPlayers)
+        {
+            scrollToPlayers = false;
+            ImGui.SetScrollHereY(0f);
+        }
+
         var title = members.Count > 0 ? texts.Count(L.HostDesk.PlayersCount, members.Count) : Loc.T(L.HostDesk.Players);
         DrawTitle(ui, title, width, true, scale);
         if (members.Count == 0)

@@ -56,6 +56,7 @@ internal sealed partial class TableDoor
     private string nameBuffer = string.Empty;
     private bool nameSeeded;
     private bool renaming;
+    private bool scrollToPlayers;
     private long copiedCodeAtTick;
     private long copiedInviteAtTick;
     private CasinoTableRowDto? statusSource;
@@ -84,6 +85,7 @@ internal sealed partial class TableDoor
         nameBuffer = string.Empty;
         nameSeeded = false;
         renaming = false;
+        scrollToPlayers = false;
         copiedCodeAtTick = 0;
         copiedInviteAtTick = 0;
         menu.Close();
@@ -100,6 +102,7 @@ internal sealed partial class TableDoor
         nameBuffer = string.Empty;
         nameSeeded = false;
         renaming = false;
+        scrollToPlayers = false;
         menu.Close();
         tables.ForgetDoor();
         tables.ForgetBookLedgerAdmission();
