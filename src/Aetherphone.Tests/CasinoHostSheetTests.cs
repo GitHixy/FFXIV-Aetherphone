@@ -362,25 +362,6 @@ public sealed class CasinoHostSheetTests
     }
 
     [Fact]
-    public void TheHostSheetSkipsThePlayForStepForABook()
-    {
-        var book = HostFlowLayout.Steps(HostGame.Book);
-        Assert.Equal(HostStep.None, book & HostStep.PlayFor);
-        Assert.Equal(1, HostFlowLayout.StepOrdinal(book, HostStep.Game));
-        Assert.Equal(0, HostFlowLayout.StepOrdinal(book, HostStep.PlayFor));
-        Assert.Equal(2, HostFlowLayout.StepOrdinal(book, HostStep.Table));
-
-        for (var game = HostGame.Blackjack; game < HostGame.Book; game++)
-        {
-            var steps = HostFlowLayout.Steps(game);
-            Assert.Equal(HostFlowLayout.EveryStep, steps);
-            Assert.Equal(1, HostFlowLayout.StepOrdinal(steps, HostStep.Game));
-            Assert.Equal(2, HostFlowLayout.StepOrdinal(steps, HostStep.PlayFor));
-            Assert.Equal(3, HostFlowLayout.StepOrdinal(steps, HostStep.Table));
-        }
-    }
-
-    [Fact]
     public void ABookPayoutCapRunsFromTheBottomOfTheLadderToTheBank()
     {
         var draft = new HostDraft();

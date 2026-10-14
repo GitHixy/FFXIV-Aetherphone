@@ -17,6 +17,7 @@ internal sealed class CasinoStore : IDisposable
     private readonly StoreWork work = new("Casino");
     private readonly object pendingSittingsSwapLock = new();
     private readonly object bonusGate = new();
+    private readonly object cashOutGate = new();
 
     private volatile CasinoStateDto? state;
     private volatile CasinoFeatureSet features = CasinoFeatureSet.Empty;
@@ -27,10 +28,15 @@ internal sealed class CasinoStore : IDisposable
     private string bonusIntentId = string.Empty;
     private volatile bool buyingChips;
     private volatile bool closingSitting;
+    private volatile bool cashingOutChips;
     private volatile bool savingLimits;
     private CasinoBuyChipsDto? buyResult;
     private int buyFailed;
     private CasinoSittingResultDto? closeResult;
+    private CasinoCashOutChipsDto? cashOutResult;
+    private long cashOutIntentCoins;
+    private long cashOutIntentStack;
+    private string cashOutIntentId = string.Empty;
     private CasinoLimitsDto? limitsResult;
     private int moneyMoveFailed;
     private int limitsSaveFailed;
@@ -54,9 +60,11 @@ internal sealed class CasinoStore : IDisposable
 
     public bool ClosingSitting => closingSitting;
 
+    public bool CashingOutChips => cashingOutChips;
+
     public bool SavingLimits => savingLimits;
 
-    public bool MovingMoney => buyingChips || closingSitting;
+    public bool MovingMoney => buyingChips || closingSitting || cashingOutChips;
 
     public string PendingSittingId
     {
@@ -115,6 +123,11 @@ internal sealed class CasinoStore : IDisposable
     public CasinoSittingResultDto? TakeCloseResult()
     {
         return Interlocked.Exchange(ref closeResult, null);
+    }
+
+    public CasinoCashOutChipsDto? TakeCashOutResult()
+    {
+        return Interlocked.Exchange(ref cashOutResult, null);
     }
 
     public CasinoLimitsDto? TakeLimitsResult()
@@ -414,6 +427,94 @@ internal sealed class CasinoStore : IDisposable
         }, () => closingSitting = false);
     }
 
+    public bool CashOutChips(long coinAmount)
+    {
+        var bankroll = state?.Sitting;
+        if (MovingMoney || !session.IsSignedIn || coinAmount <= 0 || bankroll is not { Id.Length: > 0 })
+        {
+            return false;
+        }
+
+        cashingOutChips = true;
+        var clientActionId = CashOutIntentFor(coinAmount, bankroll.Stack);
+        work.Run("cash out chips", async token =>
+        {
+            var result = await casino.CashOutChipsAsync(coinAmount, clientActionId, token).ConfigureAwait(false);
+            if (result is null)
+            {
+                Interlocked.Exchange(ref moneyMoveFailed, 1);
+                return;
+            }
+
+            ForgetCashOutIntent(clientActionId);
+            var current = state;
+            if (current is not null)
+            {
+                state = CashOutChipsAbsorbedInto(current, result);
+            }
+
+            if (result.Granted)
+            {
+                coins.AbsorbLocalAward(result.Balance);
+            }
+
+            Interlocked.Exchange(ref cashOutResult, result);
+            RefreshNow();
+        }, () => cashingOutChips = false);
+        return true;
+    }
+
+    internal static CasinoStateDto CashOutChipsAbsorbedInto(CasinoStateDto current, CasinoCashOutChipsDto result)
+    {
+        if (!result.Granted)
+        {
+            return current;
+        }
+
+        var next = current with { Balance = result.Balance };
+        if (result.Sitting is { Id.Length: > 0 } sitting)
+        {
+            return next with { Sitting = sitting };
+        }
+
+        if (result.Stack > 0 && next.Sitting is { } bankroll)
+        {
+            return next with { Sitting = bankroll with { Stack = result.Stack } };
+        }
+
+        return next with { Sitting = null };
+    }
+
+    internal static bool KeepsCashOutIntent(string intentId, long intentCoins, long intentStack, long coinAmount,
+        long stack) =>
+        intentId.Length > 0 && intentCoins == coinAmount && intentStack == stack;
+
+    private string CashOutIntentFor(long coinAmount, long stack)
+    {
+        lock (cashOutGate)
+        {
+            if (!KeepsCashOutIntent(cashOutIntentId, cashOutIntentCoins, cashOutIntentStack, coinAmount, stack))
+            {
+                cashOutIntentCoins = coinAmount;
+                cashOutIntentStack = stack;
+                cashOutIntentId = Guid.NewGuid().ToString("N");
+            }
+
+            return cashOutIntentId;
+        }
+    }
+
+    private void ForgetCashOutIntent(string clientActionId)
+    {
+        lock (cashOutGate)
+        {
+            if (string.Equals(cashOutIntentId, clientActionId, StringComparison.Ordinal))
+            {
+                cashOutIntentId = string.Empty;
+            }
+        }
+    }
+
     public void SetLimits(long? selfLossLimit)
     {
         if (savingLimits || !session.IsSignedIn)
@@ -540,6 +641,12 @@ internal sealed class CasinoStore : IDisposable
             Interlocked.Exchange(ref buyResult, null);
             Interlocked.Exchange(ref buyFailed, 0);
             Interlocked.Exchange(ref closeResult, null);
+            Interlocked.Exchange(ref cashOutResult, null);
+            lock (cashOutGate)
+            {
+                cashOutIntentId = string.Empty;
+            }
+
             Interlocked.Exchange(ref limitsResult, null);
             Interlocked.Exchange(ref bonusResult, null);
             Interlocked.Exchange(ref bonusFailed, 0);
