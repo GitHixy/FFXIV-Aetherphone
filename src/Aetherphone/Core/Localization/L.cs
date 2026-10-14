@@ -11560,7 +11560,6 @@ internal static class L
         public static readonly LocString KnockDeniedTitle = new("casino.tables.knockDeniedTitle", "Request declined");
         public static readonly LocString KnockAgain = new("casino.tables.knockAgain", "Ask again");
         public static readonly LocString HostTitle = new("casino.tables.hostTitle", "Host a table");
-        public static readonly LocString SectionRules = new("casino.tables.sectionRules", "House rules");
         public static readonly LocString HostName = new("casino.tables.hostName", "Name");
         public static readonly LocString HostNameHint = new("casino.tables.hostNameHint", "Your name if empty");
         public static readonly LocString HostSeats = new("casino.tables.hostSeats", "Seats");
@@ -11575,14 +11574,11 @@ internal static class L
         public static readonly LocString Rebuys = new("casino.tables.rebuys", "Allow rebuys");
         public static readonly LocString FaceUp = new("casino.tables.faceUp", "Cards face up for everyone");
         public static readonly LocString Bank = new("casino.tables.bank", "Your bank");
-        public static readonly LocString MaxPayout = new("casino.tables.maxPayout", "Max payout a hand");
         public static readonly LocString TurnClock = new("casino.tables.turnClock", "Turn clock");
         public static readonly LocString SecondsValue = new("casino.tables.secondsValue", "{0} s");
-        public static readonly LocString TimeBank = new("casino.tables.timeBank", "Time bank, 3 times 10 s");
         public static readonly LocString DealerMode = new("casino.tables.dealerMode", "Who deals");
         public static readonly LocString DealerHouse = new("casino.tables.dealerHouse", "The clock");
         public static readonly LocString DealerHost = new("casino.tables.dealerHost", "I deal");
-        public static readonly LocString AutoDeal = new("casino.tables.autoDeal", "Deal automatically on the betting clock");
         public static readonly LocString CoDealersNote = new("casino.tables.coDealersNote", "Once players sit, promote up to 3 co-dealers from the table door. They get the same Deal and Pause controls.");
         public static readonly LocString CoDealersHoldemNote = new("casino.tables.coDealersHoldemNote", "Poker tables are dealt by the house, so they take no co-dealers.");
         public static readonly LocString DealerChipNote = new("casino.tables.dealerChipNote", "Chip tables are dealt by the house on the clock. Play for practice or gil to deal yourself and add co-dealers.");
@@ -11667,14 +11663,11 @@ internal static class L
         public static readonly LocString RebuyTo = new("casino.tables.rebuyTo", "Rebuy to {0}");
         public static readonly LocString StepGame = new("casino.tables.stepGame", "Pick a game");
         public static readonly LocString StepPlayFor = new("casino.tables.stepPlayFor", "Play for");
-        public static readonly LocString StepTable = new("casino.tables.stepTable", "Set the table");
         public static readonly LocString GameBlackjackLine = new("casino.tables.gameBlackjackLine", "Beat the dealer to 21. Every seat plays on its own.");
         public static readonly LocString GameHoldemLine = new("casino.tables.gameHoldemLine", "Texas Hold'em, player against player.");
         public static readonly LocString GameDiceLine = new("casino.tables.gameDiceLine", "Everyone rolls in one shared, fair log.");
         public static readonly LocString GameDeathrollLine = new("casino.tables.gameDeathrollLine", "Roll down from a number. Whoever rolls 1 loses.");
         public static readonly LocString GameRaffleLine = new("casino.tables.gameRaffleLine", "Hand out tickets. One fair draw picks the winner.");
-        public static readonly LocString PlayCoins = new("casino.tables.playCoins", "Coins");
-        public static readonly LocString PlayCoinsLine = new("casino.tables.playCoinsLine", "Players bet their own coins and every house rule applies.");
         public static readonly LocString PlayPracticeLine = new("casino.tables.playPracticeLine", "Everyone gets a free practice stack. Nothing to win or lose.");
         public static readonly LocString PlayGilLine = new("casino.tables.playGilLine", "You are the bank in gil. Every buy-in and payout goes in the table's gil ledger.");
         public static readonly LocString PlayRoomsNoCoins = new("casino.tables.playRoomsNoCoins", "Rooms play for practice or gil.");
@@ -11684,22 +11677,16 @@ internal static class L
         public static readonly LocString BetsRange = new("casino.tables.betsRange", "{0} to {1}");
         public static readonly LocString GilRange = new("casino.tables.gilRange", "{0} to {1} gil");
         public static readonly LocString GilValue = new("casino.tables.gilValue", "{0} gil");
-        public static readonly LocString DiceRange = new("casino.tables.diceRange", "1 to {0}");
         public static readonly LocString JoinInvite = new("casino.tables.joinInvite", "Invite only");
-        public static readonly LocString JoinKnock = new("casino.tables.joinKnock", "Ask to join");
-        public static readonly LocString JoinOpen = new("casino.tables.joinOpen", "Open");
         public static readonly LocString JoinInviteLine = new("casino.tables.joinInviteLine", "Only people with your room code can sit. The table stays off the list.");
         public static readonly LocString JoinKnockLine = new("casino.tables.joinKnockLine", "Listed in Tables. You let each player in from the door.");
         public static readonly LocString JoinOpenLine = new("casino.tables.joinOpenLine", "Listed in Tables. Anyone can sit while seats are free.");
-        public static readonly LocString MoreOptions = new("casino.tables.moreOptions", "More options");
         public static readonly LocString SummaryBlackjack = new("casino.tables.summaryBlackjack", "{0}, {1} seats, bets {2}, {3}");
         public static readonly LocString SummaryHoldem = new("casino.tables.summaryHoldem", "{0}, {1} seats, blinds {2}, {3}");
         public static readonly LocString SummaryDice = new("casino.tables.summaryDice", "{0}, rolls 1 to {1}, {2}");
         public static readonly LocString SummaryDeathroll = new("casino.tables.summaryDeathroll", "{0}, from {1}, stake {2}, {3}");
         public static readonly LocString SummaryRaffle = new("casino.tables.summaryRaffle", "{0}, {1}");
         public static readonly LocString SummaryInvite = new("casino.tables.summaryInvite", "invite only");
-        public static readonly LocString SummaryKnock = new("casino.tables.summaryKnock", "ask to join");
-        public static readonly LocString SummaryOpen = new("casino.tables.summaryOpen", "open to all");
         public static readonly LocString CodeHeading = new("casino.tables.codeHeading", "Room code");
         public static readonly LocString CodeCopy = new("casino.tables.codeCopy", "Copy");
         public static readonly LocString CodeCopied = new("casino.tables.codeCopied", "Copied");
@@ -11845,6 +11832,74 @@ internal static class L
     internal static class HostSetup
     {
         public static readonly LocString RulesTitle = new("casino.hostSetup.rulesTitle", "Table rules");
+        public static readonly LocString Change = new("casino.hostSetup.change", "Change");
+        public static readonly LocString Done = new("casino.hostSetup.done", "Done");
+        public static readonly LocString TableHeading = new("casino.hostSetup.tableHeading", "The table");
+        public static readonly LocString ChipsHint = new("casino.hostSetup.chipsHint", "Chips from the Gamba cashier. The house clock deals, so every seat can always play out.");
+        public static readonly LocString BookGilOnly = new("casino.hostSetup.bookGilOnly", "The Book is a gil ledger.");
+        public static readonly LocString BankHint = new("casino.hostSetup.bankHint", "The gil you bring to cover payouts tonight.");
+        public static readonly LocString BlindsHint = new("casino.hostSetup.blindsHint", "Players buy in for {0} to {1} big blinds.");
+        public static readonly LocString RollsUpTo = new("casino.hostSetup.rollsUpTo", "Rolls up to");
+        public static readonly LocString RollsHint = new("casino.hostSetup.rollsHint", "Same as /random {0} in game.");
+        public static readonly LocString StartFrom = new("casino.hostSetup.startFrom", "Start from");
+        public static readonly LocString DuelStake = new("casino.hostSetup.duelStake", "Stake per duel");
+        public static readonly LocString DuelStakeHint = new("casino.hostSetup.duelStakeHint", "The house holds both stakes and pays the winner.");
+        public static readonly LocString RaffleInfo = new("casino.hostSetup.raffleInfo", "Players buy tickets at the table. You set the ticket price there and draw when you are ready.");
+        public static readonly LocString JoinAnyone = new("casino.hostSetup.joinAnyone", "Anyone");
+        public static readonly LocString JoinKnock = new("casino.hostSetup.joinKnock", "Knock");
+        public static readonly LocString SummaryAnyone = new("casino.hostSetup.summaryAnyone", "anyone can join");
+        public static readonly LocString SummaryKnock = new("casino.hostSetup.summaryKnock", "knock to join");
+        public static readonly LocString Optional = new("casino.hostSetup.optional", "optional");
+        public static readonly LocString NamePlaceholder = new("casino.hostSetup.namePlaceholder", "e.g. Velvet Room {0}");
+        public static readonly LocString InviteOnlyNote = new("casino.hostSetup.inviteOnlyNote", "Invite only tables are not listed at this venue. Pick Knock or Anyone to list it.");
+        public static readonly LocString BookInviteOnlyNote = new("casino.hostSetup.bookInviteOnlyNote", "Patrons cannot find or open an invite only book. Pick Knock or Anyone to list it at this venue.");
+        public static readonly LocString PartClockDeals = new("casino.hostSetup.partClockDeals", "the clock deals");
+        public static readonly LocString PartYouDeal = new("casino.hostSetup.partYouDeal", "you deal");
+        public static readonly LocString PartTurns = new("casino.hostSetup.partTurns", "{0} s turns");
+        public static readonly LocString PartPaysDecks = new("casino.hostSetup.partPaysDecks", "{0}, {1} decks");
+        public static readonly LocString PartNoAnte = new("casino.hostSetup.partNoAnte", "no ante");
+        public static readonly LocString PartAnte = new("casino.hostSetup.partAnte", "ante {0}");
+        public static readonly LocString PartHighest = new("casino.hostSetup.partHighest", "highest roll wins");
+        public static readonly LocString PartLowest = new("casino.hostSetup.partLowest", "lowest roll wins");
+        public static readonly LocString PartRounds = new("casino.hostSetup.partRounds", "{0} rounds");
+        public static readonly LocString PartRoundStake = new("casino.hostSetup.partRoundStake", "stake {0} a round");
+        public static readonly LocString PartStack = new("casino.hostSetup.partStack", "stack {0}");
+        public static readonly LocString PartPayoutCap = new("casino.hostSetup.partPayoutCap", "payouts up to {0}");
+        public static readonly LocString PartPinned = new("casino.hostSetup.partPinned", "pinned to this venue");
+        public static readonly LocString PartNotPinned = new("casino.hostSetup.partNotPinned", "not pinned");
+        public static readonly LocString ListSeparator = new("casino.hostSetup.listSeparator", ", ");
+        public static readonly LocString Percent = new("casino.hostSetup.percent", "{0}%");
+        public static readonly LocString Minutes = new("casino.hostSetup.minutes", "{0} min");
+        public static readonly LocString RulesIntro = new("casino.hostSetup.rulesIntro", "Every rule starts on a sensible default. Change only what your venue does differently.");
+        public static readonly LocString SectionDealing = new("casino.hostSetup.sectionDealing", "Dealing");
+        public static readonly LocString SectionTurns = new("casino.hostSetup.sectionTurns", "Turns");
+        public static readonly LocString SectionBlackjack = new("casino.hostSetup.sectionBlackjack", "Blackjack rules");
+        public static readonly LocString SectionDice = new("casino.hostSetup.sectionDice", "Dice");
+        public static readonly LocString SectionRoom = new("casino.hostSetup.sectionRoom", "Room");
+        public static readonly LocString ClockDealsHint = new("casino.hostSetup.clockDealsHint", "Rounds start on their own when the betting clock ends.");
+        public static readonly LocString YouDealHint = new("casino.hostSetup.youDealHint", "You start each round from your console or the table.");
+        public static readonly LocString AutoDeal = new("casino.hostSetup.autoDeal", "Auto deal");
+        public static readonly LocString AutoDealHint = new("casino.hostSetup.autoDealHint", "The betting clock deals each round for you. You can still deal early.");
+        public static readonly LocString CoDealersNote = new("casino.hostSetup.coDealersNote", "Co-dealers are picked later, from a player on your console.");
+        public static readonly LocString ChipClockNote = new("casino.hostSetup.chipClockNote", "Chip tables deal on the house clock, so every seat can always play its chips out.");
+        public static readonly LocString TimeBank = new("casino.hostSetup.timeBank", "Time bank");
+        public static readonly LocString TimeBankHint = new("casino.hostSetup.timeBankHint", "{0} extra boosts of {1} s for each player when their clock runs out.");
+        public static readonly LocString CharlieHint = new("casino.hostSetup.charlieHint", "Five cards without busting wins.");
+        public static readonly LocString PeekHint = new("casino.hostSetup.peekHint", "The dealer checks for blackjack before anyone acts.");
+        public static readonly LocString AnteHint = new("casino.hostSetup.anteHint", "Share of the big blind every player puts in before the deal.");
+        public static readonly LocString RoundLength = new("casino.hostSetup.roundLength", "Round length");
+        public static readonly LocString HighestWins = new("casino.hostSetup.highestWins", "Highest roll wins");
+        public static readonly LocString HighestWinsHint = new("casino.hostSetup.highestWinsHint", "Off means the lowest roll wins.");
+        public static readonly LocString StackHint = new("casino.hostSetup.stackHint", "What everyone sits down with. It has no value.");
+        public static readonly LocString RebuysHint = new("casino.hostSetup.rebuysHint", "Busted players can take a fresh stack.");
+        public static readonly LocString FaceUpHint = new("casino.hostSetup.faceUpHint", "Good for teaching a table.");
+        public static readonly LocString LargestPayout = new("casino.hostSetup.largestPayout", "Largest single payout");
+        public static readonly LocString PayoutHint = new("casino.hostSetup.payoutHint", "Caps one win so a lucky hand never empties your bank.");
+        public static readonly LocString SpectatorsHint = new("casino.hostSetup.spectatorsHint", "People can watch without taking a seat.");
+        public static readonly LocString PinVenue = new("casino.hostSetup.pinVenue", "Pin to this venue");
+        public static readonly LocString PinHint = new("casino.hostSetup.pinHint", "Players at {0} see your table first in Live.");
+        public static readonly LocString PinNoWard = new("casino.hostSetup.pinNoWard", "Stand in a housing ward to pin the table there.");
+        public static readonly LocString PinNoPlotNote = new("casino.hostSetup.pinNoPlotNote", "Stand on the venue's plot so the Venues app can show your table. Live still lists it for this ward.");
     }
 
     internal static class Venue
@@ -11945,17 +12000,8 @@ internal static class L
         public static readonly LocString TradeFailedTitle = new("casino.venue.tradeFailedTitle", "Trade not recorded");
         public static readonly LocString TradeFailedBody = new("casino.venue.tradeFailedBody", "Your trade of {0} gil could not be recorded. Add it by hand in the gil ledger.");
         public static readonly LocString AtThisVenue = new("casino.venue.atThisVenue", "At this venue");
-        public static readonly LocString Sides = new("casino.venue.sides", "Die sides");
-        public static readonly LocString HighestWins = new("casino.venue.highestWins", "Highest roll rounds");
-        public static readonly LocString RoundSeconds = new("casino.venue.roundSeconds", "Round seconds");
-        public static readonly LocString StartNumber = new("casino.venue.startNumber", "Start number");
-        public static readonly LocString Stake = new("casino.venue.stake", "Stake");
-        public static readonly LocString Location = new("casino.venue.location", "Venue");
-        public static readonly LocString LocationNone = new("casino.venue.locationNone", "Not in a housing ward");
         public static readonly LocString LocationPlot = new("casino.venue.locationPlot", "{0}, ward {1}, plot {2}");
         public static readonly LocString LocationWard = new("casino.venue.locationWard", "{0}, ward {1}");
-        public static readonly LocString PinLocation = new("casino.venue.pinLocation", "List at this venue");
-        public static readonly LocString LocationHint = new("casino.venue.locationHint", "Taken from where you stand. Players in the same ward see the table once Who can join is Ask to join or Open.");
         public static readonly LocString TournamentHeading = new("casino.venue.tournamentHeading", "Tournament");
         public static readonly LocString TournamentHands = new("casino.venue.tournamentHands", "Hands");
         public static readonly LocString TournamentStack = new("casino.venue.tournamentStack", "Starting stack");
@@ -11985,9 +12031,6 @@ internal static class L
         public static readonly LocString TicketCountLabel = new("casino.venue.ticketCountLabel", "Tickets");
         public static readonly LocString TakeTickets = new("casino.venue.takeTickets", "Take {0} tickets");
         public static readonly LocString TicketsTotalGil = new("casino.venue.ticketsTotalGil", "{0} tickets for {1} gil, paid to the host in one trade");
-        public static readonly LocString UpTo = new("casino.venue.upTo", "Up to {0}");
-        public static readonly LocString RaffleEntrantsCap = new("casino.venue.raffleEntrantsCap", "Entrants");
-        public static readonly LocString RaffleCapsHint = new("casino.venue.raffleCapsHint", "You set each raffle's title, tickets a person, winners and clock when you open it from the room, within these limits.");
         public static readonly LocString EntrantsButton = new("casino.venue.entrantsButton", "Entrants ({0})");
         public static readonly LocString EntrantsTitle = new("casino.venue.entrantsTitle", "Raffle entrants");
         public static readonly LocString EntrantsHint = new("casino.venue.entrantsHint", "Remove anyone who went quiet or dropped before the draw. Their tickets leave with them, and removing someone from the room takes them out of the raffle too.");
@@ -11997,7 +12040,6 @@ internal static class L
         public static readonly LocString RemoveEntrantBodyGil = new("casino.venue.removeEntrantBodyGil", "Their tickets leave the raffle. Tickets they have not paid for come off the gil ledger, and tickets they paid for are owed back to them.");
         public static readonly LocString ReasonTicketCount = new("casino.venue.reasonTicketCount", "Fewer tickets than that are left to you in this raffle. Take what is left or wait for the next one.");
 
-        public static readonly LocString PinInviteOnlyNote = new("casino.venue.pinInviteOnlyNote", "Not listed at this venue while Who can join is Invite only. Pick Ask to join or Open to list it.");
         public static readonly LocString PinNoPlotNote = new("casino.venue.pinNoPlotNote", "Stand on the venue's plot so the Venues app can show your table. The Floor still shows it for this ward.");
     }
 
@@ -12044,7 +12086,6 @@ internal static class L
         public static readonly LocString OpenLedger = new("casino.book.openLedger", "Open the ledger");
         public static readonly LocString CloseTitle = new("casino.book.closeTitle", "Close this book?");
         public static readonly LocString CloseBody = new("casino.book.closeBody", "The ledger stays readable for 30 days after it closes.");
-        public static readonly LocString PinInviteOnlyNote = new("casino.book.pinInviteOnlyNote", "This book is not listed at the venue while Who can join is Invite only, so patrons cannot open it or register on it. Pick Ask to join or Open to list it.");
         public static readonly LocString RecordHostHint = new("casino.book.recordHostHint", "Trade the gil in game first, then record it here. Patrons who use the app appear here once they open this book from the Venues app or with its code; anyone else goes in as a guest.");
     }
 
