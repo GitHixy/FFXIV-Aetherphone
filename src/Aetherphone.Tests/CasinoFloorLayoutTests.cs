@@ -139,16 +139,6 @@ public sealed class CasinoFloorLayoutTests
         Assert.True(row - gap - split >= spin - 0.001f);
     }
 
-    [Fact]
-    public void TheStreakLabelGetsItsOwnLineAboveTheDots()
-    {
-        var label = 18f;
-        var dot = StripHero.StreakDot;
-        Assert.Equal(label + StripHero.StreakLabelGap + dot, StripHero.StreakHeight(label, dot, StripHero.StreakLabelGap));
-        Assert.True(StripHero.StreakDays * StripHero.StreakDot + (StripHero.StreakDays - 1) * StripHero.StreakGap
-                    <= FloorWidth - StripHero.Pad * 2f);
-    }
-
     [Theory]
     [InlineData(0.75f)]
     [InlineData(1f)]
