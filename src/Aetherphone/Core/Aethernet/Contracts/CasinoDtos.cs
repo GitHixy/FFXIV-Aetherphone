@@ -97,6 +97,17 @@ internal sealed record CasinoBuyChipsDto(
     CasinoSittingDto? Sitting = null,
     CasinoCeilingDto? Ceiling = null);
 
+internal sealed record CasinoCashOutChipsRequest(long Coins = 0, string ClientActionId = "");
+
+internal sealed record CasinoCashOutChipsDto(
+    bool Granted = false,
+    string Reason = "",
+    long Coins = 0,
+    long Chips = 0,
+    long Stack = 0,
+    long Balance = 0,
+    CasinoSittingDto? Sitting = null);
+
 internal sealed record CasinoCloseSittingRequest(string SittingId);
 
 internal sealed record CasinoSittingResultDto(
