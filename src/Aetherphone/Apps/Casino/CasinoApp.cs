@@ -78,8 +78,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private readonly Venue.TournamentOverlay tournament = new();
     private readonly Venue.VenueTableSheet venueSheet;
     private readonly Venue.TradeRecordedCard tradeCard;
-    private readonly Venue.NearbyTablesCard nearbyTables;
-    private readonly Venue.VenueSection venueSection;
     private readonly CasinoStage stage = new();
     private readonly GameRulesSheet rulesSheet = new();
     private readonly TabBar bottomNav = new();
@@ -164,12 +162,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         broadcast = new Venue.BroadcastView(casinoRooms);
         venueSheet = new Venue.VenueTableSheet(casinoVenue, tradeSync, report, JoinCodeOf);
         tradeCard = new Venue.TradeRecordedCard(tradeSync);
-        nearbyTables = new Venue.NearbyTablesCard(casinoVenue);
-        var contextActions = new Venue.VenueContextActions(openTable, openDoorFromRow, OpenLedger, OpenHostDraft,
-            OpenHostSheet);
-        venueSection = new Venue.VenueSection(
-            new Venue.VenueContextCard("casino.venue.floor", casinoTables, casino, preferences, nearbyTables,
-                contextActions), casino, OpenHostGame);
         this.holdemStore = holdemStore;
         holdem = new Tables.HoldemTable(casino, casinoRooms, casinoTables, holdemStore, casinoTurns, remoteImages,
             lodestone, PopRoute);
@@ -249,7 +241,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         missionsSheet.Close();
         heroCards.Reset();
         shelves.Reset();
-        venueSection.Reset();
         winsTicker.Reset();
         RefreshFloor();
         floor.Watch();

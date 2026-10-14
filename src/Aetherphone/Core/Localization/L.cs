@@ -11690,7 +11690,6 @@ internal static class L
         public static readonly LocString JoinAction = new("casino.tables.joinAction", "Join");
         public static readonly LocString ReasonCodeUnknown = new("casino.tables.reasonCodeUnknown", "No open table uses that code. Check the letters and try again.");
         public static readonly LocString HostCta = new("casino.tables.hostCta", "Host a table");
-        public static readonly LocString HostCtaLine = new("casino.tables.hostCtaLine", "Pick a game, set the stakes, share the code.");
         public static readonly LocString HostedBy = new("casino.tables.hostedBy", "Hosted by {0}");
         public static readonly LocString ControlCoDealers = new("casino.tables.controlCoDealers", "Co-dealers");
         public static readonly LocString SeatLabel = new("casino.tables.seatLabel", "Seat {0}");
@@ -11918,7 +11917,6 @@ internal static class L
         public static readonly LocString TradeOk = new("casino.venue.tradeOk", "OK");
         public static readonly LocString TradeFailedTitle = new("casino.venue.tradeFailedTitle", "Trade not recorded");
         public static readonly LocString TradeFailedBody = new("casino.venue.tradeFailedBody", "Your trade of {0} gil could not be recorded. Add it by hand in the gil ledger.");
-        public static readonly LocString AtThisVenue = new("casino.venue.atThisVenue", "At this venue");
         public static readonly LocString Sides = new("casino.venue.sides", "Die sides");
         public static readonly LocString HighestWins = new("casino.venue.highestWins", "Highest roll rounds");
         public static readonly LocString RoundSeconds = new("casino.venue.roundSeconds", "Round seconds");
@@ -11977,7 +11975,6 @@ internal static class L
 
     internal static class VenueHub
     {
-        public static readonly LocString Title = new("casino.venuehub.title", "Venues");
         public static readonly LocString Tab = new("casino.venuehub.tab", "Venues");
         public static readonly LocString PlaysGilPracticeChips = new("casino.venuehub.playsGilPracticeChips", "Gil, practice or chips");
         public static readonly LocString PlaysChipsPractice = new("casino.venuehub.playsChipsPractice", "Chips or practice");
@@ -11986,10 +11983,6 @@ internal static class L
         public static readonly LocString PlaysPractice = new("casino.venuehub.playsPractice", "Practice only");
         public static readonly LocString PlaysFreeTickets = new("casino.venuehub.playsFreeTickets", "Free tickets");
         public static readonly LocString GilBadge = new("casino.venuehub.gilBadge", "Gil");
-        public static readonly LocString HostAgain = new("casino.venuehub.hostAgain", "Host again");
-        public static readonly LocString Host = new("casino.venuehub.host", "Host");
-        public static readonly LocString NewTable = new("casino.venuehub.newTable", "New table");
-        public static readonly LocString Door = new("casino.venuehub.door", "Door");
         public static readonly LocString DraftSummaryGil = new("casino.venuehub.draftSummaryGil", "{0}, {1}, bank {2}");
         public static readonly LocString DraftSummaryBets = new("casino.venuehub.draftSummaryBets", "{0}, {1}, {2} to {3}");
         public static readonly LocString DraftSummaryStake = new("casino.venuehub.draftSummaryStake", "{0}, {1}, stake {2}");

@@ -48,7 +48,7 @@ internal sealed class HostGameGrid
         return top + HostHomeLayout.GridHeight(count, tileHeight, scale);
     }
 
-    internal static bool DrawPoster(ImDrawListPtr drawList, HostGame game, Rect tile, string meta, string badge,
+    private static bool DrawPoster(ImDrawListPtr drawList, HostGame game, Rect tile, string meta, string badge,
         bool open, float phase, bool interactive, float scale)
     {
         ref readonly var info = ref HostGames.Of(game);
