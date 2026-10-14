@@ -59,15 +59,15 @@ internal sealed class CasinoTradeSync : IDisposable
 
     public bool Enabled
     {
-        get => configuration.CasinoTradeSync;
+        get => configuration.CasinoHostTradeSync;
         set
         {
-            if (configuration.CasinoTradeSync == value)
+            if (configuration.CasinoHostTradeSync == value)
             {
                 return;
             }
 
-            configuration.CasinoTradeSync = value;
+            configuration.CasinoHostTradeSync = value;
             configuration.Save();
             tracker.Reset();
             AepLog.Info($"[TradeSync] Trade sync turned {(value ? "on" : "off")}");
@@ -133,7 +133,7 @@ internal sealed class CasinoTradeSync : IDisposable
         }
 
         Send();
-        if (!configuration.CasinoTradeSync)
+        if (!configuration.CasinoHostTradeSync)
         {
             StopTracking();
             return;
@@ -177,6 +177,7 @@ internal sealed class CasinoTradeSync : IDisposable
         if (completion.PartnerName.Length == 0)
         {
             AepLog.Info($"[TradeSync] A trade of {amount} gil completed without a partner name, not recorded");
+            NotifyFailure(amount);
             return;
         }
 

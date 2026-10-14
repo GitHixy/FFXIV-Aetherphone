@@ -37,8 +37,6 @@ internal sealed class TradeSyncTracker
     {
         public long Net => TheirOffer - MyOffer;
 
-        public bool Unread => MyOffer == 0 && TheirOffer == 0;
-
         public bool SamePartner(string partnerName, string partnerWorld) =>
             string.Equals(PartnerName, partnerName, StringComparison.Ordinal)
             && string.Equals(PartnerWorld, partnerWorld, StringComparison.Ordinal);
@@ -211,13 +209,7 @@ internal sealed class TradeSyncTracker
             return null;
         }
 
-        var openCandidate = windowOpen && !openDone;
-        var matched = OldestMatching(delta, openCandidate);
-        if (matched == NoMatch)
-        {
-            matched = OnlyUnread(openCandidate);
-        }
-
+        var matched = OldestMatching(delta, windowOpen && !openDone);
         if (matched == NoMatch)
         {
             return null;
@@ -258,27 +250,5 @@ internal sealed class TradeSyncTracker
         }
 
         return matched;
-    }
-
-    private int OnlyUnread(bool openCandidate)
-    {
-        var matched = NoMatch;
-        var count = 0;
-        for (var index = 0; index < armedCount; index++)
-        {
-            if (armed[index].Unread)
-            {
-                matched = index;
-                count++;
-            }
-        }
-
-        if (openCandidate && open.Unread)
-        {
-            matched = OpenSlot;
-            count++;
-        }
-
-        return count == 1 ? matched : NoMatch;
     }
 }

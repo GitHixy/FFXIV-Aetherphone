@@ -149,27 +149,14 @@ public sealed class TradeSyncTests
     }
 
     [Fact]
-    public void UnreadOffersCompleteWithTheWalletChangeWhenOnlyOneTradeIsUnread()
+    public void ATradeWithNoGilOfferedNeverTakesALaterWalletChange()
     {
         var tracker = new TradeSyncTracker();
         tracker.Observe(Open(Mira, 0, 0, 1_000_000), 0);
         tracker.Observe(Closed(1_000_000), 100);
 
-        var done = tracker.Observe(Closed(1_075_000), 200);
-
-        Assert.Equal(new TradeCompletion(Mira, string.Empty, 75_000, 0), done);
-    }
-
-    [Fact]
-    public void TwoUnreadTradesCannotTellWhichOneTheWalletChangeBelongsTo()
-    {
-        var tracker = new TradeSyncTracker();
-        tracker.Observe(Open(Mira, 0, 0, 1_000_000), 0);
-        tracker.Observe(Closed(1_000_000), 100);
-        tracker.Observe(Open(Ciri, 0, 0, 1_000_000), 200);
-        tracker.Observe(Closed(1_000_000), 300);
-
-        Assert.Null(tracker.Observe(Closed(1_075_000), 400));
+        Assert.Null(tracker.Observe(Closed(999_000), 200));
+        Assert.Null(tracker.Observe(Closed(1_075_000), 300));
     }
 
     [Fact]
@@ -215,8 +202,8 @@ public sealed class TradeSyncTests
     public void AnUnreadableWalletNeverCompletesAnything()
     {
         var tracker = new TradeSyncTracker();
-        tracker.Observe(Open(Mira, 0, 0, 1_000_000), 0);
-        Assert.Null(tracker.Observe(Unreadable(true, Mira, 0, 0), 16));
+        tracker.Observe(Open(Mira, 0, 20_000, 1_000_000), 0);
+        Assert.Null(tracker.Observe(Unreadable(true, Mira, 0, 20_000), 16));
         Assert.Null(tracker.Observe(Unreadable(false, string.Empty, 0, 0), 32));
         Assert.Null(tracker.Observe(Unreadable(false, string.Empty, 0, 0), 48));
 
@@ -230,7 +217,7 @@ public sealed class TradeSyncTests
         var tracker = new TradeSyncTracker();
         Assert.Null(tracker.Observe(Closed(5_000_000), 0));
         Assert.Null(tracker.Observe(Closed(5_000_000), 16));
-        tracker.Observe(Open(Mira, 0, 0, 5_000_000), 32);
+        tracker.Observe(Open(Mira, 0, 10_000, 5_000_000), 32);
         tracker.Observe(Closed(5_000_000), 48);
 
         Assert.NotNull(tracker.Observe(Closed(5_010_000), 64));
