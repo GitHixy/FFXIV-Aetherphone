@@ -13,13 +13,8 @@ internal sealed partial class CasinoApp
 {
     private const float WordmarkHeight = 19f;
     private const float WordmarkFlickerPeriod = 6.5f;
-    private const int NamedTableSlots = 16;
 
-    private readonly CasinoTableRowDto?[] namedTables = new CasinoTableRowDto?[NamedTableSlots];
-    private readonly string[] namedTableTexts = new string[NamedTableSlots];
     private RollingAmount jackpotRoll;
-    private LanguageInfo? namedLanguage;
-    private int namedNext;
 
     private void DrawWordmark(ImDrawListPtr drawList, Rect body, float scale)
     {
@@ -79,28 +74,5 @@ internal sealed partial class CasinoApp
         }
 
         return origin.Y + JackpotMarquee.BlockHeight(scale);
-    }
-
-    private string TableName(CasinoTableRowDto row)
-    {
-        if (!ReferenceEquals(namedLanguage, Loc.Current))
-        {
-            namedLanguage = Loc.Current;
-            Array.Clear(namedTables);
-        }
-
-        for (var slot = 0; slot < NamedTableSlots; slot++)
-        {
-            if (ReferenceEquals(namedTables[slot], row))
-            {
-                return namedTableTexts[slot];
-            }
-        }
-
-        var next = namedNext;
-        namedNext = (namedNext + 1) % NamedTableSlots;
-        namedTables[next] = row;
-        namedTableTexts[next] = Tables.TableRowViews.NameOf(row);
-        return namedTableTexts[next];
     }
 }

@@ -19,7 +19,6 @@ internal static class FloorRoomCard
     public const float BarGap = 6f;
     public const float BarHeight = 3f;
     public const int NameLines = 2;
-    public const int PhaseLines = 2;
 
     private const float WashShare = 0.30f;
     private const float RimAlpha = 0.45f;
@@ -34,8 +33,7 @@ internal static class FloorRoomCard
 
     public static float TextWidth(float cardWidth, float scale) => MathF.Max(1f, cardWidth - Pad * 2f * scale);
 
-    public static float Countdown(long remainingMilliseconds, int windowSeconds) =>
-        windowSeconds <= 0 ? 0f : Math.Clamp(remainingMilliseconds / (windowSeconds * 1000f), 0f, 1f);
+    public static float LineBlock(int lines, float lineHeight) => Math.Max(1, lines) * lineHeight;
 
     public static bool Draw(ImDrawListPtr drawList, AppSkin ui, in LiveRoomView view, Rect card, float scale,
         out Rect pressed)
@@ -70,9 +68,8 @@ internal static class FloorRoomCard
         var lineInk = Palette.Mix(tint, CasinoArt.White, LineLift);
         var lines = Typography.WrapText(view.Line, TextStyles.Footnote, TextWidth(card.Width, scale));
         var lineHeight = Typography.LineHeight(TextStyles.Footnote);
-        var shown = Math.Min(lines.Length, PhaseLines);
-        var lineTop = barTop - BarGap * scale - shown * lineHeight;
-        for (var line = 0; line < shown; line++)
+        var lineTop = barTop - BarGap * scale - lines.Length * lineHeight;
+        for (var line = 0; line < lines.Length; line++)
         {
             Typography.Draw(drawList, new Vector2(left, lineTop), lines[line], view.Live ? lineInk : ui.BodyInk,
                 TextStyles.Footnote);
