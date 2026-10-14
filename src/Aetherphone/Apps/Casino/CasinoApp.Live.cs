@@ -142,6 +142,11 @@ internal sealed partial class CasinoApp
 
         var top = LiveArt.Header(drawList, ui, new Vector2(origin.X, origin.Y + LiveArt.SectionGap * scale), width,
             Loc.T(L.LivePage.YourTable), string.Empty, scale) + LiveArt.HeaderGap * scale;
+        if (owner)
+        {
+            casinoTables.EnsureDoorFresh(pinned.TableId);
+        }
+
         var door = owner ? casinoTables.DoorFor(pinned.TableId) : null;
         var here = LiveBoard.HereOf(pinned, door);
         var knocking = LiveBoard.KnockingOf(door);

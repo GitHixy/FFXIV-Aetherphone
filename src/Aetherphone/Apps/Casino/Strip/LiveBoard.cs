@@ -200,12 +200,35 @@ internal static class LiveBoard
 
     public static int HereOf(CasinoTableRowDto row, CasinoTableDoorDto? door)
     {
-        if (door is not null)
+        if (door is null)
         {
-            return (door.Seated?.Length ?? 0) + (door.Present?.Length ?? 0);
+            return Math.Max(row.Occupancy, row.SeatedCount);
         }
 
-        return Math.Max(row.Occupancy, row.SeatedCount);
+        var owner = row.OwnerUserId;
+        var seated = door.Seated ?? Array.Empty<CasinoTableSeatedDto>();
+        var count = 0;
+        for (var index = 0; index < seated.Length; index++)
+        {
+            var userId = seated[index].UserId;
+            if (!Same(userId, owner) && !SeatedBefore(seated, index, userId))
+            {
+                count++;
+            }
+        }
+
+        var present = door.Present ?? Array.Empty<CasinoTablePresentDto>();
+        for (var index = 0; index < present.Length; index++)
+        {
+            var member = present[index];
+            if (member.Attached && !Same(member.UserId, owner)
+                && !SeatedBefore(seated, seated.Length, member.UserId) && !PresentBefore(present, index, member.UserId))
+            {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     public static int KnockingOf(CasinoTableDoorDto? door) => door?.Knocks?.Length ?? 0;
@@ -275,6 +298,19 @@ internal static class LiveBoard
         return second.Length == 0 ? first : Loc.T(L.LivePage.LineJoin, first, second);
     }
 
+    public static CasinoTableRowDto? Find(CasinoTableRowDto[] rows, string tableId)
+    {
+        for (var index = 0; index < rows.Length; index++)
+        {
+            if (string.Equals(rows[index].TableId, tableId, StringComparison.Ordinal))
+            {
+                return rows[index];
+            }
+        }
+
+        return null;
+    }
+
     private static string StakesOf(CasinoTableRowDto row, string gameId)
     {
         if (row.MinBet <= 0 || row.MaxBet <= 0)
@@ -318,16 +354,32 @@ internal static class LiveBoard
         return false;
     }
 
-    public static CasinoTableRowDto? Find(CasinoTableRowDto[] rows, string tableId)
+    private static bool Same(string userId, string other) =>
+        userId.Length > 0 && string.Equals(userId, other, StringComparison.Ordinal);
+
+    private static bool SeatedBefore(CasinoTableSeatedDto[] seated, int end, string userId)
     {
-        for (var index = 0; index < rows.Length; index++)
+        for (var index = 0; index < end; index++)
         {
-            if (string.Equals(rows[index].TableId, tableId, StringComparison.Ordinal))
+            if (Same(userId, seated[index].UserId))
             {
-                return rows[index];
+                return true;
             }
         }
 
-        return null;
+        return false;
+    }
+
+    private static bool PresentBefore(CasinoTablePresentDto[] present, int end, string userId)
+    {
+        for (var index = 0; index < end; index++)
+        {
+            if (present[index].Attached && Same(userId, present[index].UserId))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
