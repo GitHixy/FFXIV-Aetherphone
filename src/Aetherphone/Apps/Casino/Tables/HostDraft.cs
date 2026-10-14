@@ -255,7 +255,7 @@ internal sealed class HostDraft
         Listing = Math.Clamp(memory.Listing, 0, CasinoListings.All.Length - 1);
         Spectators = memory.Spectators;
         FaceUp = memory.FaceUp;
-        Name = memory.Name;
+        Name = FitName(memory.Name);
         var rungs = BetRungs;
         MinBet = LastIndexAtMost(memory.MinBet, rungs.Length);
         MaxBet = LastIndexAtMost(memory.MaxBet, rungs.Length);
@@ -266,13 +266,13 @@ internal sealed class HostDraft
         Bank = LastIndexAtMost(memory.Bank, HostLadders.Gil.Length);
         MaxPayout = LastIndexAtMost(memory.MaxPayout, HostLadders.Gil.Length);
         PayoutCapped = memory.PayoutCapped;
-        TurnSeconds = memory.TurnSeconds;
+        TurnSeconds = Nearest(CasinoHostingRules.TurnSeconds, memory.TurnSeconds);
         TimeBank = memory.TimeBank;
         DealerMode = Math.Clamp(memory.DealerMode, CasinoDealerModes.House, CasinoDealerModes.Host);
         AutoDeal = memory.AutoDeal;
         Pays = Math.Clamp(memory.Pays, CasinoRuleSheet.PaysThreeToTwo, CasinoRuleSheet.PaysEven);
         HitsSoft17 = memory.HitsSoft17;
-        Decks = memory.Decks;
+        Decks = Nearest(CasinoRuleSheet.Decks, memory.Decks);
         Splits = Math.Clamp(memory.Splits, CasinoRuleSheet.SplitsOff, CasinoRuleSheet.SplitsToFour);
         Doubles = Math.Clamp(memory.Doubles, CasinoRuleSheet.DoublesAny, CasinoRuleSheet.DoublesOff);
         Charlie = memory.Charlie;
@@ -286,6 +286,28 @@ internal sealed class HostDraft
     }
 
     private static int LastIndexAtMost(int index, int length) => Math.Clamp(index, 0, length - 1);
+
+    internal static int Nearest(int[] allowed, int value)
+    {
+        var best = allowed[0];
+        for (var index = 1; index < allowed.Length; index++)
+        {
+            if (Math.Abs((long)allowed[index] - value) < Math.Abs((long)best - value))
+            {
+                best = allowed[index];
+            }
+        }
+
+        return best;
+    }
+
+    internal static string FitName(string? name)
+    {
+        var trimmed = name?.Trim() ?? string.Empty;
+        return trimmed.Length > CasinoHostingRules.NameMaxLength
+            ? trimmed[..CasinoHostingRules.NameMaxLength].TrimEnd()
+            : trimmed;
+    }
 
     private void ResetStakes()
     {
