@@ -7889,6 +7889,7 @@
   "changelog.r1300.131": "Behoben, dass das Guthaben der Geldbörse bis zu eine Minute brauchte, um eine Sperre oder ihre Aufhebung zu zeigen",
   "changelog.r1300.132": "Behoben, dass die Spawn-Markierungen seit der Verkleinerung kaum zu sehen waren: Jeder Zustand hat ein Symbol in voller Größe, verfolgte Punkte bekommen eine größere Scheibe, und Gebiete mit wenigen Spawn-Punkten eine noch größere",
   "changelog.r1300.133": "Behoben, dass das Leuchten um eine Schaltfläche in voller Breite, etwa Tragen bei einem Abzeichen, an den Seiten flach abgeschnitten wurde",
+  "changelog.r1300.158": "Mausrad direkt nach dem Öffnen einer Seite behoben: Es scrollt jetzt die Seite vor dir statt der, die du gerade verlassen hast",
   "changelog.r1300.134": "Behoben, dass die Karten Serien und Trends bei größerer Textgröße ihren Text abschnitten: Die Karten wachsen mit dem Text, und lange Beschriftungen brechen um",
   "changelog.r1300.136": "Kauf mehrerer Lose auf einmal hinzugefügt: Anzahl eintippen und den Gesamtpreis sehen, bis zum Limit pro Person, das der Gastgeber festlegt, bis zu 1.000",
   "changelog.r1300.150": "Entfernen von Verlosungsteilnehmern hinzugefügt: Der Gastgeber öffnet die Teilnehmerliste in der Verlosung und entfernt alle, die still geworden oder rausgeflogen sind, samt ihren Losen, und wer aus dem Raum entfernt wird, ist auch raus",

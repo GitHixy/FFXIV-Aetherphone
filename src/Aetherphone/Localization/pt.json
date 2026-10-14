@@ -7889,6 +7889,7 @@
   "changelog.r1300.131": "Corrigido o saldo da carteira, que levava até um minuto para mostrar um congelamento ou o seu fim",
   "changelog.r1300.132": "Corrigidos os marcadores de surgimento, fracos demais desde a redução: cada estado tem um ícone em tamanho cheio, os pontos acompanhados ganham um disco maior, e as zonas com poucos pontos de surgimento um disco ainda maior",
   "changelog.r1300.133": "Corrigido o brilho em volta de um botão de largura total, como Usar numa insígnia, que era cortado reto nas laterais",
+  "changelog.r1300.158": "Corrigida a roda do mouse logo após abrir uma página: agora ela rola a página à sua frente em vez da que você acabou de deixar",
   "changelog.r1300.134": "Corrigidos os cartões Sequências e Tendências, que cortavam o texto em tamanhos de texto maiores: os cartões crescem com o texto e os rótulos longos quebram linha",
   "changelog.r1300.136": "Adicionamos a compra de vários bilhetes de rifa de uma vez: digite a quantidade e veja o total, até o limite por pessoa que o anfitrião define, de até 1.000",
   "changelog.r1300.150": "Adicionamos a remoção de participantes da rifa: o anfitrião abre a lista de participantes na rifa e remove quem ficou inativo ou caiu, com os bilhetes, e remover alguém da sala também o tira",

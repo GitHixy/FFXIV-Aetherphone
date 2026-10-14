@@ -2501,6 +2501,8 @@ internal static class L
                 "Fixed uploaded images with transparent or see-through areas getting harsh glowing edges and black fringes: they now blend smoothly, contributed by Haydooners"),
             new("changelog.r1300.133",
                 "Fixed the glow around a full-width button, such as Wear on a badge, being cut flat at the sides"),
+            new("changelog.r1300.158",
+                "Fixed the scroll wheel right after a page opens: it now scrolls the page in front of you instead of the one you just left"),
         };
 
         public static readonly LocString[] Release1300ChirperAethergramVelvet =

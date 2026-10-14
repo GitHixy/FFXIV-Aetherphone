@@ -7889,6 +7889,7 @@
   "changelog.r1300.131": "Fixed the wallet balance waiting up to a minute to show a freeze or a lift",
   "changelog.r1300.132": "Fixed the spawn markers being too faint to see since the shrink: each state has a full-size icon, tracked spots get a larger disc, and zones with few spawn points get a bigger one",
   "changelog.r1300.133": "Fixed the glow around a full-width button, such as Wear on a badge, being cut flat at the sides",
+  "changelog.r1300.158": "Fixed the scroll wheel right after a page opens: it now scrolls the page in front of you instead of the one you just left",
   "changelog.r1300.134": "Fixed the Streaks and Trends cards clipping their text at larger text sizes: the cards grow with the text and long labels wrap",
   "changelog.r1300.136": "Added buying several raffle tickets at once: type a count and see the total, up to the per-person limit the host sets, as many as 1,000",
   "changelog.r1300.150": "Added removing raffle entrants: the host opens the entrant list from the raffle and takes out anyone who went quiet or dropped, tickets and all, and removing someone from the room takes them out too",

@@ -7889,6 +7889,7 @@
   "changelog.r1300.131": "Corregido el saldo de la cartera, que tardaba hasta un minuto en mostrar una congelación o su fin",
   "changelog.r1300.132": "Corregidos los marcadores de aparición, demasiado tenues desde que se redujeron: cada estado tiene un icono a tamaño completo, los puntos seguidos reciben un disco mayor, y las zonas con pocos puntos de aparición uno aún mayor",
   "changelog.r1300.133": "Corregido el brillo alrededor de un botón a todo lo ancho, como Llevar en una insignia, que se cortaba plano por los lados",
+  "changelog.r1300.158": "Corregida la rueda del ratón justo al abrir una página: ahora desplaza la página que tienes delante en lugar de la que acabas de dejar",
   "changelog.r1300.134": "Corregidas las tarjetas Rachas y Tendencias, que cortaban su texto con tamaños de texto grandes: las tarjetas crecen con el texto y las etiquetas largas saltan de línea",
   "changelog.r1300.136": "Se añadió comprar varios boletos de rifa a la vez: escribe una cantidad y ve el total, hasta el límite por persona que fija el anfitrión, de hasta 1000",
   "changelog.r1300.150": "Se añadió sacar participantes de la rifa: el anfitrión abre la lista de participantes desde la rifa y saca a quien se haya quedado inactivo o desconectado, con sus boletos, y sacar a alguien de la sala también lo saca",
