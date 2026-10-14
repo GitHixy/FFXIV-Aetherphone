@@ -65,7 +65,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private readonly Core.Casino.HoldemStore holdemStore;
     private readonly Tables.HoldemTable holdem;
     private readonly Tables.HoldemPit holdemPit;
-    private readonly Tables.TableBrowser browser;
     private readonly Tables.BlackjackPit pit;
     private readonly Tables.TableHandsCard tableHands;
     private readonly Tables.HostSheet hostSheet;
@@ -78,7 +77,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private readonly Venue.TournamentOverlay tournament = new();
     private readonly Venue.VenueTableSheet venueSheet;
     private readonly Venue.TradeRecordedCard tradeCard;
-    private readonly Venue.NearbyTablesCard nearbyTables;
     private readonly CasinoStage stage = new();
     private readonly GameRulesSheet rulesSheet = new();
     private readonly TabBar bottomNav = new();
@@ -163,23 +161,16 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         broadcast = new Venue.BroadcastView(casinoRooms);
         venueSheet = new Venue.VenueTableSheet(casinoVenue, tradeSync, report, JoinCodeOf);
         tradeCard = new Venue.TradeRecordedCard(tradeSync);
-        nearbyTables = new Venue.NearbyTablesCard(casinoVenue);
-        var contextActions = new Venue.VenueContextActions(openTable, openDoorFromRow, OpenLedger, OpenHostDraft,
-            OpenHostSheet);
         this.holdemStore = holdemStore;
         holdem = new Tables.HoldemTable(casino, casinoRooms, casinoTables, holdemStore, casinoTurns, remoteImages,
             lodestone, PopRoute);
         holdemPit = new Tables.HoldemPit(holdemStore, casino, openTable, openDoorFromRow, OpenHoldemHostSheet);
         holdemPit.Lead = DrawDealerHoldemLead;
-        browser = new Tables.TableBrowser(casinoTables, holdemStore, casino, openTable, openDoorFromRow,
-            EnterHouseBlackjack, OpenHostSheet, OpenGilLedger, nearbyTables,
-            new Venue.VenueContextCard("casino.venue.tab", casinoTables, casino, preferences, nearbyTables,
-                contextActions));
         tableHands = new Tables.TableHandsCard(history);
         pit = new Tables.BlackjackPit(casinoTables, casino, openTable, openDoorFromRow, EnterHouseBlackjack, OpenTables,
             OpenHostSheet);
         hostSheet = new Tables.HostSheet(casinoTables, casino, new Venue.VenueHostOptions(casinoVenue), preferences);
-        tableDoor = new Tables.TableDoor(casinoTables, casino, confirm, openTable,
+        tableDoor = new Tables.TableDoor(casinoTables, confirm, openTable, OpenLedger,
             new Venue.TournamentDoorCard(casinoVenue), tradeSync);
         router = new ViewRouter<CasinoRoute>(CasinoRoute.Floor);
         routes = new CasinoNavigation(router);
@@ -235,7 +226,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         broadcast.Reset();
         tournament.Reset();
         venueSheet.Close();
-        browser.Reset();
         tableDoor.Reset();
         pendingTableId = string.Empty;
         rulesSheet.Close();
@@ -277,7 +267,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         broadcast.Reset();
         tournament.Reset();
         venueSheet.Close();
-        browser.Reset();
         tableDoor.Reset();
         pendingTableId = string.Empty;
         rulesSheet.Close();
@@ -382,6 +371,8 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         fameConsent.Gate();
         venueRoom.Gate();
         venueSheet.Gate();
+        tableDoor.Gate();
+        playerLedger.Gate();
         tradeCard.Gate();
         stage.Gate();
         SyncRaceLandscape();
@@ -425,6 +416,8 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         venueRoom.DrawOverlay(screenArea, ui);
         venueSheet.Draw(screenArea, ui);
         HandleVenueSheet();
+        tableDoor.DrawOverlay(screenArea, ui, router.Current.Screen == CasinoScreen.TableDoor);
+        playerLedger.DrawOverlay(screenArea, ui, router.Current.Screen == CasinoScreen.TableLedger);
         rulesSheet.Draw(screenArea, ui);
         DrawLiveSheet();
         fameConsent.Draw(screenArea, ui);
@@ -502,7 +495,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private void DrawStage(CasinoRoute route, Rect area)
     {
         var scale = UiScale.Current;
-        var spec = StageSpecFor(route);
+        var spec = WithHostPill(route, StageSpecFor(route));
         using (AppSurface.BeginEdgeToEdge(area, true))
         {
             ImGui.Dummy(new Vector2(area.Width, MathF.Max(1f, area.Height - StageSurfaceSlack * scale)));
@@ -517,7 +510,27 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             {
                 OpenCashier();
             }
+            else if (action == CasinoStageAction.Host)
+            {
+                OpenHostControls(route.TableId);
+            }
         }
+    }
+
+    private CasinoStageSpec WithHostPill(CasinoRoute route, in CasinoStageSpec spec)
+    {
+        if (route.Screen is not (CasinoScreen.Table or CasinoScreen.VenueRoom) || route.TableId.Length == 0)
+        {
+            return spec;
+        }
+
+        var card = casinoTables.CardFor(route.TableId);
+        if (card is null || !casinoTables.Owns(card))
+        {
+            return spec;
+        }
+
+        return spec with { Host = true, HostKnocks = casinoTables.DoorFor(route.TableId)?.Knocks?.Length ?? 0 };
     }
 
     private bool RouteOpen(CasinoRoute route)
@@ -758,9 +771,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             case CasinoScreen.Tables when IsHoldem(route):
                 holdemPit.Draw(navBar.Body, ui);
                 break;
-            case CasinoScreen.Tables:
-                browser.Draw(navBar.Body, ui);
-                break;
             case CasinoScreen.Pit:
                 pit.Draw(navBar.Body, ui);
                 break;
@@ -846,11 +856,10 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private string RouteTitle(CasinoRoute route) => route.Screen switch
     {
         CasinoScreen.Tables or CasinoScreen.Table when IsHoldem(route) => Loc.T(L.Casino.GameHoldem),
-        CasinoScreen.Tables => Loc.T(L.VenueHub.Tab),
         CasinoScreen.Pit => Loc.T(L.Blackjack.PitTitle),
         CasinoScreen.TableDoor => Loc.T(Tables.TableDoor.TitleFor(casinoTables.CardFor(route.TableId))),
         CasinoScreen.HostTable => Loc.T(L.Tables.HostTitle),
-        CasinoScreen.TableLedger => Loc.T(L.Tables.LedgerHeading),
+        CasinoScreen.TableLedger => Loc.T(Tables.TableLedger.TitleFor(casinoTables.CardFor(route.TableId))),
         CasinoScreen.GilLedger => Loc.T(L.Tables.MyLedgerTitle),
         CasinoScreen.Table => Loc.T(L.Casino.GameBlackjack),
         CasinoScreen.VenueRoom => Loc.T(Venue.VenueCabinet.NameOf(venueRoom.Kind)),
@@ -1129,7 +1138,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
 
         if (next == CasinoTab.Host)
         {
-            browser.Enter();
+            EnterHostTab();
         }
 
         routes.Select(next);
@@ -1517,12 +1526,6 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         if (request == Venue.VenueSheetRequest.GilLedger)
         {
             OpenGilLedger();
-            return;
-        }
-
-        if (request == Venue.VenueSheetRequest.HostControls)
-        {
-            OpenHostControls(router.Current.TableId);
             return;
         }
 

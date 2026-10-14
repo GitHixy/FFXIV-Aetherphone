@@ -80,7 +80,7 @@ internal sealed class BlackjackPit
         {
             if (IsHostedBlackjack(source[index]))
             {
-                hostedViews[index] = TableBrowser.ViewOf(source[index], account);
+                hostedViews[index] = TableRowViews.ViewOf(source[index], account);
             }
         }
     }
