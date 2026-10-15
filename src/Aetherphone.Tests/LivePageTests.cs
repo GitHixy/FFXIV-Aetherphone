@@ -308,7 +308,7 @@ public sealed class LivePageTests
 
         Assert.Equal(CasinoGames.Slots, view.GameId);
         Assert.Equal(Loc.T(L.LivePage.ChallengeMostGoal, CasinoMultiples.Label(1_000),
-            Loc.T(CasinoGameNames.Of(CasinoGames.Slots))), view.Goal);
+            Loc.T(L.Casino.GameSlots)), view.Goal);
         Assert.Equal(Loc.T(L.LivePage.ChallengeMinStake, NumberText.Compact(1_000)), view.Stake);
         Assert.Equal(Loc.T(L.LivePage.ChallengeLeader, "Ysolde Vance", Loc.Plural(L.LivePage.ChallengeWins, 12)),
             view.Leader);
@@ -325,11 +325,21 @@ public sealed class LivePageTests
         });
 
         Assert.Equal(Loc.T(L.LivePage.ChallengeFirstGoal, CasinoMultiples.Label(1_000),
-            Loc.T(CasinoGameNames.Of(CasinoGames.Slots))), view.Goal);
+            Loc.T(L.Casino.GameSlots)), view.Goal);
         Assert.Equal(Loc.T(L.LivePage.ChallengeLeader, "Ysolde Vance", CasinoMultiples.Label(5_250)), view.Leader);
         Assert.Empty(view.Stake);
         Assert.Empty(view.Yours);
         Assert.Equal(Loc.T(L.LivePage.ChallengePrize, NumberText.Compact(50_000)), view.Prize);
+    }
+
+    [Fact]
+    public void AChallengeOpenToEveryGameSaysAnyGame()
+    {
+        var first = LiveChallenges.ViewOf(Challenge() with { GameKind = string.Empty, Kind = CasinoChallengeKinds.First });
+        var most = LiveChallenges.ViewOf(Challenge() with { GameKind = string.Empty });
+
+        Assert.Equal(Loc.T(L.LivePage.ChallengeFirstGoalAny, CasinoMultiples.Label(1_000)), first.Goal);
+        Assert.Equal(Loc.T(L.LivePage.ChallengeMostGoalAny, CasinoMultiples.Label(1_000)), most.Goal);
     }
 
     [Fact]
