@@ -2487,6 +2487,10 @@ internal static class L
                 "Added an FPS counter to the mini phone, off by default under Settings > Minimized phone, contributed by t3sco"),
             new("changelog.r1300.118",
                 "Added reordering inside folders: in edit mode, drag an app to a new spot, contributed by hellovvn"),
+            new("changelog.r1300.160",
+                "Added a color picker to Nameplate Title: with the Custom look, pick any text or glow color, or type its hex code"),
+            new("changelog.r1300.161",
+                "Added gradient glows to Nameplate Title: sixteen color sets or two colors of your own, in a wave, a pulse or held still"),
             new("changelog.r1300.51",
                 "Fixed the scrollbar moving the wrong way and too slowly when dragged while the phone position is locked, contributed by jambalong"),
             new("changelog.r1300.57",
@@ -10044,6 +10048,34 @@ internal static class L
         public static readonly LocString StyleMineMissing = new("nameplate.styleMineMissing", "Set a custom title in Honorific first. Until then, app colors are used.");
         public static readonly LocString TextColor = new("nameplate.textColor", "Text color");
         public static readonly LocString GlowColor = new("nameplate.glowColor", "Glow color");
+        public static readonly LocString Glow = new("nameplate.glow", "Glow");
+        public static readonly LocString Solid = new("nameplate.solid", "Solid");
+        public static readonly LocString Gradient = new("nameplate.gradient", "Gradient");
+        public static readonly LocString MotionWave = new("nameplate.motionWave", "Wave");
+        public static readonly LocString MotionPulse = new("nameplate.motionPulse", "Pulse");
+        public static readonly LocString MotionStatic = new("nameplate.motionStatic", "Still");
+        public static readonly LocString MotionWaveHint = new("nameplate.motionWaveHint", "The colors roll along your title.");
+        public static readonly LocString MotionPulseHint = new("nameplate.motionPulseHint", "Your whole title glows through the colors together.");
+        public static readonly LocString MotionStaticHint = new("nameplate.motionStaticHint", "The colors spread across your title and hold still.");
+        public static readonly LocString FirstColor = new("nameplate.firstColor", "First color");
+        public static readonly LocString SecondColor = new("nameplate.secondColor", "Second color");
+        public static readonly LocString GradientTwoColors = new("nameplate.gradients.twoColors", "Two colors");
+        public static readonly LocString GradientPride = new("nameplate.gradients.pride", "Pride rainbow");
+        public static readonly LocString GradientTransgender = new("nameplate.gradients.transgender", "Transgender");
+        public static readonly LocString GradientLesbian = new("nameplate.gradients.lesbian", "Lesbian");
+        public static readonly LocString GradientBisexual = new("nameplate.gradients.bisexual", "Bisexual");
+        public static readonly LocString GradientBlackWhite = new("nameplate.gradients.blackWhite", "Black and white");
+        public static readonly LocString GradientBlackRed = new("nameplate.gradients.blackRed", "Black and red");
+        public static readonly LocString GradientBlackBlue = new("nameplate.gradients.blackBlue", "Black and blue");
+        public static readonly LocString GradientBlackYellow = new("nameplate.gradients.blackYellow", "Black and yellow");
+        public static readonly LocString GradientBlackGreen = new("nameplate.gradients.blackGreen", "Black and green");
+        public static readonly LocString GradientBlackPink = new("nameplate.gradients.blackPink", "Black and pink");
+        public static readonly LocString GradientBlackCyan = new("nameplate.gradients.blackCyan", "Black and cyan");
+        public static readonly LocString GradientCherryBlossom = new("nameplate.gradients.cherryBlossom", "Cherry blossom");
+        public static readonly LocString GradientGolden = new("nameplate.gradients.golden", "Golden");
+        public static readonly LocString GradientPastelRainbow = new("nameplate.gradients.pastelRainbow", "Pastel rainbow");
+        public static readonly LocString GradientDarkRainbow = new("nameplate.gradients.darkRainbow", "Dark rainbow");
+        public static readonly LocString GradientNonBinary = new("nameplate.gradients.nonBinary", "Non-binary");
         public static readonly LocString Position = new("nameplate.position", "Position");
         public static readonly LocString Above = new("nameplate.above", "Above my name");
         public static readonly LocString Below = new("nameplate.below", "Below my name");

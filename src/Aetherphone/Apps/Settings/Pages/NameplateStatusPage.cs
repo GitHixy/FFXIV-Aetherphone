@@ -101,8 +101,7 @@ internal sealed class NameplateStatusPage : ISettingsPage
             sample = titles.Sample(status);
         }
 
-        var name = titles.CharacterName.Length > 0 ? titles.CharacterName : Loc.T(L.Nameplate.Example);
-        stage.Draw(theme, scale, name, sample);
+        stage.Draw(theme, scale, NameplateStage.NameOf(titles), sample);
         ImGui.Dummy(new Vector2(0f, Metrics.Space.Sm * scale));
         SettingsSection.Hint(LengthLine(), theme);
     }
