@@ -54,6 +54,7 @@ internal sealed class BarkeepCabinet : ICabinetIdle
     private static readonly Vector4 Gold = BarkeepArt.PerfectGold;
     private static readonly Vector4 CardFill = new(0.06f, 0.035f, 0.05f, 0.94f);
     private static readonly Vector4 Veil = new(0f, 0f, 0f, 0.45f);
+    private static readonly Vector4 Shadow = new(0f, 0f, 0f, 0.7f);
 
     private readonly CasinoStore store;
     private readonly CasinoPlayStore play;
@@ -434,7 +435,7 @@ internal sealed class BarkeepCabinet : ICabinetIdle
             return;
         }
 
-        if (shift is not null && finishSent || shift is null && (startRequested || play.RoundInFlight))
+        if (shift is not null && finishSent && !ShowingStepResult || shift is null && (startRequested || play.RoundInFlight))
         {
             LoadingPulse.Draw(work.Center, 16f * scale, ui.Palette.Accent, ui.MutedInk, LoadingPulse.SafeLabel());
             return;
@@ -507,6 +508,12 @@ internal sealed class BarkeepCabinet : ICabinetIdle
         }
 
         var area = new Rect(new Vector2(work.Min.X, top), work.Max);
+        if (ShowingStepResult)
+        {
+            DrawStepResult(drawList, ui, area, delta, scale);
+            return;
+        }
+
         if (current.AllServed)
         {
             Typography.DrawCentered(drawList, area.Center, Loc.T(L.Casino.BarkeepShiftDone), CasinoColors.InkTitle,
@@ -536,25 +543,9 @@ internal sealed class BarkeepCabinet : ICabinetIdle
         }
 
         var kind = current.CurrentStepKind;
-        var titleY = area.Min.Y + Typography.LineHeight(TextStyles.Title2) * 0.5f;
-        ShadowedCentered(drawList, new Vector2(area.Center.X, titleY),
-            Typography.FitText(Loc.T(VerbName(kind)), area.Width, TextStyles.Title2), CasinoColors.InkTitle,
-            TextStyles.Title2, scale);
-        var hintTop = titleY + Typography.LineHeight(TextStyles.Title2) * 0.5f + 2f * scale;
-        var hintBottom = Typography.DrawWrappedCentered(drawList, Loc.T(VerbHint(kind)), TextStyles.Subheadline,
-            CasinoColors.InkBody, new Vector2(area.Center.X, hintTop), area.Width);
-        var canvas = new Rect(new Vector2(area.Min.X + 8f * scale, hintBottom + 6f * scale),
-            new Vector2(area.Max.X - 8f * scale, area.Max.Y));
+        var canvas = DrawStepHeader(drawList, kind, area, scale);
         if (canvas.Height <= 0f)
         {
-            return;
-        }
-
-        if (gradeFlashLeft > 0f && gradeFlash >= 0)
-        {
-            DrawGradeFlash(drawList, canvas, scale);
-            DrawToss(drawList, delta, scale);
-            DrawTapFlash(drawList, ui, delta, scale);
             return;
         }
 
@@ -604,6 +595,35 @@ internal sealed class BarkeepCabinet : ICabinetIdle
 
         current.CommitStepGrade(grade);
         CelebrateGrade(stage, grade, canvas.Center, scale);
+    }
+
+    private bool ShowingStepResult => gradeFlashLeft > 0f && gradeFlash >= 0;
+
+    private static Rect DrawStepHeader(ImDrawListPtr drawList, int kind, Rect area, float scale)
+    {
+        var titleY = area.Min.Y + Typography.LineHeight(TextStyles.Title2) * 0.5f;
+        ShadowedCentered(drawList, new Vector2(area.Center.X, titleY),
+            Typography.FitText(Loc.T(VerbName(kind)), area.Width, TextStyles.Title2), CasinoColors.InkTitle,
+            TextStyles.Title2, scale);
+        var hintTop = titleY + Typography.LineHeight(TextStyles.Title2) * 0.5f + 2f * scale;
+        var hintBottom = Typography.DrawWrappedCentered(drawList, Loc.T(VerbHint(kind)), TextStyles.Subheadline,
+            CasinoColors.InkBody, new Vector2(area.Center.X, hintTop), area.Width);
+        return new Rect(new Vector2(area.Min.X + 8f * scale, hintBottom + 6f * scale),
+            new Vector2(area.Max.X - 8f * scale, area.Max.Y));
+    }
+
+    private void DrawStepResult(ImDrawListPtr drawList, AppSkin ui, Rect area, float delta, float scale)
+    {
+        var canvas = DrawStepHeader(drawList, verbStage.Kind, area, scale);
+        if (canvas.Height <= 0f)
+        {
+            return;
+        }
+
+        verbStage.Draw(drawList, ui, canvas, delta, scale);
+        DrawGradeFlash(drawList, canvas, scale);
+        DrawToss(drawList, delta, scale);
+        DrawTapFlash(drawList, ui, delta, scale);
     }
 
     private void ClearStepEffects()
@@ -732,10 +752,16 @@ internal sealed class BarkeepCabinet : ICabinetIdle
             ? MathF.Sin(progress * 34f) * (1f - progress) * 5f * scale
             : 0f;
         var fitted = Typography.FitText(label, canvas.Width, TextStyles.Title2);
-        Typography.DrawCentered(drawList, new Vector2(canvas.Center.X + shakeX, canvas.Center.Y - 10f * scale), fitted,
-            color, TextStyles.Title2.Scale * (0.6f + 0.4f * pop), TextStyles.Title2.Weight);
-        Typography.DrawCentered(drawList, canvas.Center with { Y = canvas.Center.Y + 16f * scale },
-            GameNumber.Signed(Math.Max(gradeFlash, 0)), Palette.WithAlpha(color, 0.8f), TextStyles.FootnoteEmphasized);
+        var labelCenter = new Vector2(canvas.Center.X + shakeX, canvas.Center.Y - 10f * scale);
+        var labelScale = TextStyles.Title2.Scale * (0.6f + 0.4f * pop);
+        var shadow = new Vector2(0f, ShadowOffset * scale);
+        Typography.DrawCentered(drawList, labelCenter + shadow, fitted, Shadow, labelScale, TextStyles.Title2.Weight);
+        Typography.DrawCentered(drawList, labelCenter, fitted, color, labelScale, TextStyles.Title2.Weight);
+        var points = GameNumber.Signed(Math.Max(gradeFlash, 0));
+        var pointsCenter = canvas.Center with { Y = canvas.Center.Y + 16f * scale };
+        Typography.DrawCentered(drawList, pointsCenter + shadow, points, Shadow, TextStyles.FootnoteEmphasized);
+        Typography.DrawCentered(drawList, pointsCenter, points, Palette.WithAlpha(color, 0.8f),
+            TextStyles.FootnoteEmphasized);
     }
 
     private void DrawSettleCard(ImDrawListPtr drawList, CasinoStage stage, in CasinoStageFrame frame, AppSkin ui,
