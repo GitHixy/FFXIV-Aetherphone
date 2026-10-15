@@ -30,6 +30,7 @@ internal sealed partial class CasinoApp
         new("casino.live.blackjack", CasinoGames.Blackjack, CasinoRoomIds.BlackjackHouse.Length);
     private readonly HoldemRoomRows holdemRoomRows = new();
     private readonly BlackjackRoomRows blackjackRoomRows = new();
+    private readonly LiveChallenges liveChallenges = new();
     private LanguageInfo? liveViewLanguage;
     private CasinoTableRowDto? liveOwnSource;
     private LanguageInfo? liveOwnLanguage;
@@ -63,6 +64,7 @@ internal sealed partial class CasinoApp
             var pinned = PinnedLiveTable(out var owner);
             cursorY = DrawYourTable(drawList, pinned, owner, new Vector2(origin.X, cursorY), width, interactive, scale);
             cursorY = DrawOnTheClock(drawList, new Vector2(origin.X, cursorY), width, interactive, scale);
+            cursorY = DrawChallenges(drawList, new Vector2(origin.X, cursorY), width, interactive, scale);
             cursorY = DrawHouseTables(drawList, new Vector2(origin.X, cursorY), width, interactive, scale);
             cursorY = DrawPlayerTables(drawList, pinned?.TableId ?? string.Empty, new Vector2(origin.X, cursorY), width,
                 interactive, scale);
@@ -281,6 +283,61 @@ internal sealed partial class CasinoApp
         return new LiveRoomCard(gameId, Loc.T(CasinoGameNames.Of(gameId)),
             clocked ? phaseLine : Loc.T(L.Casino.RoomIdle), texts.Count(L.Venue.InRoom, casinoRooms.OccupancyOf(roomId)),
             ring, open, clocked);
+    }
+
+    private float DrawChallenges(ImDrawListPtr drawList, Vector2 origin, float width, bool interactive, float scale)
+    {
+        if (!casino.HasFeature(CasinoFeatures.Challenges))
+        {
+            return origin.Y;
+        }
+
+        var views = liveChallenges.Refresh(floor.Challenges);
+        var now = floor.ServerNowUnix;
+        var showing = 0;
+        for (var index = 0; index < views.Length; index++)
+        {
+            if (LiveChallenges.PhaseOf(views[index], now) != ChallengePhase.Over)
+            {
+                showing++;
+            }
+        }
+
+        if (showing == 0)
+        {
+            return origin.Y;
+        }
+
+        var top = LiveArt.Header(drawList, ui, new Vector2(origin.X, origin.Y + LiveArt.SectionGap * scale), width,
+            Loc.T(L.LivePage.ChallengesTitle), Loc.T(L.LivePage.ChallengesLine), scale) + LiveArt.HeaderGap * scale;
+        var gap = LiveArt.RowGap * scale;
+        for (var index = 0; index < views.Length; index++)
+        {
+            var phase = LiveChallenges.PhaseOf(views[index], now);
+            if (phase == ChallengePhase.Over)
+            {
+                continue;
+            }
+
+            var running = phase == ChallengePhase.Running;
+            var clock = running
+                ? texts.Duration(L.LivePage.ChallengeEndsIn, LiveChallenges.SecondsUntil(views[index].EndsAtUnix, now))
+                : texts.Duration(L.LivePage.ChallengeStartsIn,
+                    LiveChallenges.SecondsUntil(views[index].StartsAtUnix, now));
+            var height = ChallengeCard.Height(views[index], running, width, scale);
+            var rect = new Rect(new Vector2(origin.X, top), new Vector2(origin.X + width, top + height));
+            using (ImRaii.PushId(index))
+            {
+                if (ChallengeCard.Draw(drawList, ui, rect, views[index], clock, running, interactive, scale))
+                {
+                    OpenGame(views[index].GameId, rect);
+                }
+            }
+
+            top = rect.Max.Y + gap;
+        }
+
+        return top - gap;
     }
 
     private float DrawHouseTables(ImDrawListPtr drawList, Vector2 origin, float width, bool interactive, float scale)

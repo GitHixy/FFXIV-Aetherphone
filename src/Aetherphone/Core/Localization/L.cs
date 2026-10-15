@@ -2304,7 +2304,7 @@ internal static class L
             new("changelog.r1300.17",
                 "Added daily missions: three a day, each paying chips when you finish it"),
             new("changelog.r1300.18",
-                "Added floor challenges with a chip prize and the current leader on the Floor"),
+                "Added floor challenges on Live: each shows the goal, the leader, your wins, the prize and the time left"),
             new("changelog.r1300.19",
                 "Added the Hall of Fame: weekly boards for profit, best multiplier and biggest win, naming only players who choose to appear when Gamba asks"),
             new("changelog.r1300.20",
@@ -2368,7 +2368,7 @@ internal static class L
             new("changelog.r1300.155",
                 "Added a Host button on your own table that takes you back to the console and shows when someone knocks"),
             new("changelog.r1300.159",
-                "Added picking a house blackjack table on Live: see how full each of the four tables is and sit where your friends are, or tap Find me a seat"),
+                "Added picking a house blackjack table on Live and from Blackjack on the Floor: see how full each of the four tables is and sit where your friends are, or tap Find me a seat"),
             new("changelog.r1300.36",
                 "Overhauled the Floor: your chips with a clear daily streak, shortcuts to Missions, Club, Hall of Fame and History, then every game in full grids of Cards, Slots and Quick bets, a jackpot marquee and the live rooms counting down"),
             new("changelog.r1300.92",
@@ -11210,6 +11210,20 @@ internal static class L
         public static readonly LocString LineJoin = new("casino.livePage.lineJoin", "{0}, {1}");
         public static readonly LocString HostTitle = new("casino.livePage.hostTitle", "Host your own table");
         public static readonly LocString HostLine = new("casino.livePage.hostLine", "For your venue, your friends or your FC");
+        public static readonly LocString ChallengesTitle = new("casino.livePage.challengesTitle", "Challenges");
+        public static readonly LocString ChallengesLine = new("casino.livePage.challengesLine", "Race the floor for a prize");
+        public static readonly LocString ChallengeEndsIn = new("casino.livePage.challengeEndsIn", "Ends in {0}");
+        public static readonly LocString ChallengeStartsIn = new("casino.livePage.challengeStartsIn", "Starts in {0}");
+        public static readonly LocString ChallengeFirstGoal = new("casino.livePage.challengeFirstGoal", "First to win {0} or more on {1}");
+        public static readonly LocString ChallengeMostGoal = new("casino.livePage.challengeMostGoal", "Most wins of {0} or more on {1}");
+        public static readonly LocString ChallengeMinStake = new("casino.livePage.challengeMinStake", "Bets of {0} chips and up count");
+        public static readonly LocString ChallengeLeader = new("casino.livePage.challengeLeader", "Leader: {0}, {1}");
+        public static readonly LocString ChallengeNoLeader = new("casino.livePage.challengeNoLeader", "No qualifying wins yet");
+        public static readonly LocPlural ChallengeWins = new("casino.livePage.challengeWins", "{0} win", "{0} wins");
+        public static readonly LocString ChallengeYours = new("casino.livePage.challengeYours", "You: {0}");
+        public static readonly LocString ChallengePrize = new("casino.livePage.challengePrize", "Prize: {0} chips");
+        public static readonly LocString ChallengePrizeBadge = new("casino.livePage.challengePrizeBadge", "Prize: {0} chips and a badge");
+        public static readonly LocString ChallengeBadge = new("casino.livePage.challengeBadge", "Prize: a badge");
     }
 
     internal static class Strip
