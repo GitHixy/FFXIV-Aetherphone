@@ -33,13 +33,29 @@ public sealed class CasinoHouseFloorTests
     [Fact]
     public void TheHouseRangeRunsFromTheTableFloorToThePlayersOwnCeiling()
     {
-        var floor = new HouseBlackjackFloor(Table("a", CasinoTableKinds.House), 0, true);
+        var floor = new HouseBlackjackFloor(Table("a", CasinoTableKinds.House), 0, true, 500, 10_000_000);
         Assert.Equal(500, floor.MinBet);
         Assert.Equal(250_000, floor.TopBetFor(250_000));
         Assert.Equal(500, floor.TopBetFor(100));
         Assert.Equal(10_000_000, floor.TopBetFor(50_000_000));
         Assert.Equal(10_000_000, floor.TopBetFor(0));
-        Assert.Equal(BlackjackRules.MinBet, new HouseBlackjackFloor(null, 0, false).MinBet);
+        Assert.Equal(BlackjackRules.MinBet, new HouseBlackjackFloor(null, 0, false, 0, 0).MinBet);
+    }
+
+    [Fact]
+    public void TheHouseRangeSpansTheLowestFeltToTheHighest()
+    {
+        var pit = Table("pit", CasinoTableKinds.House) with { MinBet = 500, MaxBet = 10_000 };
+        var salon = Table("salon", CasinoTableKinds.House) with { MinBet = 50_000, MaxBet = 1_000_000 };
+        var vault = Table("vault", CasinoTableKinds.House) with { MinBet = 500_000, MaxBet = 10_000_000 };
+        var hosted = Table("mine", CasinoTableKinds.Private) with { MinBet = 100, MaxBet = 50_000_000 };
+        var floor = HouseBlackjack.Of(new[] { salon, vault, hosted, pit });
+        Assert.Equal(500, floor.MinBet);
+        Assert.Equal(100_000, floor.TopBetFor(100_000));
+        Assert.Equal(10_000_000, floor.TopBetFor(0));
+        Assert.True(HouseBlackjack.Reaches(100_000, salon.MinBet));
+        Assert.False(HouseBlackjack.Reaches(100_000, vault.MinBet));
+        Assert.True(HouseBlackjack.Reaches(0, vault.MinBet));
     }
 
     [Fact]
@@ -82,13 +98,14 @@ public sealed class CasinoHouseFloorTests
     public void TheHouseBlackjackRowQuotesThePlayersRangeAndTheWholeFloorsHeadcount()
     {
         var lead = Table("blackjack-pit", CasinoTableKinds.House, seated: 2);
-        var view = TableRowViews.HouseView(new HouseBlackjackFloor(lead, 5, true), 250_000);
+        var view = TableRowViews.HouseView(new HouseBlackjackFloor(lead, 5, true, 500, 10_000_000), 250_000);
         Assert.Equal(Loc.T(L.Casino.GameBlackjack), view.Name);
         Assert.Equal(Loc.T(L.Casino.TableStakes, NumberText.Compact(500), NumberText.Compact(250_000)), view.Stakes);
         Assert.Equal(5, view.Seated);
         Assert.Equal(CasinoGames.Blackjack, view.GameId);
         Assert.False(view.Full);
-        Assert.True(TableRowViews.HouseView(new HouseBlackjackFloor(lead, 24, false), 250_000).Full);
+        Assert.True(TableRowViews.HouseView(new HouseBlackjackFloor(lead, 24, false, 500, 10_000_000), 250_000)
+            .Full);
     }
 
     private static CasinoTableRowDto Table(string id, int kind, int seated = 0,

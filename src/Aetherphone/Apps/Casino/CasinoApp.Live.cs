@@ -92,10 +92,10 @@ internal sealed partial class CasinoApp
 
         if (blackjackRooms.CapturesPointer)
         {
-            blackjackRoomRows.Refresh(casinoTables.Tables, SeatedBlackjackTable());
+            blackjackRoomRows.Refresh(casinoTables.Tables, SeatedBlackjackTable(), casino.Ceiling.MaxBet);
             blackjackRooms.Draw(screenArea, ui, Loc.T(L.LivePage.BlackjackRoomsTitle),
-                HouseBlackjackStakes(L.LivePage.BlackjackRoomsLine, HouseBlackjack.Of(casinoTables.Tables)),
-                blackjackRoomRows.Rows, Loc.T(L.Casino.QuickSeatAction), !casinoTables.IntentInFlight);
+                Loc.T(L.LivePage.BlackjackRoomsLine), blackjackRoomRows.Rows, Loc.T(L.Casino.QuickSeatAction),
+                !casinoTables.IntentInFlight);
         }
 
         OpenTable(holdemRooms.TakePick());

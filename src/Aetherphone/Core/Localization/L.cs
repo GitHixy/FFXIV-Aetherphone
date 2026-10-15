@@ -11187,7 +11187,8 @@ internal static class L
         public static readonly LocString RoomsTitle = new("casino.livePage.roomsTitle", "Hold'em rooms");
         public static readonly LocString RoomsLine = new("casino.livePage.roomsLine", "Same game, different blinds. Pick your size.");
         public static readonly LocString BlackjackRoomsTitle = new("casino.livePage.blackjackRoomsTitle", "Blackjack tables");
-        public static readonly LocString BlackjackRoomsLine = new("casino.livePage.blackjackRoomsLine", "Same stakes at every table, {0} to {1} a hand. Sit where your friends are.");
+        public static readonly LocString BlackjackRoomsLine = new("casino.livePage.blackjackRoomsLine", "Each table has its own stakes. All of them pay blackjack 3:2, and the dealer stands on soft 17 with six decks.");
+        public static readonly LocString BlackjackAboveMaxBet = new("casino.livePage.blackjackAboveMaxBet", "Above your max bet of {0}");
         public static readonly LocString BlackjackPit = new("casino.livePage.blackjackPit", "The Pit");
         public static readonly LocString BlackjackParlour = new("casino.livePage.blackjackParlour", "The Parlour");
         public static readonly LocString BlackjackSalon = new("casino.livePage.blackjackSalon", "The Salon");

@@ -17,6 +17,7 @@ internal static class HouseRoomCard
     private const float EmptySeatAlpha = 0.16f;
     private const float DotsGap = 7f;
     private const float RimAlpha = 0.45f;
+    private const float DimAlpha = 0.45f;
 
     public static float Height(in HouseRoomRow row, float width, float scale) =>
         PadY * 2f * scale + MathF.Max(Button.RegularHeight * scale,
@@ -46,11 +47,15 @@ internal static class HouseRoomCard
         var left = origin.X + padX;
         var textWidth = TextWidth(row, width, scale);
         var top = centerY - TextHeight(row, textWidth, scale) * 0.5f;
-        top = PitText.Draw(drawList, row.Name, TextStyles.Headline, CasinoColors.Money, left, top, textWidth, false);
-        top = PitText.Draw(drawList, row.Detail, TextStyles.Footnote, skin.BodyInk, left, top + LineGap * scale,
-            textWidth, false);
+        var fade = row.Dim ? DimAlpha : 1f;
+        top = PitText.Draw(drawList, row.Name, TextStyles.Headline,
+            CasinoColors.Money with { W = CasinoColors.Money.W * fade }, left, top, textWidth, false);
+        top = PitText.Draw(drawList, row.Detail, TextStyles.FootnoteEmphasized, skin.TitleInk, left,
+            top + LineGap * scale, textWidth, false);
+        top = PitText.Draw(drawList, row.Note, TextStyles.Footnote, skin.BodyInk, left, top, textWidth, false);
         CasinoArt.SeatDots(drawList, new Vector2(left, top + DotsGap * scale + DotsHeight(scale) * 0.5f), row.Seated,
-            row.MaxSeats, skin.Accent, skin.TitleInk with { W = EmptySeatAlpha }, scale);
+            row.MaxSeats, skin.Accent with { W = skin.Accent.W * fade },
+            skin.TitleInk with { W = EmptySeatAlpha * fade }, scale);
         return Button.Draw(drawList, action, row.Action, skin.Ink, row.Seats ? ButtonStyle.Prominent : ButtonStyle.Gray,
             enabled: enabled, overlay: overlay, id: actionId);
     }
@@ -64,5 +69,6 @@ internal static class HouseRoomCard
 
     private static float TextHeight(in HouseRoomRow row, float textWidth, float scale) =>
         PitText.Height(row.Name, TextStyles.Headline, textWidth) + LineGap * scale
-        + PitText.Height(row.Detail, TextStyles.Footnote, textWidth) + DotsGap * scale + DotsHeight(scale);
+        + PitText.Height(row.Detail, TextStyles.FootnoteEmphasized, textWidth)
+        + PitText.Height(row.Note, TextStyles.Footnote, textWidth) + DotsGap * scale + DotsHeight(scale);
 }

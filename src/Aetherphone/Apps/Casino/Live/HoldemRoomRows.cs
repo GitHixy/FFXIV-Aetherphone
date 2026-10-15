@@ -39,7 +39,7 @@ internal sealed class HoldemRoomRows
     {
         var seats = Seats(room);
         return new HouseRoomRow(room.RoomId, room.Name, room.Locked ? Loc.T(L.Holdem.RoyalLocked) : room.BuyIn,
-            room.Seated, room.MaxSeats, Loc.T(seats ? L.LivePage.Sit : L.LivePage.Watch), seats,
-            tier == HoldemRules.RoyalTier);
+            string.Empty, room.Seated, room.MaxSeats, Loc.T(seats ? L.LivePage.Sit : L.LivePage.Watch), seats,
+            tier == HoldemRules.RoyalTier, room.Locked);
     }
 }
