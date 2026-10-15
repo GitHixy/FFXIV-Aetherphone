@@ -1,6 +1,7 @@
 using Aetherphone.Apps.Casino.Stage;
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Core.Animation;
 using Aetherphone.Core.Onboarding;
 using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
@@ -38,6 +39,11 @@ internal sealed class FloorShortcuts
     public const int LabelLines = 2;
 
     private const string AnchorKey = "casino.shortcuts";
+    private const string PressId = "shortcut";
+    private const float HoverFloor = 0.001f;
+    private const float WashAlpha = 0.22f;
+    private const float RimAlpha = 0.75f;
+    private const float RimWidth = 1.2f;
 
     private static readonly TextStyle LabelStyle = TextStyles.FootnoteEmphasized;
     private static readonly TextStyle BadgeStyle = TextStyles.Caption1;
@@ -122,16 +128,24 @@ internal sealed class FloorShortcuts
     private static bool DrawTile(ImDrawListPtr drawList, AppSkin ui, in FloorShortcut item, in TileLabelFit fit,
         Rect tile, float labelBlock, float band, float scale)
     {
-        var hovered = CasinoArt.PressCard(ImGui.GetID("shortcut"), tile.Min, tile.Max, out var min, out var max);
+        var hovered = CasinoArt.PressCard(ImGui.GetID(PressId), tile.Min, tile.Max, out var pressedMin,
+            out var pressedMax);
+        var hover = HoverFx.Amount(PressId, hovered);
+        var center = (pressedMin + pressedMax) * 0.5f;
+        var half = (pressedMax - pressedMin) * 0.5f * (1f + Motion.HoverLiftCard * hover);
+        var min = center - half;
+        var max = center + half;
         var radius = Metrics.Radius.Lg * scale;
         ui.Card(drawList, min, max, radius);
+        DrawHover(drawList, item.Tint, min, max, radius, hover, scale);
         var icon = Icon * scale;
         var regionTop = min.Y + BlockTop(band, scale);
         var regionBottom = max.Y - Pad * scale;
         var block = icon + IconGap * scale + labelBlock;
         var blockTop = regionTop + MathF.Max(0f, (regionBottom - regionTop - block) * 0.5f);
         var iconCenter = new Vector2((min.X + max.X) * 0.5f, blockTop + icon * 0.5f);
-        CasinoArt.IconTileAt(drawList, iconCenter, icon, item.Tint, item.Icon);
+        CasinoArt.IconTileAt(drawList, iconCenter, icon * (1f + Motion.HoverLiftIcon * hover), item.Tint,
+            item.Icon);
         var lineHeight = Typography.LineHeight(fit.Style);
         var top = blockTop + icon + IconGap * scale;
         for (var line = 0; line < fit.Lines.Length; line++)
@@ -144,6 +158,20 @@ internal sealed class FloorShortcuts
 
         DrawBadge(drawList, item, new Rect(min, max), scale);
         return UiInteract.Click(tile.Min, tile.Max, hovered);
+    }
+
+    private static void DrawHover(ImDrawListPtr drawList, Vector4 tint, Vector2 min, Vector2 max, float radius,
+        float hover, float scale)
+    {
+        if (hover <= HoverFloor)
+        {
+            return;
+        }
+
+        Squircle.FillVerticalGradient(drawList, min, max, radius,
+            ImGui.GetColorU32(tint with { W = WashAlpha * hover }), ImGui.GetColorU32(tint with { W = 0f }));
+        Squircle.Stroke(drawList, min, max, radius, ImGui.GetColorU32(tint with { W = RimAlpha * hover }),
+            MathF.Max(1f, RimWidth * scale));
     }
 
     private static void DrawBadge(ImDrawListPtr drawList, in FloorShortcut item, Rect tile, float scale)
