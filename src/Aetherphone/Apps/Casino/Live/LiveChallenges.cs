@@ -85,8 +85,11 @@ internal sealed class LiveChallenges
     {
         var gameId = CasinoRecentGames.ClientGameId(challenge.GameKind);
         var first = string.Equals(challenge.Kind, CasinoChallengeKinds.First, StringComparison.Ordinal);
-        var goal = Loc.T(first ? L.LivePage.ChallengeFirstGoal : L.LivePage.ChallengeMostGoal,
-            CasinoMultiples.Label(Hundredths(challenge.ThresholdTenths)), Loc.T(CasinoGameNames.Of(gameId)));
+        var multiple = CasinoMultiples.Label(Hundredths(challenge.ThresholdTenths));
+        var goal = challenge.GameKind.Length == 0
+            ? Loc.T(first ? L.LivePage.ChallengeFirstGoalAny : L.LivePage.ChallengeMostGoalAny, multiple)
+            : Loc.T(first ? L.LivePage.ChallengeFirstGoal : L.LivePage.ChallengeMostGoal, multiple,
+                Loc.T(CasinoGameNames.OfEveryMachine(gameId)));
         var stake = challenge.MinStake > 0
             ? Loc.T(L.LivePage.ChallengeMinStake, NumberText.Compact(challenge.MinStake))
             : string.Empty;
