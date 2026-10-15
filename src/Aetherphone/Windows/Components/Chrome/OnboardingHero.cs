@@ -31,7 +31,9 @@ internal static class OnboardingHero
     private const float PumpkinUnits = 34f;
     private const double PumpkinBobPeriodMs = 3200.0;
     private const float PumpkinBobUnits = 2.2f;
-    private static readonly Vector4 BatInk = new(0.86f, 0.80f, 1f, 0.92f);
+    private const float PumpkinGlowReach = 1.6f;
+    private const float PumpkinGlowAlpha = 0.32f;
+    private const int PumpkinGlowCells = 12;
 
     public static void Draw(ImDrawListPtr drawList, Vector2 center, HeroMotif motif, Vector4 accent, float scale,
         float reveal, float alpha)
@@ -63,6 +65,8 @@ internal static class OnboardingHero
     private static void DrawHalloween(ImDrawListPtr drawList, Vector2 center, float scale, float reveal,
         float settle, float alpha)
     {
+        NightScene.Glow(drawList, center, BatOrbitUnits * scale * PumpkinGlowReach,
+            Spooks.Pumpkin with { W = PumpkinGlowAlpha * alpha * settle }, PumpkinGlowCells);
         var drift = Pulse.Phase(BatOrbitPeriodMs) * MathF.PI * 2f;
         var seconds = (float)ImGui.GetTime();
         var denominator = MathF.Max(1f - StaggerSpan, 0.001f);
@@ -81,7 +85,7 @@ internal static class OnboardingHero
                 center.Y + MathF.Sin(angle) * radius * BatOrbitTilt);
             var flap = MathF.Sin(seconds * (BatFlapRate + batIndex * 1.7f));
             NightScene.DrawBat(drawList, position, BatUnits * scale * appear, flap,
-                ImGui.GetColorU32(BatInk with { W = BatInk.W * appear * alpha }));
+                ImGui.GetColorU32(Spooks.BatShadow with { W = appear * alpha }));
         }
 
         var size = PumpkinUnits * scale * settle;
