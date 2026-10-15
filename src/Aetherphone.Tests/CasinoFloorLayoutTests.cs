@@ -288,12 +288,14 @@ public sealed class CasinoFloorLayoutTests
         {
             CasinoGames.Blackjack, CasinoGames.SlotsBird, CasinoGames.SlotsCascade, CasinoGames.SlotsMoogle,
             CasinoGames.Plinko, CasinoGames.Mines, CasinoGames.Race, CasinoGames.Wheel, CasinoGames.Bingo,
-            CasinoGames.Scratch, CasinoGames.Barkeep, CasinoGames.DealerHoldem,
+            CasinoGames.Scratch, CasinoGames.DealerHoldem,
         };
         for (var index = 0; index < printed.Length; index++)
         {
             Assert.InRange(CasinoAppReturns(printed[index]), 900, 999);
         }
+
+        Assert.Equal(0, CasinoAppReturns(CasinoGames.Barkeep));
     }
 
     [Fact]

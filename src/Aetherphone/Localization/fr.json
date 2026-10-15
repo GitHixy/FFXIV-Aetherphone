@@ -9903,6 +9903,7 @@
   "casino.floorPage.missionsBadge": "{0}/{1}",
   "casino.floorPage.rankBadge": "#{0}",
   "casino.floorPage.playerVersusPlayer": "Joueur contre joueur",
+  "casino.floorPage.skillPaysUpTo": "Jusqu'à {0}x",
   "casino.floorPage.tourShortcutsTitle": "Raccourcis",
   "casino.floorPage.tourShortcutsBody": "Missions, Club, Panthéon et Historique sont à un geste.",
   "casino.club.hidden": "Masqué",

@@ -9903,6 +9903,7 @@
   "casino.floorPage.missionsBadge": "{0}/{1}",
   "casino.floorPage.rankBadge": "#{0}",
   "casino.floorPage.playerVersusPlayer": "Jugador contra jugador",
+  "casino.floorPage.skillPaysUpTo": "Hasta {0}x",
   "casino.floorPage.tourShortcutsTitle": "Accesos directos",
   "casino.floorPage.tourShortcutsBody": "Misiones, Club, Salón de la Fama e Historial están a un toque.",
   "casino.club.hidden": "Oculto",

@@ -9903,6 +9903,7 @@
   "casino.floorPage.missionsBadge": "{0}/{1}",
   "casino.floorPage.rankBadge": "第{0}名",
   "casino.floorPage.playerVersusPlayer": "玩家对战",
+  "casino.floorPage.skillPaysUpTo": "最高{0}倍",
   "casino.floorPage.tourShortcutsTitle": "快捷入口",
   "casino.floorPage.tourShortcutsBody": "任务、俱乐部、名人堂和记录都只需一键。",
   "casino.club.hidden": "已隐藏",

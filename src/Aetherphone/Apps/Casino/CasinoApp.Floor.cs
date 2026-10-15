@@ -25,6 +25,8 @@ internal sealed partial class CasinoApp
     private readonly LiveRoomView[] roomViews = new LiveRoomView[LiveRooms.Length];
     private readonly Dictionary<int, string> returnLabels = new();
     private LanguageInfo? returnLanguage;
+    private string? skillTopLabel;
+    private LanguageInfo? skillTopLanguage;
 
     private static string RoomOf(string gameId) => gameId switch
     {
@@ -176,7 +178,6 @@ internal sealed partial class CasinoApp
         CasinoGames.Wheel => WheelRules.ReturnBasisPointsFor(0) / 10,
         CasinoGames.Bingo => BingoRules.ReturnTenths,
         CasinoGames.Scratch => ScratchRules.ReturnBasisPoints / 10,
-        CasinoGames.Barkeep => Cabinets.BarkeepCabinet.ReturnTenths,
         CasinoGames.Blackjack => BlackjackRules.ReturnTenths,
         CasinoGames.DealerHoldem => DealerHoldemRules.ReturnTenths,
         _ => 0,
@@ -205,10 +206,25 @@ internal sealed partial class CasinoApp
         return label;
     }
 
-    private string PosterReturn(string gameId) =>
-        string.Equals(gameId, CasinoGames.Holdem, StringComparison.Ordinal)
-            ? Loc.T(L.FloorPage.PlayerVersusPlayer)
-            : ReturnLabel(ReturnTenthsOf(gameId));
+    private string SkillTopLabel()
+    {
+        if (skillTopLabel is not null && ReferenceEquals(skillTopLanguage, Loc.Current))
+        {
+            return skillTopLabel;
+        }
+
+        skillTopLanguage = Loc.Current;
+        skillTopLabel = Loc.T(L.FloorPage.SkillPaysUpTo,
+            (BarkeepRules.TopPayTenths / 10m).ToString("0.#", Loc.Culture));
+        return skillTopLabel;
+    }
+
+    private string PosterReturn(string gameId) => gameId switch
+    {
+        CasinoGames.Holdem => Loc.T(L.FloorPage.PlayerVersusPlayer),
+        CasinoGames.Barkeep => SkillTopLabel(),
+        _ => ReturnLabel(ReturnTenthsOf(gameId)),
+    };
 
     public PosterInfo Describe(in StripEntry entry)
     {

@@ -9903,6 +9903,7 @@
   "casino.floorPage.missionsBadge": "{0}/{1}",
   "casino.floorPage.rankBadge": "№{0}",
   "casino.floorPage.playerVersusPlayer": "Игроки против игроков",
+  "casino.floorPage.skillPaysUpTo": "До {0}x",
   "casino.floorPage.tourShortcutsTitle": "Быстрый доступ",
   "casino.floorPage.tourShortcutsBody": "Задания, Клуб, Зал славы и История в одном касании.",
   "casino.club.hidden": "Скрыто",

@@ -9903,6 +9903,7 @@
   "casino.floorPage.missionsBadge": "{0}/{1}",
   "casino.floorPage.rankBadge": "#{0}",
   "casino.floorPage.playerVersusPlayer": "Oyuncuya karşı oyuncu",
+  "casino.floorPage.skillPaysUpTo": "{0}x kadar",
   "casino.floorPage.tourShortcutsTitle": "Kısayollar",
   "casino.floorPage.tourShortcutsBody": "Görevler, Kulüp, Şöhretler Salonu ve Geçmiş bir dokunuş uzakta.",
   "casino.club.hidden": "Gizli",

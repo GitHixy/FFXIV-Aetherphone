@@ -9903,6 +9903,7 @@
   "casino.floorPage.missionsBadge": "{0}/{1}",
   "casino.floorPage.rankBadge": "{0}位",
   "casino.floorPage.playerVersusPlayer": "プレイヤー同士の対戦",
+  "casino.floorPage.skillPaysUpTo": "最大{0}倍",
   "casino.floorPage.tourShortcutsTitle": "ショートカット",
   "casino.floorPage.tourShortcutsBody": "ミッション、クラブ、殿堂、履歴にワンタップで移動できます。",
   "casino.club.hidden": "非公開",

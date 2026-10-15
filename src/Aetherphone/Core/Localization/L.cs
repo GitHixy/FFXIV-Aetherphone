@@ -11358,6 +11358,7 @@ internal static class L
         public static readonly LocString MissionsBadge = new("casino.floorPage.missionsBadge", "{0}/{1}");
         public static readonly LocString RankBadge = new("casino.floorPage.rankBadge", "#{0}");
         public static readonly LocString PlayerVersusPlayer = new("casino.floorPage.playerVersusPlayer", "Player vs player");
+        public static readonly LocString SkillPaysUpTo = new("casino.floorPage.skillPaysUpTo", "Up to {0}x");
         public static readonly LocString TourShortcutsTitle = new("casino.floorPage.tourShortcutsTitle", "Shortcuts");
         public static readonly LocString TourShortcutsBody = new("casino.floorPage.tourShortcutsBody", "Missions, Club, Hall of Fame and History are one tap away.");
     }

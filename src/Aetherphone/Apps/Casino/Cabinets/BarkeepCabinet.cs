@@ -117,8 +117,6 @@ internal sealed class BarkeepCabinet : ICabinetIdle
 
     public static float DeckHeight => BarkeepDeckLayout.Height;
 
-    public static int ReturnTenths => BarkeepRules.ReturnBasisPointsAtPerfectPlay / 10;
-
     public bool Practicing => mode == BarkeepMode.Practice && (shift is not null || practiceSettled);
 
     public void Enter()

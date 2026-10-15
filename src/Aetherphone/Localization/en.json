@@ -9903,6 +9903,7 @@
   "casino.floorPage.missionsBadge": "{0}/{1}",
   "casino.floorPage.rankBadge": "#{0}",
   "casino.floorPage.playerVersusPlayer": "Player vs player",
+  "casino.floorPage.skillPaysUpTo": "Up to {0}x",
   "casino.floorPage.tourShortcutsTitle": "Shortcuts",
   "casino.floorPage.tourShortcutsBody": "Missions, Club, Hall of Fame and History are one tap away.",
   "casino.club.hidden": "Hidden",
