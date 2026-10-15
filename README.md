@@ -202,6 +202,8 @@ Gamba's Host tab shows your open table with its code, who is here and who is kno
 
 **Speaks your language.** Nine interface languages and one-tap translation on posts, profiles and messages.
 
+**Emoji as you type.** Type `:` and two or more letters in a chat, comment, caption or chirp to get emoji suggestions. Arrow keys move through them and Enter or Tab picks one, or just click it. In Linkpearl this follows the emoji picker and shortcode settings.
+
 **Private by design.** Messages, photos and voice notes are end-to-end encrypted. A Velvet intro is sent as plain text. A human moderation team reviews reported content.
 
 ## Install
