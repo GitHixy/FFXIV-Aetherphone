@@ -2491,6 +2491,8 @@ internal static class L
                 "Added a color picker to Nameplate Title: with the Custom look, pick any text or glow color, or type its hex code"),
             new("changelog.r1300.161",
                 "Added gradient glows to Nameplate Title: sixteen color sets or two colors of your own, in a wave, a pulse or held still"),
+            new("changelog.r1300.162",
+                "Added a live preview to Settings > Minimized phone that plays music, a call and a notification banner, so you can see each one without minimizing"),
             new("changelog.r1300.163",
                 "Changed Minimized phone to its own row in Settings, right under Display"),
             new("changelog.r1300.51",
@@ -10138,6 +10140,7 @@ internal static class L
         public static readonly LocString MinimapZoomHint = new("minimized.minimapZoomHint", "Scroll the wheel over the map to zoom, or use the plus and minus buttons that fade in when you hover it.");
         public static readonly LocString NoMap = new("minimized.noMap", "No map here");
         public static readonly LocString ResizeHint = new("minimized.resizeHint", "Drag its bottom right corner to make the minimized phone bigger or smaller.");
+        public static readonly LocString DemoCaller = new("minimized.demoCaller", "Raid leader");
     }
 
     internal static class Time
