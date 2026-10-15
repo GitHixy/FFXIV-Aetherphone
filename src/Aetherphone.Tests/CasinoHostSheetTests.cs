@@ -195,7 +195,7 @@ public sealed class CasinoHostSheetTests
     }
 
     [Fact]
-    public void SwitchingBackToBlackjackClampsTheSeatsToSix()
+    public void SwitchingBackToBlackjackClampsTheSeatsToSeven()
     {
         var draft = new HostDraft();
         draft.SelectGame(HostGame.Holdem, false);
@@ -204,6 +204,21 @@ public sealed class CasinoHostSheetTests
         draft.Normalize(false);
 
         Assert.Equal(CasinoHostingRules.MaxSeats, draft.Build(null).Seats);
+    }
+
+    [Fact]
+    public void AHoldemDraftStillStartsAtTheSixSeatHouseRing()
+    {
+        var draft = new HostDraft();
+        draft.SelectGame(HostGame.Holdem, true);
+        draft.Normalize(true);
+
+        Assert.Equal(HoldemRules.HouseSeats, draft.Build(null).Seats);
+
+        draft.SelectGame(HostGame.Blackjack, true);
+        draft.Normalize(true);
+
+        Assert.Equal(BlackjackRules.SeatCount, draft.Build(null).Seats);
     }
 
     [Theory]

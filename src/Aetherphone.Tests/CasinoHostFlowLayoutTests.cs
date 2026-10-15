@@ -1,6 +1,7 @@
 using System.Numerics;
 using Aetherphone.Apps.Casino.Tables;
 using Aetherphone.Core;
+using Aetherphone.Core.Casino;
 using Aetherphone.Windows.Components;
 using Xunit;
 
@@ -65,7 +66,7 @@ public sealed class CasinoHostFlowLayoutTests
     public void SeatDiscsFitOneRowAndTheirTargetsNeverOverlap(float scale)
     {
         var inner = (PhoneWidth - HostFlowLayout.CardPad * 2f) * scale;
-        CheckSeats(inner, 6, scale);
+        CheckSeats(inner, CasinoHostingRules.MaxSeats, scale);
         CheckSeats(inner, 9, scale);
         CheckSeats(240f * scale, 9, scale);
     }

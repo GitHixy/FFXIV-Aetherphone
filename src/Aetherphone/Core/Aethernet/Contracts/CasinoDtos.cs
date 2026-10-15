@@ -631,7 +631,7 @@ internal sealed record CasinoTableCreateRequest(string ClientTableId, int StakeT
 internal sealed record CasinoTableConfigDto(
     string GameKind = "casino.blackjack",
     string Name = "",
-    int Seats = 6,
+    int Seats = 7,
     long MinBet = 0,
     long MaxBet = 0,
     long MinBuyIn = 0,

@@ -57,6 +57,9 @@ internal static class HostGames
     public static int MaxSeats(HostGame game) =>
         game == HostGame.Holdem ? HoldemRules.MaxSeats : CasinoHostingRules.MaxSeats;
 
+    public static int DefaultSeats(HostGame game) =>
+        game == HostGame.Holdem ? HoldemRules.HouseSeats : CasinoHostingRules.DefaultSeats;
+
     public static HostGame FromVenue(VenueRoomKind kind) => kind switch
     {
         VenueRoomKind.Dice => HostGame.DiceTable,
