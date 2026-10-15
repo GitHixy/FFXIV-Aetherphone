@@ -141,7 +141,7 @@ internal sealed class BlackjackPit
     private void DrawHouse(ImDrawListPtr drawList, AppSkin ui, float width, float scale)
     {
         var seatedAt = CasinoWire.SittingFor(chips.State, CasinoWire.BlackjackKind)?.TableId ?? string.Empty;
-        houseRows.Refresh(tables.Tables, seatedAt);
+        houseRows.Refresh(tables.Tables, seatedAt, chips.Ceiling.MaxBet);
         var rows = houseRows.Rows;
         for (var index = 0; index < rows.Length; index++)
         {
@@ -153,6 +153,11 @@ internal sealed class BlackjackPit
 
             ImGui.Dummy(new Vector2(width, HouseRoomCard.Height(rows[index], width, scale) + RowGap * scale));
         }
+
+        var rulesTop = ImGui.GetCursorScreenPos();
+        var rulesBottom = PitText.Draw(drawList, Loc.T(L.LivePage.BlackjackRoomsLine), TextStyles.Footnote,
+            ui.BodyInk, rulesTop.X, rulesTop.Y, width, false);
+        ImGui.Dummy(new Vector2(width, rulesBottom - rulesTop.Y + RowGap * scale));
     }
 
     private void DrawLitCard(ImDrawListPtr drawList, Rect card, float rounding, float scale)

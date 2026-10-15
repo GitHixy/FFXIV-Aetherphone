@@ -10,11 +10,13 @@ internal readonly record struct HouseRoomRow(
     string RoomId,
     string Name,
     string Detail,
+    string Note,
     int Seated,
     int MaxSeats,
     string Action,
     bool Seats,
-    bool Rim);
+    bool Rim,
+    bool Dim);
 
 internal sealed class HouseRoomsSheet
 {
