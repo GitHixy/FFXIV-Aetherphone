@@ -74,7 +74,7 @@ internal sealed class AboutPage : ISettingsPage
 
     private void DrawVersionRow(Rect row, PhoneTheme theme)
     {
-        SettingsRow.Info(row, Loc.T(L.Settings.Version), AepConstants.Version, theme);
+        SettingsRow.Info(row, Loc.T(L.Settings.Version), DisplayVersion.Text, theme);
         if (!UiInteract.Click(row.Min, row.Max, UiInteract.Hover(row.Min, row.Max), false))
         {
             return;

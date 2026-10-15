@@ -933,6 +933,7 @@
   "settings.about": "概要",
   "settings.plugin": "プラグイン",
   "settings.version": "バージョン",
+  "settings.betaVersion": "{0} ベータ {1}",
   "settings.command": "コマンド",
   "settings.testServer": "テストサーバー",
   "settings.testServerHint": "ベータ版はAethernetのテストサーバーに接続します。アカウント、メッセージ、投稿はすべてテストサーバー専用です。本番サーバーを使うにはこれをオフにしてください。切り替えるとサインアウトするので、もう一方のサーバーで改めてサインインしてください。",

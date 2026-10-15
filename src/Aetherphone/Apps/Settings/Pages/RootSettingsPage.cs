@@ -38,7 +38,6 @@ internal sealed class RootSettingsPage : ISettingsPage
     private static readonly Vector4 DoNotDisturbTint = new(0.36f, 0.40f, 0.92f, 1f);
     private static readonly Vector4 IdleScrollTint = new(0.20f, 0.70f, 0.62f, 1f);
     private static readonly Vector4 SilentTint = new(0.95f, 0.40f, 0.65f, 1f);
-    private static readonly string VersionLabel = string.Concat(AepConstants.Name, "  ", AepConstants.Version);
     private readonly ISettingsNavigator navigator;
     private readonly IReadOnlyList<ISettingsPage[]> groups;
     private readonly bool[][] matches;
@@ -384,11 +383,12 @@ internal sealed class RootSettingsPage : ISettingsPage
 
     private static void DrawVersion(PhoneTheme theme)
     {
-        var size = Typography.Measure(VersionLabel, TextStyles.Footnote);
+        var label = DisplayVersion.WithName;
+        var size = Typography.Measure(label, TextStyles.Footnote);
         var origin = ImGui.GetCursorScreenPos();
         var available = ImGui.GetContentRegionAvail().X;
         Typography.Draw(ImGui.GetWindowDrawList(), new Vector2(origin.X + (available - size.X) * 0.5f, origin.Y),
-            VersionLabel, theme.TextMuted, TextStyles.Footnote);
+            label, theme.TextMuted, TextStyles.Footnote);
         ImGui.Dummy(new Vector2(available, size.Y));
     }
 }

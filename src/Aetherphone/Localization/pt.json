@@ -933,6 +933,7 @@
   "settings.about": "Sobre",
   "settings.plugin": "Plugin",
   "settings.version": "Versão",
+  "settings.betaVersion": "{0} beta {1}",
   "settings.command": "Comando",
   "settings.testServer": "Servidor de teste",
   "settings.testServerHint": "As versões beta se conectam ao servidor de teste do Aethernet, que tem contas, mensagens e publicações próprias. Desative isto para usar o servidor principal. Ao trocar você sai da conta, então entre novamente no outro servidor.",

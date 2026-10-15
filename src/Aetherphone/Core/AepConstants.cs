@@ -24,6 +24,12 @@ internal static class AepConstants
     #else
     public static readonly bool IsPrerelease = false;
     #endif
+
+    #if BETA
+    public static readonly bool IsBeta = true;
+    #else
+    public static readonly bool IsBeta = false;
+    #endif
     public const string DiscordUrl = "https://discord.gg/3HbJCscMyS";
     public const string WebsiteUrl = "https://www.aetherphone.net";
     public const string PatreonUrl = "https://www.patreon.com/c/xeldaralz";

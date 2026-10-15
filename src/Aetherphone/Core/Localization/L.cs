@@ -2075,6 +2075,7 @@ internal static class L
         public static readonly LocString About = new("settings.about", "About");
         public static readonly LocString Plugin = new("settings.plugin", "Plugin");
         public static readonly LocString Version = new("settings.version", "Version");
+        public static readonly LocString BetaVersion = new("settings.betaVersion", "{0} beta {1}");
         public static readonly LocString Command = new("settings.command", "Command");
         public static readonly LocString TestServer = new("settings.testServer", "Test server");
 
