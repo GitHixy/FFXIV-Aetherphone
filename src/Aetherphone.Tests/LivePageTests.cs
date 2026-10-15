@@ -1,5 +1,6 @@
 using Aetherphone.Apps.Casino;
 using Aetherphone.Apps.Casino.Live;
+using Aetherphone.Apps.Casino.Stage;
 using Aetherphone.Apps.Casino.Strip;
 using Aetherphone.Apps.Casino.Tables;
 using Aetherphone.Core.Aethernet.Contracts;
@@ -238,6 +239,88 @@ public sealed class LivePageTests
             }
         }
     }
+
+    [Fact]
+    public void LiveListsRunningAndUpcomingChallengesOnly()
+    {
+        var feed = new CasinoChallengesDto(new[]
+        {
+            Challenge(),
+            Challenge() with { Id = "c-2", State = CasinoChallengeStates.Scheduled },
+            Challenge() with { Id = "c-3", State = CasinoChallengeStates.Settled },
+            Challenge() with { Id = "c-4", State = CasinoChallengeStates.Cancelled },
+            Challenge() with { Id = "c-5", State = CasinoChallengeStates.Ended },
+            Challenge() with { Id = "c-6", GameKind = string.Empty },
+        });
+        var challenges = new LiveChallenges();
+
+        var views = challenges.Refresh(feed);
+
+        Assert.Equal(2, views.Length);
+        Assert.Same(views, challenges.Refresh(feed));
+        Assert.Empty(challenges.Refresh(null));
+    }
+
+    [Fact]
+    public void AChallengeRunsFromItsStartUntilItsEnd()
+    {
+        var view = LiveChallenges.ViewOf(Challenge());
+
+        Assert.Equal(ChallengePhase.Upcoming, LiveChallenges.PhaseOf(view, 999));
+        Assert.Equal(ChallengePhase.Running, LiveChallenges.PhaseOf(view, 1_000));
+        Assert.Equal(ChallengePhase.Running, LiveChallenges.PhaseOf(view, 4_599));
+        Assert.Equal(ChallengePhase.Over, LiveChallenges.PhaseOf(view, 4_600));
+        Assert.Equal(3_600, LiveChallenges.SecondsUntil(view.EndsAtUnix, 1_000));
+        Assert.Equal(0, LiveChallenges.SecondsUntil(view.EndsAtUnix, 9_000));
+    }
+
+    [Fact]
+    public void AMostWinsChallengeCountsTheLeaderAndYourOwnWins()
+    {
+        var view = LiveChallenges.ViewOf(Challenge());
+
+        Assert.Equal(CasinoGames.Slots, view.GameId);
+        Assert.Equal(Loc.T(L.LivePage.ChallengeMostGoal, CasinoMultiples.Label(1_000),
+            Loc.T(CasinoGameNames.Of(CasinoGames.Slots))), view.Goal);
+        Assert.Equal(Loc.T(L.LivePage.ChallengeMinStake, NumberText.Compact(1_000)), view.Stake);
+        Assert.Equal(Loc.T(L.LivePage.ChallengeLeader, "Ysolde Vance", Loc.Plural(L.LivePage.ChallengeWins, 12)),
+            view.Leader);
+        Assert.Equal(Loc.T(L.LivePage.ChallengeYours, Loc.Plural(L.LivePage.ChallengeWins, 3)), view.Yours);
+        Assert.Equal(Loc.T(L.LivePage.ChallengePrizeBadge, NumberText.Compact(50_000)), view.Prize);
+    }
+
+    [Fact]
+    public void AFirstToWinChallengeNamesTheWinningMultiple()
+    {
+        var view = LiveChallenges.ViewOf(Challenge() with
+        {
+            Kind = CasinoChallengeKinds.First, LeaderValue = 525, MinStake = 0, BadgeId = string.Empty,
+        });
+
+        Assert.Equal(Loc.T(L.LivePage.ChallengeFirstGoal, CasinoMultiples.Label(1_000),
+            Loc.T(CasinoGameNames.Of(CasinoGames.Slots))), view.Goal);
+        Assert.Equal(Loc.T(L.LivePage.ChallengeLeader, "Ysolde Vance", CasinoMultiples.Label(5_250)), view.Leader);
+        Assert.Empty(view.Stake);
+        Assert.Empty(view.Yours);
+        Assert.Equal(Loc.T(L.LivePage.ChallengePrize, NumberText.Compact(50_000)), view.Prize);
+    }
+
+    [Fact]
+    public void AChallengeWithoutAWinnerOrAPrizeSaysSo()
+    {
+        var view = LiveChallenges.ViewOf(Challenge() with { Leader = null, LeaderValue = 0, MyValue = 0 });
+
+        Assert.Equal(Loc.T(L.LivePage.ChallengeNoLeader), view.Leader);
+        Assert.Empty(view.Yours);
+        Assert.Equal(Loc.T(L.LivePage.ChallengeBadge), LiveChallenges.PrizeOf(0, true));
+        Assert.Empty(LiveChallenges.PrizeOf(0, false));
+    }
+
+    private static CasinoChallengeDto Challenge() =>
+        new("c-1", "Slot sprint", CasinoChallengeKinds.Most, CasinoWire.SlotsKind, ThresholdTenths: 100,
+            MinStake: 1_000, StartsAtUnix: 1_000, EndsAtUnix: 4_600, State: CasinoChallengeStates.Live,
+            Reward: 50_000, BadgeId: "slot-sprint", Leader: new CasinoPlayerRefDto("u-ysolde", "Ysolde Vance"),
+            LeaderValue: 12, MyValue: 3);
 
     private static CasinoTableRowDto Hosted() =>
         new("t-1", CasinoWire.BlackjackKind, CasinoTableKinds.Private, OwnerUserId: "u-ysolde",
