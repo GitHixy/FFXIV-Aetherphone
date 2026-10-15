@@ -7883,6 +7883,7 @@
   "changelog.r1300.118": "Ajout de la réorganisation dans les dossiers : en mode d'édition, faites glisser une app vers un nouvel emplacement, contribution de hellovvn",
   "changelog.r1300.160": "Ajout d'un sélecteur de couleur au Titre de la plaque : avec l'apparence « Personnalisé », choisissez n'importe quelle couleur de texte ou de lueur, ou tapez son code hexadécimal",
   "changelog.r1300.161": "Ajout de lueurs en dégradé au Titre de la plaque : seize jeux de couleurs ou deux couleurs de votre choix, en vague, en pulsation ou fixes",
+  "changelog.r1300.165": "Modification du Titre de la plaque : l'aperçu reste en haut pendant le défilement, pour voir chaque changement dès qu'il est fait",
   "changelog.r1300.162": "Ajout d'un aperçu en direct dans Réglages > Téléphone réduit : il montre la musique, un appel et une bannière de notification, pour voir chacun sans réduire le téléphone",
   "changelog.r1300.163": "Modification de Téléphone réduit : il a maintenant sa propre ligne dans Réglages, juste sous Affichage",
   "changelog.r1300.119": "Ajout d'une mise aux tables de dés : sur une table de dés en gils, tous ceux qui font un jet inférieur doivent la mise à la maison, et la maison paie le gagnant, le tout au registre",

@@ -56,12 +56,11 @@ internal sealed class NameplateColorPage : ISettingsPage
     {
         var theme = context.Theme;
         var scale = UiScale.Current;
-        using (var surface = AppSurface.Begin(body))
+        var stageBottom = stage.DrawPinned(body, theme, scale, NameplateStage.NameOf(titles),
+            titles.Preview with { Look = titles.Settings.CustomLook() }, NameplateStage.CaptionOf(titles));
+        using (var surface = AppSurface.Begin(new Rect(new Vector2(body.Min.X, stageBottom), body.Max)))
         {
-            ImGui.Dummy(new Vector2(0f, Metrics.Space.Md * scale));
-            stage.Draw(theme, scale, NameplateStage.NameOf(titles),
-                titles.Preview with { Look = titles.Settings.CustomLook() });
-            ImGui.Dummy(new Vector2(0f, Metrics.Space.Xl * scale));
+            ImGui.Dummy(new Vector2(0f, Metrics.Space.Lg * scale));
             var result = ColorField.DrawCard("nameplate.color", picker, theme);
             if (result.Dragging || result.Released)
             {

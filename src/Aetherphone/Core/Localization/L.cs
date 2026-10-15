@@ -2491,6 +2491,8 @@ internal static class L
                 "Added a color picker to Nameplate Title: with the Custom look, pick any text or glow color, or type its hex code"),
             new("changelog.r1300.161",
                 "Added gradient glows to Nameplate Title: sixteen color sets or two colors of your own, in a wave, a pulse or held still"),
+            new("changelog.r1300.165",
+                "Changed Nameplate Title to keep its preview at the top while you scroll, so every change shows as you make it"),
             new("changelog.r1300.162",
                 "Added a live preview to Settings > Minimized phone that plays music, a call and a notification banner, so you can see each one without minimizing"),
             new("changelog.r1300.163",

@@ -91,19 +91,24 @@ internal sealed class NameplateTitlePage : ISettingsPage
     {
         var theme = context.Theme;
         var scale = UiScale.Current;
-        using (AppSurface.Begin(body))
+        if (!titles.Available)
         {
-            ImGui.Dummy(new Vector2(0f, Metrics.Space.Md * scale));
-            if (!titles.Available)
+            var messageBottom = NameplateStage.DrawPinnedMessage(body, theme, scale,
+                Loc.T(L.Nameplate.NotInstalledTitle));
+            using (AppSurface.Begin(new Rect(new Vector2(body.Min.X, messageBottom), body.Max)))
             {
-                NameplateStage.DrawMessage(theme, scale, Loc.T(L.Nameplate.NotInstalledTitle));
                 ImGui.Dummy(new Vector2(0f, Metrics.Space.Md * scale));
                 SettingsSection.Hint(Loc.T(L.Nameplate.NotInstalledBody), theme);
-                return;
             }
 
-            DrawStage(theme, scale);
-            ImGui.Dummy(new Vector2(0f, Metrics.Space.Xl * scale));
+            return;
+        }
+
+        var stageBottom = stage.DrawPinned(body, theme, scale, NameplateStage.NameOf(titles), titles.Preview,
+            NameplateStage.CaptionOf(titles));
+        using (AppSurface.Begin(new Rect(new Vector2(body.Min.X, stageBottom), body.Max)))
+        {
+            ImGui.Dummy(new Vector2(0f, Metrics.Space.Lg * scale));
             DrawMasterSwitch(theme, scale);
             ImGui.Dummy(new Vector2(0f, Metrics.Space.Xl * scale));
             DrawPriority(theme, scale);
@@ -113,18 +118,6 @@ internal sealed class NameplateTitlePage : ISettingsPage
         }
 
         ApplyPendingMove();
-    }
-
-    private void DrawStage(PhoneTheme theme, float scale)
-    {
-        stage.Draw(theme, scale, NameplateStage.NameOf(titles), titles.Preview);
-        ImGui.Dummy(new Vector2(0f, Metrics.Space.Sm * scale));
-        var caption = !titles.Current.IsNone
-            ? Loc.T(L.Nameplate.Live)
-            : titles.Settings.Enabled
-                ? Loc.T(L.Nameplate.NothingActive)
-                : Loc.T(L.Nameplate.Example);
-        SettingsSection.Hint(caption, theme);
     }
 
     private void DrawMasterSwitch(PhoneTheme theme, float scale)

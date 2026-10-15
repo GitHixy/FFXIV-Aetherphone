@@ -7883,6 +7883,7 @@
   "changelog.r1300.118": "Adicionamos a reorganização dentro das pastas: no modo de edição, arraste um app para outro lugar, contribuição de hellovvn",
   "changelog.r1300.160": "Adicionado um seletor de cor ao Título da placa: com o visual Personalizado, escolha qualquer cor de texto ou de brilho, ou digite o código hexadecimal",
   "changelog.r1300.161": "Adicionados brilhos em degradê ao Título da placa: dezesseis conjuntos de cores ou duas cores suas, em onda, em pulso ou fixos",
+  "changelog.r1300.165": "Alterado o Título da placa para manter a prévia no topo enquanto você rola, mostrando cada mudança na hora",
   "changelog.r1300.162": "Adicionada uma prévia ao vivo em Ajustes > Telefone minimizado que mostra música, uma chamada e um banner de notificação, para você ver cada um sem minimizar",
   "changelog.r1300.163": "Mudamos Telefone minimizado para uma linha própria em Ajustes, logo abaixo de Tela",
   "changelog.r1300.119": "Adicionamos uma aposta às mesas de dados: numa mesa de dados de gil, todos que rolam menos devem a aposta à casa, e a casa paga o vencedor, tudo no registro",
