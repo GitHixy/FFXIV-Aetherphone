@@ -69,6 +69,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
     private bool entered;
     private bool motionsPrimed;
     private bool dealing;
+    private bool banking;
 
     public BlackjackTable(CasinoStore chips, CasinoRoomsStore rooms, CasinoTablesStore tables,
         CasinoHistoryStore history, CasinoTurnNotifier turns, ConfirmService confirm, RemoteImageCache images,
@@ -178,6 +179,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         inlineReason = string.Empty;
         mySeat = -1;
         dealing = false;
+        banking = false;
         projection.Reset();
         playback.Reset();
         seatFlow.Reset();
@@ -224,6 +226,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         historySheet.Close();
         mySeat = -1;
         dealing = false;
+        banking = false;
         projection.Reset();
         playback.Reset();
         dealer.Clear();
@@ -289,8 +292,10 @@ internal sealed partial class BlackjackTable : ICabinetIdle
             return;
         }
 
-        dealing = BlackjackHosting.DealsFromDeck(board, rooms.AccountId, OwnerId(),
-            BlackjackRules.IsSeat(mySeat) || CasinoSeatMachine.Holds(seatFlow.Stage));
+        var ownerId = OwnerId();
+        var holdsSeat = BlackjackRules.IsSeat(mySeat) || CasinoSeatMachine.Holds(seatFlow.Stage);
+        dealing = BlackjackHosting.DealsFromDeck(board, rooms.AccountId, ownerId, holdsSeat);
+        banking = !dealing && BlackjackHosting.BanksFromDeck(board, rooms.AccountId, ownerId, holdsSeat);
 
         if (frame.SnapToTruth)
         {

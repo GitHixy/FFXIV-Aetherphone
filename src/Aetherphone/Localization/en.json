@@ -9050,6 +9050,8 @@
   "casino.tables.reasonPracticeOnly": "That option is only for free play and gil tables, not house chip tables.",
   "casino.tables.reasonNotDealer": "Only the host or a co-dealer can do that.",
   "casino.tables.reasonDealerCannotSit": "You deal at this table, so you cannot also take a seat at it.",
+  "casino.tables.reasonHostCannotSit": "You hold the bank at your gil table, so you cannot also take a seat at it.",
+  "casino.tables.hostBanksNote": "You hold the bank, so you cannot sit here",
   "casino.tables.leaveTitle": "Leave the table?",
   "casino.tables.leaveBody": "You give up your seat. If you are in a hand, you leave when it ends.",
   "casino.tables.leaveConfirm": "Leave",

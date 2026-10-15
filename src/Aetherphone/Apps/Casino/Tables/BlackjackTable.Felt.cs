@@ -207,7 +207,7 @@ internal sealed partial class BlackjackTable
         var shoe = layout.ShoeAnchor;
         var dealerAnchor = layout.DealerFanCenter;
         var seated = BlackjackRules.IsSeat(mySeat);
-        var canSit = !seated && !dealing;
+        var canSit = !seated && !dealing && !banking;
         var currency = CasinoCurrencies.Of(board);
         var limit = SeatLimit(board);
         var tapped = -1;
@@ -467,7 +467,7 @@ internal sealed partial class BlackjackTable
     {
         if (!BlackjackRules.IsSeat(mySeat))
         {
-            if (!dealing)
+            if (!dealing && !banking)
             {
                 DrawHeroGhostSlots(drawList, scale);
             }

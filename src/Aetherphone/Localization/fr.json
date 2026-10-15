@@ -9050,6 +9050,8 @@
   "casino.tables.reasonPracticeOnly": "Cette option n'existe que pour les tables en jeu gratuit et en gils, pas pour les tables à jetons de la maison.",
   "casino.tables.reasonNotDealer": "Seul l'hôte ou un co-croupier peut faire ça.",
   "casino.tables.reasonDealerCannotSit": "Tu distribues à cette table, tu ne peux donc pas aussi t'y asseoir.",
+  "casino.tables.reasonHostCannotSit": "Tu tiens la banque à ta table en gils, tu ne peux donc pas aussi t'y asseoir.",
+  "casino.tables.hostBanksNote": "Tu tiens la banque, tu ne peux pas t'asseoir ici",
   "casino.tables.leaveTitle": "Quitter la table ?",
   "casino.tables.leaveBody": "Tu libères ta place. Si tu es dans une main, tu pars quand elle se termine.",
   "casino.tables.leaveConfirm": "Quitter",

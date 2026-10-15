@@ -9050,6 +9050,8 @@
   "casino.tables.reasonPracticeOnly": "该选项仅适用于免费游玩桌和金币桌，不适用于赌场筹码桌。",
   "casino.tables.reasonNotDealer": "只有桌主或副荷官可以这样做。",
   "casino.tables.reasonDealerCannotSit": "你在这张桌负责发牌，因此不能同时入座。",
+  "casino.tables.reasonHostCannotSit": "你是这张金币桌的庄家，因此不能同时入座。",
+  "casino.tables.hostBanksNote": "你是庄家，因此不能在这里入座",
   "casino.tables.leaveTitle": "离开桌子？",
   "casino.tables.leaveBody": "你会让出座位。如果你正在一手牌中，会在这手牌结束时离开。",
   "casino.tables.leaveConfirm": "离开",

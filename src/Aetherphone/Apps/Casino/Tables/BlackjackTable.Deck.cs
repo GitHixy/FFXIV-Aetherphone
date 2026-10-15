@@ -193,6 +193,7 @@ internal sealed partial class BlackjackTable
         var canBet = onBoard && CasinoJoinGate.CanPlaceBet(board.Phase, true, seatFlow.Waiting, draining, floorPaused);
         var facts = new BlackjackDeckFacts(
             dealing,
+            banking,
             bought,
             onBoard,
             CasinoSeatMachine.Holds(seatFlow.Stage),
@@ -210,6 +211,11 @@ internal sealed partial class BlackjackTable
                 return;
             case BlackjackDeck.Dealer:
                 DrawDealerDeck(ui, board, row, scale);
+                return;
+            case BlackjackDeck.Bank:
+                StageText.Status(ImGui.GetWindowDrawList(), BlackjackDeckLayout.UpperRow(row, scale).Center,
+                    Loc.T(L.Tables.HostBanksNote), row.Width, scale);
+                DrawLedgerAction(stage, ui);
                 return;
             case BlackjackDeck.Rebuy:
                 DrawStand(stage, ui, state, draining, banked);

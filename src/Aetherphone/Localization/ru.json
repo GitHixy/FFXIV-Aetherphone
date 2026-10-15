@@ -9050,6 +9050,8 @@
   "casino.tables.reasonPracticeOnly": "Эта опция есть только у столов без ставок и гиловых столов, а не у столов с фишками казино.",
   "casino.tables.reasonNotDealer": "Это может сделать только хозяин стола или содилер.",
   "casino.tables.reasonDealerCannotSit": "Вы раздаёте за этим столом, поэтому не можете ещё и занять за ним место.",
+  "casino.tables.reasonHostCannotSit": "За своим столом на гил вы держите банк, поэтому не можете ещё и занять за ним место.",
+  "casino.tables.hostBanksNote": "Вы держите банк, поэтому не можете здесь сесть",
   "casino.tables.leaveTitle": "Покинуть стол?",
   "casino.tables.leaveBody": "Вы освобождаете своё место. Если вы в раздаче, то уйдёте, когда она закончится.",
   "casino.tables.leaveConfirm": "Покинуть",
