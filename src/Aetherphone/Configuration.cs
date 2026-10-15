@@ -190,7 +190,7 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
     public bool ScrollWhileIdle { get; set; } = true;
     public bool ShowLodestonePortraits { get; set; } = true;
     public int LodestoneIdIndexVersion { get; set; }
-    public float TextZoom { get; set; } = 1.0f;
+    public float TextZoom { get; set; } = TextZoomCatalog.DefaultZoom;
     public string FontGlyphCache { get; set; } = string.Empty;
     public string IconGlyphCache { get; set; } = string.Empty;
     public float ScreenBrightness { get; set; } = 1f;
