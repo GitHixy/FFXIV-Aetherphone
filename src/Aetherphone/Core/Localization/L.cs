@@ -12781,6 +12781,13 @@ internal static class L
         public static readonly LocString FinaleTitle = new("onboarding.finaleTitle", "You're all set");
         public static readonly LocString FinaleBody = new("onboarding.finaleBody", "Every app shows you around the first time you open it. Replay this tour anytime from Settings, under Tips & Tutorials.");
         public static readonly LocString StartExploring = new("onboarding.startExploring", "Start Exploring");
+        public static readonly LocString ShowMe = new("onboarding.showMe", "Show Me");
+        public static readonly LocString HalloweenTitle = new("onboarding.halloweenTitle", "Halloween is almost here");
+        public static readonly LocString HalloweenBody = new("onboarding.halloweenBody", "Get yourself ready, we added something for you: bats on the Home Screen, night scenes in Chirper, Aethergram and Velvet, and spooky sounds. It stays off until you turn it on.");
+        public static readonly LocString HalloweenAppearanceTitle = new("onboarding.halloweenAppearanceTitle", "Open Appearance");
+        public static readonly LocString HalloweenAppearanceBody = new("onboarding.halloweenAppearanceBody", "Seasonal Theme lives in Appearance. Tap it to take a look.");
+        public static readonly LocString HalloweenPickTitle = new("onboarding.halloweenPickTitle", "Your choice");
+        public static readonly LocString HalloweenPickBody = new("onboarding.halloweenPickBody", "Tap Halloween to turn it on now, or Automatic to bring it back every year from 15 October to 2 November. Off keeps your phone as it is.");
         public static readonly LocString StepCounter = new("onboarding.stepCounter", "{0} of {1}");
         public static readonly LocString BasicsBody = new("onboarding.basicsBody", "Your phone is ready. Let's try a few quick moves together so you feel right at home.");
         public static readonly LocString OpenAppTitle = new("onboarding.openAppTitle", "Open an app");

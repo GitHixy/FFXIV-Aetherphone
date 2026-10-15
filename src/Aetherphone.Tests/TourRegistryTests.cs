@@ -85,4 +85,20 @@ public sealed class TourRegistryTests
         Assert.Null(welcome.RequiredAppId);
         Assert.True(welcome.IsValid);
     }
+
+    [Fact]
+    public void TheHalloweenGuideOpensSettingsAndEndsOnTheSeasonalPicker()
+    {
+        var guide = TourRegistry.GetHalloweenGuide();
+        Assert.Equal(TourRegistry.HalloweenGuideId, guide.Id);
+        Assert.Equal(1, guide.ContentVersion);
+        Assert.Null(guide.RequiredAppId);
+        Assert.True(guide.LeavesHome);
+        Assert.Equal(3, guide.Steps.Length);
+        Assert.Equal(GuideSurface.FullCard, guide.Steps[0].Surface);
+        Assert.NotNull(guide.Steps[0].OnAdvance);
+        Assert.Equal("settings.row.appearance", guide.Steps[1].AnchorKey);
+        Assert.Equal("settings.appearance.seasonal", guide.Steps[2].AnchorKey);
+        Assert.False(TourRegistry.TryGetAppTour(TourRegistry.HalloweenGuideId, out _));
+    }
 }
