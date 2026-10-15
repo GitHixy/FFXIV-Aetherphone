@@ -257,7 +257,7 @@ internal sealed partial class BlackjackTable
                     ImGui.GetColorU32(Palette.WithAlpha(ui.MutedInk, 0.45f + 0.4f * Pulse.Wave(Pulse.Breath))), 12);
             }
 
-            DrawSeatPlate(drawList, currency, view, puck, puckRadius, columnWidth - 2f * scale, dimmed, scale);
+            DrawSeatPlate(drawList, currency, view, puck, puckRadius, layout.RailPlateWidth, dimmed, scale);
             if (layout.ShowsRailTitles)
             {
                 DrawBalanceTitle(drawList, currency, view.Stack, puck, puckRadius, columnWidth, scale);

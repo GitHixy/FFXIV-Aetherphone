@@ -101,7 +101,7 @@ internal sealed class HostDraft
     {
         Game = game;
         Currency = HostGames.DefaultCurrency(game);
-        Seats = CasinoHostingRules.DefaultSeats;
+        Seats = HostGames.DefaultSeats(game);
         Listing = DefaultListing(game);
         Spectators = true;
         FaceUp = false;
