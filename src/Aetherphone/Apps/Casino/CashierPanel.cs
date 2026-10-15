@@ -51,6 +51,7 @@ internal sealed class CashierPanel
     private static readonly TextStyle HeadingStyle = TextStyles.SubheadlineEmphasized;
     private static readonly TextStyle StatusStyle = TextStyles.FootnoteEmphasized;
     private static readonly TextStyle NoteStyle = TextStyles.Footnote;
+    private static readonly TextStyle TileLabelFloor = TextStyles.FootnoteEmphasized;
     private static readonly Vector4 Black = new(0f, 0f, 0f, 1f);
 
     private readonly CasinoStore store;
@@ -469,6 +470,7 @@ internal sealed class CashierPanel
         bool enabled, bool overlay)
     {
         var style = Button.LabelStyle(layout.TileRow.Height);
+        var labelScale = TileLabelScale(layout, view.Mode, style);
         var fieldCoins = view.Field.Coins;
         for (var index = 0; index < layout.TileCount; index++)
         {
@@ -487,10 +489,10 @@ internal sealed class CashierPanel
                     ImGui.GetColorU32(ui.Accent), Metrics.Stroke.Hairline * 1.5f);
             }
 
-            var label = view.Mode == CashierMode.Buy ? buyIn.TileLabel(index) : cashOut.TileLabel(index);
-            var shown = Typography.FitText(label, MathF.Max(1f, face.Face.Width - face.Face.Height * 0.5f), style);
-            var size = Typography.Measure(shown, style);
-            Typography.Draw(drawList, face.Face.Center - size * 0.5f, shown, on ? ui.TitleInk : face.LabelInk, style);
+            var shown = Typography.FitText(TileLabel(view.Mode, index), TileLabelRoom(rect), labelScale, style.Weight);
+            var size = Typography.Measure(shown, labelScale, style.Weight);
+            Typography.Draw(drawList, face.Face.Center - size * 0.5f, shown, on ? ui.TitleInk : face.LabelInk,
+                labelScale, style.Weight);
             if (!live || !UiInteract.Click(rect.Min, rect.Max, hovered))
             {
                 continue;
@@ -507,6 +509,23 @@ internal sealed class CashierPanel
             }
         }
     }
+
+    private float TileLabelScale(in CashierAmountLayout layout, CashierMode shown, in TextStyle style)
+    {
+        var labelScale = style.Scale;
+        for (var index = 0; index < layout.TileCount; index++)
+        {
+            labelScale = MathF.Min(labelScale, Typography.FitScale(TileLabel(shown, index),
+                TileLabelRoom(layout.Tile(index)), style.Scale, TileLabelFloor.Scale, style.Weight));
+        }
+
+        return labelScale;
+    }
+
+    private string TileLabel(CashierMode shown, int index) =>
+        shown == CashierMode.Buy ? buyIn.TileLabel(index) : cashOut.TileLabel(index);
+
+    private static float TileLabelRoom(Rect tile) => MathF.Max(1f, tile.Width - tile.Height * 0.5f);
 
     private static string TileId(CashierMode shown, int index) => shown == CashierMode.Buy
         ? index switch
