@@ -132,10 +132,7 @@ internal sealed class BarkeepCabinet : ICabinetIdle
     {
         if (mode == BarkeepMode.Wager && shift is not null && settle is null)
         {
-            verbStage.Cancel();
-            gradeFlashLeft = 0f;
-            tapFlashLeft = 0f;
-            tossLeft = 0f;
+            ClearStepEffects();
             inlineReason = string.Empty;
             snapFlow = true;
             return;
@@ -150,14 +147,10 @@ internal sealed class BarkeepCabinet : ICabinetIdle
         startRequested = false;
         finishSent = false;
         finishRetryAtElapsed = 0;
-        gradeFlash = -1;
-        gradeFlashLeft = 0f;
-        tapFlashLeft = 0f;
-        tossLeft = 0f;
+        ClearStepEffects();
         punch = 0f;
         fever = 0f;
         inlineReason = string.Empty;
-        verbStage.Cancel();
         tips.Reset();
         scoreRoll.Snap(0);
     }
@@ -296,11 +289,8 @@ internal sealed class BarkeepCabinet : ICabinetIdle
         practiceNewBest = false;
         finishSent = false;
         finishRetryAtElapsed = 0;
-        gradeFlashLeft = 0f;
-        tapFlashLeft = 0f;
-        tossLeft = 0f;
+        ClearStepEffects();
         inlineReason = string.Empty;
-        verbStage.Cancel();
         tips.Reset();
         flow.Begin(seed, next.PatronCount);
         scoreRoll.Snap(next.Score);
@@ -528,7 +518,7 @@ internal sealed class BarkeepCabinet : ICabinetIdle
 
         if (!flow.AtRail(current, current.CurrentPatronIndex) || !current.CurrentPatronArrived(elapsed))
         {
-            verbStage.Cancel();
+            ClearStepEffects();
             var wait = (int)Math.Ceiling(current.SecondsUntilCurrentPatron(elapsed));
             var next = Loc.T(L.Casino.BarkeepNextPatron);
             var block = Typography.MeasureWrappedBlock(next, TextStyles.Title2, area.Width).Y;
@@ -616,6 +606,15 @@ internal sealed class BarkeepCabinet : ICabinetIdle
 
         current.CommitStepGrade(grade);
         CelebrateGrade(stage, grade, canvas.Center, scale);
+    }
+
+    private void ClearStepEffects()
+    {
+        verbStage.Cancel();
+        gradeFlash = -1;
+        gradeFlashLeft = 0f;
+        tapFlashLeft = 0f;
+        tossLeft = 0f;
     }
 
     private void CelebrateTap(CasinoStage stage, AppSkin ui, int grade, Rect canvas, float scale)
