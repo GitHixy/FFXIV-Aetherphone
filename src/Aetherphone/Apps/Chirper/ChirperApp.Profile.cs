@@ -503,7 +503,7 @@ internal sealed partial class ChirperApp
             return;
         }
 
-        profileVirtualizer.BeginFrame(arrowSteps: configuration.ArrowKeysStepPosts);
+        profileVirtualizer.BeginFrame(stepping: configuration);
         renderedUnderlyingIds.Clear();
         for (var index = 0; index < posts.Length; index++)
         {
@@ -795,7 +795,7 @@ internal sealed partial class ChirperApp
             }
 
             ImGui.Dummy(new Vector2(0f, FeedTopPadding * scale));
-            hashtagVirtualizer.BeginFrame(arrowSteps: configuration.ArrowKeysStepPosts);
+            hashtagVirtualizer.BeginFrame(stepping: configuration);
             renderedUnderlyingIds.Clear();
             for (var index = 0; index < posts.Length; index++)
             {
