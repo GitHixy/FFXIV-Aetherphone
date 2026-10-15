@@ -163,7 +163,8 @@ internal sealed partial class MinimizedPhone
         }
 
         var scale = frameScale;
-        var height = MinimizedPhoneRenderer.BannerHeight(scale);
+        var height = MinimizedPhoneRenderer.BannerHeight(notification, screen.Width - BannerInset * 2f * scale,
+            scale);
         var top = screen.Min.Y + (BannerTop - BannerDrop * (1f - presence)) * scale;
         var banner = new Rect(new Vector2(screen.Min.X + BannerInset * scale, top),
             new Vector2(screen.Max.X - BannerInset * scale, top + height));

@@ -2511,6 +2511,8 @@ internal static class L
                 "Fixed the glow around a full-width button, such as Wear on a badge, being cut flat at the sides"),
             new("changelog.r1300.158",
                 "Fixed the scroll wheel right after a page opens: it now scrolls the page in front of you instead of the one you just left"),
+            new("changelog.r1300.164",
+                "Fixed mini phone notification banners cutting the sender and message down to a few letters: the message now wraps onto two lines"),
         };
 
         public static readonly LocString[] Release1300ChirperAethergramVelvet =

@@ -7901,6 +7901,7 @@
   "changelog.r1300.132": "Correction des marqueurs d'apparition devenus trop pâles depuis leur réduction : chaque état a une icône pleine taille, les points suivis reçoivent un disque plus grand, et les zones avec peu de points d'apparition un disque encore plus grand",
   "changelog.r1300.133": "Correction du halo d'un bouton pleine largeur, comme Porter sur un badge, qui était coupé net sur les côtés",
   "changelog.r1300.158": "Correction de la molette juste après l'ouverture d'une page : elle fait maintenant défiler la page affichée au lieu de celle que tu viens de quitter",
+  "changelog.r1300.164": "Correction des bannières de notification du mini téléphone qui coupaient l'expéditeur et le message à quelques lettres : le message passe maintenant sur deux lignes",
   "changelog.r1300.134": "Correction des cartes Séries et Tendances qui coupaient leur texte aux grandes tailles de texte : les cartes grandissent avec le texte et les libellés longs passent à la ligne",
   "changelog.r1300.136": "Ajout de l'achat de plusieurs tickets de tombola à la fois : saisissez un nombre et voyez le total, jusqu'à la limite par personne fixée par l'hôte, jusqu'à 1 000",
   "changelog.r1300.150": "Ajout du retrait de participants à la tombola : l'hôte ouvre la liste des participants depuis la tombola et retire toute personne inactive ou déconnectée, tickets compris, et retirer quelqu'un de la salle le retire aussi",
