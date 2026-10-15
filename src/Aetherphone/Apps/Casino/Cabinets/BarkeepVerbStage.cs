@@ -21,6 +21,7 @@ internal sealed class BarkeepVerbStage
     private const float JoltDecay = 5f;
     private const float BottlePourTilt = 0.55f;
     private const float BottleRestTilt = -0.35f;
+    private const float PourBottleHeadroom = 52f;
     private const int LiquidSlices = 12;
 
     private static readonly Vector4 Gold = BarkeepArt.PerfectGold;
@@ -323,6 +324,12 @@ internal sealed class BarkeepVerbStage
     private void DrawPour(ImDrawListPtr drawList, AppSkin ui, Rect canvas, float scale)
     {
         var glass = GlassRect(canvas, 0.3f, 84f, 0.22f, 0.06f, scale);
+        var bottleClearTop = canvas.Min.Y + PourBottleHeadroom * scale;
+        if (glass.Min.Y < bottleClearTop)
+        {
+            glass = new Rect(new Vector2(glass.Min.X, bottleClearTop), glass.Max);
+        }
+
         var glassHeight = glass.Height;
         var goodHalf = BarkeepGrading.GoodWithin * BarkeepGrading.PourFullScale;
         var perfectHalf = BarkeepGrading.PerfectWithin * BarkeepGrading.PourFullScale;

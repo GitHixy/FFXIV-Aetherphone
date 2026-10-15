@@ -42,6 +42,8 @@ internal sealed class BarkeepCabinet : ICabinetIdle
     private const float FeverFall = 1.5f;
     private const float TossSeconds = 0.55f;
     private const float TossArc = 0.6f;
+    private const float TossClearance = 15f;
+    private const int ArcSearchSteps = 12;
     private const float CardPad = 14f;
     private const float CardGap = 6f;
     private const float LadderRowHeight = 22f;
@@ -91,6 +93,7 @@ internal sealed class BarkeepCabinet : ICabinetIdle
     private float idleTime;
     private float tossLeft;
     private bool tossLanded;
+    private float tossHeight;
     private Vector2 tossFrom;
     private Vector2 tossTo;
     private GameRandom jitter = GameRandom.FromSeed(JitterSeed);
@@ -585,12 +588,11 @@ internal sealed class BarkeepCabinet : ICabinetIdle
 
         gradeFlash = grade;
         gradeFlashLeft = GradeFlashSecondsTotal;
+        tossLeft = 0f;
+        tossLanded = false;
         if (kind == BarkeepRules.GarnishKind)
         {
-            tossFrom = verbStage.GarnishFrom;
-            tossTo = verbStage.GarnishTo;
-            tossLanded = grade >= BarkeepGrading.RoughGrade;
-            tossLeft = TossSeconds;
+            BeginToss(grade >= BarkeepGrading.RoughGrade, canvas, scale);
         }
 
         current.CommitStepGrade(grade);
@@ -621,8 +623,8 @@ internal sealed class BarkeepCabinet : ICabinetIdle
         }
 
         verbStage.Draw(drawList, ui, canvas, delta, scale);
-        DrawGradeFlash(drawList, canvas, scale);
         DrawToss(drawList, delta, scale);
+        DrawGradeFlash(drawList, canvas, scale);
         DrawTapFlash(drawList, ui, delta, scale);
     }
 
@@ -633,6 +635,7 @@ internal sealed class BarkeepCabinet : ICabinetIdle
         gradeFlashLeft = 0f;
         tapFlashLeft = 0f;
         tossLeft = 0f;
+        tossLanded = false;
     }
 
     private void CelebrateTap(CasinoStage stage, AppSkin ui, int grade, Rect canvas, float scale)
@@ -694,20 +697,72 @@ internal sealed class BarkeepCabinet : ICabinetIdle
         }
     }
 
+    private void BeginToss(bool landed, Rect canvas, float scale)
+    {
+        var glass = verbStage.GarnishTo;
+        tossFrom = verbStage.GarnishFrom;
+        tossTo = landed
+            ? glass
+            : glass + new Vector2(glass.X > tossFrom.X ? 60f * scale : -60f * scale, 30f * scale);
+        tossLanded = landed;
+        tossLeft = TossSeconds;
+        var rise = MathF.Abs(tossTo.X - tossFrom.X) * TossArc + 30f * scale;
+        var headroom = MathF.Max(0f, tossFrom.Y - canvas.Min.Y - TossClearance * scale);
+        tossHeight = ArcHeightWithin(rise, tossTo.Y - tossFrom.Y, headroom);
+    }
+
+    private static float ArcHeightWithin(float height, float drop, float headroom)
+    {
+        if (PeakRise(height, drop) <= headroom)
+        {
+            return height;
+        }
+
+        var low = 0f;
+        var high = height;
+        for (var iteration = 0; iteration < ArcSearchSteps; iteration++)
+        {
+            var middle = (low + high) * 0.5f;
+            if (PeakRise(middle, drop) <= headroom)
+            {
+                low = middle;
+            }
+            else
+            {
+                high = middle;
+            }
+        }
+
+        return low;
+    }
+
+    private static float PeakRise(float height, float drop)
+    {
+        if (height <= 0f)
+        {
+            return MathF.Max(0f, -drop);
+        }
+
+        var along = MathF.Acos(Math.Clamp(drop / (height * MathF.PI), -1f, 1f)) / MathF.PI;
+        return height * MathF.Sin(along * MathF.PI) - drop * along;
+    }
+
     private void DrawToss(ImDrawListPtr drawList, float delta, float scale)
     {
         if (tossLeft <= 0f)
         {
+            if (tossLanded)
+            {
+                BarkeepVerbStage.DrawCherry(drawList, tossTo, 9f * scale, scale);
+            }
+
             return;
         }
 
         tossLeft = MathF.Max(0f, tossLeft - delta);
         var progress = 1f - tossLeft / TossSeconds;
-        var end = tossLanded ? tossTo : tossTo + new Vector2(tossTo.X > tossFrom.X ? 60f * scale : -60f * scale,
-            30f * scale);
-        var position = Vector2.Lerp(tossFrom, end, progress);
-        var height = MathF.Abs(end.X - tossFrom.X) * TossArc + 30f * scale;
-        position.Y -= MathF.Sin(progress * MathF.PI) * height;
+        var position = Vector2.Lerp(tossFrom, tossTo, progress);
+        position.Y -= MathF.Sin(progress * MathF.PI) * tossHeight;
         BarkeepVerbStage.DrawCherry(drawList, position, 9f * scale, scale);
         if (tossLeft <= 0f && tossLanded)
         {
