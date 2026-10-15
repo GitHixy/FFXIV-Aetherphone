@@ -24,7 +24,12 @@ internal sealed partial class CasinoApp
     private readonly bool[] liveFilterActive = new bool[LiveBoard.Filters.Length];
     private readonly ChipRail liveFilterRail = new();
     private readonly LiveJoinBar liveJoin = new();
-    private readonly HoldemRoomsSheet holdemRooms = new();
+    private readonly HouseRoomsSheet holdemRooms =
+        new("casino.live.holdem", CasinoGames.Holdem, HoldemRules.TierCount);
+    private readonly HouseRoomsSheet blackjackRooms =
+        new("casino.live.blackjack", CasinoGames.Blackjack, CasinoRoomIds.BlackjackHouse.Length);
+    private readonly HoldemRoomRows holdemRoomRows = new();
+    private readonly BlackjackRoomRows blackjackRoomRows = new();
     private LanguageInfo? liveViewLanguage;
     private CasinoTableRowDto? liveOwnSource;
     private LanguageInfo? liveOwnLanguage;
@@ -50,11 +55,11 @@ internal sealed partial class CasinoApp
             var drawList = ImGui.GetWindowDrawList();
             var origin = ImGui.GetCursorScreenPos();
             var width = ScrollLayout.StableContentWidth();
-            var interactive = !router.IsTransitioning && !holdemRooms.CapturesPointer;
+            var interactive = !router.IsTransitioning && !LiveSheetOpen;
             var cursorY = DrawLiveTicker(drawList, origin, width, scale);
             cursorY = DrawStakeNotice(new Vector2(origin.X, cursorY), width, scale);
             cursorY = liveJoin.Draw(drawList, ui, casinoTables, new Vector2(origin.X, cursorY), width,
-                !holdemRooms.CapturesPointer, scale);
+                !LiveSheetOpen, scale);
             var pinned = PinnedLiveTable(out var owner);
             cursorY = DrawYourTable(drawList, pinned, owner, new Vector2(origin.X, cursorY), width, interactive, scale);
             cursorY = DrawOnTheClock(drawList, new Vector2(origin.X, cursorY), width, interactive, scale);
@@ -66,18 +71,36 @@ internal sealed partial class CasinoApp
         }
     }
 
+    private bool LiveSheetOpen => holdemRooms.CapturesPointer || blackjackRooms.CapturesPointer;
+
     private void DrawLiveSheet()
     {
         if (!routes.OnRoot || routes.Tab != CasinoTab.Live)
         {
             holdemRooms.Close();
+            blackjackRooms.Close();
         }
 
-        holdemRooms.Draw(screenArea, ui, holdemStore.Tables, !HoldemRules.RoyalOpenTo(HoldemBalance()));
-        var picked = holdemRooms.TakePick();
-        if (picked.Length > 0)
+        if (holdemRooms.CapturesPointer)
         {
-            OpenTable(picked);
+            holdemRoomRows.Refresh(holdemStore.Tables, !HoldemRules.RoyalOpenTo(HoldemBalance()));
+            holdemRooms.Draw(screenArea, ui, Loc.T(L.LivePage.RoomsTitle), Loc.T(L.LivePage.RoomsLine),
+                holdemRoomRows.Rows);
+        }
+
+        if (blackjackRooms.CapturesPointer)
+        {
+            blackjackRoomRows.Refresh(casinoTables.Tables, SeatedBlackjackTable());
+            blackjackRooms.Draw(screenArea, ui, Loc.T(L.LivePage.BlackjackRoomsTitle),
+                HouseBlackjackStakes(L.LivePage.BlackjackRoomsLine, HouseBlackjack.Of(casinoTables.Tables)),
+                blackjackRoomRows.Rows, Loc.T(L.Casino.QuickSeatAction), !casinoTables.IntentInFlight);
+        }
+
+        OpenTable(holdemRooms.TakePick());
+        OpenTable(blackjackRooms.TakePick());
+        if (blackjackRooms.TakeQuickSeat())
+        {
+            EnterHouseBlackjack();
         }
     }
 
@@ -273,12 +296,14 @@ internal sealed partial class CasinoApp
         var top = LiveArt.Header(drawList, ui, new Vector2(origin.X, origin.Y + LiveArt.SectionGap * scale), width,
             Loc.T(L.LivePage.HouseTitle), Loc.T(L.LivePage.HouseLine), scale) + LiveArt.HeaderGap * scale;
         var floorRow = HouseBlackjack.Of(casinoTables.Tables);
-        var blackjackLine = texts.Compacts(L.LivePage.BlackjackLine, floorRow.MinBet,
-            floorRow.TopBetFor(casino.Ceiling.MaxBet));
+        var blackjackLine = HouseBlackjackStakes(L.LivePage.BlackjackLine, floorRow);
         var holdemLine = texts.Count(L.LivePage.HoldemLine, HoldemRules.TierCount);
-        var sit = new LiveRowAction(Loc.T(L.LivePage.Sit), true, false, "casino.live.sit");
+        var rejoins = CasinoRoomIds.IsBlackjackHouse(SeatedBlackjackTable());
+        var blackjackAction = rejoins
+            ? new LiveRowAction(Loc.T(L.Strip.ResumeAction), true, false, "casino.live.rejoin")
+            : new LiveRowAction(Loc.T(L.LivePage.Pick), false, true, "casino.live.pickBlackjack");
         var pick = new LiveRowAction(Loc.T(L.LivePage.Pick), false, true, "casino.live.pick");
-        var blackjackHeight = blackjackOpen ? LiveArt.HouseRowHeight(blackjackLine, width, sit, scale) : 0f;
+        var blackjackHeight = blackjackOpen ? LiveArt.HouseRowHeight(blackjackLine, width, blackjackAction, scale) : 0f;
         var holdemHeight = holdemOpen ? LiveArt.HouseRowHeight(holdemLine, width, pick, scale) : 0f;
         var max = new Vector2(origin.X + width, top + blackjackHeight + holdemHeight);
         CoinArt.Card(drawList, ui, new Vector2(origin.X, top), max, scale);
@@ -287,10 +312,10 @@ internal sealed partial class CasinoApp
         {
             var row = new Rect(new Vector2(origin.X, rowTop), new Vector2(max.X, rowTop + blackjackHeight));
             if (LiveArt.HouseRow(drawList, ui, row, CasinoGames.Blackjack, Loc.T(L.Casino.GameBlackjack),
-                    blackjackLine, texts.Count(L.Casino.LivePlayers, floorRow.Seated), sit, false,
-                    interactive && !casinoTables.IntentInFlight, scale))
+                    blackjackLine, texts.Count(L.Casino.LivePlayers, floorRow.Seated), blackjackAction, false,
+                    interactive, scale))
             {
-                EnterHouseBlackjack();
+                OpenHouseBlackjack(rejoins);
             }
 
             rowTop = row.Max.Y;
@@ -419,12 +444,29 @@ internal sealed partial class CasinoApp
 
     private string JoinCodeOf(string tableId) => casinoTables.CardFor(tableId)?.JoinCode ?? string.Empty;
 
+    private string SeatedBlackjackTable() =>
+        CasinoWire.SittingFor(casino.State, CasinoWire.BlackjackKind)?.TableId ?? string.Empty;
+
+    private string HouseBlackjackStakes(LocString template, in HouseBlackjackFloor floorRow) =>
+        texts.Compacts(template, floorRow.MinBet, floorRow.TopBetFor(casino.Ceiling.MaxBet));
+
+    private void OpenHouseBlackjack(bool rejoins)
+    {
+        if (rejoins)
+        {
+            OpenTable(SeatedBlackjackTable());
+            return;
+        }
+
+        blackjackRooms.Open();
+    }
+
     private void EnterHouseBlackjack()
     {
-        var sitting = CasinoWire.SittingFor(casino.State, CasinoWire.BlackjackKind);
-        if (sitting is not null && CasinoRoomIds.IsBlackjackHouse(sitting.TableId))
+        var seatedAt = SeatedBlackjackTable();
+        if (CasinoRoomIds.IsBlackjackHouse(seatedAt))
         {
-            OpenTable(sitting.TableId);
+            OpenTable(seatedAt);
             return;
         }
 
