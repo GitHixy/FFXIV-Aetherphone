@@ -190,6 +190,8 @@ Gamba's Host tab shows your open table with its code, who is here and who is kno
 
 **Lives in your HUD.** Drag it anywhere, resize it, or shrink it to a mini phone with the clock, widgets, music, calls and an optional FPS counter. The counter uses larger, brighter text, with a compact fallback for large text settings. Keep it on screen through Group Pose and cutscenes if it lives on a second monitor.
 
+**In the server info bar.** The phone sits in the game's server info bar with your unread count, and a click opens it. Settings → General → Server info bar picks Icon + text (the default), Text or Icon, and lets you rename the label. If the icon doesn't show in Umbra, pick a style with text.
+
 **Widgets and Smart Stacks.** Widgets for most apps, resized from the corner and stacked by dropping one onto another.
 
 **A Dynamic Island** for calls, playback, timers, voyages, watch parties and meetups.
