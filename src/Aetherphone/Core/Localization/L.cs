@@ -2272,6 +2272,86 @@ internal static class L
         public static readonly LocString SectionSounds = new("changelog.sectionSounds", "Sounds");
         public static readonly LocString SectionHalloween = new("changelog.sectionHalloween", "Halloween");
 
+        public static readonly LocString[] Release1301Phone =
+        {
+            new("changelog.r1301.0",
+                "Added emoji suggestions while you type a :shortcode in any message, post or comment box: Enter or Tab picks the top one, contributed by t3sco"),
+            new("changelog.r1301.1",
+                "Added edit mode from inside a folder: hold an app in an open folder, the same as on the Home Screen, contributed by hellovvn"),
+            new("changelog.r1301.2",
+                "Added dragging an app out of a folder: hold it outside the folder for a moment, then drop it anywhere on the Home Screen, contributed by hellovvn"),
+            new("changelog.r1301.3",
+                "Fixed images dropped on a post, reply or chat screen only landing on part of it: drop them anywhere on the screen, contributed by t3sco"),
+            new("changelog.r1301.4",
+                "Fixed an app dropped outside an open folder sliding back under the folder instead of on top of it, contributed by hellovvn"),
+            new("changelog.r1301.5",
+                "Fixed buttons on empty screens and in-app Back links using the system accent instead of the app's own color, contributed by t3sco"),
+            new("changelog.r1301.6",
+                "Fixed faint seams along progress rings, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1301ChirperAethergramVelvet =
+        {
+            new("changelog.r1301.7",
+                "Added Auto-advance posts under Settings > General: a feed moves to the next post on its own after 3 to 30 seconds without input, off by default, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1301Settings =
+        {
+            new("changelog.r1301.8",
+                "Added Server info bar under Settings > General: show the phone as an icon, as text or as both, and change the text, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1301Social =
+        {
+            new("changelog.r1301.9",
+                "Added an Open Settings button to Chirper and Aethergram while you are signed out, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1301Games =
+        {
+            new("changelog.r1301.10",
+                "Added a confirmation before you resign, leave a round in progress, close a room with players in it or remove a player, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1301Hunts =
+        {
+            new("changelog.r1301.11",
+                "Added a confirmation before Reset to Default under Alerts and before logging out of Faloop, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1301Fishing =
+        {
+            new("changelog.r1301.12",
+                "Changed the fish and voyage lists to skip rows you cannot see, so Fishing draws about three times faster, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1301Messaging =
+        {
+            new("changelog.r1301.13",
+                "Fixed pressing a photo or reaction to scroll a chat opening it: taps now act when you let go, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1301Chirper =
+        {
+            new("changelog.r1301.14",
+                "Fixed the Back button on a Chirper profile scrolling away: it stays in the corner, and the name shows at the top once you scroll, contributed by hellovvn"),
+        };
+
+        public static readonly LocString[] Release1301Jobs =
+        {
+            new("changelog.r1301.15",
+                "Fixed level rings running backwards on a level up: they now fill up and start again from empty, contributed by t3sco"),
+            new("changelog.r1301.16",
+                "Fixed long values in the stat tiles being cut off: they shrink to fit instead, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1301Clock =
+        {
+            new("changelog.r1301.17",
+                "Fixed near misses on alarm day buttons and recent timer play buttons doing nothing: both have a full size tap area, contributed by t3sco"),
+        };
+
         public static readonly LocString[] Release1300Halloween =
         {
             new("changelog.r1300.101",
