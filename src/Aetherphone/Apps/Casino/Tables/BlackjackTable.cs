@@ -44,7 +44,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
     private readonly Action leaveRoom;
     private readonly Action<string> openLedger;
     private readonly Action openGilLedger;
-    private readonly Action resignSeat;
+    private readonly Action standUp;
     private readonly BlackjackHostedText hostedText = new();
     private readonly CasinoTextCache text = new();
     private readonly BlackjackHandLog handLog = new();
@@ -87,7 +87,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
         this.leaveRoom = leaveRoom;
         this.openLedger = openLedger;
         this.openGilLedger = openGilLedger;
-        resignSeat = StandUp;
+        standUp = StandUp;
         seatFlow = new BlackjackSeatFlow(tables);
         composer = new BetComposer("##blackjackBet");
         gilComposer = new ClassicBetComposer("##blackjackGilBet");
@@ -127,23 +127,27 @@ internal sealed partial class BlackjackTable : ICabinetIdle
             ClassicBetComposer.HeightFor(1f) + BetComposer.Pad * 2f));
     }
 
+    public bool HoldsSeat => entered && !seatFlow.StandQueued
+                             && (BlackjackRules.IsSeat(mySeat) || CasinoSeatMachine.Holds(seatFlow.Stage));
+
     public bool ForfeitsTournament
     {
         get
         {
             var board = projection.Board;
-            if (board is null || !entered || seatFlow.StandQueued)
-            {
-                return false;
-            }
-
-            if (!BlackjackRules.IsSeat(mySeat) && !CasinoSeatMachine.Holds(seatFlow.Stage))
-            {
-                return false;
-            }
-
-            return BlackjackHosting.StillInTournament(board, rooms.AccountId);
+            return board is not null && HoldsSeat && BlackjackHosting.StillInTournament(board, rooms.AccountId);
         }
+    }
+
+    public void ConfirmLeave(Action leave)
+    {
+        if (ForfeitsTournament)
+        {
+            ConfirmResign(leave);
+            return;
+        }
+
+        TableLeaveConfirm.Ask(confirm, leave);
     }
 
     public void ConfirmResign(Action resign)
@@ -199,12 +203,7 @@ internal sealed partial class BlackjackTable : ICabinetIdle
 
     private void AbandonSeatIfHeld()
     {
-        if (!entered || seatFlow.StandQueued)
-        {
-            return;
-        }
-
-        if (!BlackjackRules.IsSeat(mySeat) && !CasinoSeatMachine.Holds(seatFlow.Stage))
+        if (!HoldsSeat)
         {
             return;
         }

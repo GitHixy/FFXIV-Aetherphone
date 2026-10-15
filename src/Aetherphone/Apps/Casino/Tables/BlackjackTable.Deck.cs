@@ -269,19 +269,10 @@ internal sealed partial class BlackjackTable
             return;
         }
 
-        var forfeits = ForfeitsTournament;
-        if (!stage.SecondaryAction(StandLabel(state, draining, banked, forfeits), !seatFlow.Busy, ui.Ink))
+        if (stage.SecondaryAction(StandLabel(state, draining, banked, ForfeitsTournament), !seatFlow.Busy, ui.Ink))
         {
-            return;
+            ConfirmLeave(standUp);
         }
-
-        if (forfeits)
-        {
-            ConfirmResign(resignSeat);
-            return;
-        }
-
-        StandUp();
     }
 
     private static string StandLabel(CasinoStateDto state, bool draining, bool banked, bool forfeits)

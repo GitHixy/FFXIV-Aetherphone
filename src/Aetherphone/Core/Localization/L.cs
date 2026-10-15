@@ -11555,6 +11555,9 @@ internal static class L
         public static readonly LocString ReasonPracticeOnly = new("casino.tables.reasonPracticeOnly", "That option is only for free play and gil tables, not house chip tables.");
         public static readonly LocString ReasonNotDealer = new("casino.tables.reasonNotDealer", "Only the host or a co-dealer can do that.");
         public static readonly LocString ReasonDealerCannotSit = new("casino.tables.reasonDealerCannotSit", "You deal at this table, so you cannot also take a seat at it.");
+        public static readonly LocString LeaveTitle = new("casino.tables.leaveTitle", "Leave the table?");
+        public static readonly LocString LeaveBody = new("casino.tables.leaveBody", "You give up your seat. If you are in a hand, you leave when it ends.");
+        public static readonly LocString LeaveConfirm = new("casino.tables.leaveConfirm", "Leave");
         public static readonly LocString ReasonRebuyOff = new("casino.tables.reasonRebuyOff", "The host turned rebuys off at this table.");
         public static readonly LocString ReasonTournamentLive = new("casino.tables.reasonTournamentLive", "A tournament is running. Wait for it to finish first.");
         public static readonly LocString ReasonNoTournament = new("casino.tables.reasonNoTournament", "There is no tournament running at this table.");
