@@ -1,3 +1,4 @@
+using Aetherphone.Apps.Casino.Live;
 using Aetherphone.Apps.Casino.Stage;
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
@@ -17,6 +18,7 @@ internal sealed class BlackjackPit
     private const float QuickHeight = 124f;
     private const float RowGap = 8f;
     private const float BulbInset = 5f;
+    private const string HouseActionPrefix = "blackjack.pit.house.";
 
     private readonly CasinoTablesStore tables;
     private readonly CasinoStore chips;
@@ -26,6 +28,8 @@ internal sealed class BlackjackPit
     private readonly Action openBrowser;
     private readonly Action openHostSheet;
     private readonly CasinoTextCache text = new();
+    private readonly BlackjackRoomRows houseRows = new();
+    private readonly string[] houseActionIds = new string[CasinoRoomIds.BlackjackHouse.Length];
 
     private CasinoTableRowDto[] hostedSource = Array.Empty<CasinoTableRowDto>();
     private TableRowView[] hostedViews = Array.Empty<TableRowView>();
@@ -42,6 +46,11 @@ internal sealed class BlackjackPit
         this.enterHouse = enterHouse;
         this.openBrowser = openBrowser;
         this.openHostSheet = openHostSheet;
+        for (var index = 0; index < houseActionIds.Length; index++)
+        {
+            houseActionIds[index] = HouseActionPrefix
+                + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
     }
 
     public void Enter()
@@ -58,6 +67,8 @@ internal sealed class BlackjackPit
         var drawList = ImGui.GetWindowDrawList();
         var width = ScrollLayout.StableContentWidth();
         DrawQuickSeat(drawList, ui, width, scale);
+        ui.SectionHeading(Loc.T(L.LivePage.HouseTitle), 4f);
+        DrawHouse(drawList, ui, width, scale);
         ui.SectionHeading(Loc.T(L.Blackjack.PitHostedHeading), 4f);
         DrawHosted(drawList, ui, width, scale);
         DrawLinks(ui, width, scale);
@@ -125,6 +136,23 @@ internal sealed class BlackjackPit
 
         ImGui.SetCursorScreenPos(origin);
         ImGui.Dummy(new Vector2(width, card.Height + CardGap * scale));
+    }
+
+    private void DrawHouse(ImDrawListPtr drawList, AppSkin ui, float width, float scale)
+    {
+        var seatedAt = CasinoWire.SittingFor(chips.State, CasinoWire.BlackjackKind)?.TableId ?? string.Empty;
+        houseRows.Refresh(tables.Tables, seatedAt);
+        var rows = houseRows.Rows;
+        for (var index = 0; index < rows.Length; index++)
+        {
+            var origin = ImGui.GetCursorScreenPos();
+            if (HouseRoomCard.Draw(drawList, ui, rows[index], origin, width, houseActionIds[index], true, false, scale))
+            {
+                openTable(rows[index].RoomId);
+            }
+
+            ImGui.Dummy(new Vector2(width, HouseRoomCard.Height(rows[index], width, scale) + RowGap * scale));
+        }
     }
 
     private void DrawLitCard(ImDrawListPtr drawList, Rect card, float rounding, float scale)

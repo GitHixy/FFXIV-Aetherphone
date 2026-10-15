@@ -7894,7 +7894,7 @@
   "changelog.r1300.136": "Tek seferde birden fazla çekiliş bileti alma eklendi: bir sayı yazıp toplamı görün; ev sahibinin belirlediği kişi başı sınıra kadar, en fazla 1.000",
   "changelog.r1300.150": "Çekiliş katılımcılarını çıkarma eklendi: ev sahibi çekilişten katılımcı listesini açıp sessizleşen ya da bağlantısı kopan herkesi biletleriyle birlikte çıkarır; odadan çıkarılan kişi de çekilişten çıkar",
   "changelog.r1300.155": "Kendi masana Ev sahibi düğmesi eklendi: seni ev sahibi paneline geri götürür ve biri kapıyı çaldığında gösterir",
-  "changelog.r1300.159": "Canlı sekmesine kasanın blackjack masasını seçme eklendi: dört masanın her birinin ne kadar dolu olduğunu gör ve arkadaşlarının olduğu masaya otur ya da Bana bir yer bul'a dokun",
+  "changelog.r1300.159": "Canlı sekmesine ve Salon'daki Blackjack'e kasanın blackjack masasını seçme eklendi: dört masanın her birinin ne kadar dolu olduğunu gör ve arkadaşlarının olduğu masaya otur ya da Bana bir yer bul'a dokun",
   "changelog.r1300.137": "Gil çekiliş biletleri değiştirildi: her alım defterde tek kayıt olur, böylece bilet başına bir takas yerine tek takas hepsini kapatır",
   "changelog.r1300.138": "Bir mekana sabitlenen masanın, Kimler katılabilir Yalnızca kodla olduğu sürece gizli kalması düzeltildi: ev sahibi sayfası artık Katılma isteği veya Açık seçilene kadar listelenmeyeceğini söyler ve arsada durmanızı ister",
   "changelog.r1300.140": "Gil blackjack değişti: oturmadan önce verilen gil, müşteri oturunca onun yığını olur; kalktığında ya da masa kapandığında oynanmamış kalan, ev sahibinin borçlu olduğu bir bozdurma olarak geri döner",

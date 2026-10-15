@@ -1,8 +1,5 @@
-using Aetherphone.Apps.Casino.Stage;
-using Aetherphone.Apps.Casino.Strip;
 using Aetherphone.Apps.Casino.Tables;
 using Aetherphone.Core;
-using Aetherphone.Core.Localization;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
@@ -27,15 +24,6 @@ internal sealed class HouseRoomsSheet
     private const float HeaderGap = 12f;
     private const float ListGap = 14f;
     private const float RowGap = 8f;
-    private const float RowPadX = 14f;
-    private const float RowPadY = 12f;
-    private const float RowRadius = 16f;
-    private const float LineGap = 3f;
-    private const float ColumnGap = 12f;
-    private const float RowStrokeAlpha = 0.06f;
-    private const float EmptySeatAlpha = 0.16f;
-    private const float DotsGap = 7f;
-    private const float RimAlpha = 0.45f;
 
     private readonly SheetSurface sheet;
     private readonly string gameId;
@@ -129,26 +117,11 @@ internal sealed class HouseRoomsSheet
         var height = HeaderHeight(width, scale) + ListGap * scale + QuickHeight(scale);
         for (var index = 0; index < rows.Length; index++)
         {
-            height += RowHeight(rows[index], width, scale) + (index > 0 ? RowGap * scale : 0f);
+            height += HouseRoomCard.Height(rows[index], width, scale) + (index > 0 ? RowGap * scale : 0f);
         }
 
         return height;
     }
-
-    private static float ActionWidth(in HouseRoomRow row) => Button.WidthFor(row.Action, ButtonSize.Regular);
-
-    private static float TextWidth(in HouseRoomRow row, float width, float scale) =>
-        MathF.Max(1f, width - RowPadX * 2f * scale - ActionWidth(row) - ColumnGap * scale);
-
-    private static float DotsHeight(float scale) => CasinoArt.SeatDotRadius * 2f * scale;
-
-    private static float TextHeight(in HouseRoomRow row, float textWidth, float scale) =>
-        PitText.Height(row.Name, TextStyles.Headline, textWidth) + LineGap * scale
-        + PitText.Height(row.Detail, TextStyles.Footnote, textWidth) + DotsGap * scale + DotsHeight(scale);
-
-    private static float RowHeight(in HouseRoomRow row, float width, float scale) =>
-        RowPadY * 2f * scale + MathF.Max(Button.RegularHeight * scale,
-            TextHeight(row, TextWidth(row, width, scale), scale));
 
     private void DrawBody(Rect content)
     {
@@ -205,39 +178,12 @@ internal sealed class HouseRoomsSheet
     private float DrawRoom(ImDrawListPtr drawList, in HouseRoomRow row, int index, Vector2 origin, float width,
         float scale)
     {
-        var height = RowHeight(row, width, scale);
-        var max = new Vector2(origin.X + width, origin.Y + height);
-        var radius = RowRadius * scale;
-        Squircle.Fill(drawList, origin, max, radius, ImGui.GetColorU32(StageText.CapsuleFill));
-        Squircle.Stroke(drawList, origin, max, radius,
-            ImGui.GetColorU32(skin.TitleInk with { W = RowStrokeAlpha }), MathF.Max(1f, scale));
-        if (row.Rim)
-        {
-            Squircle.Stroke(drawList, origin, max, radius,
-                ImGui.GetColorU32(CasinoColors.Money with { W = RimAlpha }), MathF.Max(1f, scale));
-        }
-
-        var centerY = origin.Y + height * 0.5f;
-        var padX = RowPadX * scale;
-        var actionWidth = ActionWidth(row);
-        var actionHeight = Button.RegularHeight * scale;
-        var action = new Rect(new Vector2(max.X - padX - actionWidth, centerY - actionHeight * 0.5f),
-            new Vector2(max.X - padX, centerY + actionHeight * 0.5f));
-        var left = origin.X + padX;
-        var textWidth = TextWidth(row, width, scale);
-        var top = centerY - TextHeight(row, textWidth, scale) * 0.5f;
-        top = PitText.Draw(drawList, row.Name, TextStyles.Headline, CasinoColors.Money, left, top, textWidth, false);
-        top = PitText.Draw(drawList, row.Detail, TextStyles.Footnote, skin.BodyInk, left, top + LineGap * scale,
-            textWidth, false);
-        CasinoArt.SeatDots(drawList, new Vector2(left, top + DotsGap * scale + DotsHeight(scale) * 0.5f), row.Seated,
-            row.MaxSeats, skin.Accent, skin.TitleInk with { W = EmptySeatAlpha }, scale);
-        if (Button.Draw(drawList, action, row.Action, skin.Ink, row.Seats ? ButtonStyle.Prominent : ButtonStyle.Gray,
-                enabled: sheet.IsOpen, overlay: true, id: actionIds[index]))
+        if (HouseRoomCard.Draw(drawList, skin, row, origin, width, actionIds[index], sheet.IsOpen, true, scale))
         {
             picked = row.RoomId;
             sheet.Close();
         }
 
-        return max.Y;
+        return origin.Y + HouseRoomCard.Height(row, width, scale);
     }
 }

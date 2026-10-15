@@ -7894,7 +7894,7 @@
   "changelog.r1300.136": "Kauf mehrerer Lose auf einmal hinzugefügt: Anzahl eintippen und den Gesamtpreis sehen, bis zum Limit pro Person, das der Gastgeber festlegt, bis zu 1.000",
   "changelog.r1300.150": "Entfernen von Verlosungsteilnehmern hinzugefügt: Der Gastgeber öffnet die Teilnehmerliste in der Verlosung und entfernt alle, die still geworden oder rausgeflogen sind, samt ihren Losen, und wer aus dem Raum entfernt wird, ist auch raus",
   "changelog.r1300.155": "Gastgeber-Schaltfläche an deinem eigenen Tisch hinzugefügt: sie bringt dich zurück zur Gastgeber-Steuerung und zeigt an, wenn jemand anklopft",
-  "changelog.r1300.159": "Auswahl der Blackjack-Tische des Hauses in Live hinzugefügt: Sieh, wie voll jeder der vier Tische ist, und setz dich zu deinen Freunden, oder tippe auf Finde mir einen Platz",
+  "changelog.r1300.159": "Auswahl der Blackjack-Tische des Hauses in Live und über Blackjack auf dem Floor hinzugefügt: Sieh, wie voll jeder der vier Tische ist, und setz dich zu deinen Freunden, oder tippe auf Finde mir einen Platz",
   "changelog.r1300.137": "Gil-Lostickets geändert: Ein Kauf ergibt einen Bucheintrag, sodass ein Handel alle Tickets begleicht statt einer pro Ticket",
   "changelog.r1300.138": "Behoben, dass ein an eine Location gehefteter Tisch unsichtbar blieb, solange unter Wer darf dazu Nur mit Code gewählt war: Das Gastgeberblatt sagt jetzt, dass er erst mit Anfragen oder Offen gelistet wird, und bittet dich, auf dem Grundstück zu stehen",
   "changelog.r1300.140": "Gil-Blackjack geändert: Gil, das vor dem Hinsetzen übergeben wurde, wird beim Hinsetzen zum Stapel des Gastes, und was beim Aufstehen oder beim Schließen des Tisches ungespielt bleibt, kommt als Abrechnung zurück, die der Gastgeber schuldet",

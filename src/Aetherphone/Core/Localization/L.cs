@@ -2368,7 +2368,7 @@ internal static class L
             new("changelog.r1300.155",
                 "Added a Host button on your own table that takes you back to the console and shows when someone knocks"),
             new("changelog.r1300.159",
-                "Added picking a house blackjack table on Live: see how full each of the four tables is and sit where your friends are, or tap Find me a seat"),
+                "Added picking a house blackjack table on Live and from Blackjack on the Floor: see how full each of the four tables is and sit where your friends are, or tap Find me a seat"),
             new("changelog.r1300.36",
                 "Overhauled the Floor: your chips with a clear daily streak, shortcuts to Missions, Club, Hall of Fame and History, then every game in full grids of Cards, Slots and Quick bets, a jackpot marquee and the live rooms counting down"),
             new("changelog.r1300.92",

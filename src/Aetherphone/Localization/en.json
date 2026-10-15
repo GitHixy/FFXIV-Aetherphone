@@ -7894,7 +7894,7 @@
   "changelog.r1300.136": "Added buying several raffle tickets at once: type a count and see the total, up to the per-person limit the host sets, as many as 1,000",
   "changelog.r1300.150": "Added removing raffle entrants: the host opens the entrant list from the raffle and takes out anyone who went quiet or dropped, tickets and all, and removing someone from the room takes them out too",
   "changelog.r1300.155": "Added a Host button on your own table that takes you back to the console and shows when someone knocks",
-  "changelog.r1300.159": "Added picking a house blackjack table on Live: see how full each of the four tables is and sit where your friends are, or tap Find me a seat",
+  "changelog.r1300.159": "Added picking a house blackjack table on Live and from Blackjack on the Floor: see how full each of the four tables is and sit where your friends are, or tap Find me a seat",
   "changelog.r1300.137": "Changed gil raffle tickets to one ledger entry per purchase, so one trade settles the lot instead of one trade per ticket",
   "changelog.r1300.138": "Fixed a table pinned to a venue staying hidden while Who can join was Invite only: the host sheet now says it will not be listed until you pick Ask to join or Open, and asks you to stand on the plot",
   "changelog.r1300.140": "Changed gil blackjack so gil handed over before sitting becomes the patron's stack when they sit, and whatever is unplayed when they stand or the table closes comes back as a cash-out the host owes",
