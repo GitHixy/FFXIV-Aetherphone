@@ -1,5 +1,6 @@
 using Aetherphone.Core;
 using Aetherphone.Core.Honorific;
+using Aetherphone.Core.Localization;
 using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
@@ -43,10 +44,41 @@ internal sealed class NameplateStage
         }
 
         var look = title.Look;
+        var center = new Vector2(stage.Center.X, titleCenterY);
+        var quoted = Quoted(title.Text);
+        var ink = new Vector4(look.Color, 1f);
+        Span<Vector4> halos = stackalloc Vector4[quoted.Length];
+        if (TryGradientHalos(halos, look, title.Text.Length))
+        {
+            Typography.DrawCenteredHalo(center, quoted, ink, halos, HaloRadius * scale, maxWidth,
+                TextStyles.SubheadlineEmphasized);
+            return;
+        }
+
         var glow = look.Glow ?? look.Color3 ?? NameplatePalette.DarkGlow;
-        Typography.DrawCenteredHalo(new Vector2(stage.Center.X, titleCenterY), Quoted(title.Text),
-            new Vector4(look.Color, 1f), new Vector4(glow, 1f), HaloRadius * scale, maxWidth,
+        Typography.DrawCenteredHalo(center, quoted, ink, new Vector4(glow, 1f), HaloRadius * scale, maxWidth,
             TextStyles.SubheadlineEmphasized);
+    }
+
+    public static string NameOf(NameplateTitleService titles) =>
+        titles.CharacterName.Length > 0 ? titles.CharacterName : Loc.T(L.Nameplate.Example);
+
+    private static bool TryGradientHalos(Span<Vector4> halos, in TitleLook look, int length)
+    {
+        var tick = NameplateGradients.Tick(Environment.TickCount64);
+        var edge = new Vector4(NameplatePalette.DarkGlow, 1f);
+        halos.Fill(edge);
+        for (var glyph = 0; glyph < length; glyph++)
+        {
+            if (!NameplateGradients.TryGlyphGlow(look, glyph, length, tick, out var glow))
+            {
+                return false;
+            }
+
+            halos[OpenQuote.Length + glyph] = new Vector4(glow, 1f);
+        }
+
+        return length > 0;
     }
 
     public static void DrawMessage(PhoneTheme theme, float scale, string message)
