@@ -267,6 +267,7 @@ internal sealed class VelvetPostComposer
             intake.Paste(library);
         }
 
+        intake.AcceptDrop(area, library, VelvetTheme.Rose);
         var scale = UiScale.Current;
         if (VHeader.Push(area, Title, HeaderActionSlots))
         {
@@ -307,8 +308,6 @@ internal sealed class VelvetPostComposer
                 intake.Paste(library);
             }
         }
-
-        intake.AcceptDrop(library, VelvetTheme.Rose);
     }
 
     private void DrawEdit(Rect area)
