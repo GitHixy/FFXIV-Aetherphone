@@ -563,7 +563,7 @@ internal sealed class BarkeepCabinet : ICabinetIdle
             verbStage.Begin(kind, random);
         }
 
-        var blocked = frame.Blocked || stage.OverlayOpen;
+        var blocked = stage.OverlayOpen;
         var hovered = !blocked && UiInteract.Hover(canvas.Min, canvas.Max);
         if (hovered)
         {
@@ -1063,7 +1063,7 @@ internal sealed class BarkeepCabinet : ICabinetIdle
         }
 
         var sitting = state.Sitting ?? CasinoWire.NoBankroll;
-        var blocked = state.StakesPaused || state.Draining || frame.Blocked;
+        var blocked = state.StakesPaused || state.Draining;
         var enabled = !blocked && !busy;
         composer.Reset(BarkeepRules.EntryChips);
         var model = new BetComposerModel(BarkeepRules.EntryChips, BarkeepRules.EntryChips, sitting.Stack,

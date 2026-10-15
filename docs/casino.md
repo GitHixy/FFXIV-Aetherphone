@@ -14,7 +14,7 @@ Paths are under src/Aetherphone. Namespaces follow the folders (`Aetherphone.Cor
 | Core/Aethernet/Contracts/Casino*Dtos.cs | Wire records (`CasinoDtos`, `CasinoFloorDtos`, `CasinoHoldemDtos`, `CasinoOriginalsDtos`, `CasinoPlinkoDtos`), all registered in `AethernetJsonContext` |
 | Core/Casino/ | Stores, the room session, rules mirrors, the fairness verifier, the ladder, trade sync; Dalamud-free wherever it can be |
 | Apps/Casino/CasinoApp*.cs | The app: router, tabs (Floor, Live, Host, Cashier), the stage host and the records pages (History, Fairness, Limits) |
-| Apps/Casino/Stage/ | The stage kit: frame, layout, celebration ladder, lights, stage text, felt, seats, bets rail, reality check |
+| Apps/Casino/Stage/ | The stage kit: frame, layout, celebration ladder, lights, stage text, felt, seats, bets rail |
 | Apps/Casino/Cabinets/ | Scratch, Wheel, Bingo, Barkeep and the daily spin |
 | Apps/Casino/Machines/ | The three slot machines on one shell |
 | Apps/Casino/Originals/ | Mines, Dice, Limbo, Keno and Hi-Lo on one cabinet with a skin per game |
@@ -70,7 +70,7 @@ cabinet.Draw(stage, frame, ui);
 var action = stage.End(ui);
 ```
 
-`Begin` draws the backdrop and the frosted deck, advances effects, and returns a `CasinoStageFrame`: `Layout`, `Safe`, `Deck`, `Body`, `Full`, `DeltaSeconds`, `Phase` (the lights clock), `Instant`, `Focused`, `Blocked` (a reality check is showing) and `SnapToTruth`. `End` draws particles, the celebration, screen effects, the practice ribbon, the reality-check card, the bets handle and the chrome, and returns `CasinoStageAction.Back` or `Cashier` for the host to act on. Overlays draw at window level through `stage.Gate()` and `stage.DrawOverlays(screen, ui)`; `TakeInfoRequest()` returns `Rules`, `Extra` or `Fairness`, and `TakeRoundRequest()` a round id tapped in the bets rail.
+`Begin` draws the backdrop and the frosted deck, advances effects, and returns a `CasinoStageFrame`: `Layout`, `Safe`, `Deck`, `Body`, `Full`, `DeltaSeconds`, `Phase` (the lights clock), `Instant`, `Focused` and `SnapToTruth`. `End` draws particles, the celebration, screen effects, the practice ribbon, the bets handle and the chrome, and returns `CasinoStageAction.Back` or `Cashier` for the host to act on. Overlays draw at window level through `stage.Gate()` and `stage.DrawOverlays(screen, ui)`; `TakeInfoRequest()` returns `Rules`, `Extra` or `Fairness`, and `TakeRoundRequest()` a round id tapped in the bets rail.
 
 `CasinoStageSpec(GameId, Title, Preset, Room, DeckHeight, Practice, BetsRail, InstantAvailable, ReturnTenths, Extra, Warmth, LampPool)` declares the screen: `Room` adds the 40 unit phase ribbon, `DeckHeight` reserves the bet deck (0 for layouts that draw their own controls), `Practice` swaps the capsule to grey Practice chips and adds the practice ribbon, `ReturnTenths` prints the return in the info sheet, `Extra` names a second info button (a pay table, odds sheet or the table sheet), `History` names a recent hands button (blackjack), `Warmth` tints the Strip toward amber, `LampPool` lights the felt. `CasinoApp.StageSpecFor(route)` picks the spec per screen.
 
@@ -142,7 +142,7 @@ Binding for every cabinet, table and room:
 
 Gil is not on the ladder, so gil blackjack tables bet through `ClassicBetComposer`: the same amount row (a free gil field with ½, 2× and Max) over a 56 unit primary, bounded by the host's limits and the seat's stack. The race deck (`RaceDeck` over `RaceDeckLayout`) shares the amount row under its bet kind switch, labels its button "Bet 100" and shows the pick ("Saffron Dash · 5.62x", from `RaceDeck.Caption`) or the prompt as a fitted caption just above it. Hold'em raises use `HoldemRaiseComposer` (Min, half pot, three quarters, Pot and All in as 44 unit chips on a pannable rail, a slider and a one big blind stepper, the button label always the exact amount).
 
-Every settled chip round goes through `stage.Settle(new CasinoBetRecord(game, stake, payout, roundId, settledAtUnixMs, capped))`, which feeds the bets rail's My bets tab and the reality check (`RealityCheck`: a card every 100 rounds or 30 minutes of play showing rounds, minutes and session net, with Keep playing or Take a break). The bets rail's All bets and High rollers tabs read `GET /casino/feed`.
+Every settled chip round goes through `stage.Settle(new CasinoBetRecord(game, stake, payout, roundId, settledAtUnixMs, capped))`, which feeds the bets rail's My bets tab. The bets rail's All bets and High rollers tabs read `GET /casino/feed`.
 
 ## Playback
 

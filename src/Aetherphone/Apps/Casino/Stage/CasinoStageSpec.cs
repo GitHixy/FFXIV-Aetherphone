@@ -50,18 +50,16 @@ internal readonly struct CasinoStageFrame
     public readonly bool SnapToTruth;
     public readonly bool Instant;
     public readonly bool Focused;
-    public readonly bool Blocked;
     public readonly float Phase;
 
     public CasinoStageFrame(in CasinoStageLayout layout, float deltaSeconds, bool snapToTruth, bool instant,
-        bool focused, bool blocked, float phase)
+        bool focused, float phase)
     {
         Layout = layout;
         DeltaSeconds = deltaSeconds;
         SnapToTruth = snapToTruth;
         Instant = instant;
         Focused = focused;
-        Blocked = blocked;
         Phase = phase;
     }
 

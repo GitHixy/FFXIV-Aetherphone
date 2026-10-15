@@ -2337,8 +2337,6 @@ internal static class L
                 "Added Instant mode and Auto play with stops on profit and loss"),
             new("changelog.r1300.34",
                 "Added a Bets sheet with your bets, all bets and high rollers, where each of your rounds can be checked"),
-            new("changelog.r1300.35",
-                "Added a check-in every 100 rounds or 30 minutes with your session net"),
             new("changelog.r1300.48",
                 "Added Get chips: when a bet is bigger than your chips, buy more in one tap without leaving the game, or let auto top-up do it"),
             new("changelog.r1300.49",
@@ -11287,10 +11285,7 @@ internal static class L
         public static readonly LocString AutoStoppedBonus = new("casino.strip.autoStoppedBonus", "Auto stopped on a bonus");
         public static readonly LocString AutoStoppedChips = new("casino.strip.autoStoppedChips", "Auto stopped: not enough chips for the next bet");
         public static readonly LocString AutoStoppedRefused = new("casino.strip.autoStoppedRefused", "Auto stopped: the floor turned the bet down");
-        public static readonly LocString RealityTitle = new("casino.strip.realityTitle", "Quick check-in");
-        public static readonly LocString RealityBody = new("casino.strip.realityBody", "{0} rounds in {1} minutes. Session net: {2} chips.");
         public static readonly LocString KeepPlaying = new("casino.strip.keepPlaying", "Keep playing");
-        public static readonly LocString TakeBreak = new("casino.strip.takeBreak", "Take a break");
         public static readonly LocString ReasonCeiling = new("casino.strip.reasonCeiling", "That bet is above your max bet right now. Lower it, or grow your level or balance to raise the cap.");
         public static readonly LocString ReasonLadder = new("casino.strip.reasonLadder", "Bets move in ladder steps. Pick one of the steps and try again.");
         public static readonly LocString ReasonCeilingAt = new("casino.strip.reasonCeilingAt", "That bet is above your max bet of {0} right now. Lower it, or grow your level or balance to raise the cap.");
@@ -13313,7 +13308,6 @@ internal static class L
         public static readonly LocString[] CasinoSelfCareItems =
         {
             new("conduct.casino.selfCare.1", "Set your own loss limit in the cashier"),
-            new("conduct.casino.selfCare.2", "The check-in every 100 rounds or 30 minutes shows how your session is going"),
             new("conduct.casino.selfCare.3", "Take breaks. The felt will be here tomorrow"),
         };
 

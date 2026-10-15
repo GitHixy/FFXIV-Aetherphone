@@ -486,7 +486,7 @@ internal sealed class RaceCabinet : ICabinetIdle
         var sitting = state.Sitting;
         var tickets = bets?.Tickets ?? Array.Empty<CasinoRaceTicketDto>();
         var full = tickets.Length >= RaceRules.MaxTickets;
-        var selectable = sitting is not null && !frame.Blocked && !full;
+        var selectable = sitting is not null && !full;
         var safe = frame.Safe;
         var message = inlineReason.Length > 0 ? Loc.T(CasinoReasons.MessageFor(inlineReason)) : string.Empty;
         var noticeHeight = message.Length > 0
@@ -555,7 +555,7 @@ internal sealed class RaceCabinet : ICabinetIdle
         CasinoStateDto state, CasinoSittingDto sitting, CasinoRaceRunnerDto[] runners, CasinoRaceBetsDto? bets,
         bool full)
     {
-        var enabled = !state.StakesPaused && !state.Draining && !rooms.StakeInFlight && !frame.Blocked && !full;
+        var enabled = !state.StakesPaused && !state.Draining && !rooms.StakeInFlight && !full;
         var ride = RideAmount(bets, sitting);
         var model = new RaceDeckModel(chips.Ceiling.MaxBet, sitting.Stack, builder.Kind, DeckCaption(runners, full),
             builder.Ready, enabled, ride > 0 ? texts.Ride(ride) : string.Empty, stage.RepeatPressed(), ride);

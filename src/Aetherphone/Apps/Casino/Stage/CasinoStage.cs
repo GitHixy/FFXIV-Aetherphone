@@ -21,8 +21,6 @@ internal sealed class CasinoStage
     private const float DeckRadius = 24f;
     private const float GlyphSize = 15f;
     private const float CapsulePadX = 14f;
-    private const float RealityVeil = 0.6f;
-    private const float RealityCardWidth = 300f;
     private const float CappedSeconds = 4f;
     private const float CappedFadeSeconds = 0.4f;
     private const float CappedPillHeight = 34f;
@@ -46,12 +44,7 @@ internal sealed class CasinoStage
     private readonly BetsRail betsRail = new();
     private readonly CasinoBetsLog bets = new();
     private readonly HashSet<string> instantGames = new(StringComparer.Ordinal);
-    private readonly RealityCheck reality = new();
     private readonly ChipValueText capsuleValue = new();
-
-    private string realityText = string.Empty;
-    private int realityRounds = -1;
-    private LanguageInfo? realityLanguage;
 
     private CasinoStageSpec spec;
     private CasinoStageLayout layout;
@@ -122,19 +115,15 @@ internal sealed class CasinoStage
         cappedLeft = 0f;
     }
 
-    public bool RealityDue => reality.Due;
-
     public void ResetSession()
     {
         Reset();
         bets.Clear();
-        reality.Reset();
     }
 
     public void Settle(in CasinoBetRecord record)
     {
         bets.Record(record);
-        reality.Record(record.Stake, record.Payout, Environment.TickCount64);
         cappedLeft = record.Capped ? CappedSeconds : 0f;
     }
 
@@ -145,7 +134,6 @@ internal sealed class CasinoStage
         var now = Environment.TickCount64;
         info.Ceiling = ceiling;
         info.Rate = Chips?.Rate ?? CasinoChipLots.ChipPerCoin;
-        reality.Tick(now);
         var gap = lastFrameTick == 0 ? 0 : now - lastFrameTick;
         lastFrameTick = now;
         delta = MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
@@ -215,7 +203,7 @@ internal sealed class CasinoStage
             drawList.PopClipRect();
         }
 
-        return new CasinoStageFrame(layout, delta, snap, InstantFor(next.GameId), focused, reality.Due, phase);
+        return new CasinoStageFrame(layout, delta, snap, InstantFor(next.GameId), focused, phase);
     }
 
     public CasinoStageAction End(AppSkin ui)
@@ -238,11 +226,6 @@ internal sealed class CasinoStage
         }
 
         var action = CasinoStageAction.None;
-        if (reality.Due && DrawRealityCheck(drawList, ui, scale))
-        {
-            action = CasinoStageAction.Back;
-        }
-
         if (spec.BetsRail && layout.HasDeck && BetsRail.DrawHandle(drawList, layout.Deck, scale))
         {
             betsRail.Open();
@@ -361,53 +344,6 @@ internal sealed class CasinoStage
         }
 
         instantGames.Remove(gameId);
-    }
-
-    private bool DrawRealityCheck(ImDrawListPtr drawList, AppSkin skin, float scale)
-    {
-        var now = Environment.TickCount64;
-        var full = layout.Full;
-        drawList.AddRectFilled(full.Min, full.Max, ImGui.GetColorU32(new Vector4(0f, 0f, 0f, RealityVeil)));
-        var safe = layout.Safe;
-        var width = MathF.Min(safe.Width, RealityCardWidth * scale);
-        var left = safe.Center.X - width * 0.5f;
-        var title = Loc.T(L.Strip.RealityTitle);
-        var body = RealityBody(now);
-        var cardHeight = CasinoNotice.Height(CasinoNoticeKind.Card, title, body, width, scale);
-        var buttonHeight = Button.RegularHeight * scale;
-        var gap = Metrics.Space.Sm * scale;
-        var total = cardHeight + gap + buttonHeight * 2f + gap;
-        var top = safe.Center.Y - total * 0.5f;
-        var bottom = CasinoNotice.Draw(drawList, skin, CasinoNoticeKind.Card, title, body, left, top, width, scale);
-        var keep = new Rect(new Vector2(left, bottom + gap), new Vector2(left + width, bottom + gap + buttonHeight));
-        if (Button.Draw(drawList, keep, Loc.T(L.Strip.KeepPlaying), skin.Ink))
-        {
-            reality.Acknowledge(now);
-        }
-
-        var leave = new Rect(new Vector2(left, keep.Max.Y + gap), new Vector2(left + width, keep.Max.Y + gap + buttonHeight));
-        if (!Button.Draw(drawList, leave, Loc.T(L.Strip.TakeBreak), skin.Ink, ButtonStyle.Gray))
-        {
-            return false;
-        }
-
-        reality.Acknowledge(now);
-        return true;
-    }
-
-    private string RealityBody(long now)
-    {
-        if (reality.Rounds == realityRounds && ReferenceEquals(realityLanguage, Loc.Current))
-        {
-            return realityText;
-        }
-
-        realityRounds = reality.Rounds;
-        realityLanguage = Loc.Current;
-        var minutes = (int)(reality.SessionMilliseconds(now) / 60_000);
-        realityText = Loc.T(L.Strip.RealityBody, Games.Framework.GameNumber.Label(reality.Rounds),
-            Games.Framework.GameNumber.Label(Math.Max(1, minutes)), NumberText.Signed(reality.Net));
-        return realityText;
     }
 
     private void FitCapsule(float scale)

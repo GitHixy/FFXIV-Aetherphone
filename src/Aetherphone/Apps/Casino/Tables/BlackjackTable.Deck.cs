@@ -376,7 +376,7 @@ internal sealed partial class BlackjackTable
         var currency = CasinoCurrencies.Of(board);
         var minimum = board.MinBet > 0 ? board.MinBet : BlackjackRules.MinBet;
         var tableMax = board.MaxBet > 0 ? board.MaxBet : BlackjackRules.MaxBet;
-        var blocked = veiled || board.Paused || rooms.StakeInFlight || frame.Blocked;
+        var blocked = veiled || board.Paused || rooms.StakeInFlight;
         if (currency == CasinoCurrencies.Gil)
         {
             var inset = BetComposer.Pad * scale;
