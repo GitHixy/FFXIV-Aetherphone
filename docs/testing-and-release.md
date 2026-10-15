@@ -146,6 +146,20 @@ src/Aetherphone holds one Dalamud manifest per build variant: Aetherphone.json (
 
 The Beta variant is a Release build with `-p:AetherphoneBeta=true` (`dotnet build Aetherphone.sln -c Release -p:AetherphoneBeta=true`). It defines `BETA`, builds AetherphoneBeta.dll, installs side by side with the stable plugin, opens with `/phonebeta`, keeps its own config, and talks to the development Aethernet instance by default (Settings, About has a test-server toggle on prerelease builds).
 
+### Beta builds and the tester handoff
+
+Beta builds are cut by the separate Aetherphone-Beta repository (`beta-release.yml`, dispatched by hand), which builds a ref of this repository on the Beta variant and publishes it to its own repo.json. A beta always previews the newest entry in ChangelogData.cs, and its version says which:
+
+- The version is `Major.Minor.Build.(R * 100 + N)`, where `Major.Minor.Build.R` is the previewed changelog version and `N` is the beta number within it (1 to 99). 1.3.1.3 is "1.3.1.0 beta 3"; 1.3.0.102 is "1.3.0.1 beta 2". Dalamud only offers an update when the version goes up, and this keeps every build higher than the last as long as the changelog version only moves forward.
+- The beta number comes from builds.json in the Aetherphone-Beta repository, one record per build.
+- The workflow refuses to build when the newest changelog version is already tagged as a release. Open the next changelog entry first.
+- On beta builds, Settings, About and the Settings footer show the decoded label ("1.3.1.0 beta 3"), localized through `L.Settings.BetaVersion`. The informational version and the backend build header keep the raw number.
+
+After publishing, the workflow hands the build to the testers:
+
+- The first beta of a version creates a Drive folder "Version X" with a testing sheet and a feedback sheet copied from templates, and a forum post "Beta X" on the staff Discord server with the changelog so far and links to the folder and both sheets.
+- Every later beta of the same version replies in that post with what is new since the previous beta, and appends that build's QA rows to the bottom of the version's testing sheet.
+
 ## The changelog system
 
 The changelog is compiled into the plugin and shown in the Settings app (src/Aetherphone/Apps/Settings/Pages/ChangelogPage.cs). A badge appears on the page while `Configuration.HasUnseenChangelog` is true, which compares `LastSeenChangelogVersion` against `ChangelogData.LatestVersion`.
