@@ -6,19 +6,19 @@ internal static class ChangelogData
 {
     public static readonly IReadOnlyList<ChangelogEntry> Entries = new[]
     {
-        new ChangelogEntry("1.3.0.1", "2026-10-15", new ChangelogSection[]
+        new ChangelogEntry("1.3.1.0", "2026-10-15", new ChangelogSection[]
         {
-            new(L.Changelog.SectionPhone, L.Changelog.Release1301Phone),
-            new(L.Changelog.SectionChirperAethergramVelvet, L.Changelog.Release1301ChirperAethergramVelvet),
-            new(L.Apps.Settings, L.Changelog.Release1301Settings),
-            new(L.Changelog.SectionSocial, L.Changelog.Release1301Social),
-            new(L.Apps.Games, L.Changelog.Release1301Games),
-            new(L.Apps.Hunts, L.Changelog.Release1301Hunts),
-            new(L.Apps.Fishing, L.Changelog.Release1301Fishing),
-            new(L.Changelog.SectionMessaging, L.Changelog.Release1301Messaging),
-            new(L.Apps.Chirper, L.Changelog.Release1301Chirper),
-            new(L.Apps.Jobs, L.Changelog.Release1301Jobs),
-            new(L.Apps.Clock, L.Changelog.Release1301Clock),
+            new(L.Changelog.SectionPhone, L.Changelog.Release1310Phone),
+            new(L.Changelog.SectionChirperAethergramVelvet, L.Changelog.Release1310ChirperAethergramVelvet),
+            new(L.Apps.Settings, L.Changelog.Release1310Settings),
+            new(L.Changelog.SectionSocial, L.Changelog.Release1310Social),
+            new(L.Apps.Games, L.Changelog.Release1310Games),
+            new(L.Apps.Hunts, L.Changelog.Release1310Hunts),
+            new(L.Apps.Fishing, L.Changelog.Release1310Fishing),
+            new(L.Changelog.SectionMessaging, L.Changelog.Release1310Messaging),
+            new(L.Apps.Chirper, L.Changelog.Release1310Chirper),
+            new(L.Apps.Jobs, L.Changelog.Release1310Jobs),
+            new(L.Apps.Clock, L.Changelog.Release1310Clock),
         }),
         new ChangelogEntry("1.3.0.0", "2026-10-15", new ChangelogSection[]
         {
