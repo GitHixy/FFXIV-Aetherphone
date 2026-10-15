@@ -185,10 +185,58 @@ public sealed class LivePageTests
                 SeatedCount: 6), true);
         var royal = HoldemPit.HouseView(HoldemRules.RoyalTier, null, true);
 
-        Assert.True(HoldemRoomsSheet.Seats(open));
-        Assert.False(HoldemRoomsSheet.Seats(full));
-        Assert.False(HoldemRoomsSheet.Seats(royal));
-        Assert.True(HoldemRoomsSheet.Seats(HoldemPit.HouseView(HoldemRules.RoyalTier, null, false)));
+        Assert.True(HoldemRoomRows.Seats(open));
+        Assert.False(HoldemRoomRows.Seats(full));
+        Assert.False(HoldemRoomRows.Seats(royal));
+        Assert.True(HoldemRoomRows.Seats(HoldemPit.HouseView(HoldemRules.RoyalTier, null, false)));
+        Assert.Equal(Loc.T(L.LivePage.Watch), HoldemRoomRows.RowOf(full, HoldemRules.MidTier).Action);
+        Assert.True(HoldemRoomRows.RowOf(royal, HoldemRules.RoyalTier).Rim);
+        Assert.False(HoldemRoomRows.RowOf(open, HoldemRules.LowTier).Rim);
+    }
+
+    [Fact]
+    public void TheBlackjackSheetSeatsAtAnyOpenTableUntilYouHoldASeat()
+    {
+        var pit = new CasinoTableRowDto(CasinoRoomIds.BlackjackPit, CasinoWire.BlackjackKind, CasinoTableKinds.House,
+            MaxSeats: 7, SeatedCount: 3);
+
+        var open = BlackjackRoomRows.RowOf(0, pit, string.Empty);
+        Assert.Equal(CasinoRoomIds.BlackjackPit, open.RoomId);
+        Assert.True(open.Seats);
+        Assert.Equal(Loc.T(L.LivePage.Sit), open.Action);
+        Assert.Equal(Loc.T(L.Casino.TableSeats, "3", "7"), open.Detail);
+
+        var full = BlackjackRoomRows.RowOf(0, pit with { SeatedCount = 7 }, string.Empty);
+        Assert.False(full.Seats);
+        Assert.Equal(Loc.T(L.LivePage.Watch), full.Action);
+
+        var mine = BlackjackRoomRows.RowOf(0, pit with { SeatedCount = 7 }, CasinoRoomIds.BlackjackPit);
+        Assert.True(mine.Seats);
+        Assert.Equal(Loc.T(L.Strip.ResumeAction), mine.Action);
+
+        var elsewhere = BlackjackRoomRows.RowOf(1, null, CasinoRoomIds.BlackjackPit);
+        Assert.Equal(CasinoRoomIds.BlackjackParlour, elsewhere.RoomId);
+        Assert.False(elsewhere.Seats);
+        Assert.Equal(BlackjackRules.SeatCount, elsewhere.MaxSeats);
+        Assert.False(BlackjackRoomRows.RowOf(2, null, "table-a1b2").Seats);
+    }
+
+    [Fact]
+    public void EveryHouseBlackjackTableIsListedUnderItsOwnName()
+    {
+        var rows = new BlackjackRoomRows();
+        rows.Refresh(Array.Empty<CasinoTableRowDto>(), string.Empty);
+
+        Assert.Equal(CasinoRoomIds.BlackjackHouse.Length, rows.Rows.Length);
+        for (var index = 0; index < rows.Rows.Length; index++)
+        {
+            Assert.Equal(CasinoRoomIds.BlackjackHouse[index], rows.Rows[index].RoomId);
+            Assert.False(string.IsNullOrEmpty(rows.Rows[index].Name));
+            for (var other = 0; other < index; other++)
+            {
+                Assert.NotEqual(rows.Rows[other].Name, rows.Rows[index].Name);
+            }
+        }
     }
 
     private static CasinoTableRowDto Hosted() =>

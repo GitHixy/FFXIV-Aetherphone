@@ -2367,6 +2367,8 @@ internal static class L
                 "Added removing raffle entrants: the host opens the entrant list from the raffle and takes out anyone who went quiet or dropped, tickets and all, and removing someone from the room takes them out too"),
             new("changelog.r1300.155",
                 "Added a Host button on your own table that takes you back to the console and shows when someone knocks"),
+            new("changelog.r1300.159",
+                "Added picking a house blackjack table on Live: see how full each of the four tables is and sit where your friends are, or tap Find me a seat"),
             new("changelog.r1300.36",
                 "Overhauled the Floor: your chips with a clear daily streak, shortcuts to Missions, Club, Hall of Fame and History, then every game in full grids of Cards, Slots and Quick bets, a jackpot marquee and the live rooms counting down"),
             new("changelog.r1300.92",
@@ -11186,6 +11188,12 @@ internal static class L
         public static readonly LocString Watch = new("casino.livePage.watch", "Watch");
         public static readonly LocString RoomsTitle = new("casino.livePage.roomsTitle", "Hold'em rooms");
         public static readonly LocString RoomsLine = new("casino.livePage.roomsLine", "Same game, different blinds. Pick your size.");
+        public static readonly LocString BlackjackRoomsTitle = new("casino.livePage.blackjackRoomsTitle", "Blackjack tables");
+        public static readonly LocString BlackjackRoomsLine = new("casino.livePage.blackjackRoomsLine", "Same stakes at every table, {0} to {1} a hand. Sit where your friends are.");
+        public static readonly LocString BlackjackPit = new("casino.livePage.blackjackPit", "The Pit");
+        public static readonly LocString BlackjackParlour = new("casino.livePage.blackjackParlour", "The Parlour");
+        public static readonly LocString BlackjackSalon = new("casino.livePage.blackjackSalon", "The Salon");
+        public static readonly LocString BlackjackVault = new("casino.livePage.blackjackVault", "The Vault");
         public static readonly LocString FilterAll = new("casino.livePage.filterAll", "All");
         public static readonly LocString FilterChips = new("casino.livePage.filterChips", "Chips");
         public static readonly LocString FilterGil = new("casino.livePage.filterGil", "Gil");
