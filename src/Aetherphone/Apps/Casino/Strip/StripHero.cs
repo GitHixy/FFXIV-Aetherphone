@@ -75,7 +75,6 @@ internal sealed class StripHero
     private const float TodayHaloAlpha = 0.45f;
     private const float TodayHaloGrowth = 0.7f;
     private const float FitSlack = 0.5f;
-    private const float TitleShare = 0.4f;
     private const string GetChipsId = "casino.hero.get";
     private const string SpinId = "casino.hero.spin";
     private const string TimedId = "casino.hero.timed";
@@ -130,8 +129,6 @@ internal sealed class StripHero
     public static float BalanceBlockHeight(float amountLine, float footnoteLine, float coinsGap) =>
         amountLine + coinsGap + footnoteLine;
 
-    public static float DetailRowHeight(float footnoteLine, float titleHeight) => MathF.Max(footnoteLine, titleHeight);
-
     public static float ClaimsHeight(StripHeroClaims claims, float buttonHeight) =>
         (claims & (StripHeroClaims.Timed | StripHeroClaims.Spin)) != 0 ? buttonHeight : 0f;
 
@@ -167,14 +164,9 @@ internal sealed class StripHero
             height += gap + getHeight;
         }
 
-        var title = StatusTitle.For(model.Balance);
         if (model.ShowsLevel)
         {
-            height += gap + MathF.Max(LevelCapsule.Ring * scale, LevelCapsule.TextBlock(title, scale));
-        }
-        else if (title != BalanceTitle.None)
-        {
-            height += gap + DetailRowHeight(0f, StatusTitle.PillHeight(title, scale));
+            height += gap + LevelCardHeight(model.Level, scale);
         }
 
         var claims = ClaimsHeight(ClaimsOf(model), Button.LargeHeight * scale);
@@ -190,6 +182,9 @@ internal sealed class StripHero
 
         return height;
     }
+
+    private static float LevelCardHeight(int level, float scale) =>
+        MathF.Max(LevelCapsule.Ring * scale, LevelCapsule.TextBlock(StatusTitle.ForLevel(level), scale));
 
     private static float StreakLabelBlock() =>
         Typography.LineHeight(TextStyles.FootnoteEmphasized) + Typography.LineHeight(TextStyles.Footnote);
@@ -280,25 +275,13 @@ internal sealed class StripHero
             top = getRect.Max.Y;
         }
 
-        var title = StatusTitle.For(model.Balance);
         if (model.ShowsLevel)
         {
             top += gap;
-            var cardHeight = MathF.Max(LevelCapsule.Ring * scale, LevelCapsule.TextBlock(title, scale));
-            var capsule = new Rect(new Vector2(left, top), new Vector2(right, top + cardHeight));
-            level.Draw(drawList, capsule, Math.Max(1, model.Level), model.LevelProgress, model.LevelCap, title,
-                CasinoColors.Money, scale);
+            var capsule = new Rect(new Vector2(left, top), new Vector2(right, top + LevelCardHeight(model.Level, scale)));
+            level.Draw(drawList, capsule, Math.Max(1, model.Level), model.LevelProgress, model.LevelCap,
+                StatusTitle.ForLevel(model.Level), CasinoColors.Money, scale);
             top = capsule.Max.Y;
-        }
-        else if (title != BalanceTitle.None)
-        {
-            top += gap;
-            var pillHeight = StatusTitle.PillHeight(title, scale);
-            var titleMax = (right - left) * TitleShare;
-            var titleWidth = StatusTitle.Width(title, titleMax, scale);
-            StatusTitle.Draw(drawList, new Vector2(right - titleWidth * 0.5f, top + pillHeight * 0.5f), title, titleMax,
-                scale);
-            top += pillHeight;
         }
 
         var claims = ClaimsOf(model);

@@ -111,8 +111,6 @@ public sealed class CasinoFloorLayoutTests
         Assert.False(StripHero.GetChipsInline(row, row - gap - getChips + 2f, getChips, gap));
         Assert.Equal(34f * scale, StripHero.BalanceRowHeight(34f * scale, 34f * scale));
         Assert.Equal(34f * scale, StripHero.BalanceRowHeight(34f * scale, 0f));
-        Assert.Equal(24f * scale, StripHero.DetailRowHeight(17f * scale, 24f * scale));
-        Assert.Equal(17f * scale, StripHero.DetailRowHeight(17f * scale, 0f));
     }
 
     [Theory]
