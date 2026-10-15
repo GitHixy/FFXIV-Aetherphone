@@ -655,8 +655,7 @@ internal sealed partial class HoldemTable
         if (RoundButton.Icon(drawList, center, radius, LeaveGlyph, ui.Ink, ButtonStyle.Gray, Loc.T(L.Holdem.Leave),
                 HoverLabelSide.Above, !seatFlow.Busy && !seatFlow.StandQueued))
         {
-            inlineReason = string.Empty;
-            seatFlow.Stand(roomId);
+            ConfirmLeave(standUp);
         }
     }
 

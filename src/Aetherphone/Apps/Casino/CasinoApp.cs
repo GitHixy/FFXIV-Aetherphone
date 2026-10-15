@@ -89,7 +89,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private readonly CasinoNavigation routes;
     private readonly RouterDraw<CasinoRoute> drawView;
     private readonly Action popRoute;
-    private readonly Action popResigned;
+    private readonly Action popLeft;
     private readonly Action leaveDoor;
     private readonly Action openLimits;
     private readonly Action refreshFloor;
@@ -101,7 +101,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private Rect screenArea;
     private Rect frameArea;
     private string pendingTableId = string.Empty;
-    private CasinoRoute resigningRoute;
+    private CasinoRoute leavingRoute;
     private bool historyLoadFailed;
 
     public CasinoApp(AethernetSession session, CoinStore coins, Core.Casino.CasinoStore casino,
@@ -162,8 +162,8 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         venueSheet = new Venue.VenueTableSheet(casinoVenue, tradeSync, report, JoinCodeOf);
         tradeCard = new Venue.TradeRecordedCard(tradeSync);
         this.holdemStore = holdemStore;
-        holdem = new Tables.HoldemTable(casino, casinoRooms, casinoTables, holdemStore, casinoTurns, remoteImages,
-            lodestone, PopRoute);
+        holdem = new Tables.HoldemTable(casino, casinoRooms, casinoTables, holdemStore, casinoTurns, confirm,
+            remoteImages, lodestone, PopRoute);
         holdemPit = new Tables.HoldemPit(holdemStore, casino, openTable, openDoorFromRow, OpenHoldemHostSheet);
         holdemPit.Lead = DrawDealerHoldemLead;
         tableHands = new Tables.TableHandsCard(history);
@@ -176,7 +176,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         routes = new CasinoNavigation(router);
         drawView = DrawView;
         popRoute = PopRoute;
-        popResigned = PopResigned;
+        popLeft = PopLeft;
         leaveDoor = LeaveDoor;
         openLimits = OpenLimits;
         refreshFloor = RefreshFloor;
@@ -924,10 +924,9 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
 
     private void LeaveStage(CasinoRoute route)
     {
-        if (route.Screen == CasinoScreen.Table && !IsHoldem(route) && !CasinoRoute.KeepsSeat(route, RouteBelow())
-            && blackjack.ForfeitsTournament)
+        if (route.Screen == CasinoScreen.Table && !CasinoRoute.KeepsSeat(route, RouteBelow()))
         {
-            AskResign(route);
+            AskLeave(route, IsHoldem(route) ? holdem.RoomId : blackjack.RoomId);
             return;
         }
 
@@ -938,26 +937,36 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     {
         var door = router.Current;
         if (door.Screen == CasinoScreen.TableDoor && door.TableId.Length > 0
-            && !CasinoRoute.ReturnsToTable(door, RouteBelow())
-            && string.Equals(blackjack.RoomId, door.TableId, StringComparison.Ordinal)
-            && blackjack.ForfeitsTournament)
+            && !CasinoRoute.ReturnsToTable(door, RouteBelow()))
         {
-            AskResign(door);
+            AskLeave(door, door.TableId);
             return;
         }
 
         PopRoute();
     }
 
-    private void AskResign(CasinoRoute leaving)
+    private void AskLeave(CasinoRoute leaving, string tableId)
     {
-        resigningRoute = leaving;
-        blackjack.ConfirmResign(popResigned);
+        leavingRoute = leaving;
+        if (string.Equals(holdem.RoomId, tableId, StringComparison.Ordinal) && holdem.HoldsSeat)
+        {
+            holdem.ConfirmLeave(popLeft);
+            return;
+        }
+
+        if (string.Equals(blackjack.RoomId, tableId, StringComparison.Ordinal) && blackjack.HoldsSeat)
+        {
+            blackjack.ConfirmLeave(popLeft);
+            return;
+        }
+
+        PopRoute();
     }
 
-    private void PopResigned()
+    private void PopLeft()
     {
-        if (router.Current == resigningRoute)
+        if (router.Current == leavingRoute)
         {
             PopRoute();
         }
