@@ -8750,9 +8750,9 @@ internal static class L
         public static readonly LocString CoinTimerHint = new("games.coinTimerHint",
             "Aether Coin timer: stay in this game until the countdown ends to earn coins. It keeps counting while the game is paused.");
         public static readonly LocString CoinTimerDeepHint = new("games.coinTimerDeepHint",
-            "Coins earned. Stay in this game until the countdown ends for the long session bonus. It keeps counting while the game is paused.");
+            "Coins are paid when you leave this game. Stay until the countdown ends for the long session bonus. It keeps counting while the game is paused.");
         public static readonly LocString CoinTimerDoneHint = new("games.coinTimerDoneHint",
-            "Coins earned for this game, including the long session bonus.");
+            "Timer done. The coins are paid when you leave this game.");
         public static readonly LocString CoinTimerCooldownHint = new("games.coinTimerCooldownHint",
             "Aether Coin timer starts soon: a new timer can begin one minute after the last one started. Stay in this game and it starts on its own.");
         public static readonly LocString Lines = new("games.lines", "Lines");
@@ -10464,13 +10464,13 @@ internal static class L
         public static readonly LocString QuestsReset = new("coin.questsReset", "New quests at {0}");
         public static readonly LocString QuestProgress = new("coin.questProgress", "{0} / {1}");
         public static readonly LocString QuestMinutes = new("coin.questMinutes", "{0} / {1} min");
-        public static readonly LocString QuestPlayFeatured = new("coin.questPlayFeatured", "Play today's featured game");
-        public static readonly LocString QuestPlayThree = new("coin.questPlayThree", "Play {0} games");
+        public static readonly LocString QuestPlayFeatured = new("coin.questPlayFeatured", "Play today's game");
+        public static readonly LocString QuestPlayThree = new("coin.questPlayThree", "Play a game for three minutes, {0} times");
         public static readonly LocString QuestPlayLong = new("coin.questPlayLong", "Stay in one game for 15 minutes");
         public static readonly LocString QuestPlayMatch = new("coin.questPlayMatch", "Finish a match with a friend");
-        public static readonly LocString QuestSocialChat = new("coin.questSocialChat", "Message {0} friends");
+        public static readonly LocString QuestSocialChat = new("coin.questSocialChat", "Message {0} people in ChocoChat");
         public static readonly LocString QuestSocialComment = new("coin.questSocialComment", "Comment on posts from {0} people");
-        public static readonly LocString QuestSocialPost = new("coin.questSocialPost", "Share a post");
+        public static readonly LocString QuestSocialPost = new("coin.questSocialPost", "Post a chirp or gram");
         public static readonly LocString QuestSocialStory = new("coin.questSocialStory", "Post a story");
         public static readonly LocString QuestSocialCall = new("coin.questSocialCall", "Call a friend");
         public static readonly LocString QuestExploreRadio = new("coin.questExploreRadio", "Listen to community radio for {0} minutes");
@@ -10478,11 +10478,11 @@ internal static class L
         public static readonly LocString QuestExploreMuster = new("coin.questExploreMuster", "Say you're going to a meetup");
         public static readonly LocString RuleQuest = new("coin.ruleQuest", "Daily quest");
         public static readonly LocString RuleQuestHint = new("coin.ruleQuestHint", "Finish one of today's three quests and the coins arrive on their own, up to three a day");
-        public static readonly LocString QuestPlayFeaturedHint = new("coin.questPlayFeaturedHint", "One session of three minutes or more in today's featured game, in the Games app");
-        public static readonly LocString QuestPlayThreeHint = new("coin.questPlayThreeHint", "Sessions of three minutes or more in the Games app, the same game or not; online rooms do not count");
-        public static readonly LocString QuestPlayLongHint = new("coin.questPlayLongHint", "Fifteen minutes in one game without leaving it");
+        public static readonly LocString QuestPlayFeaturedHint = new("coin.questPlayFeaturedHint", "Three minutes or more in Today's Game in the Games app; it counts when you leave the game");
+        public static readonly LocString QuestPlayThreeHint = new("coin.questPlayThreeHint", "Each stay of three minutes or more counts once when you leave the game, the same game or not; online rooms do not count");
+        public static readonly LocString QuestPlayLongHint = new("coin.questPlayLongHint", "Fifteen minutes in one game without leaving it; it counts when you leave the game");
         public static readonly LocString QuestPlayMatchHint = new("coin.questPlayMatchHint", "Finish a round in an online room with at least one other person");
-        public static readonly LocString QuestSocialChatHint = new("coin.questSocialChatHint", "Send a message in two different private chats; it counts within fifteen minutes");
+        public static readonly LocString QuestSocialChatHint = new("coin.questSocialChatHint", "Send a message in two different one-on-one ChocoChat chats; it counts within fifteen minutes");
         public static readonly LocString QuestSocialCommentHint = new("coin.questSocialCommentHint", "Comment on posts by two different people; a comment counts an hour after you post it");
         public static readonly LocString QuestSocialPostHint = new("coin.questSocialPostHint", "One chirp or gram, not a repost; it counts an hour after you post it");
         public static readonly LocString QuestSocialStoryHint = new("coin.questSocialStoryHint", "Post a story in Aethergram");
