@@ -22,6 +22,16 @@ internal static class OnboardingHero
     private const double DriftPeriodMs = 30000.0;
     private const double RipplePeriodMs = 2800.0;
     private const float BrandCoreUnits = 36f;
+    private const int HalloweenBats = 3;
+    private const double BatOrbitPeriodMs = 8000.0;
+    private const float BatOrbitUnits = 48f;
+    private const float BatOrbitTilt = 0.55f;
+    private const float BatUnits = 0.8f;
+    private const float BatFlapRate = 10f;
+    private const float PumpkinUnits = 34f;
+    private const double PumpkinBobPeriodMs = 3200.0;
+    private const float PumpkinBobUnits = 2.2f;
+    private static readonly Vector4 BatInk = new(0.86f, 0.80f, 1f, 0.92f);
 
     public static void Draw(ImDrawListPtr drawList, Vector2 center, HeroMotif motif, Vector4 accent, float scale,
         float reveal, float alpha)
@@ -33,6 +43,13 @@ internal static class OnboardingHero
 
         var clampedReveal = Easing.Clamp01(reveal);
         var settle = clampedReveal;
+        if (motif == HeroMotif.Halloween)
+        {
+            Halo(drawList, center, Spooks.Pumpkin, scale, settle, alpha);
+            DrawHalloween(drawList, center, scale, clampedReveal, settle, alpha);
+            return;
+        }
+
         Halo(drawList, center, accent, scale, settle, alpha);
         if (motif == HeroMotif.Care)
         {
@@ -41,6 +58,41 @@ internal static class OnboardingHero
         }
 
         DrawConstellation(drawList, center, accent, scale, clampedReveal, settle, alpha);
+    }
+
+    private static void DrawHalloween(ImDrawListPtr drawList, Vector2 center, float scale, float reveal,
+        float settle, float alpha)
+    {
+        var drift = Pulse.Phase(BatOrbitPeriodMs) * MathF.PI * 2f;
+        var seconds = (float)ImGui.GetTime();
+        var denominator = MathF.Max(1f - StaggerSpan, 0.001f);
+        for (var batIndex = 0; batIndex < HalloweenBats; batIndex++)
+        {
+            var stagger = batIndex / (float)(HalloweenBats - 1) * StaggerSpan;
+            var appear = Easing.Clamp01((reveal - stagger) / denominator);
+            if (appear <= 0.002f)
+            {
+                continue;
+            }
+
+            var angle = -MathF.PI / 2f + batIndex * (MathF.PI * 2f / HalloweenBats) + drift;
+            var radius = BatOrbitUnits * scale * appear;
+            var position = new Vector2(center.X + MathF.Cos(angle) * radius,
+                center.Y + MathF.Sin(angle) * radius * BatOrbitTilt);
+            var flap = MathF.Sin(seconds * (BatFlapRate + batIndex * 1.7f));
+            NightScene.DrawBat(drawList, position, BatUnits * scale * appear, flap,
+                ImGui.GetColorU32(BatInk with { W = BatInk.W * appear * alpha }));
+        }
+
+        var size = PumpkinUnits * scale * settle;
+        if (size <= 1f)
+        {
+            return;
+        }
+
+        var bob = MathF.Sin(Pulse.Phase(PumpkinBobPeriodMs) * MathF.PI * 2f) * PumpkinBobUnits * scale * settle;
+        PhoneIcon.Draw(drawList, new Vector2(center.X, center.Y + bob), PhoneIcons.Pumpkin,
+            Spooks.Pumpkin with { W = alpha * settle }, size);
     }
 
     private static void DrawConstellation(ImDrawListPtr drawList, Vector2 center, Vector4 accent, float scale,

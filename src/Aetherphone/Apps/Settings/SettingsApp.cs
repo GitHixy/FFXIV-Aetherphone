@@ -268,6 +268,11 @@ internal sealed class SettingsApp : IResumableApp, ISettingsNavigator, ISpotligh
     public void Draw(in PhoneContext context)
     {
         ConsumeSharedWallpaper();
+        if (GuideIntents.Consume(TourRegistry.SettingsRootIntent))
+        {
+            router.Reset();
+        }
+
         if (safetyLauncher.TryConsume())
         {
             router.Reset();
