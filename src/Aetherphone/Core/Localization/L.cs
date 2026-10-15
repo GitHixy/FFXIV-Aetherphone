@@ -2491,6 +2491,8 @@ internal static class L
                 "Added a color picker to Nameplate Title: with the Custom look, pick any text or glow color, or type its hex code"),
             new("changelog.r1300.161",
                 "Added gradient glows to Nameplate Title: sixteen color sets or two colors of your own, in a wave, a pulse or held still"),
+            new("changelog.r1300.163",
+                "Changed Minimized phone to its own row in Settings, right under Display"),
             new("changelog.r1300.51",
                 "Fixed the scrollbar moving the wrong way and too slowly when dragged while the phone position is locked, contributed by jambalong"),
             new("changelog.r1300.57",

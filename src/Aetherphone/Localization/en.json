@@ -7882,6 +7882,7 @@
   "changelog.r1300.118": "Added reordering inside folders: in edit mode, drag an app to a new spot, contributed by hellovvn",
   "changelog.r1300.160": "Added a color picker to Nameplate Title: with the Custom look, pick any text or glow color, or type its hex code",
   "changelog.r1300.161": "Added gradient glows to Nameplate Title: sixteen color sets or two colors of your own, in a wave, a pulse or held still",
+  "changelog.r1300.163": "Changed Minimized phone to its own row in Settings, right under Display",
   "changelog.r1300.119": "Added a stake to dice tables: on a gil dice table, everyone who rolls lower owes the house the stake, and the house pays the winner, each on the ledger",
   "changelog.r1300.120": "Added every seat's Pairs and 21+3 stakes under its name plate on the blackjack felt, with the result once the hand is revealed",
   "changelog.r1300.121": "Added the time bank to blackjack: the seat on its turn shows its longer turns left as pips, as Hold'em does",

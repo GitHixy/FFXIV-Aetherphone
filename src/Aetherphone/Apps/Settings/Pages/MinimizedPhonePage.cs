@@ -18,7 +18,7 @@ internal sealed class MinimizedPhonePage : ISettingsPage
     public string Title => Loc.T(L.Minimized.Title);
     public string Summary => string.Empty;
     public FontAwesomeIcon Icon => FontAwesomeIcon.MobileAlt;
-    public Vector4 Tint => new(0.30f, 0.62f, 0.92f, 1f);
+    public Vector4 Tint => new(0.98f, 0.58f, 0.16f, 1f);
     private readonly MinimizedLayoutService layout;
     private readonly Configuration configuration;
     private readonly string[] shapeLabels = new string[MinimizedShapes.ShapeCount];

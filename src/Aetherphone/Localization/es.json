@@ -7882,6 +7882,7 @@
   "changelog.r1300.118": "Se añadió reordenar dentro de las carpetas: en el modo de edición, arrastra una app a otro sitio, contribuido por hellovvn",
   "changelog.r1300.160": "Añadido un selector de color al Título de la placa: con el aspecto «Personalizado», elige cualquier color de texto o de brillo, o escribe su código hexadecimal",
   "changelog.r1300.161": "Añadidos brillos degradados al Título de la placa: dieciséis juegos de colores o dos colores propios, en ola, en pulso o fijos",
+  "changelog.r1300.163": "Se cambió Teléfono minimizado a su propia fila en Ajustes, justo debajo de Pantalla",
   "changelog.r1300.119": "Se añadió una apuesta a las mesas de dados: en una mesa de dados de gil, todos los que sacan menos deben la apuesta a la casa, y la casa paga al ganador, todo en el registro",
   "changelog.r1300.120": "Se añadieron las apuestas laterales Parejas y 21+3 de cada asiento bajo su placa en la mesa de blackjack, con el resultado cuando se revela la mano",
   "changelog.r1300.121": "Se añadió el banco de tiempo al blackjack: el asiento en su turno muestra los turnos largos que le quedan como puntos, igual que en Hold'em",
