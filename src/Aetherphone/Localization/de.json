@@ -7814,6 +7814,7 @@
   "changelog.r1310.21": "Behoben, dass das Gewinnbanner an Spielautomaten die Jackpot-Anzeigen verdeckte: Es sitzt jetzt mittig über den Walzen, der Betrag auf einer dunklen Fläche",
   "changelog.r1310.26": "Behoben, dass Reaktionen bei Hold'em nur auf dem eigenen Bildschirm erschienen: Jetzt sieht sie der ganze Tisch",
   "changelog.r1310.28": "Behoben, dass das Rot-oder-Schwarz-Risiko bei Golden Bird Deluxe seine Karte nie zeigte: Die Karte und Verdoppelt oder Diesmal nicht erscheinen jetzt bei jeder Telefongröße",
+  "changelog.r1310.33": "Behoben, dass Namen, Einsätze, Auszahlungen und Rangtitel an einem vollen Blackjack-Tisch mit sieben Plätzen abgeschnitten wurden: Sie schrumpfen jetzt, bis sie passen",
   "changelog.r1300.101": "Halloween-Theme hinzugefügt: Nachtszenen in Chirper, Aethergram und Velvet, Fledermäuse und Nebel auf dem Home-Bildschirm sowie Halloween-Symbole, -Hintergründe und -Töne, beigetragen von t3sco",
   "changelog.r1300.102": "Süßigkeitenjagd vom 15. Oktober bis 2. November hinzugefügt: 13 Süßigkeiten verstecken sich im Telefon, eine pro Tag, und findest du alle, brennt dein Name im Hexenfeuer, beigetragen von t3sco",
   "changelog.r1300.103": "Saisonales Theme unter Einstellungen > Darstellung hinzugefügt: Automatisch zeigt Halloween vom 15. Oktober bis 2. November, Halloween behält es das ganze Jahr, und Aus schaltet es ab, beigetragen von t3sco",

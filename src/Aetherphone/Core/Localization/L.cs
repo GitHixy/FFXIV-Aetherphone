@@ -2385,6 +2385,8 @@ internal static class L
                 "Fixed Hold'em reactions only showing on your own screen: everyone at the table sees them now"),
             new("changelog.r1310.28",
                 "Fixed the red or black gamble on Golden Bird Deluxe never showing its card: the card and Doubled or Not this time now show on every phone size"),
+            new("changelog.r1310.33",
+                "Fixed names, bets, payouts and balance titles on a full seven-seat blackjack rail being cut short: they shrink to fit instead"),
         };
 
         public static readonly LocString[] Release1300Halloween =
