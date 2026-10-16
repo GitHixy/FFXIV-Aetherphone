@@ -7801,6 +7801,7 @@
   "changelog.r1310.18": "Corregido que el domador de bestias en su nivel máximo 50 apareciera como incompleto: su anillo está lleno y cuenta en En el nivel máximo y Niveles obtenidos",
   "changelog.r1310.19": "Corregido que la apuesta a rojo o negro fallara siempre en Crystal Cascade y Moogle Money: ahora solo se ofrece en Golden Bird Deluxe, la única máquina que la tiene",
   "changelog.r1310.20": "Corregido que Sincronizar intercambios registrara y anunciara intercambios de gil hechos lejos de tu mesa: los invitados solo se anotan mientras estás en tu mesa de gil abierta o hasta 30 minutos después de dejarla",
+  "changelog.r1310.21": "Corregido que el cartel de gran premio de las tragaperras tapara los medidores del bote: ahora se centra sobre los rodillos y la cantidad va sobre una placa oscura",
   "changelog.r1300.101": "Se añadió un tema de Halloween: escenas nocturnas en Chirper, Aethergram y Velvet, murciélagos y niebla en la Pantalla de inicio, e iconos, fondos y sonidos de Halloween, contribuido por t3sco",
   "changelog.r1300.102": "Se añadió una búsqueda de dulces del 15 de octubre al 2 de noviembre: 13 dulces se esconden por el teléfono, uno al día, y si los encuentras todos tu nombre arde con fuego de bruja, contribuido por t3sco",
   "changelog.r1300.103": "Se añadió Tema de temporada en Ajustes > Apariencia: Automático muestra Halloween del 15 de octubre al 2 de noviembre, Halloween lo mantiene todo el año y Desactivado lo apaga, contribuido por t3sco",

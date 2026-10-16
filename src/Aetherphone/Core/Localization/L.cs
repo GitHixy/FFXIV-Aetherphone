@@ -2361,6 +2361,8 @@ internal static class L
                 "Fixed the red or black gamble always failing on Crystal Cascade and Moogle Money: it is only offered on Golden Bird Deluxe now, the one machine that has it"),
             new("changelog.r1310.20",
                 "Fixed trade sync recording and announcing gil trades made away from your table: guests are booked only while you are at your open gil table or within 30 minutes of leaving it"),
+            new("changelog.r1310.21",
+                "Fixed the big win banner on slot machines covering the jackpot meters: it is centred on the reels now, with the amount on a dark plate"),
         };
 
         public static readonly LocString[] Release1300Halloween =
