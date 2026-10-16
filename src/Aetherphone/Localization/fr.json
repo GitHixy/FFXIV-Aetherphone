@@ -7810,6 +7810,7 @@
   "changelog.r1310.20": "Correction de la Synchro des échanges qui inscrivait et annonçait des échanges de gils faits loin de votre table : les invités ne sont inscrits que pendant que vous êtes à votre table en gils ouverte ou dans les 30 minutes après l'avoir quittée",
   "changelog.r1310.21": "Correction de la bannière de gros gain des machines à sous qui cachait les jauges de jackpot : elle est maintenant centrée sur les rouleaux, avec le montant sur un fond sombre",
   "changelog.r1310.26": "Correction des réactions du Hold'em qui ne s'affichaient que sur votre écran : toute la table les voit maintenant",
+  "changelog.r1310.28": "Correction du quitte ou double rouge ou noir de Golden Bird Deluxe qui ne montrait jamais sa carte : la carte et Doublé ou Pas cette fois s'affichent maintenant sur toutes les tailles de téléphone",
   "changelog.r1300.101": "Ajout d'un thème Halloween : scènes nocturnes dans Chirper, Aethergram et Velvet, chauves-souris et brume sur l'écran d'accueil, et icônes, fonds et sons d'Halloween, contribution de t3sco",
   "changelog.r1300.102": "Ajout d'une chasse aux friandises du 15 octobre au 2 novembre : 13 friandises se cachent dans le téléphone, une par jour, et les trouver toutes fait brûler ton nom d'un feu de sorcière, contribution de t3sco",
   "changelog.r1300.103": "Ajout de Thème saisonnier dans Réglages > Apparence : Automatique affiche Halloween du 15 octobre au 2 novembre, Halloween le garde toute l'année et Désactivé le coupe, contribution de t3sco",

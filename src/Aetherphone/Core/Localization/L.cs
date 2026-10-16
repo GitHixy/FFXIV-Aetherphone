@@ -2377,6 +2377,8 @@ internal static class L
                 "Fixed the big win banner on slot machines covering the jackpot meters: it is centred on the reels now, with the amount on a dark plate"),
             new("changelog.r1310.26",
                 "Fixed Hold'em reactions only showing on your own screen: everyone at the table sees them now"),
+            new("changelog.r1310.28",
+                "Fixed the red or black gamble on Golden Bird Deluxe never showing its card: the card and Doubled or Not this time now show on every phone size"),
         };
 
         public static readonly LocString[] Release1300Halloween =

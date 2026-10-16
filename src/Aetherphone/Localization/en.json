@@ -7810,6 +7810,7 @@
   "changelog.r1310.20": "Fixed trade sync recording and announcing gil trades made away from your table: guests are booked only while you are at your open gil table or within 30 minutes of leaving it",
   "changelog.r1310.21": "Fixed the big win banner on slot machines covering the jackpot meters: it is centred on the reels now, with the amount on a dark plate",
   "changelog.r1310.26": "Fixed Hold'em reactions only showing on your own screen: everyone at the table sees them now",
+  "changelog.r1310.28": "Fixed the red or black gamble on Golden Bird Deluxe never showing its card: the card and Doubled or Not this time now show on every phone size",
   "changelog.r1300.101": "Added a Halloween theme: night scenes in Chirper, Aethergram and Velvet, bats and mist on the Home Screen, and Halloween icons, wallpapers and sounds, contributed by t3sco",
   "changelog.r1300.102": "Added a treat hunt from 15 October to 2 November: 13 treats hide around the phone, one a day, and finding them all sets your name in Witchfire, contributed by t3sco",
   "changelog.r1300.103": "Added Seasonal Theme under Settings > Appearance: Automatic shows Halloween from 15 October to 2 November, Halloween keeps it all year, and Off turns it off, contributed by t3sco",
