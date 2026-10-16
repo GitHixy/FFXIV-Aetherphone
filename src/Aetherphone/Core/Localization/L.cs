@@ -8110,6 +8110,7 @@ internal static class L
         public static readonly LocString SearchHint = new("fishing.searchHint", "Search fish, holes or zones");
         public static readonly LocString BigFish = new("fishing.bigFish", "Big fish");
         public static readonly LocString UncaughtFilter = new("fishing.uncaughtFilter", "Not caught");
+        public static readonly LocString CaughtProgress = new("fishing.caughtProgress", "Caught {0} of {1}");
         public static readonly LocString AnyTime = new("fishing.anyTime", "Any time");
         public static readonly LocString NoWindowShort = new("fishing.noWindowShort", "No window");
         public static readonly LocString NoWindowSoon = new("fishing.noWindowSoon", "No window in the next two months");

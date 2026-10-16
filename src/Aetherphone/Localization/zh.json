@@ -3613,6 +3613,7 @@
   "fishing.searchHint": "搜索鱼、钓场或区域",
   "fishing.bigFish": "鱼王",
   "fishing.uncaughtFilter": "未钓到",
+  "fishing.caughtProgress": "已钓到 {0}/{1}",
   "fishing.anyTime": "全天",
   "fishing.noWindowShort": "无窗口",
   "fishing.noWindowSoon": "未来两个月内不会出现",

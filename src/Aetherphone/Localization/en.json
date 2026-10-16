@@ -3613,6 +3613,7 @@
   "fishing.searchHint": "Search fish, holes or zones",
   "fishing.bigFish": "Big fish",
   "fishing.uncaughtFilter": "Not caught",
+  "fishing.caughtProgress": "Caught {0} of {1}",
   "fishing.anyTime": "Any time",
   "fishing.noWindowShort": "No window",
   "fishing.noWindowSoon": "No window in the next two months",

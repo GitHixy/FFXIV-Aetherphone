@@ -3613,6 +3613,7 @@
   "fishing.searchHint": "Buscar peixes, pontos ou zonas",
   "fishing.bigFish": "Peixe lendário",
   "fishing.uncaughtFilter": "Não capturados",
+  "fishing.caughtProgress": "{0} de {1} capturados",
   "fishing.anyTime": "A qualquer hora",
   "fishing.noWindowShort": "Sem janela",
   "fishing.noWindowSoon": "Sem janela nos próximos dois meses",

@@ -3613,6 +3613,7 @@
   "fishing.searchHint": "Поиск рыбы, мест или зон",
   "fishing.bigFish": "Крупная рыба",
   "fishing.uncaughtFilter": "Не поймана",
+  "fishing.caughtProgress": "Поймано {0} из {1}",
   "fishing.anyTime": "В любое время",
   "fishing.noWindowShort": "Нет окна",
   "fishing.noWindowSoon": "Нет окна в ближайшие два месяца",
