@@ -45,7 +45,8 @@ internal sealed class FishingAlerts : IDisposable
     private readonly Dictionary<uint, long> notifiedWindowStart = new();
     private readonly HashSet<uint> caughtItems = new();
     private readonly OceanVoyageSlot[] voyageProbe = new OceanVoyageSlot[1];
-    private long lastCaughtRefresh = long.MinValue;
+    private long lastCaughtRefresh = long.MinValue / 2;
+    private bool catalogTracked;
 
     public FishingAlerts(Configuration configuration, FishingCatalog catalog, NotificationService notifications,
         IClientState clientState, IFramework framework, AppGate gate)
@@ -262,7 +263,8 @@ internal sealed class FishingAlerts : IDisposable
     private unsafe void RefreshCaught()
     {
         var now = Environment.TickCount64;
-        if (now - lastCaughtRefresh < CaughtRefreshMilliseconds)
+        var catalogReady = catalog.State == FishingCatalogState.Ready;
+        if (now - lastCaughtRefresh < CaughtRefreshMilliseconds && catalogReady == catalogTracked)
         {
             return;
         }
@@ -271,6 +273,7 @@ internal sealed class FishingAlerts : IDisposable
         var playerState = clientState.IsLoggedIn ? PlayerState.Instance() : null;
         if (playerState == null || !playerState->IsLoaded)
         {
+            catalogTracked = false;
             if (CaughtKnown)
             {
                 CaughtKnown = false;
@@ -282,7 +285,7 @@ internal sealed class FishingAlerts : IDisposable
         }
 
         var changed = !CaughtKnown;
-        if (catalog.State == FishingCatalogState.Ready)
+        if (catalogReady)
         {
             var entries = catalog.Entries;
             for (var index = 0; index < entries.Length; index++)
@@ -290,6 +293,8 @@ internal sealed class FishingAlerts : IDisposable
                 changed |= Track(playerState, entries[index].ItemId, entries[index].LogRow);
             }
         }
+
+        catalogTracked = catalogReady;
 
         var blueFish = OceanItinerary.AllBlueFish;
         for (var index = 0; index < blueFish.Length; index++)

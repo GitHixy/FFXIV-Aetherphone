@@ -7796,6 +7796,7 @@
   "changelog.r1310.12": "Fisch- und Fahrtenlisten so geändert, dass unsichtbare Zeilen übersprungen werden, dadurch zeichnet Angeln etwa dreimal schneller, beigetragen von t3sco",
   "changelog.r1310.24": "Erweiterungsfilter für die Fischliste hinzugefügt, und die Suche kennt jetzt Patchnummern: Gib 7.2 ein, um die Fische dieses Patches zu finden",
   "changelog.r1310.25": "Filter Gefangen neben Nicht gefangen hinzugefügt: Beide listen alle passenden Fische unter einer Fangzahl mit Fortschrittsbalken auf",
+  "changelog.r1310.27": "Behoben, dass Angeln nicht wusste, welche Fische du schon gefangen hast: Der Filter Nicht gefangen, das Abzeichen Gefangen und die Häkchen bei gefangenen Fischen erscheinen jetzt",
   "changelog.r1310.13": "Behoben, dass Fotos und Reaktionen aufgingen, wenn man sie zum Scrollen eines Chats drückte: Tippen wirkt jetzt erst beim Loslassen, beigetragen von t3sco",
   "changelog.r1310.23": "Nachrichtenfeld in ChocoChat-, Aethergram- und Velvet-Chats so geändert, dass ein Klick irgendwo darauf es auswählt, nicht nur auf der Textzeile",
   "changelog.r1310.14": "Behoben, dass der Zurück-Knopf auf einem Chirper-Profil wegscrollte: Er bleibt in der Ecke, und beim Scrollen erscheint oben der Name, beigetragen von hellovvn",

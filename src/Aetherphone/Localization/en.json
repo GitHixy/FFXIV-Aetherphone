@@ -7796,6 +7796,7 @@
   "changelog.r1310.12": "Changed the fish and voyage lists to skip rows you cannot see, so Fishing draws about three times faster, contributed by t3sco",
   "changelog.r1310.24": "Added expansion filters to the fish list, and patch numbers to its search: type 7.2 to find that patch's fish",
   "changelog.r1310.25": "Added a Caught filter beside Not caught: either one lists every matching fish under a caught count with a progress bar",
+  "changelog.r1310.27": "Fixed Fishing not knowing which fish you have caught: the Not caught filter, the caught badge and the check marks on caught fish show up now",
   "changelog.r1310.13": "Fixed pressing a photo or reaction to scroll a chat opening it: taps now act when you let go, contributed by t3sco",
   "changelog.r1310.23": "Changed the message box in ChocoChat, Aethergram and Velvet chats to take a click anywhere on it, not only on its line of text",
   "changelog.r1310.14": "Fixed the Back button on a Chirper profile scrolling away: it stays in the corner, and the name shows at the top once you scroll, contributed by hellovvn",

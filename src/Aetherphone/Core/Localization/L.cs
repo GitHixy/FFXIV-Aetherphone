@@ -2329,6 +2329,8 @@ internal static class L
                 "Added a Caught filter beside Not caught: either one lists every matching fish under a caught count with a progress bar"),
             new("changelog.r1310.12",
                 "Changed the fish and voyage lists to skip rows you cannot see, so Fishing draws about three times faster, contributed by t3sco"),
+            new("changelog.r1310.27",
+                "Fixed Fishing not knowing which fish you have caught: the Not caught filter, the caught badge and the check marks on caught fish show up now"),
         };
 
         public static readonly LocString[] Release1310Messaging =

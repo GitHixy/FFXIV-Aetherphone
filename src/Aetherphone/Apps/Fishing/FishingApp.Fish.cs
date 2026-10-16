@@ -378,6 +378,11 @@ internal sealed partial class FishingApp
                 continue;
             }
 
+            if (listing && entry.LogRow == 0)
+            {
+                continue;
+            }
+
             var caught = alerts.IsCaught(entry.ItemId);
             progressTotal++;
             if (caught)
