@@ -2341,6 +2341,8 @@ internal static class L
                 "Fixed pressing a photo or reaction to scroll a chat opening it: taps now act when you let go, contributed by t3sco"),
             new("changelog.r1310.29",
                 "Fixed the Speaker and Microphone lists in calls and in Phone Calls settings only offering System default: they list your devices now"),
+            new("changelog.r1310.30",
+                "Fixed Aethergram and Velvet messages from the same person landing in one notification stack and clearing together when you opened either chat"),
         };
 
         public static readonly LocString[] Release1310Chirper =

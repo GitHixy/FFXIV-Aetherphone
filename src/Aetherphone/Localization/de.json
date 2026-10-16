@@ -7800,6 +7800,7 @@
   "changelog.r1310.13": "Behoben, dass Fotos und Reaktionen aufgingen, wenn man sie zum Scrollen eines Chats drückte: Tippen wirkt jetzt erst beim Loslassen, beigetragen von t3sco",
   "changelog.r1310.23": "Nachrichtenfeld in ChocoChat-, Aethergram- und Velvet-Chats so geändert, dass ein Klick irgendwo darauf es auswählt, nicht nur auf der Textzeile",
   "changelog.r1310.29": "Behoben, dass die Listen Lautsprecher und Mikrofon in Anrufen und in den Einstellungen Telefonanrufe nur Systemstandard anboten: Jetzt erscheinen deine Geräte",
+  "changelog.r1310.30": "Behoben, dass Aethergram- und Velvet-Nachrichten derselben Person in einem Benachrichtigungsstapel landeten und zusammen verschwanden, sobald du einen der beiden Chats geöffnet hast",
   "changelog.r1310.14": "Behoben, dass der Zurück-Knopf auf einem Chirper-Profil wegscrollte: Er bleibt in der Ecke, und beim Scrollen erscheint oben der Name, beigetragen von hellovvn",
   "changelog.r1310.15": "Behoben, dass Levelringe bei einem Stufenaufstieg rückwärts liefen: Sie füllen sich jetzt ganz und beginnen dann leer von vorn, beigetragen von t3sco",
   "changelog.r1310.16": "Behoben, dass lange Werte in den Statistikkacheln abgeschnitten wurden: Sie werden jetzt passend verkleinert, beigetragen von t3sco",
