@@ -7808,6 +7808,7 @@
   "changelog.r1310.20": "Corrigido o Sincronizar trocas registrando e anunciando trocas de gil feitas longe da sua mesa: convidados só são registrados enquanto você está na sua mesa de gil aberta ou até 30 minutos depois de sair dela",
   "changelog.r1310.21": "Corrigido o banner de grande prêmio dos caça-níqueis cobrindo os medidores do jackpot: agora ele fica centralizado nos rolos, com o valor sobre uma placa escura",
   "changelog.r1310.26": "Corrigidas as reações do Hold'em que só apareciam na sua própria tela: agora a mesa inteira as vê",
+  "changelog.r1310.28": "Corrigida a aposta em vermelho ou preto do Golden Bird Deluxe, que nunca mostrava a carta: a carta e Dobrado ou Desta vez não agora aparecem em qualquer tamanho de telefone",
   "changelog.r1300.101": "Adicionamos um tema de Halloween: cenas noturnas no Chirper, Aethergram e Velvet, morcegos e névoa na Tela de Início, e ícones, papéis de parede e sons de Halloween, contribuição de t3sco",
   "changelog.r1300.102": "Adicionamos uma caça aos doces de 15 de outubro a 2 de novembro: 13 doces se escondem pelo celular, um por dia, e encontrar todos faz seu nome arder com fogo de bruxa, contribuição de t3sco",
   "changelog.r1300.103": "Adicionamos Tema sazonal em Ajustes > Aparência: Automático mostra o Halloween de 15 de outubro a 2 de novembro, Halloween o mantém o ano todo e Desativado o desliga, contribuição de t3sco",
