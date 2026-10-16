@@ -7794,6 +7794,7 @@
   "changelog.r1310.11": "Rückfrage vor „Auf Standard zurücksetzen“ unter Hinweise und vor dem Abmelden bei Faloop hinzugefügt, beigetragen von t3sco",
   "changelog.r1310.12": "Fisch- und Fahrtenlisten so geändert, dass unsichtbare Zeilen übersprungen werden, dadurch zeichnet Angeln etwa dreimal schneller, beigetragen von t3sco",
   "changelog.r1310.13": "Behoben, dass Fotos und Reaktionen aufgingen, wenn man sie zum Scrollen eines Chats drückte: Tippen wirkt jetzt erst beim Loslassen, beigetragen von t3sco",
+  "changelog.r1310.23": "Nachrichtenfeld in ChocoChat-, Aethergram- und Velvet-Chats so geändert, dass ein Klick irgendwo darauf es auswählt, nicht nur auf der Textzeile",
   "changelog.r1310.14": "Behoben, dass der Zurück-Knopf auf einem Chirper-Profil wegscrollte: Er bleibt in der Ecke, und beim Scrollen erscheint oben der Name, beigetragen von hellovvn",
   "changelog.r1310.15": "Behoben, dass Levelringe bei einem Stufenaufstieg rückwärts liefen: Sie füllen sich jetzt ganz und beginnen dann leer von vorn, beigetragen von t3sco",
   "changelog.r1310.16": "Behoben, dass lange Werte in den Statistikkacheln abgeschnitten wurden: Sie werden jetzt passend verkleinert, beigetragen von t3sco",

@@ -7794,6 +7794,7 @@
   "changelog.r1310.11": "Uyarılar'daki Varsayılana sıfırla ve Faloop'tan çıkış öncesine onay eklendi, katkı: t3sco",
   "changelog.r1310.12": "Balık ve sefer listeleri görünmeyen satırları atlayacak şekilde değiştirildi, böylece Balıkçılık yaklaşık üç kat hızlı çiziliyor, katkı: t3sco",
   "changelog.r1310.13": "Bir sohbeti kaydırmak için fotoğrafa veya tepkiye basınca açılması düzeltildi: dokunmalar artık bırakınca çalışıyor, katkı: t3sco",
+  "changelog.r1310.23": "ChocoChat, Aethergram ve Velvet sohbetlerindeki mesaj kutusu, yalnızca metin satırında değil, herhangi bir yerine tıklanınca seçilecek şekilde değiştirildi",
   "changelog.r1310.14": "Chirper profilindeki Geri düğmesinin kaydırınca kaybolması düzeltildi: artık köşede kalıyor ve kaydırınca üstte ad görünüyor, katkı: hellovvn",
   "changelog.r1310.15": "Seviye atlarken seviye halkalarının geriye doğru dönmesi düzeltildi: artık dolup boştan yeniden başlıyorlar, katkı: t3sco",
   "changelog.r1310.16": "İstatistik kutularındaki uzun değerlerin kesilmesi düzeltildi: artık sığacak şekilde küçülüyorlar, katkı: t3sco",
