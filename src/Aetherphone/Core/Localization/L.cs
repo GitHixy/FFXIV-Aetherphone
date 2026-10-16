@@ -2371,6 +2371,8 @@ internal static class L
                 "Fixed trade sync recording and announcing gil trades made away from your table: guests are booked only while you are at your open gil table or within 30 minutes of leaving it"),
             new("changelog.r1310.21",
                 "Fixed the big win banner on slot machines covering the jackpot meters: it is centred on the reels now, with the amount on a dark plate"),
+            new("changelog.r1310.26",
+                "Fixed Hold'em reactions only showing on your own screen: everyone at the table sees them now"),
         };
 
         public static readonly LocString[] Release1300Halloween =
