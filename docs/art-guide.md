@@ -72,7 +72,7 @@ Seasonal sounds play under the same switch, and players can also turn them off a
 
 ## Sending your work
 
-When the checker is clean, send the finished files to the maintainers on the [Aetherphone Discord server](https://discord.gg/3HbJCscMyS) or by email to contact@aetherphone.net. Include:
+When the checker is clean, send the finished files to the maintainers on the [Aetherphone Discord server](https://discord.gg/3HbJCscMyS). Include:
 
 - the files, named as above;
 - for a case, its main metal color as a hex value (the case checker suggests one);
