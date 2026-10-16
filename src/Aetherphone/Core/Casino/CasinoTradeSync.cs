@@ -51,6 +51,7 @@ internal sealed class CasinoTradeSync : IDisposable
     private long hostingCheckedAtTick;
     private long atTableAtTick;
     private string atTableId = string.Empty;
+    private string atTableAccountId = string.Empty;
     private string accountId = string.Empty;
 
     public CasinoTradeSync(Configuration configuration, AethernetSession session, CasinoClient casino,
@@ -178,6 +179,12 @@ internal sealed class CasinoTradeSync : IDisposable
         return atTableAtTick != 0 && nowTick - atTableAtTick <= AtTableGraceMilliseconds;
     }
 
+    internal static bool ForgetsTable(string atTableAccountId, string signedInAccountId)
+    {
+        return signedInAccountId.Length > 0
+            && !string.Equals(atTableAccountId, signedInAccountId, StringComparison.Ordinal);
+    }
+
     private void StopTracking()
     {
         if (!tracking)
@@ -192,9 +199,14 @@ internal sealed class CasinoTradeSync : IDisposable
     private void SwitchAccount(string account)
     {
         accountId = account;
-        hostingCheckedAtTick = 0;
-        atTableAtTick = 0;
-        atTableId = string.Empty;
+        if (ForgetsTable(atTableAccountId, account))
+        {
+            hostingCheckedAtTick = 0;
+            atTableAtTick = 0;
+            atTableId = string.Empty;
+            atTableAccountId = string.Empty;
+        }
+
         tracker.Reset();
         if (pending.Count > 0)
         {
@@ -212,7 +224,11 @@ internal sealed class CasinoTradeSync : IDisposable
         if (completion.PartnerName.Length == 0)
         {
             AepLog.Info($"[TradeSync] A trade of {amount} gil completed without a partner name, not recorded");
-            NotifyFailure(hint, amount);
+            if (hint.Length > 0)
+            {
+                NotifyFailure(amount);
+            }
+
             return;
         }
 
@@ -281,7 +297,7 @@ internal sealed class CasinoTradeSync : IDisposable
         if (result is null)
         {
             AepLog.Info($"[TradeSync] Gave up recording a trade of {amount} gil after every retry");
-            NotifyFailure(request.TableId, amount);
+            NotifyFailure(amount);
             return;
         }
 
@@ -291,7 +307,7 @@ internal sealed class CasinoTradeSync : IDisposable
             if (!string.Equals(result.Reason, CasinoReasons.NoGilTable, StringComparison.Ordinal)
                 && !string.Equals(result.Reason, CasinoReasons.ConfigInvalid, StringComparison.Ordinal))
             {
-                NotifyFailure(request.TableId, amount);
+                NotifyFailure(amount);
             }
 
             return;
@@ -342,6 +358,7 @@ internal sealed class CasinoTradeSync : IDisposable
         {
             atTableId = live;
             atTableAtTick = nowTick;
+            atTableAccountId = accountId;
         }
 
         return live;
@@ -383,13 +400,8 @@ internal sealed class CasinoTradeSync : IDisposable
                 NumberText.Group(shown.Amount)));
     }
 
-    private void NotifyFailure(string hintTableId, long amount)
+    private void NotifyFailure(long amount)
     {
-        if (hintTableId.Length == 0)
-        {
-            return;
-        }
-
         Notify(string.Empty, Loc.T(L.Venue.TradeFailedTitle), Loc.T(L.Venue.TradeFailedBody, NumberText.Group(amount)));
     }
 

@@ -280,4 +280,13 @@ public sealed class TradeSyncTests
         Assert.False(CasinoTradeSync.StillAtTable(leftAt, leftAt + CasinoTradeSync.AtTableGraceMilliseconds + 1));
         Assert.Equal(30 * 60 * 1_000L, CasinoTradeSync.AtTableGraceMilliseconds);
     }
+
+    [Fact]
+    public void SigningOutKeepsTheTableAndOnlyAnotherCharacterForgetsIt()
+    {
+        Assert.False(CasinoTradeSync.ForgetsTable("host", string.Empty));
+        Assert.False(CasinoTradeSync.ForgetsTable("host", "host"));
+        Assert.True(CasinoTradeSync.ForgetsTable("host", "alt"));
+        Assert.True(CasinoTradeSync.ForgetsTable(string.Empty, "host"));
+    }
 }
