@@ -517,11 +517,12 @@ internal sealed partial class FishingApp
         var subRight = row.Max.X - whenWidth;
         Typography.Draw(drawList, new Vector2(subRight, top + titleHeight + LineGap * scale), when, ui.MutedInk,
             TextStyles.Footnote);
+        var bellHovered = false;
         if (alerts.HasAlarm(entry.ItemId))
         {
             var bell = FishBellSize * scale;
-            PhoneIcon.Draw(drawList, new Vector2(subRight - bell, top + titleHeight + LineGap * scale + subHeight * 0.5f),
-                PhoneIcons.BellFilled, ui.Accent, bell);
+            var bellCenter = new Vector2(subRight - bell, top + titleHeight + LineGap * scale + subHeight * 0.5f);
+            bellHovered = DrawAlarmBell(drawList, entry.ItemId, bellCenter, bell, scale);
             subRight -= bell * 2f;
         }
 
@@ -540,11 +541,28 @@ internal sealed partial class FishingApp
         Typography.Draw(drawList, new Vector2(textLeft, top + titleHeight + LineGap * scale),
             Typography.FitText(Subtitle(entryIndex, entry), MathF.Max(1f, subRight - RowGap * scale - textLeft),
                 TextStyles.Footnote), ui.MutedInk, TextStyles.Footnote);
-        if (UiInteract.Click(bounds.Min, bounds.Max, hovered))
+        if (UiInteract.Click(bounds.Min, bounds.Max, hovered && !bellHovered))
         {
             UiFeedback.Play(UiSound.Tap);
             router.Push(FishingRoute.Fish(entry.ItemId));
         }
+    }
+
+    private bool DrawAlarmBell(ImDrawListPtr drawList, uint itemId, Vector2 center, float size, float scale)
+    {
+        var reach = new Vector2(Metrics.Size.TapTarget * scale * 0.5f);
+        var min = center - reach;
+        var max = center + reach;
+        var hovered = UiInteract.Hover(min, max);
+        PhoneIcon.Draw(drawList, center, hovered ? PhoneIcons.BellOff : PhoneIcons.BellFilled, ui.Accent, size);
+        if (!UiInteract.Click(min, max, hovered, UiSound.ToggleOff))
+        {
+            return hovered;
+        }
+
+        alerts.ToggleAlarm(itemId);
+        fishListDirty = true;
+        return hovered;
     }
 
     private string Subtitle(int entryIndex, FishEntry entry)

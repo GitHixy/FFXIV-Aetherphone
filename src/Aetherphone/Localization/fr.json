@@ -7797,6 +7797,8 @@
   "changelog.r1310.24": "Ajout de filtres par extension à la liste des poissons, et des numéros de patch à sa recherche : tapez 7.2 pour trouver les poissons de ce patch",
   "changelog.r1310.25": "Ajout du filtre Pêché à côté de Non pêchés : chacun liste tous les poissons correspondants sous un total de prises avec une barre de progression",
   "changelog.r1310.27": "Correction de Pêche qui ne savait pas quels poissons vous avez pêchés : le filtre Non pêchés, le badge Pêché et les coches sur les poissons pêchés s'affichent maintenant",
+  "changelog.r1310.31": "Ajout d'un appui sur la cloche d'un poisson de la liste Alertes pour désactiver son alerte",
+  "changelog.r1310.32": "Correction d'une alerte de poisson qui se déclenchait aussitôt activée quand sa fenêtre était déjà ouverte ou sur le point de l'être : elle attend maintenant la fenêtre suivante",
   "changelog.r1310.13": "Correction d'une photo ou d'une réaction qui s'ouvrait quand on appuyait dessus pour faire défiler une discussion : les appuis agissent désormais au relâchement, contribution de t3sco",
   "changelog.r1310.23": "Modification du champ de message des discussions ChocoChat, Aethergram et Velvet : un clic n'importe où dessus le sélectionne, pas seulement sur sa ligne de texte",
   "changelog.r1310.29": "Correction des listes Haut-parleur et Microphone, pendant un appel et dans les réglages Appels téléphoniques, qui ne proposaient que Système par défaut : elles listent maintenant vos appareils",

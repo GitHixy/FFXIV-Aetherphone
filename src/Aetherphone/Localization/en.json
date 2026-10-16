@@ -7797,6 +7797,8 @@
   "changelog.r1310.24": "Added expansion filters to the fish list, and patch numbers to its search: type 7.2 to find that patch's fish",
   "changelog.r1310.25": "Added a Caught filter beside Not caught: either one lists every matching fish under a caught count with a progress bar",
   "changelog.r1310.27": "Fixed Fishing not knowing which fish you have caught: the Not caught filter, the caught badge and the check marks on caught fish show up now",
+  "changelog.r1310.31": "Added a tap on the bell of a fish in the Alerts list to turn its alert off",
+  "changelog.r1310.32": "Fixed turning on a fish alert while its window was already open or about to open firing the alert at once: it waits for the next window",
   "changelog.r1310.13": "Fixed pressing a photo or reaction to scroll a chat opening it: taps now act when you let go, contributed by t3sco",
   "changelog.r1310.23": "Changed the message box in ChocoChat, Aethergram and Velvet chats to take a click anywhere on it, not only on its line of text",
   "changelog.r1310.29": "Fixed the Speaker and Microphone lists in calls and in Phone Calls settings only offering System default: they list your devices now",
