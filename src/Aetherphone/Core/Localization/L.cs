@@ -2355,6 +2355,14 @@ internal static class L
                 "Fixed near misses on alarm day buttons and recent timer play buttons doing nothing: both have a full size tap area, contributed by t3sco"),
         };
 
+        public static readonly LocString[] Release1310Gamba =
+        {
+            new("changelog.r1310.19",
+                "Fixed the red or black gamble always failing on Crystal Cascade and Moogle Money: it is only offered on Golden Bird Deluxe now, the one machine that has it"),
+            new("changelog.r1310.20",
+                "Fixed trade sync recording and announcing gil trades made away from your table: it only reads trades while you are at your open gil table, and books guests only there"),
+        };
+
         public static readonly LocString[] Release1300Halloween =
         {
             new("changelog.r1300.101",

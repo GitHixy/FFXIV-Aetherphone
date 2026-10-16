@@ -7799,6 +7799,8 @@
   "changelog.r1310.16": "İstatistik kutularındaki uzun değerlerin kesilmesi düzeltildi: artık sığacak şekilde küçülüyorlar, katkı: t3sco",
   "changelog.r1310.17": "Alarm gün düğmelerine ve son zamanlayıcıların oynat düğmelerine yakın dokunuşların işe yaramaması düzeltildi: ikisi de artık tam boyutlu dokunma alanına sahip, katkı: t3sco",
   "changelog.r1310.18": "Azami seviyesi olan 50'deki Canavar Terbiyecisi'nin tamamlanmamış görünmesi düzeltildi: halkası dolu ve Azami seviyede ile Kazanılan seviyeler sayımına giriyor",
+  "changelog.r1310.19": "Crystal Cascade ve Moogle Money'de kırmızı ya da siyah kumarının her seferinde başarısız olması düzeltildi: artık yalnızca bu kumara sahip tek makine olan Golden Bird Deluxe'te sunuluyor",
+  "changelog.r1310.20": "Takas eşitlemenin masandan uzakta yapılan gil takaslarını kaydedip bildirmesi düzeltildi: takasları yalnızca açık gil masandayken okur ve misafirleri yalnızca orada yazar",
   "changelog.r1300.101": "Halloween teması eklendi: Chirper, Aethergram ve Velvet'te gece sahneleri, Ana Ekran'da yarasalar ve sis, Halloween simgeleri, duvar kâğıtları ve sesleri, katkı: t3sco",
   "changelog.r1300.102": "15 Ekim ile 2 Kasım arasında şeker avı eklendi: telefonun her yerine günde bir tane olmak üzere 13 şeker saklanır, hepsini bulunca adın cadı ateşiyle yanar, katkı: t3sco",
   "changelog.r1300.103": "Ayarlar > Görünüm altına Mevsimsel Tema eklendi: Otomatik, Halloween'i 15 Ekim ile 2 Kasım arasında gösterir, Halloween tüm yıl açık tutar, Kapalı ise kapatır, katkı: t3sco",

@@ -7799,6 +7799,8 @@
   "changelog.r1310.16": "Behoben, dass lange Werte in den Statistikkacheln abgeschnitten wurden: Sie werden jetzt passend verkleinert, beigetragen von t3sco",
   "changelog.r1310.17": "Behoben, dass knappe Fehlklicks auf die Wochentagsknöpfe eines Weckers und die Startknöpfe letzter Timer nichts taten: Beide haben jetzt eine volle Tippfläche, beigetragen von t3sco",
   "changelog.r1310.18": "Behoben, dass ein Bestienbändiger auf seiner Höchststufe 50 als unfertig angezeigt wurde: Sein Ring ist voll und er zählt bei Auf Höchststufe und Erreichte Stufen",
+  "changelog.r1310.19": "Behoben, dass das Rot-oder-Schwarz-Risiko bei Crystal Cascade und Moogle Money immer fehlschlug: Es wird jetzt nur noch bei Golden Bird Deluxe angeboten, der einzigen Maschine, die es hat",
+  "changelog.r1310.20": "Behoben, dass der Handelsabgleich Gil-Handel abseits deines Tisches eintrug und meldete: Er liest Handel nur, während du an deinem offenen Gil-Tisch bist, und trägt Gäste nur dort ein",
   "changelog.r1300.101": "Halloween-Theme hinzugefügt: Nachtszenen in Chirper, Aethergram und Velvet, Fledermäuse und Nebel auf dem Home-Bildschirm sowie Halloween-Symbole, -Hintergründe und -Töne, beigetragen von t3sco",
   "changelog.r1300.102": "Süßigkeitenjagd vom 15. Oktober bis 2. November hinzugefügt: 13 Süßigkeiten verstecken sich im Telefon, eine pro Tag, und findest du alle, brennt dein Name im Hexenfeuer, beigetragen von t3sco",
   "changelog.r1300.103": "Saisonales Theme unter Einstellungen > Darstellung hinzugefügt: Automatisch zeigt Halloween vom 15. Oktober bis 2. November, Halloween behält es das ganze Jahr, und Aus schaltet es ab, beigetragen von t3sco",
