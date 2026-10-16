@@ -504,7 +504,7 @@ internal sealed partial class MachineCabinet
         var payout = playback.TotalWin + playback.Jackpot;
         stage.Settle(new CasinoBetRecord(TitleOf(machineId), playback.Cost, payout, playback.RoundId,
             DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), playback.Capped));
-        stage.Celebration.Celebrate(playback.Cost, payout, window.Center, frame.Instant, playback.Jackpot > 0);
+        stage.Celebration.Celebrate(playback.Cost, payout, window.Center, frame.Instant, playback.Jackpot > 0, window);
         resultNet = payout - playback.Cost;
         resultTick = Environment.TickCount64;
         if (playback.Current.Grid is { } grid)
