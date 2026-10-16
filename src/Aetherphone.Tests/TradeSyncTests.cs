@@ -270,4 +270,14 @@ public sealed class TradeSyncTests
         Assert.False(CasinoTradeSync.HostedRecently(atTable, atTable + CasinoTradeSync.HostedWindowMilliseconds + 1));
         Assert.Equal(12 * 60 * 60 * 1_000L, CasinoTradeSync.HostedWindowMilliseconds);
     }
+
+    [Fact]
+    public void TheTableStaysTheHintForThirtyMinutesAfterTheHostLeavesIt()
+    {
+        const long leftAt = 1_000;
+        Assert.False(CasinoTradeSync.StillAtTable(0, 5_000));
+        Assert.True(CasinoTradeSync.StillAtTable(leftAt, leftAt + CasinoTradeSync.AtTableGraceMilliseconds));
+        Assert.False(CasinoTradeSync.StillAtTable(leftAt, leftAt + CasinoTradeSync.AtTableGraceMilliseconds + 1));
+        Assert.Equal(30 * 60 * 1_000L, CasinoTradeSync.AtTableGraceMilliseconds);
+    }
 }

@@ -24,6 +24,8 @@ internal sealed class CasinoTradeSync : IDisposable
 
     public const long HostedWindowMilliseconds = CasinoHostingRules.TradeClosedTableHours * 3_600_000L;
 
+    public const long AtTableGraceMilliseconds = 30 * 60_000L;
+
     private const long HostingCheckMilliseconds = 1_000;
 
     private static readonly int[] RetryDelaysMilliseconds = { 2_000, 5_000, 10_000 };
@@ -47,7 +49,8 @@ internal sealed class CasinoTradeSync : IDisposable
     private bool sending;
     private bool tracking;
     private long hostingCheckedAtTick;
-    private long hostedAtTick;
+    private long atTableAtTick;
+    private string atTableId = string.Empty;
     private string accountId = string.Empty;
 
     public CasinoTradeSync(Configuration configuration, AethernetSession session, CasinoClient casino,
@@ -159,18 +162,20 @@ internal sealed class CasinoTradeSync : IDisposable
         if (nowTick - hostingCheckedAtTick >= HostingCheckMilliseconds)
         {
             hostingCheckedAtTick = nowTick;
-            if (HintTableId(nowTick).Length > 0)
-            {
-                hostedAtTick = nowTick;
-            }
+            NoteTable(nowTick);
         }
 
-        return HostedRecently(hostedAtTick, nowTick);
+        return HostedRecently(atTableAtTick, nowTick);
     }
 
-    internal static bool HostedRecently(long hostedAtTick, long nowTick)
+    internal static bool HostedRecently(long atTableAtTick, long nowTick)
     {
-        return hostedAtTick != 0 && nowTick - hostedAtTick <= HostedWindowMilliseconds;
+        return atTableAtTick != 0 && nowTick - atTableAtTick <= HostedWindowMilliseconds;
+    }
+
+    internal static bool StillAtTable(long atTableAtTick, long nowTick)
+    {
+        return atTableAtTick != 0 && nowTick - atTableAtTick <= AtTableGraceMilliseconds;
     }
 
     private void StopTracking()
@@ -188,7 +193,8 @@ internal sealed class CasinoTradeSync : IDisposable
     {
         accountId = account;
         hostingCheckedAtTick = 0;
-        hostedAtTick = 0;
+        atTableAtTick = 0;
+        atTableId = string.Empty;
         tracker.Reset();
         if (pending.Count > 0)
         {
@@ -319,6 +325,29 @@ internal sealed class CasinoTradeSync : IDisposable
     }
 
     private string HintTableId(long nowTick)
+    {
+        var live = NoteTable(nowTick);
+        if (live.Length > 0)
+        {
+            return live;
+        }
+
+        return StillAtTable(atTableAtTick, nowTick) ? atTableId : string.Empty;
+    }
+
+    private string NoteTable(long nowTick)
+    {
+        var live = LiveTableId(nowTick);
+        if (live.Length > 0)
+        {
+            atTableId = live;
+            atTableAtTick = nowTick;
+        }
+
+        return live;
+    }
+
+    private string LiveTableId(long nowTick)
     {
         var roomId = venue.Rooms.Room.RoomId;
         if (OwnsGil(roomId))
