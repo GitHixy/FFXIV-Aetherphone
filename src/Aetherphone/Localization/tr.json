@@ -7781,6 +7781,7 @@
   "changelog.r1041.12": "Sıra bittiğinde partiler artık kapanmak yerine karanlık bir ekranla beş dakika açık kalıyor",
   "changelog.r1041.13": "Ekran artık her yerde onu nereye koyduğunu hatırlıyor",
   "changelog.r1041.14": "Yolu tırnak içinde yapıştırılan yerel dosyaların oynatılmaması düzeltildi",
+  "changelog.r1311.0": "Yedi koltuğu dolu bir blackjack masasında uzun adların kesilmesi düzeltildi: bir koltuğun plakası artık yanındaki boş koltuklara doğru genişliyor",
   "changelog.r1310.0": "Herhangi bir mesaj, gönderi veya yorum kutusuna :kısaltma yazarken emoji önerileri eklendi: Enter veya Tab ilkini seçer, katkı: t3sco",
   "changelog.r1310.1": "Klasör içinden düzenleme modu eklendi: açık bir klasördeki uygulamayı Ana Ekran'daki gibi basılı tutun, katkı: hellovvn",
   "changelog.r1310.2": "Bir uygulamayı klasörden sürükleyip çıkarma eklendi: klasörün dışında kısa bir süre tutun, sonra Ana Ekran'da istediğiniz yere bırakın, katkı: hellovvn",

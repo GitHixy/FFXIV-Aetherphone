@@ -2273,6 +2273,12 @@ internal static class L
         public static readonly LocString SectionSounds = new("changelog.sectionSounds", "Sounds");
         public static readonly LocString SectionHalloween = new("changelog.sectionHalloween", "Halloween");
 
+        public static readonly LocString[] Release1311Gamba =
+        {
+            new("changelog.r1311.0",
+                "Fixed long names on a full seven-seat blackjack rail being cut short: a seat's plate now widens into the empty seats beside it"),
+        };
+
         public static readonly LocString[] Release1310Phone =
         {
             new("changelog.r1310.0",

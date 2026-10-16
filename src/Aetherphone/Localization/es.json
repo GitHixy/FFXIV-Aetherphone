@@ -7781,6 +7781,7 @@
   "changelog.r1041.12": "Las fiestas ahora siguen abiertas cinco minutos con la pantalla en negro cuando se acaba la cola, en lugar de cerrarse",
   "changelog.r1041.13": "La pantalla ahora recuerda dónde la colocaste en cada lugar",
   "changelog.r1041.14": "Corregido que los archivos locales no se reprodujeran cuando su ruta se pegaba entre comillas",
+  "changelog.r1311.0": "Corregido que los nombres largos se recortaran en una mesa de blackjack llena con siete asientos: la placa de un asiento ahora se ensancha hacia los asientos vacíos de al lado",
   "changelog.r1310.0": "Se añadieron sugerencias de emoji al escribir un :atajo en cualquier campo de mensaje, publicación o comentario: Intro o Tab elige el primero, contribuido por t3sco",
   "changelog.r1310.1": "Se añadió el modo de edición desde dentro de una carpeta: mantén pulsada una app en una carpeta abierta, igual que en la Pantalla de inicio, contribuido por hellovvn",
   "changelog.r1310.2": "Se añadió sacar una app de una carpeta: mantenla un momento fuera de la carpeta y suéltala en cualquier lugar de la Pantalla de inicio, contribuido por hellovvn",

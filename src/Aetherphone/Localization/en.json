@@ -7781,6 +7781,7 @@
   "changelog.r1041.12": "Parties now stay open for five minutes on a dark screen when the queue runs out, instead of closing",
   "changelog.r1041.13": "The screen now remembers where you placed it in each location",
   "changelog.r1041.14": "Fixed local files not playing when their path was pasted with quotes around it",
+  "changelog.r1311.0": "Fixed long names on a full seven-seat blackjack rail being cut short: a seat's plate now widens into the empty seats beside it",
   "changelog.r1310.0": "Added emoji suggestions while you type a :shortcode in any message, post or comment box: Enter or Tab picks the top one, contributed by t3sco",
   "changelog.r1310.1": "Added edit mode from inside a folder: hold an app in an open folder, the same as on the Home Screen, contributed by hellovvn",
   "changelog.r1310.2": "Added dragging an app out of a folder: hold it outside the folder for a moment, then drop it anywhere on the Home Screen, contributed by hellovvn",

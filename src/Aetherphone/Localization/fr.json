@@ -7781,6 +7781,7 @@
   "changelog.r1041.12": "Les soirées restent maintenant ouvertes cinq minutes sur un écran noir quand la file d'attente se termine, au lieu de se fermer",
   "changelog.r1041.13": "L'écran retient maintenant où vous l'avez placé dans chaque lieu",
   "changelog.r1041.14": "Correction des fichiers locaux qui ne se lisaient pas quand leur chemin était collé entre guillemets",
+  "changelog.r1311.0": "Correction des noms longs tronqués sur une table de blackjack pleine à sept places : la plaque d'une place s'élargit maintenant sur les places vides voisines",
   "changelog.r1310.0": "Ajout de suggestions d'emoji pendant la saisie d'un :raccourci dans tous les champs de message, de publication et de commentaire : Entrée ou Tab choisit le premier, contribution de t3sco",
   "changelog.r1310.1": "Ajout du mode d'édition depuis un dossier : maintenez une app dans un dossier ouvert, comme sur l'écran d'accueil, contribution de hellovvn",
   "changelog.r1310.2": "Ajout du glisser d'une app hors d'un dossier : maintenez-la un instant hors du dossier, puis déposez-la n'importe où sur l'écran d'accueil, contribution de hellovvn",

@@ -7781,6 +7781,7 @@
   "changelog.r1041.12": "As festas agora ficam abertas por cinco minutos com a tela escura quando a fila acaba, em vez de fechar",
   "changelog.r1041.13": "A tela agora lembra onde você a colocou em cada lugar",
   "changelog.r1041.14": "Corrigidos arquivos locais que não reproduziam quando o caminho era colado entre aspas",
+  "changelog.r1311.0": "Corrigidos nomes longos cortados em uma mesa de blackjack cheia com sete assentos: a placa de um assento agora se alarga sobre os assentos vazios ao lado",
   "changelog.r1310.0": "Adicionamos sugestões de emoji enquanto você digita um :atalho em qualquer campo de mensagem, publicação ou comentário: Enter ou Tab escolhe o primeiro, contribuição de t3sco",
   "changelog.r1310.1": "Adicionamos o modo de edição dentro das pastas: segure um app numa pasta aberta, como na Tela de Início, contribuição de hellovvn",
   "changelog.r1310.2": "Adicionamos arrastar um app para fora de uma pasta: segure-o um instante fora da pasta e solte em qualquer lugar da Tela de Início, contribuição de hellovvn",
