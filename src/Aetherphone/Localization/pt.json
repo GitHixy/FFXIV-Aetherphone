@@ -7798,6 +7798,7 @@
   "changelog.r1310.15": "Corrigidos os anéis de nível que voltavam para trás ao subir de nível: agora eles enchem e recomeçam do zero, contribuição de t3sco",
   "changelog.r1310.16": "Corrigidos os valores longos cortados nos blocos de estatísticas: agora eles diminuem para caber, contribuição de t3sco",
   "changelog.r1310.17": "Corrigidos os toques perto dos botões de dia dos alarmes e de reproduzir dos timers recentes, que não faziam nada: agora eles têm uma área de toque completa, contribuição de t3sco",
+  "changelog.r1310.18": "Corrigido o domador de feras no nível máximo 50 aparecendo como incompleto: seu anel fica cheio e ele conta em No nível máximo e Níveis conquistados",
   "changelog.r1300.101": "Adicionamos um tema de Halloween: cenas noturnas no Chirper, Aethergram e Velvet, morcegos e névoa na Tela de Início, e ícones, papéis de parede e sons de Halloween, contribuição de t3sco",
   "changelog.r1300.102": "Adicionamos uma caça aos doces de 15 de outubro a 2 de novembro: 13 doces se escondem pelo celular, um por dia, e encontrar todos faz seu nome arder com fogo de bruxa, contribuição de t3sco",
   "changelog.r1300.103": "Adicionamos Tema sazonal em Ajustes > Aparência: Automático mostra o Halloween de 15 de outubro a 2 de novembro, Halloween o mantém o ano todo e Desativado o desliga, contribuição de t3sco",
