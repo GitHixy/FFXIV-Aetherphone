@@ -32,6 +32,7 @@ internal sealed class BlackjackTableLayout
     public const float RailRingGap = 4f;
     public const float RailPlateGap = 7f;
     public const float RailPlateHeight = 32f;
+    public const float RailGutter = 2f;
     public const float RailArcLift = 12f;
     public const float SpotRadiusMax = 28f;
     public const float SpotRadiusMin = 18f;
@@ -287,7 +288,14 @@ internal sealed class BlackjackTableLayout
         return new Rect(new Vector2(puck.X - half, top), new Vector2(puck.X + half, top + RailPlateHeight * Scale));
     }
 
-    public float RailPlateWidth => MathF.Min(ColumnWidth - 2f * Scale, (ColumnWidth - PuckRadius - Scale) * 2f);
+    public float RailPlateWidth =>
+        MathF.Min(ColumnWidth - RailGutter * Scale, (ColumnWidth - PuckRadius - Scale) * 2f);
+
+    public float RailPlateTextWidth => RailPlateWidth - Stage.StageText.TightPadX * 2f * Scale;
+
+    public float RailBetPlateWidth => ColumnWidth - RailGutter * Scale;
+
+    public float RailHandWidth(int handCount) => ColumnWidth / (handCount > 0 ? handCount : 1);
 
     public float SideStakeFloor => Seated ? HeroTop + RaisePixels : HeroTop;
 
