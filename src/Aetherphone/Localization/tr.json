@@ -7800,6 +7800,7 @@
   "changelog.r1310.17": "Alarm gün düğmelerine ve son zamanlayıcıların oynat düğmelerine yakın dokunuşların işe yaramaması düzeltildi: ikisi de artık tam boyutlu dokunma alanına sahip, katkı: t3sco",
   "changelog.r1310.18": "Azami seviyesi olan 50'deki Canavar Terbiyecisi'nin tamamlanmamış görünmesi düzeltildi: halkası dolu ve Azami seviyede ile Kazanılan seviyeler sayımına giriyor",
   "changelog.r1310.19": "Crystal Cascade ve Moogle Money'de kırmızı ya da siyah kumarının her seferinde başarısız olması düzeltildi: artık yalnızca bu kumara sahip tek makine olan Golden Bird Deluxe'te sunuluyor",
+  "changelog.r1310.22": "Günlük seri, günün ilk elinden sonra kendiliğinden alınacak şekilde değiştirildi, fişler bir bildirimle gösteriliyor; kutucuğuna dokunmak da çalışmaya devam ediyor",
   "changelog.r1310.20": "Takas eşitlemenin masandan uzakta yapılan gil takaslarını kaydedip bildirmesi düzeltildi: misafirler yalnızca açık gil masandayken ya da masadan ayrıldıktan sonraki 30 dakika içinde yazılır",
   "changelog.r1310.21": "Slot makinelerinde büyük kazanç afişinin jackpot göstergelerini kapatması düzeltildi: afiş artık makaraların ortasında, tutar koyu bir zeminin üstünde",
   "changelog.r1300.101": "Halloween teması eklendi: Chirper, Aethergram ve Velvet'te gece sahneleri, Ana Ekran'da yarasalar ve sis, Halloween simgeleri, duvar kâğıtları ve sesleri, katkı: t3sco",

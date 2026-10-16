@@ -7800,6 +7800,7 @@
   "changelog.r1310.17": "Correction des appuis juste à côté des boutons de jour des alarmes et des boutons de lecture des minuteurs récents qui ne faisaient rien : ils ont désormais une zone d'appui complète, contribution de t3sco",
   "changelog.r1310.18": "Correction du dresseur à son niveau maximal 50 affiché comme inachevé : son anneau est plein et il compte dans Au niveau maximal et Niveaux obtenus",
   "changelog.r1310.19": "Correction du quitte ou double rouge ou noir qui échouait toujours sur Crystal Cascade et Moogle Money : il n'est plus proposé que sur Golden Bird Deluxe, la seule machine qui l'a",
+  "changelog.r1310.22": "Modification de la Série quotidienne, qui se réclame seule après votre première manche du jour avec un message pour les jetons ; toucher sa tuile fonctionne toujours",
   "changelog.r1310.20": "Correction de la Synchro des échanges qui inscrivait et annonçait des échanges de gils faits loin de votre table : les invités ne sont inscrits que pendant que vous êtes à votre table en gils ouverte ou dans les 30 minutes après l'avoir quittée",
   "changelog.r1310.21": "Correction de la bannière de gros gain des machines à sous qui cachait les jauges de jackpot : elle est maintenant centrée sur les rouleaux, avec le montant sur un fond sombre",
   "changelog.r1300.101": "Ajout d'un thème Halloween : scènes nocturnes dans Chirper, Aethergram et Velvet, chauves-souris et brume sur l'écran d'accueil, et icônes, fonds et sons d'Halloween, contribution de t3sco",

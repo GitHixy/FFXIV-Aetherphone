@@ -2357,6 +2357,8 @@ internal static class L
 
         public static readonly LocString[] Release1310Gamba =
         {
+            new("changelog.r1310.22",
+                "Changed the Daily streak to claim itself after your first round of the day, with a toast for the chips; tapping its tile still works"),
             new("changelog.r1310.19",
                 "Fixed the red or black gamble always failing on Crystal Cascade and Moogle Money: it is only offered on Golden Bird Deluxe now, the one machine that has it"),
             new("changelog.r1310.20",
