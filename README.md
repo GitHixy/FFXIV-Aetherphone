@@ -188,7 +188,7 @@ Aether Coin's product buttons keep their rounded edges and glow visible when hig
 
 **Speaks your language.** Nine interface languages and one-tap translation on posts, profiles and messages.
 
-**Private by design.** Messages, photos and voice notes are end-to-end encrypted. A Velvet intro is sent as plain text. A human moderation team reviews reported content.
+**Private by design.** Messages, photos and voice notes are end-to-end encrypted. A Velvet intro is sent as plain text, and translating a message sends that text to our server to be translated. A human moderation team reviews reported content.
 
 ## Install
 

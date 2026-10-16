@@ -254,7 +254,7 @@ On GitHub (repository Settings, Secrets and variables, Actions), all four as sec
 | `DISCORD_BOT_TOKEN` | yes | The bot token |
 | `DISCORD_PULL_REQUEST_FORUM_ID` | yes | The forum channel id |
 | `DISCORD_MAINTAINERS_ROLE_ID` | optional | The role pinged for new pull requests that nobody was asked to review |
-| `DISCORD_GITHUB_USERS` | optional | A JSON object from GitHub login to Discord user id, for example `{"XeldarAlz": "123456789012345678", "t3sco": "234567890123456789"}` |
+| `DISCORD_GITHUB_USERS` | optional | A JSON object from GitHub login to Discord user id, for example `{"octocat": "123456789012345678"}` |
 
 Then run the workflow by hand (Actions, Pull request forum, Run workflow) with the pull request number left empty: the run confirms the token, the forum, every tag, the role, and that each mapped user is a member of the server, without printing any of their ids. Run it again with a pull request number to create or resync that pull request's post. Pull requests that were already open when the workflow landed get their post the first time anything happens on them, or when you sync them this way. A new contributor joins the map by sending you their Discord user id; until then their events still post, in bold and without a ping.
 
@@ -274,7 +274,7 @@ Maintainers now bump the dropdown by hand inside the release commit (see the che
 
 .github/workflows/staff-role-sync.yml keeps the community Discord server's staff roles in step with the private staff server, using the same bot as the pull request forum. On a ten-minute schedule, on every push to dev, on a `repository_dispatch` poke of type `staff-role-sync`, and on demand, .github/scripts/staff-role-sync.mjs reads every member and their roles on both servers and reconciles the mapped roles: a community member holds a mapped role only while the same Discord account holds one of the matching roles on the staff server. Someone who holds a mapped role on the community without the staff counterpart, or who is not on the staff server at all, loses it. Roles outside the map, bots, and the staff server itself are never touched; staff is the only source of truth.
 
-The map is a JSON secret from community role name to one or more staff role names, resolved by name on both servers at run time, for example `{"Moderator": ["Moderator", "Moderator Intern"], "Developer": ["Developer"]}`. A name that does not resolve on either server aborts the run before anything is changed, so a renamed role can never strip everyone.
+The map is a JSON secret from community role name to one or more staff role names, resolved by name on both servers at run time, for example `{"Helper": ["Helper"]}`. A name that does not resolve on either server aborts the run before anything is changed, so a renamed role can never strip everyone.
 
 ### Modes and safety
 

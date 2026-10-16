@@ -21,7 +21,7 @@ Artists work from the spec pages and checkers on [aetherphone.net](https://aethe
 
 | Asset | Spec | Checker | Ships through |
 |---|---|---|---|
-| Avatar frame | [frame-spec](https://aetherphone.net/frame-spec/) | [frame-checker](https://aetherphone.net/frame-checker/) | Mod console upload, no plugin release |
+| Avatar frame | [frame-spec](https://aetherphone.net/frame-spec/) | [frame-checker](https://aetherphone.net/frame-checker/) | Uploaded by staff, no plugin release |
 | Phone case | [case-spec](https://aetherphone.net/case-spec/) | [case-checker](https://aetherphone.net/case-checker/) | Plugin release |
 | App icon | [icon-spec](https://aetherphone.net/icon-spec/) | [icon-checker](https://aetherphone.net/icon-checker/) | Plugin release |
 | Wallpaper | [wallpaper-spec](https://aetherphone.net/wallpaper-spec/) | [wallpaper-checker](https://aetherphone.net/wallpaper-checker/) | Plugin release |
@@ -57,7 +57,7 @@ The full steps are in [assets and media](assets-and-media.md#device-cases).
 
 ### Avatar frames
 
-Frames upload through the mod console's Frames page and reach players without a plugin release. The flow lives in the Aethernet repository.
+Frames are uploaded by staff and reach players without a plugin release.
 
 ### Themes
 
@@ -84,7 +84,7 @@ art-kit.js copies plugin constants by hand and names the source file next to eac
 
 ## Open art decisions
 
-- **Case band width.** The band is 38 px; comparable plugins use about 2.4 times that. Widening it changes the case canvas and forces every finished case to be re-exported, so decide before more case art is commissioned.
+- **Case band width.** The band is 38 px. Widening it changes the case canvas and forces every finished case to be re-exported, so decide before more case art is commissioned.
 - **Off-centre avatar frames.** A frame's scale sets its size, not its position. A design that cannot sit centred needs two more numbers on the frame record.
 
 ## Gotchas

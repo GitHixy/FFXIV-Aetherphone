@@ -270,7 +270,7 @@ internal interface ISettingsPage
 - `Entries` lists the settings on your page that Settings search should find. Each `SettingsEntry` wraps the same `LocString` your row draws (optionally with a section label), so a search for it shows a result that opens your page and highlights the row. Declare it on every new page.
 - `ShowsBadge` puts a badge on the page's row (`ChangelogPage` uses it for unseen notes).
 - `OwnsChrome` skips the shared title bar so the page draws its own.
-- `IsHidden` keeps the page off the root list, out of Settings search, and out of Spotlight (Linked Devices stays hidden until it is unlocked).
+- `IsHidden` keeps the page off the root list, out of Settings search, and out of Spotlight.
 - `GuideAnchor` reports the row's rectangle under that key for the Settings tour.
 
 The steps:
