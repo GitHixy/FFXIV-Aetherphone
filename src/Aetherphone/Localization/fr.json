@@ -7788,6 +7788,7 @@
   "changelog.r1310.4": "Correction d'une app relâchée hors d'un dossier ouvert qui revenait sous le dossier au lieu de passer par-dessus, contribution de hellovvn",
   "changelog.r1310.5": "Correction des boutons des écrans vides et des liens Retour des apps qui utilisaient la couleur d'accent du système au lieu de celle de l'app, contribution de t3sco",
   "changelog.r1310.6": "Correction de fines coutures le long des anneaux de progression, contribution de t3sco",
+  "changelog.r1310.34": "Correction du téléphone qui s'éloignait un peu plus de sa place à chaque fois qu'il était réduit puis rouvert",
   "changelog.r1310.7": "Ajout de « Défilement automatique des publications » dans Réglages > Général : le fil passe tout seul à la publication suivante après 3 à 30 secondes sans action, désactivé par défaut, contribution de t3sco",
   "changelog.r1310.8": "Ajout de « Barre d'infos du serveur » dans Réglages > Général : affichez le téléphone en icône, en texte ou les deux, et modifiez le texte, contribution de t3sco",
   "changelog.r1310.9": "Ajout d'un bouton « Ouvrir les Réglages » dans Chirper et Aethergram quand vous n'êtes pas connecté, contribution de t3sco",

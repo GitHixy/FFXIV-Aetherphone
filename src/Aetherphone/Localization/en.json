@@ -7788,6 +7788,7 @@
   "changelog.r1310.4": "Fixed an app dropped outside an open folder sliding back under the folder instead of on top of it, contributed by hellovvn",
   "changelog.r1310.5": "Fixed buttons on empty screens and in-app Back links using the system accent instead of the app's own color, contributed by t3sco",
   "changelog.r1310.6": "Fixed faint seams along progress rings, contributed by t3sco",
+  "changelog.r1310.34": "Fixed the phone creeping a little further from its spot every time it was minimized and brought back",
   "changelog.r1310.7": "Added Auto-advance posts under Settings > General: a feed moves to the next post on its own after 3 to 30 seconds without input, off by default, contributed by t3sco",
   "changelog.r1310.8": "Added Server info bar under Settings > General: show the phone as an icon, as text or as both, and change the text, contributed by t3sco",
   "changelog.r1310.9": "Added an Open Settings button to Chirper and Aethergram while you are signed out, contributed by t3sco",

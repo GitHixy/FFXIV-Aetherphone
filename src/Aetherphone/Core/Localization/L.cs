@@ -2289,6 +2289,8 @@ internal static class L
                 "Fixed buttons on empty screens and in-app Back links using the system accent instead of the app's own color, contributed by t3sco"),
             new("changelog.r1310.6",
                 "Fixed faint seams along progress rings, contributed by t3sco"),
+            new("changelog.r1310.34",
+                "Fixed the phone creeping a little further from its spot every time it was minimized and brought back"),
         };
 
         public static readonly LocString[] Release1310ChirperAethergramVelvet =
