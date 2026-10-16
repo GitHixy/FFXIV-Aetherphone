@@ -477,6 +477,8 @@ internal sealed partial class VelvetStore : ChatThreadStoreBase<VelvetMessageDto
         };
     }
 
+    protected override string NotificationAppId => "velvet";
+
     protected override string ThreadKeyOf(VelvetThreadDto thread) => thread.OtherUserId;
 
     protected override long ThreadLastMessageAtOf(VelvetThreadDto thread) => thread.LastMessageAtUnix;
@@ -488,8 +490,8 @@ internal sealed partial class VelvetStore : ChatThreadStoreBase<VelvetMessageDto
     protected override PhoneNotification BuildInboxNotification(VelvetThreadDto thread)
     {
         var name = string.IsNullOrEmpty(thread.OtherDisplayName) ? thread.OtherHandle : thread.OtherDisplayName;
-        return new PhoneNotification("velvet", name, ChatText.ListPreview(thread.LastMessagePreview), DateTime.Now,
-            AppPalettes.Velvet.Accent, thread.OtherUserId);
+        return new PhoneNotification(NotificationAppId, name, ChatText.ListPreview(thread.LastMessagePreview),
+            DateTime.Now, AppPalettes.Velvet.Accent, thread.OtherUserId);
     }
 
     protected override VelvetMessageDto[] DecorateMessages(string threadId, VelvetMessageDto[] items)

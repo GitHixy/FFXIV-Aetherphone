@@ -57,7 +57,7 @@ flowchart TD
 | `Muted` | Skips the notification sound only, for producers that ring some other way |
 | `ActorId`, `PostId`, `SocialType`, `CreatedAtUnix` | Deep link targets and read-acknowledgement data for social notifications |
 
-Two derived keys drive everything else. `StackKey` is the group key when set, otherwise the app id: the center stacks by it, a banner replaces by it, and the sound throttle (one sound per stack every 3 seconds) keys on it. `SettingsKey` is the channel id when set, otherwise the app id, and every per-app setting except the timed mute is looked up by it.
+Two derived keys drive everything else. `StackKey` is the app id joined to the group key when one is set (`velvet:user-1`), otherwise the app id alone, so two apps that key on the same user never share a stack: the center stacks by it, a banner replaces by it, the sound throttle (one sound per stack every 3 seconds) keys on it, and `NotificationService.RemoveGroup(appId, groupKey)` clears it. `SettingsKey` is the channel id when set, otherwise the app id, and every per-app setting except the timed mute is looked up by it.
 
 `TimerNotifier` (src/Aetherphone/Core/Notifications/TimerNotifier.cs) is a small producer. It passes one group key per category, so resets, ventures, and voyages each stack on their own:
 
