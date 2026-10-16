@@ -2281,6 +2281,34 @@ internal static class L
                 "Fixed the gil ledger missing trades once you had been away from your table page for 30 minutes or had reloaded the plugin: trades now record for 12 hours after you were last at your open gil table, across restarts, until you close the table"),
         };
 
+        public static readonly LocString[] Release1311Phone =
+        {
+            new("changelog.r1311.4",
+                "Changed the scroll indicator while the phone position is locked: it dims when idle, brightens under the pointer, and a click on it no longer reaches what is underneath"),
+        };
+
+        public static readonly LocString[] Release1311Fishing =
+        {
+            new("changelog.r1311.2",
+                "Added a lead time for fish alerts: a stepper under the alerts list sets how many minutes before a window the alert rings, 1 to 60, 5 by default"),
+            new("changelog.r1311.3",
+                "Changed the Timed Fish tab filters: the big fish and caught filters sit on their own row above the expansion chips"),
+        };
+
+        public static readonly LocString[] Release1311Messaging =
+        {
+            new("changelog.r1311.6",
+                "Added the double tick to the chats list in ChocoChat, Aethergram and Velvet: a message you sent shows two ticks once it has been read"),
+            new("changelog.r1311.5",
+                "Fixed a tall or narrow photo making its bubble narrow and cutting the caption short: the bubble keeps its full width and the photo sits inside it"),
+        };
+
+        public static readonly LocString[] Release1311Skywatcher =
+        {
+            new("changelog.r1311.7",
+                "Fixed the sky staying at the overridden time after resetting it in Skywatcher: the clock is handed back to the game over a second so the lighting follows"),
+        };
+
         public static readonly LocString[] Release1310Phone =
         {
             new("changelog.r1310.0",
@@ -8142,6 +8170,8 @@ internal static class L
         public static readonly LocString SearchHint = new("fishing.searchHint", "Search fish, holes or zones");
         public static readonly LocString BigFish = new("fishing.bigFish", "Big fish");
         public static readonly LocString UncaughtFilter = new("fishing.uncaughtFilter", "Not caught");
+        public static readonly LocString AlertLeadValue = new("fishing.alertLeadValue", "{0} min before the window");
+        public static readonly LocString AlertLeadHint = new("fishing.alertLeadHint", "How early a fish alert rings before its window opens.");
         public static readonly LocString CaughtProgress = new("fishing.caughtProgress", "Caught {0} of {1}");
         public static readonly LocString AnyTime = new("fishing.anyTime", "Any time");
         public static readonly LocString NoWindowShort = new("fishing.noWindowShort", "No window");
