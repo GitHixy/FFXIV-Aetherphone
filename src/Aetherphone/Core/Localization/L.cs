@@ -2357,6 +2357,8 @@ internal static class L
 
         public static readonly LocString[] Release1310Gamba =
         {
+            new("changelog.r1310.22",
+                "Changed the Daily streak to claim itself after your first round of the day, with a toast for the chips; tapping its tile still works"),
             new("changelog.r1310.19",
                 "Fixed the red or black gamble always failing on Crystal Cascade and Moogle Money: it is only offered on Golden Bird Deluxe now, the one machine that has it"),
             new("changelog.r1310.20",
@@ -11395,6 +11397,7 @@ internal static class L
         public static readonly LocString BonusClaim = new("casino.strip.bonusClaim", "Claim {0}");
         public static readonly LocString BonusReadyIn = new("casino.strip.bonusReadyIn", "In {0}");
         public static readonly LocString BonusLanded = new("casino.strip.bonusLanded", "{0} chips landed in your bankroll.");
+        public static readonly LocString StreakLanded = new("casino.strip.streakLanded", "Daily streak: {0} chips landed in your bankroll.");
         public static readonly LocString ClubBronze = new("casino.strip.clubBronze", "Bronze");
         public static readonly LocString ClubSilver = new("casino.strip.clubSilver", "Silver");
         public static readonly LocString ClubGold = new("casino.strip.clubGold", "Gold");

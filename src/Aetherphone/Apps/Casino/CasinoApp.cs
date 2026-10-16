@@ -359,6 +359,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         screenArea = context.Content;
         frameArea = screen;
         barkeep.Tick();
+        bonusShelf.ClaimStreakAfterRounds(stage.SettledRounds);
         bonusShelf.Update(MathF.Min(ImGui.GetIO().DeltaTime, Core.Animation.TransitionTiming.MaxFrameSeconds), scale);
         OfferFameConsent();
         cashier.Gate();
