@@ -7794,7 +7794,7 @@
   "changelog.r1310.10": "Ajout d'une confirmation avant d'abandonner, de quitter une manche en cours, de fermer un salon avec des joueurs ou de retirer un joueur, contribution de t3sco",
   "changelog.r1310.11": "Ajout d'une confirmation avant « Réinitialiser par défaut » dans Alertes et avant de se déconnecter de Faloop, contribution de t3sco",
   "changelog.r1310.12": "Modification des listes de poissons et de traversées pour ignorer les lignes invisibles : Pêche s'affiche environ trois fois plus vite, contribution de t3sco",
-  "changelog.r1310.24": "Ajout de filtres par extension à la liste des poissons, et des numéros de patch à sa recherche : tapez 7.2 pour trouver les poissons de ce patch",
+  "changelog.r1310.24": "Ajout de filtres par extension et par patch à la liste des poissons : choisissez une extension puis l'un de ses patchs, ou tapez 7.2 dans la recherche pour trouver les poissons de ce patch",
   "changelog.r1310.25": "Ajout du filtre Pêché à côté de Non pêchés : chacun liste tous les poissons correspondants sous un total de prises avec une barre de progression",
   "changelog.r1310.27": "Correction de Pêche qui ne savait pas quels poissons vous avez pêchés : le filtre Non pêchés, le badge Pêché et les coches sur les poissons pêchés s'affichent maintenant",
   "changelog.r1310.31": "Ajout d'un appui sur la cloche d'un poisson de la liste Alertes pour désactiver son alerte",

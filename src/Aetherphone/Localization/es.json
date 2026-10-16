@@ -7794,7 +7794,7 @@
   "changelog.r1310.10": "Se añadió una confirmación antes de rendirte, salir de una ronda en curso, cerrar una sala con jugadores o expulsar a un jugador, contribuido por t3sco",
   "changelog.r1310.11": "Se añadió una confirmación antes de «Restablecer valores predeterminados» en Avisos y antes de cerrar sesión en Faloop, contribuido por t3sco",
   "changelog.r1310.12": "Se cambiaron las listas de peces y travesías para omitir las filas que no se ven, así Pesca se dibuja unas tres veces más rápido, contribuido por t3sco",
-  "changelog.r1310.24": "Se añadieron filtros por expansión a la lista de peces y números de parche a su búsqueda: escribe 7.2 para encontrar los peces de ese parche",
+  "changelog.r1310.24": "Se añadieron filtros por expansión y por parche a la lista de peces: elige una expansión y luego uno de sus parches, o escribe 7.2 en la búsqueda para encontrar los peces de ese parche",
   "changelog.r1310.25": "Se añadió el filtro Capturado junto a Sin capturar: cualquiera de los dos muestra todos los peces que coinciden bajo un recuento de capturas con barra de progreso",
   "changelog.r1310.27": "Corregido que Pesca no supiera qué peces has capturado: el filtro Sin capturar, la insignia Capturado y las marcas en los peces capturados ya aparecen",
   "changelog.r1310.31": "Añadido un toque en la campana de un pez de la lista Alertas para desactivar su alerta",

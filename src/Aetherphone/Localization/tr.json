@@ -7794,7 +7794,7 @@
   "changelog.r1310.10": "Pes etmeden, devam eden bir turdan ayrılmadan, içinde oyuncu olan bir odayı kapatmadan veya bir oyuncuyu çıkarmadan önce onay eklendi, katkı: t3sco",
   "changelog.r1310.11": "Uyarılar'daki Varsayılana sıfırla ve Faloop'tan çıkış öncesine onay eklendi, katkı: t3sco",
   "changelog.r1310.12": "Balık ve sefer listeleri görünmeyen satırları atlayacak şekilde değiştirildi, böylece Balıkçılık yaklaşık üç kat hızlı çiziliyor, katkı: t3sco",
-  "changelog.r1310.24": "Balık listesine genişleme filtreleri, aramasına da yama numaraları eklendi: o yamanın balıklarını bulmak için 7.2 yazın",
+  "changelog.r1310.24": "Balık listesine genişleme ve yama filtreleri eklendi: bir genişleme, sonra onun yamalarından birini seçin ya da o yamanın balıklarını bulmak için aramaya 7.2 yazın",
   "changelog.r1310.25": "Yakalanmadı filtresinin yanına Yakalandı filtresi eklendi: ikisi de eşleşen tüm balıkları bir yakalama sayısı ve ilerleme çubuğunun altında listeler",
   "changelog.r1310.27": "Balıkçılık'ın hangi balıkları yakaladığınızı bilmemesi düzeltildi: Yakalanmadı filtresi, Yakalandı rozeti ve yakalanan balıklardaki onay işaretleri artık görünüyor",
   "changelog.r1310.31": "Uyarılar listesindeki bir balığın ziline dokunarak uyarısını kapatma eklendi",

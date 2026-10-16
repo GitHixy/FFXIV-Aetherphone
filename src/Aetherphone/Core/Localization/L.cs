@@ -2324,7 +2324,7 @@ internal static class L
         public static readonly LocString[] Release1310Fishing =
         {
             new("changelog.r1310.24",
-                "Added expansion filters to the fish list, and patch numbers to its search: type 7.2 to find that patch's fish"),
+                "Added expansion and patch filters to the fish list: pick an expansion, then one of its patches, or type 7.2 in search to find that patch's fish"),
             new("changelog.r1310.25",
                 "Added a Caught filter beside Not caught: either one lists every matching fish under a caught count with a progress bar"),
             new("changelog.r1310.31",
