@@ -48,6 +48,11 @@ internal sealed partial class FishingApp
     private readonly string[] filterLabels = new string[FilterSlots];
     private readonly bool[] filterActive = new bool[FilterSlots];
     private readonly int[] expansionChips = new int[TimedFish.ExpansionSlots];
+    private readonly ChipRail patchRail = new();
+    private readonly string[] patchLabels = new string[FishPatchChips.PatchSlots];
+    private readonly bool[] patchActive = new bool[FishPatchChips.PatchSlots];
+    private readonly float[] patchChips = new float[FishPatchChips.PatchSlots];
+    private readonly int[] patchKeys = new int[FishPatchChips.PatchSlots];
     private int[] alarmRows = Array.Empty<int>();
     private int[] openRows = Array.Empty<int>();
     private int[] upcomingRows = Array.Empty<int>();
@@ -67,6 +72,9 @@ internal sealed partial class FishingApp
     private FishCaughtFilter caughtFilter;
     private int expansionFilter = -1;
     private int expansionChipCount = -1;
+    private int patchFilter = -1;
+    private int patchChipCount = -1;
+    private int patchChipExpansion = -1;
     private int progressCaught;
     private int progressTotal;
     private int shownProgressCaught = -1;
@@ -214,6 +222,7 @@ internal sealed partial class FishingApp
         {
             var picked = expansionChips[tapped - firstExpansion];
             expansionFilter = expansionFilter == picked ? -1 : picked;
+            patchFilter = -1;
             fishListDirty = true;
             UiFeedback.Play(expansionFilter >= 0 ? UiSound.ToggleOn : UiSound.ToggleOff);
         }
@@ -225,7 +234,56 @@ internal sealed partial class FishingApp
             UiFeedback.Play(caughtFilter != FishCaughtFilter.All ? UiSound.ToggleOn : UiSound.ToggleOff);
         }
 
+        if (expansionFilter >= 0)
+        {
+            DrawPatchChips();
+        }
+
         ImGui.Dummy(new Vector2(0f, 2f * UiScale.Current));
+    }
+
+    private void DrawPatchChips()
+    {
+        EnsurePatchChips();
+        if (patchChipCount == 0)
+        {
+            return;
+        }
+
+        for (var chip = 0; chip < patchChipCount; chip++)
+        {
+            patchActive[chip] = patchFilter == patchKeys[chip];
+        }
+
+        var tapped = patchRail.Draw(ui, patchLabels.AsSpan(0, patchChipCount), patchActive.AsSpan(0, patchChipCount),
+            "fishing.patches");
+        if (tapped < 0)
+        {
+            return;
+        }
+
+        var picked = patchKeys[tapped];
+        patchFilter = patchFilter == picked ? -1 : picked;
+        fishListDirty = true;
+        UiFeedback.Play(patchFilter >= 0 ? UiSound.ToggleOn : UiSound.ToggleOff);
+    }
+
+    private void EnsurePatchChips()
+    {
+        if (patchChipCount >= 0 && patchChipExpansion == expansionFilter)
+        {
+            return;
+        }
+
+        patchChipExpansion = expansionFilter;
+        patchChipCount = FishPatchChips.Collect(catalog.Entries, expansionFilter, patchChips);
+        for (var chip = 0; chip < patchChipCount; chip++)
+        {
+            patchKeys[chip] = FishPatchChips.Key(patchChips[chip]);
+            patchLabels[chip] = FishingCatalog.PatchText(patchChips[chip]);
+        }
+
+        patchRail.Reset();
     }
 
     private void EnsureExpansionChips()
@@ -329,6 +387,7 @@ internal sealed partial class FishingApp
         rowWhen = new CachedText[count];
         rowSubtitles = new string[count];
         expansionChipCount = -1;
+        patchChipCount = -1;
         fishListDirty = true;
     }
 
@@ -369,6 +428,11 @@ internal sealed partial class FishingApp
             }
 
             if (expansionFilter >= 0 && entry.Fish.Expansion != expansionFilter)
+            {
+                continue;
+            }
+
+            if (patchFilter >= 0 && FishPatchChips.Key(entry.Fish.Patch) != patchFilter)
             {
                 continue;
             }
