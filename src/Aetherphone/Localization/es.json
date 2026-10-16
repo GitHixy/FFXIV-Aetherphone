@@ -9132,6 +9132,7 @@
   "casino.strip.bonusClaim": "Cobrar {0}",
   "casino.strip.bonusReadyIn": "En {0}",
   "casino.strip.bonusLanded": "{0} fichas llegaron a tu saldo.",
+  "casino.strip.streakLanded": "Racha diaria: {0} fichas llegaron a tu saldo.",
   "casino.strip.clubBronze": "Bronce",
   "casino.strip.clubSilver": "Plata",
   "casino.strip.clubGold": "Oro",

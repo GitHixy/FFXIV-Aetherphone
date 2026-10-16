@@ -9132,6 +9132,7 @@
   "casino.strip.bonusClaim": "{0}を受け取る",
   "casino.strip.bonusReadyIn": "あと{0}",
   "casino.strip.bonusLanded": "{0}チップが残高に入りました。",
+  "casino.strip.streakLanded": "連続ログイン：{0}チップが残高に入りました。",
   "casino.strip.clubBronze": "ブロンズ",
   "casino.strip.clubSilver": "シルバー",
   "casino.strip.clubGold": "ゴールド",

@@ -11395,6 +11395,7 @@ internal static class L
         public static readonly LocString BonusClaim = new("casino.strip.bonusClaim", "Claim {0}");
         public static readonly LocString BonusReadyIn = new("casino.strip.bonusReadyIn", "In {0}");
         public static readonly LocString BonusLanded = new("casino.strip.bonusLanded", "{0} chips landed in your bankroll.");
+        public static readonly LocString StreakLanded = new("casino.strip.streakLanded", "Daily streak: {0} chips landed in your bankroll.");
         public static readonly LocString ClubBronze = new("casino.strip.clubBronze", "Bronze");
         public static readonly LocString ClubSilver = new("casino.strip.clubSilver", "Silver");
         public static readonly LocString ClubGold = new("casino.strip.clubGold", "Gold");

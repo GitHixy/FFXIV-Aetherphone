@@ -9132,6 +9132,7 @@
   "casino.strip.bonusClaim": "Забрать {0}",
   "casino.strip.bonusReadyIn": "Через {0}",
   "casino.strip.bonusLanded": "{0} фишек поступили на банкролл.",
+  "casino.strip.streakLanded": "Ежедневная серия: {0} фишек поступили на банкролл.",
   "casino.strip.clubBronze": "Бронза",
   "casino.strip.clubSilver": "Серебро",
   "casino.strip.clubGold": "Золото",

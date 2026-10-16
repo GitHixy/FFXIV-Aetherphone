@@ -9132,6 +9132,7 @@
   "casino.strip.bonusClaim": "{0} al",
   "casino.strip.bonusReadyIn": "{0} sonra",
   "casino.strip.bonusLanded": "{0} fiş bakiyene geçti.",
+  "casino.strip.streakLanded": "Günlük seri: {0} fiş bakiyene geçti.",
   "casino.strip.clubBronze": "Bronz",
   "casino.strip.clubSilver": "Gümüş",
   "casino.strip.clubGold": "Altın",

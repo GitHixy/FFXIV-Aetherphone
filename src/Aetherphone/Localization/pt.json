@@ -9132,6 +9132,7 @@
   "casino.strip.bonusClaim": "Resgatar {0}",
   "casino.strip.bonusReadyIn": "Em {0}",
   "casino.strip.bonusLanded": "{0} fichas caíram no seu saldo.",
+  "casino.strip.streakLanded": "Sequência diária: {0} fichas caíram no seu saldo.",
   "casino.strip.clubBronze": "Bronze",
   "casino.strip.clubSilver": "Prata",
   "casino.strip.clubGold": "Ouro",

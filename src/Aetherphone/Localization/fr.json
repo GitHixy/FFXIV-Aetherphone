@@ -9132,6 +9132,7 @@
   "casino.strip.bonusClaim": "Récupérer {0}",
   "casino.strip.bonusReadyIn": "Dans {0}",
   "casino.strip.bonusLanded": "{0} jetons sont arrivés sur ton solde.",
+  "casino.strip.streakLanded": "Série quotidienne : {0} jetons sont arrivés sur ton solde.",
   "casino.strip.clubBronze": "Bronze",
   "casino.strip.clubSilver": "Argent",
   "casino.strip.clubGold": "Or",

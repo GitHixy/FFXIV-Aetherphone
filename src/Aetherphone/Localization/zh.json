@@ -9132,6 +9132,7 @@
   "casino.strip.bonusClaim": "领取 {0}",
   "casino.strip.bonusReadyIn": "{0} 后",
   "casino.strip.bonusLanded": "{0} 筹码已存入你的账户。",
+  "casino.strip.streakLanded": "每日连签：{0} 筹码已存入你的账户。",
   "casino.strip.clubBronze": "青铜",
   "casino.strip.clubSilver": "白银",
   "casino.strip.clubGold": "黄金",

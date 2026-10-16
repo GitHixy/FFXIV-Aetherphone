@@ -9132,6 +9132,7 @@
   "casino.strip.bonusClaim": "{0} holen",
   "casino.strip.bonusReadyIn": "In {0}",
   "casino.strip.bonusLanded": "{0} Chips sind in deinem Guthaben gelandet.",
+  "casino.strip.streakLanded": "Tagesserie: {0} Chips sind in deinem Guthaben gelandet.",
   "casino.strip.clubBronze": "Bronze",
   "casino.strip.clubSilver": "Silber",
   "casino.strip.clubGold": "Gold",
