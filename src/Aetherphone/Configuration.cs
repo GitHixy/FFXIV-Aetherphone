@@ -386,6 +386,9 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
     public Dictionary<ulong, long> CasinoSittingSeenAtUnix { get; set; } = new();
     public Dictionary<ulong, PendingCasinoRound> PendingCasinoRounds { get; set; } = new();
     public bool CasinoHostTradeSync { get; set; }
+    public string CasinoTradeTableId { get; set; } = string.Empty;
+    public string CasinoTradeTableAccountId { get; set; } = string.Empty;
+    public long CasinoTradeTableAtUnixMs { get; set; }
     public Dictionary<string, long> CasinoMachineBets { get; set; } = new();
     public int CasinoPlinkoRows { get; set; } = PlinkoRules.DefaultRows;
     public int CasinoPlinkoRisk { get; set; } = PlinkoRules.DefaultRisk;

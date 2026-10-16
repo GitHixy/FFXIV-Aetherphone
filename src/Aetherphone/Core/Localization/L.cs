@@ -2277,6 +2277,8 @@ internal static class L
         {
             new("changelog.r1311.0",
                 "Fixed long names on a full seven-seat blackjack rail being cut short: a seat's plate now widens into the empty seats beside it"),
+            new("changelog.r1311.1",
+                "Fixed the gil ledger missing trades once you had been away from your table page for 30 minutes or had reloaded the plugin: trades now record for 12 hours after you were last at your open gil table, across restarts, until you close the table"),
         };
 
         public static readonly LocString[] Release1310Phone =
@@ -12153,7 +12155,7 @@ internal static class L
         public static readonly LocString BroadcastPot = new("casino.venue.broadcastPot", "Pot {0}");
         public static readonly LocString BroadcastBet = new("casino.venue.broadcastBet", "Bet {0}");
         public static readonly LocString TradeSync = new("casino.venue.tradeSync", "Trade sync");
-        public static readonly LocString TradeSyncHint = new("casino.venue.tradeSyncHint", "Records the gil trades you make while you are at your open gil table in Gamba and for 30 minutes after. Gil you receive is a buy-in and gil you send is a payout; a trade that pays an owed line settles it. Players are matched by character name, and anyone else is booked as a guest. After that, for up to 12 hours, only trades with the table's players are recorded. Nothing in the game is clicked for you.");
+        public static readonly LocString TradeSyncHint = new("casino.venue.tradeSyncHint", "Records the gil trades you make while you are at your open gil table in Gamba and for 12 hours after, until you close the table. Gil you receive is a buy-in and gil you send is a payout; a trade that pays an owed line settles it. Players are matched by character name, and anyone else is booked as a guest. After the table closes, only cash-outs to its players are recorded, for 12 hours. Nothing in the game is clicked for you.");
         public static readonly LocString TradeReceivedFrom = new("casino.venue.tradeReceivedFrom", "You received {1} gil from {0}");
         public static readonly LocString TradeSentTo = new("casino.venue.tradeSentTo", "You sent {1} gil to {0}");
         public static readonly LocString TradeRecorded = new("casino.venue.tradeRecorded", "{0} recorded");
@@ -12251,7 +12253,7 @@ internal static class L
         public static readonly LocString RemoveCoDealer = new("casino.hostDesk.removeCoDealer", "Remove co-dealer");
         public static readonly LocString RemoveFromTable = new("casino.hostDesk.removeFromTable", "Remove from table");
         public static readonly LocString CoDealersFull = new("casino.hostDesk.coDealersFull", "All {0} co-dealer spots are taken. Remove one first.");
-        public static readonly LocString TradeSyncLine = new("casino.hostDesk.tradeSyncLine", "Writes the gil trades you make at this table, and for 30 minutes after you leave it.");
+        public static readonly LocString TradeSyncLine = new("casino.hostDesk.tradeSyncLine", "Writes the gil trades you make at this table, and for 12 hours after you were last at it.");
         public static readonly LocString TakenIn = new("casino.hostDesk.takenIn", "Taken in");
         public static readonly LocString PaidOut = new("casino.hostDesk.paidOut", "Paid out");
         public static readonly LocString Owed = new("casino.hostDesk.owed", "Owed");
