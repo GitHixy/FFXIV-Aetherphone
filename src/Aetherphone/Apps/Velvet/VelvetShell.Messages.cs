@@ -415,6 +415,8 @@ internal sealed partial class VelvetShell
         var preview = string.IsNullOrEmpty(thread.LastMessagePreview)
             ? Loc.T(L.Velvet.ThreadEmpty)
             : ChatText.ListPreview(thread.LastMessagePreview);
+        var mine = !string.IsNullOrEmpty(thread.LastMessagePreview)
+            && string.Equals(thread.LastMessageSenderId, store.Me?.UserId, StringComparison.Ordinal);
         var model = new VRowModel
         {
             Title = DisplayNameOf(thread.OtherDisplayName, thread.OtherHandle),
@@ -429,6 +431,8 @@ internal sealed partial class VelvetShell
             Time = TimeText.Short(thread.LastMessageAtUnix),
             Badge = thread.UnreadCount,
             Pinned = pinned,
+            SubtitleGlyph = mine ? (thread.LastMessageSeen ? PhoneIcons.Checks : PhoneIcons.Check) : null,
+            SubtitleGlyphTint = thread.LastMessageSeen ? Core.Theme.ChatInk.SeenTick : VelvetTheme.MutedInk,
         };
         var hit = VRow.Cell(in model, theme, images, lodestone);
         if (hit == VRowHit.Body)

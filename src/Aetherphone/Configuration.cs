@@ -575,6 +575,7 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
     public List<WorldClockEntry> WorldClocks { get; set; } = new();
     public List<AlarmEntry> Alarms { get; set; } = new();
     public List<uint> FishingAlarms { get; set; } = new();
+    public int FishingAlertLeadMinutes { get; set; } = Core.Fishing.FishingAlerts.DefaultLeadMinutes;
     public List<FishingVoyageReminder> FishingVoyageReminders { get; set; } = new();
     public DateTime? TimerEndsAtUtc { get; set; }
     public int TimerDurationSeconds { get; set; }
