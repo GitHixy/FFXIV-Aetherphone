@@ -13,6 +13,8 @@ public sealed class BlackjackRailTextBudgetTests
     private const int FullRail = BlackjackRules.SeatCount;
     private const int SeatedRail = BlackjackRules.SeatCount - 1;
     private const float WidePayoutFullRailFloor = 300f;
+    private const string LongForename = "KiwiShadow";
+    private const float LongForenameEndSeatFullRailFloor = 336f;
 
     private static readonly float[] Scales = { 0.75f, 1f, 1.25f, 1.5f };
     private static readonly float[] FeltWidths = { 272f, 300f, 312f, 336f };
@@ -61,6 +63,45 @@ public sealed class BlackjackRailTextBudgetTests
         {
             AssertHoldsText(inner, Stacks[index], scale);
         }
+    }
+
+    [Theory]
+    [MemberData(nameof(Rails))]
+    public void AMiddleSeatBetweenEmptySeatsHoldsATenLetterForenameOnARegularFelt(float scale, float width,
+        float height, int railCount)
+    {
+        var layout = Compute(scale, width, height, railCount);
+        if (layout.Compact)
+        {
+            return;
+        }
+
+        var slot = railCount / 2;
+        var plate = layout.RailPlateRect(slot, true, true);
+        Assert.True(plate.Width > layout.RailPlateWidth);
+        AssertHoldsText(layout.RailPlateTextWidthFor(plate.Width), LongForename, scale);
+    }
+
+    [Theory]
+    [MemberData(nameof(Rails))]
+    public void AnEndSeatBesideAnEmptyOneHoldsATenLetterForenameOnSixSeatRailsAndTheWidestSevenSeatRail(
+        float scale, float width, float height, int railCount)
+    {
+        if (railCount == FullRail && width < LongForenameEndSeatFullRailFloor)
+        {
+            return;
+        }
+
+        var layout = Compute(scale, width, height, railCount);
+        if (layout.Compact)
+        {
+            return;
+        }
+
+        var first = layout.RailPlateRect(0, false, true);
+        var last = layout.RailPlateRect(railCount - 1, true, false);
+        AssertHoldsText(layout.RailPlateTextWidthFor(first.Width), LongForename, scale);
+        AssertHoldsText(layout.RailPlateTextWidthFor(last.Width), LongForename, scale);
     }
 
     [Theory]

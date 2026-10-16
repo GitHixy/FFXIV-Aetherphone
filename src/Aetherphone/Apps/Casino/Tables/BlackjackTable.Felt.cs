@@ -212,9 +212,11 @@ internal sealed partial class BlackjackTable
         var limit = SeatLimit(board);
         var tapped = -1;
         var sitLabel = Loc.T(L.Blackjack.SeatSit);
+        Span<bool> emptySlots = stackalloc bool[BlackjackRules.SeatCount];
+        MarkEmptySlots(emptySlots, seated, limit);
         for (var seatIndex = 0; seatIndex < BlackjackRules.SeatCount; seatIndex++)
         {
-            if ((seated && seatIndex == mySeat) || seatIndex >= limit)
+            if (!OnRail(seatIndex, seated, limit))
             {
                 continue;
             }
@@ -257,7 +259,8 @@ internal sealed partial class BlackjackTable
                     ImGui.GetColorU32(Palette.WithAlpha(ui.MutedInk, 0.45f + 0.4f * Pulse.Wave(Pulse.Breath))), 12);
             }
 
-            DrawSeatPlate(drawList, currency, view, puck, dimmed, scale);
+            var plate = layout.RailPlateRect(slot, SlotEmpty(emptySlots, slot - 1), SlotEmpty(emptySlots, slot + 1));
+            DrawSeatPlate(drawList, currency, view, plate, dimmed, scale);
             if (layout.ShowsRailTitles)
             {
                 DrawBalanceTitle(drawList, currency, view.Stack, puck, puckRadius, columnWidth, scale);
@@ -273,28 +276,44 @@ internal sealed partial class BlackjackTable
         return tapped;
     }
 
-    private void DrawSeatPlate(ImDrawListPtr drawList, int currency, in SeatView view, Vector2 puck, bool dimmed,
+    private void MarkEmptySlots(Span<bool> emptySlots, bool seated, int limit)
+    {
+        for (var seatIndex = 0; seatIndex < BlackjackRules.SeatCount; seatIndex++)
+        {
+            if (!OnRail(seatIndex, seated, limit))
+            {
+                continue;
+            }
+
+            emptySlots[BlackjackTableLayout.RailSlotOf(seatIndex, mySeat, limit)] =
+                seatViews[seatIndex].Phase == SeatPhase.Empty;
+        }
+    }
+
+    private bool OnRail(int seatIndex, bool seated, int limit) => (!seated || seatIndex != mySeat) && seatIndex < limit;
+
+    private static bool SlotEmpty(ReadOnlySpan<bool> emptySlots, int slot) =>
+        slot >= 0 && slot < emptySlots.Length && emptySlots[slot];
+
+    private void DrawSeatPlate(ImDrawListPtr drawList, int currency, in SeatView view, in Rect plate, bool dimmed,
         float scale)
     {
-        var width = layout.RailPlateWidth;
-        var top = puck.Y + layout.RailPlateTop;
-        var min = new Vector2(puck.X - width * 0.5f, top);
-        var max = new Vector2(puck.X + width * 0.5f, top + BlackjackTableLayout.RailPlateHeight * scale);
         var rounding = Metrics.Radius.Md * scale;
-        Material.LiquidGlass(drawList, min, max, rounding, scale, GlassTone.Dark, 0f);
-        var inner = layout.RailPlateTextWidth;
-        var lineHeight = (max.Y - min.Y) * 0.5f;
+        Material.LiquidGlass(drawList, plate.Min, plate.Max, rounding, scale, GlassTone.Dark, 0f);
+        var textWidth = layout.RailPlateTextWidthFor(plate.Width);
+        var centerX = plate.Center.X;
+        var lineHeight = plate.Height * 0.5f;
         var nameStyle = TextStyles.Footnote;
-        var name = RailName(view.SeatIndex, view.DisplayName, inner);
-        var nameFit = StageText.FitScale(name, inner, nameStyle, StageTextRole.Caption);
-        Typography.DrawCentered(drawList, new Vector2(puck.X, min.Y + lineHeight * 0.55f),
-            Typography.FitText(name, inner, nameFit, nameStyle.Weight), dimmed ? StageText.Body : StageText.Strong,
-            nameFit, nameStyle.Weight);
+        var name = RailName(view.SeatIndex, view.DisplayName, textWidth);
+        var nameFit = StageText.FitScale(name, textWidth, nameStyle, StageTextRole.Caption);
+        Typography.DrawCentered(drawList, new Vector2(centerX, plate.Min.Y + lineHeight * 0.55f),
+            Typography.FitText(name, textWidth, nameFit, nameStyle.Weight),
+            dimmed ? StageText.Body : StageText.Strong, nameFit, nameStyle.Weight);
         var stackStyle = TextStyles.FootnoteEmphasized;
-        var stack = RailStack(currency, view.Stack, inner, stackStyle);
-        var stackFit = StageText.FitScale(stack, inner, stackStyle, StageTextRole.Caption);
-        Typography.DrawCentered(drawList, new Vector2(puck.X, min.Y + lineHeight * 1.45f),
-            Typography.FitText(stack, inner, stackFit, stackStyle.Weight),
+        var stack = RailStack(currency, view.Stack, textWidth, stackStyle);
+        var stackFit = StageText.FitScale(stack, textWidth, stackStyle, StageTextRole.Caption);
+        Typography.DrawCentered(drawList, new Vector2(centerX, plate.Min.Y + lineHeight * 1.45f),
+            Typography.FitText(stack, textWidth, stackFit, stackStyle.Weight),
             dimmed ? StageText.Body : StackInk(currency), stackFit, stackStyle.Weight);
     }
 
