@@ -2327,10 +2327,14 @@ internal static class L
                 "Added expansion filters to the fish list, and patch numbers to its search: type 7.2 to find that patch's fish"),
             new("changelog.r1310.25",
                 "Added a Caught filter beside Not caught: either one lists every matching fish under a caught count with a progress bar"),
+            new("changelog.r1310.31",
+                "Added a tap on the bell of a fish in the Alerts list to turn its alert off"),
             new("changelog.r1310.12",
                 "Changed the fish and voyage lists to skip rows you cannot see, so Fishing draws about three times faster, contributed by t3sco"),
             new("changelog.r1310.27",
                 "Fixed Fishing not knowing which fish you have caught: the Not caught filter, the caught badge and the check marks on caught fish show up now"),
+            new("changelog.r1310.32",
+                "Fixed turning on a fish alert while its window was already open or about to open firing the alert at once: it waits for the next window"),
         };
 
         public static readonly LocString[] Release1310Messaging =

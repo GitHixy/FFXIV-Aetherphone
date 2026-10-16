@@ -7797,6 +7797,8 @@
   "changelog.r1310.24": "Erweiterungsfilter für die Fischliste hinzugefügt, und die Suche kennt jetzt Patchnummern: Gib 7.2 ein, um die Fische dieses Patches zu finden",
   "changelog.r1310.25": "Filter Gefangen neben Nicht gefangen hinzugefügt: Beide listen alle passenden Fische unter einer Fangzahl mit Fortschrittsbalken auf",
   "changelog.r1310.27": "Behoben, dass Angeln nicht wusste, welche Fische du schon gefangen hast: Der Filter Nicht gefangen, das Abzeichen Gefangen und die Häkchen bei gefangenen Fischen erscheinen jetzt",
+  "changelog.r1310.31": "Tippen auf die Glocke eines Fisches in der Liste Benachrichtigungen hinzugefügt, um seine Benachrichtigung auszuschalten",
+  "changelog.r1310.32": "Behoben, dass eine Fisch-Benachrichtigung sofort ausgelöst wurde, wenn du sie einschaltest, während das Zeitfenster schon offen war oder gleich öffnet: Sie wartet jetzt auf das nächste Zeitfenster",
   "changelog.r1310.13": "Behoben, dass Fotos und Reaktionen aufgingen, wenn man sie zum Scrollen eines Chats drückte: Tippen wirkt jetzt erst beim Loslassen, beigetragen von t3sco",
   "changelog.r1310.23": "Nachrichtenfeld in ChocoChat-, Aethergram- und Velvet-Chats so geändert, dass ein Klick irgendwo darauf es auswählt, nicht nur auf der Textzeile",
   "changelog.r1310.29": "Behoben, dass die Listen Lautsprecher und Mikrofon in Anrufen und in den Einstellungen Telefonanrufe nur Systemstandard anboten: Jetzt erscheinen deine Geräte",

@@ -78,10 +78,40 @@ internal sealed class FishingAlerts : IDisposable
         {
             alarms.Add(itemId);
             notifiedWindowStart.Remove(itemId);
+            SkipRunningWindow(itemId);
         }
 
         configuration.Save();
         return enabled;
+    }
+
+    public static bool AlertWindowRunning(in FishWindow window, long nowUnix) =>
+        window.Exists && nowUnix >= window.StartUnix - FishLeadSeconds && nowUnix < window.EndUnix;
+
+    private void SkipRunningWindow(uint itemId)
+    {
+        if (!catalog.TryIndex(itemId, out var index))
+        {
+            return;
+        }
+
+        var entry = catalog.Entries[index];
+        if (entry.Fish.Rule.AlwaysOpen)
+        {
+            return;
+        }
+
+        var nowUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var window = catalog.WindowAt(index);
+        if (!window.Exists || nowUnix >= window.EndUnix)
+        {
+            window = FishWindowMath.Next(entry.Fish.Rule, entry.Odds, nowUnix);
+        }
+
+        if (AlertWindowRunning(window, nowUnix))
+        {
+            notifiedWindowStart[itemId] = window.StartUnix;
+        }
     }
 
     public bool HasVoyageReminder(long boardingUnix) => FindReminder(boardingUnix) >= 0;

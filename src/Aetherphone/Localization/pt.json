@@ -7797,6 +7797,8 @@
   "changelog.r1310.24": "Adicionamos filtros por expansão à lista de peixes e números de patch à busca dela: digite 7.2 para achar os peixes desse patch",
   "changelog.r1310.25": "Adicionamos o filtro Capturado ao lado de Não capturados: qualquer um deles lista todos os peixes correspondentes sob uma contagem de capturas com barra de progresso",
   "changelog.r1310.27": "Corrigida a Pesca, que não sabia quais peixes você já capturou: o filtro Não capturados, o selo Capturado e as marcas nos peixes capturados agora aparecem",
+  "changelog.r1310.31": "Adicionado um toque no sino de um peixe na lista Alertas para desligar o alerta dele",
+  "changelog.r1310.32": "Corrigido que ligar o alerta de um peixe com a janela já aberta ou prestes a abrir disparava o alerta na hora: agora ele espera a próxima janela",
   "changelog.r1310.13": "Corrigido que pressionar uma foto ou reação para rolar um chat a abria: agora os toques agem ao soltar, contribuição de t3sco",
   "changelog.r1310.23": "Alteramos a caixa de mensagem das conversas do ChocoChat, Aethergram e Velvet para aceitar um clique em qualquer parte dela, não só na linha de texto",
   "changelog.r1310.29": "Corrigidas as listas Alto-falante e Microfone, nas chamadas e nas configurações de Chamadas telefônicas, que só ofereciam Padrão do sistema: agora elas mostram seus dispositivos",
