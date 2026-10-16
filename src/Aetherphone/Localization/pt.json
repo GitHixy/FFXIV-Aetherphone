@@ -7794,6 +7794,8 @@
   "changelog.r1310.10": "Adicionamos uma confirmação antes de desistir, sair de uma rodada em andamento, fechar uma sala com jogadores ou remover um jogador, contribuição de t3sco",
   "changelog.r1310.11": "Adicionamos uma confirmação antes de Restaurar padrão em Alertas e antes de sair do Faloop, contribuição de t3sco",
   "changelog.r1310.12": "Alteramos as listas de peixes e viagens para pular as linhas fora de vista, então Pesca desenha cerca de três vezes mais rápido, contribuição de t3sco",
+  "changelog.r1310.24": "Adicionamos filtros por expansão à lista de peixes e números de patch à busca dela: digite 7.2 para achar os peixes desse patch",
+  "changelog.r1310.25": "Adicionamos o filtro Capturado ao lado de Não capturados: qualquer um deles lista todos os peixes correspondentes sob uma contagem de capturas com barra de progresso",
   "changelog.r1310.13": "Corrigido que pressionar uma foto ou reação para rolar um chat a abria: agora os toques agem ao soltar, contribuição de t3sco",
   "changelog.r1310.23": "Alteramos a caixa de mensagem das conversas do ChocoChat, Aethergram e Velvet para aceitar um clique em qualquer parte dela, não só na linha de texto",
   "changelog.r1310.14": "Corrigido o botão Voltar de um perfil do Chirper que sumia ao rolar: agora ele fica no canto e o nome aparece no topo quando você rola, contribuição de hellovvn",

@@ -7794,6 +7794,8 @@
   "changelog.r1310.10": "Ajout d'une confirmation avant d'abandonner, de quitter une manche en cours, de fermer un salon avec des joueurs ou de retirer un joueur, contribution de t3sco",
   "changelog.r1310.11": "Ajout d'une confirmation avant « Réinitialiser par défaut » dans Alertes et avant de se déconnecter de Faloop, contribution de t3sco",
   "changelog.r1310.12": "Modification des listes de poissons et de traversées pour ignorer les lignes invisibles : Pêche s'affiche environ trois fois plus vite, contribution de t3sco",
+  "changelog.r1310.24": "Ajout de filtres par extension à la liste des poissons, et des numéros de patch à sa recherche : tapez 7.2 pour trouver les poissons de ce patch",
+  "changelog.r1310.25": "Ajout du filtre Pêché à côté de Non pêchés : chacun liste tous les poissons correspondants sous un total de prises avec une barre de progression",
   "changelog.r1310.13": "Correction d'une photo ou d'une réaction qui s'ouvrait quand on appuyait dessus pour faire défiler une discussion : les appuis agissent désormais au relâchement, contribution de t3sco",
   "changelog.r1310.23": "Modification du champ de message des discussions ChocoChat, Aethergram et Velvet : un clic n'importe où dessus le sélectionne, pas seulement sur sa ligne de texte",
   "changelog.r1310.14": "Correction du bouton Retour d'un profil Chirper qui disparaissait au défilement : il reste dans le coin et le nom s'affiche en haut quand vous faites défiler, contribution de hellovvn",

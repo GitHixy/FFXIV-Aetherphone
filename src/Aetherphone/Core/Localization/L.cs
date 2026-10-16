@@ -2323,6 +2323,10 @@ internal static class L
 
         public static readonly LocString[] Release1310Fishing =
         {
+            new("changelog.r1310.24",
+                "Added expansion filters to the fish list, and patch numbers to its search: type 7.2 to find that patch's fish"),
+            new("changelog.r1310.25",
+                "Added a Caught filter beside Not caught: either one lists every matching fish under a caught count with a progress bar"),
             new("changelog.r1310.12",
                 "Changed the fish and voyage lists to skip rows you cannot see, so Fishing draws about three times faster, contributed by t3sco"),
         };
