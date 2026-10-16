@@ -7794,6 +7794,7 @@
   "changelog.r1310.11": "Ajout d'une confirmation avant « Réinitialiser par défaut » dans Alertes et avant de se déconnecter de Faloop, contribution de t3sco",
   "changelog.r1310.12": "Modification des listes de poissons et de traversées pour ignorer les lignes invisibles : Pêche s'affiche environ trois fois plus vite, contribution de t3sco",
   "changelog.r1310.13": "Correction d'une photo ou d'une réaction qui s'ouvrait quand on appuyait dessus pour faire défiler une discussion : les appuis agissent désormais au relâchement, contribution de t3sco",
+  "changelog.r1310.23": "Modification du champ de message des discussions ChocoChat, Aethergram et Velvet : un clic n'importe où dessus le sélectionne, pas seulement sur sa ligne de texte",
   "changelog.r1310.14": "Correction du bouton Retour d'un profil Chirper qui disparaissait au défilement : il reste dans le coin et le nom s'affiche en haut quand vous faites défiler, contribution de hellovvn",
   "changelog.r1310.15": "Correction des anneaux de niveau qui reculaient lors d'une montée de niveau : ils se remplissent puis repartent de zéro, contribution de t3sco",
   "changelog.r1310.16": "Correction des valeurs longues tronquées dans les tuiles de statistiques : elles rétrécissent désormais pour tenir, contribution de t3sco",
