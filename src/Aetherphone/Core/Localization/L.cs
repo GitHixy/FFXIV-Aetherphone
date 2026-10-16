@@ -2323,6 +2323,10 @@ internal static class L
 
         public static readonly LocString[] Release1310Fishing =
         {
+            new("changelog.r1310.24",
+                "Added expansion filters to the fish list, and patch numbers to its search: type 7.2 to find that patch's fish"),
+            new("changelog.r1310.25",
+                "Added a Caught filter beside Not caught: either one lists every matching fish under a caught count with a progress bar"),
             new("changelog.r1310.12",
                 "Changed the fish and voyage lists to skip rows you cannot see, so Fishing draws about three times faster, contributed by t3sco"),
         };
@@ -8110,6 +8114,7 @@ internal static class L
         public static readonly LocString SearchHint = new("fishing.searchHint", "Search fish, holes or zones");
         public static readonly LocString BigFish = new("fishing.bigFish", "Big fish");
         public static readonly LocString UncaughtFilter = new("fishing.uncaughtFilter", "Not caught");
+        public static readonly LocString CaughtProgress = new("fishing.caughtProgress", "Caught {0} of {1}");
         public static readonly LocString AnyTime = new("fishing.anyTime", "Any time");
         public static readonly LocString NoWindowShort = new("fishing.noWindowShort", "No window");
         public static readonly LocString NoWindowSoon = new("fishing.noWindowSoon", "No window in the next two months");
