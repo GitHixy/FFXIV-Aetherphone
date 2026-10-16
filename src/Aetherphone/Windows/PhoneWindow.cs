@@ -228,7 +228,8 @@ internal sealed class PhoneWindow : Window
         SizeCondition = ImGuiCond.Always;
         var locked = !minimized && configuration.LockPosition;
         var holdStill = !minimized &&
-                        (turning || shell.HomeEditing || Components.UiInteract.PointerOverGestureSurface);
+                        (turning || shell.HomeEditing || Components.UiInteract.PointerOverGestureSurface ||
+                         Plugin.DragDrop.IsDragging);
         Flags = minimized || locked || holdStill
             ? BaseFlags | ImGuiWindowFlags.NoMove
             : BaseFlags;

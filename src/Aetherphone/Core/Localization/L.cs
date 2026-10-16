@@ -2345,6 +2345,8 @@ internal static class L
                 "Fixed level rings running backwards on a level up: they now fill up and start again from empty, contributed by t3sco"),
             new("changelog.r1310.16",
                 "Fixed long values in the stat tiles being cut off: they shrink to fit instead, contributed by t3sco"),
+            new("changelog.r1310.18",
+                "Fixed Beastmaster at its level 50 cap showing as unfinished: its ring is full and it counts in At the level cap and Levels earned"),
         };
 
         public static readonly LocString[] Release1310Clock =

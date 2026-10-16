@@ -7798,6 +7798,7 @@
   "changelog.r1310.15": "Correction des anneaux de niveau qui reculaient lors d'une montée de niveau : ils se remplissent puis repartent de zéro, contribution de t3sco",
   "changelog.r1310.16": "Correction des valeurs longues tronquées dans les tuiles de statistiques : elles rétrécissent désormais pour tenir, contribution de t3sco",
   "changelog.r1310.17": "Correction des appuis juste à côté des boutons de jour des alarmes et des boutons de lecture des minuteurs récents qui ne faisaient rien : ils ont désormais une zone d'appui complète, contribution de t3sco",
+  "changelog.r1310.18": "Correction du dresseur à son niveau maximal 50 affiché comme inachevé : son anneau est plein et il compte dans Au niveau maximal et Niveaux obtenus",
   "changelog.r1300.101": "Ajout d'un thème Halloween : scènes nocturnes dans Chirper, Aethergram et Velvet, chauves-souris et brume sur l'écran d'accueil, et icônes, fonds et sons d'Halloween, contribution de t3sco",
   "changelog.r1300.102": "Ajout d'une chasse aux friandises du 15 octobre au 2 novembre : 13 friandises se cachent dans le téléphone, une par jour, et les trouver toutes fait brûler ton nom d'un feu de sorcière, contribution de t3sco",
   "changelog.r1300.103": "Ajout de Thème saisonnier dans Réglages > Apparence : Automatique affiche Halloween du 15 octobre au 2 novembre, Halloween le garde toute l'année et Désactivé le coupe, contribution de t3sco",

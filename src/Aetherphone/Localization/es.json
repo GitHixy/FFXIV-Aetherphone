@@ -7798,6 +7798,7 @@
   "changelog.r1310.15": "Corregido que los anillos de nivel retrocedieran al subir de nivel: ahora se llenan y empiezan de nuevo desde vacíos, contribuido por t3sco",
   "changelog.r1310.16": "Corregido que los valores largos de los recuadros de estadísticas se cortaran: ahora se reducen para caber, contribuido por t3sco",
   "changelog.r1310.17": "Corregido que los toques cerca de los botones de día de las alarmas y de reproducir de los temporizadores recientes no hicieran nada: ahora tienen un área de toque completa, contribuido por t3sco",
+  "changelog.r1310.18": "Corregido que el domador de bestias en su nivel máximo 50 apareciera como incompleto: su anillo está lleno y cuenta en En el nivel máximo y Niveles obtenidos",
   "changelog.r1300.101": "Se añadió un tema de Halloween: escenas nocturnas en Chirper, Aethergram y Velvet, murciélagos y niebla en la Pantalla de inicio, e iconos, fondos y sonidos de Halloween, contribuido por t3sco",
   "changelog.r1300.102": "Se añadió una búsqueda de dulces del 15 de octubre al 2 de noviembre: 13 dulces se esconden por el teléfono, uno al día, y si los encuentras todos tu nombre arde con fuego de bruja, contribuido por t3sco",
   "changelog.r1300.103": "Se añadió Tema de temporada en Ajustes > Apariencia: Automático muestra Halloween del 15 de octubre al 2 de noviembre, Halloween lo mantiene todo el año y Desactivado lo apaga, contribuido por t3sco",

@@ -7798,6 +7798,7 @@
   "changelog.r1310.15": "Fixed level rings running backwards on a level up: they now fill up and start again from empty, contributed by t3sco",
   "changelog.r1310.16": "Fixed long values in the stat tiles being cut off: they shrink to fit instead, contributed by t3sco",
   "changelog.r1310.17": "Fixed near misses on alarm day buttons and recent timer play buttons doing nothing: both have a full size tap area, contributed by t3sco",
+  "changelog.r1310.18": "Fixed Beastmaster at its level 50 cap showing as unfinished: its ring is full and it counts in At the level cap and Levels earned",
   "changelog.r1300.101": "Added a Halloween theme: night scenes in Chirper, Aethergram and Velvet, bats and mist on the Home Screen, and Halloween icons, wallpapers and sounds, contributed by t3sco",
   "changelog.r1300.102": "Added a treat hunt from 15 October to 2 November: 13 treats hide around the phone, one a day, and finding them all sets your name in Witchfire, contributed by t3sco",
   "changelog.r1300.103": "Added Seasonal Theme under Settings > Appearance: Automatic shows Halloween from 15 October to 2 November, Halloween keeps it all year, and Off turns it off, contributed by t3sco",
