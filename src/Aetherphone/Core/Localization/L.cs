@@ -2273,18 +2273,58 @@ internal static class L
         public static readonly LocString SectionSounds = new("changelog.sectionSounds", "Sounds");
         public static readonly LocString SectionHalloween = new("changelog.sectionHalloween", "Halloween");
 
+        public static readonly LocString[] Release1311MogCast =
+        {
+            new("changelog.r1311.12",
+                "Fixed videos freezing on the first frame when the audio device stops taking sound: the video keeps playing without sound, says so, and sound returns on the next video, contributed by t3sco"),
+            new("changelog.r1311.13",
+                "Fixed a stutter when pressing play: the player now starts and restarts in the background, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1311Velvet =
+        {
+            new("changelog.r1311.16",
+                "Fixed posts, the feed, chats and intro requests sitting on loading or reading as empty after a failed fetch: they now say loading and offer a retry, contributed by t3sco"),
+            new("changelog.r1311.17",
+                "Fixed onboarding marking you as set up before your profile had saved: it now waits for the save and shows an error if it fails, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1311Games =
+        {
+            new("changelog.r1311.18",
+                "Fixed your ranks disappearing from the profile when they failed to load: a retry card shows instead, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1311Photos =
+        {
+            new("changelog.r1311.19",
+                "Fixed the first open of a large screenshot folder stalling the phone while every thumbnail decoded at once: thumbnails now load three at a time in the background, contributed by t3sco"),
+        };
+
         public static readonly LocString[] Release1311Gamba =
         {
             new("changelog.r1311.0",
                 "Fixed long names on a full seven-seat blackjack rail being cut short: a seat's plate now widens into the empty seats beside it"),
             new("changelog.r1311.1",
                 "Fixed the gil ledger missing trades once you had been away from your table page for 30 minutes or had reloaded the plugin: trades now record for 12 hours after you were last at your open gil table, across restarts, until you close the table"),
+            new("changelog.r1311.14",
+                "Fixed the lobby balance, cashier, floor feed and fairness panel reading as zero or empty while they were still loading, contributed by t3sco"),
+            new("changelog.r1311.15",
+                "Fixed the Limits page sitting on a spinner when the casino state fails to load: it now offers a retry, contributed by t3sco"),
         };
 
         public static readonly LocString[] Release1311Phone =
         {
             new("changelog.r1311.4",
                 "Changed the scroll indicator while the phone position is locked: it dims when idle, brightens under the pointer, and a click on it no longer reaches what is underneath"),
+            new("changelog.r1311.8",
+                "Changed the MogCast and Music setup button to say checking while it only checks, and installing once a download starts, contributed by t3sco"),
+            new("changelog.r1311.9",
+                "Fixed rows cutting off the word that told them apart, from tomestone names and forecast weather to district tiles and leaderboard ranks, contributed by t3sco"),
+            new("changelog.r1311.10",
+                "Fixed a short hitch when an app opened with a sound after the phone had been quiet for a while, contributed by t3sco"),
+            new("changelog.r1311.11",
+                "Fixed Gamba history, the Skywatcher sun arc, chess clocks, the inventory list and the call history doing more work every frame than they needed to, contributed by t3sco"),
         };
 
         public static readonly LocString[] Release1311Fishing =
