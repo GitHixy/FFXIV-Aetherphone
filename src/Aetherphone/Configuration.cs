@@ -123,7 +123,7 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
     public int Version { get; set; } = 1;
     public bool OpenOnStartup { get; set; } = true;
     public bool OpenMinimizedOnStartup { get; set; } = true;
-    public ServerBarStyle ServerBarStyle { get; set; } = ServerBarStyle.IconAndText;
+    public ServerBarStyle ServerBarStyle { get; set; } = ServerBarStyle.Icon;
     public string ServerBarText { get; set; } = string.Empty;
     public bool WelcomeShown { get; set; }
     public bool SetupCompleted { get; set; }
