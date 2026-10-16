@@ -22,6 +22,12 @@ internal sealed class CasinoTradeSync : IDisposable
 {
     public const long RecordedShownMilliseconds = 8_000;
 
+    public const long HostedWindowMilliseconds = CasinoHostingRules.TradeClosedTableHours * 3_600_000L;
+
+    public const long AtTableGraceMilliseconds = 30 * 60_000L;
+
+    private const long HostingCheckMilliseconds = 1_000;
+
     private static readonly int[] RetryDelaysMilliseconds = { 2_000, 5_000, 10_000 };
 
     private readonly Configuration configuration;
@@ -42,6 +48,10 @@ internal sealed class CasinoTradeSync : IDisposable
     private volatile bool undoing;
     private bool sending;
     private bool tracking;
+    private long hostingCheckedAtTick;
+    private long atTableAtTick;
+    private string atTableId = string.Empty;
+    private string atTableAccountId = string.Empty;
     private string accountId = string.Empty;
 
     public CasinoTradeSync(Configuration configuration, AethernetSession session, CasinoClient casino,
@@ -133,18 +143,46 @@ internal sealed class CasinoTradeSync : IDisposable
         }
 
         Send();
-        if (!configuration.CasinoHostTradeSync)
+        var nowTick = Environment.TickCount64;
+        if (!configuration.CasinoHostTradeSync || !Hosting(nowTick))
         {
             StopTracking();
             return;
         }
 
         tracking = true;
-        var completion = tracker.Observe(reader.Sample(), Environment.TickCount64);
+        var completion = tracker.Observe(reader.Sample(), nowTick);
         if (completion is { } done)
         {
-            Completed(done);
+            Completed(done, nowTick);
         }
+    }
+
+    private bool Hosting(long nowTick)
+    {
+        if (nowTick - hostingCheckedAtTick >= HostingCheckMilliseconds)
+        {
+            hostingCheckedAtTick = nowTick;
+            NoteTable(nowTick);
+        }
+
+        return HostedRecently(atTableAtTick, nowTick);
+    }
+
+    internal static bool HostedRecently(long atTableAtTick, long nowTick)
+    {
+        return atTableAtTick != 0 && nowTick - atTableAtTick <= HostedWindowMilliseconds;
+    }
+
+    internal static bool StillAtTable(long atTableAtTick, long nowTick)
+    {
+        return atTableAtTick != 0 && nowTick - atTableAtTick <= AtTableGraceMilliseconds;
+    }
+
+    internal static bool ForgetsTable(string atTableAccountId, string signedInAccountId)
+    {
+        return signedInAccountId.Length > 0
+            && !string.Equals(atTableAccountId, signedInAccountId, StringComparison.Ordinal);
     }
 
     private void StopTracking()
@@ -161,6 +199,14 @@ internal sealed class CasinoTradeSync : IDisposable
     private void SwitchAccount(string account)
     {
         accountId = account;
+        if (ForgetsTable(atTableAccountId, account))
+        {
+            hostingCheckedAtTick = 0;
+            atTableAtTick = 0;
+            atTableId = string.Empty;
+            atTableAccountId = string.Empty;
+        }
+
         tracker.Reset();
         if (pending.Count > 0)
         {
@@ -171,17 +217,21 @@ internal sealed class CasinoTradeSync : IDisposable
         recorded = null;
     }
 
-    private void Completed(in TradeCompletion completion)
+    private void Completed(in TradeCompletion completion, long nowTick)
     {
         var amount = Math.Abs(completion.Net);
+        var hint = HintTableId(nowTick);
         if (completion.PartnerName.Length == 0)
         {
             AepLog.Info($"[TradeSync] A trade of {amount} gil completed without a partner name, not recorded");
-            NotifyFailure(amount);
+            if (hint.Length > 0)
+            {
+                NotifyFailure(amount);
+            }
+
             return;
         }
 
-        var hint = HintTableId();
         pending.Enqueue(new CasinoLedgerTradeRequest(Guid.NewGuid().ToString("N"), completion.PartnerName,
             completion.PartnerWorld, completion.Received, completion.Sent, hint));
         AepLog.Info($"[TradeSync] Trade completed: received {completion.Received} gil, sent {completion.Sent} gil, "
@@ -290,15 +340,39 @@ internal sealed class CasinoTradeSync : IDisposable
         return name.Length > 0 ? name : request.PartnerName;
     }
 
-    private string HintTableId()
+    private string HintTableId(long nowTick)
     {
-        var view = venue.View;
-        if (view is not null && view.Gil && OwnsGil(view.RoomId))
+        var live = NoteTable(nowTick);
+        if (live.Length > 0)
         {
-            return view.RoomId;
+            return live;
         }
 
-        var attended = tables.AttendedTableId(Environment.TickCount64);
+        return StillAtTable(atTableAtTick, nowTick) ? atTableId : string.Empty;
+    }
+
+    private string NoteTable(long nowTick)
+    {
+        var live = LiveTableId(nowTick);
+        if (live.Length > 0)
+        {
+            atTableId = live;
+            atTableAtTick = nowTick;
+            atTableAccountId = accountId;
+        }
+
+        return live;
+    }
+
+    private string LiveTableId(long nowTick)
+    {
+        var roomId = venue.Rooms.Room.RoomId;
+        if (OwnsGil(roomId))
+        {
+            return roomId;
+        }
+
+        var attended = tables.AttendedTableId(nowTick);
         return OwnsGil(attended) ? attended : string.Empty;
     }
 

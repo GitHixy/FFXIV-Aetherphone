@@ -19,6 +19,7 @@ internal static class ChangelogData
             new(L.Apps.Chirper, L.Changelog.Release1310Chirper),
             new(L.Apps.Jobs, L.Changelog.Release1310Jobs),
             new(L.Apps.Clock, L.Changelog.Release1310Clock),
+            new(L.Apps.Casino, L.Changelog.Release1310Gamba),
         }),
         new ChangelogEntry("1.3.0.0", "2026-10-15", new ChangelogSection[]
         {

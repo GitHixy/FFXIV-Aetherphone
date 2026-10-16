@@ -523,7 +523,7 @@ internal sealed partial class MachineCabinet
 
         if (playback.Jackpot == 0)
         {
-            gamble.Offer(playback.RoundId, playback.Bet, playback.TotalWin);
+            gamble.Offer(playback.MachineId, playback.RoundId, playback.Bet, playback.TotalWin);
         }
     }
 

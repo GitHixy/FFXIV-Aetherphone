@@ -60,10 +60,10 @@ internal sealed class GambleLadder
 
     public int LastPick => lastPick;
 
-    public void Offer(string roundId, long bet, long amount)
+    public void Offer(string machineId, string roundId, long bet, long amount)
     {
         Reset();
-        if (!SlotsRules.GambleEligible(SlotsRules.BirdId, bet, amount) || roundId.Length == 0)
+        if (!SlotsRules.GambleEligible(machineId, bet, amount) || roundId.Length == 0)
         {
             return;
         }
