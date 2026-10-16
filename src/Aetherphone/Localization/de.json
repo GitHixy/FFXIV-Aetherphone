@@ -7781,6 +7781,7 @@
   "changelog.r1041.12": "Partys bleiben jetzt fünf Minuten mit dunklem Bildschirm offen, wenn die Warteschlange endet, statt sich zu schließen",
   "changelog.r1041.13": "Der Bildschirm merkt sich jetzt an jedem Ort, wo du ihn platziert hast",
   "changelog.r1041.14": "Behoben, dass lokale Dateien nicht abgespielt wurden, wenn ihr Pfad mit Anführungszeichen eingefügt wurde",
+  "changelog.r1311.0": "Behoben, dass lange Namen an einem vollen Blackjack-Tisch mit sieben Plätzen abgeschnitten wurden: Das Schild eines Platzes wird jetzt in die leeren Nachbarplätze hinein breiter",
   "changelog.r1310.0": "Emoji-Vorschläge beim Tippen eines :Kürzels in jedem Nachrichten-, Beitrags- und Kommentarfeld hinzugefügt: Enter oder Tab übernimmt den ersten, beigetragen von t3sco",
   "changelog.r1310.1": "Bearbeitungsmodus aus Ordnern heraus hinzugefügt: eine App in einem geöffneten Ordner gedrückt halten, genau wie auf dem Home-Bildschirm, beigetragen von hellovvn",
   "changelog.r1310.2": "Apps aus Ordnern ziehen hinzugefügt: die App kurz außerhalb des Ordners halten und dann irgendwo auf dem Home-Bildschirm ablegen, beigetragen von hellovvn",
