@@ -2337,6 +2337,8 @@ internal static class L
                 "Changed the message box in ChocoChat, Aethergram and Velvet chats to take a click anywhere on it, not only on its line of text"),
             new("changelog.r1310.13",
                 "Fixed pressing a photo or reaction to scroll a chat opening it: taps now act when you let go, contributed by t3sco"),
+            new("changelog.r1310.29",
+                "Fixed the Speaker and Microphone lists in calls and in Phone Calls settings only offering System default: they list your devices now"),
         };
 
         public static readonly LocString[] Release1310Chirper =
