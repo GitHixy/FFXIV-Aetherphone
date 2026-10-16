@@ -7799,6 +7799,7 @@
   "changelog.r1310.27": "Corrigida a Pesca, que não sabia quais peixes você já capturou: o filtro Não capturados, o selo Capturado e as marcas nos peixes capturados agora aparecem",
   "changelog.r1310.13": "Corrigido que pressionar uma foto ou reação para rolar um chat a abria: agora os toques agem ao soltar, contribuição de t3sco",
   "changelog.r1310.23": "Alteramos a caixa de mensagem das conversas do ChocoChat, Aethergram e Velvet para aceitar um clique em qualquer parte dela, não só na linha de texto",
+  "changelog.r1310.29": "Corrigidas as listas Alto-falante e Microfone, nas chamadas e nas configurações de Chamadas telefônicas, que só ofereciam Padrão do sistema: agora elas mostram seus dispositivos",
   "changelog.r1310.14": "Corrigido o botão Voltar de um perfil do Chirper que sumia ao rolar: agora ele fica no canto e o nome aparece no topo quando você rola, contribuição de hellovvn",
   "changelog.r1310.15": "Corrigidos os anéis de nível que voltavam para trás ao subir de nível: agora eles enchem e recomeçam do zero, contribuição de t3sco",
   "changelog.r1310.16": "Corrigidos os valores longos cortados nos blocos de estatísticas: agora eles diminuem para caber, contribuição de t3sco",

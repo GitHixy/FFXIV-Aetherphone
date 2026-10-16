@@ -7799,6 +7799,7 @@
   "changelog.r1310.27": "Balıkçılık'ın hangi balıkları yakaladığınızı bilmemesi düzeltildi: Yakalanmadı filtresi, Yakalandı rozeti ve yakalanan balıklardaki onay işaretleri artık görünüyor",
   "changelog.r1310.13": "Bir sohbeti kaydırmak için fotoğrafa veya tepkiye basınca açılması düzeltildi: dokunmalar artık bırakınca çalışıyor, katkı: t3sco",
   "changelog.r1310.23": "ChocoChat, Aethergram ve Velvet sohbetlerindeki mesaj kutusu, yalnızca metin satırında değil, herhangi bir yerine tıklanınca seçilecek şekilde değiştirildi",
+  "changelog.r1310.29": "Aramalarda ve Telefon Aramaları ayarlarında Hoparlör ve Mikrofon listelerinin yalnızca Sistem varsayılanı sunması düzeltildi: artık cihazlarınız listeleniyor",
   "changelog.r1310.14": "Chirper profilindeki Geri düğmesinin kaydırınca kaybolması düzeltildi: artık köşede kalıyor ve kaydırınca üstte ad görünüyor, katkı: hellovvn",
   "changelog.r1310.15": "Seviye atlarken seviye halkalarının geriye doğru dönmesi düzeltildi: artık dolup boştan yeniden başlıyorlar, katkı: t3sco",
   "changelog.r1310.16": "İstatistik kutularındaki uzun değerlerin kesilmesi düzeltildi: artık sığacak şekilde küçülüyorlar, katkı: t3sco",
