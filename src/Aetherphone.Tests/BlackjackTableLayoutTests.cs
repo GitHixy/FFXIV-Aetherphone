@@ -824,7 +824,7 @@ public sealed class BlackjackTableLayoutTests
             && inner.Min.Y >= outer.Min.Y - Epsilon && inner.Max.Y <= outer.Max.Y + Epsilon;
     }
 
-    private static BlackjackTableLayout Compute(float scale, float width, float height, int railCount, bool seated)
+    internal static BlackjackTableLayout Compute(float scale, float width, float height, int railCount, bool seated)
     {
         var origin = new Vector2(40f, 120f);
         var felt = new Rect(origin, origin + new Vector2(width, height) * scale);
