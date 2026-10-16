@@ -7788,6 +7788,7 @@
   "changelog.r1310.4": "Corregido que una app soltada fuera de una carpeta abierta volviera a su sitio por debajo de la carpeta en lugar de por encima, contribuido por hellovvn",
   "changelog.r1310.5": "Corregido que los botones de las pantallas vacías y los enlaces Atrás de las apps usaran el color de acento del sistema en lugar del color de la app, contribuido por t3sco",
   "changelog.r1310.6": "Corregidas las marcas tenues a lo largo de los anillos de progreso, contribuido por t3sco",
+  "changelog.r1310.34": "Corregido que el teléfono se alejara un poco más de su sitio cada vez que se minimizaba y se volvía a abrir",
   "changelog.r1310.7": "Se añadió «Avanzar publicaciones automáticamente» en Ajustes > General: el feed pasa solo a la siguiente publicación tras 3 a 30 segundos sin actividad, desactivado por defecto, contribuido por t3sco",
   "changelog.r1310.8": "Se añadió «Barra de información del servidor» en Ajustes > General: muestra el teléfono como icono, como texto o con ambos, y cambia el texto, contribuido por t3sco",
   "changelog.r1310.9": "Se añadió un botón «Abrir Ajustes» a Chirper y Aethergram cuando no has iniciado sesión, contribuido por t3sco",

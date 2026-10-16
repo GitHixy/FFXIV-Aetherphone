@@ -7788,6 +7788,7 @@
   "changelog.r1310.4": "Behoben, dass eine außerhalb eines geöffneten Ordners losgelassene App unter den Ordner statt darüber zurückglitt, beigetragen von hellovvn",
   "changelog.r1310.5": "Behoben, dass Schaltflächen auf leeren Seiten und Zurück-Links in Apps die Systemakzentfarbe statt der Farbe der App nutzten, beigetragen von t3sco",
   "changelog.r1310.6": "Behoben, dass Fortschrittsringe feine Nähte zeigten, beigetragen von t3sco",
+  "changelog.r1310.34": "Behoben, dass das Telefon bei jedem Minimieren und Zurückholen ein Stück weiter von seinem Platz wanderte",
   "changelog.r1310.7": "„Beiträge automatisch weiterblättern“ unter Einstellungen > Allgemein hinzugefügt: Ein Feed springt nach 3 bis 30 Sekunden ohne Eingabe von selbst zum nächsten Beitrag, standardmäßig aus, beigetragen von t3sco",
   "changelog.r1310.8": "„Server-Infoleiste“ unter Einstellungen > Allgemein hinzugefügt: Das Telefon erscheint als Symbol, als Text oder als beides, und der Text lässt sich ändern, beigetragen von t3sco",
   "changelog.r1310.9": "Schaltfläche „Einstellungen öffnen“ zu Chirper und Aethergram im abgemeldeten Zustand hinzugefügt, beigetragen von t3sco",
