@@ -22,6 +22,10 @@ internal sealed class CasinoTradeSync : IDisposable
 {
     public const long RecordedShownMilliseconds = 8_000;
 
+    public const long HostedWindowMilliseconds = CasinoHostingRules.TradeClosedTableHours * 3_600_000L;
+
+    private const long HostingCheckMilliseconds = 1_000;
+
     private static readonly int[] RetryDelaysMilliseconds = { 2_000, 5_000, 10_000 };
 
     private readonly Configuration configuration;
@@ -42,6 +46,8 @@ internal sealed class CasinoTradeSync : IDisposable
     private volatile bool undoing;
     private bool sending;
     private bool tracking;
+    private long hostingCheckedAtTick;
+    private long hostedAtTick;
     private string accountId = string.Empty;
 
     public CasinoTradeSync(Configuration configuration, AethernetSession session, CasinoClient casino,
@@ -133,18 +139,38 @@ internal sealed class CasinoTradeSync : IDisposable
         }
 
         Send();
-        if (!configuration.CasinoHostTradeSync)
+        var nowTick = Environment.TickCount64;
+        if (!configuration.CasinoHostTradeSync || !Hosting(nowTick))
         {
             StopTracking();
             return;
         }
 
         tracking = true;
-        var completion = tracker.Observe(reader.Sample(), Environment.TickCount64);
+        var completion = tracker.Observe(reader.Sample(), nowTick);
         if (completion is { } done)
         {
-            Completed(done);
+            Completed(done, nowTick);
         }
+    }
+
+    private bool Hosting(long nowTick)
+    {
+        if (nowTick - hostingCheckedAtTick >= HostingCheckMilliseconds)
+        {
+            hostingCheckedAtTick = nowTick;
+            if (HintTableId(nowTick).Length > 0)
+            {
+                hostedAtTick = nowTick;
+            }
+        }
+
+        return HostedRecently(hostedAtTick, nowTick);
+    }
+
+    internal static bool HostedRecently(long hostedAtTick, long nowTick)
+    {
+        return hostedAtTick != 0 && nowTick - hostedAtTick <= HostedWindowMilliseconds;
     }
 
     private void StopTracking()
@@ -161,6 +187,8 @@ internal sealed class CasinoTradeSync : IDisposable
     private void SwitchAccount(string account)
     {
         accountId = account;
+        hostingCheckedAtTick = 0;
+        hostedAtTick = 0;
         tracker.Reset();
         if (pending.Count > 0)
         {
@@ -171,17 +199,17 @@ internal sealed class CasinoTradeSync : IDisposable
         recorded = null;
     }
 
-    private void Completed(in TradeCompletion completion)
+    private void Completed(in TradeCompletion completion, long nowTick)
     {
         var amount = Math.Abs(completion.Net);
+        var hint = HintTableId(nowTick);
         if (completion.PartnerName.Length == 0)
         {
             AepLog.Info($"[TradeSync] A trade of {amount} gil completed without a partner name, not recorded");
-            NotifyFailure(amount);
+            NotifyFailure(hint, amount);
             return;
         }
 
-        var hint = HintTableId();
         pending.Enqueue(new CasinoLedgerTradeRequest(Guid.NewGuid().ToString("N"), completion.PartnerName,
             completion.PartnerWorld, completion.Received, completion.Sent, hint));
         AepLog.Info($"[TradeSync] Trade completed: received {completion.Received} gil, sent {completion.Sent} gil, "
@@ -247,7 +275,7 @@ internal sealed class CasinoTradeSync : IDisposable
         if (result is null)
         {
             AepLog.Info($"[TradeSync] Gave up recording a trade of {amount} gil after every retry");
-            NotifyFailure(amount);
+            NotifyFailure(request.TableId, amount);
             return;
         }
 
@@ -257,7 +285,7 @@ internal sealed class CasinoTradeSync : IDisposable
             if (!string.Equals(result.Reason, CasinoReasons.NoGilTable, StringComparison.Ordinal)
                 && !string.Equals(result.Reason, CasinoReasons.ConfigInvalid, StringComparison.Ordinal))
             {
-                NotifyFailure(amount);
+                NotifyFailure(request.TableId, amount);
             }
 
             return;
@@ -290,15 +318,15 @@ internal sealed class CasinoTradeSync : IDisposable
         return name.Length > 0 ? name : request.PartnerName;
     }
 
-    private string HintTableId()
+    private string HintTableId(long nowTick)
     {
-        var view = venue.View;
-        if (view is not null && view.Gil && OwnsGil(view.RoomId))
+        var roomId = venue.Rooms.Room.RoomId;
+        if (OwnsGil(roomId))
         {
-            return view.RoomId;
+            return roomId;
         }
 
-        var attended = tables.AttendedTableId(Environment.TickCount64);
+        var attended = tables.AttendedTableId(nowTick);
         return OwnsGil(attended) ? attended : string.Empty;
     }
 
@@ -326,8 +354,13 @@ internal sealed class CasinoTradeSync : IDisposable
                 NumberText.Group(shown.Amount)));
     }
 
-    private void NotifyFailure(long amount)
+    private void NotifyFailure(string hintTableId, long amount)
     {
+        if (hintTableId.Length == 0)
+        {
+            return;
+        }
+
         Notify(string.Empty, Loc.T(L.Venue.TradeFailedTitle), Loc.T(L.Venue.TradeFailedBody, NumberText.Group(amount)));
     }
 
