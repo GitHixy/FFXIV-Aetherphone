@@ -29,8 +29,8 @@ internal sealed partial class DynamicIsland
         var player = suite.Player;
         var onScreen = string.Equals(foregroundAppId, IslandActivities.OwnerAppId(IslandActivity.Session),
             StringComparison.Ordinal);
-        return IslandActivities.VideoLive(suite.WatchAlong.InParty, player.HasMedia && !onScreen,
-            player.State == VideoPlaybackState.Playing, musicPlaying);
+        return IslandActivities.VideoLive(suite.WatchAlong.InParty, player.HasMedia && !onScreen, player.Unpaused,
+            musicPlaying);
     }
 
     private bool PcMediaPlaying()
@@ -61,7 +61,7 @@ internal sealed partial class DynamicIsland
         }
 
         Equalizer.Draw(drawList, new Vector2(trailingRight - 3f * scale, bounds.Center.Y), scale,
-            bounds.Height * 0.44f, clock, accent, alpha, suite.Player.State == VideoPlaybackState.Playing);
+            bounds.Height * 0.44f, clock, accent, alpha, suite.Player.Unpaused);
     }
 
     private bool DrawSessionExpanded(ImDrawListPtr drawList, Rect bounds, float scale, Vector4 accent, float alpha,
@@ -75,8 +75,7 @@ internal sealed partial class DynamicIsland
         var player = suite.Player;
         var progress = player.Progress;
         var media = IslandMedia.ForVideo(SessionTitle(suite), SessionSubtitle(suite), progress.Position,
-            progress.Duration, player.HasMedia, player.State == VideoPlaybackState.Playing, CanDriveVideo(suite),
-            VideoHasNext(suite));
+            progress.Duration, player.HasMedia, player.Unpaused, CanDriveVideo(suite), VideoHasNext(suite));
         var artCenter = MediaArtCenter(bounds, scale);
         DrawSessionArt(drawList, artCenter, CardIconRadius * scale, suite, accent, alpha);
         return DrawMediaCard(drawList, bounds, artCenter, media, IslandMediaSource.Video, scale, accent, alpha,
