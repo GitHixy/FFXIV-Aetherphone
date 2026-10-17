@@ -89,6 +89,7 @@ internal sealed partial class FishingApp
     private string shownProgressLanguage = string.Empty;
     private string progressText = string.Empty;
     private bool fishListDirty = true;
+    private bool scrollFishListToTop;
     private int builtCaughtVersion = -1;
     private int builtAlarmCount = -1;
     private float sinceListBuild;
@@ -97,6 +98,12 @@ internal sealed partial class FishingApp
     {
         using var id = ImRaii.PushId("fishing.fish");
         using var surface = AppSurface.Begin(body);
+        if (scrollFishListToTop)
+        {
+            ImGui.SetScrollY(0f);
+            scrollFishListToTop = false;
+        }
+
         DrawSearch(scale);
         var state = catalog.State;
         if (state == FishingCatalogState.Failed)
