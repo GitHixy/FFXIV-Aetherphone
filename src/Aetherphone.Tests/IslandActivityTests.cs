@@ -21,16 +21,98 @@ public sealed class IslandActivityTests
             IslandActivities.ExpandedHeightUnits(IslandActivity.Playback));
         Assert.Equal(IslandActivities.PlaybackCardHeightUnits,
             IslandActivities.ExpandedHeightUnits(IslandActivity.PcMedia));
+        Assert.Equal(IslandActivities.PlaybackCardHeightUnits,
+            IslandActivities.ExpandedHeightUnits(IslandActivity.Session));
         Assert.True(IslandActivities.PlaybackCardHeightUnits > IslandActivities.CardHeightUnits);
         for (var activity = IslandActivity.None; activity <= IslandActivity.Fishing; activity++)
         {
-            if (activity is IslandActivity.Playback or IslandActivity.PcMedia)
+            if (activity is IslandActivity.Playback or IslandActivity.PcMedia or IslandActivity.Session)
             {
                 continue;
             }
 
             Assert.Equal(IslandActivities.CardHeightUnits, IslandActivities.ExpandedHeightUnits(activity));
         }
+    }
+
+    [Theory]
+    [InlineData(true, false, false, true, true)]
+    [InlineData(false, true, true, true, true)]
+    [InlineData(false, true, false, false, true)]
+    [InlineData(false, true, false, true, false)]
+    [InlineData(false, false, false, false, false)]
+    public void VideoShowsWhenPlayingInAPartyOrWhenNoMusicPlays(bool inParty, bool loaded, bool playing,
+        bool musicPlaying, bool expected)
+    {
+        Assert.Equal(expected, IslandActivities.VideoLive(inParty, loaded, playing, musicPlaying));
+    }
+
+    [Fact]
+    public void PlayingVideoOutranksPhoneMusic()
+    {
+        var session = IslandActivities.VideoLive(false, true, true, true);
+
+        Assert.Equal(IslandActivity.Session,
+            IslandActivities.Select(new IslandSignals(false, session, true, false, false)));
+    }
+
+    [Fact]
+    public void PausedVideoGivesWayToPlayingMusic()
+    {
+        var session = IslandActivities.VideoLive(false, true, false, true);
+
+        Assert.Equal(IslandActivity.Playback,
+            IslandActivities.Select(new IslandSignals(false, session, true, false, false)));
+    }
+
+    [Fact]
+    public void DrivableVideoCarriesSeekPlayPauseAndNext()
+    {
+        var media = IslandMedia.ForVideo("Video", "Site", 30f, 600f, true, true, true, true);
+
+        Assert.True(media.HasTimeline);
+        Assert.True(media.Has(IslandMediaControls.Playing | IslandMediaControls.PlayPause |
+                              IslandMediaControls.Seek | IslandMediaControls.Next));
+        Assert.False(media.Has(IslandMediaControls.Previous));
+        Assert.False(media.Has(IslandMediaControls.Shuffle));
+        Assert.False(media.Has(IslandMediaControls.Repeat));
+    }
+
+    [Fact]
+    public void GuestWithoutControlSeesAReadOnlyTimeline()
+    {
+        var media = IslandMedia.ForVideo("Video", "Party", 30f, 600f, true, true, false, true);
+
+        Assert.True(media.HasTimeline);
+        Assert.Equal(IslandMediaControls.Playing, media.Controls);
+    }
+
+    [Fact]
+    public void LiveStreamHidesTheTimelineButKeepsPlayPause()
+    {
+        var media = IslandMedia.ForVideo("Stream", "Site", 42f, 0f, true, true, true, false);
+
+        Assert.False(media.HasTimeline);
+        Assert.Equal(0f, media.Position);
+        Assert.True(media.Has(IslandMediaControls.PlayPause));
+        Assert.False(media.Has(IslandMediaControls.Seek));
+        Assert.False(media.Has(IslandMediaControls.Next));
+    }
+
+    [Fact]
+    public void PartyWithoutAVideoOffersNoControls()
+    {
+        var media = IslandMedia.ForVideo("MogCast", "Hosting", 0f, 0f, false, false, true, true);
+
+        Assert.False(media.HasTimeline);
+        Assert.Equal(IslandMediaControls.None, media.Controls);
+    }
+
+    [Fact]
+    public void VideoPositionStaysInsideItsDuration()
+    {
+        Assert.Equal(600f, IslandMedia.ForVideo("Video", "Site", 640f, 600f, true, true, true, false).Position);
+        Assert.Equal(0f, IslandMedia.ForVideo("Video", "Site", -3f, 600f, true, true, true, false).Position);
     }
 
     [Theory]

@@ -63,6 +63,6 @@ internal sealed partial class DynamicIsland
         var side = radius * 2f;
         PcMediaView.DrawArt(drawList, artCenter - new Vector2(radius, radius), side, side * ArtRadiusFraction,
             pcMedia.Artwork(pcSnapshot, side), pcSnapshot, accent, alpha);
-        return DrawMediaCard(drawList, bounds, artCenter, media, true, scale, accent, alpha, active);
+        return DrawMediaCard(drawList, bounds, artCenter, media, IslandMediaSource.Pc, scale, accent, alpha, active);
     }
 }

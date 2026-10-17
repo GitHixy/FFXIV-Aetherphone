@@ -4,7 +4,9 @@ using Aetherphone.Core.Apps;
 using Aetherphone.Core.Fishing;
 using Aetherphone.Core.Home;
 using Aetherphone.Core.Localization;
+using Aetherphone.Core.Media;
 using Aetherphone.Core.Muster;
+using Aetherphone.Core.Net;
 using Aetherphone.Core.Notifications;
 using Aetherphone.Core.Playback;
 using Aetherphone.Core.SystemMedia;
@@ -102,9 +104,12 @@ internal sealed partial class DynamicIsland
 
     public DynamicIsland(PlaybackHub playback, CallHub calls, Configuration configuration, AppInstaller installer,
         VideoSuite? video, MusterStore? musters, MusterLauncher? musterLauncher, PcMediaSource? pcMedia,
-        GameTimers? gameTimers = null, FishingAlerts? fishing = null)
+        GameTimers? gameTimers = null, FishingAlerts? fishing = null, RemoteImageCache? images = null,
+        HttpService? http = null)
     {
         this.installer = installer;
+        this.images = images;
+        this.http = http;
         this.gameTimers = gameTimers;
         this.fishing = fishing;
         this.playback = playback;
@@ -157,7 +162,7 @@ internal sealed partial class DynamicIsland
     public void Draw(Rect screen, PhoneTheme theme, INavigator navigation, string? foregroundAppId)
     {
         var view = calls.Snapshot();
-        var signals = ReadSignals(view);
+        var signals = ReadSignals(view, foregroundAppId);
         var selected = IslandActivities.Select(signals);
         var primary = selected != IslandActivity.Call && ImGui.GetTime() < noticeUntil
             ? IslandActivity.Notice
@@ -195,10 +200,12 @@ internal sealed partial class DynamicIsland
         }
     }
 
-    private IslandSignals ReadSignals(in CallView view)
+    private IslandSignals ReadSignals(in CallView view, string? foregroundAppId)
     {
         var call = view.State is CallState.Ringing or CallState.Dialing or CallState.Connecting or CallState.Active;
-        var session = Allows(IslandActivity.Session) && video is { } suite && suite.WatchAlong.InParty;
+        var music = Allows(IslandActivity.Playback);
+        var phonePlayback = music && playback.IsActive;
+        var session = ReadVideo(foregroundAppId, music && (playback.IsPlaying || PcMediaPlaying()));
         var nowUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         upcomingMuster = Allows(IslandActivity.Muster) && musters is { } store
             ? IslandActivities.SoonestMuster(store.GoingMusters, store.Mine, nowUnix)
@@ -206,8 +213,6 @@ internal sealed partial class DynamicIsland
         upcomingGameTimer = Allows(IslandActivity.GameTimer) && gameTimers is { Enabled: true } timers
             ? TimerBoard.Tally(timers.Characters, timers.Workshops, nowUnix).Soonest
             : default;
-        var music = Allows(IslandActivity.Playback);
-        var phonePlayback = music && playback.IsActive;
         var pcMediaLive = music && ReadPcMedia(call || session || phonePlayback);
         var timer = Allows(IslandActivity.Timer) && TimerRemainingSeconds() > 0;
         var fishingLive = Allows(IslandActivity.Fishing) && fishing is { Island.Kind: not FishingIslandKind.None };
@@ -455,28 +460,6 @@ internal sealed partial class DynamicIsland
         return viewersCachedText;
     }
 
-    private static string SessionTitle(VideoSuite suite)
-    {
-        var entry = suite.WatchAlong.IsViewing ? suite.WatchAlong.ViewingEntry : suite.Queue.Current;
-        return entry is { Title.Length: > 0 } ? entry.Title : Loc.T(L.Apps.AetherStream);
-    }
-
-    private string SessionStatus(VideoSuite suite)
-    {
-        if (suite.Player.State == VideoPlaybackState.Paused)
-        {
-            return Loc.T(L.Music.Paused);
-        }
-
-        var count = suite.WatchAlong.Roster.Count;
-        if (count > 1)
-        {
-            return ViewersText(count);
-        }
-
-        return suite.WatchAlong.IsHosting ? Loc.T(L.Island.Hosting) : Loc.T(L.Island.Watching);
-    }
-
     private void DrawCompact(ImDrawListPtr drawList, Rect bounds, float scale, in CallView view, Vector4 accent,
         float alpha)
     {
@@ -497,8 +480,8 @@ internal sealed partial class DynamicIsland
                     trailingMaxWidth, Ink, alpha);
                 break;
             case IslandActivity.Session:
-                DrawIconBubble(drawList, bubbleCenter, bubbleRadius, FontAwesomeIcon.Tv, accent, alpha);
-                DrawLiveLabel(drawList, trailingRight, bounds.Center.Y, trailingMaxWidth, scale, accent, alpha);
+                DrawSessionCompact(drawList, bubbleCenter, bubbleRadius, trailingRight, trailingMaxWidth, bounds,
+                    scale, accent, alpha);
                 break;
             case IslandActivity.Playback:
                 DrawPlaybackArt(drawList, CompactArtCenter(bubbleCenter, scale), bubbleRadius * CompactArtFraction,
@@ -665,23 +648,8 @@ internal sealed partial class DynamicIsland
                 break;
             }
             case IslandActivity.Session:
-            {
-                if (video is not { } suite)
-                {
-                    break;
-                }
-
-                DrawIconBubble(drawList, iconCenter, iconRadius, FontAwesomeIcon.Tv, accent, alpha);
-                DrawLines(drawList, SessionTitle(suite), TextStyles.Headline, Ink, SessionStatus(suite),
-                    TextStyles.Subheadline, accent, textLeft, textWidth, centerY, scale, alpha, true);
-                if (RoundButton(drawList, controlCenter, controlRadius, FontAwesomeIcon.ArrowRight, controlFill, Ink,
-                        alpha, active))
-                {
-                    OpenOwner(navigation);
-                }
-
+                overControl = DrawSessionExpanded(drawList, bounds, scale, accent, alpha, active);
                 break;
-            }
             case IslandActivity.Playback:
                 overControl = DrawPlaybackExpanded(drawList, bounds, scale, accent, alpha, active);
                 break;

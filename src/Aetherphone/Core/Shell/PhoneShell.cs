@@ -97,7 +97,8 @@ internal sealed class PhoneShell : IDisposable
         notifications.Vibration += OnVibration;
         island = new DynamicIsland(services.Playback, calls, configuration, services.Installer, bundle.Video,
             services.Musters,
-            services.MusterLauncher, services.PcMedia, services.GameTimers, services.FishingAlerts);
+            services.MusterLauncher, services.PcMedia, services.GameTimers, services.FishingAlerts,
+            services.RemoteImages, services.Http);
         var rateLimitPill = new RateLimitPill(services.Http, services.AethernetSession);
         shortcutPill = new ShortcutRunPill(services.ShortcutRunner);
         coinPill = new CoinEarnPill(services.Coins, configuration);

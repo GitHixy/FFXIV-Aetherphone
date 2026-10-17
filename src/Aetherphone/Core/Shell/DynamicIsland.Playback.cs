@@ -24,10 +24,10 @@ internal sealed partial class DynamicIsland
     private const string RepeatOneLabel = "1";
 
     private bool playbackScrubbing;
-    private bool playbackScrubPc;
+    private IslandMediaSource playbackScrubSource;
     private float playbackScrubValue;
     private SeekHold playbackSeekHold;
-    private bool playbackSeekHoldPc;
+    private IslandMediaSource playbackSeekHoldSource;
 
     private enum MediaCommand : byte
     {
@@ -45,7 +45,8 @@ internal sealed partial class DynamicIsland
             playback.IsPlaying, playback.SongActive, playback.ShuffleEnabled, playback.RepeatMode);
         var artCenter = MediaArtCenter(bounds, scale);
         DrawPlaybackArt(drawList, artCenter, CardIconRadius * scale, alpha);
-        return DrawMediaCard(drawList, bounds, artCenter, media, false, scale, accent, alpha, active);
+        return DrawMediaCard(drawList, bounds, artCenter, media, IslandMediaSource.Phone, scale, accent, alpha,
+            active);
     }
 
     private static Vector2 MediaArtCenter(Rect bounds, float scale)
@@ -55,8 +56,8 @@ internal sealed partial class DynamicIsland
             bounds.Min.Y + PlaybackCardPadY * scale + iconRadius);
     }
 
-    private bool DrawMediaCard(ImDrawListPtr drawList, Rect bounds, Vector2 artCenter, in IslandMedia media, bool pc,
-        float scale, Vector4 accent, float alpha, bool active)
+    private bool DrawMediaCard(ImDrawListPtr drawList, Rect bounds, Vector2 artCenter, in IslandMedia media,
+        IslandMediaSource source, float scale, Vector4 accent, float alpha, bool active)
     {
         var iconRadius = CardIconRadius * scale;
         var textLeft = artCenter.X + iconRadius + CardTextGap * scale;
@@ -69,7 +70,8 @@ internal sealed partial class DynamicIsland
         if (media.HasTimeline)
         {
             var trackY = artBottom + PlaybackTrackGap * scale;
-            overTimeline = DrawPlaybackTimeline(drawList, bounds, trackY, media, pc, scale, accent, alpha, active);
+            overTimeline = DrawPlaybackTimeline(drawList, bounds, trackY, media, source, scale, accent, alpha,
+                active);
             transportY = trackY + PlaybackTransportGap * scale;
         }
         else
@@ -79,22 +81,22 @@ internal sealed partial class DynamicIsland
         }
 
         var center = new Vector2(bounds.Center.X, transportY);
-        var overTransport = DrawPlaybackTransport(drawList, center, media, pc, scale, accent, alpha, active);
-        var overModes = DrawPlaybackModes(drawList, center, media, pc, scale, accent, alpha, active);
+        var overTransport = DrawPlaybackTransport(drawList, center, media, source, scale, accent, alpha, active);
+        var overModes = DrawPlaybackModes(drawList, center, media, source, scale, accent, alpha, active);
         return overTimeline || overTransport || overModes;
     }
 
     private bool DrawPlaybackTimeline(ImDrawListPtr drawList, Rect bounds, float centerY, in IslandMedia media,
-        bool pc, float scale, Vector4 accent, float alpha, bool active)
+        IslandMediaSource source, float scale, Vector4 accent, float alpha, bool active)
     {
         var padX = CardPadX * scale;
         var duration = media.Duration;
-        if (playbackScrubbing && playbackScrubPc != pc)
+        if (playbackScrubbing && playbackScrubSource != source)
         {
             playbackScrubbing = false;
         }
 
-        if (playbackSeekHold.Active && playbackSeekHoldPc != pc)
+        if (playbackSeekHold.Active && playbackSeekHoldSource != source)
         {
             playbackSeekHold.Clear();
         }
@@ -138,7 +140,7 @@ internal sealed partial class DynamicIsland
         if ((wasScrubbing || hovered) && ImGui.IsMouseDown(ImGuiMouseButton.Left))
         {
             playbackScrubbing = true;
-            playbackScrubPc = pc;
+            playbackScrubSource = source;
             playbackScrubValue = updated;
             UiInteract.CancelPendingTap();
         }
@@ -146,9 +148,9 @@ internal sealed partial class DynamicIsland
         {
             playbackScrubbing = false;
             var target = playbackScrubValue * duration;
-            SeekMedia(pc, target);
+            SeekMedia(source, target);
             playbackSeekHold.Begin(target, now);
-            playbackSeekHoldPc = pc;
+            playbackSeekHoldSource = source;
             UiInteract.CancelPendingTap();
         }
 
@@ -164,8 +166,8 @@ internal sealed partial class DynamicIsland
         drawList.AddRectFilled(track.Min, fillMax, ImGui.GetColorU32(Palette.WithAlpha(accent, alpha)), rounding);
     }
 
-    private bool DrawPlaybackTransport(ImDrawListPtr drawList, Vector2 center, in IslandMedia media, bool pc,
-        float scale, Vector4 accent, float alpha, bool active)
+    private bool DrawPlaybackTransport(ImDrawListPtr drawList, Vector2 center, in IslandMedia media,
+        IslandMediaSource source, float scale, Vector4 accent, float alpha, bool active)
     {
         var sideRadius = IslandActivities.SideControlRadiusUnits * scale;
         var playRadius = CardControlRadius * scale;
@@ -177,7 +179,7 @@ internal sealed partial class DynamicIsland
         if (media.Has(IslandMediaControls.Previous) && TransportButton.Draw(previousCenter, sideRadius,
                 TransportAction.Previous, accent, Ink, alpha, active, drawList))
         {
-            RunMedia(MediaCommand.Previous, pc);
+            RunMedia(MediaCommand.Previous, source);
         }
 
         drawList.AddCircleFilled(center, playRadius,
@@ -188,20 +190,20 @@ internal sealed partial class DynamicIsland
         if (TransportButton.Draw(center, playRadius, playAction, accent, Ink, playAlpha, active && canToggle,
                 drawList))
         {
-            RunMedia(MediaCommand.PlayPause, pc);
+            RunMedia(MediaCommand.PlayPause, source);
         }
 
         if (media.Has(IslandMediaControls.Next) && TransportButton.Draw(nextCenter, sideRadius, TransportAction.Next,
                 accent, Ink, alpha, active, drawList))
         {
-            RunMedia(MediaCommand.Next, pc);
+            RunMedia(MediaCommand.Next, source);
         }
 
         return overControl;
     }
 
-    private bool DrawPlaybackModes(ImDrawListPtr drawList, Vector2 center, in IslandMedia media, bool pc,
-        float scale, Vector4 accent, float alpha, bool active)
+    private bool DrawPlaybackModes(ImDrawListPtr drawList, Vector2 center, in IslandMedia media,
+        IslandMediaSource source, float scale, Vector4 accent, float alpha, bool active)
     {
         var radius = IslandActivities.ModeRadiusUnits * scale;
         var offset = new Vector2(IslandActivities.ModeStrideUnits * scale, 0f);
@@ -212,7 +214,7 @@ internal sealed partial class DynamicIsland
                     media.Has(IslandMediaControls.ShuffleActive), false, scale, accent, alpha, active,
                     out var shuffleHovered))
             {
-                RunMedia(MediaCommand.Shuffle, pc);
+                RunMedia(MediaCommand.Shuffle, source);
             }
 
             over |= shuffleHovered;
@@ -223,7 +225,7 @@ internal sealed partial class DynamicIsland
             if (DrawPlaybackMode(drawList, center + offset, radius, true, media.Has(IslandMediaControls.RepeatActive),
                     media.Has(IslandMediaControls.RepeatOne), scale, accent, alpha, active, out var repeatHovered))
             {
-                RunMedia(MediaCommand.Repeat, pc);
+                RunMedia(MediaCommand.Repeat, source);
             }
 
             over |= repeatHovered;
@@ -271,23 +273,32 @@ internal sealed partial class DynamicIsland
         return UiInteract.Click(center - reach, center + reach, hovered);
     }
 
-    private void SeekMedia(bool pc, float seconds)
+    private void SeekMedia(IslandMediaSource source, float seconds)
     {
-        if (pc)
+        switch (source)
         {
-            pcMedia?.Seek(TimeSpan.FromSeconds(seconds));
-            return;
+            case IslandMediaSource.Pc:
+                pcMedia?.Seek(TimeSpan.FromSeconds(seconds));
+                return;
+            case IslandMediaSource.Video:
+                SeekVideo(seconds);
+                return;
+            default:
+                playback.Seek(seconds);
+                return;
         }
-
-        playback.Seek(seconds);
     }
 
-    private void RunMedia(MediaCommand command, bool pc)
+    private void RunMedia(MediaCommand command, IslandMediaSource source)
     {
-        if (pc)
+        switch (source)
         {
-            RunPcMedia(command);
-            return;
+            case IslandMediaSource.Pc:
+                RunPcMedia(command);
+                return;
+            case IslandMediaSource.Video:
+                RunVideo(command);
+                return;
         }
 
         switch (command)
