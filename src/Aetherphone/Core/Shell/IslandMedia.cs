@@ -19,6 +19,13 @@ internal enum IslandMediaControls : ushort
     RepeatOne = 1 << 9,
 }
 
+internal enum IslandMediaSource : byte
+{
+    Phone,
+    Pc,
+    Video,
+}
+
 internal readonly record struct IslandMedia(string Title, string Subtitle, float Position, float Duration,
     IslandMediaControls Controls)
 {
@@ -72,6 +79,19 @@ internal readonly record struct IslandMedia(string Title, string Subtitle, float
 
         return new IslandMedia(title, subtitle, (float)snapshot.PositionAt(utcTicks).TotalSeconds,
             (float)snapshot.Duration.TotalSeconds, controls);
+    }
+
+    public static IslandMedia ForVideo(string title, string subtitle, float position, float duration, bool loaded,
+        bool playing, bool canDrive, bool hasNext)
+    {
+        var drivable = loaded && canDrive;
+        var controls = When(loaded && playing, IslandMediaControls.Playing) |
+                       When(drivable, IslandMediaControls.PlayPause) |
+                       When(drivable && hasNext, IslandMediaControls.Next) |
+                       When(drivable && duration > 0f, IslandMediaControls.Seek);
+        return loaded && duration > 0f
+            ? new IslandMedia(title, subtitle, Math.Clamp(position, 0f, duration), duration, controls)
+            : new IslandMedia(title, subtitle, 0f, 0f, controls);
     }
 
     private static IslandMediaControls When(bool condition, IslandMediaControls control) =>

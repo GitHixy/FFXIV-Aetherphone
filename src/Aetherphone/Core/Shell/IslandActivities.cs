@@ -40,7 +40,12 @@ internal static class IslandActivities
     public const float ModeRadiusUnits = SideControlRadiusUnits;
 
     public static float ExpandedHeightUnits(IslandActivity activity) =>
-        activity is IslandActivity.Playback or IslandActivity.PcMedia ? PlaybackCardHeightUnits : CardHeightUnits;
+        activity is IslandActivity.Playback or IslandActivity.PcMedia or IslandActivity.Session
+            ? PlaybackCardHeightUnits
+            : CardHeightUnits;
+
+    public static bool VideoLive(bool inParty, bool videoLoaded, bool videoPlaying, bool musicPlaying) =>
+        inParty || (videoLoaded && (videoPlaying || !musicPlaying));
 
     public static float CornerRadius(float height, float scale) =>
         MathF.Min(height * 0.5f, CardHeightUnits * 0.5f * scale);
