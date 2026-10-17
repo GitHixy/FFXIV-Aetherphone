@@ -6,7 +6,13 @@ namespace Aetherphone.Tests;
 
 public sealed class ResumableAppsTests
 {
+    private const ulong CharacterA = 1001;
+    private const ulong CharacterB = 2002;
+    private const ulong AccountA = 1001;
+    private const ulong AccountB = 2002;
+    private const long ClosedAt = 50_000;
     private static readonly string[] RestartFreshAppIds = { "camera", "casino", "games" };
+    private static readonly ResumeStamp Closed = new(ClosedAt, CharacterA, AccountA);
 
     [Fact]
     public void EveryApp_ResumesWhereItWasLeft_ExceptTheOnesThatRestartFresh()
@@ -39,6 +45,52 @@ public sealed class ResumableAppsTests
         }
 
         Assert.Fail($"'{appId}' is not registered");
+    }
+
+    [Theory]
+    [InlineData("camera")]
+    [InlineData("casino")]
+    [InlineData("games")]
+    public void RestartFreshApp_KeepsASwitcherCardButNeverResumes(string appId)
+    {
+        var resumable = typeof(IResumableApp).IsAssignableFrom(TypeOf(appId));
+        Assert.True(NavigationStack.ListsCard(Closed, ClosedAt + 1, CharacterA, AccountA));
+        Assert.False(NavigationStack.Resumes(resumable, true, Closed, true, ClosedAt + 1, CharacterA, AccountA));
+        Assert.False(NavigationStack.Resumes(resumable, true, Closed, false, ClosedAt + 1, CharacterA, AccountA));
+    }
+
+    [Fact]
+    public void RestartFreshCard_DropsOutAfterTheWindowOrACharacterOrAccountSwitch()
+    {
+        Assert.False(NavigationStack.ListsCard(Closed, ClosedAt + ResumeStamp.WindowMilliseconds + 1, CharacterA,
+            AccountA));
+        Assert.False(NavigationStack.ListsCard(Closed, ClosedAt + 1, CharacterB, AccountA));
+        Assert.False(NavigationStack.ListsCard(Closed, ClosedAt + 1, CharacterA, AccountB));
+    }
+
+    [Fact]
+    public void ResumableApp_ResumesFromItsCardAndThroughBack()
+    {
+        Assert.True(NavigationStack.Resumes(true, true, Closed, true, ClosedAt + 1, CharacterA, AccountA));
+        Assert.False(NavigationStack.Resumes(true, true, Closed, true,
+            ClosedAt + ResumeStamp.WindowMilliseconds + 1, CharacterA, AccountA));
+        Assert.True(NavigationStack.Resumes(true, true, Closed, false,
+            ClosedAt + ResumeStamp.WindowMilliseconds + 1, CharacterA, AccountA));
+        Assert.False(NavigationStack.Resumes(true, true, Closed, false, ClosedAt + 1, CharacterB, AccountA));
+    }
+
+    private static Type TypeOf(string appId)
+    {
+        var apps = RegisteredApps();
+        for (var index = 0; index < apps.Count; index++)
+        {
+            if (apps[index].Id == appId)
+            {
+                return apps[index].Type;
+            }
+        }
+
+        throw new InvalidOperationException($"'{appId}' is not registered");
     }
 
     private static List<(string Id, Type Type)> RegisteredApps()
