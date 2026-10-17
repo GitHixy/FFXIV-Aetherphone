@@ -14,7 +14,7 @@ using Dalamud.Bindings.ImGui;
 
 namespace Aetherphone.Apps.Collections;
 
-internal sealed partial class CollectionsApp : IPhoneApp
+internal sealed partial class CollectionsApp : IResumableApp
 {
     private const float IconFadeSeconds = 0.22f;
     private const float SpinnerRadius = 9f;
@@ -67,6 +67,7 @@ internal sealed partial class CollectionsApp : IPhoneApp
     {
         router.Reset();
         ResetCategoryState();
+        iconFade.Clear();
         rootQuery = string.Empty;
         sortSheet.Close();
         tracking = IsPresent();
@@ -91,13 +92,9 @@ internal sealed partial class CollectionsApp : IPhoneApp
         }
     }
 
-    public void OnClosed()
-    {
-        router.Reset();
-        sortSheet.Close();
-        iconFade.Clear();
-        ResetCategoryState();
-    }
+    public void OnResumed() => digest.Invalidate();
+
+    public void OnClosed() => sortSheet.Close();
 
     public void Draw(in PhoneContext context)
     {
