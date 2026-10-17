@@ -3648,6 +3648,8 @@
   "fishing.catchSection": "釣り方",
   "fishing.locationSection": "釣り場",
   "fishing.showOnMap": "マップで表示",
+  "fishing.teleport": "テレポ",
+  "fishing.equipFisher": "漁師に着替える",
   "dailies.daily": "デイリー",
   "dailies.weekly": "ウィークリー",
   "dailies.allDone": "すべて完了",

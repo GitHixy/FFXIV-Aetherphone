@@ -3648,6 +3648,8 @@
   "fishing.catchSection": "How to catch",
   "fishing.locationSection": "Location",
   "fishing.showOnMap": "Show on map",
+  "fishing.teleport": "Teleport",
+  "fishing.equipFisher": "Equip Fisher",
   "dailies.daily": "Daily",
   "dailies.weekly": "Weekly",
   "dailies.allDone": "All done",

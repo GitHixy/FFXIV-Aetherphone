@@ -3648,6 +3648,8 @@
   "fishing.catchSection": "Nasıl yakalanır",
   "fishing.locationSection": "Konum",
   "fishing.showOnMap": "Haritada göster",
+  "fishing.teleport": "Işınlan",
+  "fishing.equipFisher": "Balıkçıya geç",
   "dailies.daily": "Günlük",
   "dailies.weekly": "Haftalık",
   "dailies.allDone": "Hepsi tamam",

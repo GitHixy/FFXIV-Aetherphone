@@ -1281,7 +1281,7 @@ internal sealed class ChatTranscript
                     HoverLabelSide.Above);
                 if (UiInteract.Click(travelMin, travelMax, true, false))
                 {
-                    StartTravel(in destination);
+                    TeleportActions.Travel(in destination);
                 }
             }
         }
@@ -1309,24 +1309,6 @@ internal sealed class ChatTranscript
 
         var chipRow = DrawReactionChips(drawList, message, mine, bubbleMin, bubbleMax, fx.Alpha, model, scale);
         ImGui.SetCursorScreenPos(new Vector2(start.X, start.Y + bubbleHeight + chipRow + BubbleGap * scale));
-    }
-
-    private static void StartTravel(in TravelDestination destination)
-    {
-        var outcome = TravelPlanner.Go(in destination);
-        if (outcome == LifestreamOutcome.Started)
-        {
-            return;
-        }
-
-        if (outcome == LifestreamOutcome.NotInstalled)
-        {
-            ImGui.SetClipboardText(TravelPlanner.Command(in destination));
-            ShellToast.Show();
-            return;
-        }
-
-        ShellToast.Show(TravelPlanner.Notice(outcome, in destination));
     }
 
     private void DrawMusterBubble(TranscriptMessage message, int index, string musterId, in ChatTranscriptModel model)

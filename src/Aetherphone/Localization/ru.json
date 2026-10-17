@@ -3648,6 +3648,8 @@
   "fishing.catchSection": "Как поймать",
   "fishing.locationSection": "Место",
   "fishing.showOnMap": "Показать на карте",
+  "fishing.teleport": "Телепорт",
+  "fishing.equipFisher": "Сменить на рыбака",
   "dailies.daily": "Ежедневные",
   "dailies.weekly": "Еженедельные",
   "dailies.allDone": "Всё выполнено",

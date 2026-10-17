@@ -3648,6 +3648,8 @@
   "fishing.catchSection": "Como pescar",
   "fishing.locationSection": "Local",
   "fishing.showOnMap": "Ver no mapa",
+  "fishing.teleport": "Teleportar",
+  "fishing.equipFisher": "Mudar para Pescador",
   "dailies.daily": "Diário",
   "dailies.weekly": "Semanal",
   "dailies.allDone": "Tudo concluído",
