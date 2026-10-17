@@ -9,9 +9,10 @@ namespace Aetherphone.Core.Notifications;
 internal sealed class SoundEffectPlayer : IDisposable
 {
     private readonly object gate = new();
-    private readonly List<IWavePlayer> oneShots = new();
+    private readonly List<OneShot> oneShots = new();
     private IWavePlayer? loopOutput;
     private WaveStream? loopReader;
+    private string? loopPath;
     private bool disposed;
 
     public void PlayOnce(string path, float volume)
@@ -24,25 +25,52 @@ internal sealed class SoundEffectPlayer : IDisposable
         thread.Start();
     }
 
-    public void StopOneShots()
+    public void StopOneShots() => StopOneShots(null);
+
+    public void Release(string path)
     {
-        IWavePlayer[] snapshot;
+        StopOneShots(path);
+        bool looping;
         lock (gate)
         {
-            if (oneShots.Count == 0)
-            {
-                return;
-            }
-
-            snapshot = oneShots.ToArray();
-            oneShots.Clear();
+            looping = string.Equals(loopPath, path, StringComparison.OrdinalIgnoreCase);
         }
 
-        for (var index = 0; index < snapshot.Length; index++)
+        if (looping)
+        {
+            StopLoop();
+        }
+    }
+
+    private void StopOneShots(string? path)
+    {
+        List<IWavePlayer>? stopping = null;
+        lock (gate)
+        {
+            for (var index = oneShots.Count - 1; index >= 0; index--)
+            {
+                if (path is not null &&
+                    !string.Equals(oneShots[index].Path, path, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                stopping ??= new List<IWavePlayer>();
+                stopping.Add(oneShots[index].Output);
+                oneShots.RemoveAt(index);
+            }
+        }
+
+        if (stopping is null)
+        {
+            return;
+        }
+
+        for (var index = 0; index < stopping.Count; index++)
         {
             try
             {
-                snapshot[index].Stop();
+                stopping[index].Stop();
             }
             catch (Exception exception)
             {
@@ -84,6 +112,7 @@ internal sealed class SoundEffectPlayer : IDisposable
 
             loopOutput = output;
             loopReader = reader;
+            loopPath = path;
         }
 
         output.Play();
@@ -99,6 +128,7 @@ internal sealed class SoundEffectPlayer : IDisposable
             reader = loopReader;
             loopOutput = null;
             loopReader = null;
+            loopPath = null;
         }
 
         if (output is null)
@@ -136,7 +166,7 @@ internal sealed class SoundEffectPlayer : IDisposable
                     return;
                 }
 
-                oneShots.Add(output);
+                oneShots.Add(new OneShot(output, path));
             }
 
             output.Play();
@@ -155,13 +185,25 @@ internal sealed class SoundEffectPlayer : IDisposable
             {
                 lock (gate)
                 {
-                    oneShots.Remove(output);
+                    RemoveOneShot(output);
                 }
 
                 output.Dispose();
             }
 
             reader?.Dispose();
+        }
+    }
+
+    private void RemoveOneShot(IWavePlayer output)
+    {
+        for (var index = 0; index < oneShots.Count; index++)
+        {
+            if (ReferenceEquals(oneShots[index].Output, output))
+            {
+                oneShots.RemoveAt(index);
+                return;
+            }
         }
     }
 
@@ -244,6 +286,8 @@ internal sealed class SoundEffectPlayer : IDisposable
         StopLoop();
         StopOneShots();
     }
+
+    private readonly record struct OneShot(IWavePlayer Output, string Path);
 }
 
 internal sealed class LoopStream : WaveStream

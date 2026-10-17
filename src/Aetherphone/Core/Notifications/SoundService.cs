@@ -9,6 +9,8 @@ internal sealed class SoundService : IDisposable
     private const string AlarmFile = "alarm.wav";
     private const string TimerFile = "timer.wav";
     private const float RingbackVolume = 0.5f;
+    private const int DeleteAttempts = 10;
+    private const int DeleteRetryMilliseconds = 100;
 
     private readonly Configuration configuration;
     private readonly SoundLibrary ringtones;
@@ -49,6 +51,25 @@ internal sealed class SoundService : IDisposable
     public void StopPreview() => player.StopOneShots();
 
     public string AddUserFile(SoundKind kind, string sourcePath) => For(kind).AddUserFile(sourcePath);
+
+    public bool CanRemove(SoundKind kind, string token) => For(kind).IsUserFile(token);
+
+    public void RemoveUserFile(SoundKind kind, string token)
+    {
+        var library = For(kind);
+        if (!library.IsUserFile(token) || !library.TryUserPath(token, out var path))
+        {
+            return;
+        }
+
+        player.Release(path);
+        if (configuration.ForgetSound(kind, token))
+        {
+            configuration.Save();
+        }
+
+        _ = DeleteWhenReleasedAsync(library, path);
+    }
 
     public void PlayNotification(string appId)
     {
@@ -100,6 +121,29 @@ internal sealed class SoundService : IDisposable
     public void StopCallRing() => player.StopLoop();
 
     private SoundLibrary For(SoundKind kind) => kind == SoundKind.Ringtone ? ringtones : notifications;
+
+    private static async Task DeleteWhenReleasedAsync(SoundLibrary library, string path)
+    {
+        try
+        {
+            for (var attempt = 0; attempt < DeleteAttempts; attempt++)
+            {
+                if (SoundLibrary.TryDelete(path))
+                {
+                    library.Refresh();
+                    return;
+                }
+
+                await Task.Delay(DeleteRetryMilliseconds).ConfigureAwait(false);
+            }
+
+            AepLog.Warning($"[Sound] could not remove {Path.GetFileName(path)}: the file is still in use");
+        }
+        catch (Exception exception)
+        {
+            AepLog.Warning(exception, $"[Sound] removing {Path.GetFileName(path)} failed");
+        }
+    }
 
     private void Play(SoundKind kind, string? token, float volume)
     {

@@ -752,6 +752,43 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
         return changed;
     }
 
+    public bool ForgetSound(SoundKind kind, string token)
+    {
+        if (kind == SoundKind.Ringtone)
+        {
+            if (!SameSound(RingtoneSound, token))
+            {
+                return false;
+            }
+
+            RingtoneSound = SoundLibrary.BundledRingtoneToken;
+            return true;
+        }
+
+        var changed = false;
+        if (SameSound(NotificationSound, token))
+        {
+            NotificationSound = SoundLibrary.BundledNotificationToken;
+            changed = true;
+        }
+
+        foreach (var pair in NotificationSettings)
+        {
+            if (!SameSound(pair.Value.Sound, token))
+            {
+                continue;
+            }
+
+            pair.Value.Sound = null;
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private static bool SameSound(string? stored, string token) =>
+        string.Equals(stored, token, StringComparison.OrdinalIgnoreCase);
+
     public void MigrateRetiredWallpapers()
     {
         if (!ReplaceRetiredWallpapers())
