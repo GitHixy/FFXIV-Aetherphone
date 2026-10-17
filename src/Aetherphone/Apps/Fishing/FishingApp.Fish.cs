@@ -30,6 +30,7 @@ internal sealed partial class FishingApp
     private const float FishIconSize = 40f;
     private const float FishCheckSize = 14f;
     private const float FishBellSize = 12f;
+    private const float FishBellHitSize = 28f;
     private const float SearchGap = 10f;
     private const float SkeletonRowUnits = 56f;
     private const float SkeletonGapUnits = 10f;
@@ -641,7 +642,8 @@ internal sealed partial class FishingApp
         {
             var bell = FishBellSize * scale;
             var bellCenter = new Vector2(subRight - bell, top + titleHeight + LineGap * scale + subHeight * 0.5f);
-            bellHovered = DrawAlarmBell(drawList, entry.ItemId, bellCenter, bell, scale);
+            var bellZone = new Rect(bounds.Min, new Vector2(subRight, bounds.Max.Y));
+            bellHovered = DrawAlarmBell(drawList, entry.ItemId, bellCenter, bell, bellZone, scale);
             subRight -= bell * 2f;
         }
 
@@ -667,14 +669,13 @@ internal sealed partial class FishingApp
         }
     }
 
-    private bool DrawAlarmBell(ImDrawListPtr drawList, uint itemId, Vector2 center, float size, float scale)
+    private bool DrawAlarmBell(ImDrawListPtr drawList, uint itemId, Vector2 center, float size, Rect zone,
+        float scale)
     {
-        var reach = new Vector2(Metrics.Size.TapTarget * scale * 0.5f);
-        var min = center - reach;
-        var max = center + reach;
-        var hovered = UiInteract.Hover(min, max);
+        var hit = TapArea.Around(center, FishBellHitSize * scale, zone);
+        var hovered = UiInteract.Hover(hit.Min, hit.Max);
         PhoneIcon.Draw(drawList, center, hovered ? PhoneIcons.BellOff : PhoneIcons.BellFilled, ui.Accent, size);
-        if (!UiInteract.Click(min, max, hovered, UiSound.ToggleOff))
+        if (!UiInteract.Click(hit.Min, hit.Max, hovered, UiSound.ToggleOff))
         {
             return hovered;
         }

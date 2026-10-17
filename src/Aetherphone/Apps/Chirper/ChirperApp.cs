@@ -1087,7 +1087,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             new Vector2(left + width + boxPad, listRect.Min.Y + travel + boxPad));
         ImGui.SetCursorScreenPos(box.Min);
         using var overlay = ImRaii.Child(NewChirpsChildId, new Vector2(box.Width, box.Height), false,
-            ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+            ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse |
+            ImGuiWindowFlags.NoInputs);
         var drawList = ImGui.GetWindowDrawList();
         var hovered = UiInteract.HoverOverlay(rect);
         var pressed = hovered && ImGui.IsMouseDown(ImGuiMouseButton.Left);
