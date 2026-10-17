@@ -1,3 +1,4 @@
+using Aetherphone.Core.Aethernet;
 using Aetherphone.Core.Animation;
 using Aetherphone.Core.Home;
 using Aetherphone.Core.Moderation;
@@ -14,13 +15,12 @@ internal enum ShellMotion
 
 internal sealed class NavigationStack : INavigator
 {
-    private const long ResumeWindowMilliseconds = 10 * 60 * 1000;
-
     private readonly IReadOnlyList<IPhoneApp> apps;
     private readonly AppInstaller installer;
     private readonly SuspensionGate suspensions;
+    private readonly AethernetSession session;
     private readonly Stack<IPhoneApp> history = new();
-    private readonly Dictionary<string, long> closedAtTicks = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, ResumeStamp> closedApps = new(StringComparer.Ordinal);
     private readonly HashSet<string> forgetOnClose = new(StringComparer.Ordinal);
     private bool resumingOpen;
     private bool scrubbing;
@@ -38,11 +38,13 @@ internal sealed class NavigationStack : INavigator
     private Rect? motionOrigin;
     private LaunchOrigin motionOriginKind;
 
-    public NavigationStack(IReadOnlyList<IPhoneApp> apps, AppInstaller installer, SuspensionGate suspensions)
+    public NavigationStack(IReadOnlyList<IPhoneApp> apps, AppInstaller installer, SuspensionGate suspensions,
+        AethernetSession session)
     {
         this.apps = apps;
         this.installer = installer;
         this.suspensions = suspensions;
+        this.session = session;
     }
 
     public event Action<string>? AppOpened;
@@ -142,18 +144,23 @@ internal sealed class NavigationStack : INavigator
             return false;
         }
 
-        if (requireRecentClose)
+        var stamped = closedApps.TryGetValue(app.Id, out var closed);
+        if (requireRecentClose && (!stamped || !CanResume(closed, Environment.TickCount64)))
         {
-            if (!closedAtTicks.TryGetValue(app.Id, out var closedAt) ||
-                Environment.TickCount64 - closedAt > ResumeWindowMilliseconds)
-            {
-                return false;
-            }
+            return false;
+        }
+
+        if (stamped && !closed.BelongsTo(session.PlayingContentId, session.ActiveContentId))
+        {
+            return false;
         }
 
         resumable.OnResumed();
         return true;
     }
+
+    private bool CanResume(in ResumeStamp closed, long nowTicks) =>
+        closed.Allows(nowTicks, session.PlayingContentId, session.ActiveContentId);
 
     public bool IsAvailable(string appId)
     {
@@ -178,9 +185,9 @@ internal sealed class NavigationStack : INavigator
 
         var now = Environment.TickCount64;
         var sortedFrom = results.Count;
-        foreach (var entry in closedAtTicks)
+        foreach (var entry in closedApps)
         {
-            if (now - entry.Value > ResumeWindowMilliseconds)
+            if (!CanResume(entry.Value, now))
             {
                 continue;
             }
@@ -193,7 +200,8 @@ internal sealed class NavigationStack : INavigator
             }
 
             var insertIndex = results.Count;
-            while (insertIndex > sortedFrom && closedAtTicks[results[insertIndex - 1].Id] < entry.Value)
+            while (insertIndex > sortedFrom &&
+                   closedApps[results[insertIndex - 1].Id].ClosedAtTicks < entry.Value.ClosedAtTicks)
             {
                 insertIndex--;
             }
@@ -204,7 +212,7 @@ internal sealed class NavigationStack : INavigator
 
     public void Forget(string appId)
     {
-        closedAtTicks.Remove(appId);
+        closedApps.Remove(appId);
         RemoveFromHistory(appId);
         if (current is { } leaving && string.Equals(leaving.Id, appId, StringComparison.Ordinal))
         {
@@ -216,7 +224,7 @@ internal sealed class NavigationStack : INavigator
 
     public void ForgetAll()
     {
-        closedAtTicks.Clear();
+        closedApps.Clear();
         history.Clear();
         if (current is { } leaving)
         {
@@ -515,6 +523,6 @@ internal sealed class NavigationStack : INavigator
             return;
         }
 
-        closedAtTicks[app.Id] = Environment.TickCount64;
+        closedApps[app.Id] = new ResumeStamp(Environment.TickCount64, session.PlayingContentId, session.ActiveContentId);
     }
 }

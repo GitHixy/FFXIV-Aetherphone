@@ -81,7 +81,7 @@ internal sealed class PhoneShell : IDisposable
         session = services.AethernetSession;
         confirm = services.Confirm;
         suspensions = new SuspensionGate(services.AethernetSession);
-        navigation = new NavigationStack(apps, services.Installer, suspensions);
+        navigation = new NavigationStack(apps, services.Installer, suspensions, services.AethernetSession);
         notifications.AppAvailability = navigation.IsAvailable;
         director = new OnboardingDirector(navigation);
         navigation.AppOpened += director.OnAppOpened;

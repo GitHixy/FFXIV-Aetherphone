@@ -70,21 +70,12 @@ internal sealed partial class CollectionsApp : IResumableApp
         iconFade.Clear();
         rootQuery = string.Empty;
         sortSheet.Close();
-        tracking = IsPresent();
-        lodestoneId = ResolveLocalId();
-        catalog.ResetOwned();
-        catalog.ResetSummaries();
-        if (tracking)
-        {
-            catalog.RequestSummary(lodestoneId);
-        }
-
+        Track(IsPresent(), ResolveLocalId());
         for (var index = 0; index < CollectionCategories.All.Length; index++)
         {
             catalog.RequestCatalog(CollectionCategories.All[index]);
         }
 
-        digest.Invalidate();
         heroFill.SnapTo(0f);
         for (var index = 0; index < tileFills.Length; index++)
         {
@@ -92,7 +83,19 @@ internal sealed partial class CollectionsApp : IResumableApp
         }
     }
 
-    public void OnResumed() => digest.Invalidate();
+    public void OnResumed()
+    {
+        var present = IsPresent();
+        var localId = present ? ResolveLocalId() : null;
+        var switchedCharacter = localId is not null && !string.Equals(localId, lodestoneId, StringComparison.Ordinal);
+        if (present != tracking || switchedCharacter)
+        {
+            Track(present, localId);
+            return;
+        }
+
+        digest.Invalidate();
+    }
 
     public void OnClosed() => sortSheet.Close();
 
@@ -144,8 +147,13 @@ internal sealed partial class CollectionsApp : IResumableApp
             return;
         }
 
+        Track(present, present ? ResolveLocalId() : null);
+    }
+
+    private void Track(bool present, string? localId)
+    {
         tracking = present;
-        lodestoneId = present ? ResolveLocalId() : null;
+        lodestoneId = localId;
         catalog.ResetOwned();
         catalog.ResetSummaries();
         if (present)
