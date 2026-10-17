@@ -11,6 +11,7 @@ internal sealed class HalloweenBadgeStore : IDisposable
     private const long FailureBackoffMilliseconds = 60_000;
     private const long MissingBackoffMilliseconds = 15 * 60_000;
     private const long HeldBackMilliseconds = 5 * 60_000;
+    private const long RefreshMilliseconds = 3 * 60_000;
 
     private readonly AethernetSession session;
     private readonly CoinsClient coins;
@@ -20,6 +21,7 @@ internal sealed class HalloweenBadgeStore : IDisposable
 
     private volatile HalloweenTreatsDto? progress;
     private long blockedUntilTick;
+    private long refreshDueTick;
     private int reporting;
     private int generation;
     private string? lastAccountId;
@@ -37,12 +39,17 @@ internal sealed class HalloweenBadgeStore : IDisposable
 
     public bool Granted => progress?.Granted == true;
 
+    public int Found => progress?.Found ?? 0;
+
     public bool Waiting => Environment.TickCount64 < Interlocked.Read(ref blockedUntilTick);
 
-    public void Report(int found)
+    public void Report(int found) => Send(found, false);
+
+    public void Refresh(int found) => Send(found, true);
+
+    private void Send(int found, bool refresh)
     {
-        var known = progress;
-        if (!session.IsSignedIn || known is { Granted: true } || (known is not null && known.Found >= found)
+        if (!session.IsSignedIn || !Due(progress, found, refresh)
             || Environment.TickCount64 < Interlocked.Read(ref blockedUntilTick)
             || Interlocked.Exchange(ref reporting, 1) != 0)
         {
@@ -68,6 +75,7 @@ internal sealed class HalloweenBadgeStore : IDisposable
 
             var unlocked = fresh.Granted && !Granted;
             progress = fresh;
+            Interlocked.Exchange(ref refreshDueTick, Environment.TickCount64 + RefreshMilliseconds);
             if (fresh.Found < found)
             {
                 Block(HeldBackMilliseconds);
@@ -79,6 +87,22 @@ internal sealed class HalloweenBadgeStore : IDisposable
                 loadout.RefreshNow();
             }
         }, () => Interlocked.Exchange(ref reporting, 0));
+    }
+
+    private bool Due(HalloweenTreatsDto? known, int found, bool refresh)
+    {
+        if (known is null)
+        {
+            return true;
+        }
+
+        if (known.Granted)
+        {
+            return false;
+        }
+
+        return found > known.Found ||
+               (refresh && Environment.TickCount64 >= Interlocked.Read(ref refreshDueTick));
     }
 
     private void Block(long milliseconds) =>
@@ -96,6 +120,7 @@ internal sealed class HalloweenBadgeStore : IDisposable
         Interlocked.Increment(ref generation);
         progress = null;
         Interlocked.Exchange(ref blockedUntilTick, 0);
+        Interlocked.Exchange(ref refreshDueTick, 0);
     }
 
     public void Dispose()

@@ -58,9 +58,13 @@ internal static class Treats
     private static int lastSpot = NoSpot;
     private static bool devHunt;
 
-    public static int Found => Plugin.Cfg.HalloweenTreatYear == DateTime.Today.Year
+    public static int Found => HalloweenTreatCount.Merge(LocalFound, ServerFound, Total);
+
+    private static int LocalFound => Plugin.Cfg.HalloweenTreatYear == DateTime.Today.Year
         ? BitOperations.PopCount((uint)Plugin.Cfg.HalloweenTreats)
         : 0;
+
+    private static int ServerFound => badge?.Found ?? 0;
 
     public static bool HuntOpen => SeasonalTheme.Halloween && (SeasonalTheme.HalloweenByDate || devHunt);
 
@@ -72,7 +76,25 @@ internal static class Treats
 
     public static bool BadgeWaiting => badge?.Waiting == true;
 
-    public static void SyncBadge() => badge?.Report(Found);
+    public static void SyncBadge()
+    {
+        badge?.Refresh(LocalFound);
+        AdoptServerCount();
+    }
+
+    private static void AdoptServerCount()
+    {
+        var server = ServerFound;
+        if (server <= LocalFound)
+        {
+            return;
+        }
+
+        var configuration = Plugin.Cfg;
+        configuration.HalloweenTreatYear = DateTime.Today.Year;
+        configuration.HalloweenTreats = HalloweenTreatCount.Mask(Math.Min(server, Total));
+        configuration.Save();
+    }
 
     public static void Configure(AppInstaller appInstaller, AethernetSession aethernetSession,
         HalloweenBadgeStore badgeStore)
@@ -137,7 +159,14 @@ internal static class Treats
 
     public static int ActiveSpot()
     {
-        if (!HuntOpen || Found >= Unlocked)
+        if (!HuntOpen)
+        {
+            return NoSpot;
+        }
+
+        badge?.Report(LocalFound);
+        AdoptServerCount();
+        if (Found >= Unlocked)
         {
             return NoSpot;
         }
@@ -255,20 +284,13 @@ internal static class Treats
     private static void Collect(TreatSpot spot)
     {
         var configuration = Plugin.Cfg;
-        var year = DateTime.Today.Year;
-        if (configuration.HalloweenTreatYear != year)
-        {
-            configuration.HalloweenTreatYear = year;
-            configuration.HalloweenTreats = 0;
-        }
-
-        var treats = configuration.HalloweenTreats;
-        configuration.HalloweenTreats = treats | (~treats & (treats + 1));
+        var found = HalloweenTreatCount.Next(LocalFound, ServerFound, Total);
+        configuration.HalloweenTreatYear = DateTime.Today.Year;
+        configuration.HalloweenTreats = HalloweenTreatCount.Mask(found);
         activeSpot = NoSpot;
         lastSpot = (int)spot;
         configuration.HalloweenTreatDue = Now + Wait();
         configuration.Save();
-        var found = Found;
         badge?.Report(found);
         UiFeedback.Play(found >= Total ? UiSound.HalloweenFlare : UiSound.HalloweenSparkle);
         ShellToast.Show(found >= Total
