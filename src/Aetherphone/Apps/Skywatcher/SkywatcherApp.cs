@@ -19,7 +19,7 @@ internal enum SkywatcherTab : byte
     Control,
 }
 
-internal sealed partial class SkywatcherApp : IPhoneApp
+internal sealed partial class SkywatcherApp : IResumableApp
 {
     private const int WindowCount = 10;
     private const float MaxFrameSeconds = 0.1f;
@@ -59,10 +59,15 @@ internal sealed partial class SkywatcherApp : IPhoneApp
     {
         activeTab = SkywatcherTab.Forecast;
         viewedTerritory = 0;
-        scrubbing = false;
         editingZones = false;
         zoneQuery = string.Empty;
         resetScroll = true;
+        OnResumed();
+    }
+
+    public void OnResumed()
+    {
+        scrubbing = false;
         Refresh();
         sky.Snap();
     }
