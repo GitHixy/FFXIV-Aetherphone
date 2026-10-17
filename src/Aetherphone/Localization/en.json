@@ -931,6 +931,7 @@
   "settings.soundImportHint": "Imported files appear in the list below and play at the volume set here, separate from the game's own sound settings.",
   "settings.removeSound": "Remove Sound",
   "settings.removeSoundMessage": "Remove {0}? Apps that use it go back to the default sound.",
+  "settings.removeRingtoneMessage": "Remove {0}? If it is your ringtone, the default ringtone takes its place.",
   "settings.removeSoundConfirm": "Remove",
   "settings.language": "Language",
   "settings.about": "About",

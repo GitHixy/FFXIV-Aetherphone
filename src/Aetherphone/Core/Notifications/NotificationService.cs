@@ -121,20 +121,19 @@ internal sealed class NotificationService : IDisposable
     {
         if (!installer.IsInstalled(notification.AppId))
         {
-            AepLog.Warning($"[Notifications] dropped {notification.AppId}/{notification.StackKey}: app not installed");
+            AepLog.Warning($"[Notifications] dropped {notification.AppId}: app not installed");
             return;
         }
 
         if (!configuration.IsAppNotificationEnabled(notification.SettingsKey))
         {
-            AepLog.Info($"[Notifications] dropped {notification.AppId}/{notification.StackKey}: " +
-                "notifications off for this app");
+            AepLog.Info($"[Notifications] dropped {notification.AppId}: notifications off for this app");
             return;
         }
 
         if (AppAvailability is { } available && !available(notification.AppId))
         {
-            AepLog.Warning($"[Notifications] dropped {notification.AppId}/{notification.StackKey}: app unavailable");
+            AepLog.Warning($"[Notifications] dropped {notification.AppId}: app unavailable");
             return;
         }
 
@@ -156,7 +155,7 @@ internal sealed class NotificationService : IDisposable
         var quietReason = QuietReason(notification.AppId);
         if (quietReason.Length > 0)
         {
-            AepLog.Info($"[Notifications] {notification.AppId}/{stamped.StackKey} held quiet: {quietReason}");
+            AepLog.Info($"[Notifications] {notification.AppId} held quiet: {quietReason}");
             RaiseChanged();
             return;
         }
@@ -209,15 +208,17 @@ internal sealed class NotificationService : IDisposable
         }
         else if (!ShouldPlaySound(stackKey))
         {
-            detail = $"another sound for this stack played under {SoundRepeatSeconds:0} s ago";
+            AepLog.Debug($"[Notifications] {notification.AppId} no sound: another sound for the same conversation " +
+                $"played under {SoundRepeatSeconds:0} s ago");
+            return;
         }
         else if (sound.TryPlayNotification(notification.SettingsKey, out detail))
         {
-            AepLog.Info($"[Notifications] {notification.AppId}/{stackKey} sound: {detail}");
+            AepLog.Info($"[Notifications] {notification.AppId} sound: {detail}");
             return;
         }
 
-        AepLog.Info($"[Notifications] {notification.AppId}/{stackKey} no sound: {detail}");
+        AepLog.Info($"[Notifications] {notification.AppId} no sound: {detail}");
     }
 
     private bool ShouldPlaySound(string stackKey)

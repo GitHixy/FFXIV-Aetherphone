@@ -931,6 +931,7 @@
   "settings.soundImportHint": "インポートしたファイルは下のリストに表示され、ここで設定した音量で再生されます。ゲーム本体の音量設定とは別です。",
   "settings.removeSound": "サウンドを削除",
   "settings.removeSoundMessage": "{0} を削除しますか? 使用中のアプリはデフォルトのサウンドに戻ります。",
+  "settings.removeRingtoneMessage": "{0} を削除しますか? 着信音に設定している場合は、デフォルトの着信音に戻ります。",
   "settings.removeSoundConfirm": "削除",
   "settings.language": "言語",
   "settings.about": "概要",

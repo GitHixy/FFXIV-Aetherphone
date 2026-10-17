@@ -799,7 +799,7 @@ internal abstract class ChatThreadStoreBase<TMessage, TThread> : IDisposable
             inboxMarks[key] = new InboxMark(lastMessageAt, unread);
             if (IsBeingViewed(key))
             {
-                NoteSkippedWhileViewed(key);
+                NoteSkippedWhileViewed();
                 continue;
             }
 
@@ -819,15 +819,15 @@ internal abstract class ChatThreadStoreBase<TMessage, TThread> : IDisposable
         inboxMarks[key] = new InboxMark(lastMessageAt, unread);
         if (IsBeingViewed(key))
         {
-            NoteSkippedWhileViewed(key);
+            NoteSkippedWhileViewed();
             return;
         }
 
         notifications.Notify(arrival);
     }
 
-    private void NoteSkippedWhileViewed(string threadKey) =>
-        AepLog.Info($"[Notifications] {NotificationAppId}/{threadKey} skipped: the chat is on screen " +
+    private void NoteSkippedWhileViewed() =>
+        AepLog.Info($"[Notifications] {NotificationAppId} skipped: the chat is on screen " +
             $"or was left under {ViewingMark.Grace.TotalSeconds:0} s ago");
 
     protected void RefreshThreadListCore()
