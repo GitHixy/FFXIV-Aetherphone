@@ -31,12 +31,22 @@ internal static class IslandActivities
     public const long MusterStartedGraceSeconds = 300;
     public const float CardHeightUnits = 96f;
     public const float PlaybackCardHeightUnits = 136f;
+    public const float ExpandedHalfWidthUnits = 150f;
+    public const float ExpandedSideInsetUnits = 14f;
+    public const float CardPadUnits = 18f;
+    public const float TransportStrideUnits = 44f;
+    public const float ModeStrideUnits = TransportStrideUnits * 2f;
+    public const float SideControlRadiusUnits = 15f;
+    public const float ModeRadiusUnits = SideControlRadiusUnits;
 
     public static float ExpandedHeightUnits(IslandActivity activity) =>
-        activity == IslandActivity.Playback ? PlaybackCardHeightUnits : CardHeightUnits;
+        activity is IslandActivity.Playback or IslandActivity.PcMedia ? PlaybackCardHeightUnits : CardHeightUnits;
 
     public static float CornerRadius(float height, float scale) =>
         MathF.Min(height * 0.5f, CardHeightUnits * 0.5f * scale);
+
+    public static float ExpandedHalfWidth(float screenWidth, float scale) =>
+        MathF.Min(screenWidth * 0.5f - ExpandedSideInsetUnits * scale, ExpandedHalfWidthUnits * scale);
 
     public static int RemainingSeconds(float positionSeconds, float durationSeconds)
     {

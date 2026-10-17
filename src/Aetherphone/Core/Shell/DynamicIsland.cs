@@ -32,10 +32,8 @@ internal sealed partial class DynamicIsland
     private const float CompactTrailingInset = 11f;
     private const float CompactTrailingGap = 8f;
     private const float BubbleGap = 7f;
-    private const float ExpandedHalfWidth = 150f;
-    private const float ExpandedSideInset = 14f;
     private const float ExpandedLift = 2f;
-    private const float CardPadX = 18f;
+    private const float CardPadX = IslandActivities.CardPadUnits;
     private const float CardIconRadius = 22f;
     private const float CardControlRadius = 20f;
     private const float CardTextGap = 12f;
@@ -869,7 +867,8 @@ internal sealed partial class DynamicIsland
     private static Rect NoticeBounds(Rect screen, Rect rest, float scale)
     {
         var compact = CompactBounds(rest, scale);
-        var halfWidth = MathF.Min(screen.Width * 0.5f - ExpandedSideInset * scale, NoticeHalfWidth * scale);
+        var halfWidth = MathF.Min(screen.Width * 0.5f - IslandActivities.ExpandedSideInsetUnits * scale,
+            NoticeHalfWidth * scale);
         var centerX = rest.Center.X;
         return new Rect(new Vector2(MathF.Min(compact.Min.X, centerX - halfWidth), compact.Min.Y),
             new Vector2(MathF.Max(compact.Max.X, centerX + halfWidth), compact.Max.Y));
@@ -877,7 +876,7 @@ internal sealed partial class DynamicIsland
 
     private static Rect ExpandedBounds(Rect screen, Rect rest, float scale, float heightUnits)
     {
-        var halfWidth = MathF.Min(screen.Width * 0.5f - ExpandedSideInset * scale, ExpandedHalfWidth * scale);
+        var halfWidth = IslandActivities.ExpandedHalfWidth(screen.Width, scale);
         var top = rest.Min.Y - ExpandedLift * scale;
         var centerX = screen.Center.X;
         return new Rect(new Vector2(centerX - halfWidth, top),
