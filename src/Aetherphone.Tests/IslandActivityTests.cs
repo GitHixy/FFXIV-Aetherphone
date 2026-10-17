@@ -28,6 +28,15 @@ public sealed class IslandActivityTests
     }
 
     [Fact]
+    public void CornerRadiusRoundsPillsFullyAndCapsTallCards()
+    {
+        Assert.Equal(18f, IslandActivities.CornerRadius(36f, 1f));
+        Assert.Equal(48f, IslandActivities.CornerRadius(IslandActivities.CardHeightUnits, 1f));
+        Assert.Equal(48f, IslandActivities.CornerRadius(IslandActivities.PlaybackCardHeightUnits, 1f));
+        Assert.Equal(96f, IslandActivities.CornerRadius(IslandActivities.PlaybackCardHeightUnits * 2f, 2f));
+    }
+
+    [Fact]
     public void RemainingSecondsCountsWholeSecondsLeftAndNeverGoesNegative()
     {
         Assert.Equal(91, IslandActivities.RemainingSeconds(185f, 276f));

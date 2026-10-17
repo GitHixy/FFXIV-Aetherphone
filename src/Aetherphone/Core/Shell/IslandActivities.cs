@@ -35,6 +35,9 @@ internal static class IslandActivities
     public static float ExpandedHeightUnits(IslandActivity activity) =>
         activity == IslandActivity.Playback ? PlaybackCardHeightUnits : CardHeightUnits;
 
+    public static float CornerRadius(float height, float scale) =>
+        MathF.Min(height * 0.5f, CardHeightUnits * 0.5f * scale);
+
     public static int RemainingSeconds(float positionSeconds, float durationSeconds)
     {
         var duration = (int)MathF.Ceiling(MathF.Max(0f, durationSeconds));

@@ -249,7 +249,7 @@ internal sealed partial class DynamicIsland
         var compactAlpha = Math.Clamp(presenceValue * 1.6f - 0.6f, 0f, 1f) * (1f - expandAmount);
         var drawList = ImGui.GetWindowDrawList();
         DrawBubble(drawList, theme, navigation, bounds, scale, expandAmount);
-        var rounding = bounds.Height * 0.5f;
+        var rounding = IslandActivities.CornerRadius(bounds.Height, scale);
         if (expandAmount > 0.02f)
         {
             Elevation.Draw(drawList, bounds.Min, bounds.Max, rounding, scale, 5f + 6f * expandAmount, 3f,
