@@ -139,28 +139,35 @@ internal sealed class NavigationStack : INavigator
 
     private bool TryResume(IPhoneApp app, bool requireRecentClose)
     {
-        if (app is not IResumableApp resumable)
-        {
-            return false;
-        }
-
         var stamped = closedApps.TryGetValue(app.Id, out var closed);
-        if (requireRecentClose && (!stamped || !CanResume(closed, Environment.TickCount64)))
+        if (!Resumes(app is IResumableApp, stamped, closed, requireRecentClose, Environment.TickCount64,
+                session.PlayingContentId, session.ActiveContentId))
         {
             return false;
         }
 
-        if (stamped && !closed.BelongsTo(session.PlayingContentId, session.ActiveContentId))
-        {
-            return false;
-        }
-
-        resumable.OnResumed();
+        ((IResumableApp)app).OnResumed();
         return true;
     }
 
-    private bool CanResume(in ResumeStamp closed, long nowTicks) =>
-        closed.Allows(nowTicks, session.PlayingContentId, session.ActiveContentId);
+    internal static bool Resumes(bool resumable, bool stamped, in ResumeStamp closed, bool requireRecentClose,
+        long nowTicks, ulong characterId, ulong accountId)
+    {
+        if (!resumable)
+        {
+            return false;
+        }
+
+        if (requireRecentClose && (!stamped || !closed.Allows(nowTicks, characterId, accountId)))
+        {
+            return false;
+        }
+
+        return !stamped || closed.BelongsTo(characterId, accountId);
+    }
+
+    internal static bool ListsCard(in ResumeStamp closed, long nowTicks, ulong characterId, ulong accountId) =>
+        closed.Allows(nowTicks, characterId, accountId);
 
     public bool IsAvailable(string appId)
     {
@@ -187,13 +194,13 @@ internal sealed class NavigationStack : INavigator
         var sortedFrom = results.Count;
         foreach (var entry in closedApps)
         {
-            if (!CanResume(entry.Value, now))
+            if (!ListsCard(entry.Value, now, session.PlayingContentId, session.ActiveContentId))
             {
                 continue;
             }
 
             var app = FindApp(entry.Key);
-            if (app is not IResumableApp || ReferenceEquals(app, current) || !app.IsAvailable ||
+            if (app is null || ReferenceEquals(app, current) || !app.IsAvailable ||
                 !installer.IsInstalled(app.Id) || suspensions.Blocks(app.Id))
             {
                 continue;
