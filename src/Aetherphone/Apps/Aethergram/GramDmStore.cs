@@ -398,6 +398,8 @@ internal sealed class GramDmStore : ChatThreadStoreBase<GramMessageDto, GramThre
 
     protected override int ThreadUnreadCountOf(GramThreadDto thread) => thread.UnreadCount;
 
+    protected override string? ThreadLastMessageIdOf(GramThreadDto thread) => thread.LastMessageId;
+
     protected override GramThreadDto WithUnreadCleared(GramThreadDto thread) => thread with { UnreadCount = 0 };
 
     protected override PhoneNotification BuildInboxNotification(GramThreadDto thread)
