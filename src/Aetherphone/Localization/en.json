@@ -744,6 +744,8 @@
   "phone.audioTitle": "Call Audio",
   "phone.callVolume": "Call volume",
   "phone.micVolume": "Microphone volume",
+  "phone.autoGain": "Automatic gain",
+  "phone.autoGainHint": "Evens out your voice so quiet and loud speech reach others at a similar level. The volume slider still applies on top, and voice messages use both.",
   "phone.muteForMe": "Mute for me",
   "phone.audioDevicesHint": "Use headphones to avoid echo. Device and volume changes apply right away, even during a call.",
   "phone.incomingCallBody": "Incoming call",

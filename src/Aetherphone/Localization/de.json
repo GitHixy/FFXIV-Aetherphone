@@ -744,6 +744,8 @@
   "phone.audioTitle": "Anrufaudio",
   "phone.callVolume": "Anruflautstärke",
   "phone.micVolume": "Mikrofonlautstärke",
+  "phone.autoGain": "Automatische Verstärkung",
+  "phone.autoGainHint": "Gleicht deine Stimme aus, damit leise und laute Sprache bei anderen ähnlich laut ankommt. Der Lautstärkeregler gilt zusätzlich, und Sprachnachrichten nutzen beides.",
   "phone.muteForMe": "Für mich stummschalten",
   "phone.audioDevicesHint": "Nutze Kopfhörer, um Echo zu vermeiden. Geräte- und Lautstärkeänderungen gelten sofort, auch während eines Anrufs.",
   "phone.incomingCallBody": "Eingehender Anruf",

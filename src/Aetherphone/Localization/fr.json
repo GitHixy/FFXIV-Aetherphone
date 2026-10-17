@@ -744,6 +744,8 @@
   "phone.audioTitle": "Audio de l'appel",
   "phone.callVolume": "Volume de l'appel",
   "phone.micVolume": "Volume du micro",
+  "phone.autoGain": "Gain automatique",
+  "phone.autoGainHint": "Égalise votre voix pour que la parole douce ou forte arrive aux autres à un volume proche. Le curseur de volume s'applique en plus, et les messages vocaux utilisent les deux.",
   "phone.muteForMe": "Couper pour moi",
   "phone.audioDevicesHint": "Utilisez un casque pour éviter l'écho. Les changements de périphérique et de volume s'appliquent immédiatement, même pendant un appel.",
   "phone.incomingCallBody": "Appel entrant",

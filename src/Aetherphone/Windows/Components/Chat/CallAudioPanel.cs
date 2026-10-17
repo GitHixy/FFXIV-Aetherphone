@@ -106,7 +106,10 @@ internal sealed class CallAudioPanel
     {
         SettingsSection.Header(Loc.T(L.Phone.MicVolume), theme);
         var live = view.InCall;
-        var card = GroupCard.Begin(theme, GroupCard.DefaultRowHeight + (live ? MeterRowHeight : 0f));
+        var card = GroupCard.Begin(theme, GroupCard.DefaultRowHeight * 2f + (live ? MeterRowHeight : 0f));
+        var autoGain = calls.AutoGain;
+        var autoGainNext = SettingsRow.Bool(card.NextRow(GroupCard.DefaultRowHeight), Loc.T(L.Phone.AutoGain), autoGain,
+            theme, "call.autoGain");
         var result = VolumeSlider.Draw("##call.micGain", card.NextRow(GroupCard.DefaultRowHeight), calls.InputGain,
             theme, AudioCapture.MaximumGain);
         if (live)
@@ -115,6 +118,12 @@ internal sealed class CallAudioPanel
         }
 
         card.End();
+        SettingsSection.Hint(Loc.T(L.Phone.AutoGainHint), theme);
+        if (autoGainNext != autoGain)
+        {
+            calls.SetAutoGain(autoGainNext);
+        }
+
         if (result.Dragging || result.Released)
         {
             calls.SetInputGain(result.Value);

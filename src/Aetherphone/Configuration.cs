@@ -356,6 +356,7 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
     public string CallOutputDevice { get; set; } = string.Empty;
     public float CallOutputVolume { get; set; } = 1f;
     public float CallInputGain { get; set; } = 1f;
+    public bool CallAutoGain { get; set; } = true;
     public Dictionary<string, float> CallPeerVolumes { get; set; } = new();
     public HashSet<string> CallPeerMuted { get; set; } = new();
     public List<CallLogEntry> CallLog { get; set; } = new();

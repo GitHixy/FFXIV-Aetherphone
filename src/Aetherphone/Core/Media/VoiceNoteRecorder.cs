@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+using Aetherphone.Core.Telephony.Audio;
 using NAudio.Wave;
 
 namespace Aetherphone.Core.Media;
@@ -10,6 +12,9 @@ internal sealed class VoiceNoteRecorder : IDisposable
     private const int MaxBytes = BytesPerSecond * MaxSeconds;
 
     private readonly object gate = new();
+    private readonly AutoGain autoGain = new();
+    private float gain = 1f;
+    private bool autoGainEnabled;
     private MemoryStream? buffer;
     private WaveInEvent? waveIn;
     private DateTime startedUtc;
@@ -33,14 +38,14 @@ internal sealed class VoiceNoteRecorder : IDisposable
         }
     }
 
-    public bool Start(int deviceIndex)
+    public bool Start(VoiceInput input)
     {
         Cancel();
         try
         {
             var capture = new WaveInEvent
             {
-                DeviceNumber = deviceIndex,
+                DeviceNumber = input.Device,
                 WaveFormat = new WaveFormat(SampleRate, 16, 1),
                 BufferMilliseconds = 50,
                 NumberOfBuffers = 4,
@@ -49,6 +54,9 @@ internal sealed class VoiceNoteRecorder : IDisposable
             lock (gate)
             {
                 buffer = new MemoryStream();
+                gain = Math.Clamp(input.Gain, 0f, AudioCapture.MaximumGain);
+                autoGainEnabled = input.AutoGain;
+                autoGain.Reset();
             }
 
             capture.StartRecording();
@@ -125,6 +133,7 @@ internal sealed class VoiceNoteRecorder : IDisposable
 
     private void OnData(object? sender, WaveInEventArgs args)
     {
+        float rms;
         lock (gate)
         {
             if (buffer is null || buffer.Length >= MaxBytes)
@@ -132,29 +141,14 @@ internal sealed class VoiceNoteRecorder : IDisposable
                 return;
             }
 
+            var pcm = MemoryMarshal.Cast<byte, short>(args.Buffer.AsSpan(0, args.BytesRecorded & ~1));
+            autoGain.Process(pcm, SampleRate, gain, autoGainEnabled);
+            rms = AutoGain.Rms(pcm);
             var count = (int)Math.Min(args.BytesRecorded, MaxBytes - buffer.Length);
             buffer.Write(args.Buffer, 0, count);
         }
 
-        level = Rms(args.Buffer, args.BytesRecorded);
-    }
-
-    private static float Rms(byte[] bytes, int count)
-    {
-        var samples = count / 2;
-        if (samples == 0)
-        {
-            return 0f;
-        }
-
-        double sum = 0;
-        for (var index = 0; index < samples; index++)
-        {
-            double sample = BitConverter.ToInt16(bytes, index * 2);
-            sum += sample * sample;
-        }
-
-        return (float)(Math.Sqrt(sum / samples) / 32768.0);
+        level = rms;
     }
 
     private static byte[] WrapWav(byte[] pcm)

@@ -744,6 +744,8 @@
   "phone.audioTitle": "Audio de la llamada",
   "phone.callVolume": "Volumen de la llamada",
   "phone.micVolume": "Volumen del micrófono",
+  "phone.autoGain": "Ganancia automática",
+  "phone.autoGainHint": "Equilibra tu voz para que lo que dices en voz baja o en voz alta llegue a los demás con un volumen parecido. El control de volumen se aplica además, y los mensajes de voz usan ambos.",
   "phone.muteForMe": "Silenciar para mí",
   "phone.audioDevicesHint": "Usa auriculares para evitar eco. Los cambios de dispositivo y volumen se aplican al instante, incluso durante una llamada.",
   "phone.incomingCallBody": "Llamada entrante",

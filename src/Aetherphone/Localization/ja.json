@@ -744,6 +744,8 @@
   "phone.audioTitle": "通話オーディオ",
   "phone.callVolume": "通話の音量",
   "phone.micVolume": "マイクの音量",
+  "phone.autoGain": "自動ゲイン",
+  "phone.autoGainHint": "小さな声も大きな声も相手に近い音量で届くよう、声の大きさを自動で整えます。音量スライダーはその上に適用され、ボイスメッセージにも両方が使われます。",
   "phone.muteForMe": "自分だけミュート",
   "phone.audioDevicesHint": "エコーを防ぐためにヘッドフォンを使用してください。デバイスと音量の変更は通話中でもすぐに反映されます。",
   "phone.incomingCallBody": "着信",
