@@ -2,6 +2,7 @@ using Aetherphone.Core.Aethernet;
 using Aetherphone.Core.Aethernet.Clients;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Social;
+using Aetherphone.Core.Theme;
 
 namespace Aetherphone.Core.Coins;
 
@@ -35,11 +36,14 @@ internal sealed class HalloweenBadgeStore : IDisposable
         this.loadout = loadout;
         lastAccountId = session.CurrentUser?.Id;
         session.Changed += OnSessionChanged;
+        Prime();
     }
 
     public bool Granted => progress?.Granted == true;
 
     public int Found => progress?.Found ?? 0;
+
+    public int Generation => Volatile.Read(ref generation);
 
     public bool Waiting => Environment.TickCount64 < Interlocked.Read(ref blockedUntilTick);
 
@@ -91,18 +95,25 @@ internal sealed class HalloweenBadgeStore : IDisposable
 
     private bool Due(HalloweenTreatsDto? known, int found, bool refresh)
     {
-        if (known is null)
-        {
-            return true;
-        }
-
-        if (known.Granted)
+        if (known is { Granted: true })
         {
             return false;
         }
 
-        return found > known.Found ||
-               (refresh && Environment.TickCount64 >= Interlocked.Read(ref refreshDueTick));
+        if (found > (known?.Found ?? 0))
+        {
+            return true;
+        }
+
+        return refresh && (known is null || Environment.TickCount64 >= Interlocked.Read(ref refreshDueTick));
+    }
+
+    private void Prime()
+    {
+        if (session.IsSignedIn && SeasonalTheme.IsHalloweenDate(DateTime.Today))
+        {
+            Send(0, true);
+        }
     }
 
     private void Block(long milliseconds) =>
@@ -121,6 +132,7 @@ internal sealed class HalloweenBadgeStore : IDisposable
         progress = null;
         Interlocked.Exchange(ref blockedUntilTick, 0);
         Interlocked.Exchange(ref refreshDueTick, 0);
+        Prime();
     }
 
     public void Dispose()
