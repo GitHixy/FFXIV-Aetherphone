@@ -3613,7 +3613,7 @@
   "fishing.searchHint": "Balık, yer veya bölge ara",
   "fishing.bigFish": "Büyük balık",
   "fishing.uncaughtFilter": "Yakalanmadı",
-  "fishing.alertLeadValue": "pencereden {0} dk önce",
+  "fishing.alertLeadValue": "{0} dk önce",
   "fishing.alertLeadHint": "Bir balık uyarısının, penceresi açılmadan ne kadar önce çalacağı.",
   "fishing.caughtProgress": "{1} balıktan {0} tanesi yakalandı",
   "fishing.anyTime": "Her zaman",

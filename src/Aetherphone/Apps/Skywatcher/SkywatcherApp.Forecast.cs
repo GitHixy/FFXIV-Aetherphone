@@ -22,6 +22,9 @@ internal sealed partial class SkywatcherApp
     private const float RowUnits = 44f;
     private const float OddsRowUnits = 50f;
     private const float TileUnits = 158f;
+    private const float DayBarUnits = 80f;
+    private const float DayBarMinUnits = 56f;
+    private const float ForecastNameMinimumFit = 0.72f;
     private const float DawnBell = 6f;
     private const float DuskBell = 19f;
     private static readonly Vector4 White = new(1f, 1f, 1f, 1f);
@@ -173,15 +176,27 @@ internal sealed partial class SkywatcherApp
         WeatherCard.Panel(drawList, card, palette, sky.Density, scale);
         WeatherCard.Header(drawList, card, FontAwesomeIcon.CalendarAlt, Loc.T(L.Skywatcher.Forecast), palette, scale);
         var labelWidth = 0f;
+        var longestName = 0f;
         for (var index = 0; index < forecast.Count; index++)
         {
             labelWidth = MathF.Max(labelWidth, Typography.Measure(hourLabels[index], TextStyles.BodyEmphasized).X);
+            longestName = MathF.Max(longestName,
+                Typography.Measure(forecast[index].Weather.Name, TextStyles.Body).X);
         }
 
-        var barWidth = 80f * scale;
         var glyphX = card.Min.X + padding + labelWidth + 12f * scale;
         var nameX = glyphX + 22f * scale;
+        var nameGap = 10f * scale;
+        var barWidth = DayBarUnits * scale;
+        var nameRoom = card.Max.X - padding - barWidth - nameGap - nameX;
+        var nameNeed = longestName * ForecastNameMinimumFit;
+        if (nameNeed > nameRoom)
+        {
+            barWidth = MathF.Max(DayBarMinUnits * scale, barWidth - (nameNeed - nameRoom));
+        }
+
         var barMinX = card.Max.X - padding - barWidth;
+        var nameMaxWidth = MathF.Max(1f, barMinX - nameGap - nameX);
         var behind = WeatherCard.Behind(palette, sky.Density);
         var now = EorzeaTime.Now();
         var nowBell = now.Hour + now.Minute / 60f;
@@ -202,8 +217,11 @@ internal sealed partial class SkywatcherApp
             var kind = WeatherSky.Classify(window.Weather.EnglishKey);
             var isDay = IsDayWindow(window);
             WeatherCard.Glyph(drawList, kind, new Vector2(glyphX, centerY), 12f * scale, isDay, behind);
-            WidgetText.Draw(drawList, new Vector2(nameX, centerY - Typography.LineHeight(TextStyles.Body) * 0.5f),
-                window.Weather.Name, palette.Ink, TextStyles.Body, barMinX - 10f * scale - nameX);
+            var name = WidgetText.Fit(window.Weather.Name, nameMaxWidth, TextStyles.Body, ForecastNameMinimumFit,
+                out var nameScale);
+            var nameHeight = Typography.LineHeight(new TextStyle(nameScale, TextStyles.Body.Weight));
+            Typography.Draw(drawList, new Vector2(nameX, centerY - nameHeight * 0.5f), name, palette.Ink, nameScale,
+                TextStyles.Body.Weight);
             DrawDayBar(drawList, new Rect(new Vector2(barMinX, centerY - 2.5f * scale),
                 new Vector2(card.Max.X - padding, centerY + 2.5f * scale)), window, kind, isDay,
                 window.IsCurrent ? nowBell : -1f, palette, scale);

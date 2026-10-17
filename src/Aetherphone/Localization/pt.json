@@ -3613,7 +3613,7 @@
   "fishing.searchHint": "Buscar peixes, pontos ou zonas",
   "fishing.bigFish": "Peixe lendário",
   "fishing.uncaughtFilter": "Não capturados",
-  "fishing.alertLeadValue": "{0} min antes da janela",
+  "fishing.alertLeadValue": "{0} min antes",
   "fishing.alertLeadHint": "Com quanta antecedência um alerta de peixe toca antes de a janela abrir.",
   "fishing.caughtProgress": "{0} de {1} capturados",
   "fishing.anyTime": "A qualquer hora",
