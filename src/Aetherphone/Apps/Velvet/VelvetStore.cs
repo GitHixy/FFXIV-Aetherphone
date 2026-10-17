@@ -434,6 +434,14 @@ internal sealed partial class VelvetStore : ChatThreadStoreBase<VelvetMessageDto
         return result?.Url;
     }
 
+    protected override async Task<ReadMarkOutcome> MarkThreadReadRequestAsync(string threadKey, CancellationToken token)
+    {
+        var failure = AepFailure.None;
+        var succeeded = await client.MarkThreadReadAsync(threadKey, token, reported => failure = reported)
+            .ConfigureAwait(false);
+        return ReadConfirmations.Classify(succeeded, failure, missingRouteIsUnsupported: true);
+    }
+
     protected override long MessageTimeOf(VelvetMessageDto message) => message.CreatedAtUnix;
 
     protected override int MessageEncVersionOf(VelvetMessageDto message) => message.EncVersion;
