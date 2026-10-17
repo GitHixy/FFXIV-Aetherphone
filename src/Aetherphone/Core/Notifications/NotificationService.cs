@@ -127,6 +127,8 @@ internal sealed class NotificationService : IDisposable
 
         if (!configuration.IsAppNotificationEnabled(notification.SettingsKey))
         {
+            AepLog.Info($"[Notifications] dropped {notification.AppId}/{notification.StackKey}: " +
+                "notifications off for this app");
             return;
         }
 
@@ -151,28 +153,71 @@ internal sealed class NotificationService : IDisposable
 
         UnreadCount++;
         Added?.Invoke(stamped);
-        if (Plugin.ClientState.IsLoggedIn && !configuration.DoNotDisturb && !IsMuted(notification.AppId) &&
-            !(configuration.QuietWhileBusy && PlayerBusy.Now))
+        var quietReason = QuietReason(notification.AppId);
+        if (quietReason.Length > 0)
         {
-            if (configuration.ShowNotificationBanner &&
-                configuration.ShouldShowNotificationBanner(notification.SettingsKey))
-            {
-                Presented?.Invoke(stamped);
-            }
-
-            if (configuration.Vibration)
-            {
-                Vibration?.Invoke(stamped);
-            }
-
-            if (!notification.Muted && configuration.ShouldPlayNotificationSound(notification.SettingsKey) &&
-                ShouldPlaySound(stamped.StackKey))
-            {
-                sound.PlayNotification(notification.SettingsKey);
-            }
+            AepLog.Info($"[Notifications] {notification.AppId}/{stamped.StackKey} held quiet: {quietReason}");
+            RaiseChanged();
+            return;
         }
 
+        if (configuration.ShowNotificationBanner &&
+            configuration.ShouldShowNotificationBanner(notification.SettingsKey))
+        {
+            Presented?.Invoke(stamped);
+        }
+
+        if (configuration.Vibration)
+        {
+            Vibration?.Invoke(stamped);
+        }
+
+        PlaySoundFor(notification, stamped.StackKey);
         RaiseChanged();
+    }
+
+    private string QuietReason(string appId)
+    {
+        if (!Plugin.ClientState.IsLoggedIn)
+        {
+            return "not logged in";
+        }
+
+        if (configuration.DoNotDisturb)
+        {
+            return "do not disturb";
+        }
+
+        if (IsMuted(appId))
+        {
+            return "app muted for now";
+        }
+
+        return configuration.QuietWhileBusy && PlayerBusy.Now ? "quiet while busy" : string.Empty;
+    }
+
+    private void PlaySoundFor(PhoneNotification notification, string stackKey)
+    {
+        string detail;
+        if (notification.Muted)
+        {
+            detail = "conversation muted";
+        }
+        else if (!configuration.ShouldPlayNotificationSound(notification.SettingsKey))
+        {
+            detail = "sound off for this app";
+        }
+        else if (!ShouldPlaySound(stackKey))
+        {
+            detail = $"another sound for this stack played under {SoundRepeatSeconds:0} s ago";
+        }
+        else if (sound.TryPlayNotification(notification.SettingsKey, out detail))
+        {
+            AepLog.Info($"[Notifications] {notification.AppId}/{stackKey} sound: {detail}");
+            return;
+        }
+
+        AepLog.Info($"[Notifications] {notification.AppId}/{stackKey} no sound: {detail}");
     }
 
     private bool ShouldPlaySound(string stackKey)
