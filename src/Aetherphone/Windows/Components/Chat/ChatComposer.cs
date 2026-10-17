@@ -34,7 +34,7 @@ internal struct ChatComposerModel
     public bool Blocked;
     public string BlockedNotice;
     public Action? OnBlockedTap;
-    public Func<int> ResolveVoiceInput;
+    public Func<VoiceInput> ResolveVoiceInput;
     public Action<string> OnPickImage;
     public Action<string> OnShareLocation;
     public Action<string, string, string?> OnSendText;

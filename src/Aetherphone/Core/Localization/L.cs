@@ -1897,6 +1897,8 @@ internal static class L
         public static readonly LocString AudioTitle = new("phone.audioTitle", "Call Audio");
         public static readonly LocString CallVolume = new("phone.callVolume", "Call volume");
         public static readonly LocString MicVolume = new("phone.micVolume", "Microphone volume");
+        public static readonly LocString AutoGain = new("phone.autoGain", "Automatic gain");
+        public static readonly LocString AutoGainHint = new("phone.autoGainHint", "Evens out your voice so quiet and loud speech reach others at a similar level. The volume slider still applies on top, and voice messages use both.");
         public static readonly LocString MuteForMe = new("phone.muteForMe", "Mute for me");
         public static readonly LocString AudioDevicesHint = new("phone.audioDevicesHint", "Use headphones to avoid echo. Device and volume changes apply right away, even during a call.");
         public static readonly LocString IncomingCallBody = new("phone.incomingCallBody", "Incoming call");

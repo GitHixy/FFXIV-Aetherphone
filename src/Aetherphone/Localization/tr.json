@@ -744,6 +744,8 @@
   "phone.audioTitle": "Arama sesi",
   "phone.callVolume": "Arama ses düzeyi",
   "phone.micVolume": "Mikrofon ses düzeyi",
+  "phone.autoGain": "Otomatik kazanç",
+  "phone.autoGainHint": "Sesini dengeler, böylece alçak ve yüksek sesle konuşman karşı tarafa benzer bir seviyede ulaşır. Ses kaydırıcısı bunun üzerine uygulanır ve sesli mesajlar ikisini de kullanır.",
   "phone.muteForMe": "Benim için sessize al",
   "phone.audioDevicesHint": "Yankıyı önlemek için kulaklık kullan. Aygıt ve ses düzeyi değişiklikleri arama sırasında bile hemen uygulanır.",
   "phone.incomingCallBody": "Gelen arama",

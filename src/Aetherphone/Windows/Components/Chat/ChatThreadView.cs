@@ -68,7 +68,7 @@ internal abstract class ChatThreadView<TMessage, TThread> : IDisposable, IChatTr
     private readonly Action<string, string, string> editText;
     private readonly Action<string, byte[], int> sendVoice;
     private readonly Action<string, string, string> sendImage;
-    private readonly Func<int> resolveVoiceInput;
+    private readonly Func<VoiceInput> resolveVoiceInput;
     private string? pendingPrefill;
     private readonly Func<string, bool> canRevealBody;
 
@@ -866,7 +866,9 @@ internal abstract class ChatThreadView<TMessage, TThread> : IDisposable, IChatTr
         transcript.RequestSnapToBottom();
     }
 
-    private int ResolveVoiceInput() => AudioDevices.ResolveInput(configuration.CallInputDevice);
+    private VoiceInput ResolveVoiceInput() =>
+        new(AudioDevices.ResolveInput(configuration.CallInputDevice), configuration.CallInputGain,
+            configuration.CallAutoGain);
 
     protected void ToggleVoice(string messageId)
     {
