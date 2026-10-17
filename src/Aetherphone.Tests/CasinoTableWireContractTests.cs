@@ -383,6 +383,69 @@ public sealed class CasinoTableWireContractTests
     }
 
     [Fact]
+    public void ATradeNoteGroupsOnItsLedgerApartFromTheTurnAlertsOfThatTable()
+    {
+        var trade = new PhoneNotification(CasinoTurnNotifier.AppId, "Trade recorded", "You received 1,000 gil",
+            System.DateTime.Now, default, CasinoLauncher.LedgerGroupKey("table-7"));
+        var turn = new PhoneNotification(CasinoTurnNotifier.AppId, "Your turn", "The table is waiting",
+            System.DateTime.Now, default, string.Concat(CasinoTurnNotifier.GroupPrefix, "table-7"));
+        Assert.Equal("casino:ledger:table-7", trade.GroupKey);
+        Assert.NotEqual(turn.StackKey, trade.StackKey);
+        Assert.Equal("casino", trade.SettingsKey);
+
+        var launcher = new CasinoLauncher();
+        launcher.RequestNotification(trade.GroupKey!);
+        Assert.True(launcher.TryConsume(out var launch));
+        Assert.Equal(CasinoLaunchKind.Ledger, launch.Kind);
+        Assert.Equal("table-7", launch.TableId);
+        Assert.False(launcher.TryConsume(out _));
+    }
+
+    [Fact]
+    public void TurnAndKnockKeysStillAskForTheTableItself()
+    {
+        var launcher = new CasinoLauncher();
+        launcher.RequestNotification(string.Concat(CasinoTurnNotifier.GroupPrefix, "table-7"));
+        Assert.True(launcher.TryConsume(out var launch));
+        Assert.Equal(CasinoLaunchKind.Table, launch.Kind);
+        Assert.Equal("table-7", launch.TableId);
+
+        launcher.RequestNotification(string.Concat(CasinoTurnNotifier.GroupPrefix, CasinoRoomIds.BlackjackPit));
+        Assert.True(launcher.TryConsume(out launch));
+        Assert.Equal(CasinoLaunchKind.Table, launch.Kind);
+        Assert.Equal(CasinoRoomIds.BlackjackPit, launch.TableId);
+    }
+
+    [Theory]
+    [InlineData("casino:")]
+    [InlineData("casino:ledger:")]
+    [InlineData("fishing.fish.42")]
+    [InlineData("")]
+    public void AKeyThatNamesNoTableAsksForNothing(string groupKey)
+    {
+        var launcher = new CasinoLauncher();
+        launcher.RequestNotification(groupKey);
+        Assert.False(launcher.HasPending);
+    }
+
+    [Fact]
+    public void HouseRoomsRouteAtOnceWhileHostedTablesWaitForTheirCard()
+    {
+        for (var index = 0; index < CasinoRoomIds.BlackjackHouse.Length; index++)
+        {
+            Assert.True(CasinoLauncher.RoutesWithoutCard(CasinoRoomIds.BlackjackHouse[index]));
+        }
+
+        for (var index = 0; index < HoldemRules.HouseRooms.Length; index++)
+        {
+            Assert.True(CasinoLauncher.RoutesWithoutCard(HoldemRules.HouseRooms[index]));
+        }
+
+        Assert.False(CasinoLauncher.RoutesWithoutCard("0f3c2a9b7d"));
+        Assert.False(CasinoLauncher.RoutesWithoutCard(string.Empty));
+    }
+
+    [Fact]
     public void AWidgetTapAsksForItsGameAndTheLauncherHandsItOverOnce()
     {
         var launcher = new CasinoLauncher();
