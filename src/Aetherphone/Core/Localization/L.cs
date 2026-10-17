@@ -2315,6 +2315,8 @@ internal static class L
 
         public static readonly LocString[] Release1311Phone =
         {
+            new("changelog.r1311.20",
+                "Added song progress to the expanded Dynamic Island: a bar you can drag, the time played and left, and previous and next buttons"),
             new("changelog.r1311.4",
                 "Changed the scroll indicator while the phone position is locked: it dims when idle, brightens under the pointer, and a click on it no longer reaches what is underneath"),
             new("changelog.r1311.8",
@@ -2340,13 +2342,23 @@ internal static class L
             new("changelog.r1311.6",
                 "Added the double tick to the chats list in ChocoChat, Aethergram and Velvet: a message you sent shows two ticks once it has been read"),
             new("changelog.r1311.5",
-                "Fixed a tall or narrow photo making its bubble narrow and cutting the caption short: the bubble keeps its full width and the photo sits inside it"),
+                "Fixed a tall or narrow photo making its bubble narrow and cutting the caption short: the bubble keeps its full width and a tall photo is cropped to fit it"),
+        };
+
+        public static readonly LocString[] Release1311Chirper =
+        {
+            new("changelog.r1311.22",
+                "Changed the Chirper timeline to keep your place when you come back to the Home tab: new chirps wait behind a button at the top instead of moving the list"),
+            new("changelog.r1311.23",
+                "Fixed a rechirped quote chirp showing the chirp it quoted as unavailable"),
         };
 
         public static readonly LocString[] Release1311Skywatcher =
         {
             new("changelog.r1311.7",
                 "Fixed the sky staying at the overridden time after resetting it in Skywatcher: the clock is handed back to the game over a second so the lighting follows"),
+            new("changelog.r1311.21",
+                "Fixed the Skywatcher header shrinking in steps as you scroll: the title now resizes smoothly, its lines fade together and the cards fade under it"),
         };
 
         public static readonly LocString[] Release1310Phone =

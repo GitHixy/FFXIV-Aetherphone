@@ -11,6 +11,7 @@ internal static class ChangelogData
             new(L.Changelog.SectionPhone, L.Changelog.Release1311Phone),
             new(L.Apps.Fishing, L.Changelog.Release1311Fishing),
             new(L.Changelog.SectionMessaging, L.Changelog.Release1311Messaging),
+            new(L.Apps.Chirper, L.Changelog.Release1311Chirper),
             new(L.Apps.Skywatcher, L.Changelog.Release1311Skywatcher),
             new(L.Apps.Casino, L.Changelog.Release1311Gamba),
             new(L.Apps.AetherStream, L.Changelog.Release1311MogCast),
