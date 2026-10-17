@@ -8258,6 +8258,7 @@ internal static class L
         public static readonly LocString ShowOnMap = new("fishing.showOnMap", "Show on map");
         public static readonly LocString Teleport = new("fishing.teleport", "Teleport");
         public static readonly LocString EquipFisher = new("fishing.equipFisher", "Equip Fisher");
+        public static readonly LocString SearchSpot = new("fishing.searchSpot", "Search this fishing hole");
     }
 
     internal static class Dailies

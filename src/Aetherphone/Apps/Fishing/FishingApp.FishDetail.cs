@@ -55,9 +55,11 @@ internal sealed partial class FishingApp
     private const float WindowRowHeight = 40f;
     private const float MapButtonHeight = Button.RegularHeight;
     private const float LocationButtonGap = 8f;
+    private const float SpotSearchGlyphSize = 16f;
     private const float SectionInnerGap = 8f;
     private const int LocationActionSlots = 3;
     private const uint FisherClassJobId = 18;
+    private const string SpotSearchTooltipId = "fishing.detail.spotSearch";
     private const string TeleportTooltipId = "fishing.detail.teleportTip";
 
     private readonly FishDetailText detailText = new();
@@ -532,12 +534,9 @@ internal sealed partial class FishingApp
         ui.Card(drawList, card.Min, card.Max, Metrics.Radius.Grouped * scale);
         var left = card.Min.X + pad;
         var top = card.Min.Y + pad;
-        Typography.Draw(drawList, new Vector2(left, top), Typography.FitText(entry.SpotName, inner, TextStyles.Headline),
-            ui.TitleInk, TextStyles.Headline);
-        top += titleHeight + LineGap * scale;
-        Typography.Draw(drawList, new Vector2(left, top), Typography.FitText(entry.ZoneName, inner, TextStyles.Subheadline),
-            ui.MutedInk, TextStyles.Subheadline);
-        top += subHeight;
+        DrawSpotHeading(drawList, entry, new Rect(new Vector2(left, top), new Vector2(left + inner, top + placeHeight)),
+            scale);
+        top += placeHeight;
         if (detailText.Coordinates.Length > 0)
         {
             top += LineGap * scale;
@@ -553,6 +552,48 @@ internal sealed partial class FishingApp
 
         ImGui.SetCursorScreenPos(card.Min);
         ImGui.Dummy(new Vector2(width, height + FishingArt.CardGap * scale));
+    }
+
+    private void DrawSpotHeading(ImDrawListPtr drawList, FishEntry entry, Rect place, float scale)
+    {
+        var titleHeight = Typography.LineHeight(TextStyles.Headline);
+        var searchable = entry.SpotName.Length > 0;
+        var hovered = searchable && UiInteract.Hover(place.Min, place.Max);
+        var glyph = SpotSearchGlyphSize * scale;
+        var titleWidth = searchable ? MathF.Max(1f, place.Width - glyph - RowGap * scale) : place.Width;
+        Typography.Draw(drawList, place.Min, Typography.FitText(entry.SpotName, titleWidth, TextStyles.Headline),
+            hovered ? ui.Accent : ui.TitleInk, TextStyles.Headline);
+        Typography.Draw(drawList, new Vector2(place.Min.X, place.Min.Y + titleHeight + LineGap * scale),
+            Typography.FitText(entry.ZoneName, place.Width, TextStyles.Subheadline), ui.MutedInk,
+            TextStyles.Subheadline);
+        if (!searchable)
+        {
+            return;
+        }
+
+        PhoneIcon.Draw(drawList, new Vector2(place.Max.X - glyph * 0.5f, place.Min.Y + titleHeight * 0.5f),
+            PhoneIcons.Search, hovered ? ui.Accent : ui.MutedInk, glyph);
+        HoverTooltip.Show(SpotSearchTooltipId, place, Loc.T(L.Fishing.SearchSpot), HoverLabelSide.Above);
+        if (hovered)
+        {
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+        }
+
+        if (UiInteract.Click(place.Min, place.Max, hovered))
+        {
+            SearchFishingHole(entry);
+        }
+    }
+
+    private void SearchFishingHole(FishEntry entry)
+    {
+        search = entry.SpotName;
+        expansionFilter = -1;
+        patchFilter = -1;
+        activeTab = FishingTab.Fish;
+        scrollFishListToTop = true;
+        fishListDirty = true;
+        router.Pop();
     }
 
     private static int FisherGearsetToOffer()
