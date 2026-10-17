@@ -11,6 +11,7 @@ internal sealed class SoundService : IDisposable
     private const float RingbackVolume = 0.5f;
     private const int DeleteAttempts = 10;
     private const int DeleteRetryMilliseconds = 100;
+    private static readonly TimeSpan NotificationLeadIn = TimeSpan.FromMilliseconds(250);
 
     private readonly Configuration configuration;
     private readonly SoundLibrary ringtones;
@@ -71,14 +72,36 @@ internal sealed class SoundService : IDisposable
         _ = DeleteWhenReleasedAsync(library, path);
     }
 
-    public void PlayNotification(string appId)
+    public bool TryPlayNotification(string appId, out string detail)
     {
-        if (configuration.SilentMode || !configuration.NotificationSoundsEnabled)
+        if (configuration.SilentMode)
         {
-            return;
+            detail = "silent mode";
+            return false;
         }
 
-        Play(SoundKind.Notification, configuration.ResolveNotificationToken(appId), configuration.NotificationVolume);
+        if (!configuration.NotificationSoundsEnabled)
+        {
+            detail = "notification sounds off";
+            return false;
+        }
+
+        var token = configuration.ResolveNotificationToken(appId);
+        if (SoundTokens.IsSilent(notifications.Resolve(token)))
+        {
+            detail = "silent sound chosen";
+            return false;
+        }
+
+        if (!TryResolvePath(SoundKind.Notification, token, out var path))
+        {
+            detail = $"no playable file for {token}";
+            return false;
+        }
+
+        player.PlayOnce(path, configuration.NotificationVolume, NotificationLeadIn);
+        detail = Path.GetFileName(path);
+        return true;
     }
 
     public void StartCallRing()

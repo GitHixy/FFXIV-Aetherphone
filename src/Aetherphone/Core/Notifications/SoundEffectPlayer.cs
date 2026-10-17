@@ -15,10 +15,12 @@ internal sealed class SoundEffectPlayer : IDisposable
     private string? loopPath;
     private bool disposed;
 
-    public void PlayOnce(string path, float volume)
+    public void PlayOnce(string path, float volume) => PlayOnce(path, volume, TimeSpan.Zero);
+
+    public void PlayOnce(string path, float volume, TimeSpan leadIn)
     {
         var clamped = Math.Clamp(volume, 0f, 1f);
-        var thread = new Thread(() => RunOnce(path, clamped))
+        var thread = new Thread(() => RunOnce(path, clamped, leadIn))
         {
             IsBackground = true, Name = "Aetherphone.Sound",
         };
@@ -149,16 +151,21 @@ internal sealed class SoundEffectPlayer : IDisposable
         reader?.Dispose();
     }
 
-    private void RunOnce(string path, float volume)
+    private void RunOnce(string path, float volume, TimeSpan leadIn)
     {
         WaveStream? reader = null;
         IWavePlayer? output = null;
         try
         {
             reader = OpenReader(path);
-            var volumeProvider = new VolumeSampleProvider(reader.ToSampleProvider()) { Volume = volume };
+            ISampleProvider source = new VolumeSampleProvider(reader.ToSampleProvider()) { Volume = volume };
+            if (leadIn > TimeSpan.Zero)
+            {
+                source = new OffsetSampleProvider(source) { DelayBy = leadIn };
+            }
+
             output = AudioOutputFactory.Create();
-            output.Init(volumeProvider, true);
+            output.Init(source, true);
             lock (gate)
             {
                 if (disposed)
@@ -177,7 +184,7 @@ internal sealed class SoundEffectPlayer : IDisposable
         }
         catch (Exception exception)
         {
-            AepLog.Warning(exception, "[Sound] playback failed");
+            AepLog.Warning(exception, $"[Sound] playback of {Path.GetFileName(path)} failed");
         }
         finally
         {
