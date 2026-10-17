@@ -2294,6 +2294,8 @@ internal static class L
 
         public static readonly LocString[] Release1311Games =
         {
+            new("changelog.r1311.33",
+                "Changed online games to pick who goes first at random, then pass the first turn around the table each round"),
             new("changelog.r1311.18",
                 "Fixed your ranks disappearing from the profile when they failed to load: a retry card shows instead, contributed by t3sco"),
         };
@@ -2310,6 +2312,8 @@ internal static class L
                 "Fixed long names on a full seven-seat blackjack rail being cut short: a seat's plate now widens into the empty seats beside it"),
             new("changelog.r1311.1",
                 "Fixed the gil ledger missing trades once you had been away from your table page for 30 minutes or had reloaded the plugin: trades now record for 12 hours after you were last at your open gil table, across restarts, until you close the table"),
+            new("changelog.r1311.32",
+                "Fixed tapping a Gamba notification after a restart opening an empty blackjack table: it now opens your table, and a trade notification opens that table's gil ledger"),
             new("changelog.r1311.14",
                 "Fixed the lobby balance, cashier, floor feed and fairness panel reading as zero or empty while they were still loading, contributed by t3sco"),
             new("changelog.r1311.15",
@@ -2319,11 +2323,15 @@ internal static class L
         public static readonly LocString[] Release1311Phone =
         {
             new("changelog.r1311.20",
-                "Added song progress to the expanded Dynamic Island: a bar you can drag, the time played and left, and previous and next buttons"),
+                "Added song progress to the expanded Dynamic Island: a bar you can drag, the time played and left, previous and next buttons, and shuffle and repeat, for Music and for media playing on your PC"),
+            new("changelog.r1311.24",
+                "Changed the app switcher to keep every app you used in the last 10 minutes and reopen it where you left it, apart from Games, Gamba and Camera, which start fresh"),
             new("changelog.r1311.4",
                 "Changed the scroll indicator while the phone position is locked: it dims when idle, brightens under the pointer, and a click on it no longer reaches what is underneath"),
             new("changelog.r1311.8",
                 "Changed the MogCast and Music setup button to say checking while it only checks, and installing once a download starts, contributed by t3sco"),
+            new("changelog.r1311.25",
+                "Fixed the scroll bar and the mouse wheel not working beside the + button in Chirper, Aethergram, Velvet and MogCast"),
             new("changelog.r1311.9",
                 "Fixed rows cutting off the word that told them apart, from tomestone names and forecast weather to district tiles and leaderboard ranks, contributed by t3sco"),
             new("changelog.r1311.10",
@@ -2336,8 +2344,16 @@ internal static class L
         {
             new("changelog.r1311.2",
                 "Added a lead time for fish alerts: a stepper under the alerts list sets how many minutes before a window the alert rings, 1 to 60, 5 by default"),
+            new("changelog.r1311.26",
+                "Added a Teleport button to a fish's location that takes you to the aetheryte nearest its fishing hole"),
+            new("changelog.r1311.27",
+                "Added an Equip Fisher button to a fish's location when you are on another class and have a Fisher gear set"),
+            new("changelog.r1311.28",
+                "Added a tap on a fish's fishing hole that searches the Timed Fish tab for that hole"),
             new("changelog.r1311.3",
                 "Changed the Timed Fish tab filters: the big fish and caught filters sit on their own row above the expansion chips"),
+            new("changelog.r1311.29",
+                "Fixed the bell in the alerts list turning an alert off when you clicked near it rather than on it"),
         };
 
         public static readonly LocString[] Release1311Messaging =
@@ -2346,6 +2362,8 @@ internal static class L
                 "Added the double tick to the chats list in ChocoChat, Aethergram and Velvet: a message you sent shows two ticks once it has been read"),
             new("changelog.r1311.5",
                 "Fixed a tall or narrow photo making its bubble narrow and cutting the caption short: the bubble keeps its full width and a tall photo is cropped to fit it"),
+            new("changelog.r1311.30",
+                "Fixed unread counts and app badges coming back in ChocoChat, Aethergram and Velvet after a chat had been read"),
         };
 
         public static readonly LocString[] Release1311Chirper =
@@ -2356,12 +2374,30 @@ internal static class L
                 "Fixed a rechirped quote chirp showing the chirp it quoted as unavailable"),
         };
 
+        public static readonly LocString[] Release1311Sounds =
+        {
+            new("changelog.r1311.34",
+                "Added a way to remove a ringtone or notification sound you imported: anything that used it goes back to the default sound"),
+            new("changelog.r1311.35",
+                "Fixed short notification sounds losing their start on Bluetooth, USB and HDMI audio devices"),
+        };
+
+        public static readonly LocString[] Release1311Halloween =
+        {
+            new("changelog.r1311.36",
+                "Fixed the treats card saying a treat was hiding on an empty screen: treats now hide only where the card can name, and no longer in Velvet, contributed by t3sco"),
+            new("changelog.r1311.37",
+                "Fixed Halloween treat progress staying on one PC: the treats you found now follow your character to another PC once you sign in"),
+        };
+
         public static readonly LocString[] Release1311Skywatcher =
         {
             new("changelog.r1311.7",
                 "Fixed the sky staying at the overridden time after resetting it in Skywatcher: the clock is handed back to the game over a second so the lighting follows"),
             new("changelog.r1311.21",
                 "Fixed the Skywatcher header shrinking in steps as you scroll: the title now resizes smoothly, its lines fade together and the cards fade under it"),
+            new("changelog.r1311.31",
+                "Fixed the hourly forecast cutting times short at large text sizes: the times shrink together, and fewer hours show when they still do not fit"),
         };
 
         public static readonly LocString[] Release1310Phone =

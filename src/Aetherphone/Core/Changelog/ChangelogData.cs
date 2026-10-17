@@ -10,6 +10,7 @@ internal static class ChangelogData
         {
             new(L.Changelog.SectionPhone, L.Changelog.Release1311Phone),
             new(L.Apps.Fishing, L.Changelog.Release1311Fishing),
+            new(L.Changelog.SectionSounds, L.Changelog.Release1311Sounds),
             new(L.Changelog.SectionMessaging, L.Changelog.Release1311Messaging),
             new(L.Apps.Chirper, L.Changelog.Release1311Chirper),
             new(L.Apps.Skywatcher, L.Changelog.Release1311Skywatcher),
@@ -18,6 +19,7 @@ internal static class ChangelogData
             new(L.Apps.Velvet, L.Changelog.Release1311Velvet),
             new(L.Apps.Games, L.Changelog.Release1311Games),
             new(L.Apps.Photos, L.Changelog.Release1311Photos),
+            new(L.Changelog.SectionHalloween, L.Changelog.Release1311Halloween),
         }),
         new ChangelogEntry("1.3.1.0", "2026-10-16", new ChangelogSection[]
         {
