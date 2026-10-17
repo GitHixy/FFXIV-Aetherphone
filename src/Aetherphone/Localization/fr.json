@@ -7819,7 +7819,7 @@
   "changelog.r1311.21": "Correction de l'en-tête de Météorologue qui rétrécissait par paliers au défilement : le titre se redimensionne désormais en douceur, ses lignes s'estompent ensemble et les cartes s'estompent dessous",
   "changelog.r1311.22": "Modification du fil de Chirper, qui garde désormais votre position quand vous revenez à l'onglet Accueil : les nouveaux chirps attendent derrière un bouton en haut au lieu de déplacer la liste",
   "changelog.r1311.23": "Correction d'un chirp avec citation qui, une fois repartagé, affichait le chirp cité comme indisponible",
-  "changelog.r1311.24": "Changement du sélecteur d'apps, qui garde chaque app utilisée dans les 10 dernières minutes et la rouvre là où vous l'avez laissée, sauf Jeux, Gamba et Appareil photo, qui repartent de zéro",
+  "changelog.r1311.24": "Changement du sélecteur d'apps, qui garde chaque app utilisée dans les 10 dernières minutes et la rouvre là où vous l'avez laissée ; Jeux, Gamba et Appareil photo gardent aussi une carte et s'ouvrent de zéro sur leur premier écran",
   "changelog.r1311.25": "Correction de la barre de défilement et de la molette de la souris qui ne fonctionnaient pas à côté du bouton + dans Chirper, Aethergram, Velvet et MogCast",
   "changelog.r1311.26": "Ajout d'un bouton Téléportation à l'emplacement d'un poisson, qui vous emmène à l'éthérite le plus proche de son coin de pêche",
   "changelog.r1311.27": "Ajout d'un bouton pour équiper Pêcheur à l'emplacement d'un poisson quand vous jouez une autre classe et avez un ensemble d'équipement de Pêcheur",

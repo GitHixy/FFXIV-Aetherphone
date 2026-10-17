@@ -7819,7 +7819,7 @@
   "changelog.r1311.21": "Corregido que la cabecera de Vigía del cielo se encogiera a saltos al desplazarte: el título ahora cambia de tamaño con suavidad, sus líneas se desvanecen juntas y las tarjetas se desvanecen debajo",
   "changelog.r1311.22": "Se cambió la cronología de Chirper para que conserve tu posición al volver a la pestaña Inicio: los chirps nuevos esperan tras un botón arriba en lugar de mover la lista",
   "changelog.r1311.23": "Corregido que un chirp con cita, al ser reposteado, mostrara el chirp citado como no disponible",
-  "changelog.r1311.24": "Se cambió el selector de apps para que conserve cada app que usaste en los últimos 10 minutos y la reabra donde la dejaste, salvo Juegos, Gamba y Cámara, que empiezan de cero",
+  "changelog.r1311.24": "Se cambió el selector de apps para que conserve cada app que usaste en los últimos 10 minutos y la reabra donde la dejaste; Juegos, Gamba y Cámara también conservan una tarjeta y se abren de cero en su primera pantalla",
   "changelog.r1311.25": "Corregido que la barra de desplazamiento y la rueda del ratón no funcionaran junto al botón + en Chirper, Aethergram, Velvet y MogCast",
   "changelog.r1311.26": "Se añadió un botón Teletransportarse a la ubicación de un pez que te lleva al eterito más cercano a su punto de pesca",
   "changelog.r1311.27": "Se añadió un botón para equipar Pescador en la ubicación de un pez cuando juegas con otra clase y tienes un conjunto de equipo de Pescador",

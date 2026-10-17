@@ -7819,7 +7819,7 @@
   "changelog.r1311.21": "Behoben, dass die Kopfzeile von Wetterwart beim Scrollen stufenweise schrumpfte: Der Titel verkleinert sich jetzt gleichmäßig, seine Zeilen blenden gemeinsam aus und die Karten blenden darunter aus",
   "changelog.r1311.22": "Chirper-Timeline geändert: Sie behält deine Position, wenn du zum Start-Tab zurückkehrst, und neue Chirps warten hinter einer Schaltfläche oben, statt die Liste zu verschieben",
   "changelog.r1311.23": "Behoben, dass ein erneut geposteter Zitat-Chirp den zitierten Chirp als nicht verfügbar anzeigte",
-  "changelog.r1311.24": "Den App-Umschalter geändert: Er behält jede App, die du in den letzten 10 Minuten benutzt hast, und öffnet sie dort, wo du aufgehört hast, außer Spiele, Gamba und Kamera, die neu starten",
+  "changelog.r1311.24": "Den App-Umschalter geändert: Er behält jede App, die du in den letzten 10 Minuten benutzt hast, und öffnet sie dort, wo du aufgehört hast; Spiele, Gamba und Kamera behalten ebenfalls eine Karte und starten neu auf ihrem ersten Bildschirm",
   "changelog.r1311.25": "Behoben, dass Scrollleiste und Mausrad neben der Plus-Taste in Chirper, Aethergram, Velvet und MogCast nicht funktionierten",
   "changelog.r1311.26": "Eine Teleport-Taste beim Fundort eines Fisches hinzugefügt, die dich zum Ätheryten bringt, der seinem Angelplatz am nächsten liegt",
   "changelog.r1311.27": "Eine Taste zum Anlegen des Fischers beim Fundort eines Fisches hinzugefügt, wenn du eine andere Klasse spielst und ein Fischer-Ausrüstungsset hast",

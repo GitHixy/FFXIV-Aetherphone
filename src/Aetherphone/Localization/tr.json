@@ -7819,7 +7819,7 @@
   "changelog.r1311.21": "Gökgözcü başlığının kaydırırken basamaklı küçülmesi düzeltildi: başlık artık yumuşakça boyut değiştirir, satırları birlikte solar ve kartlar altında solarak kaybolur",
   "changelog.r1311.22": "Chirper zaman akışı, Ana sayfa sekmesine döndüğünde yerini koruyacak şekilde değiştirildi: yeni chirpler listeyi kaydırmak yerine üstteki bir düğmenin arkasında bekler",
   "changelog.r1311.23": "Alıntılı bir chirp yeniden paylaşıldığında alıntılanan chirpin kullanılamıyor görünmesi düzeltildi",
-  "changelog.r1311.24": "Uygulama değiştirici, son 10 dakikada kullandığın her uygulamayı tutup bıraktığın yerden açacak şekilde değiştirildi; Oyunlar, Gamba ve Kamera baştan başlar",
+  "changelog.r1311.24": "Uygulama değiştirici, son 10 dakikada kullandığın her uygulamayı tutup bıraktığın yerden açacak şekilde değiştirildi; Oyunlar, Gamba ve Kamera da bir kart tutar ve ilk ekranlarından baştan açılır",
   "changelog.r1311.25": "Chirper, Aethergram, Velvet ve MogCast'te + düğmesinin yanında kaydırma çubuğu ile fare tekerleğinin çalışmaması düzeltildi",
   "changelog.r1311.26": "Bir balığın konumuna, onu balık tutma noktasına en yakın aetherite'a götüren bir Işınlan düğmesi eklendi",
   "changelog.r1311.27": "Başka bir sınıftayken ve bir Balıkçı teçhizat setin varken bir balığın konumuna Balıkçıyı kuşanma düğmesi eklendi",

@@ -2333,7 +2333,7 @@ internal static class L
             new("changelog.r1311.39",
                 "Added automatic gain for your microphone in calls and voice messages, on by default: it evens out quiet and loud speech, and a toggle in Settings and in the call's audio options turns it off"),
             new("changelog.r1311.24",
-                "Changed the app switcher to keep every app you used in the last 10 minutes and reopen it where you left it, apart from Games, Gamba and Camera, which start fresh"),
+                "Changed the app switcher to keep every app you used in the last 10 minutes and reopen it where you left it; Games, Gamba and Camera keep a card too and open fresh on their first screen"),
             new("changelog.r1311.4",
                 "Changed the scroll indicator while the phone position is locked: it dims when idle, brightens under the pointer, and a click on it no longer reaches what is underneath"),
             new("changelog.r1311.8",
