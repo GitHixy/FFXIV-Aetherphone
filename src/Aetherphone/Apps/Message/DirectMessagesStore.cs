@@ -76,8 +76,7 @@ internal sealed class DirectMessagesStore : ChatThreadStoreBase<ChatMessageDto, 
             return;
         }
 
-        work.Run("mark read", async token =>
-            await client.MarkReadAsync(message.ConversationId, token).ConfigureAwait(false));
+        RequestReadConfirmation(message.ConversationId);
     }
 
     public ConversationDto[] Conversations => ThreadListItems;
@@ -173,6 +172,14 @@ internal sealed class DirectMessagesStore : ChatThreadStoreBase<ChatMessageDto, 
     {
         var result = await client.TypingAsync(threadId, token).ConfigureAwait(false);
         return result is null ? null : result.TypingUserIds.Length > 0;
+    }
+
+    protected override async Task<ReadMarkOutcome> MarkThreadReadRequestAsync(string threadKey, CancellationToken token)
+    {
+        var failure = AepFailure.None;
+        var succeeded = await client.MarkReadAsync(threadKey, token, reported => failure = reported)
+            .ConfigureAwait(false);
+        return ReadConfirmations.Classify(succeeded, failure, missingRouteIsUnsupported: false);
     }
 
     protected override async Task<string?> FetchMediaUrlRequestAsync(string messageId, CancellationToken token)
