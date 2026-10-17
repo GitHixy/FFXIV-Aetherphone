@@ -140,7 +140,7 @@ internal sealed partial class SkywatcherApp : IPhoneApp
         DrawBody(body, screen, palette, daylight, hasData, showHero, scale);
         if (showHero)
         {
-            DrawHero(body, screen, palette, scale);
+            DrawHero(body, palette, scale);
         }
 
         DrawTabBar(content, scale);
@@ -173,6 +173,11 @@ internal sealed partial class SkywatcherApp : IPhoneApp
         ImGui.PushClipRect(new Vector2(body.Min.X, clipTop), body.Max, true);
         DrawTab(screen, palette, daylight, hasData, showHero, scale);
         ImGui.PopClipRect();
+        if (showHero)
+        {
+            DrawHeroScrim(body, screen, palette, scale);
+        }
+
         ImGui.Dummy(new Vector2(0f, TabBar.ContentInset(scale) + SectionGapUnits * scale));
         if (scrubbing)
         {
