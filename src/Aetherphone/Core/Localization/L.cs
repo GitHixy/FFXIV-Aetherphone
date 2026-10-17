@@ -2282,6 +2282,8 @@ internal static class L
 
         public static readonly LocString[] Release1311MogCast =
         {
+            new("changelog.r1311.38",
+                "Added MogCast to the expanded Dynamic Island: the video's thumbnail, a bar you can drag, the time played and left, and play, pause and next, on your own or in a watch party"),
             new("changelog.r1311.12",
                 "Fixed videos freezing on the first frame when the audio device stops taking sound: the video keeps playing without sound, says so, and sound returns on the next video, contributed by t3sco"),
             new("changelog.r1311.13",
@@ -2328,6 +2330,8 @@ internal static class L
         {
             new("changelog.r1311.20",
                 "Added song progress to the expanded Dynamic Island: a bar you can drag, the time played and left, previous and next buttons, and shuffle and repeat, for Music and for media playing on your PC"),
+            new("changelog.r1311.39",
+                "Added automatic gain for your microphone in calls and voice messages, on by default: it evens out quiet and loud speech, and a toggle in Settings and in the call's audio options turns it off"),
             new("changelog.r1311.24",
                 "Changed the app switcher to keep every app you used in the last 10 minutes and reopen it where you left it, apart from Games, Gamba and Camera, which start fresh"),
             new("changelog.r1311.4",
