@@ -21,14 +21,14 @@ public sealed class AutoGainTests
             for (var frame = 0; frame < 15; frame++)
             {
                 phase = FillSine(block, 0.0283f, phase);
-                gain.Process(block, SampleRate, 1f, true);
+                Run(gain, block, 1f, true);
                 lastToneRms = AutoGain.Rms(block);
             }
 
             for (var frame = 0; frame < 5; frame++)
             {
                 phase = FillSine(block, 0.0007f, phase);
-                gain.Process(block, SampleRate, 1f, true);
+                Run(gain, block, 1f, true);
             }
         }
 
@@ -48,7 +48,7 @@ public sealed class AutoGainTests
         {
             phase = FillSine(block, 0.95f, phase);
             inputRms = AutoGain.Rms(block);
-            gain.Process(block, SampleRate, 1f, true);
+            Run(gain, block, 1f, true);
             outputRms = AutoGain.Rms(block);
             for (var index = 0; index < block.Length; index++)
             {
@@ -70,12 +70,12 @@ public sealed class AutoGainTests
         {
             phase = FillSine(block, 0.0014f, phase);
             var before = (short[])block.Clone();
-            gain.Process(block, SampleRate, 1f, true);
+            Run(gain, block, 1f, true);
             Assert.Equal(before, block);
         }
 
         Array.Clear(block);
-        gain.Process(block, SampleRate, 1f, true);
+        Run(gain, block, 1f, true);
         Assert.All(block, sample => Assert.Equal(0, sample));
         Assert.Equal(1f, gain.Gain);
     }
@@ -91,7 +91,7 @@ public sealed class AutoGainTests
             var amplitude = (frame / 25) % 2 == 0 ? 0.9f : 0.02f;
             phase = FillSine(block, amplitude, phase);
             var before = gain.Gain;
-            gain.Process(block, SampleRate, 1f, true);
+            Run(gain, block, 1f, true);
             var stepDecibels = 20f * MathF.Log10(gain.Gain / before);
             Assert.InRange(stepDecibels, -6f, 0.7f);
             Assert.InRange(gain.Gain, AutoGain.MinimumGain, AutoGain.MaximumGain);
@@ -107,16 +107,16 @@ public sealed class AutoGainTests
         for (var frame = 0; frame < 100; frame++)
         {
             phase = FillSine(block, 0.9f, phase);
-            gain.Process(block, SampleRate, 1f, true);
+            Run(gain, block, 1f, true);
         }
 
         Assert.True(gain.Gain < 1f);
         phase = FillSine(block, 0.3f, phase);
-        gain.Process(block, SampleRate, 1f, false);
+        Run(gain, block, 1f, false);
         Assert.Equal(1f, gain.Gain);
         phase = FillSine(block, 0.3f, phase);
         var before = (short[])block.Clone();
-        gain.Process(block, SampleRate, 1f, false);
+        Run(gain, block, 1f, false);
         Assert.Equal(before, block);
     }
 
@@ -126,7 +126,7 @@ public sealed class AutoGainTests
         var gain = new AutoGain();
         var block = new short[BlockSamples];
         FillSine(block, 0.7f, 0);
-        gain.Process(block, SampleRate, 2f, false);
+        Run(gain, block, 2f, false);
         for (var index = 0; index < block.Length; index++)
         {
             Assert.InRange((int)block[index], -32767, 32767);
@@ -142,6 +142,79 @@ public sealed class AutoGainTests
         Assert.True(AutoGain.Limit(4f) <= AutoGain.LimiterCeiling * short.MaxValue + 1f);
         Assert.True(AutoGain.Limit(-4f) >= -AutoGain.LimiterCeiling * short.MaxValue - 1f);
         Assert.Equal((short)MathF.Round(0.5f * short.MaxValue), AutoGain.Limit(0.5f));
+    }
+
+    [Fact]
+    public void ClicksAfterDigitalSilenceDoNotRaiseTheGain()
+    {
+        var gain = new AutoGain();
+        var block = new short[BlockSamples];
+        for (var frame = 0; frame < 100; frame++)
+        {
+            Array.Clear(block);
+            Run(gain, block, 1f, true);
+        }
+
+        for (var click = 0; click < 10; click++)
+        {
+            Array.Clear(block);
+            for (var index = 0; index < 20; index++)
+            {
+                block[index] = (short)(0.5f * short.MaxValue);
+            }
+
+            Run(gain, block, 1f, true);
+            for (var frame = 0; frame < 10; frame++)
+            {
+                Array.Clear(block);
+                Run(gain, block, 1f, true);
+            }
+        }
+
+        Assert.Equal(1f, gain.Gain);
+    }
+
+    [Fact]
+    public void NoiseBetweenWordsKeepsTheCallGateClosed()
+    {
+        var gain = new AutoGain();
+        var block = new short[BlockSamples];
+        var phase = 0;
+        var noiseGateLevel = 0f;
+        for (var burst = 0; burst < 12; burst++)
+        {
+            for (var frame = 0; frame < 15; frame++)
+            {
+                phase = FillSine(block, 0.0424f, phase);
+                AudioCapture.Condition(block, gain, 1f, true);
+            }
+
+            for (var frame = 0; frame < 5; frame++)
+            {
+                phase = FillSine(block, 0.0035f, phase);
+                noiseGateLevel = AudioCapture.Condition(block, gain, 1f, true);
+            }
+        }
+
+        Assert.True(gain.Gain > 2f);
+        Assert.True(noiseGateLevel < AudioCapture.GateCloseRms);
+    }
+
+    [Fact]
+    public void ResetStartsFromACarriedGainInsideTheBounds()
+    {
+        var gain = new AutoGain();
+        gain.Reset(3f);
+        Assert.Equal(3f, gain.Gain);
+        gain.Reset(40f);
+        Assert.Equal(AutoGain.MaximumGain, gain.Gain);
+        gain.Reset(0f);
+        Assert.Equal(AutoGain.MinimumGain, gain.Gain);
+    }
+
+    private static void Run(AutoGain gain, short[] block, float trim, bool adaptive)
+    {
+        gain.Process(block, AutoGain.Rms(block), SampleRate, trim, adaptive);
     }
 
     private static int FillSine(short[] block, float amplitude, int phase)
