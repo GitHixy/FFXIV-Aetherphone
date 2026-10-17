@@ -3613,7 +3613,7 @@
   "fishing.searchHint": "Search fish, holes or zones",
   "fishing.bigFish": "Big fish",
   "fishing.uncaughtFilter": "Not caught",
-  "fishing.alertLeadValue": "{0} min before the window",
+  "fishing.alertLeadValue": "{0} min before",
   "fishing.alertLeadHint": "How early a fish alert rings before its window opens.",
   "fishing.caughtProgress": "Caught {0} of {1}",
   "fishing.anyTime": "Any time",

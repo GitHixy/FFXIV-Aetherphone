@@ -3613,7 +3613,7 @@
   "fishing.searchHint": "Rechercher poissons, lieux ou zones",
   "fishing.bigFish": "Gros poisson",
   "fishing.uncaughtFilter": "Non pêchés",
-  "fishing.alertLeadValue": "{0} min avant la fenêtre",
+  "fishing.alertLeadValue": "{0} min avant",
   "fishing.alertLeadHint": "Combien de temps avant l'ouverture de sa fenêtre une alerte de poisson sonne.",
   "fishing.caughtProgress": "{0} sur {1} pêchés",
   "fishing.anyTime": "À toute heure",

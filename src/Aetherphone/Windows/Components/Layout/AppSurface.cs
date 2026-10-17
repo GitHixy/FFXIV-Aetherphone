@@ -16,6 +16,7 @@ internal static class AppSurface
     private const float ScrollbarRoundingUnits = 2f;
     private const float IndicatorHoldSeconds = 0.8f;
     private const float IndicatorStripUnits = 16f;
+    private const float IndicatorThumbSlackUnits = 6f;
     private const float IndicatorWidthUnits = 3f;
     private const float IndicatorWideUnits = 5f;
     private const float IndicatorIdleAlpha = 0.30f;
@@ -141,8 +142,11 @@ internal static class AppSurface
         var windowMin = ImGui.GetWindowPos();
         var windowSize = ImGui.GetWindowSize();
         var windowMax = windowMin + windowSize;
-        var hovering = DragScrollHost.HoversEdgeStrip(IndicatorStripUnits * scale);
-        if (grabbing || hovering)
+        var maxY = ImGui.GetScrollMaxY();
+        var thumb = ScrollThumb.Measure(windowMin.Y, windowSize.Y, scrollY, maxY, scale);
+        var awake = DragScrollHost.HoversEdgeStrip(IndicatorStripUnits * scale);
+        var hovering = awake && maxY > 0f && thumb.Spans(ImGui.GetMousePos().Y, IndicatorThumbSlackUnits * scale);
+        if (grabbing || awake)
         {
             lastScrollMotion = now;
         }
@@ -160,13 +164,11 @@ internal static class AppSurface
             return;
         }
 
-        var maxY = ImGui.GetScrollMaxY();
         if (maxY <= 0f)
         {
             return;
         }
 
-        var thumb = ScrollThumb.Measure(windowMin.Y, windowSize.Y, scrollY, maxY, scale);
         var right = windowMax.X - ScrollThumb.InsetUnits * scale;
         var width = (grabbing || hovering ? IndicatorWideUnits : IndicatorWidthUnits) * scale;
         var strength = grabbing ? IndicatorActiveAlpha : hovering ? IndicatorHoverAlpha : IndicatorIdleAlpha;

@@ -3613,7 +3613,7 @@
   "fishing.searchHint": "搜索鱼、钓场或区域",
   "fishing.bigFish": "鱼王",
   "fishing.uncaughtFilter": "未钓到",
-  "fishing.alertLeadValue": "窗口开始前{0}分钟",
+  "fishing.alertLeadValue": "提前{0}分钟",
   "fishing.alertLeadHint": "鱼的提醒在窗口开始前多久响起。",
   "fishing.caughtProgress": "已钓到 {0}/{1}",
   "fishing.anyTime": "全天",

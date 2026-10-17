@@ -252,6 +252,7 @@ internal sealed class ChatTranscript
     private const float TravelPillHeight = 26f;
     private const float TravelIconSpace = 17f;
     private const float CaptionTextScale = 0.9f;
+    private const float MaxPortraitAspect = 1.4f;
     private const float ReactionChipHeight = 26f;
     private const float ReactionChipGap = 4f;
     private const float ReactionChipEmoji = 17f;
@@ -1926,15 +1927,10 @@ internal sealed class ChatTranscript
             : 1f;
         var frameWidth = available * 0.62f;
         var imageWidth = frameWidth;
-        var imageHeight = imageWidth * aspect;
         var maxHeight = 280f * scale;
-        if (imageHeight > maxHeight)
-        {
-            imageHeight = maxHeight;
-            imageWidth = imageHeight / aspect;
-        }
-
-        var imageInset = (frameWidth - imageWidth) * 0.5f;
+        var shownAspect = MathF.Min(aspect, MathF.Min(MaxPortraitAspect, maxHeight / frameWidth));
+        var imageHeight = imageWidth * shownAspect;
+        var cropInset = aspect > shownAspect ? (1f - shownAspect / aspect) * 0.5f : 0f;
         var header = TakeSenderHeader(message, frameWidth - 8f * scale, scale);
         var headerBlock = header.Height > 0f ? header.Height + 2f * scale : 0f;
         var caption = message.Body ?? string.Empty;
@@ -1969,8 +1965,7 @@ internal sealed class ChatTranscript
                 mine, model, scale);
         }
 
-        var imageMin = scaledMin
-                       + new Vector2((padding + imageInset) * fx.Pop, (padding + headerBlock + forwardBlock) * fx.Pop);
+        var imageMin = scaledMin + new Vector2(padding * fx.Pop, (padding + headerBlock + forwardBlock) * fx.Pop);
         var imageMax = imageMin + new Vector2(imageWidth * fx.Pop, imageHeight * fx.Pop);
         var rounding = 10f * scale * fx.Pop;
         var texture = model.Media?.Texture(message.Id);
@@ -1983,8 +1978,9 @@ internal sealed class ChatTranscript
         }
         else
         {
-            drawList.AddImageRounded(texture.Handle, imageMin, imageMax, Vector2.Zero, Vector2.One,
-                ImGui.GetColorU32(new Vector4(1f, 1f, 1f, fx.Alpha)), rounding, ImDrawFlags.RoundCornersAll);
+            drawList.AddImageRounded(texture.Handle, imageMin, imageMax, new Vector2(0f, cropInset),
+                new Vector2(1f, 1f - cropInset), ImGui.GetColorU32(new Vector4(1f, 1f, 1f, fx.Alpha)), rounding,
+                ImDrawFlags.RoundCornersAll);
             if (entrance >= 1f && model.Media is { } media && Hovering(imageMin, imageMax))
             {
                 ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
@@ -2030,8 +2026,7 @@ internal sealed class ChatTranscript
         {
             var stampPad = new Vector2(7f * scale, 3f * scale);
             var pillMax = bubbleMin
-                          + new Vector2(padding + imageInset + imageWidth,
-                              padding + headerBlock + forwardBlock + imageHeight)
+                          + new Vector2(padding + imageWidth, padding + headerBlock + forwardBlock + imageHeight)
                           - new Vector2(6f * scale, 6f * scale);
             var pillMin = pillMax - new Vector2(stamp.Width + stampPad.X * 2f, stamp.Height + stampPad.Y * 2f);
             Squircle.Fill(drawList, fx.Apply(pillMin), fx.Apply(pillMax),

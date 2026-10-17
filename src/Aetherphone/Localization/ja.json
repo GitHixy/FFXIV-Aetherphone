@@ -3613,7 +3613,7 @@
   "fishing.searchHint": "魚・釣り場・エリアを検索",
   "fishing.bigFish": "ヌシ・オオヌシ",
   "fishing.uncaughtFilter": "未釣獲",
-  "fishing.alertLeadValue": "ウィンドウの{0}分前",
+  "fishing.alertLeadValue": "{0}分前",
   "fishing.alertLeadHint": "魚の通知を、ウィンドウが開くどれくらい前に鳴らすかを決めます。",
   "fishing.caughtProgress": "{1}匹中{0}匹釣獲済み",
   "fishing.anyTime": "常時",
