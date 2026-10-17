@@ -446,6 +446,79 @@ public sealed class CasinoTableWireContractTests
     }
 
     [Fact]
+    public void ALaunchAnswerForTheCurrentAskIsHandedOverOnce()
+    {
+        var resolve = new CasinoLaunchResolve();
+        var asked = resolve.Begin();
+        Assert.False(resolve.TryTake(out _));
+
+        resolve.Complete(asked, new CasinoLaunchAnswer("table-7", null, CasinoReasons.TableClosed));
+        Assert.True(resolve.TryTake(out var answer));
+        Assert.Equal("table-7", answer.TableId);
+        Assert.Equal(CasinoReasons.TableClosed, answer.Reason);
+        Assert.False(resolve.TryTake(out _));
+    }
+
+    [Fact]
+    public void AnAnswerToAnOlderAskIsDroppedWhenASecondTapAskedAgain()
+    {
+        var resolve = new CasinoLaunchResolve();
+        var first = resolve.Begin();
+        var second = resolve.Begin();
+
+        resolve.Complete(first, new CasinoLaunchAnswer("table-a", null, string.Empty));
+        Assert.False(resolve.TryTake(out _));
+
+        resolve.Complete(second, new CasinoLaunchAnswer("table-b", null, string.Empty));
+        Assert.True(resolve.TryTake(out var answer));
+        Assert.Equal("table-b", answer.TableId);
+    }
+
+    [Fact]
+    public void AnAbandonedAskDropsBothItsLateAnswerAndAnAnswerAlreadyWaiting()
+    {
+        var resolve = new CasinoLaunchResolve();
+        var asked = resolve.Begin();
+        resolve.Forget();
+        resolve.Complete(asked, new CasinoLaunchAnswer("table-7", null, CasinoReasons.TableClosed));
+        Assert.False(resolve.TryTake(out _));
+
+        var again = resolve.Begin();
+        resolve.Complete(again, new CasinoLaunchAnswer("table-7", null, CasinoReasons.TableClosed));
+        resolve.Forget();
+        Assert.False(resolve.TryTake(out _));
+    }
+
+    [Fact]
+    public void ALaunchWaitHoldsWhileTheUserStaysWhereTheTapLeftThem()
+    {
+        var wait = new CasinoLaunchWait("table-7", true, CasinoRoute.Floor, 1, CasinoTab.Floor);
+        Assert.True(wait.Active);
+        Assert.True(wait.Answers("table-7"));
+        Assert.False(wait.Answers("table-8"));
+        Assert.False(wait.Outlived(CasinoRoute.Floor, 1, CasinoTab.Floor));
+    }
+
+    [Fact]
+    public void ALaunchWaitEndsOnceTheUserMovesSomewhereElseInGamba()
+    {
+        var wait = new CasinoLaunchWait("table-7", false, CasinoRoute.Floor, 1, CasinoTab.Floor);
+        var door = new CasinoRoute(CasinoScreen.TableDoor, CasinoGames.Blackjack, string.Empty, "table-9");
+        Assert.True(wait.Outlived(door, 2, CasinoTab.Floor));
+        Assert.True(wait.Outlived(CasinoRoute.Floor, 1, CasinoTab.Live));
+        Assert.True(wait.Outlived(door, 1, CasinoTab.Floor));
+    }
+
+    [Fact]
+    public void NoLaunchWaitAnswersAnything()
+    {
+        var wait = default(CasinoLaunchWait);
+        Assert.False(wait.Active);
+        Assert.False(wait.Answers("table-7"));
+        Assert.False(wait.Answers(string.Empty));
+    }
+
+    [Fact]
     public void AWidgetTapAsksForItsGameAndTheLauncherHandsItOverOnce()
     {
         var launcher = new CasinoLauncher();

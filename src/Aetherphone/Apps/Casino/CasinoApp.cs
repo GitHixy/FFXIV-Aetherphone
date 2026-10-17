@@ -102,8 +102,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private Rect screenArea;
     private Rect frameArea;
     private string pendingTableId = string.Empty;
-    private string awaitedTableId = string.Empty;
-    private bool awaitedLedger;
+    private CasinoLaunchWait awaited;
     private bool awaitedResolveAsked;
     private CasinoRoute leavingRoute;
     private bool historyLoadFailed;
@@ -233,7 +232,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         venueSheet.Close();
         tableDoor.Reset();
         pendingTableId = string.Empty;
-        awaitedTableId = string.Empty;
+        AbandonAwaitedTable();
         rulesSheet.Close();
         fameConsent.Close();
         stage.ResetSession();
@@ -277,7 +276,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         venueSheet.Close();
         tableDoor.Reset();
         pendingTableId = string.Empty;
-        awaitedTableId = string.Empty;
+        AbandonAwaitedTable();
         rulesSheet.Close();
         holdemRooms.Close();
         blackjackRooms.Close();
@@ -307,7 +306,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         }
 
         routes.Reset();
-        awaitedTableId = string.Empty;
+        AbandonAwaitedTable();
         var ledger = launch.Kind == Core.Casino.CasinoLaunchKind.Ledger;
         if ((launch.Kind == Core.Casino.CasinoLaunchKind.Table || ledger) && launch.TableId.Length > 0)
         {
@@ -317,9 +316,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
                 return;
             }
 
-            awaitedTableId = launch.TableId;
-            awaitedLedger = ledger;
-            awaitedResolveAsked = false;
+            awaited = new CasinoLaunchWait(launch.TableId, ledger, routes.Current, routes.Depth, routes.Tab);
             return;
         }
 
@@ -350,55 +347,68 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         OpenLedger(tableId);
     }
 
-    private bool TakeAwaitedTable(string tableId)
+    private void AbandonAwaitedTable()
     {
-        if (awaitedTableId.Length == 0 || !string.Equals(awaitedTableId, tableId, StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        awaitedTableId = string.Empty;
-        OpenLaunchedTable(tableId, awaitedLedger);
-        return true;
+        awaited = default;
+        awaitedResolveAsked = false;
+        casinoTables.ForgetLaunch();
     }
 
-    private void SettleAwaitedTable(bool storeIdle)
+    private void SettleAwaitedTable()
     {
-        if (awaitedTableId.Length == 0 || !storeIdle)
+        if (!awaited.Active)
         {
             return;
         }
 
-        if (casinoTables.CardFor(awaitedTableId) is not null)
+        if (awaited.Outlived(routes.Current, routes.Depth, routes.Tab))
         {
-            TakeAwaitedTable(awaitedTableId);
+            AbandonAwaitedTable();
             return;
         }
 
-        if (awaitedResolveAsked)
+        var wait = awaited;
+        if (casinoTables.TryTakeLaunchAnswer(out var answer))
         {
-            awaitedTableId = string.Empty;
-            ToastAwaitedRefusal();
+            AbandonAwaitedTable();
+            if (!wait.Answers(answer.TableId))
+            {
+                return;
+            }
+
+            if (answer.Table is null)
+            {
+                ToastLaunchRefusal(answer.Reason);
+                return;
+            }
+
+            OpenLaunchedTable(wait.TableId, wait.Ledger);
             return;
         }
 
-        awaitedResolveAsked = true;
-        casinoTables.ResolveToken(awaitedTableId);
+        if (awaitedResolveAsked || casinoTables.IntentInFlight)
+        {
+            return;
+        }
+
+        if (casinoTables.CardFor(wait.TableId) is not null)
+        {
+            AbandonAwaitedTable();
+            OpenLaunchedTable(wait.TableId, wait.Ledger);
+            return;
+        }
+
+        awaitedResolveAsked = casinoTables.ResolveLaunch(wait.TableId);
     }
 
-    private void ToastAwaitedRefusal()
+    private static void ToastLaunchRefusal(string reason)
     {
-        var notice = casinoTables.TakeNoticeOutcome();
-        var reason = notice is { Granted: false } ? notice.Reason : string.Empty;
-        if (reason.Length == 0 && casinoTables.TakeIntentFailure())
+        if (reason.Length == 0)
         {
-            reason = Core.Casino.CasinoReasons.Unreachable;
+            return;
         }
 
-        if (reason.Length > 0)
-        {
-            ShellToast.Show(Loc.T(Core.Casino.CasinoReasons.MessageFor(reason)));
-        }
+        ShellToast.Show(Loc.T(Core.Casino.CasinoReasons.MessageFor(reason)));
     }
 
     public void Draw(in PhoneContext context)
@@ -1711,9 +1721,8 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             OpenDoor(hosted.TableId, hosted.InviteToken);
         }
 
-        var storeIdle = !casinoTables.IntentInFlight;
         var resolved = casinoTables.TakeResolvedTable();
-        if (resolved is not null && !TakeAwaitedTable(resolved.TableId))
+        if (resolved is not null)
         {
             if (casinoTables.Owns(resolved))
             {
@@ -1729,7 +1738,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             }
         }
 
-        SettleAwaitedTable(storeIdle);
+        SettleAwaitedTable();
         if (pendingTableId.Length == 0
             || (!casino.HasChips && !SeatedAt(Core.Casino.CasinoWire.BlackjackKind)))
         {
