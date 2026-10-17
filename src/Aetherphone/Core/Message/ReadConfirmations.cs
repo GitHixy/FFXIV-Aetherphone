@@ -27,6 +27,7 @@ internal sealed class ReadConfirmations
         public DateTime DueUtc;
         public int Attempts;
         public int Generation;
+        public int Account;
     }
 
     public bool Unsupported
@@ -59,7 +60,7 @@ internal sealed class ReadConfirmations
         }
     }
 
-    public void Request(string key, DateTime nowUtc, TimeSpan delay)
+    public void Request(string key, DateTime nowUtc, TimeSpan delay, int account)
     {
         lock (gate)
         {
@@ -69,12 +70,12 @@ internal sealed class ReadConfirmations
             }
 
             var due = nowUtc + delay;
-            if (pending.TryGetValue(key, out var existing) && existing.DueUtc < due)
+            if (pending.TryGetValue(key, out var existing) && existing.Account == account && existing.DueUtc < due)
             {
                 due = existing.DueUtc;
             }
 
-            pending[key] = new Entry { DueUtc = due, Attempts = 0, Generation = ++nextGeneration };
+            pending[key] = new Entry { DueUtc = due, Attempts = 0, Generation = ++nextGeneration, Account = account };
         }
     }
 
@@ -102,12 +103,13 @@ internal sealed class ReadConfirmations
         }
     }
 
-    public bool TryTakeDue(DateTime nowUtc, out string key, out int generation)
+    public bool TryTakeDue(DateTime nowUtc, out string key, out int generation, out int account)
     {
         lock (gate)
         {
             key = string.Empty;
             generation = 0;
+            account = 0;
             if (inFlightKey is not null || unsupported || pending.Count == 0)
             {
                 return false;
@@ -123,6 +125,7 @@ internal sealed class ReadConfirmations
                 inFlightKey = pair.Key;
                 key = pair.Key;
                 generation = pair.Value.Generation;
+                account = pair.Value.Account;
                 return true;
             }
 

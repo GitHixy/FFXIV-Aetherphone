@@ -486,6 +486,8 @@ internal sealed class AdInquiryStore : ChatThreadStoreBase<AdInquiryMessageDto, 
 
     protected override int ThreadUnreadCountOf(AdInquiryDto thread) => thread.UnreadCount;
 
+    protected override string? ThreadLastMessageIdOf(AdInquiryDto thread) => thread.LastMessageId;
+
     protected override AdInquiryDto WithUnreadCleared(AdInquiryDto thread) => thread with { UnreadCount = 0 };
 
     protected override PhoneNotification BuildInboxNotification(AdInquiryDto thread)

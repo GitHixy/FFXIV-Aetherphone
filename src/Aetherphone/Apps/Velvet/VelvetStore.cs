@@ -497,6 +497,8 @@ internal sealed partial class VelvetStore : ChatThreadStoreBase<VelvetMessageDto
 
     protected override int ThreadUnreadCountOf(VelvetThreadDto thread) => thread.UnreadCount;
 
+    protected override string? ThreadLastMessageIdOf(VelvetThreadDto thread) => thread.LastMessageId;
+
     protected override VelvetThreadDto WithUnreadCleared(VelvetThreadDto thread) => thread with { UnreadCount = 0 };
 
     protected override PhoneNotification BuildInboxNotification(VelvetThreadDto thread)
