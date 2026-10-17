@@ -7010,6 +7010,8 @@ internal static class L
         public static readonly LocString Quote = new("chirper.quote", "Quote");
         public static readonly LocString QuoteTitle = new("chirper.quoteTitle", "Quote Chirp");
         public static readonly LocString Unavailable = new("chirper.unavailable", "This chirp is unavailable");
+        public static readonly LocString NewChirps = new("chirper.newChirps", "New chirps");
+        public static readonly LocPlural NewChirpsCount = new("chirper.newChirpsCount", "{0} new chirp", "{0} new chirps");
     }
 
     internal static class Aethergram
