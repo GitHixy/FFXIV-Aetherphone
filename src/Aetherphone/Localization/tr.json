@@ -931,6 +931,7 @@
   "settings.soundImportHint": "İçe aktarılan dosyalar aşağıdaki listede görünür ve buradaki ses düzeyiyle çalınır; oyunun kendi ses ayarlarından bağımsızdır.",
   "settings.removeSound": "Sesi kaldır",
   "settings.removeSoundMessage": "{0} kaldırılsın mı? Bu sesi kullanan uygulamalar varsayılan sese döner.",
+  "settings.removeRingtoneMessage": "{0} kaldırılsın mı? Zil sesin buysa yerine varsayılan zil sesi çalar.",
   "settings.removeSoundConfirm": "Kaldır",
   "settings.language": "Dil",
   "settings.about": "Hakkında",

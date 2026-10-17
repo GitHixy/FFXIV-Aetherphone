@@ -63,10 +63,15 @@ internal sealed class SoundService : IDisposable
             return;
         }
 
-        player.Release(path);
+        var wasRinging = player.Release(path);
         if (configuration.ForgetSound(kind, token))
         {
             configuration.Save();
+        }
+
+        if (wasRinging && kind == SoundKind.Ringtone)
+        {
+            StartCallRing();
         }
 
         _ = DeleteWhenReleasedAsync(library, path);

@@ -931,6 +931,7 @@
   "settings.soundImportHint": "Импортированные файлы появляются в списке ниже и воспроизводятся с заданной здесь громкостью, независимо от настроек звука игры.",
   "settings.removeSound": "Удалить звук",
   "settings.removeSoundMessage": "Удалить {0}? Приложения, которые его используют, вернутся к звуку по умолчанию.",
+  "settings.removeRingtoneMessage": "Удалить {0}? Если это ваш рингтон, вместо него будет звучать рингтон по умолчанию.",
   "settings.removeSoundConfirm": "Удалить",
   "settings.language": "Язык",
   "settings.about": "О программе",

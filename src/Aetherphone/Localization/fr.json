@@ -931,6 +931,7 @@
   "settings.soundImportHint": "Les fichiers importés apparaissent dans la liste ci-dessous et sont lus au volume défini ici, indépendamment des réglages audio du jeu.",
   "settings.removeSound": "Supprimer le son",
   "settings.removeSoundMessage": "Supprimer {0} ? Les apps qui l’utilisent reviennent au son par défaut.",
+  "settings.removeRingtoneMessage": "Supprimer {0} ? Si c’est votre sonnerie, la sonnerie par défaut la remplace.",
   "settings.removeSoundConfirm": "Supprimer",
   "settings.language": "Langue",
   "settings.about": "À propos",

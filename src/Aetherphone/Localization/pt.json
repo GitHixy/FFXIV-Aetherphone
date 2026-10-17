@@ -931,6 +931,7 @@
   "settings.soundImportHint": "Os arquivos importados aparecem na lista abaixo e tocam no volume definido aqui, separado das configurações de som do próprio jogo.",
   "settings.removeSound": "Remover som",
   "settings.removeSoundMessage": "Remover {0}? Os apps que usam esse som voltam ao som padrão.",
+  "settings.removeRingtoneMessage": "Remover {0}? Se for o seu toque, o toque padrão entra no lugar.",
   "settings.removeSoundConfirm": "Remover",
   "settings.language": "Idioma",
   "settings.about": "Sobre",

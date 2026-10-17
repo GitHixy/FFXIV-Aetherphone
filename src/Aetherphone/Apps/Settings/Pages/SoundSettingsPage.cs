@@ -107,7 +107,8 @@ internal sealed class SoundSettingsPage : ISettingsPage
         confirm.Ask(new ConfirmRequest
         {
             Title = Loc.T(L.Settings.RemoveSound),
-            Message = Loc.T(L.Settings.RemoveSoundMessage, sound.Label(kind, token)),
+            Message = Loc.T(kind == SoundKind.Ringtone ? L.Settings.RemoveRingtoneMessage : L.Settings.RemoveSoundMessage,
+                sound.Label(kind, token)),
             ConfirmLabel = Loc.T(L.Settings.RemoveSoundConfirm),
             CancelLabel = Loc.T(L.Common.Cancel),
             Danger = true,

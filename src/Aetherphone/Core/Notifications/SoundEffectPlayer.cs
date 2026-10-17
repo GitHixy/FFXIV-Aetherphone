@@ -29,7 +29,7 @@ internal sealed class SoundEffectPlayer : IDisposable
 
     public void StopOneShots() => StopOneShots(null);
 
-    public void Release(string path)
+    public bool Release(string path)
     {
         StopOneShots(path);
         bool looping;
@@ -42,6 +42,8 @@ internal sealed class SoundEffectPlayer : IDisposable
         {
             StopLoop();
         }
+
+        return looping;
     }
 
     private void StopOneShots(string? path)

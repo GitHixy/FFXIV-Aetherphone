@@ -71,6 +71,19 @@ public sealed class SoundRemovalTests : IDisposable
     }
 
     [Fact]
+    public void AnImportNamedLikeABundledSoundIsNotRemovable()
+    {
+        var source = Path.Combine(root.FullName, "chime.mp3");
+        File.WriteAllBytes(source, new byte[] { 3 });
+        var library = new SoundLibrary(bundled, user);
+
+        var token = library.AddUserFile(source);
+
+        Assert.False(library.IsUserFile(token));
+        Assert.False(library.IsUserFile(SoundLibrary.BundledNotificationToken));
+    }
+
+    [Fact]
     public void DeletingAnImportedFileDropsItFromTheList()
     {
         var source = Path.Combine(root.FullName, "Bubble_Pop.mp3");

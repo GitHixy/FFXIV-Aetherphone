@@ -931,6 +931,7 @@
   "settings.soundImportHint": "Los archivos importados aparecen en la lista de abajo y se reproducen al volumen ajustado aquí, independientemente de los ajustes de sonido del juego.",
   "settings.removeSound": "Eliminar sonido",
   "settings.removeSoundMessage": "¿Eliminar {0}? Las apps que lo usan vuelven al sonido predeterminado.",
+  "settings.removeRingtoneMessage": "¿Eliminar {0}? Si es tu tono de llamada, se usará el tono predeterminado.",
   "settings.removeSoundConfirm": "Eliminar",
   "settings.language": "Idioma",
   "settings.about": "Acerca de",

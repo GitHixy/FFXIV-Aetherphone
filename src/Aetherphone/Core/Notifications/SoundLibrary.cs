@@ -28,14 +28,14 @@ internal sealed class SoundLibrary
     {
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var built = new List<string>();
-        var userFiles = ListFiles(userDirectory);
-        AddFiles(ListFiles(bundledDirectory), seen, built);
+        var imported = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        AddFiles(ListFiles(bundledDirectory), seen, built, null);
         var bundledCount = built.Count;
-        AddFiles(userFiles, seen, built);
+        AddFiles(ListFiles(userDirectory), seen, built, imported);
         defaultToken = bundledCount > 0 ? built[0] : SoundTokens.Silent;
         built.Add(SoundTokens.Silent);
         options = built;
-        userTokens = CollectTokens(userFiles);
+        userTokens = imported;
     }
 
     public bool IsUserFile(string token) => userTokens.Contains(token);
@@ -133,17 +133,6 @@ internal sealed class SoundLibrary
         return string.IsNullOrEmpty(stem) ? fileName : stem.Replace('_', ' ').Replace('-', ' ').Trim();
     }
 
-    private static HashSet<string> CollectTokens(List<string> files)
-    {
-        var tokens = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        for (var index = 0; index < files.Count; index++)
-        {
-            tokens.Add(SoundTokens.File(Path.GetFileName(files[index])));
-        }
-
-        return tokens;
-    }
-
     private static List<string> ListFiles(DirectoryInfo directory)
     {
         var files = new List<string>();
@@ -162,15 +151,20 @@ internal sealed class SoundLibrary
         return files;
     }
 
-    private static void AddFiles(List<string> files, HashSet<string> seen, List<string> built)
+    private static void AddFiles(List<string> files, HashSet<string> seen, List<string> built,
+        HashSet<string>? imported)
     {
         for (var index = 0; index < files.Count; index++)
         {
             var fileName = Path.GetFileName(files[index]);
-            if (seen.Add(fileName))
+            if (!seen.Add(fileName))
             {
-                built.Add(SoundTokens.File(fileName));
+                continue;
             }
+
+            var token = SoundTokens.File(fileName);
+            built.Add(token);
+            imported?.Add(token);
         }
     }
 }

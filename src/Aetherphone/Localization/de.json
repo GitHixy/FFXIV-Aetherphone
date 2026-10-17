@@ -931,6 +931,7 @@
   "settings.soundImportHint": "Importierte Dateien erscheinen in der Liste unten und werden mit der hier eingestellten Lautstärke abgespielt, unabhängig von den Toneinstellungen des Spiels.",
   "settings.removeSound": "Ton entfernen",
   "settings.removeSoundMessage": "{0} entfernen? Apps, die diesen Ton nutzen, verwenden wieder den Standardton.",
+  "settings.removeRingtoneMessage": "{0} entfernen? Ist es dein Klingelton, tritt der Standardklingelton an seine Stelle.",
   "settings.removeSoundConfirm": "Entfernen",
   "settings.language": "Sprache",
   "settings.about": "Info",

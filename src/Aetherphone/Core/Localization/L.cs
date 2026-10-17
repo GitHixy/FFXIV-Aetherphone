@@ -2074,6 +2074,8 @@ internal static class L
         public static readonly LocString RemoveSound = new("settings.removeSound", "Remove Sound");
         public static readonly LocString RemoveSoundMessage = new("settings.removeSoundMessage",
             "Remove {0}? Apps that use it go back to the default sound.");
+        public static readonly LocString RemoveRingtoneMessage = new("settings.removeRingtoneMessage",
+            "Remove {0}? If it is your ringtone, the default ringtone takes its place.");
         public static readonly LocString RemoveSoundConfirm = new("settings.removeSoundConfirm", "Remove");
         public static readonly LocString Language = new("settings.language", "Language");
         public static readonly LocString About = new("settings.about", "About");
