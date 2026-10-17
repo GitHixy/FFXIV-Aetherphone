@@ -28,6 +28,7 @@ internal static class Treats
     public const int Total = 13;
     public const int NoSpot = -1;
 
+    private const int NoReset = -1;
     private const int SpotCount = 10;
     private const double MinimumWaitMilliseconds = 30 * 60 * 1000;
     private const double MaximumWaitMilliseconds = 60 * 60 * 1000;
@@ -57,6 +58,7 @@ internal static class Treats
     private static int activeSpot = NoSpot;
     private static int lastSpot = NoSpot;
     private static bool devHunt;
+    private static int resetGeneration = NoReset;
 
     public static int Found => HalloweenTreatCount.Merge(LocalFound, ServerFound, Total);
 
@@ -64,7 +66,8 @@ internal static class Treats
         ? BitOperations.PopCount((uint)Plugin.Cfg.HalloweenTreats)
         : 0;
 
-    private static int ServerFound => badge?.Found ?? 0;
+    private static int ServerFound =>
+        badge is null || badge.Generation == resetGeneration ? 0 : badge.Found;
 
     public static bool HuntOpen => SeasonalTheme.Halloween && (SeasonalTheme.HalloweenByDate || devHunt);
 
@@ -112,6 +115,7 @@ internal static class Treats
         activeSpot = NoSpot;
         lastSpot = NoSpot;
         devHunt = false;
+        resetGeneration = NoReset;
     }
 
     public static void SummonNow()
@@ -126,9 +130,10 @@ internal static class Treats
         devHunt = true;
         var configuration = Plugin.Cfg;
         configuration.HalloweenTreatYear = DateTime.Today.Year;
-        configuration.HalloweenTreats = found ? (1 << Total) - 1 : 0;
+        configuration.HalloweenTreats = found ? HalloweenTreatCount.Mask(Total) : 0;
         configuration.HalloweenTreatDue = 0;
         configuration.Save();
+        resetGeneration = found || badge is null ? NoReset : badge.Generation;
         activeSpot = NoSpot;
     }
 
@@ -159,14 +164,7 @@ internal static class Treats
 
     public static int ActiveSpot()
     {
-        if (!HuntOpen)
-        {
-            return NoSpot;
-        }
-
-        badge?.Report(LocalFound);
-        AdoptServerCount();
-        if (Found >= Unlocked)
+        if (!HuntOpen || Found >= Unlocked)
         {
             return NoSpot;
         }
