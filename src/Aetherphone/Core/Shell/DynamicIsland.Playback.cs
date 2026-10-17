@@ -24,7 +24,10 @@ internal sealed partial class DynamicIsland
     private const string RepeatOneLabel = "1";
 
     private bool playbackScrubbing;
+    private bool playbackScrubPc;
     private float playbackScrubValue;
+    private SeekHold playbackSeekHold;
+    private bool playbackSeekHoldPc;
 
     private enum MediaCommand : byte
     {
@@ -86,7 +89,19 @@ internal sealed partial class DynamicIsland
     {
         var padX = CardPadX * scale;
         var duration = media.Duration;
-        var fraction = playbackScrubbing ? playbackScrubValue : Math.Clamp(media.Position / duration, 0f, 1f);
+        if (playbackScrubbing && playbackScrubPc != pc)
+        {
+            playbackScrubbing = false;
+        }
+
+        if (playbackSeekHold.Active && playbackSeekHoldPc != pc)
+        {
+            playbackSeekHold.Clear();
+        }
+
+        var now = Environment.TickCount64;
+        var position = playbackSeekHold.Shown(media.Position, now);
+        var fraction = playbackScrubbing ? playbackScrubValue : Math.Clamp(position / duration, 0f, 1f);
         var shownSeconds = fraction * duration;
         var elapsed = TimeText.Duration((int)shownSeconds);
         var remaining = TimeText.Duration(IslandActivities.RemainingSeconds(shownSeconds, duration));
@@ -123,13 +138,17 @@ internal sealed partial class DynamicIsland
         if ((wasScrubbing || hovered) && ImGui.IsMouseDown(ImGuiMouseButton.Left))
         {
             playbackScrubbing = true;
+            playbackScrubPc = pc;
             playbackScrubValue = updated;
             UiInteract.CancelPendingTap();
         }
         else if (wasScrubbing)
         {
             playbackScrubbing = false;
-            SeekMedia(pc, playbackScrubValue * duration);
+            var target = playbackScrubValue * duration;
+            SeekMedia(pc, target);
+            playbackSeekHold.Begin(target, now);
+            playbackSeekHoldPc = pc;
             UiInteract.CancelPendingTap();
         }
 
