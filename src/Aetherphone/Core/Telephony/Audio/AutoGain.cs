@@ -13,20 +13,23 @@ internal sealed class AutoGain
     private const float NoiseFallSeconds = 0.1f;
     private const float NoiseRiseSeconds = 6f;
     private const float SpeechOverNoise = 3.16f;
-    private const float QuietestNoise = 0.00001f;
+    private const float QuietestNoise = NoiseFloorRms / SpeechOverNoise;
+    private const float OnsetSeconds = 0.06f;
     private const float SampleScale = 1f / 32768f;
     private float gain = 1f;
     private float noise = NoiseFloorRms;
+    private float voicedSeconds;
 
     public float Gain => gain;
 
-    public void Reset()
+    public void Reset(float startGain = 1f)
     {
-        gain = 1f;
+        gain = Math.Clamp(startGain, MinimumGain, MaximumGain);
         noise = NoiseFloorRms;
+        voicedSeconds = 0f;
     }
 
-    public void Process(Span<short> pcm, int sampleRate, float trim, bool adaptive)
+    public void Process(Span<short> pcm, float rawRms, int sampleRate, float trim, bool adaptive)
     {
         if (pcm.IsEmpty || sampleRate <= 0)
         {
@@ -36,11 +39,12 @@ internal sealed class AutoGain
         var startGain = gain;
         if (adaptive)
         {
-            Adapt(Rms(pcm), pcm.Length / (float)sampleRate);
+            Adapt(rawRms, rawRms * trim, pcm.Length / (float)sampleRate);
         }
         else
         {
             gain = 1f;
+            voicedSeconds = 0f;
         }
 
         Apply(pcm, startGain * trim, gain * trim);
@@ -63,10 +67,17 @@ internal sealed class AutoGain
         return (float)(Math.Sqrt(sum / pcm.Length) / 32768.0);
     }
 
-    private void Adapt(float rms, float seconds)
+    private void Adapt(float rms, float gateLevel, float seconds)
     {
         TrackNoise(rms, seconds);
-        if (rms < NoiseFloorRms || rms < noise * SpeechOverNoise)
+        if (gateLevel < AudioCapture.GateOpenRms)
+        {
+            voicedSeconds = 0f;
+            return;
+        }
+
+        voicedSeconds += seconds;
+        if (voicedSeconds < OnsetSeconds || rms < NoiseFloorRms || rms < noise * SpeechOverNoise)
         {
             return;
         }

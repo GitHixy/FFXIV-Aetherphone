@@ -867,8 +867,7 @@ internal abstract class ChatThreadView<TMessage, TThread> : IDisposable, IChatTr
     }
 
     private VoiceInput ResolveVoiceInput() =>
-        new(AudioDevices.ResolveInput(configuration.CallInputDevice), configuration.CallInputGain,
-            configuration.CallAutoGain);
+        new(AudioDevices.ResolveInput(configuration.CallInputDevice), configuration.CallAutoGain);
 
     protected void ToggleVoice(string messageId)
     {

@@ -11,9 +11,9 @@ internal sealed class VoiceNoteRecorder : IDisposable
     private const int BytesPerSecond = SampleRate * 2;
     private const int MaxBytes = BytesPerSecond * MaxSeconds;
 
+    private static float carriedGain = 1f;
     private readonly object gate = new();
     private readonly AutoGain autoGain = new();
-    private float gain = 1f;
     private bool autoGainEnabled;
     private MemoryStream? buffer;
     private WaveInEvent? waveIn;
@@ -54,9 +54,8 @@ internal sealed class VoiceNoteRecorder : IDisposable
             lock (gate)
             {
                 buffer = new MemoryStream();
-                gain = Math.Clamp(input.Gain, 0f, AudioCapture.MaximumGain);
                 autoGainEnabled = input.AutoGain;
-                autoGain.Reset();
+                autoGain.Reset(autoGainEnabled ? Volatile.Read(ref carriedGain) : 1f);
             }
 
             capture.StartRecording();
@@ -81,6 +80,7 @@ internal sealed class VoiceNoteRecorder : IDisposable
         {
             pcm = buffer?.ToArray() ?? Array.Empty<byte>();
             buffer = null;
+            CarryGain();
         }
 
         recording = false;
@@ -103,10 +103,19 @@ internal sealed class VoiceNoteRecorder : IDisposable
         lock (gate)
         {
             buffer = null;
+            CarryGain();
         }
 
         recording = false;
         level = 0f;
+    }
+
+    private void CarryGain()
+    {
+        if (autoGainEnabled)
+        {
+            Volatile.Write(ref carriedGain, autoGain.Gain);
+        }
     }
 
     private void StopCapture()
@@ -142,7 +151,7 @@ internal sealed class VoiceNoteRecorder : IDisposable
             }
 
             var pcm = MemoryMarshal.Cast<byte, short>(args.Buffer.AsSpan(0, args.BytesRecorded & ~1));
-            autoGain.Process(pcm, SampleRate, gain, autoGainEnabled);
+            autoGain.Process(pcm, AutoGain.Rms(pcm), SampleRate, 1f, autoGainEnabled);
             rms = AutoGain.Rms(pcm);
             var count = (int)Math.Min(args.BytesRecorded, MaxBytes - buffer.Length);
             buffer.Write(args.Buffer, 0, count);
