@@ -33,14 +33,23 @@ internal sealed partial class SkywatcherApp
     private float HeroVisibleHeight(float scale) =>
         MathF.Max(HeroCollapsedUnits * scale, HeroExpandedUnits * scale - scrollY);
 
-    private void DrawHero(Rect body, Rect screen, in SkyPalette palette, float scale)
+    private float HeroCollapse(float scale) =>
+        Math.Clamp(scrollY / ((HeroExpandedUnits - HeroCollapsedUnits) * scale), 0f, 1f);
+
+    private float ScrimAlpha(float scale) =>
+        Math.Clamp((HeroCollapse(scale) - ScrimFadeStart) / (1f - ScrimFadeStart), 0f, 1f);
+
+    private void DrawHeroScrim(Rect body, Rect screen, in SkyPalette palette, float scale) =>
+        DrawScrim(ImGui.GetWindowDrawList(), body, screen, body.Min.Y + HeroVisibleHeight(scale), ScrimAlpha(scale),
+            palette, scale);
+
+    private void DrawHero(Rect body, in SkyPalette palette, float scale)
     {
         var drawList = ImGui.GetWindowDrawList();
         var top = body.Min.Y;
         var centerX = body.Center.X;
         var maxWidth = body.Width - 2f * SidePaddingUnits * scale;
-        var travel = (HeroExpandedUnits - HeroCollapsedUnits) * scale;
-        var collapse = Math.Clamp(scrollY / travel, 0f, 1f);
+        var collapse = HeroCollapse(scale);
         var visible = HeroVisibleHeight(scale);
         if (UiAnchors.Recording)
         {
@@ -89,9 +98,6 @@ internal sealed partial class SkywatcherApp
                 Typography.FitText(CompactLine(), maxWidth, TextStyles.Subheadline), palette.InkSoft,
                 TextStyles.Subheadline, compactAlpha, palette, scale);
         }
-
-        var scrimAlpha = Math.Clamp((collapse - ScrimFadeStart) / (1f - ScrimFadeStart), 0f, 1f);
-        DrawScrim(drawList, body, screen, top + visible, scrimAlpha, palette, scale);
     }
 
     private void DrawExpandedLines(ImDrawListPtr drawList, float centerX, float top, float maxWidth, float alpha,
