@@ -2282,6 +2282,38 @@ internal static class L
         public static readonly LocString SectionSounds = new("changelog.sectionSounds", "Sounds");
         public static readonly LocString SectionHalloween = new("changelog.sectionHalloween", "Halloween");
 
+        public static readonly LocString[] Release1321Chirper =
+        {
+            new("changelog.r1321.0",
+                "Added a Chirper widget with For You, Latest and Activity tabs, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1321Phone =
+        {
+            new("changelog.r1321.1",
+                "Added a confirmation before removing a Market price alert or withdrawing a Velvet intro, contributed by t3sco"),
+            new("changelog.r1321.2",
+                "Changed Home Screen edit mode to show its add and done buttons beside the Dynamic Island, so the icons no longer shift down, contributed by t3sco"),
+            new("changelog.r1321.3",
+                "Changed widgets to end level with the app names in their last row, contributed by t3sco"),
+            new("changelog.r1321.4",
+                "Changed the status bar clock to line up with screen titles, contributed by t3sco"),
+            new("changelog.r1321.5",
+                "Changed the status bar clock to leave out AM and PM, contributed by t3sco"),
+            new("changelog.r1321.6",
+                "Changed sheet, call, Dynamic Island and game buttons to act when you let go, so sliding off a press cancels it, contributed by t3sco"),
+            new("changelog.r1321.7",
+                "Changed small icon buttons to take taps over a larger area, contributed by t3sco"),
+            new("changelog.r1321.8",
+                "Changed photos you post or send in chats to upload at a higher quality, contributed by t3sco"),
+            new("changelog.r1321.9",
+                "Fixed the status bar clock moving when Do Not Disturb or Lock Position was turned on, contributed by t3sco"),
+            new("changelog.r1321.10",
+                "Fixed sheet, call and Dynamic Island buttons taking taps while they were still opening, contributed by t3sco"),
+            new("changelog.r1321.11",
+                "Fixed dock app names showing on top of the widget gallery and other sheets, contributed by t3sco"),
+        };
+
         public static readonly LocString[] Release1320MogCast =
         {
             new("changelog.r1320.38",
