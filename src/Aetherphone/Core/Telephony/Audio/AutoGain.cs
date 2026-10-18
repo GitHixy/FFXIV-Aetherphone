@@ -19,6 +19,7 @@ internal sealed class AutoGain
     private float gain = 1f;
     private float noise = NoiseFloorRms;
     private float voicedSeconds;
+    private float appliedGain = float.NaN;
 
     public float Gain => gain;
 
@@ -27,6 +28,7 @@ internal sealed class AutoGain
         gain = Math.Clamp(startGain, MinimumGain, MaximumGain);
         noise = NoiseFloorRms;
         voicedSeconds = 0f;
+        appliedGain = float.NaN;
     }
 
     public void Process(Span<short> pcm, float rawRms, int sampleRate, float trim, bool adaptive)
@@ -47,7 +49,10 @@ internal sealed class AutoGain
             voicedSeconds = 0f;
         }
 
-        Apply(pcm, startGain * trim, gain * trim);
+        var outputGain = adaptive ? gain : trim;
+        var fromGain = float.IsNaN(appliedGain) ? (adaptive ? startGain : outputGain) : appliedGain;
+        appliedGain = outputGain;
+        Apply(pcm, fromGain, outputGain);
     }
 
     public static float Rms(ReadOnlySpan<short> pcm)
