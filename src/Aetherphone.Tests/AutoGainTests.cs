@@ -200,6 +200,83 @@ public sealed class AutoGainTests
         Assert.True(noiseGateLevel < AudioCapture.GateCloseRms);
     }
 
+    [Theory]
+    [InlineData(0.5f)]
+    [InlineData(2f)]
+    public void TrimLeavesTheSettledLoudnessToAutomaticGain(float trim)
+    {
+        var errorDecibels = 20f * MathF.Log10(SettledToneRms(trim) / AutoGain.TargetRms);
+        Assert.InRange(errorDecibels, -2f, 2f);
+    }
+
+    [Fact]
+    public void TrimDoesNotChangeTheSettledLoudness()
+    {
+        var spreadDecibels = 20f * MathF.Log10(SettledToneRms(2f) / SettledToneRms(0.5f));
+        Assert.InRange(spreadDecibels, -1f, 1f);
+    }
+
+    [Fact]
+    public void TrimStillScalesTheCallGateLevel()
+    {
+        var block = new short[BlockSamples];
+        FillSine(block, 0.05f, 0);
+        var rawRms = AutoGain.Rms(block);
+        var low = AudioCapture.Condition((short[])block.Clone(), new AutoGain(), 0.5f, true);
+        var high = AudioCapture.Condition((short[])block.Clone(), new AutoGain(), 2f, true);
+        Assert.Equal(rawRms * 0.5f, low, 5);
+        Assert.Equal(rawRms * 2f, high, 5);
+    }
+
+    [Fact]
+    public void TurnedOffTheTrimScalesTheOutput()
+    {
+        var gain = new AutoGain();
+        var block = new short[BlockSamples];
+        var phase = 0;
+        for (var frame = 0; frame < 3; frame++)
+        {
+            phase = FillSine(block, 0.2f, phase);
+            var inputRms = AutoGain.Rms(block);
+            Run(gain, block, 0.5f, false);
+            Assert.InRange(AutoGain.Rms(block) / inputRms, 0.49f, 0.51f);
+        }
+    }
+
+    [Fact]
+    public void TogglingAutomaticGainNeverJumpsBetweenFrames()
+    {
+        const float level = 0.03f;
+        const float trim = 2f;
+        var gain = new AutoGain();
+        var block = new short[BlockSamples];
+        var previousLast = 0f;
+        var adaptiveLevel = 0f;
+        var manualLevel = 0f;
+        for (var frame = 0; frame < 120; frame++)
+        {
+            var adaptive = frame < 50 || frame >= 70;
+            Array.Fill(block, (short)MathF.Round(level * short.MaxValue));
+            Run(gain, block, trim, adaptive);
+            if (frame > 0)
+            {
+                Assert.InRange(block[0] / previousLast, 0.98f, 1.02f);
+            }
+
+            previousLast = block[^1];
+            if (frame == 49)
+            {
+                adaptiveLevel = previousLast;
+            }
+            else if (frame == 69)
+            {
+                manualLevel = previousLast;
+            }
+        }
+
+        Assert.True(MathF.Abs(adaptiveLevel / manualLevel - 1f) > 0.1f);
+    }
+
     [Fact]
     public void ResetStartsFromACarriedGainInsideTheBounds()
     {
@@ -210,6 +287,31 @@ public sealed class AutoGainTests
         Assert.Equal(AutoGain.MaximumGain, gain.Gain);
         gain.Reset(0f);
         Assert.Equal(AutoGain.MinimumGain, gain.Gain);
+    }
+
+    private static float SettledToneRms(float trim)
+    {
+        var gain = new AutoGain();
+        var block = new short[BlockSamples];
+        var phase = 0;
+        var lastToneRms = 0f;
+        for (var burst = 0; burst < 12; burst++)
+        {
+            for (var frame = 0; frame < 15; frame++)
+            {
+                phase = FillSine(block, 0.0707f, phase);
+                Run(gain, block, trim, true);
+                lastToneRms = AutoGain.Rms(block);
+            }
+
+            for (var frame = 0; frame < 5; frame++)
+            {
+                phase = FillSine(block, 0.0007f, phase);
+                Run(gain, block, trim, true);
+            }
+        }
+
+        return lastToneRms;
     }
 
     private static void Run(AutoGain gain, short[] block, float trim, bool adaptive)
