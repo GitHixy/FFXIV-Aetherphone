@@ -7812,6 +7812,7 @@
   "changelog.r1321.9": "Behoben, dass sich die Uhrzeit in der Statusleiste verschob, wenn Nicht stören oder Position sperren eingeschaltet wurde, beigetragen von t3sco",
   "changelog.r1321.10": "Behoben, dass Tasten in Menüs, Anrufen und der Dynamic Island schon Tipps annahmen, während sie sich noch öffneten, beigetragen von t3sco",
   "changelog.r1321.11": "Behoben, dass App-Namen im Dock über der Widget-Galerie und anderen Menüs erschienen, beigetragen von t3sco",
+  "changelog.r1321.12": "Wischen von pausierter Musik aus der Dynamic Island hinzugefügt: Musik hält an, und Medien, die auf deinem PC laufen, bleiben ausgeblendet, bis sie wieder spielen, beigetragen von hellovvn",
   "changelog.r1320.0": "Behoben, dass lange Namen an einem vollen Blackjack-Tisch mit sieben Plätzen abgeschnitten wurden: Das Schild eines Platzes wird jetzt in die leeren Nachbarplätze hinein breiter",
   "changelog.r1320.1": "Behoben, dass das Gil-Buch Handel ausließ, sobald du 30 Minuten nicht mehr auf der Tischseite warst oder das Plugin neu geladen hattest: Handel wird jetzt 12 Stunden lang eingetragen, nachdem du zuletzt an deinem offenen Gil-Tisch warst, auch über Neustarts hinweg, bis du den Tisch schließt",
   "changelog.r1320.2": "Vorlaufzeit für Fisch-Hinweise hinzugefügt: Ein Schrittregler unter der Hinweisliste legt fest, wie viele Minuten vor einem Fenster der Hinweis klingelt, 1 bis 60, standardmäßig 5",

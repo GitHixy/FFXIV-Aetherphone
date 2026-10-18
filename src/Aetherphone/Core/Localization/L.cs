@@ -2290,6 +2290,8 @@ internal static class L
 
         public static readonly LocString[] Release1321Phone =
         {
+            new("changelog.r1321.12",
+                "Added swiping paused music off the Dynamic Island: Music stops, and media playing on your PC stays hidden until it plays again, contributed by hellovvn"),
             new("changelog.r1321.1",
                 "Added a confirmation before removing a Market price alert or withdrawing a Velvet intro, contributed by t3sco"),
             new("changelog.r1321.2",
