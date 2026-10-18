@@ -2306,6 +2306,12 @@ internal static class L
                 "Changed online games to pick who goes first at random, then pass the first turn around the table each round"),
             new("changelog.r1311.18",
                 "Fixed your ranks disappearing from the profile when they failed to load: a retry card shows instead, contributed by t3sco"),
+            new("changelog.r1311.42",
+                "Fixed games played sideways hiding the coin timer: it now sits next to the back button"),
+            new("changelog.r1311.43",
+                "Fixed leaving a game too early to earn coins saying nothing: a note now tells you the session was too short"),
+            new("changelog.r1311.44",
+                "Fixed game icons in the Library, the shelves, Profile and the leaderboards taking on the Home Screen icon style: every game keeps its own colours"),
         };
 
         public static readonly LocString[] Release1311Photos =
@@ -2333,7 +2339,7 @@ internal static class L
             new("changelog.r1311.20",
                 "Added song progress to the expanded Dynamic Island: a bar you can drag, the time played and left, previous and next buttons, and shuffle and repeat, for Music and for media playing on your PC"),
             new("changelog.r1311.39",
-                "Added automatic gain for your microphone in calls and voice messages, on by default: it evens out quiet and loud speech, and a toggle in Settings and in the call's audio options turns it off"),
+                "Added automatic gain for your microphone in calls and voice messages, on by default: it evens out quiet and loud speech, the microphone slider then sets how loud you need to speak before others hear you, and a toggle in Settings and in the call's audio options turns it off"),
             new("changelog.r1311.24",
                 "Changed the app switcher to keep every app you used in the last 10 minutes and reopen it where you left it; Games, Gamba and Camera keep a card too and open fresh on their first screen"),
             new("changelog.r1311.4",
@@ -2342,6 +2348,8 @@ internal static class L
                 "Changed the MogCast and Music setup button to say checking while it only checks, and installing once a download starts, contributed by t3sco"),
             new("changelog.r1311.25",
                 "Fixed the scroll bar and the mouse wheel not working beside the + button in Chirper, Aethergram, Velvet and MogCast"),
+            new("changelog.r1311.41",
+                "Fixed the call speaker list showing only System default on some PCs when one audio device could not be read"),
             new("changelog.r1311.9",
                 "Fixed rows cutting off the word that told them apart, from tomestone names and forecast weather to district tiles and leaderboard ranks, contributed by t3sco"),
             new("changelog.r1311.10",
@@ -2370,6 +2378,8 @@ internal static class L
         {
             new("changelog.r1311.6",
                 "Added the double tick to the chats list in ChocoChat, Aethergram and Velvet: a message you sent shows two ticks once it has been read"),
+            new("changelog.r1311.40",
+                "Changed sending a photo in a chat: a photo you pick, import or share now waits above the message box so you can add a caption before you send it"),
             new("changelog.r1311.5",
                 "Fixed a tall or narrow photo making its bubble narrow and cutting the caption short: the bubble keeps its full width and a tall photo is cropped to fit it"),
             new("changelog.r1311.30",
