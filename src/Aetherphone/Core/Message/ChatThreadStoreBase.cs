@@ -1319,7 +1319,7 @@ internal abstract class ChatThreadStoreBase<TMessage, TThread> : IDisposable
             }
             else
             {
-                var baked = ImageProcessor.BakeJpeg(sourcePath, DmImageMaxDimension);
+                var baked = ImageProcessor.BakeJpeg(sourcePath, DmImageMaxDimension, ImageProcessor.UploadJpegQuality);
                 plainBytes = baked.Bytes;
                 width = baked.Width;
                 height = baked.Height;
