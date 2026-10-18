@@ -137,7 +137,7 @@ internal sealed partial class SkywatcherApp
             UiAnchors.Report("skywatcher.forecast", card);
         }
 
-        WeatherCard.Panel(drawList, card, palette, sky.Density, scale);
+        DrawCardPanel(drawList, card, palette, scale);
         Typography.DrawWrappedLeft(new Vector2(card.Min.X + padding, card.Min.Y + padding), summaryText, palette.Ink,
             TextStyles.Subheadline, textWidth);
         WeatherCard.Divider(drawList, card, card.Min.Y + columnsTop - 8f * scale, palette, scale);
@@ -229,7 +229,7 @@ internal sealed partial class SkywatcherApp
         var headerHeight = WeatherCard.HeaderUnits * scale;
         var height = headerHeight + forecast.Count * rowHeight + 4f * scale;
         var card = new Rect(origin, origin + new Vector2(width, height));
-        WeatherCard.Panel(drawList, card, palette, sky.Density, scale);
+        DrawCardPanel(drawList, card, palette, scale);
         WeatherCard.Header(drawList, card, FontAwesomeIcon.CalendarAlt, Loc.T(L.Skywatcher.Forecast), palette, scale);
         var labelWidth = 0f;
         var longestName = 0f;
@@ -329,7 +329,7 @@ internal sealed partial class SkywatcherApp
 
     private void DrawSunTile(ImDrawListPtr drawList, Rect tile, in SkyPalette palette, float scale)
     {
-        WeatherCard.Panel(drawList, tile, palette, sky.Density, scale);
+        DrawCardPanel(drawList, tile, palette, scale);
         var header = WeatherCard.Header(drawList, tile, FontAwesomeIcon.Sun, Loc.T(L.Skywatcher.Sun), palette, scale);
         var padding = WeatherCard.PaddingUnits * scale;
         var innerWidth = tile.Width - padding * 2f;
@@ -399,7 +399,7 @@ internal sealed partial class SkywatcherApp
 
     private void DrawWindowTile(ImDrawListPtr drawList, Rect tile, in SkyPalette palette, float scale)
     {
-        WeatherCard.Panel(drawList, tile, palette, sky.Density, scale);
+        DrawCardPanel(drawList, tile, palette, scale);
         var header = WeatherCard.Header(drawList, tile, FontAwesomeIcon.HourglassHalf, Loc.T(L.Skywatcher.ThisWindow),
             palette, scale);
         var padding = WeatherCard.PaddingUnits * scale;
@@ -430,7 +430,7 @@ internal sealed partial class SkywatcherApp
         var headerHeight = WeatherCard.HeaderUnits * scale;
         var height = headerHeight + odds.Count * rowHeight + 2f * scale;
         var card = new Rect(origin, origin + new Vector2(width, height));
-        WeatherCard.Panel(drawList, card, palette, sky.Density, scale);
+        DrawCardPanel(drawList, card, palette, scale);
         WeatherCard.Header(drawList, card, FontAwesomeIcon.ChartBar, Loc.T(L.Skywatcher.WeatherOdds), palette, scale);
         var behind = WeatherCard.Behind(palette, sky.Density);
         var rightColumn = 86f * scale;

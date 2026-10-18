@@ -176,13 +176,9 @@ internal sealed partial class SkywatcherApp : IResumableApp
         scrollY = ImGui.GetScrollY();
         var clipTop = showHero ? body.Min.Y + HeroVisibleHeight(scale) : body.Min.Y;
         ImGui.PushClipRect(new Vector2(body.Min.X, clipTop), body.Max, true);
-        DrawTab(screen, palette, daylight, hasData, showHero, scale);
+        DrawTab(screen, palette, daylight, hasData, showHero, clipTop, scale);
+        EndCardFade(ImGui.GetWindowDrawList());
         ImGui.PopClipRect();
-        if (showHero)
-        {
-            DrawHeroScrim(body, screen, palette, scale);
-        }
-
         ImGui.Dummy(new Vector2(0f, TabBar.ContentInset(scale) + SectionGapUnits * scale));
         if (scrubbing)
         {
@@ -190,7 +186,8 @@ internal sealed partial class SkywatcherApp : IResumableApp
         }
     }
 
-    private void DrawTab(Rect screen, in SkyPalette palette, float daylight, bool hasData, bool showHero, float scale)
+    private void DrawTab(Rect screen, in SkyPalette palette, float daylight, bool hasData, bool showHero,
+        float heroEdge, float scale)
     {
         switch (activeTab)
         {
@@ -211,6 +208,7 @@ internal sealed partial class SkywatcherApp : IResumableApp
         if (showHero)
         {
             ImGui.Dummy(new Vector2(0f, HeroExpandedUnits * scale));
+            BeginCardFade(heroEdge, scale);
         }
 
         DrawForecast(palette, scale);
