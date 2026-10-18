@@ -206,7 +206,7 @@ internal sealed class StageIntro
         var center = Lifted(rect.Center, phase, scale);
         var half = rect.Size * 0.5f;
         var firstVertex = drawList.VtxBuffer.Size;
-        GameIconArt.Draw(drawList, gameId, accent, center - half, center + half, IconAppearance.Default, true);
+        GameIconArt.Draw(drawList, gameId, accent, center - half, center + half, true);
         LayerCompositor.Fade(drawList, firstVertex, phase);
     }
 
