@@ -283,7 +283,20 @@ internal sealed class CoinGameSessionTracker : IDisposable
     }
 
     internal static bool Reports(CoinAwardDto award, bool playerWatching) =>
-        award.Granted || (playerWatching && string.Equals(award.Reason, TooShortReason, StringComparison.Ordinal));
+        award.Granted || (playerWatching && IsTooShort(award));
+
+    internal static CoinAwardNote NoteFor(CoinAwardDto award)
+    {
+        if (award.Granted)
+        {
+            return award.Amount > 0 ? CoinAwardNote.Reward : CoinAwardNote.None;
+        }
+
+        return IsTooShort(award) ? CoinAwardNote.TooShort : CoinAwardNote.None;
+    }
+
+    private static bool IsTooShort(CoinAwardDto award) =>
+        string.Equals(award.Reason, TooShortReason, StringComparison.Ordinal);
 
     private void RememberPending(string sessionId)
     {
