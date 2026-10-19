@@ -7817,6 +7817,8 @@
   "changelog.r1321.11": "Fixed dock app names showing on top of the widget gallery and other sheets, contributed by t3sco",
   "changelog.r1321.12": "Added swiping paused music off the Dynamic Island: Music stops, and media playing on your PC stays hidden until it plays again, contributed by hellovvn",
   "changelog.r1321.13": "Fixed the Owned filter in Facewear listing the wrong styles, contributed by jambalong",
+  "changelog.r1321.14": "Fixed notification sounds staying silent on most audio devices, contributed by t3sco",
+  "changelog.r1321.15": "Added search to the Followers, Following and Followed by lists, matching names and handles, contributed by hellovvn",
   "changelog.r1320.0": "Fixed long names on a full seven-seat blackjack rail being cut short: a seat's plate now widens into the empty seats beside it",
   "changelog.r1320.1": "Fixed the gil ledger missing trades once you had been away from your table page for 30 minutes or had reloaded the plugin: trades now record for 12 hours after you were last at your open gil table, across restarts, until you close the table",
   "changelog.r1320.2": "Added a lead time for fish alerts: a stepper under the alerts list sets how many minutes before a window the alert rings, 1 to 60, 5 by default",

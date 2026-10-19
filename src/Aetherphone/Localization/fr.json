@@ -7817,6 +7817,8 @@
   "changelog.r1321.11": "Correction des noms d'applications du dock qui s'affichaient par-dessus la galerie de widgets et d'autres panneaux, contribution de t3sco",
   "changelog.r1321.12": "Ajout du balayage de la musique en pause hors de la Dynamic Island : Musique s'arrête, et les médias lus sur votre PC restent masqués jusqu'à leur reprise, contribution de hellovvn",
   "changelog.r1321.13": "Correction du filtre Obtenus des Accessoires faciaux qui affichait les mauvais styles, contribution de jambalong",
+  "changelog.r1321.14": "Correction des sons de notification restés muets sur la plupart des périphériques audio, contribution de t3sco",
+  "changelog.r1321.15": "Ajout de la recherche dans les listes Abonnés, Abonnements et Suivi(e) par, par nom ou pseudo, contribution de hellovvn",
   "changelog.r1320.0": "Correction des noms longs tronqués sur une table de blackjack pleine à sept places : la plaque d'une place s'élargit maintenant sur les places vides voisines",
   "changelog.r1320.1": "Correction du livre de gils qui manquait des échanges après 30 minutes loin de la page de votre table ou après un rechargement du plugin : les échanges sont maintenant inscrits pendant 12 heures après votre dernière présence à votre table en gils ouverte, même après un redémarrage, jusqu'à ce que vous fermiez la table",
   "changelog.r1320.2": "Ajout d'un délai d'avance pour les alertes de poissons : un sélecteur sous la liste des alertes fixe combien de minutes avant une fenêtre l'alerte sonne, de 1 à 60, 5 par défaut",

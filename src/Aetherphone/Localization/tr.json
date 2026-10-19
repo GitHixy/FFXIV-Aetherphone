@@ -7817,6 +7817,8 @@
   "changelog.r1321.11": "Dock'taki uygulama adlarının widget galerisi ve diğer panellerin üstünde görünmesi düzeltildi, katkı: t3sco",
   "changelog.r1321.12": "Duraklatılmış müziği Dynamic Island'dan kaydırarak kaldırma eklendi: Müzik durur, bilgisayarında çalan medya ise yeniden çalana kadar gizli kalır, katkı: hellovvn",
   "changelog.r1321.13": "Yüz Aksesuarları'ndaki Sahip Olunan filtresinin yanlış stilleri göstermesi düzeltildi, katkı: jambalong",
+  "changelog.r1321.14": "Bildirim seslerinin çoğu ses cihazında çalmaması düzeltildi, katkı: t3sco",
+  "changelog.r1321.15": "Takipçiler, Takip ve Tanıdığın takipçiler listelerine ad ve kullanıcı adıyla arama eklendi, katkı: hellovvn",
   "changelog.r1320.0": "Yedi koltuğu dolu bir blackjack masasında uzun adların kesilmesi düzeltildi: bir koltuğun plakası artık yanındaki boş koltuklara doğru genişliyor",
   "changelog.r1320.1": "Masanın sayfasından 30 dakika uzak kaldığında ya da eklentiyi yeniden yüklediğinde gil defterinin takasları atlaması düzeltildi: takaslar artık açık gil masanda son bulunduğundan itibaren 12 saat boyunca, yeniden başlatmalarda da, masayı kapatana kadar kaydediliyor",
   "changelog.r1320.2": "Balık uyarılarına öncül süre eklendi: uyarı listesinin altındaki adımlayıcı, uyarının pencereden kaç dakika önce çalacağını belirler, 1 ile 60 arası, varsayılan 5",

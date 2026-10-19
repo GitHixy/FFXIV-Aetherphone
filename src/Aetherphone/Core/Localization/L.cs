@@ -2325,6 +2325,18 @@ internal static class L
                 "Fixed the Owned filter in Facewear listing the wrong styles, contributed by jambalong"),
         };
 
+        public static readonly LocString[] Release1321Sounds =
+        {
+            new("changelog.r1321.14",
+                "Fixed notification sounds staying silent on most audio devices, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1321Social =
+        {
+            new("changelog.r1321.15",
+                "Added search to the Followers, Following and Followed by lists, matching names and handles, contributed by hellovvn"),
+        };
+
         public static readonly LocString[] Release1320MogCast =
         {
             new("changelog.r1320.38",
