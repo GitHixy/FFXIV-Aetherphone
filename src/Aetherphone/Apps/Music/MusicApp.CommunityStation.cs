@@ -101,7 +101,7 @@ internal sealed partial class MusicApp
         }
 
         community.EnsureTracks(station.Id);
-        VisitStationRoom(station.Id);
+        VisitStationRoom(station);
         var body = frame.Body;
         var stageBottom = DrawStationStage(body, station, scale);
         var inset = Metrics.Space.Lg * scale;
