@@ -2325,6 +2325,32 @@ internal static class L
                 "Fixed the Owned filter in Facewear listing the wrong styles, contributed by jambalong"),
         };
 
+        public static readonly LocString[] Release1330Messaging =
+        {
+            new("changelog.r1330.16",
+                "Fixed voice messages recorded with Automatic gain on reaching the other person too quietly, mostly from quiet microphones"),
+        };
+
+        public static readonly LocString[] Release1330Music =
+        {
+            new("changelog.r1330.17",
+                "Fixed long host names getting cut off on a radio station's page"),
+            new("changelog.r1330.18",
+                "Fixed a radio station's chat opening at the oldest message instead of the newest when you come back to it"),
+        };
+
+        public static readonly LocString[] Release1330Skywatcher =
+        {
+            new("changelog.r1330.19",
+                "Fixed Reset in Control jumping the sky to the wrong time of day a second after it returned to the real sky"),
+        };
+
+        public static readonly LocString[] Release1330Settings =
+        {
+            new("changelog.r1330.20",
+                "Fixed the Radio on air status in Nameplate Title leaving out your station's name"),
+        };
+
         public static readonly LocString[] Release1330Sounds =
         {
             new("changelog.r1330.14",
