@@ -761,6 +761,9 @@ internal static class L
         public static readonly LocString DeleteConversationMessage = new("message.deleteConversationMessage",
             "This deletes the conversation for you. This can't be undone.");
         public static readonly LocString DeletedBody = new("message.deletedBody", "This message was deleted");
+        public static readonly LocString BlockedBody = new("message.blockedBody", "Message from someone you blocked");
+        public static readonly LocString BlockedSender = new("message.blockedSender", "Someone you blocked");
+        public static readonly LocString BlockedShow = new("message.blockedShow", "Show");
         public static readonly LocString MuteAction = new("message.muteAction", "Mute");
         public static readonly LocString UnmuteAction = new("message.unmuteAction", "Unmute");
         public static readonly LocString RecordVoiceHint = new("message.recordVoiceHint", "Record a voice message");

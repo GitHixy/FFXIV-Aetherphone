@@ -23,6 +23,7 @@ internal static class TranscriptFlags
     public const byte Forwarded = 16;
     public const byte Edited = 32;
     public const byte Starred = 64;
+    public const byte Blocked = 128;
 }
 
 internal readonly struct TranscriptReaction
@@ -149,6 +150,10 @@ internal interface IChatTranscriptInteractions
     void OnQuoteClick(string messageId);
 
     void OnReactionClick(string messageId, string token);
+
+    void OnBlockedReveal(string messageId)
+    {
+    }
 }
 
 internal interface IChatTranscriptVoice
@@ -369,6 +374,7 @@ internal sealed class ChatTranscript
                 }
 
                 var grouped = hasPrevious && !newDay && previous.Kind != KindSystem &&
+                              (previous.Flags & TranscriptFlags.Blocked) == 0 &&
                               previous.SenderId == message.SenderId &&
                               message.CreatedAtUnix - previous.CreatedAtUnix <= GroupWindowSeconds;
                 if (hasPrevious && !newDay && !grouped)
@@ -380,6 +386,12 @@ internal sealed class ChatTranscript
                 if (message.Kind == KindSystem)
                 {
                     DrawSystemMessage(message, model);
+                    continue;
+                }
+
+                if ((message.Flags & TranscriptFlags.Blocked) != 0)
+                {
+                    DrawBlockedRow(message, model);
                     continue;
                 }
 
@@ -785,6 +797,51 @@ internal sealed class ChatTranscript
         var center = new Vector2(origin.X + available * 0.5f, origin.Y + 6f * scale + textSize.Y * 0.5f);
         Typography.DrawCentered(center, message.Body, model.MutedInk, 0.74f, FontWeight.Medium);
         ImGui.SetCursorScreenPos(new Vector2(origin.X, origin.Y + textSize.Y + 14f * scale));
+    }
+
+    private void DrawBlockedRow(TranscriptMessage message, in ChatTranscriptModel model)
+    {
+        var scale = UiScale.Current;
+        var drawList = ImGui.GetWindowDrawList();
+        var origin = ImGui.GetCursorScreenPos();
+        var gutter = model.IsGroup && model.Senders is not null
+            ? (SenderAvatarRadius * 2f + SenderAvatarGap) * scale
+            : 0f;
+        var style = TextStyles.Footnote;
+        var action = Loc.T(L.Message.BlockedShow);
+        var paddingX = 10f * scale;
+        var paddingY = 5f * scale;
+        var iconBox = 14f * scale;
+        var gap = 6f * scale;
+        var actionWidth = Typography.Measure(action, style).X;
+        var textLimit = MathF.Max(1f, rowWidth - gutter - paddingX * 2f - iconBox - gap * 2f - actionWidth);
+        var label = Typography.FitText(message.Body, textLimit, style);
+        var labelWidth = Typography.Measure(label, style).X;
+        var lineHeight = Typography.LineHeight(style);
+        var height = lineHeight + paddingY * 2f;
+        var min = new Vector2(origin.X + gutter, origin.Y);
+        var max = new Vector2(min.X + paddingX * 2f + iconBox + gap + labelWidth + gap + actionWidth, min.Y + height);
+        ConsumeScrollTarget(message.Id, min.Y);
+        var hovering = Hovering(min, max);
+        Squircle.Fill(drawList, min, max, height * 0.5f,
+            ImGui.GetColorU32(ChatInk.Wash(model.Theme, hovering ? 0.12f : 0.07f)));
+        var centerY = min.Y + height * 0.5f;
+        AppSkin.Icon(drawList, new Vector2(min.X + paddingX + iconBox * 0.5f, centerY),
+            IconGlyph.Of(FontAwesomeIcon.Ban), model.MutedInk, 0.6f);
+        var labelLeft = min.X + paddingX + iconBox + gap;
+        var lineTop = centerY - lineHeight * 0.5f;
+        Typography.Draw(drawList, new Vector2(labelLeft, lineTop), label, model.MutedInk, style);
+        Typography.Draw(drawList, new Vector2(labelLeft + labelWidth + gap, lineTop), action, model.Accent, style);
+        if (hovering && model.Interactions is { } interactions)
+        {
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            if (UiInteract.Click(min, max, true, false))
+            {
+                interactions.OnBlockedReveal(message.Id);
+            }
+        }
+
+        ImGui.SetCursorScreenPos(new Vector2(origin.X, max.Y + BubbleGap * scale));
     }
 
     private void DrawDaySeparator(long unixSeconds, in ChatTranscriptModel model)
