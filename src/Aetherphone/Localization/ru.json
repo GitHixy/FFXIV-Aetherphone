@@ -2049,7 +2049,7 @@
   "music.listeningCount": "Слушают: {0}",
   "music.watchOnTwitch": "Смотреть на Twitch",
   "music.offAir": "Не в эфире",
-  "music.hostedBy": "Ведущий: {0}",
+  "music.hostCaption": "Ведущий",
   "music.reportStation": "Пожаловаться на станцию",
   "music.reportStationTitle": "Пожаловаться на эту станцию",
   "music.followStation": "Подписаться",

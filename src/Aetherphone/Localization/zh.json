@@ -2049,7 +2049,7 @@
   "music.listeningCount": "{0} 人正在收听",
   "music.watchOnTwitch": "在 Twitch 观看",
   "music.offAir": "未播出",
-  "music.hostedBy": "主持人：{0}",
+  "music.hostCaption": "主持人",
   "music.reportStation": "举报电台",
   "music.reportStationTitle": "举报这个电台",
   "music.followStation": "关注",

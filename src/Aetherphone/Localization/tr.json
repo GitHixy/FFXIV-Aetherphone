@@ -2049,7 +2049,7 @@
   "music.listeningCount": "{0} dinliyor",
   "music.watchOnTwitch": "Twitch'te izle",
   "music.offAir": "Yayında değil",
-  "music.hostedBy": "Sunan: {0}",
+  "music.hostCaption": "Sunan",
   "music.reportStation": "İstasyonu bildir",
   "music.reportStationTitle": "Bu istasyonu bildir",
   "music.followStation": "Takip et",

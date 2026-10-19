@@ -2049,7 +2049,7 @@
   "music.listeningCount": "{0} ouvindo",
   "music.watchOnTwitch": "Assistir na Twitch",
   "music.offAir": "Fora do ar",
-  "music.hostedBy": "Apresentada por {0}",
+  "music.hostCaption": "Apresentação",
   "music.reportStation": "Denunciar estação",
   "music.reportStationTitle": "Denunciar esta estação",
   "music.followStation": "Seguir",
