@@ -70,6 +70,8 @@ internal sealed class FakePluginInterface : IDalamudPluginInterface
 
     public FileInfo AssemblyLocation { get; }
 
+    public Assembly Assembly => pluginAssembly;
+
     public DirectoryInfo ConfigDirectory { get; }
 
     public FileInfo ConfigFile { get; }
