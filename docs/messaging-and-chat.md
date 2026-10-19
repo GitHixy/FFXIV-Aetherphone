@@ -114,7 +114,7 @@ Location, muster and ad shares are kind 0 messages whose body is a token; `ChatT
 - **Replies** carry a server-made snapshot of the quoted message, so the quote renders even when the original is not loaded. Tapping it scrolls to the original.
 - **Edits and deletes.** Only your own plain text can be edited. A delete tombstones the message locally and the bubble shows a muted "deleted" row.
 - **Forwarding** seals encrypted text again for the target thread. Encrypted media cannot be forwarded.
-- **Media.** Stills are re-encoded to a capped JPEG; a GIF uploads unchanged up to `GifMedia.MaxBytes`. Voice notes record as WAV.
+- **Media.** Stills are re-encoded to a capped JPEG; a GIF uploads unchanged up to `GifMedia.MaxBytes`. Voice notes record as WAV; with automatic gain on, `SpeechLeveler` levels the whole note on stop (it looks ahead, so a shout is turned down before it starts, and caps peaks at -3 dBFS). Voice notes have no gate: the mic threshold applies to calls only.
 - **Starring** is ChocoChat only and lives in local config.
 
 ## Paging

@@ -115,6 +115,7 @@ public sealed class Plugin : IDalamudPlugin
             Cfg.MigrateCharacterSessions();
             Cfg.MigrateEncryptionKeyStore();
             Cfg.MigrateHousingRefreshFloor();
+            Cfg.MigrateCallInputThreshold();
             Cfg.MigrateHomeLooks();
             Cfg.MigrateRetiredWallpapers();
             Cfg.MigrateWindowsMediaOptIn();

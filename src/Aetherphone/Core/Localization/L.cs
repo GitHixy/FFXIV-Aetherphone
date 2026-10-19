@@ -1902,8 +1902,12 @@ internal static class L
         public static readonly LocString MicVolume = new("phone.micVolume", "Microphone volume");
         public static readonly LocString AutoGain = new("phone.autoGain", "Automatic gain");
         public static readonly LocString AutoGainHint = new("phone.autoGainHint", "Evens out your voice in calls and voice messages so quiet and loud speech reach others at a similar level.");
-        public static readonly LocString MicSensitivityHint = new("phone.micSensitivityHint", "With automatic gain on, the slider sets how loud you need to speak before others hear you.");
         public static readonly LocString MicVolumeHint = new("phone.micVolumeHint", "The slider sets your microphone volume for calls.");
+        public static readonly LocString MicThreshold = new("phone.micThreshold", "Microphone threshold");
+        public static readonly LocString MicThresholdHint = new("phone.micThresholdHint", "0 picks up every sound. Higher numbers need louder speech before others hear you in calls. Set it just under your softest speech on the meter.");
+        public static readonly LocString TestMicrophone = new("phone.testMicrophone", "Test microphone");
+        public static readonly LocString MicClipping = new("phone.micClipping", "Your microphone is clipping, which distorts loud speech. Lower its input level in Windows sound settings.");
+        public static readonly LocString AutoGainVolumeHint = new("phone.autoGainVolumeHint", "Automatic gain sets how loud you sound, so the volume slider is hidden while it is on.");
         public static readonly LocString MuteForMe = new("phone.muteForMe", "Mute for me");
         public static readonly LocString AudioDevicesHint = new("phone.audioDevicesHint", "Use headphones to avoid echo. Device and volume changes apply right away, even during a call.");
         public static readonly LocString IncomingCallBody = new("phone.incomingCallBody", "Incoming call");

@@ -11,12 +11,10 @@ internal sealed class VoiceNoteRecorder : IDisposable
     private const int BytesPerSecond = SampleRate * 2;
     private const int MaxBytes = BytesPerSecond * MaxSeconds;
     private const int BufferMilliseconds = 50;
-    private const int BlockSamples = SampleRate * BufferMilliseconds / 1000;
-    private const float NoGate = 0f;
 
     private static float carriedGain = 1f;
     private readonly object gate = new();
-    private readonly AutoGain autoGain = new(NoGate);
+    private readonly AutoGain autoGain = new();
     private bool autoGainEnabled;
     private MemoryStream? buffer;
     private WaveInEvent? waveIn;
@@ -85,7 +83,9 @@ internal sealed class VoiceNoteRecorder : IDisposable
             buffer = null;
             if (autoGainEnabled)
             {
-                autoGain.Level(MemoryMarshal.Cast<byte, short>(pcm.AsSpan(0, pcm.Length & ~1)), SampleRate, BlockSamples);
+                var levelled = SpeechLeveler.Level(MemoryMarshal.Cast<byte, short>(pcm.AsSpan(0, pcm.Length & ~1)),
+                    SampleRate, autoGain.Gain);
+                autoGain.Reset(levelled);
             }
 
             CarryGain();
