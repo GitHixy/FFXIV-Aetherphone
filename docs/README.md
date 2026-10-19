@@ -72,6 +72,7 @@ Pick the line that fits you.
 | Doc | What it covers |
 | --- | --- |
 | [Testing, CI, and releases](testing-and-release.md) | Running the tests, what CI checks, the release pipeline, the changelog, and the repo's automation |
+| [Headless preview harness](harness.md) | Render and drive the phone without the game or Dalamud: setup, the driver commands, what is faked, what is switched off |
 
 ### For artists, translators, and everyone
 

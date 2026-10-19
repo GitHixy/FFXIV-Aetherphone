@@ -67,6 +67,16 @@ internal sealed class WeatherControl : IDisposable
 
         weatherOverride = NoWeather;
         var natural = weather.NaturalNow();
+        if (!GameMemory.Attached)
+        {
+            if (GameMemory.Simulated is { } simulated && natural != NoWeather)
+            {
+                simulated.WeatherId = natural;
+            }
+
+            return;
+        }
+
         var environment = EnvManager.Instance();
         if (environment != null && natural != NoWeather)
         {
@@ -83,6 +93,16 @@ internal sealed class WeatherControl : IDisposable
         }
 
         timeOverride = NoTime;
+        if (!GameMemory.Attached)
+        {
+            if (GameMemory.Simulated is { } simulated)
+            {
+                simulated.EorzeaMinuteOverride = NoTime;
+            }
+
+            return;
+        }
+
         var instance = Framework.Instance();
         if (instance != null)
         {
@@ -116,7 +136,7 @@ internal sealed class WeatherControl : IDisposable
 
     private unsafe void OnUpdate(IFramework _)
     {
-        if (!strayOffsetSwept)
+        if (GameMemory.Attached && !strayOffsetSwept)
         {
             SweepStrayOffset();
         }
@@ -129,6 +149,12 @@ internal sealed class WeatherControl : IDisposable
         if (!installed.Open || !CanControl)
         {
             ClearAll();
+            return;
+        }
+
+        if (!GameMemory.Attached)
+        {
+            ApplySimulated();
             return;
         }
 
@@ -154,6 +180,21 @@ internal sealed class WeatherControl : IDisposable
             instance->ClientTime.IsEorzeaTimeOverridden = true;
             instance->ClientTime.EorzeaTimeOverride = days * EorzeaSecondsPerDay + timeOverride * 60L;
         }
+    }
+
+    private void ApplySimulated()
+    {
+        if (GameMemory.Simulated is not { } simulated)
+        {
+            return;
+        }
+
+        if (weatherOverride != NoWeather)
+        {
+            simulated.WeatherId = weatherOverride;
+        }
+
+        simulated.EorzeaMinuteOverride = timeOverride;
     }
 
     private void OnTerritoryChanged(uint _)

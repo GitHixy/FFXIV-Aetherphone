@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Globalization;
+using Aetherphone.Core.Game;
 using Aetherphone.Core.Housing;
 using Aetherphone.Core.Localization;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -32,6 +33,11 @@ internal static class LocationShare
 
     public static SharedLocation? Capture()
     {
+        if (!GameSheets.Available)
+        {
+            return null;
+        }
+
         if (!Plugin.ClientState.IsLoggedIn)
         {
             return null;
@@ -89,6 +95,11 @@ internal static class LocationShare
 
     private static uint ReadIndoorHouseDistrict()
     {
+        if (!GameMemory.Attached)
+        {
+            return GameMemory.Simulated is { Indoors: true } simulated ? simulated.HouseDistrict : 0;
+        }
+
         try
         {
             unsafe
@@ -152,6 +163,11 @@ internal static class LocationShare
 
     public static bool IsIndoors()
     {
+        if (!GameMemory.Attached)
+        {
+            return GameMemory.Simulated?.Indoors ?? false;
+        }
+
         try
         {
             unsafe
@@ -269,6 +285,11 @@ internal static class LocationShare
 
     public static string ZoneName(uint territoryId)
     {
+        if (!GameSheets.Available)
+        {
+            return string.Empty;
+        }
+
         if (territoryId != 0
             && Plugin.DataManager.GetExcelSheet<TerritoryType>().TryGetRow(territoryId, out var territory))
         {
@@ -280,6 +301,11 @@ internal static class LocationShare
 
     public static string WorldName(uint worldId)
     {
+        if (!GameSheets.Available)
+        {
+            return string.Empty;
+        }
+
         if (worldId != 0 && Plugin.DataManager.GetExcelSheet<World>().TryGetRow(worldId, out var world))
         {
             return world.Name.ExtractText();
@@ -290,6 +316,11 @@ internal static class LocationShare
 
     public static string DataCenterName(uint worldId)
     {
+        if (!GameSheets.Available)
+        {
+            return string.Empty;
+        }
+
         if (worldId != 0 && Plugin.DataManager.GetExcelSheet<World>().TryGetRow(worldId, out var world)
             && world.DataCenter.RowId != 0)
         {
@@ -373,6 +404,13 @@ internal static class LocationShare
 
     private static (short Ward, short Plot, short Room) ReadHousing()
     {
+        if (!GameMemory.Attached)
+        {
+            return GameMemory.Simulated is { } simulated
+                ? (simulated.Ward, simulated.Plot, simulated.Room)
+                : default;
+        }
+
         try
         {
             unsafe

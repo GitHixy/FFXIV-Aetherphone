@@ -14,6 +14,8 @@ You need the .NET 10 SDK, and compiling also needs the Dalamud assemblies on dis
 
 Load the built plugin via `/xlsettings` -> **Experimental** -> **Dev Plugin Locations**, pointing at `src/Aetherphone/bin/Release/Aetherphone.dll`. Already playing with Aetherphone from the custom repo? Disable that copy first, or build `Debug` instead: it loads beside your normal copy as `AetherphoneDev` and opens with `/phonedev`. [Getting started](docs/getting-started.md) explains the Release, Debug, and Beta builds.
 
+No game on this machine? [docs/harness.md](docs/harness.md) describes the headless preview harness: one bootstrap downloads Dalamud into a local cache, and `tools/harness/aep serve` renders and drives the phone on macOS, Windows, or Linux.
+
 ## Project layout
 
 - `src/Aetherphone/Core/`: the device platform: app framework and navigation, theming, messaging, notifications, character/contacts, game data readers, and the shared services (networking, crypto, media, localization) the apps build on.
