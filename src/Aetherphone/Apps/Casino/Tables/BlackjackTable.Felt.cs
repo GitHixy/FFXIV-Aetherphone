@@ -472,6 +472,8 @@ internal sealed partial class BlackjackTable
         var start = fanCenter.X - (count - 1) * step * 0.5f;
         var slot = BlackjackDealPlayback.SlotOf(seatIndex, handIndex);
         var rounding = PlayingCards.RoundingFor(cardWidth);
+        var revealing = playback.HandRevealing(slot);
+        var reveal = playback.HandReveal(slot);
         for (var index = 0; index < count; index++)
         {
             var travel = playback.TravelOf(slot, index);
@@ -483,8 +485,23 @@ internal sealed partial class BlackjackTable
             var target = new Vector2(start + index * step, fanCenter.Y);
             var center = BlackjackDealChoreography.Position(shoe, target, travel, scale);
             dealer.TrackCard(center, travel);
-            var rect = BlackjackDealChoreography.CardRect(center, cardWidth, travel);
             var card = projection.CardAt(seatIndex, handIndex, index, cards![index]);
+            if (revealing && travel >= 1f)
+            {
+                var squashed = SquashedRect(center, cardWidth, BlackjackDealChoreography.RevealScaleX(reveal));
+                if (BlackjackDealChoreography.RevealFaceUp(reveal) && PlayingCards.IsCard(card))
+                {
+                    PlayingCards.DrawFace(drawList, squashed, card, rounding, scale, true);
+                }
+                else
+                {
+                    PlayingCards.DrawBack(drawList, squashed, rounding, scale, true);
+                }
+
+                continue;
+            }
+
+            var rect = BlackjackDealChoreography.CardRect(center, cardWidth, travel);
             if (BlackjackDealChoreography.FaceUp(travel) && PlayingCards.IsCard(card))
             {
                 PlayingCards.DrawFace(drawList, rect, card, rounding, scale, true);
