@@ -35,6 +35,7 @@ internal static class SignalType
     public const string AnnouncePing = "announce.ping";
     public const string PollPing = "poll.ping";
     public const string FeedbackPing = "feedback.ping";
+    public const string ServerRestarting = "server.restarting";
     public const string ChatTyping = "chat.typing";
     public const string VelvetTyping = "velvet.typing";
     public const string GramTyping = "gram.typing";

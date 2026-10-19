@@ -57,6 +57,7 @@ internal sealed class RealtimeSignalBus
     public event Action<CasinoSignal>? CasinoReceived;
     public event Action<GameSignal>? GameReceived;
     public event Action<CallControl>? RadioReceived;
+    public event Action? ServerRestarting;
     public event Action<bool>? ConnectedChanged;
 
     public bool RealtimeActive => realtimeActive;
@@ -150,6 +151,11 @@ internal sealed class RealtimeSignalBus
     public void PublishRadio(CallControl signal)
     {
         RadioReceived?.Invoke(signal);
+    }
+
+    public void PublishServerRestarting()
+    {
+        ServerRestarting?.Invoke();
     }
 
     public void BindSender(Action<CallControl>? sender)

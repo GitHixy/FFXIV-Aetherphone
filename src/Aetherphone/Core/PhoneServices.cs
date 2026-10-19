@@ -77,6 +77,7 @@ internal sealed class PhoneServices : IDisposable
     public required ModerationNoticeService ModerationNotices { get; init; }
 
     public required AccountStateService AccountState { get; init; }
+    public required NetworkStatusNotices NetworkStatus { get; init; }
     public required ModerationNoticePresenter ModerationPresenter { get; init; }
     public required ModerationNoticeArchive ModerationArchive { get; init; }
     public required SafetyLauncher SafetyLauncher { get; init; }
@@ -418,6 +419,8 @@ internal sealed class PhoneServices : IDisposable
             visibility, realtimeSignals);
         var accountState = new AccountStateService(aethernetSession, aethernet.Account, framework, visibility,
             realtimeSignals);
+        var networkStatus = new NetworkStatusNotices(aethernetSession, realtimeSignals, framework, clientState,
+            chatGui, configuration);
         var moderationPresenter = new ModerationNoticePresenter(moderationNotices, confirm, notifications,
             accountState, coins, framework);
         var moderationArchive = new ModerationNoticeArchive(aethernetSession, aethernet.Account);
@@ -505,6 +508,7 @@ internal sealed class PhoneServices : IDisposable
             SocialNotifications = socialNotifications,
             ModerationNotices = moderationNotices,
             AccountState = accountState,
+            NetworkStatus = networkStatus,
             ModerationPresenter = moderationPresenter,
             ModerationArchive = moderationArchive,
             SafetyLauncher = safetyLauncher,
@@ -663,6 +667,7 @@ internal sealed class PhoneServices : IDisposable
         SocialNotifications.Dispose();
         ModerationPresenter.Dispose();
         ModerationNotices.Dispose();
+        NetworkStatus.Dispose();
         AccountState.Dispose();
         ChatHistory.Dispose();
         DeviceLinks.Dispose();

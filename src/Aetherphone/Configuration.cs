@@ -594,6 +594,7 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
 
     public bool MarketContextMenu { get; set; } = true;
     public bool LinkpearlContextMenu { get; set; }
+    public bool NetworkStatusInChat { get; set; } = true;
 
     public bool HasUnseenChangelog => LastSeenChangelogVersion != ChangelogData.LatestVersion;
 
