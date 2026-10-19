@@ -2316,6 +2316,12 @@ internal static class L
                 "Fixed dock app names showing on top of the widget gallery and other sheets, contributed by t3sco"),
         };
 
+        public static readonly LocString[] Release1321Collections =
+        {
+            new("changelog.r1321.13",
+                "Fixed the Owned filter in Facewear listing the wrong styles, contributed by jambalong"),
+        };
+
         public static readonly LocString[] Release1320MogCast =
         {
             new("changelog.r1320.38",

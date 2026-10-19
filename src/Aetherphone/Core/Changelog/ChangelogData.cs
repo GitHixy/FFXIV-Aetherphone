@@ -10,6 +10,7 @@ internal static class ChangelogData
         {
             new(L.Apps.Chirper, L.Changelog.Release1321Chirper),
             new(L.Changelog.SectionPhone, L.Changelog.Release1321Phone),
+            new(L.Apps.Collections, L.Changelog.Release1321Collections),
         }),
         new ChangelogEntry("1.3.2.0", "2026-10-18", new ChangelogSection[]
         {

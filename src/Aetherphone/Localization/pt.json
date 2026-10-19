@@ -7813,6 +7813,7 @@
   "changelog.r1321.10": "Corrigidos botões de painéis, chamadas e Dynamic Island que aceitavam toques enquanto ainda abriam, contribuição de t3sco",
   "changelog.r1321.11": "Corrigidos nomes de apps do dock que apareciam por cima da galeria de widgets e de outros painéis, contribuição de t3sco",
   "changelog.r1321.12": "Adicionamos deslizar a música pausada para fora da Dynamic Island: a Música para, e as mídias tocando no seu PC ficam ocultas até voltarem a tocar, contribuição de hellovvn",
+  "changelog.r1321.13": "Corrigido o filtro Obtidos de Acessórios faciais que mostrava os estilos errados, contribuição de jambalong",
   "changelog.r1320.0": "Corrigidos nomes longos cortados em uma mesa de blackjack cheia com sete assentos: a placa de um assento agora se alarga sobre os assentos vazios ao lado",
   "changelog.r1320.1": "Corrigido o livro de gil deixando de registrar trocas depois de 30 minutos longe da página da sua mesa ou após recarregar o plugin: as trocas agora são registradas por 12 horas desde a última vez que você esteve na sua mesa de gil aberta, mesmo após reiniciar, até você fechar a mesa",
   "changelog.r1320.2": "Adicionada uma antecedência para os alertas de peixe: um seletor abaixo da lista de alertas define quantos minutos antes de uma janela o alerta toca, de 1 a 60, 5 por padrão",
