@@ -18,7 +18,7 @@ internal sealed class AethernetApi
         GramDm = new GramDmClient(net);
         Velvet = new VelvetClient(net);
         Media = new MediaClient(net);
-        Safety = new SafetyClient(net);
+        Safety = new SafetyClient(net, session.Blocks);
         Feedback = new FeedbackClient(net);
         Polls = new PollsClient(net);
         Translation = new TranslationClient(net);

@@ -558,6 +558,12 @@ internal abstract class ChatThreadView<TMessage, TThread> : IDisposable, IChatTr
 
     void IChatTranscriptInteractions.OnReactionClick(string messageId, string token) => OpenReactions(messageId);
 
+    void IChatTranscriptInteractions.OnBlockedReveal(string messageId) => RevealBlocked(messageId);
+
+    protected virtual void RevealBlocked(string messageId)
+    {
+    }
+
     VoiceNoteState IChatTranscriptVoice.StateFor(string messageId)
     {
         var state = voicePlayer.StateFor(messageId);
@@ -673,7 +679,7 @@ internal abstract class ChatThreadView<TMessage, TThread> : IDisposable, IChatTr
         {
             ref readonly var message = ref messages[index];
             if (message.Kind != 0 || message.SenderId == myId || message.Body.Length == 0
-                || (message.Flags & (TranscriptFlags.Deleted | TranscriptFlags.Placeholder)) != 0
+                || (message.Flags & (TranscriptFlags.Deleted | TranscriptFlags.Placeholder | TranscriptFlags.Blocked)) != 0
                 || ChatText.EffectiveKind(message.Body, 0) != 0 || translation.IsSameAsTarget(message.Body))
             {
                 continue;
