@@ -2299,6 +2299,78 @@ internal static class L
         public static readonly LocString SectionSounds = new("changelog.sectionSounds", "Sounds");
         public static readonly LocString SectionHalloween = new("changelog.sectionHalloween", "Halloween");
 
+        public static readonly LocString[] Release1400Prism =
+        {
+            new("changelog.r1400.0",
+                "Added Prism, a weekly glamour contest with a new theme every Monday at the daily reset, contributed by t3sco"),
+            new("changelog.r1400.1",
+                "Added entering Prism with one photo of your look for the week's theme, picked from Photos or imported from your PC, and withdrawing it while entries are open"),
+            new("changelog.r1400.2",
+                "Added judging in Prism: rate anonymous looks in heats from Off theme to Nails it, with Aether Coin for every heat you judge"),
+            new("changelog.r1400.3",
+                "Added the Prism reveal: heat winners go through to a final, and results arrive as a podium with your placing, the Aether Coin you won and a reveal you can replay"),
+            new("changelog.r1400.4",
+                "Added reporting a Prism look, so moderators can take it out of the contest"),
+        };
+
+        public static readonly LocString[] Release1400Messaging =
+        {
+            new("changelog.r1400.5",
+                "Added hiding messages from people you blocked in ChocoChat group chats: each shows as a short row you can tap to read, and they no longer notify you"),
+            new("changelog.r1400.6",
+                "Fixed voice messages recorded with Automatic gain distorting when you raise your voice and staying quiet afterwards"),
+        };
+
+        public static readonly LocString[] Release1400Calls =
+        {
+            new("changelog.r1400.7",
+                "Added a Microphone threshold slider with a live level meter and Test microphone: at 0 every sound gets through, and higher numbers need louder speech before others hear you"),
+            new("changelog.r1400.8",
+                "Added a warning on the level meter when your microphone is clipping before the sound reaches the phone"),
+            new("changelog.r1400.9",
+                "Changed Microphone volume to hide while Automatic gain is on, since automatic gain sets your loudness"),
+            new("changelog.r1400.10",
+                "Fixed calls with Automatic gain turning your voice down after you shouted and leaving it quiet"),
+            new("changelog.r1400.11",
+                "Fixed the Speaker list showing only System default on some PCs"),
+        };
+
+        public static readonly LocString[] Release1400Music =
+        {
+            new("changelog.r1400.12",
+                "Added a Stop button on the mini player and the Dynamic Island while a radio station is connecting or has lost its connection"),
+            new("changelog.r1400.13",
+                "Changed a radio station that stays disconnected for 15 minutes to stop by itself"),
+            new("changelog.r1400.14",
+                "Fixed the reaction buttons in a radio station's chat being cut off on the left"),
+        };
+
+        public static readonly LocString[] Release1400Phone =
+        {
+            new("changelog.r1400.15",
+                "Added a line in game chat when Aethernet restarts for an update or loses its connection, and another when it is back, which you can turn off with Network status in chat in Settings"),
+            new("changelog.r1400.16",
+                "Fixed the status bar clock not lining up with screen titles"),
+        };
+
+        public static readonly LocString[] Release1400Gamba =
+        {
+            new("changelog.r1400.17",
+                "Changed blackjack so other players' hands turn face up as soon as they finish their turn"),
+        };
+
+        public static readonly LocString[] Release1400Games =
+        {
+            new("changelog.r1400.18",
+                "Fixed the Played too short to pay note never showing when you leave a game before it pays"),
+        };
+
+        public static readonly LocString[] Release1400Sounds =
+        {
+            new("changelog.r1400.19",
+                "Fixed game sounds going silent when Interface Sounds was turned off"),
+        };
+
         public static readonly LocString[] Release1330Chirper =
         {
             new("changelog.r1330.0",
