@@ -359,6 +359,8 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
     public float CallOutputVolume { get; set; } = 1f;
     public float CallInputGain { get; set; } = 1f;
     public bool CallAutoGain { get; set; } = true;
+    public float CallInputThreshold { get; set; } = Core.Telephony.Audio.MicThreshold.DefaultPosition;
+    public bool CallInputThresholdMigrated { get; set; }
     public Dictionary<string, float> CallPeerVolumes { get; set; } = new();
     public HashSet<string> CallPeerMuted { get; set; } = new();
     public List<CallLogEntry> CallLog { get; set; } = new();
@@ -675,6 +677,26 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
 
         ControlPanel = null;
         ControlPanelRepacked = true;
+        Save();
+    }
+
+    public void MigrateCallInputThreshold()
+    {
+        if (CallInputThresholdMigrated)
+        {
+            return;
+        }
+
+        CallInputThresholdMigrated = true;
+        if (MathF.Abs(CallInputGain - 1f) > 0.001f)
+        {
+            CallInputThreshold = Core.Telephony.Audio.MicThreshold.FromLegacyGain(CallInputGain);
+            if (CallAutoGain)
+            {
+                CallInputGain = 1f;
+            }
+        }
+
         Save();
     }
 

@@ -6,26 +6,22 @@ internal sealed class AutoGain
     public const float MinimumGain = 0.5f;
     public const float MaximumGain = 7.943f;
     public const float NoiseFloorRms = 0.0032f;
+    public const float SpeechOverNoise = 3.16f;
+    public const float QuietestNoise = NoiseFloorRms / SpeechOverNoise;
+    public const float AutomaticCeiling = 0.708f;
     public const float LimiterThreshold = 0.8f;
     public const float LimiterCeiling = 0.97f;
     private const float AttackSeconds = 0.075f;
     private const float ReleaseSeconds = 0.8f;
     private const float NoiseFallSeconds = 0.1f;
     private const float NoiseRiseSeconds = 6f;
-    private const float SpeechOverNoise = 3.16f;
-    private const float QuietestNoise = NoiseFloorRms / SpeechOverNoise;
+    private const float SpeechNoiseRiseSeconds = 60f;
     private const float OnsetSeconds = 0.06f;
     private const float SampleScale = 1f / 32768f;
-    private readonly float gateOpenRms;
     private float gain = 1f;
     private float noise = NoiseFloorRms;
     private float voicedSeconds;
     private float appliedGain = float.NaN;
-
-    public AutoGain(float gateOpenRms = AudioCapture.GateOpenRms)
-    {
-        this.gateOpenRms = gateOpenRms;
-    }
 
     public float Gain => gain;
 
@@ -37,7 +33,7 @@ internal sealed class AutoGain
         appliedGain = float.NaN;
     }
 
-    public void Process(Span<short> pcm, float rawRms, int sampleRate, float trim, bool adaptive)
+    public void Process(Span<short> pcm, float rawRms, int sampleRate, float openRms, float volume, bool adaptive)
     {
         if (pcm.IsEmpty || sampleRate <= 0)
         {
@@ -45,20 +41,22 @@ internal sealed class AutoGain
         }
 
         var startGain = gain;
-        if (adaptive)
-        {
-            Adapt(rawRms, rawRms * trim, pcm.Length / (float)sampleRate);
-        }
-        else
+        if (!adaptive)
         {
             gain = 1f;
             voicedSeconds = 0f;
+            var manualFrom = float.IsNaN(appliedGain) ? volume : appliedGain;
+            appliedGain = volume;
+            ApplyLimited(pcm, manualFrom, volume);
+            return;
         }
 
-        var outputGain = adaptive ? gain : trim;
-        var fromGain = float.IsNaN(appliedGain) ? (adaptive ? startGain : outputGain) : appliedGain;
-        appliedGain = outputGain;
-        Apply(pcm, fromGain, outputGain);
+        Adapt(rawRms, rawRms >= openRms, pcm.Length / (float)sampleRate);
+        var peakLimit = PeakLimit(pcm);
+        var from = MathF.Min(float.IsNaN(appliedGain) ? startGain : appliedGain, peakLimit);
+        var to = MathF.Min(gain, peakLimit);
+        appliedGain = to;
+        ApplyRamp(pcm, from, to);
     }
 
     public void Observe(float rawRms, int samples, int sampleRate)
@@ -68,22 +66,7 @@ internal sealed class AutoGain
             return;
         }
 
-        Adapt(rawRms, rawRms, samples / (float)sampleRate);
-    }
-
-    public void Level(Span<short> pcm, int sampleRate, int blockSamples)
-    {
-        if (blockSamples <= 0)
-        {
-            return;
-        }
-
-        Reset(gain);
-        for (var start = 0; start < pcm.Length; start += blockSamples)
-        {
-            var block = pcm.Slice(start, Math.Min(blockSamples, pcm.Length - start));
-            Process(block, Rms(block), sampleRate, 1f, true);
-        }
+        Adapt(rawRms, true, samples / (float)sampleRate);
     }
 
     public static float Rms(ReadOnlySpan<short> pcm)
@@ -103,10 +86,21 @@ internal sealed class AutoGain
         return (float)(Math.Sqrt(sum / pcm.Length) / 32768.0);
     }
 
-    private void Adapt(float rms, float gateLevel, float seconds)
+    public static float Peak(ReadOnlySpan<short> pcm)
+    {
+        var peak = 0;
+        for (var index = 0; index < pcm.Length; index++)
+        {
+            peak = Math.Max(peak, Math.Abs((int)pcm[index]));
+        }
+
+        return peak * SampleScale;
+    }
+
+    private void Adapt(float rms, bool voiced, float seconds)
     {
         TrackNoise(rms, seconds);
-        if (gateLevel < gateOpenRms)
+        if (!voiced)
         {
             voicedSeconds = 0f;
             return;
@@ -126,7 +120,16 @@ internal sealed class AutoGain
     private void TrackNoise(float rms, float seconds)
     {
         var level = MathF.Max(rms, QuietestNoise);
-        var timeConstant = level < noise ? NoiseFallSeconds : NoiseRiseSeconds;
+        float timeConstant;
+        if (level < noise)
+        {
+            timeConstant = NoiseFallSeconds;
+        }
+        else
+        {
+            timeConstant = level >= noise * SpeechOverNoise ? SpeechNoiseRiseSeconds : NoiseRiseSeconds;
+        }
+
         noise = TowardInLog(noise, level, seconds, timeConstant);
     }
 
@@ -137,7 +140,30 @@ internal sealed class AutoGain
         return MathF.Exp(logCurrent + (MathF.Log(target) - logCurrent) * blend);
     }
 
-    private static void Apply(Span<short> pcm, float fromGain, float toGain)
+    private static float PeakLimit(ReadOnlySpan<short> pcm)
+    {
+        var peak = Peak(pcm);
+        return peak <= 0f ? MaximumGain : AutomaticCeiling / peak;
+    }
+
+    private static void ApplyRamp(Span<short> pcm, float fromGain, float toGain)
+    {
+        if (fromGain == 1f && toGain == 1f)
+        {
+            return;
+        }
+
+        var step = (toGain - fromGain) / pcm.Length;
+        var current = fromGain;
+        for (var index = 0; index < pcm.Length; index++)
+        {
+            current += step;
+            var value = MathF.Round(pcm[index] * current);
+            pcm[index] = (short)Math.Clamp(value, short.MinValue, short.MaxValue);
+        }
+    }
+
+    private static void ApplyLimited(Span<short> pcm, float fromGain, float toGain)
     {
         if (fromGain == 1f && toGain == 1f)
         {
