@@ -61,6 +61,7 @@ using Aetherphone.Apps.Games.Whack;
 using Aetherphone.Apps.Games.WordRun;
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Core.Animation;
 using Aetherphone.Core.Apps;
 using Aetherphone.Core.Changelog;
 using Aetherphone.Core.Confirm;
@@ -111,6 +112,7 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
     private const float CoinChipRingRadius = 7f;
     private const float CoinChipGap = 5f;
     private const string CoinChipTooltipId = "games.coinChip";
+    private const string CoinFloatLayerId = "games.coinFloats";
     private const float ResultAppearSpeed = 3.4f;
 
     private static readonly string[] TabIds = [HomeTabRoute, TogetherTabRoute, LibraryTabRoute, ProfileTabRoute];
@@ -416,21 +418,39 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
             CloseCurrentGame(true);
         }
 
+        SpawnCoinNote(context.Content);
+        DrawCoinFloats();
+    }
+
+    private void SpawnCoinNote(Rect content)
+    {
         var award = coinSessions.TakeAward(out _);
-        if (award is not null)
+        if (award is null)
         {
-            var anchor = new Vector2(context.Content.Center.X, context.Content.Min.Y + 96f * UiScale.Current);
-            if (award.Granted && award.Amount > 0)
-            {
-                coinFloats.Spawn(Loc.T(L.Coin.CheckInReward, NumberText.Group(award.Amount)), anchor);
-                coins.AbsorbLocalAward(award.Balance);
-            }
-            else if (award.Reason == Core.Coins.CoinGameSessionTracker.TooShortReason)
-            {
-                coinFloats.Spawn(Loc.T(L.Coin.SessionTooShort), anchor, true);
-            }
+            return;
         }
 
+        var anchor = new Vector2(content.Center.X, content.Min.Y + 96f * UiScale.Current);
+        switch (Core.Coins.CoinGameSessionTracker.NoteFor(award))
+        {
+            case Core.Coins.CoinAwardNote.Reward:
+                coinFloats.Spawn(Loc.T(L.Coin.CheckInReward, NumberText.Group(award.Amount)), anchor);
+                coins.AbsorbLocalAward(award.Balance);
+                break;
+            case Core.Coins.CoinAwardNote.TooShort:
+                coinFloats.Spawn(Loc.T(L.Coin.SessionTooShort), anchor, true);
+                break;
+        }
+    }
+
+    private void DrawCoinFloats()
+    {
+        if (coinFloats.IsIdle)
+        {
+            return;
+        }
+
+        using var layer = ScreenLayer.BeginPassive(CoinFloatLayerId, screenRect);
         coinFloats.Draw(ImGui.GetWindowDrawList(), Core.Apps.AppAccents.For("coin"), theme.TextMuted,
             ImGui.GetIO().DeltaTime);
     }
