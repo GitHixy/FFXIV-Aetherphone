@@ -55,6 +55,7 @@ internal static class L
         public static readonly LocString NoPhotos = new("common.noPhotos", "No photos in your gallery yet");
         public static readonly LocString AddPhoto = new("common.addPhoto", "Add a photo");
         public static readonly LocString PasteImage = new("common.pasteImage", "Paste image");
+        public static readonly LocString PasteOrDropImage = new("common.pasteOrDropImage", "Or paste or drop an image here");
         public static readonly LocString PasteFailed = new("common.pasteFailed", "That image can't be pasted");
         public static readonly LocString GifTooLarge = new("common.gifTooLarge", "GIF is too large (max 4 MB)");
         public static readonly LocString GifRidesAlone = new("common.gifRidesAlone", "A GIF has to be posted on its own, without other photos.");
@@ -360,6 +361,7 @@ internal static class L
         public static readonly LocString FindPeople = new("app.findpeople", "Find People");
         public static readonly LocString Feedback = new("app.feedback", "Feedback");
         public static readonly LocString Polls = new("app.polls", "Polls");
+        public static readonly LocString Prism = new("app.prism", "Prism");
         public static readonly LocString Announcements = new("app.announcements", "Announcements");
         public static readonly LocString Muster = new("app.muster", "Muster");
         public static readonly LocString YellowPages = new("app.yellowpages", "Yellow Pages");
@@ -582,6 +584,9 @@ internal static class L
         public static readonly LocString PhotosSub = new("storeCopy.photosSub", "Your gallery");
         public static readonly LocString PhotosBody = new("storeCopy.photosBody",
             "Browse by year, month or day, make your own albums, find shots by the place they were taken, and touch them up in the built-in editor.");
+        public static readonly LocString PrismSub = new("storeCopy.prismSub", "Weekly glamour contest");
+        public static readonly LocString PrismBody = new("storeCopy.prismBody",
+            "Dress for the week's theme, enter a photo of your look and judge heats of other players' looks. The best looks win Aether Coin.");
         public static readonly LocString MusicSub = new("storeCopy.musicSub", "Songs, radio and Jams");
         public static readonly LocString MusicBody = new("storeCopy.musicBody",
             "Daily mixes, stations from around the world, your own playlists with synced lyrics, and Jams to listen in sync with friends.");
@@ -10651,6 +10656,92 @@ internal static class L
             "Couldn't refresh. Pull down to try again.");
     }
 
+    internal static class Prism
+    {
+        public static readonly LocString ShareLabel = new("prism.shareLabel", "Enter in Prism");
+        public static readonly LocString SignInTitle = new("prism.signInTitle", "Sign in to take part");
+        public static readonly LocString SignInRequired = new("prism.signInRequired",
+            "Sign in to Aethernet in Settings to enter and judge looks");
+        public static readonly LocString OpenSettings = new("prism.openSettings", "Open Settings");
+        public static readonly LocString NoWeekTitle = new("prism.noWeekTitle", "No theme right now");
+        public static readonly LocString NoWeekHint = new("prism.noWeekHint", "A new theme drops soon. Check back later.");
+        public static readonly LocString ThemeLabel = new("prism.themeLabel", "This week's theme");
+        public static readonly LocString EntriesClose = new("prism.entriesClose", "Entries close");
+        public static readonly LocString JudgingCloses = new("prism.judgingCloses", "Judging closes");
+        public static readonly LocString FinalCloses = new("prism.finalCloses", "The final closes");
+        public static readonly LocString ResultsAt = new("prism.resultsAt", "Results arrive");
+        public static readonly LocString EnterLook = new("prism.enterLook", "Enter your look");
+        public static readonly LocString EnterThisLook = new("prism.enterThisLook", "Enter this look");
+        public static readonly LocString Uploading = new("prism.uploading", "Uploading your look…");
+        public static readonly LocString Withdraw = new("prism.withdraw", "Withdraw");
+        public static readonly LocString WithdrawTitle = new("prism.withdrawTitle", "Withdraw your look?");
+        public static readonly LocString WithdrawBody = new("prism.withdrawBody",
+            "Your photo leaves this week's contest. You can enter again until entries close.");
+        public static readonly LocString StatusReview = new("prism.statusReview", "In review");
+        public static readonly LocString StatusReviewHint = new("prism.statusReviewHint",
+            "A moderator checks every look before judging starts.");
+        public static readonly LocString StatusLive = new("prism.statusLive", "In the running");
+        public static readonly LocString StatusRejected = new("prism.statusRejected", "Not accepted");
+        public static readonly LocString JudgeHeat = new("prism.judgeHeat", "Judge a heat");
+        public static readonly LocString JudgeFinal = new("prism.judgeFinal", "Judge the final");
+        public static readonly LocPlural HeatsJudged = new("prism.heatsJudged", "{0} heat judged", "{0} heats judged");
+        public static readonly LocString LookCount = new("prism.lookCount", "Look {0}/{1}");
+        public static readonly LocString RateHint = new("prism.rateHint", "How well does it wear the theme?");
+        public static readonly LocString HeatDoneTitle = new("prism.heatDoneTitle", "Heat judged");
+        public static readonly LocString HeatDoneHint = new("prism.heatDoneHint",
+            "Your scores are in. Names stay hidden until the results.");
+        public static readonly LocString JudgeAnother = new("prism.judgeAnother", "Judge another");
+        public static readonly LocString NothingLeftTitle = new("prism.nothingLeftTitle", "All caught up");
+        public static readonly LocString NothingLeftHint = new("prism.nothingLeftHint",
+            "You've judged every heat you can for now.");
+        public static readonly LocString ReportTitle = new("prism.reportTitle", "Report this look");
+        public static readonly LocString LastResults = new("prism.lastResults", "Results");
+        public static readonly LocString FinalRank = new("prism.finalRank", "Rank {0} in the final");
+        public static readonly LocString TopPercent = new("prism.topPercent", "Top {0}%");
+        public static readonly LocString CoinsWon = new("prism.coinsWon", "+{0} Aether Coin");
+        public static readonly LocString YourHeat = new("prism.yourHeat", "Your heat");
+        public static readonly LocString FinalTitle = new("prism.finalTitle", "The final");
+        public static readonly LocString Back = new("prism.back", "Back");
+        public static readonly LocString Issue = new("prism.issue", "N°{0}");
+        public static readonly LocString CoverCredit = new("prism.coverCredit", "Cover: {0}");
+        public static readonly LocPlural LooksThisIssue =
+            new("prism.looksThisIssue", "{0} look this issue", "{0} looks this issue");
+        public static readonly LocString YourLook = new("prism.yourLook", "Your look");
+        public static readonly LocString ResultsIn = new("prism.resultsIn", "New results");
+        public static readonly LocString ReplayReveal = new("prism.replayReveal", "Replay the reveal");
+        public static readonly LocString Submitting = new("prism.submitting", "Sending your scores…");
+        public static readonly LocString HeatName = new("prism.heatName", "Heat {0}");
+        public static readonly LocString YourPlacing = new("prism.yourPlacing", "Your placing");
+        public static readonly LocString TapHint = new("prism.tapHint", "Tap for the next look");
+        public static readonly LocString InspectHint = new("prism.inspectHint", "Hold to look closer");
+        public static readonly LocString StatusReviewTitle = new("prism.statusReviewTitle", "Your look is in review");
+        public static readonly LocString StatusLiveTitle = new("prism.statusLiveTitle", "Your look is in the running");
+        public static readonly LocString StatusRejectedTitle =
+            new("prism.statusRejectedTitle", "Your look wasn't accepted");
+        public static readonly LocString PlaceLabel = new("prism.placeLabel", "Place");
+        public static readonly LocString LooksIn = new("prism.looksIn", "Looks in");
+        public static readonly LocString Done = new("prism.done", "Done");
+        public static readonly LocString Submit = new("prism.submit", "Submit");
+        public static readonly LocString PrintHeading = new("prism.printHeading", "{0} N°{1}");
+        public static readonly LocString ScoreLow = new("prism.scoreLow", "Off theme");
+        public static readonly LocString ScoreHigh = new("prism.scoreHigh", "Nails it");
+        public static readonly LocString JudgingCoinLabel = new("prism.judgingCoinLabel", "Aether Coin for judging");
+        public static readonly LocString HowItWorks = new("prism.howItWorks", "How it works");
+        public static readonly LocString GuideEnterTitle = new("prism.guideEnterTitle", "Enter one look");
+        public static readonly LocString GuideEnterBody = new("prism.guideEnterBody",
+            "A new theme drops every week. Pick the one photo that wears it best, mods and all.");
+        public static readonly LocString GuideJudgeBody = new("prism.guideJudgeBody",
+            "Score looks from 1 to 5 in heats of about twelve. Entries are anonymous, and every judge's scores are evened out so nobody can sink a look alone.");
+        public static readonly LocString GuideFinalBody = new("prism.guideFinalBody",
+            "The top looks from each heat meet in the final, and everyone judges it.");
+        public static readonly LocString GuideRevealTitle = new("prism.guideRevealTitle", "The reveal");
+        public static readonly LocString GuideRevealBody = new("prism.guideRevealBody",
+            "Results play out as a countdown to first place. The podium and active judges earn Aether Coin.");
+        public static readonly LocString JudgeRewardEach = new("prism.judgeRewardEach", "+{0} Aether Coin for every heat you judge");
+        public static readonly LocString JudgeRewardLeft = new("prism.judgeRewardLeft", "+{0} Aether Coin a heat, {1} left this week");
+        public static readonly LocString JudgeRewardSpent = new("prism.judgeRewardSpent", "No judging Aether Coin left this week");
+    }
+
     internal static class Announcements
     {
         public static readonly LocString SignInRequired = new("announcements.signInRequired", "Sign in to Aethernet in Settings to read announcements");
@@ -10753,6 +10844,16 @@ internal static class L
         public static readonly LocString RuleGramHint = new("coin.ruleGramHint", "A gram that stays up for an hour, once a week");
         public static readonly LocString RuleStoryHint = new("coin.ruleStoryHint", "A story that runs its full day without being taken down, once a week");
         public static readonly LocString RuleCommentHint = new("coin.ruleCommentHint", "A comment on someone else's post that stays up for an hour, once a week");
+        public static readonly LocString RulePrismJudge = new("coin.rulePrismJudge", "Prism judging");
+        public static readonly LocString RulePrismHeatFirst = new("coin.rulePrismHeatFirst", "Prism heat, 1st place");
+        public static readonly LocString RulePrismHeatSecond = new("coin.rulePrismHeatSecond", "Prism heat, 2nd place");
+        public static readonly LocString RulePrismHeatThird = new("coin.rulePrismHeatThird", "Prism heat, 3rd place");
+        public static readonly LocString RulePrismFinalFirst = new("coin.rulePrismFinalFirst", "Prism final, 1st place");
+        public static readonly LocString RulePrismFinalSecond = new("coin.rulePrismFinalSecond", "Prism final, 2nd place");
+        public static readonly LocString RulePrismFinalThird = new("coin.rulePrismFinalThird", "Prism final, 3rd place");
+        public static readonly LocString RulePrismJudgeHint = new("coin.rulePrismJudgeHint", "Score every look in a Prism heat or the final");
+        public static readonly LocString RulePrismHeatHint = new("coin.rulePrismHeatHint", "Finish in the top three of your Prism heat");
+        public static readonly LocString RulePrismFinalHint = new("coin.rulePrismFinalHint", "Finish in the top three of the Prism final");
         public static readonly LocString EarnHeader = new("coin.earnHeader", "How to earn");
         public static readonly LocString SessionTooShort = new("coin.sessionTooShort", "Played too short to pay");
         public static readonly LocString HistoryEmptyTitle = new("coin.historyEmptyTitle", "Nothing earned yet");
