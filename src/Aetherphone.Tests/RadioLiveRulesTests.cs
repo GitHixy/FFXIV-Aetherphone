@@ -211,4 +211,32 @@ public sealed class RadioChatFollowTests
         Assert.Equal(0, follow.Unseen);
         Assert.True(follow.Update(0f, 0f, Tolerance, 300f, 3, 0));
     }
+
+    [Fact]
+    public void StaleScrollOnAReopenedScreenOnlyJumpsWhenAsked()
+    {
+        var follow = new RadioChatFollow();
+        follow.Update(0f, 0f, Tolerance, 300f, 10, 0);
+        follow.Update(500f, 500f, Tolerance, 300f, 10, 0);
+
+        Assert.False(follow.Update(500f, 500f, Tolerance, 300f, 10, 0));
+
+        follow.RequestJump();
+
+        Assert.True(follow.Update(500f, 500f, Tolerance, 300f, 10, 0));
+    }
+
+    [Fact]
+    public void RoomRefilledWithTheSameTailLandsOnTheNewestMessage()
+    {
+        var follow = new RadioChatFollow();
+        follow.Update(0f, 0f, Tolerance, 300f, 10, 0);
+        follow.Update(500f, 500f, Tolerance, 300f, 10, 0);
+
+        follow.Reset();
+
+        Assert.True(follow.Update(200f, 700f, Tolerance, 300f, 10, 0));
+        Assert.True(follow.Pinned);
+        Assert.Equal(10, follow.SeenTailId);
+    }
 }
