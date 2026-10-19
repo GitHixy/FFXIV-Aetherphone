@@ -170,6 +170,7 @@ public sealed class IslandActivityTests
         Assert.True(media.Has(IslandMediaControls.Shuffle | IslandMediaControls.ShuffleActive));
         Assert.True(media.Has(IslandMediaControls.Repeat | IslandMediaControls.RepeatActive |
                               IslandMediaControls.RepeatOne));
+        Assert.False(media.Has(IslandMediaControls.Stop));
     }
 
     [Fact]
@@ -182,6 +183,18 @@ public sealed class IslandActivityTests
                               IslandMediaControls.Next));
         Assert.False(media.Has(IslandMediaControls.Shuffle));
         Assert.False(media.Has(IslandMediaControls.Repeat));
+        Assert.True(media.Has(IslandMediaControls.Stop));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void PhoneRadioOffersStopWhetherOrNotItIsPlaying(bool playing)
+    {
+        var media = IslandMedia.ForPhone("Station", "Connection lost", 0f, 0f, playing, false, false,
+            SongRepeatMode.Off);
+
+        Assert.True(media.Has(IslandMediaControls.Stop | IslandMediaControls.PlayPause));
     }
 
     [Fact]
