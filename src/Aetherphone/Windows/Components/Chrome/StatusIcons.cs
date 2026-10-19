@@ -65,12 +65,8 @@ internal static class StatusIcons
         var scale = UiScale.Current;
         var device = Plugin.Device;
         var clusterWidth = MeasureWidth(scale, device.BatteryPercent);
-        var nubRight = (minClusterLeft + screen.Max.X + clusterWidth) * 0.5f;
-        if (nubRight - clusterWidth < minClusterLeft)
-        {
-            nubRight = MathF.Min(screen.Max.X - MinRightPadding * scale, minClusterLeft + clusterWidth);
-        }
-
+        var nubRight = StatusBarLayout.ClusterRight(screen.Max.X, theme.SidePadding * scale, minClusterLeft,
+            clusterWidth, MinRightPadding * scale);
         var batteryLeft = DrawBattery(theme, rowCenterY, nubRight, device.BatteryPercent, device.Charging);
         var wifiLeft = DrawWifi(theme, rowCenterY, batteryLeft,
             WifiArcs(device.SignalBars, device.LatencyMilliseconds));

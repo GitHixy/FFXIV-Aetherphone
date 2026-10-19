@@ -55,10 +55,9 @@ internal static class StatusBar
         var vertexStart = drawList.VtxBuffer.Size;
         var earGap = EarGap * scale;
         var earRight = island.Min.X - earGap;
-        var edgeInset = (earRight - screen.Min.X - StatusIcons.MeasureWidth(scale, Plugin.Device.BatteryPercent)) * 0.5f;
-        var timeLeft = MathF.Min(screen.Min.X + edgeInset, earRight - timeSize.X);
-        Typography.Draw(new Vector2(timeLeft, rowCenterY - timeSize.Y * 0.5f), localTime, theme.TextStrong, TimeScale,
-            TimeWeight);
+        var timeLeft = StatusBarLayout.ClockLeft(screen.Min.X, theme.SidePadding * scale, earRight, timeSize.X);
+        Typography.Draw(drawList, new Vector2(timeLeft, rowCenterY - timeSize.Y * 0.5f), localTime, theme.TextStrong,
+            TimeScale, TimeWeight);
         DrawIndicators(drawList, timeLeft + timeSize.X, earRight, rowCenterY, scale, theme);
         StatusIcons.Draw(screen, theme, rowCenterY, island.Max.X + earGap);
         LayerCompositor.Fade(drawList, vertexStart, Math.Clamp(alpha, 0f, 1f));
