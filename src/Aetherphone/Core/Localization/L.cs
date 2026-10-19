@@ -2024,6 +2024,8 @@ internal static class L
         public static readonly LocString MarketContextMenuHint = new("settings.marketContextMenuHint", "Shows \"Search the Market\" option in the in-game context menu when right-clicking on an item.");
         public static readonly LocString LinkpearlContextMenu = new("settings.linkpearlContextMenu", "Linkpearl chat in menus");
         public static readonly LocString LinkpearlContextMenuHint = new("settings.linkpearlContextMenuHint", "Shows \"Open a Linkpearl chat\" option in the in-game context menu when right-clicking on a player.");
+        public static readonly LocString NetworkStatusInChat = new("settings.networkStatusInChat", "Network status in chat");
+        public static readonly LocString NetworkStatusInChatHint = new("settings.networkStatusInChatHint", "Writes a line in game chat when Aethernet restarts or the connection drops, and again when it is back.");
         public static readonly LocString ArrowKeysStepPosts = new("settings.arrowKeysStepPosts", "Arrow keys scroll posts");
         public static readonly LocString ArrowKeysStepPostsHint = new("settings.arrowKeysStepPostsHint", "While the phone is focused, Up and Down glide to the previous or next post in Aethergram and Chirper.");
         public static readonly LocString AutoAdvancePosts = new("settings.autoAdvancePosts", "Auto-advance posts");
@@ -10496,6 +10498,9 @@ internal static class L
         public static readonly LocString StateLine = new("plugin.stateLine", "{0}: {1}");
         public static readonly LocString MusicUsage = new("plugin.musicUsage", "Type {0} music followed by play, pause, next, or prev.");
         public static readonly LocString NothingPlaying = new("plugin.nothingPlaying", "Nothing is playing.");
+        public static readonly LocString NetworkRestarting = new("plugin.networkRestarting", "Aethernet is restarting for an update. You may be disconnected for a moment.");
+        public static readonly LocString NetworkLost = new("plugin.networkLost", "Lost connection to Aethernet, reconnecting...");
+        public static readonly LocString NetworkBack = new("plugin.networkBack", "Aethernet is back online.");
         public static readonly LocString TellUsage = new("plugin.tellUsage", "Target a player, or type {0} tell followed by their name and world.");
         public static readonly LocString WorldNotFound = new("plugin.worldNotFound", "No world named {0}.");
         public static readonly LocString CallUsage = new("plugin.callUsage", "Type {0} call followed by a contact name.");
