@@ -6076,7 +6076,7 @@ internal static class L
         public static readonly LocString ListeningCount = new("music.listeningCount", "{0} listening");
         public static readonly LocString WatchOnTwitch = new("music.watchOnTwitch", "Watch on Twitch");
         public static readonly LocString OffAir = new("music.offAir", "Off air");
-        public static readonly LocString HostedBy = new("music.hostedBy", "Hosted by {0}");
+        public static readonly LocString HostCaption = new("music.hostCaption", "Host");
         public static readonly LocString ReportStation = new("music.reportStation", "Report station");
         public static readonly LocString ReportStationTitle = new("music.reportStationTitle",
             "Report this station");

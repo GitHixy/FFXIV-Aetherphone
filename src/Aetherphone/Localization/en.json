@@ -2049,7 +2049,7 @@
   "music.listeningCount": "{0} listening",
   "music.watchOnTwitch": "Watch on Twitch",
   "music.offAir": "Off air",
-  "music.hostedBy": "Hosted by {0}",
+  "music.hostCaption": "Host",
   "music.reportStation": "Report station",
   "music.reportStationTitle": "Report this station",
   "music.followStation": "Follow",

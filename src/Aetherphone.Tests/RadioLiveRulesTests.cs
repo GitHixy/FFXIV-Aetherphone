@@ -240,3 +240,35 @@ public sealed class RadioChatFollowTests
         Assert.Equal(10, follow.SeenTailId);
     }
 }
+
+public sealed class RadioStageLayoutTests
+{
+    private const float ArtBottom = 88f;
+    private const float FollowHeight = 30f;
+    private const float Gap = 4f;
+
+    [Fact]
+    public void ShortHostKeepsTheFollowButtonOnTheArtBaseline()
+    {
+        var followTop = RadioStageLayout.FollowTop(ArtBottom, FollowHeight, 53f, Gap);
+
+        Assert.Equal(ArtBottom - FollowHeight, followTop);
+        Assert.Equal(ArtBottom, RadioStageLayout.ColumnBottom(ArtBottom, 53f, followTop + FollowHeight));
+    }
+
+    [Fact]
+    public void TallHostPushesTheFollowButtonDownInsteadOfOverlappingIt()
+    {
+        var followTop = RadioStageLayout.FollowTop(ArtBottom, FollowHeight, 66f, Gap);
+
+        Assert.Equal(70f, followTop);
+        Assert.Equal(100f, RadioStageLayout.ColumnBottom(ArtBottom, 66f, followTop + FollowHeight));
+    }
+
+    [Fact]
+    public void OwnStationWithoutAFollowButtonStillClearsATallHost()
+    {
+        Assert.Equal(ArtBottom, RadioStageLayout.ColumnBottom(ArtBottom, 60f, 0f));
+        Assert.Equal(95f, RadioStageLayout.ColumnBottom(ArtBottom, 95f, 0f));
+    }
+}

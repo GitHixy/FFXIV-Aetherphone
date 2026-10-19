@@ -2049,7 +2049,7 @@
   "music.listeningCount": "{0}人が視聴中",
   "music.watchOnTwitch": "Twitchで見る",
   "music.offAir": "放送休止中",
-  "music.hostedBy": "{0} が配信",
+  "music.hostCaption": "配信者",
   "music.reportStation": "局を報告",
   "music.reportStationTitle": "この局を報告",
   "music.followStation": "フォロー",
