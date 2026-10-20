@@ -1,3 +1,4 @@
+using System.Text;
 using Aetherphone.Core;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
@@ -25,6 +26,7 @@ internal static class PrismType
     private static readonly Dictionary<WrapKey, string[]> WrapCache = new();
     private static readonly List<string> Scratch = new();
     private static readonly Dictionary<BalanceKey, float> BalanceCache = new();
+    private static readonly Dictionary<BalanceKey, string> SentenceCache = new();
 
     private readonly record struct WrapKey(string Text, PrismFace Face, int Pixels, int Width);
 
@@ -56,6 +58,18 @@ internal static class PrismType
         var width = Measure(text, face, pixels).X;
         Draw(drawList, new Vector2(topRight.X - width, topRight.Y), text, color, face, pixels);
         return width;
+    }
+
+    public static string FitLabel(string text, float pixels, float width)
+    {
+        var tier = Tier(PrismFace.Label, pixels);
+        float fontSize;
+        using (Plugin.Fonts.Push(tier, FontWeight.Medium))
+        {
+            fontSize = ImGui.GetFontSize();
+        }
+
+        return Typography.FitText(text, width * fontSize / Snap(PrismFace.Label, pixels), tier, FontWeight.Medium);
     }
 
     public static float LineHeight(PrismFace face, float pixels) =>
@@ -133,6 +147,57 @@ internal static class PrismType
 
         BalanceCache[key] = high;
         return high;
+    }
+
+    public static string Sentences(string text, in TextStyle style, float width)
+    {
+        var key = new BalanceKey(text, style.Scale, style.Weight, (int)MathF.Round(width));
+        if (SentenceCache.TryGetValue(key, out var cached))
+        {
+            return cached;
+        }
+
+        if (SentenceCache.Count >= CacheLimit)
+        {
+            SentenceCache.Clear();
+        }
+
+        var broken = BreakSentences(text);
+        var result = !ReferenceEquals(broken, text) &&
+                     Typography.WrapText(broken, style, width).Length <= Typography.WrapText(text, style, width).Length
+            ? broken
+            : text;
+        SentenceCache[key] = result;
+        return result;
+    }
+
+    private static string BreakSentences(string text)
+    {
+        var builder = new StringBuilder(text.Length);
+        var broke = false;
+        for (var index = 0; index < text.Length; index++)
+        {
+            var glyph = text[index];
+            builder.Append(glyph);
+            if (index + 1 == text.Length)
+            {
+                break;
+            }
+
+            if (glyph is '。' or '！' or '？')
+            {
+                builder.Append('\n');
+                broke = true;
+            }
+            else if (glyph is '.' or '!' or '?' && text[index + 1] == ' ')
+            {
+                builder.Append('\n');
+                index++;
+                broke = true;
+            }
+        }
+
+        return broke ? builder.ToString() : text;
     }
 
     private static string[] Break(string text, PrismFace face, float pixels, float width)
