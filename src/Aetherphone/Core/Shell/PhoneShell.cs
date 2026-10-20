@@ -327,7 +327,7 @@ internal sealed class PhoneShell : IDisposable
         if (!navigation.IsTransitioning)
         {
             transition.ResetPrepared();
-            if (navigation.Current is { } blockedApp && suspensions.Blocks(blockedApp.Id))
+            if (navigation.Current is { } blockedApp && (suspensions.Blocks(blockedApp.Id) || !blockedApp.IsAvailable))
             {
                 navigation.GoHome();
             }

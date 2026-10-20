@@ -334,6 +334,7 @@ internal sealed class PhoneServices : IDisposable
         var casinoHistory = new Casino.CasinoHistoryStore(aethernetSession, casinoApi.Casino);
         var casinoSpin = new Casino.CasinoSpinStore(aethernetSession, casinoApi.Casino, coins);
         var realtimeSignals = new RealtimeSignalBus();
+        availability.Follow(realtimeSignals);
         var peerKeys = new PeerKeyDirectory(configuration, aethernet.Keys);
         var conversationKeys = new ConversationKeyStore(aethernet.Keys, keyVault, realtimeSignals);
         var translation = new TranslationService(aethernetSession, aethernet.Translation, configuration);

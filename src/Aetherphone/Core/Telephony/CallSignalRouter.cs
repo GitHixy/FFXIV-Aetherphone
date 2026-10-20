@@ -113,6 +113,9 @@ internal sealed class CallSignalRouter : IDisposable
             case SignalType.ServerRestarting:
                 signals.PublishServerRestarting();
                 return;
+            case SignalType.FlagsChanged:
+                signals.PublishFlagsChanged();
+                return;
             case SignalType.ContentRemoved:
                 if (message.ContentId is { Length: > 0 } removedContentId)
                 {
