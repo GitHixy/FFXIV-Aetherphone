@@ -1149,6 +1149,8 @@
   "changelog.r1400.17": "Alteramos o blackjack para que as mãos dos outros jogadores fiquem viradas para cima assim que terminam a vez",
   "changelog.r1400.18": "Corrigido o aviso Sessão curta demais para pagar que nunca aparecia quando você saía de um jogo antes de ele pagar",
   "changelog.r1400.19": "Corrigidos os Sons dos jogos que ficavam mudos quando os Sons da interface eram desligados",
+  "changelog.r1400.20": "Alteramos para que os apps ligados ou desligados para todos apareçam ou sumam em segundos em vez de alguns minutos",
+  "changelog.r1400.21": "Corrigido o valor ganho ou perdido em um assento de blackjack que cobria as cartas e o total desse assento",
   "changelog.r0999.0": "Adicionadas sete capas: Atomos, Baby Bat, Dwarf Rabbit, Enkidu, Horror, Kupo e Runic, contribuído por Remi e Silkie",
   "changelog.r0999.1": "Todas as capas foram recomprimidas, então o plugin baixa com menos da metade do tamanho anterior mesmo com as sete capas novas",
   "changelog.r0999.2": "Uma mensagem agora aparece na conversa aberta assim que chega, em vez de esperar pela próxima atualização",

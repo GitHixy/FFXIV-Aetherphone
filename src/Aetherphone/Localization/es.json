@@ -1149,6 +1149,8 @@
   "changelog.r1400.17": "Se cambió el blackjack para que las manos de los demás jugadores se pongan boca arriba en cuanto terminan su turno",
   "changelog.r1400.18": "Corregido que el aviso Sesión demasiado corta para pagar nunca apareciera al salir de un juego antes de que pague",
   "changelog.r1400.19": "Corregido que los Sonidos de juegos se silenciaran al desactivar Sonidos de la interfaz",
+  "changelog.r1400.20": "Se cambió para que las apps que se activan o desactivan para todos aparezcan o desaparezcan en segundos en lugar de unos minutos",
+  "changelog.r1400.21": "Corregido que la cantidad ganada o perdida en un asiento de blackjack tapara las cartas y el total de ese asiento",
   "changelog.r0999.0": "Se añadieron siete fundas: Atomos, Baby Bat, Dwarf Rabbit, Enkidu, Horror, Kupo y Runic, contribuido por Remi y Silkie",
   "changelog.r0999.1": "Se recomprimieron todas las fundas, así que el plugin se descarga con menos de la mitad de su tamaño anterior pese a las siete fundas nuevas",
   "changelog.r0999.2": "Un mensaje aparece ahora en una conversación abierta en cuanto llega, en vez de esperar a la siguiente actualización",

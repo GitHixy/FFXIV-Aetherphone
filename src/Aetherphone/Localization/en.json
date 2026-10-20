@@ -1149,6 +1149,8 @@
   "changelog.r1400.17": "Changed blackjack so other players' hands turn face up as soon as they finish their turn",
   "changelog.r1400.18": "Fixed the Played too short to pay note never showing when you leave a game before it pays",
   "changelog.r1400.19": "Fixed game sounds going silent when Interface Sounds was turned off",
+  "changelog.r1400.20": "Changed apps that are switched on or off for everyone to appear or disappear within seconds instead of a few minutes",
+  "changelog.r1400.21": "Fixed the win or loss amount at a blackjack seat covering that seat's cards and total",
   "changelog.r0999.0": "Added seven phone cases: Atomos, Baby Bat, Dwarf Rabbit, Enkidu, Horror, Kupo, and Runic, contributed by Remi and Silkie",
   "changelog.r0999.1": "Every phone case was recompressed, so the plugin downloads at less than half its old size even with the seven new cases",
   "changelog.r0999.2": "A message now appears in an open conversation the moment it arrives, instead of waiting for the next refresh",

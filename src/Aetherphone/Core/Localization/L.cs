@@ -2349,6 +2349,8 @@ internal static class L
         {
             new("changelog.r1400.15",
                 "Added a line in game chat when Aethernet restarts for an update or loses its connection, and another when it is back, which you can turn off with Network status in chat in Settings"),
+            new("changelog.r1400.20",
+                "Changed apps that are switched on or off for everyone to appear or disappear within seconds instead of a few minutes"),
             new("changelog.r1400.16",
                 "Fixed the status bar clock not lining up with screen titles"),
         };
@@ -2357,6 +2359,8 @@ internal static class L
         {
             new("changelog.r1400.17",
                 "Changed blackjack so other players' hands turn face up as soon as they finish their turn"),
+            new("changelog.r1400.21",
+                "Fixed the win or loss amount at a blackjack seat covering that seat's cards and total"),
         };
 
         public static readonly LocString[] Release1400Games =

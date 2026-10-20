@@ -1149,6 +1149,8 @@
   "changelog.r1400.17": "Modification du blackjack : les mains des autres joueurs se retournent dès qu'ils ont fini leur tour",
   "changelog.r1400.18": "Correction de la note Session trop courte pour payer qui n'apparaissait jamais quand vous quittiez un jeu avant qu'il ne paie",
   "changelog.r1400.19": "Correction des Sons des jeux coupés quand les Sons de l'interface étaient désactivés",
+  "changelog.r1400.20": "Modification : les apps activées ou désactivées pour tout le monde apparaissent ou disparaissent en quelques secondes au lieu de quelques minutes",
+  "changelog.r1400.21": "Correction du montant gagné ou perdu à une place de blackjack qui cachait les cartes et le total de cette place",
   "changelog.r0999.0": "Ajout de sept coques : Atomos, Baby Bat, Dwarf Rabbit, Enkidu, Horror, Kupo et Runic, contribué par Remi et Silkie",
   "changelog.r0999.1": "Toutes les coques ont été recompressées, si bien que le plugin se télécharge à moins de la moitié de son ancienne taille malgré les sept nouvelles coques",
   "changelog.r0999.2": "Un message apparaît désormais dans une conversation ouverte dès son arrivée, au lieu d'attendre la prochaine actualisation",

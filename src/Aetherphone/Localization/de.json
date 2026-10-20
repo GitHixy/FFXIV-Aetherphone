@@ -1149,6 +1149,8 @@
   "changelog.r1400.17": "Beim Blackjack werden die Hände der anderen Spieler jetzt aufgedeckt, sobald sie ihren Zug beendet haben",
   "changelog.r1400.18": "Behoben, dass der Hinweis Zu kurz gespielt, um zu zählen nie erschien, wenn du ein Spiel verlässt, bevor es auszahlt",
   "changelog.r1400.19": "Behoben, dass Spielsounds verstummten, wenn Bedienungstöne ausgeschaltet waren",
+  "changelog.r1400.20": "Apps, die für alle ein- oder ausgeschaltet werden, erscheinen oder verschwinden jetzt innerhalb von Sekunden statt nach einigen Minuten",
+  "changelog.r1400.21": "Behoben, dass der Gewinn- oder Verlustbetrag an einem Blackjack-Platz die Karten und die Summe dieses Platzes verdeckte",
   "changelog.r0999.0": "Sieben Telefonhüllen hinzugefügt: Atomos, Baby Bat, Dwarf Rabbit, Enkidu, Horror, Kupo und Runic, beigetragen von Remi und Silkie",
   "changelog.r0999.1": "Alle Telefonhüllen wurden neu komprimiert, sodass das Plugin trotz der sieben neuen Hüllen weniger als halb so groß heruntergeladen wird",
   "changelog.r0999.2": "Eine Nachricht erscheint jetzt sofort in einem offenen Gespräch, statt auf die nächste Aktualisierung zu warten",
