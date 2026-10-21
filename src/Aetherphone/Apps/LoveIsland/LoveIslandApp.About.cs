@@ -128,7 +128,7 @@ internal sealed partial class LoveIslandApp
             ImGui.GetColorU32(Palette.Mix(ui.Accent, LoveIslandKit.Night, 0.72f) with { W = SheetTintTop * opacity }),
             ImGui.GetColorU32(LoveIslandKit.Night with { W = SheetTintBottom * opacity }));
         drawList.PushClipRect(panel.Min, panel.Max, true);
-        EclipseFx.Glow(drawList, new Vector2(panel.Center.X, panel.Min.Y), panel.Width * 0.62f,
+        SoftGlow.Draw(drawList, new Vector2(panel.Center.X, panel.Min.Y), panel.Width * 0.62f,
             ui.Accent with { W = SheetGlowAlpha * opacity * (0.85f + 0.15f * EclipseFx.Breath(3400.0)) });
         drawList.PopClipRect();
         Squircle.StrokeDirectional(drawList, panel.Min, panel.Max, rounding,

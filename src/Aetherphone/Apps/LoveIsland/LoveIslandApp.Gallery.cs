@@ -114,7 +114,7 @@ internal sealed partial class LoveIslandApp
         LoveIslandKit.FeaturedCard(drawList, card.Min, card.Max, LoveIslandKit.CardRadius * scale, ui.Accent, scale);
         var center = new Vector2(card.Center.X, top + pad + emblem * 1.1f);
         var breath = EclipseFx.Breath(EmptyBreath);
-        EclipseFx.Glow(drawList, center, emblem * (1.5f + 0.15f * breath),
+        SoftGlow.Draw(drawList, center, emblem * (1.5f + 0.15f * breath),
             ui.Accent with { W = 0.55f + 0.2f * breath });
         drawList.AddCircleFilled(center, emblem, ImGui.GetColorU32(LoveIslandKit.Night with { W = 0.85f }), 48);
         drawList.AddCircle(center, emblem, ImGui.GetColorU32(EclipseFx.Rose(ui.Accent, 0.5f)), 48, 1.5f * scale);

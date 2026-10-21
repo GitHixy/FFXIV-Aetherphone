@@ -186,7 +186,7 @@ internal sealed partial class LoveIslandApp
             ImGui.GetColorU32(Palette.Darken(ui.Accent, 0.2f)), ImGui.GetColorU32(Palette.Darken(ui.Accent, 0.2f)),
             ImGui.GetColorU32(EclipseFx.Rose(ui.Accent, 0.45f)), ImGui.GetColorU32(EclipseFx.Rose(ui.Accent, 0.45f)));
         var head = new Vector2(x, nowY);
-        EclipseFx.Glow(drawList, head, RailHeadGlow * scale, EclipseFx.Rose(ui.Accent, 0.3f) with { W = 0.85f });
+        SoftGlow.Draw(drawList, head, RailHeadGlow * scale, EclipseFx.Rose(ui.Accent, 0.3f) with { W = 0.85f });
         drawList.AddCircleFilled(head, RailHeadRadius * scale, ImGui.GetColorU32(LoveIslandKit.White), 16);
     }
 
@@ -195,7 +195,7 @@ internal sealed partial class LoveIslandApp
         switch (state)
         {
             case ExperienceState.Live:
-                EclipseFx.Glow(drawList, center, RailLiveGlow * scale, ui.Accent with { W = 0.65f });
+                SoftGlow.Draw(drawList, center, RailLiveGlow * scale, ui.Accent with { W = 0.65f });
                 EclipseFx.Beacon(drawList, center, RailNodeRadius * scale, EclipseFx.Rose(ui.Accent, 0.55f), scale);
                 break;
             case ExperienceState.Ended:

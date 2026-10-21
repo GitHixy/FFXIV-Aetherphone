@@ -153,7 +153,7 @@ internal sealed partial class LoveIslandApp
         var rotation = time * MathF.Tau / seconds + seed * 0.7f;
         var breath = EclipseFx.Breath(2600.0, seed * 0.3f);
         var strength = earned ? 1f : 0.55f;
-        EclipseFx.Glow(drawList, center, radius * 1.25f, ui.Accent with { W = (0.40f + 0.15f * breath) * strength });
+        SoftGlow.Draw(drawList, center, radius * 1.25f, ui.Accent with { W = (0.40f + 0.15f * breath) * strength });
         EclipseFx.Rays(drawList, center, radius * 1.15f, PerkRays, rotation, PerkRayHalfAngle,
             EclipseFx.Rose(ui.Accent, 0.5f) with { W = (0.22f + 0.10f * breath) * strength });
         drawList.AddCircleFilled(center, radius * 0.78f, ImGui.GetColorU32(LoveIslandKit.Night with { W = 0.55f }), 48);
