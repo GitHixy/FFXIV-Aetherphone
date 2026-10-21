@@ -16,7 +16,6 @@ internal interface IPhoneApp : IDisposable
     bool WantsTransparentScreen => false;
     bool WantsSystemTheme => false;
     HomeTileEffect TileEffect => HomeTileEffect.None;
-    bool RevealOnFirstPage => false;
     Rect? TransparentViewport(Rect screen, float scale) => null;
     bool IsAvailable => AppAvailability.IsEnabled(Id);
     ShareKindSet AcceptedShares => ShareKindSet.None;

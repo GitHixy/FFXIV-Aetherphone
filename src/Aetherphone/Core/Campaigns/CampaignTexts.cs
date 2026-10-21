@@ -26,6 +26,7 @@ internal static class CampaignTextKeys
     public const string WatchTwitch = "watchTwitch";
     public const string ShareTitle = "shareTitle";
     public const string ShareBody = "shareBody";
+    public const string WebsiteNote = "websiteNote";
     public const string PostCta = "postCta";
     public const string GalleryCta = "galleryCta";
     public const string Pinned = "pinned";
@@ -148,6 +149,7 @@ internal sealed class CampaignTexts
         CampaignTextKeys.WatchTwitch => L.LoveIsland.WatchTwitch,
         CampaignTextKeys.ShareTitle => L.LoveIsland.ShareTitle,
         CampaignTextKeys.ShareBody => L.LoveIsland.ShareBody,
+        CampaignTextKeys.WebsiteNote => L.LoveIsland.WebsiteNote,
         CampaignTextKeys.PostCta => L.LoveIsland.PostCta,
         CampaignTextKeys.GalleryCta => L.LoveIsland.GalleryCta,
         CampaignTextKeys.Pinned => L.LoveIsland.Pinned,

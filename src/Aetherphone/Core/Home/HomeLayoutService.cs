@@ -35,6 +35,8 @@ internal sealed class HomeLayoutService
         "appstore", "settings", "announcements", "messages", "camera", "photos", "notifications",
     };
 
+    internal static readonly string[] ArrivingApps = { "loveisland", "prism" };
+
     private readonly IReadOnlyList<IPhoneApp> apps;
     private readonly WidgetRegistry widgets;
     private readonly IShortcutSource shortcuts;
@@ -71,6 +73,11 @@ internal sealed class HomeLayoutService
         }
 
         Load();
+        InstallRevealed();
+        if (configuration.Home is { KnownBaseline: false })
+        {
+            Save();
+        }
     }
 
     public int PageCount => pages.Count;
@@ -92,6 +99,7 @@ internal sealed class HomeLayoutService
     {
         rows = ClampRows(configuration.HomeGridRows);
         Load();
+        InstallRevealed();
         Save();
     }
 
@@ -100,6 +108,7 @@ internal sealed class HomeLayoutService
         if (configuration.Home is null)
         {
             Load();
+            InstallRevealed();
             Save();
             return;
         }
@@ -360,7 +369,7 @@ internal sealed class HomeLayoutService
             return false;
         }
 
-        if (revealed && app.RevealOnFirstPage)
+        if (revealed)
         {
             AppendToFirstPage(HomeTile.ForApp(app));
         }
@@ -922,17 +931,40 @@ internal sealed class HomeLayoutService
             {
                 known.Add(stored[index]);
             }
+        }
 
-            return;
+        if (saved is not { KnownBaseline: true, Known.Count: > 0 })
+        {
+            for (var index = 0; index < apps.Count; index++)
+            {
+                if (apps[index].IsAvailable && !IsArriving(apps[index].Id))
+                {
+                    known.Add(apps[index].Id);
+                }
+            }
         }
 
         for (var index = 0; index < apps.Count; index++)
         {
-            if (apps[index].IsAvailable)
+            var app = apps[index];
+            if (app.IsAvailable && !known.Contains(app.Id) && !revealed.Contains(app.Id))
             {
-                known.Add(apps[index].Id);
+                revealed.Add(app.Id);
             }
         }
+    }
+
+    private static bool IsArriving(string appId)
+    {
+        for (var index = 0; index < ArrivingApps.Length; index++)
+        {
+            if (string.Equals(appId, ArrivingApps[index], StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void LoadInstalled(HomeLayout? saved, HashSet<string> placed)
@@ -982,7 +1014,7 @@ internal sealed class HomeLayoutService
         {
             for (var index = 0; index < apps.Count; index++)
             {
-                if (apps[index].IsAvailable)
+                if (apps[index].IsAvailable && known.Contains(apps[index].Id))
                 {
                     installed.Add(apps[index].Id);
                 }
@@ -1411,6 +1443,7 @@ internal sealed class HomeLayoutService
         SerializePages(layout.Pages);
         layout.Installed = new List<string>(installed);
         layout.Known = new List<string>(known);
+        layout.KnownBaseline = true;
 
         configuration.Home = layout;
         configuration.Save();

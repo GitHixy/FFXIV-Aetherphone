@@ -24,6 +24,7 @@ internal sealed record CampaignDto(
     bool LiveOnAir,
     bool KeepNightDefault,
     int ReminderLeadMinutes,
+    bool WebsitePhotos,
     CampaignRewardDto Reward,
     CampaignTextDto[] Texts,
     CampaignExperienceDto[] Experiences,

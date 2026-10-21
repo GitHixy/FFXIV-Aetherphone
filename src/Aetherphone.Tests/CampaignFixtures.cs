@@ -17,7 +17,7 @@ internal static class CampaignFixtures
         CampaignTextDto[]? texts = null) =>
         new("love-island-eclipse", "loveisland", "Love Island Eclipse", "A Halloween festival", "About text",
             "#cf255b", null, null, null, null, null, null, Array.Empty<CampaignLinkDto>(), "LoveIslandEclipse", Start,
-            End, Retire, "Materia (OCE)", null, null, false, false, 30,
+            End, Retire, "Materia (OCE)", null, null, false, false, 30, false,
             new CampaignRewardDto("badge", "Eclipse badge", "frame", "Eclipse frame", 500),
             texts ?? Array.Empty<CampaignTextDto>(),
             experiences ?? new[]
