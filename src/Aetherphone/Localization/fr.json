@@ -1156,6 +1156,7 @@
   "changelog.r1400.23": "Modification des grilles de publications du profil en vignettes 3:4 plus hautes, pour moins recadrer les photos en portrait, contribution de t3sco",
   "changelog.r1400.24": "Ajout de Love Island Eclipse, l'application compagnon du festival d'Halloween de PNX sur Materia : un compte à rebours jusqu'à l'ouverture et l'expérience en cours, chaque expérience avec Téléportation et rappel, la galerie #LoveIslandEclipse, les linkshells à demander, et le cadre, le badge et les Aether Coin gagnés en publiant pendant la nuit",
   "changelog.r1400.25": "Ajout de Garder la nuit dans Love Island Eclipse, qui maintient Éorzéa de nuit tant que l'application est ouverte pendant l'événement",
+  "changelog.r1400.26": "Modification : les noms des apps sur l'écran d'accueil s'affichent toujours en entier ; un nom long rétrécit un peu ou passe sur une deuxième ligne au lieu de finir par des points de suspension",
   "changelog.r0999.0": "Ajout de sept coques : Atomos, Baby Bat, Dwarf Rabbit, Enkidu, Horror, Kupo et Runic, contribué par Remi et Silkie",
   "changelog.r0999.1": "Toutes les coques ont été recompressées, si bien que le plugin se télécharge à moins de la moitié de son ancienne taille malgré les sept nouvelles coques",
   "changelog.r0999.2": "Un message apparaît désormais dans une conversation ouverte dès son arrivée, au lieu d'attendre la prochaine actualisation",

@@ -1156,6 +1156,7 @@
   "changelog.r1400.23": "Beitragsraster im Profil auf höhere 3:4-Kacheln umgestellt, damit Hochformatfotos weniger beschnitten werden, beigetragen von t3sco",
   "changelog.r1400.24": "Love Island Eclipse hinzugefügt, die Begleit-App für das Halloween-Festival von PNX auf Materia: ein Countdown bis zum Einlass und der laufende Programmpunkt, jeder Programmpunkt mit Teleport und Erinnerung, die Galerie unter #LoveIslandEclipse, die Linkshells zum Anfragen sowie Rahmen, Abzeichen und Aether Coin, die du dir durch einen Beitrag in dieser Nacht verdienst",
   "changelog.r1400.25": "„Nacht beibehalten“ zu Love Island Eclipse hinzugefügt, das Eorzea bei Nacht hält, solange die App während des Events geöffnet ist",
+  "changelog.r1400.26": "App-Namen auf dem Home-Bildschirm werden jetzt immer vollständig angezeigt: Ein langer Name wird etwas kleiner oder bricht in eine zweite Zeile um, statt mit Auslassungspunkten zu enden",
   "changelog.r0999.0": "Sieben Telefonhüllen hinzugefügt: Atomos, Baby Bat, Dwarf Rabbit, Enkidu, Horror, Kupo und Runic, beigetragen von Remi und Silkie",
   "changelog.r0999.1": "Alle Telefonhüllen wurden neu komprimiert, sodass das Plugin trotz der sieben neuen Hüllen weniger als halb so groß heruntergeladen wird",
   "changelog.r0999.2": "Eine Nachricht erscheint jetzt sofort in einem offenen Gespräch, statt auf die nächste Aktualisierung zu warten",

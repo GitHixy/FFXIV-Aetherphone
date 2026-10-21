@@ -2369,6 +2369,8 @@ internal static class L
                 "Changed apps that are switched on or off for everyone to appear or disappear within seconds instead of a few minutes"),
             new("changelog.r1400.16",
                 "Fixed the status bar clock not lining up with screen titles"),
+            new("changelog.r1400.26",
+                "Changed app names on the home screen to always show in full: a long name shrinks a little or wraps onto a second line instead of ending in an ellipsis"),
         };
 
         public static readonly LocString[] Release1400Gamba =
