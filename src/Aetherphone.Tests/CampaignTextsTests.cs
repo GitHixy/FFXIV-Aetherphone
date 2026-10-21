@@ -10,7 +10,8 @@ public sealed class CampaignTextsTests
     {
         "tabTonight", "tabExperiences", "tabGallery", "tabPerks", "doorsOpenIn", "liveNow", "betweenSets",
         "endedTitle", "endedBody", "keepNight", "keepNightHintLive", "keepNightHintBefore", "liveDj", "noStream",
-        "streamHint", "watchTwitch", "shareTitle", "shareBody", "postCta", "galleryCta", "pinned", "announcements",
+        "streamHint", "watchTwitch", "shareTitle", "shareBody", "websiteNote", "postCta", "galleryCta", "pinned",
+        "announcements",
         "announcementsFrom", "announcementsBody", "linkshellsTitle", "linkshellsBody", "askContact", "about", "more",
         "aboutFooter", "experiencesSub", "nothingScheduled", "whoIsOn", "remindMe", "dcTravelNote", "gallerySub",
         "galleryCta2", "perksSub", "frameName", "frameBody", "badgeName", "badgeBody", "coinsName", "coinsBody",

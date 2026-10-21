@@ -45,6 +45,9 @@ internal sealed partial class LoveIslandApp
     private CountdownText countdown;
     private string? twitchChannelSource;
     private string twitchChannelUrl = string.Empty;
+    private string? shareBodySource;
+    private string? websiteNoteSource;
+    private string shareBodyWithNote = string.Empty;
 
     private void DrawTonightTab(Rect area)
     {
@@ -290,7 +293,7 @@ internal sealed partial class LoveIslandApp
         cardButtons[1] = new CardButton(texts.T(CampaignTextKeys.GalleryCta), false, GalleryButtonId);
         var bottom = DrawCard(drawList, left, top, width, new CardContent(ShareCardId,
             texts.T(CampaignTextKeys.ShareTitle), CardPill.None, string.Empty, labels.HashtagTitle,
-            texts.T(CampaignTextKeys.ShareBody), 0, 0, false), 2, out var action);
+            ShareBody(texts), 0, 0, false), 2, out var action);
         if (action == 0)
         {
             PostWithHashtag();
@@ -301,6 +304,26 @@ internal sealed partial class LoveIslandApp
         }
 
         return bottom;
+    }
+
+    private string ShareBody(CampaignTexts texts)
+    {
+        var body = texts.T(CampaignTextKeys.ShareBody);
+        if (store.Campaign is not { WebsitePhotos: true })
+        {
+            return body;
+        }
+
+        var note = texts.T(CampaignTextKeys.WebsiteNote);
+        if (ReferenceEquals(body, shareBodySource) && ReferenceEquals(note, websiteNoteSource))
+        {
+            return shareBodyWithNote;
+        }
+
+        shareBodySource = body;
+        websiteNoteSource = note;
+        shareBodyWithNote = string.Concat(body, " ", note);
+        return shareBodyWithNote;
     }
 
     private float DrawPinnedCard(ImDrawListPtr drawList, float left, float top, float width)

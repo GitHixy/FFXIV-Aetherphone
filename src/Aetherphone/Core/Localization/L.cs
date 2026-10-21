@@ -10903,6 +10903,8 @@ internal static class L
         public static readonly LocString ShareTitle = new("loveisland.shareTitle", "Share your night");
         public static readonly LocString ShareBody = new("loveisland.shareBody",
             "Post your gposes with the tag and they join the live gallery. One post during the event earns the Eclipse frame and badge.");
+        public static readonly LocString WebsiteNote = new("loveisland.websiteNote",
+            "Photos you post with the tag can also appear on the event website.");
         public static readonly LocString PostCta = new("loveisland.postCta", "Post on Aethergram");
         public static readonly LocString GalleryCta = new("loveisland.galleryCta", "Gallery");
         public static readonly LocString Pinned = new("loveisland.pinned", "Pinned");
