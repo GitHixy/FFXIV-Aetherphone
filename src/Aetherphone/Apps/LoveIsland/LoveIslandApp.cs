@@ -39,6 +39,7 @@ internal sealed partial class LoveIslandApp : IResumableApp
     public bool IsAvailable => store.IsAvailable(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
     public int TileEffectLevel => store.TileEffectLevel(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
     public HomeTileEffect TileEffect => (HomeTileEffect)TileEffectLevel;
+    public bool RevealOnFirstPage => true;
 
     private readonly CampaignStore store;
     private readonly GalleryLane gallery;
