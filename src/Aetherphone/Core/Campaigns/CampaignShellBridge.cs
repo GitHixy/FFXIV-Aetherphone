@@ -11,4 +11,12 @@ internal static class CampaignShellBridge
     public static Action<string, int>? HoldNight { get; set; }
 
     public static Action<string>? ReleaseNight { get; set; }
+
+    public static void Clear()
+    {
+        UseIconOverride = null;
+        ClearIconOverride = null;
+        HoldNight = null;
+        ReleaseNight = null;
+    }
 }
