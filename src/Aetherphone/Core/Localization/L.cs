@@ -2387,6 +2387,12 @@ internal static class L
                 "Fixed the Played too short to pay note never showing when you leave a game before it pays"),
         };
 
+        public static readonly LocString[] Release1400Skywatcher =
+        {
+            new("changelog.r1400.27",
+                "Fixed Skywatcher and its widget showing another district's name and forecast, or a blank name, inside a house, apartment or workshop, contributed by YozoraCho"),
+        };
+
         public static readonly LocString[] Release1400Sounds =
         {
             new("changelog.r1400.19",
