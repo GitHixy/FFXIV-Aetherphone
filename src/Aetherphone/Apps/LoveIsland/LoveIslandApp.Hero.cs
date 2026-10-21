@@ -156,7 +156,7 @@ internal sealed partial class LoveIslandApp
         var logo = new Rect(center - half, center + half);
         var radius = side * Metrics.Radius.TileFactor;
         var breath = EclipseFx.Breath(EmblemBreath);
-        EclipseFx.Glow(drawList, center, side * (1.15f + 0.12f * breath), ui.Accent with { W = 0.55f + 0.2f * breath });
+        SoftGlow.Draw(drawList, center, side * (1.15f + 0.12f * breath), ui.Accent with { W = 0.55f + 0.2f * breath });
         var rim = EmblemRim * scale;
         var campaign = frameCampaign;
         var logoUrl = campaign?.LogoUrl;

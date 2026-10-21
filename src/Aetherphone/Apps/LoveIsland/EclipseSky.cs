@@ -1,5 +1,6 @@
 using Aetherphone.Core;
 using Aetherphone.Core.Theme;
+using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
 
 namespace Aetherphone.Apps.LoveIsland;
@@ -107,7 +108,7 @@ internal static class EclipseSky
                 frame.Min.Y + (cloud.Anchor.Y + wander.Y) * frame.Height - drift * 0.10f);
             var breath = 0.82f + 0.18f * MathF.Sin(angle * 1.3f + index);
             var tone = cloud.Tone == 0 ? accent : cloud.Tone == 1 ? Violet : Crimson;
-            EclipseFx.Glow(drawList, center, cloud.Reach * width, tone with { W = cloud.Alpha * breath });
+            SoftGlow.Draw(drawList, center, cloud.Reach * width, tone with { W = cloud.Alpha * breath });
         }
     }
 
@@ -162,8 +163,8 @@ internal static class EclipseSky
     {
         var breath = EclipseFx.Breath(MoonBreath);
         var strength = solid ? 1f : AmbientMoonStrength;
-        EclipseFx.Glow(drawList, center, radius * 3.4f, accent with { W = (0.20f + 0.08f * breath) * strength });
-        EclipseFx.Glow(drawList, center, radius * 1.75f,
+        SoftGlow.Draw(drawList, center, radius * 3.4f, accent with { W = (0.20f + 0.08f * breath) * strength });
+        SoftGlow.Draw(drawList, center, radius * 1.75f,
             EclipseFx.Rose(accent, 0.25f) with { W = (0.42f + 0.12f * breath) * strength });
         if (solid)
         {
@@ -173,7 +174,7 @@ internal static class EclipseSky
         }
         else
         {
-            EclipseFx.Glow(drawList, center, radius * 1.15f, MoonFace with { W = 0.75f });
+            SoftGlow.Draw(drawList, center, radius * 1.15f, MoonFace with { W = 0.75f });
             drawList.AddCircle(center, radius, ImGui.GetColorU32(EclipseFx.Rose(accent, 0.5f) with { W = 0.22f }), 64,
                 1f * scale);
         }
@@ -184,7 +185,7 @@ internal static class EclipseSky
         var twinkle = 0.55f + 0.45f * MathF.Sin(time * 1.7f);
         EclipseFx.Sparkle(drawList, new Vector2(center.X, center.Y - radius * 1.55f),
             radius * (0.20f + 0.06f * twinkle), Silver with { W = (0.70f + 0.30f * twinkle) * strength });
-        EclipseFx.Glow(drawList, new Vector2(center.X, center.Y + radius * 0.985f), radius * 0.55f,
+        SoftGlow.Draw(drawList, new Vector2(center.X, center.Y + radius * 0.985f), radius * 0.55f,
             Silver with { W = (0.22f + 0.14f * twinkle) * strength });
     }
 
@@ -220,7 +221,7 @@ internal static class EclipseSky
                 ImGui.GetColorU32(StarInk with { W = alpha }), (1.6f - near) * scale);
         }
 
-        EclipseFx.Glow(drawList, head, 7f * scale, EclipseFx.Rose(accent, 0.55f) with { W = 0.75f * fade });
+        SoftGlow.Draw(drawList, head, 7f * scale, EclipseFx.Rose(accent, 0.55f) with { W = 0.75f * fade });
         drawList.AddCircleFilled(head, 1.4f * scale, ImGui.GetColorU32(StarInk with { W = fade }), 8);
     }
 
@@ -245,7 +246,7 @@ internal static class EclipseSky
             var center = new Vector2(x, y);
             if (mote.Heart)
             {
-                EclipseFx.Glow(drawList, center, MoteHeartSize * 1.8f * scale, accent with { W = alpha * 0.45f });
+                SoftGlow.Draw(drawList, center, MoteHeartSize * 1.8f * scale, accent with { W = alpha * 0.45f });
                 EclipseFx.Heart(drawList, center, MoteHeartSize * scale, ink with { W = alpha });
                 continue;
             }

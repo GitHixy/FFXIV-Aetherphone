@@ -250,7 +250,7 @@ internal sealed partial class LoveIslandApp
         var radius = LineupAvatar * scale;
         var center = new Vector2(cell.Center.X, cell.Min.Y + radius);
         var name = member?.Name ?? memberId;
-        EclipseFx.Glow(drawList, center, radius * 1.6f, ui.Accent with { W = 0.35f });
+        SoftGlow.Draw(drawList, center, radius * 1.6f, ui.Accent with { W = 0.35f });
         LoveIslandKit.Portrait(drawList, images, member?.PortraitUrl, center, radius, ui.Accent,
             MonogramFor(memberId, name), ui.TitleInk);
         drawList.AddCircle(center, radius + 1.5f * scale,

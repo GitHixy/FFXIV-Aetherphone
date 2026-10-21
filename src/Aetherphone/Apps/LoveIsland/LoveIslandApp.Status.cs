@@ -178,7 +178,7 @@ internal sealed partial class LoveIslandApp
         Squircle.FillHorizontalGradient(drawList, min, new Vector2(fillRight, max.Y), radius,
             ImGui.GetColorU32(Palette.Darken(ui.Accent, 0.1f)), ImGui.GetColorU32(EclipseFx.Rose(ui.Accent, 0.45f)));
         var head = new Vector2(fillRight - radius, top + radius);
-        EclipseFx.Glow(drawList, head, ProgressHeadRadius * 4f * scale,
+        SoftGlow.Draw(drawList, head, ProgressHeadRadius * 4f * scale,
             EclipseFx.Rose(ui.Accent, 0.3f) with { W = 0.8f });
         drawList.AddCircleFilled(head, ProgressHeadRadius * scale, ImGui.GetColorU32(LoveIslandKit.White), 16);
     }

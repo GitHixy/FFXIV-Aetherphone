@@ -11,9 +11,6 @@ internal static class EclipseFx
     public const double OrbitPeriod = 5200.0;
     public const double BeaconPeriod = 1700.0;
 
-    private const int GlowSegments = 40;
-    private const float GlowMiddleRadius = 0.42f;
-    private const float GlowMiddleAlpha = 0.36f;
     private const float SparkleWaist = 0.22f;
     private const float SparkleCore = 0.18f;
     private const float SparkleHalo = 1.9f;
@@ -28,41 +25,7 @@ internal static class EclipseFx
     private const int BeaconRipples = 2;
     private const int BloomLayers = 6;
 
-    private static readonly Vector2[] UnitCircle = BuildCircle(GlowSegments);
     private static readonly Vector4 White = new(1f, 1f, 1f, 1f);
-
-    public static void Glow(ImDrawListPtr drawList, Vector2 center, float radius, Vector4 color)
-    {
-        if (radius <= 0.5f || color.W <= 0.002f)
-        {
-            return;
-        }
-
-        var inner = ImGui.GetColorU32(color);
-        var middle = ImGui.GetColorU32(color with { W = color.W * GlowMiddleAlpha });
-        var outer = ImGui.GetColorU32(color with { W = 0f });
-        var whitePixel = ImGui.GetFontTexUvWhitePixel();
-        var middleRadius = radius * GlowMiddleRadius;
-        drawList.PrimReserve(GlowSegments * 9, GlowSegments * 9);
-        for (var segment = 0; segment < GlowSegments; segment++)
-        {
-            var from = UnitCircle[segment];
-            var to = UnitCircle[segment + 1];
-            var middleFrom = center + from * middleRadius;
-            var middleTo = center + to * middleRadius;
-            var outerFrom = center + from * radius;
-            var outerTo = center + to * radius;
-            drawList.PrimVtx(center, whitePixel, inner);
-            drawList.PrimVtx(middleFrom, whitePixel, middle);
-            drawList.PrimVtx(middleTo, whitePixel, middle);
-            drawList.PrimVtx(middleFrom, whitePixel, middle);
-            drawList.PrimVtx(outerFrom, whitePixel, outer);
-            drawList.PrimVtx(outerTo, whitePixel, outer);
-            drawList.PrimVtx(middleFrom, whitePixel, middle);
-            drawList.PrimVtx(outerTo, whitePixel, outer);
-            drawList.PrimVtx(middleTo, whitePixel, middle);
-        }
-    }
 
     public static void Sparkle(ImDrawListPtr drawList, Vector2 center, float extent, Vector4 color)
     {
@@ -157,6 +120,7 @@ internal static class EclipseFx
         var inner = ImGui.GetColorU32(color);
         var outer = ImGui.GetColorU32(color with { W = 0f });
         var whitePixel = ImGui.GetFontTexUvWhitePixel();
+        drawList.PushTextureID(ImGui.GetFontTexIdWhitePixel());
         drawList.PrimReserve(count * 3, count * 3);
         for (var ray = 0; ray < count; ray++)
         {
@@ -167,6 +131,8 @@ internal static class EclipseFx
             drawList.PrimVtx(center + left, whitePixel, outer);
             drawList.PrimVtx(center + right, whitePixel, outer);
         }
+
+        drawList.PopTextureID();
     }
 
     public static void Heart(ImDrawListPtr drawList, Vector2 center, float size, Vector4 color)
@@ -190,16 +156,4 @@ internal static class EclipseFx
         0.5f + 0.5f * MathF.Sin((Pulse.Phase(periodMilliseconds) + offset) * MathF.Tau);
 
     public static Vector4 Rose(Vector4 accent, float lift) => Palette.Mix(accent, White, lift);
-
-    private static Vector2[] BuildCircle(int segments)
-    {
-        var points = new Vector2[segments + 1];
-        for (var index = 0; index <= segments; index++)
-        {
-            var angle = index * MathF.Tau / segments;
-            points[index] = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
-        }
-
-        return points;
-    }
 }
