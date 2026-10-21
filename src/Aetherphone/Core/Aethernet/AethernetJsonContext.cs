@@ -461,6 +461,16 @@ namespace Aetherphone.Core.Aethernet;
 [JsonSerializable(typeof(GameScoreRankDto))]
 [JsonSerializable(typeof(GameScoreRanksDto))]
 [JsonSerializable(typeof(UpdateGamesPrivacyRequest))]
+[JsonSerializable(typeof(CampaignDto))]
+[JsonSerializable(typeof(CampaignLinkDto))]
+[JsonSerializable(typeof(CampaignRewardDto))]
+[JsonSerializable(typeof(CampaignTextDto))]
+[JsonSerializable(typeof(CampaignExperienceDto))]
+[JsonSerializable(typeof(CampaignMemberDto))]
+[JsonSerializable(typeof(CampaignLinkshellDto))]
+[JsonSerializable(typeof(CampaignPostDto))]
+[JsonSerializable(typeof(CampaignPostPage))]
+[JsonSerializable(typeof(CampaignMeDto))]
 [JsonSerializable(typeof(Dictionary<string, string>))]
 internal sealed partial class AethernetJsonContext : JsonSerializerContext
 {
