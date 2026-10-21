@@ -2351,6 +2351,12 @@ internal static class L
                 "Added photos and link buttons to announcements: the newest one leads with its first photo, and tapping a photo opens it full screen"),
         };
 
+        public static readonly LocString[] Release1400AethergramVelvet =
+        {
+            new("changelog.r1400.23",
+                "Changed profile post grids to taller 3:4 tiles so portrait photos are cropped less, contributed by t3sco"),
+        };
+
         public static readonly LocString[] Release1400Phone =
         {
             new("changelog.r1400.15",
