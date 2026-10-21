@@ -1158,6 +1158,7 @@
   "changelog.r1400.25": "Se añadió Mantener la noche a Love Island Eclipse, que mantiene Eorzea de noche mientras la app esté abierta durante el evento",
   "changelog.r1400.26": "Se cambió para que los nombres de las apps en la pantalla de inicio se vean siempre completos: un nombre largo se reduce un poco o pasa a una segunda línea en lugar de terminar en puntos suspensivos",
   "changelog.r1400.27": "Corregido que Vigía del cielo y su widget mostraran el nombre y el pronóstico de otra zona residencial, o un nombre vacío, dentro de una casa, un apartamento o un taller, contribuido por YozoraCho",
+  "changelog.r1400.28": "Se cambió para que las apps nuevas lleguen solas a tu pantalla de inicio, en el primer hueco libre desde la primera página; una app que quites no vuelve",
   "changelog.r0999.0": "Se añadieron siete fundas: Atomos, Baby Bat, Dwarf Rabbit, Enkidu, Horror, Kupo y Runic, contribuido por Remi y Silkie",
   "changelog.r0999.1": "Se recomprimieron todas las fundas, así que el plugin se descarga con menos de la mitad de su tamaño anterior pese a las siete fundas nuevas",
   "changelog.r0999.2": "Un mensaje aparece ahora en una conversación abierta en cuanto llega, en vez de esperar a la siguiente actualización",

@@ -2371,6 +2371,8 @@ internal static class L
                 "Fixed the status bar clock not lining up with screen titles"),
             new("changelog.r1400.26",
                 "Changed app names on the home screen to always show in full: a long name shrinks a little or wraps onto a second line instead of ending in an ellipsis"),
+            new("changelog.r1400.28",
+                "Changed new apps to arrive on your home screen by themselves, in the first free spot starting from the first page; an app you remove stays removed"),
         };
 
         public static readonly LocString[] Release1400Gamba =

@@ -1158,6 +1158,7 @@
   "changelog.r1400.25": "Adicionamos Manter a noite ao Love Island Eclipse, que mantém Eorzea à noite enquanto o app estiver aberto durante o evento",
   "changelog.r1400.26": "Alteramos para que os nomes dos apps na tela inicial apareçam sempre completos: um nome longo diminui um pouco ou passa para uma segunda linha em vez de terminar em reticências",
   "changelog.r1400.27": "Corrigidos o Vigia do Céu e seu widget, que mostravam o nome e a previsão de outra área residencial, ou um nome vazio, dentro de uma casa, um apartamento ou uma oficina, contribuição de YozoraCho",
+  "changelog.r1400.28": "Alteramos para que apps novos cheguem sozinhos à sua tela inicial, no primeiro espaço livre a partir da primeira página; um app que você remover não volta",
   "changelog.r0999.0": "Adicionadas sete capas: Atomos, Baby Bat, Dwarf Rabbit, Enkidu, Horror, Kupo e Runic, contribuído por Remi e Silkie",
   "changelog.r0999.1": "Todas as capas foram recomprimidas, então o plugin baixa com menos da metade do tamanho anterior mesmo com as sete capas novas",
   "changelog.r0999.2": "Uma mensagem agora aparece na conversa aberta assim que chega, em vez de esperar pela próxima atualização",

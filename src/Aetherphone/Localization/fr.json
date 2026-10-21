@@ -1158,6 +1158,7 @@
   "changelog.r1400.25": "Ajout de Garder la nuit dans Love Island Eclipse, qui maintient Éorzéa de nuit tant que l'application est ouverte pendant l'événement",
   "changelog.r1400.26": "Modification : les noms des apps sur l'écran d'accueil s'affichent toujours en entier ; un nom long rétrécit un peu ou passe sur une deuxième ligne au lieu de finir par des points de suspension",
   "changelog.r1400.27": "Correction de Météorologue et de son widget qui affichaient le nom et les prévisions d'un autre quartier résidentiel, ou un nom vide, dans une maison, un appartement ou un atelier, contribution de YozoraCho",
+  "changelog.r1400.28": "Modification : les nouvelles apps arrivent d'elles-mêmes sur votre écran d'accueil, à la première place libre dès la première page ; une app que vous supprimez ne revient pas",
   "changelog.r0999.0": "Ajout de sept coques : Atomos, Baby Bat, Dwarf Rabbit, Enkidu, Horror, Kupo et Runic, contribué par Remi et Silkie",
   "changelog.r0999.1": "Toutes les coques ont été recompressées, si bien que le plugin se télécharge à moins de la moitié de son ancienne taille malgré les sept nouvelles coques",
   "changelog.r0999.2": "Un message apparaît désormais dans une conversation ouverte dès son arrivée, au lieu d'attendre la prochaine actualisation",
