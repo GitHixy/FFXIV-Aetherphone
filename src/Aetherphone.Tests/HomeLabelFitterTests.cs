@@ -63,8 +63,18 @@ public sealed class HomeLabelFitterTests
         var layout = HomeLabelFitter.Compute("Benachrichtigungen", 10f, Width);
 
         Assert.NotNull(layout.Second);
-        Assert.Equal("Benachrichtigungen", layout.First + layout.Second);
+        Assert.EndsWith("-", layout.First);
+        Assert.Equal("Benachrichtigungen", layout.First.TrimEnd('-') + layout.Second);
         Assert.Equal(1f, layout.Scale);
+    }
+
+    [Fact]
+    public void AnIdeographicNameBreaksWithoutAHyphen()
+    {
+        var layout = HomeLabelFitter.Compute("通知センターの設定画面", 5f, Width);
+
+        Assert.NotNull(layout.Second);
+        Assert.Equal("通知センターの設定画面", layout.First + layout.Second);
     }
 
     [Theory]
@@ -78,6 +88,6 @@ public sealed class HomeLabelFitterTests
 
         Assert.DoesNotContain("...", shown);
         Assert.DoesNotContain("…", shown);
-        Assert.Equal(label.Replace(" ", string.Empty), shown.Replace(" ", string.Empty));
+        Assert.Equal(label.Replace(" ", string.Empty), shown.Replace(" ", string.Empty).Replace("-", string.Empty));
     }
 }

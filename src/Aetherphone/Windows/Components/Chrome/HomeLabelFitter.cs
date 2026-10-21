@@ -7,7 +7,8 @@ internal readonly record struct HomeLabelLayout(string First, string? Second, fl
 internal static class HomeLabelFitter
 {
     public const float SingleLineMinimumScale = 0.88f;
-    public const float WordMinimumScale = 0.8f;
+    public const float WordMinimumScale = 0.72f;
+    private const char FirstIdeographic = '⺀';
     private const int CacheLimit = 512;
 
     private static readonly Dictionary<LabelKey, HomeLabelLayout> Cache = new();
@@ -103,7 +104,7 @@ internal static class HomeLabelFitter
                 continue;
             }
 
-            var first = label[..index];
+            var first = Hyphenates(label, index) ? label[..index] + "-" : label[..index];
             var second = label[index..];
             var widest = MathF.Max(measure(first), measure(second));
             if (widest >= bestWidest)
@@ -122,6 +123,13 @@ internal static class HomeLabelFitter
         }
 
         return new HomeLabelLayout(bestFirst, bestSecond, MathF.Min(1f, maxWidth / bestWidest));
+    }
+
+    private static bool Hyphenates(string label, int index)
+    {
+        var before = label[index - 1];
+        var after = label[index];
+        return char.IsLetter(before) && char.IsLetter(after) && before < FirstIdeographic && after < FirstIdeographic;
     }
 
     private readonly record struct LabelKey(string Label, int Width, float StyleScale, FontWeight Weight);
