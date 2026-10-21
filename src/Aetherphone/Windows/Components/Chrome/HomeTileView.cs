@@ -318,7 +318,17 @@ internal static class HomeTileView
         var style = zoom == 1f
             ? TextStyles.IconLabel
             : new TextStyle(TextStyles.IconLabel.Scale * zoom, TextStyles.IconLabel.Weight);
-        Typography.DrawCenteredHalo(labelCenter, label, text, halo, (1.3f + 0.5f * strength) * scale,
-            labelWidth * 0.92f, style);
+        var available = labelWidth * 0.92f;
+        var layout = HomeLabelFitter.For(label, available, style);
+        var lineStyle = layout.Scale >= 0.999f ? style : new TextStyle(style.Scale * layout.Scale, style.Weight);
+        var haloRadius = (1.3f + 0.5f * strength) * scale;
+        Typography.DrawCenteredHalo(labelCenter, layout.First, text, halo, haloRadius, labelWidth, lineStyle);
+        if (layout.Second is null)
+        {
+            return;
+        }
+
+        var secondCenter = new Vector2(labelCenter.X, labelCenter.Y + Typography.LineHeight(lineStyle) * 0.92f);
+        Typography.DrawCenteredHalo(secondCenter, layout.Second, text, halo, haloRadius, labelWidth, lineStyle);
     }
 }
