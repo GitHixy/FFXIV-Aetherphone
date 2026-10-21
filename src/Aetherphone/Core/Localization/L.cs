@@ -2345,6 +2345,12 @@ internal static class L
                 "Fixed the reaction buttons in a radio station's chat being cut off on the left"),
         };
 
+        public static readonly LocString[] Release1400Announcements =
+        {
+            new("changelog.r1400.22",
+                "Added photos and link buttons to announcements: the newest one leads with its first photo, and tapping a photo opens it full screen"),
+        };
+
         public static readonly LocString[] Release1400Phone =
         {
             new("changelog.r1400.15",

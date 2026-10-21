@@ -1151,6 +1151,7 @@
   "changelog.r1400.19": "Corrigidos os Sons dos jogos que ficavam mudos quando os Sons da interface eram desligados",
   "changelog.r1400.20": "Alteramos para que os apps ligados ou desligados para todos apareçam ou sumam em segundos em vez de alguns minutos",
   "changelog.r1400.21": "Corrigido o valor ganho ou perdido em um assento de blackjack que cobria as cartas e o total desse assento",
+  "changelog.r1400.22": "Adicionamos fotos e botões de link aos avisos: o mais recente mostra a primeira foto no topo, e tocar em uma foto a abre em tela cheia",
   "changelog.r0999.0": "Adicionadas sete capas: Atomos, Baby Bat, Dwarf Rabbit, Enkidu, Horror, Kupo e Runic, contribuído por Remi e Silkie",
   "changelog.r0999.1": "Todas as capas foram recomprimidas, então o plugin baixa com menos da metade do tamanho anterior mesmo com as sete capas novas",
   "changelog.r0999.2": "Uma mensagem agora aparece na conversa aberta assim que chega, em vez de esperar pela próxima atualização",

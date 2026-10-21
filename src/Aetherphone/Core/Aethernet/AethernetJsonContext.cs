@@ -125,6 +125,8 @@ namespace Aetherphone.Core.Aethernet;
 [JsonSerializable(typeof(TranslateStatusResponse))]
 [JsonSerializable(typeof(AnnouncementDto))]
 [JsonSerializable(typeof(AnnouncementTranslationDto))]
+[JsonSerializable(typeof(AnnouncementBlockDto))]
+[JsonSerializable(typeof(AnnouncementBlockTranslationDto))]
 [JsonSerializable(typeof(AnnouncementPage))]
 [JsonSerializable(typeof(CreateMusterRequest))]
 [JsonSerializable(typeof(MusterDto))]
