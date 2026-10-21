@@ -81,8 +81,8 @@ internal sealed class CampaignIconSync
                 }
 
                 Directory.CreateDirectory(directory);
-                await File.WriteAllBytesAsync(BackgroundPath, background).ConfigureAwait(false);
-                await File.WriteAllBytesAsync(ForegroundPath, foreground).ConfigureAwait(false);
+                await ReplaceAsync(BackgroundPath, background).ConfigureAwait(false);
+                await ReplaceAsync(ForegroundPath, foreground).ConfigureAwait(false);
                 await Plugin.Framework.RunOnFrameworkThread(() => Remember(iconUrl, foregroundUrl))
                     .ConfigureAwait(false);
             }
@@ -132,4 +132,11 @@ internal sealed class CampaignIconSync
     }
 
     private bool FilesPresent() => File.Exists(BackgroundPath) && File.Exists(ForegroundPath);
+
+    private static async Task ReplaceAsync(string path, byte[] bytes)
+    {
+        var staging = path + ".download";
+        await File.WriteAllBytesAsync(staging, bytes).ConfigureAwait(false);
+        File.Move(staging, path, true);
+    }
 }
