@@ -8,7 +8,7 @@ internal static class HomeLabelFitter
 {
     public const float SingleLineMinimumScale = 0.88f;
     public const float WordMinimumScale = 0.72f;
-    private const char FirstIdeographic = '⺀';
+    private const char FirstIdeographic = (char)0x2E80;
     private const int CacheLimit = 512;
 
     private static readonly Dictionary<LabelKey, HomeLabelLayout> Cache = new();
