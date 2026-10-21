@@ -2349,6 +2349,18 @@ internal static class L
                 "Fixed the reaction buttons in a radio station's chat being cut off on the left"),
         };
 
+        public static readonly LocString[] Release1400Announcements =
+        {
+            new("changelog.r1400.22",
+                "Added photos and link buttons to announcements: the newest one leads with its first photo, and tapping a photo opens it full screen"),
+        };
+
+        public static readonly LocString[] Release1400AethergramVelvet =
+        {
+            new("changelog.r1400.23",
+                "Changed profile post grids to taller 3:4 tiles so portrait photos are cropped less, contributed by t3sco"),
+        };
+
         public static readonly LocString[] Release1400Phone =
         {
             new("changelog.r1400.15",
@@ -2381,9 +2393,9 @@ internal static class L
 
         public static readonly LocString[] Release1400LoveIsland =
         {
-            new("changelog.r1400.22",
+            new("changelog.r1400.24",
                 "Added Love Island Eclipse, the companion app for PNX's Halloween festival on Materia: a countdown to the doors and the experience on now, every experience with Teleport and a reminder, the #LoveIslandEclipse gallery, the linkshells to ask for, and the frame, badge and Aether Coin you earn by posting during the night"),
-            new("changelog.r1400.23",
+            new("changelog.r1400.25",
                 "Added Keep it night to Love Island Eclipse, which holds Eorzea at night while the app is open during the event"),
         };
 
