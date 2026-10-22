@@ -1142,6 +1142,8 @@
   "changelog.r1400.33": "Gemoddete und Vanilla-Wettbewerbe nebeneinander in Prism hinzugefügt; eine Vanilla-Teilnahme listet ihre Ausrüstung und Farben von Hand auf",
   "changelog.r1400.34": "Belohnungsseite in Prism hinzugefügt, die zeigt, welche Abzeichen, Rahmen, Aether Coin und welches Gil die Gewinner jeder Woche erhalten",
   "changelog.r1400.35": "Prism-Profile mit Folgen und Platzierungen hinzugefügt sowie einen Aktivitäten-Posteingang mit Symbol-Badge für neue Likes, Follower und Wettbewerbsergebnisse",
+  "changelog.r1400.36": "Bildschirm-Modus zur Kamera hinzugefügt, der das ganze Spielfenster aufnimmt; das Handy rückt vorher aus dem Bild und zählt herunter, beigetragen von t3sco",
+  "changelog.r1400.37": "Ausschnitt-Modus zur Kamera hinzugefügt, der einen beliebigen Teil des Bildschirms über einen verschieb- und skalierbaren Rahmen aufnimmt, beigetragen von t3sco",
   "changelog.r1400.5": "Ausblenden von Nachrichten blockierter Personen in ChocoChat-Gruppenchats hinzugefügt: Jede erscheint als kurze Zeile, die du zum Lesen antippen kannst, und sie benachrichtigen dich nicht mehr",
   "changelog.r1400.6": "Behoben, dass Sprachnachrichten mit Automatische Verstärkung beim lauten Sprechen verzerrten und danach leise blieben",
   "changelog.r1400.7": "Einen Regler Mikrofonschwelle mit Live-Pegelanzeige und Mikrofon testen hinzugefügt: Bei 0 kommt jedes Geräusch durch, höhere Werte brauchen lauteres Sprechen, bevor andere dich hören",

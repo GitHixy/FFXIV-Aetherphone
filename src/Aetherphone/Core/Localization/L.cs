@@ -2369,6 +2369,14 @@ internal static class L
                 "Added photos and link buttons to announcements: the newest one leads with its first photo, and tapping a photo opens it full screen"),
         };
 
+        public static readonly LocString[] Release1400Camera =
+        {
+            new("changelog.r1400.36",
+                "Added a Screen mode to Camera that shoots the whole game window, with the phone sliding out of the way and counting down first, contributed by t3sco"),
+            new("changelog.r1400.37",
+                "Added a Crop mode to Camera that shoots any part of the screen through a box you drag and resize, contributed by t3sco"),
+        };
+
         public static readonly LocString[] Release1400AethergramVelvet =
         {
             new("changelog.r1400.23",

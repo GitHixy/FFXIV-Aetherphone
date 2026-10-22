@@ -1142,6 +1142,8 @@
   "changelog.r1400.33": "Added Modded and Vanilla contests to Prism side by side, with a Vanilla entry listing its gear and dyes by hand",
   "changelog.r1400.34": "Added the Prism rewards page, showing the badges, frames, Aether Coin and gil each week's winners take home",
   "changelog.r1400.35": "Added Prism profiles with follows and placings, and an activity inbox with a home screen badge for new likes, follows and contest results",
+  "changelog.r1400.36": "Added a Screen mode to Camera that shoots the whole game window, with the phone sliding out of the way and counting down first, contributed by t3sco",
+  "changelog.r1400.37": "Added a Crop mode to Camera that shoots any part of the screen through a box you drag and resize, contributed by t3sco",
   "changelog.r1400.5": "Added hiding messages from people you blocked in ChocoChat group chats: each shows as a short row you can tap to read, and they no longer notify you",
   "changelog.r1400.6": "Fixed voice messages recorded with Automatic gain distorting when you raise your voice and staying quiet afterwards",
   "changelog.r1400.7": "Added a Microphone threshold slider with a live level meter and Test microphone: at 0 every sound gets through, and higher numbers need louder speech before others hear you",
