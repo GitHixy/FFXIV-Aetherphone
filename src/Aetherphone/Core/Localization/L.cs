@@ -2381,6 +2381,8 @@ internal static class L
 
         public static readonly LocString[] Release1400AethergramVelvet =
         {
+            new("changelog.r1400.39",
+                "Added a Reply button under comments that starts your comment with their @handle, contributed by hellovvn"),
             new("changelog.r1400.23",
                 "Changed profile post grids to taller 3:4 tiles so portrait photos are cropped less, contributed by t3sco"),
         };
