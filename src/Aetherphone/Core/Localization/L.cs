@@ -2419,6 +2419,12 @@ internal static class L
                 "Fixed Skywatcher and its widget showing another district's name and forecast, or a blank name, inside a house, apartment or workshop, contributed by YozoraCho"),
         };
 
+        public static readonly LocString[] Release1400Social =
+        {
+            new("changelog.r1400.38",
+                "Fixed followers and following lists that did not load leaving no way to try again: they now offer Retry, as does a search through one that stops partway, contributed by hellovvn"),
+        };
+
         public static readonly LocString[] Release1400Sounds =
         {
             new("changelog.r1400.19",

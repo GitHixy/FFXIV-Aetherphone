@@ -1145,6 +1145,7 @@
   "changelog.r1400.35": "Ajout des profils Prism avec abonnements et classements, et d'une boîte d'activité avec un badge sur l'écran d'accueil pour les nouveaux j'aime, abonnés et résultats de concours",
   "changelog.r1400.36": "Ajout d'un mode Écran à Appareil photo qui capture toute la fenêtre du jeu, le téléphone s'écartant et lançant un compte à rebours avant, contribution de t3sco",
   "changelog.r1400.37": "Ajout d'un mode Recadrage à Appareil photo qui capture n'importe quelle partie de l'écran avec un cadre à déplacer et redimensionner, contribution de t3sco",
+  "changelog.r1400.38": "Correction des listes d'abonnés et d'abonnements qui ne se chargeaient pas sans permettre de réessayer : elles proposent maintenant Réessayer, tout comme une recherche dans l'une d'elles qui s'arrête en cours de route, contribution de hellovvn",
   "changelog.r1400.5": "Ajout du masquage des messages des personnes bloquées dans les discussions de groupe ChocoChat : chacun apparaît comme une ligne courte à toucher pour le lire, et ils ne vous notifient plus",
   "changelog.r1400.6": "Correction des messages vocaux enregistrés avec le Gain automatique qui saturaient quand vous haussiez la voix puis restaient faibles",
   "changelog.r1400.7": "Ajout d'un curseur Seuil du micro avec un indicateur de niveau en direct et Tester le micro : à 0 tout son passe, et des valeurs plus hautes demandent de parler plus fort pour être entendu",
