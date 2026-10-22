@@ -69,6 +69,7 @@ internal sealed partial class PrismApp
         if (PrismArt.Strip(drawList, strip, label, Arrow, true, ready, UiSound.Shutter))
         {
             var (race, gender) = WornBody();
+            RememberEntryDrops();
             store.Enter(pickSession.FirstSelected, pickSession.CropsArray()[0], EntryOutfit(), race, gender,
                 entrySettled);
         }

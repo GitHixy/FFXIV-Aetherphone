@@ -22,7 +22,7 @@ internal static class GlassField
     private const float ClearFillHoverAlpha = 0.30f;
     private const int Utf8BytesPerCharacter = 3;
     private static readonly Vector4 Transparent = new(0f, 0f, 0f, 0f);
-    private static readonly ImGui.ImGuiInputTextCallbackPtrDelegate CapCharacters = OnCapEdit;
+    private static readonly ImGui.ImGuiInputTextCallbackPtrDelegate CapCharacters = OnCapCharacters;
     private static int characterCap;
 
     public static float Radius(Rect field) => field.Height * 0.5f;
@@ -41,7 +41,7 @@ internal static class GlassField
     {
         characterCap = maxCharacters;
         return Input(field, imguiId, hint, ref text, ink, mutedInk, inset, inset,
-            maxCharacters * Utf8BytesPerCharacter + 1, false, ImGuiInputTextFlags.CallbackEdit, CapCharacters);
+            maxCharacters * Utf8BytesPerCharacter + 1, false, ImGuiInputTextFlags.CallbackAlways, CapCharacters);
     }
 
     public static bool Title(Rect field, string imguiId, string hint, ref string text, PhoneTheme theme, float scale,
@@ -139,8 +139,14 @@ internal static class GlassField
         }
     }
 
-    private static int OnCapEdit(ImGuiInputTextCallbackDataPtr data)
+    private static int OnCapCharacters(ImGuiInputTextCallbackDataPtr data)
     {
+        var imeHoldsComposition = data.SelectionStart != data.SelectionEnd;
+        if (imeHoldsComposition)
+        {
+            return 0;
+        }
+
         var bytes = data.BufSpan[..data.BufTextLen];
         var characters = 0;
         var offset = 0;
