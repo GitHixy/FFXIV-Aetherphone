@@ -9,8 +9,8 @@ namespace Aetherphone.Apps.Prism;
 
 internal sealed partial class PrismApp
 {
-    private const float StatusMaxUnits = 32f;
-    private const float StatusMinUnits = 24f;
+    private const float StatusMaxUnits = PrismType.TitleUnits;
+    private const float StatusMinUnits = PrismType.HeadingUnits;
     private const float TagDelay = 0.2f;
     private const float TagStamp = 0.35f;
 
@@ -38,11 +38,14 @@ internal sealed partial class PrismApp
         var actionsTop = done.Min.Y;
         var pixels = PrismType.Fit(Loc.T(StatusTitle(entry.Status)), PrismFace.Headline, width,
             StatusMaxUnits * scale, StatusMinUnits * scale, 2, out var lines);
-        var entryFailed = !store.Busy && (store.Failed(PrismAction.Enter) || store.Failed(PrismAction.Withdraw));
+        var entryFailed = !store.Busy && (store.Failed(PrismAction.Enter) || store.Failed(PrismAction.Withdraw) ||
+                                          store.Failed(PrismAction.Outfit));
         var failure = entryFailed ? store.ActionFailureText : string.Empty;
         var hint = entryFailed
             ? failure.Length > 0 ? failure : Loc.T(L.Common.LoadFailedHint)
-            : entry.Status == PrismPhases.StatusRejected ? entry.RejectReason : string.Empty;
+            : entry.Status is PrismPhases.StatusRejected or PrismPhases.StatusMoved
+                ? entry.RejectReason
+                : string.Empty;
         hint = PrismType.Sentences(hint, TextStyles.Subheadline, width);
         var hintWidth = PrismType.BalancedWidth(hint, TextStyles.Subheadline, width);
         var hintHeight = hint.Length > 0
@@ -80,9 +83,17 @@ internal sealed partial class PrismApp
             return;
         }
 
-        if (PrismArt.Strip(drawList, retry ? done : change, Loc.T(L.Common.ChangePhoto), "→", retry, !store.Busy))
+        if (PrismArt.Strip(drawList, retry ? done : change, Loc.T(L.Common.ChangePhoto), Arrow, retry, !store.Busy))
         {
             StartPick();
+        }
+
+        var outfit = Loc.T(VanillaEntry ? L.Prism.EditGear : L.Prism.EditMods);
+        var outfitWidth = PrismType.Measure(outfit, PrismFace.Label, labelPixels).X;
+        if (!store.Busy && PrismArt.Link(drawList, new Vector2(left + width - outfitWidth, linkTop), outfit,
+                PrismArt.Muted, scale))
+        {
+            OpenOutfit();
         }
 
         if (!store.Busy && PrismArt.Link(drawList, new Vector2(left, linkTop), Loc.T(L.Prism.Withdraw),
@@ -100,6 +111,10 @@ internal sealed partial class PrismApp
         }
     }
 
-    private static LocString StatusTitle(string status) =>
-        status == PrismPhases.StatusRejected ? L.Prism.StatusRejectedTitle : L.Prism.StatusLiveTitle;
+    private static LocString StatusTitle(string status) => status switch
+    {
+        PrismPhases.StatusRejected => L.Prism.StatusRejectedTitle,
+        PrismPhases.StatusMoved => L.Prism.StatusMovedTitle,
+        _ => L.Prism.StatusLiveTitle,
+    };
 }

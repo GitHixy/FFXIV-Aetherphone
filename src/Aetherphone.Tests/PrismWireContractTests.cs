@@ -4,6 +4,7 @@ using Aetherphone.Core.Aethernet;
 using Aetherphone.Core.Aethernet.Clients;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Coins;
+using Aetherphone.Core.Game;
 using Aetherphone.Core.Localization;
 using Xunit;
 
@@ -108,6 +109,7 @@ public sealed class PrismWireContractTests
     [InlineData("prism.final.first")]
     [InlineData("prism.final.second")]
     [InlineData("prism.final.third")]
+    [InlineData("prism.gil.cn")]
     public void PrismPayoutsHaveTheirOwnCoinLabelAndHint(string ruleId)
     {
         Assert.NotEqual(L.Coin.RuleGeneric.Key, CoinRuleLabels.For(ruleId).Key);
@@ -181,6 +183,163 @@ public sealed class PrismWireContractTests
         Assert.NotNull(results);
         Assert.Equal(1792440123456L, results.Revision);
         Assert.Null(results.Prizes);
+    }
+
+    [Fact]
+    public void PlacingsCarryBadgesFramesAndGilAheadOfTheCoinArrays()
+    {
+        var week = JsonSerializer.Deserialize("{\"id\":\"w_1\",\"prizes\":{\"heat\":[30],\"final\":[2000,1500],"
+            + "\"gilNote\":\"Paid within a week\",\"placings\":[{\"stage\":\"final\",\"rank\":2,\"coins\":1500},"
+            + "{\"stage\":\"final\",\"rank\":1,\"coins\":2000,\"gil\":500000,\"frameDays\":7,"
+            + "\"badge\":{\"id\":\"prism-gold\",\"name\":\"Cover star\",\"icon\":\"f005\"},"
+            + "\"frame\":{\"id\":\"prism-frame\",\"name\":\"Spectrum\",\"assetUrl\":\"https://x/f.png\"}}]}}",
+            AethernetJsonContext.Default.PrismWeekDto);
+        Assert.NotNull(week?.Prizes);
+        Assert.Equal("Paid within a week", week.Prizes.GilNote);
+
+        var final = new List<PrismPrizeRow>();
+        PrismRewards.Fill(final, week.Prizes, PrismPhases.StageFinal);
+        Assert.Equal(2, final.Count);
+        Assert.Equal(1, final[0].Rank);
+        Assert.Equal(500000, final[0].Gil);
+        Assert.Equal(7, final[0].FrameDays);
+        Assert.Equal("prism-gold", final[0].Badge?.Id);
+        Assert.Equal("Spectrum", final[0].Frame?.BaseName);
+        Assert.Null(final[1].Badge);
+
+        var heat = new List<PrismPrizeRow>();
+        PrismRewards.Fill(heat, week.Prizes, PrismPhases.StageHeat);
+        Assert.Single(heat);
+        Assert.Equal(30, heat[0].Coins);
+    }
+
+    [Fact]
+    public void RewardsOnlyListTheKindsTheWeekPaysOut()
+    {
+        var kinds = new PrismRewardKind[PrismRewards.KindCount];
+        var coinsOnly = JsonSerializer.Deserialize("{\"id\":\"w_1\",\"prizes\":{\"heat\":[30,20,10],"
+            + "\"final\":[2000,1500,1000],\"placings\":[{\"stage\":\"final\",\"rank\":1,\"coins\":2000,\"gil\":0,"
+            + "\"badge\":null,\"frame\":null}]}}", AethernetJsonContext.Default.PrismWeekDto);
+        Assert.Equal(1, PrismRewards.Offered(coinsOnly?.Prizes, null, kinds));
+        Assert.Equal(PrismRewardKind.Coin, kinds[0]);
+
+        var everything = JsonSerializer.Deserialize("{\"id\":\"w_2\",\"prizes\":{\"placings\":[{\"stage\":\"final\","
+            + "\"rank\":1,\"gil\":500000,\"badge\":{\"id\":\"prism-gold\",\"name\":\"Cover star\",\"icon\":\"f005\"},"
+            + "\"frame\":{\"id\":\"prism-frame\",\"name\":\"Spectrum\",\"assetUrl\":\"https://x/f.png\"}}]}}",
+            AethernetJsonContext.Default.PrismWeekDto);
+        Assert.Equal(3, PrismRewards.Offered(everything?.Prizes, null, kinds));
+        Assert.Equal(new[] { PrismRewardKind.Badge, PrismRewardKind.Frame, PrismRewardKind.Gil }, kinds[..3]);
+
+        Assert.Equal(0, PrismRewards.Offered(null, null, kinds));
+        Assert.Equal(1, PrismRewards.Offered(null, new PrismJudgeRewardDto(5, 4, 4), kinds));
+        Assert.Equal(PrismRewardKind.Coin, kinds[0]);
+    }
+
+    [Fact]
+    public void NoPrizesMeansNoPrizeRows()
+    {
+        var rows = new List<PrismPrizeRow> { new(1, 5) };
+        PrismRewards.Fill(rows, null, PrismPhases.StageFinal);
+        Assert.Empty(rows);
+    }
+
+    [Fact]
+    public void AnEntryCarriesTheBodyItWasMadeOn()
+    {
+        var made = JsonSerializer.Serialize(new PrismEntryRequest("k", 810, 1080, Race: 6, Gender: 1),
+            AethernetJsonContext.Default.PrismEntryRequest);
+        Assert.Contains("\"race\":6", made);
+        Assert.Contains("\"gender\":1", made);
+
+        var unknown = JsonSerializer.Serialize(new PrismEntryRequest("k", 810, 1080),
+            AethernetJsonContext.Default.PrismEntryRequest);
+        Assert.DoesNotContain("race", unknown);
+    }
+
+    [Fact]
+    public void AnOutfitRidesAlongOnlyWhenShared()
+    {
+        var bare = JsonSerializer.Serialize(new PrismEntryRequest("k", 810, 1080),
+            AethernetJsonContext.Default.PrismEntryRequest);
+        Assert.DoesNotContain("outfit", bare);
+
+        var shared = JsonSerializer.Serialize(new PrismEntryRequest("k", 810, 1080,
+            Outfit: new[] { new GlamGearDto(2, 45123, 1, 101) }), AethernetJsonContext.Default.PrismEntryRequest);
+        Assert.Contains("\"outfit\":[{\"slot\":2,\"itemId\":45123,\"stain0\":1,\"stain1\":101}]", shared);
+
+        var cleared = JsonSerializer.Serialize(new PrismOutfitRequest(null),
+            AethernetJsonContext.Default.PrismOutfitRequest);
+        Assert.Equal("{\"outfit\":null}", cleared);
+        Assert.Equal("/prism/weeks/w%2F1/entry/outfit", PrismClient.OutfitPath("w/1"));
+    }
+
+    [Fact]
+    public void PlacingsAndEntriesCarryTheSharedOutfit()
+    {
+        var results = JsonSerializer.Deserialize("{\"weekId\":\"w_1\",\"finalPodium\":[{\"rank\":1,\"glamId\":\"g_9\","
+            + "\"outfit\":[{\"slot\":0,\"itemId\":40001},{\"slot\":3,\"itemId\":45123,\"stain0\":12}]}]}",
+            AethernetJsonContext.Default.PrismResultsDto);
+        var winner = results?.FinalPodium?[0];
+        Assert.Equal("g_9", winner?.GlamId);
+        var outfit = winner?.Outfit;
+        Assert.Equal(2, outfit?.Length);
+        Assert.Equal(45123u, outfit![1].ItemId);
+        Assert.Equal(12, outfit[1].Stain0);
+
+        var entry = JsonSerializer.Deserialize("{\"id\":\"e_1\"}", AethernetJsonContext.Default.PrismEntryDto);
+        Assert.Null(entry?.Outfit);
+    }
+
+    [Fact]
+    public void TrackRoutesAddTheTrackOnlyWhenThereIsOne()
+    {
+        Assert.Equal("/prism/weeks/w_1/entry?track=modded", PrismClient.EntryPath("w_1", "modded"));
+        Assert.Equal("/prism/weeks/w_1/ballots?track=vanilla", PrismClient.BallotsPath("w_1", "vanilla"));
+        Assert.Equal("/prism/weeks/w_1/results?lang=ja&track=modded", PrismClient.ResultsPath("w_1", "ja", "modded"));
+        Assert.Equal("/prism/weeks/w_1/ballots", PrismClient.BallotsPath("w_1", string.Empty));
+        Assert.DoesNotContain("track", JsonSerializer.Serialize(new PrismEntryRequest("k", 810, 1080),
+            AethernetJsonContext.Default.PrismEntryRequest));
+        Assert.Contains("\"track\":\"modded\"", JsonSerializer.Serialize(new PrismEntryRequest("k", 810, 1080, "modded"),
+            AethernetJsonContext.Default.PrismEntryRequest));
+    }
+
+    [Fact]
+    public void TheWeekReadsAsTheChosenTrack()
+    {
+        var week = JsonSerializer.Deserialize("{\"id\":\"w_1\",\"phase\":\"entering\",\"entryCount\":120,"
+            + "\"tracks\":[{\"id\":\"vanilla\",\"entryCount\":120},"
+            + "{\"id\":\"modded\",\"entryCount\":84,\"ballotsCast\":3,\"myEntry\":{\"id\":\"e_2\",\"track\":\"modded\"}}]}",
+            AethernetJsonContext.Default.PrismWeekDto)!;
+        Assert.Equal("modded", PrismTracks.Choose(week, string.Empty));
+        Assert.Equal("vanilla", PrismTracks.Choose(week, "vanilla"));
+        Assert.Equal("modded", PrismTracks.Choose(week, "gone"));
+
+        var modded = PrismTracks.Project(week, "modded");
+        Assert.Equal(84, modded.EntryCount);
+        Assert.Equal(3, modded.BallotsCast);
+        Assert.Equal("e_2", modded.MyEntry?.Id);
+        Assert.Null(PrismTracks.Project(week, "vanilla").MyEntry);
+
+        var entered = PrismTracks.WithEntry(week, "vanilla", new PrismEntryDto(Id: "e_1"));
+        Assert.Equal("e_1", PrismTracks.Project(entered, "vanilla").MyEntry?.Id);
+        Assert.Equal("e_2", PrismTracks.Project(entered, "modded").MyEntry?.Id);
+        Assert.Null(PrismTracks.Project(PrismTracks.WithEntry(entered, "modded", null), "modded").MyEntry);
+    }
+
+    [Fact]
+    public void AWeekWithoutTracksStaysAsItIs()
+    {
+        var week = new PrismWeekDto(Id: "w_1", EntryCount: 9);
+        Assert.Equal(string.Empty, PrismTracks.Choose(week, "modded"));
+        Assert.Same(week, PrismTracks.Project(week, string.Empty));
+        Assert.Equal("e_1", PrismTracks.WithEntry(week, string.Empty, new PrismEntryDto(Id: "e_1")).MyEntry?.Id);
+    }
+
+    [Fact]
+    public void ModdedIsTheDefaultTrack()
+    {
+        var week = new PrismWeekDto(Id: "w_2", Tracks: new[] { new PrismTrackDto("vanilla"), new PrismTrackDto("modded") });
+        Assert.Equal("modded", PrismTracks.Choose(week, string.Empty));
     }
 
     [Fact]

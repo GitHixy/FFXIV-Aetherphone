@@ -33,7 +33,7 @@ internal sealed partial class PrismApp
     private const float RevealTapTopUnits = 56f;
     private const float StoryBarGapUnits = 8f;
     private const float StoryRowGapUnits = 12f;
-    private const float SectionIndexUnits = 44f;
+    private const float SectionIndexUnits = 36f;
     private const float RuleRevealDelay = 0.25f;
     private const float CreditDelay = 0.3f;
     private const float RefractionDelay = 0.05f;
@@ -45,7 +45,6 @@ internal sealed partial class PrismApp
     private readonly List<PrismPlacingDto> finalOrder = new();
     private readonly List<PrismPlacingDto> heatOrder = new();
 
-    private static readonly string[] SectionIndex = { "001", "002", "003", "004" };
     private static readonly Vector4 PodiumShade = new(0f, 0f, 0f, 0.6f);
     private static readonly Vector4 PodiumClear = new(0f, 0f, 0f, 0f);
 
@@ -186,7 +185,7 @@ internal sealed partial class PrismApp
         }
 
         var strips = PrismMotion.Mark(drawList);
-        if (PrismArt.Strip(drawList, StripRect(content, scale, 1), Loc.T(L.Prism.FinalTitle), "→",
+        if (PrismArt.Strip(drawList, StripRect(content, scale, 1), Loc.T(L.Prism.FinalTitle), Arrow,
                 true))
         {
             FinishReveal(results);
@@ -305,7 +304,7 @@ internal sealed partial class PrismApp
         SyncOrder(results);
         var top = DrawHeader(drawList, content, string.Empty, IssueLine(results.Issue), true, scale);
         var body = new Rect(new Vector2(content.Min.X, top), content.Max);
-        using var surface = AppSurface.BeginEdgeToEdge(body);
+        using var surface = BeginBody(body);
         var list = ImGui.GetWindowDrawList();
         var origin = ImGui.GetCursorScreenPos();
         var gutter = PrismArt.Gutter(scale);
@@ -313,9 +312,26 @@ internal sealed partial class PrismApp
         var left = origin.X + gutter;
         var cursor = origin.Y;
         cursor = DrawSectionTitle(list, left, cursor, width, results.Title, scale);
+        if (finalOrder.Count == 0 && heatOrder.Count == 0 && results.MyHeatRank <= 0)
+        {
+            var empty = Loc.T(L.Prism.NoPodium);
+            cursor += Typography.DrawWrappedLeft(new Vector2(left, cursor), empty, PrismArt.Muted,
+                TextStyles.Subheadline, PrismType.BalancedWidth(empty, TextStyles.Subheadline, width)) +
+                      Metrics.Space.Xl * scale;
+        }
+
         if (finalOrder.Count > 0)
         {
             cursor = DrawPodium(list, left, cursor, width, scale);
+            if (HasOutfit(finalOrder[0].Outfit) || finalOrder[0].GlamId.Length > 0)
+            {
+                if (PrismArt.Link(list, new Vector2(left, cursor), Loc.T(L.Prism.WinnersOutfit), PrismArt.Muted, scale))
+                {
+                    OpenGlam(finalOrder[0]);
+                }
+
+                cursor += Metrics.Size.TapTarget * scale;
+            }
         }
 
         if (results.MyHeatRank > 0)
@@ -352,6 +368,12 @@ internal sealed partial class PrismApp
             StartReveal();
         }
 
+        cursor += finalOrder.Count > 0 ? Metrics.Size.TapTarget * scale : 0f;
+        if (PrismArt.Link(list, new Vector2(left, cursor), Loc.T(L.Prism.WhatWinnersGet), PrismArt.Muted, scale))
+        {
+            OpenRewards();
+        }
+
         cursor += Metrics.Size.TapTarget * scale + PrismArt.BottomMargin(scale);
         ImGui.Dummy(new Vector2(width, cursor - origin.Y));
     }
@@ -369,7 +391,7 @@ internal sealed partial class PrismApp
         string label, float scale)
     {
         var labelPixels = PrismArt.LabelPixels();
-        PrismType.Draw(drawList, new Vector2(left, top), SectionIndex[Math.Min(index, SectionIndex.Length - 1)],
+        PrismType.Draw(drawList, new Vector2(left, top), Padded[Math.Min(index + 1, Padded.Length - 1)],
             PrismArt.Muted, PrismFace.Label, labelPixels);
         PrismType.Draw(drawList, new Vector2(left + SectionIndexUnits * scale, top), label,
             PrismArt.Fore, PrismFace.Label, labelPixels);
@@ -393,6 +415,7 @@ internal sealed partial class PrismApp
             var x = left + index * (column + gap);
             var photo = new Rect(new Vector2(x, top), new Vector2(x + column, top + photoHeight));
             DrawLook(drawList, photo, placing.ImageUrl, false);
+            TapForOutfit(photo.Min, photo.Max, placing);
             var shade = new Vector2(photo.Min.X, photo.Max.Y - photoHeight * PodiumShadeShare);
             drawList.AddRectFilledMultiColor(shade, photo.Max, ImGui.GetColorU32(PodiumClear),
                 ImGui.GetColorU32(PodiumClear), ImGui.GetColorU32(PodiumShade), ImGui.GetColorU32(PodiumShade));
@@ -428,7 +451,8 @@ internal sealed partial class PrismApp
             false, scale);
         var card = new Rect(new Vector2(left, top),
             new Vector2(left + width, MathF.Max(thumb.Max.Y, factsTop + factsHeight) + pad));
-        drawList.AddRect(card.Min, card.Max, ImGui.GetColorU32(PrismArt.Faint), 0f, ImDrawFlags.None, 1f);
+        drawList.AddRect(card.Min, card.Max, ImGui.GetColorU32(PrismArt.Faint), 0f,
+            ImDrawFlags.None, PrismArt.HairlineWidth(scale));
         DrawLook(drawList, thumb, results.MyImageUrl, false);
         var textTop = top + pad;
         PrismType.Draw(drawList, new Vector2(textLeft, textTop), Loc.T(L.Prism.YourPlacing), PrismArt.Muted,
@@ -489,6 +513,7 @@ internal sealed partial class PrismApp
         PrismType.Draw(drawList, new Vector2(left, middle - labelLine * 0.5f),
             Plain[Math.Clamp(placing.Rank, 0, Plain.Length - 1)], PrismArt.Fore, PrismFace.Label, labelPixels);
         var thumbLeft = left + RankColumnUnits * scale;
+        TapForOutfit(new Vector2(left, top), new Vector2(left + width, top + thumbHeight), placing);
         DrawLook(drawList, new Rect(new Vector2(thumbLeft, top), new Vector2(thumbLeft + thumbWidth, top + thumbHeight)),
             placing.ImageUrl, false);
         var textLeft = thumbLeft + thumbWidth + Metrics.Space.Md * scale;

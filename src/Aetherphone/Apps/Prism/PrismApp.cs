@@ -1,17 +1,25 @@
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet;
+using Aetherphone.Core.Aethernet.Clients;
 using Aetherphone.Core.Animation;
 using Aetherphone.Core.Apps;
 using Aetherphone.Core.Confirm;
+using Aetherphone.Core.Game;
+using Aetherphone.Core.Glamour;
 using Aetherphone.Core.Localization;
+using Aetherphone.Core.Market;
 using Aetherphone.Core.Media;
+using Aetherphone.Core.Notifications;
 using Aetherphone.Core.Photos;
 using Aetherphone.Core.Report;
 using Aetherphone.Core.Sharing;
+using Aetherphone.Core.Social;
 using Aetherphone.Core.Theme;
 using Aetherphone.Core.Wallpapers;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Textures.TextureWraps;
+using Dalamud.Plugin.Services;
 
 namespace Aetherphone.Apps.Prism;
 
@@ -24,24 +32,55 @@ internal enum PrismScreen : byte
     Reveal,
     Final,
     Guide,
+    Rewards,
+    Outfit,
+    Track,
+    Discover,
+    GlamDetail,
+    Compose,
+    Me,
+    Profile,
+    GlamList,
+    Wardrobe,
+    WardrobeOutfit,
+    WardrobeCover,
+    Activity,
+    GearSearch,
+    DyePick,
 }
 
 internal sealed partial class PrismApp : IResumableApp
 {
     private const float RefreshSeconds = 120f;
     private const float HeaderGapUnits = 14f;
-    private const float NoticeMaxUnits = 40f;
-    private const float NoticeMinUnits = 24f;
+    private const float NoticeMaxUnits = PrismType.TitleUnits;
+    private const float NoticeMinUnits = PrismType.HeadingUnits;
     private const int NoticeLines = 3;
+    private const int LoadedAtLimit = 512;
+    private const int GuideVersion = 2;
 
     private readonly PrismStore store;
+    private readonly GlamStore glams;
+    private readonly AccountClient account;
+    private readonly GlamourService glamour;
     private readonly RemoteImageCache images;
     private readonly PhotoLibrary library;
+    private readonly WallpaperImageCache wallpaperImages;
     private readonly Configuration configuration;
     private readonly ConfirmService confirm;
     private readonly ReportService report;
+    private readonly GameData gameData;
+    private readonly ITextureProvider textures;
+    private readonly MarketItemIndex marketIndex;
+    private readonly MarketLauncher marketLauncher;
+    private readonly ShareService share;
+    private readonly SocialNotificationService social;
+    private readonly SocialLauncher launcher;
+    private readonly SocialActivityFeed activityFeed;
     private readonly PhotoComposeSession pickSession;
     private readonly ImageIntake pickIntake = new();
+    private readonly PhotoViewerOverlay photoViewer = new();
+    private readonly Func<int, IDalamudTextureWrap?> viewerPage;
     private readonly Action withdraw;
     private readonly Action<bool> ballotSettled;
     private readonly Action<bool> entrySettled;
@@ -59,15 +98,33 @@ internal sealed partial class PrismApp : IResumableApp
 
     public PrismApp(AethernetSession session, AethernetApi api, RemoteImageCache images, PhotoLibrary library,
         WallpaperImageCache wallpaperImages, Configuration configuration, ConfirmService confirm,
-        ReportService report)
+        ReportService report, GameData gameData, ITextureProvider textures, GlamourService glamour,
+        MarketItemIndex marketIndex, MarketLauncher marketLauncher, ShareService share,
+        SocialNotificationService social, SocialLauncher launcher)
     {
         store = new PrismStore(session, api);
+        glams = new GlamStore(session, api);
+        account = api.Account;
+        this.glamour = glamour;
         this.images = images;
         this.library = library;
+        this.wallpaperImages = wallpaperImages;
         this.configuration = configuration;
         this.confirm = confirm;
         this.report = report;
+        this.gameData = gameData;
+        this.textures = textures;
+        this.marketIndex = marketIndex;
+        this.marketLauncher = marketLauncher;
+        this.share = share;
+        this.social = social;
+        this.launcher = launcher;
+        activityFeed = new SocialActivityFeed(SocialActivity.PrismApp, session, api.Account);
         pickSession = new PhotoComposeSession(library, wallpaperImages);
+        composeSession = new PhotoComposeSession(library, wallpaperImages);
+        wardrobe = new WardrobeStore(Plugin.PluginInterface.ConfigDirectory.FullName);
+        postSettled = SettlePost;
+        viewerPage = ViewerPage;
         withdraw = store.Withdraw;
         ballotSettled = SettleBallot;
         entrySettled = SettleEntry;
@@ -76,8 +133,9 @@ internal sealed partial class PrismApp : IResumableApp
     public string Id => "prism";
     public string DisplayName => Loc.T(L.Apps.Prism);
     public string Glyph => "Pr";
-    public int BadgeCount => 0;
+    public int BadgeCount => social.UnseenCount(Id);
     public bool WantsSystemTheme => !onPhoto;
+    public HomeTileEffect TileEffect => ShowcaseEffect(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
     public ShareKindSet AcceptedShares => store.IsSignedIn ? ShareKindSet.Photo : ShareKindSet.None;
 
@@ -93,16 +151,21 @@ internal sealed partial class PrismApp : IResumableApp
 
     public void OnOpened()
     {
-        if (!configuration.PrismGuideSeen)
+        if (!configuration.PrismShowcaseOpened)
         {
-            configuration.PrismGuideSeen = true;
+            configuration.PrismShowcaseOpened = true;
             configuration.Save();
-            Go(PrismScreen.Guide);
+        }
+
+        if (configuration.PrismGuideVersion < GuideVersion)
+        {
+            configuration.PrismGuideVersion = GuideVersion;
+            configuration.Save();
+            StartGuide(PrismTab.Discover);
         }
         else
         {
-            Go(PrismScreen.Cover);
-            introDelay = IntroSeconds;
+            OpenTab(PrismTab.Discover);
         }
 
         sinceRefresh = 0f;
@@ -110,15 +173,32 @@ internal sealed partial class PrismApp : IResumableApp
         store.Refresh();
     }
 
+    private HomeTileEffect ShowcaseEffect(long nowUnix)
+    {
+        if (configuration.PrismShowcaseEndsAtUnix == 0)
+        {
+            configuration.PrismShowcaseEndsAtUnix = nowUnix + PrismShowcase.Seconds;
+            configuration.Save();
+        }
+
+        return PrismShowcase.Effect(configuration.PrismShowcaseEndsAtUnix, configuration.PrismShowcaseOpened, nowUnix);
+    }
+
     public void OnResumed()
     {
         sinceRefresh = 0f;
+        statsFor = null;
         store.Refresh();
+        if (screen == PrismScreen.Discover && (glams.Lane(discoverScope).NeverLoaded || glams.Lane(discoverScope).Failed))
+        {
+            glams.Refresh(discoverScope);
+        }
     }
 
     public void OnClosed()
     {
         pickIntake.Discard();
+        photoViewer.Close();
     }
 
     public void Draw(in PhoneContext context)
@@ -129,25 +209,67 @@ internal sealed partial class PrismApp : IResumableApp
         var full = SceneChrome.ScreenFrom(content, context.Theme, scale);
         PrismArt.Follow(context.Theme);
         ImGui.GetWindowDrawList().AddRectFilled(full.Min, full.Max, ImGui.GetColorU32(PrismArt.Back));
+        if (glams.IsSignedIn && screen != PrismScreen.Guide && launcher.TryConsume(Id, out var link))
+        {
+            OpenLink(link);
+        }
+
+        if (photoViewer.Active)
+        {
+            photoViewer.Draw(full, context.Theme);
+            return;
+        }
+
         TickRefresh();
         ForgetLoadsOnNewWeek();
         ConsumeSharedPhoto();
+        ConsumePostOutcome();
+
         screenAge += MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
         var enter = PrismMotion.At(screenAge, 0f, TransitionTiming.PresentSmoothTime);
+        var bar = ShowsTabBar(screen);
+        var wearing = glamour.TryingOn && IsTabRoot(screen);
+        bottomChrome = bar
+            ? TabBar.ContentInset(scale) + (wearing ? (WearingBarUnits + WearingGapUnits) * scale : 0f)
+            : 0f;
         var stage = ScreenLayer.Begin("prism.stage", full, enter < TransitionTiming.InteractiveProgress);
         try
         {
-            DrawScreen(ImGui.GetWindowDrawList(), full, content, scale);
+            onPhoto = false;
+            using var inset = AppSurface.ReserveBottom(bottomChrome);
+            using var host = TabBar.Host(bar);
+            ImGui.PushID((int)screen);
+            try
+            {
+                DrawScreenBody(ImGui.GetWindowDrawList(), full, content, scale);
+            }
+            finally
+            {
+                ImGui.PopID();
+            }
         }
         finally
         {
             stage.Transform(PrismMotion.Stage(full, enter, enterDirection, scale));
         }
+
+        if (!bar || photoViewer.Active)
+        {
+            return;
+        }
+
+        FollowSkin(context.Theme);
+        if (wearing)
+        {
+            DrawWearingBar(content, scale);
+        }
+
+        DrawTabBar(content);
     }
 
-    private void DrawScreen(ImDrawListPtr drawList, Rect full, Rect content, float scale)
+    private void DrawScreenBody(ImDrawListPtr drawList, Rect full, Rect content, float scale)
     {
-        onPhoto = false;
+        drawingScreen = screen;
         switch (screen)
         {
             case PrismScreen.Entry:
@@ -168,6 +290,49 @@ internal sealed partial class PrismApp : IResumableApp
             case PrismScreen.Guide:
                 DrawGuide(drawList, content, scale);
                 break;
+            case PrismScreen.Rewards:
+                DrawRewards(drawList, content, scale);
+                break;
+            case PrismScreen.Outfit:
+                DrawOutfit(drawList, content, scale);
+                break;
+            case PrismScreen.GearSearch:
+                DrawGearSearch(drawList, content, scale);
+                break;
+            case PrismScreen.DyePick:
+                DrawDyePick(drawList, content, scale);
+                break;
+            case PrismScreen.Track:
+                DrawTrackChoice(drawList, content, scale);
+                break;
+            case PrismScreen.Discover:
+                DrawDiscover(drawList, content, scale);
+                break;
+            case PrismScreen.GlamDetail:
+                DrawGlamDetail(drawList, content, scale);
+                break;
+            case PrismScreen.Compose:
+                DrawCompose(drawList, content, scale);
+                break;
+            case PrismScreen.Me:
+            case PrismScreen.Profile:
+                DrawProfile(drawList, content, scale);
+                break;
+            case PrismScreen.GlamList:
+                DrawGlamList(drawList, content, scale);
+                break;
+            case PrismScreen.Wardrobe:
+                DrawWardrobe(drawList, content, scale);
+                break;
+            case PrismScreen.WardrobeOutfit:
+                DrawWardrobeOutfit(drawList, content, scale);
+                break;
+            case PrismScreen.WardrobeCover:
+                DrawWardrobeCover(drawList, content, scale);
+                break;
+            case PrismScreen.Activity:
+                DrawActivity(drawList, content, scale);
+                break;
             default:
                 DrawCover(drawList, full, content, scale);
                 break;
@@ -182,6 +347,8 @@ internal sealed partial class PrismApp : IResumableApp
         }
 
         screen = next;
+        pendingScroll = 0f;
+        SyncTab(next);
         enterDirection = direction;
         screenAge = 0f;
         introDelay = 0f;
@@ -195,9 +362,24 @@ internal sealed partial class PrismApp : IResumableApp
         float height;
         if (back)
         {
-            if (PrismArt.Link(drawList, row.Min, Loc.T(L.Prism.Back), PrismArt.Muted, scale))
+            var backClicked = PrismArt.Link(drawList, row.Min, Loc.T(L.Prism.Back), PrismArt.Muted, scale);
+            if (backClicked && screen == PrismScreen.Compose && composeDetails)
             {
-                Go(screen == PrismScreen.Pick ? pickReturn : PrismScreen.Cover, -1);
+                composeDetails = false;
+            }
+            else if (backClicked && IsLibraryScreen(screen))
+            {
+                GoBack();
+            }
+            else if (backClicked)
+            {
+                Go(screen switch
+                {
+                    PrismScreen.Pick => pickReturn,
+                    PrismScreen.Outfit => outfitReturn,
+                    PrismScreen.GearSearch or PrismScreen.DyePick => PrismScreen.Outfit,
+                    _ => PrismScreen.Cover,
+                }, -1);
             }
 
             height = PrismType.LineHeight(PrismFace.Label, PrismArt.LabelPixels());
@@ -228,16 +410,31 @@ internal sealed partial class PrismApp : IResumableApp
         var texture = images.Sized(url, MathF.Max(rect.Width, rect.Height));
         if (texture is null)
         {
-            var placeholder = Loc.T(images.Failed(url) ? L.Common.ImageFailed : L.Common.Loading);
+            var failed = images.Failed(url);
+            if (!failed && !contain)
+            {
+                return rect;
+            }
+
+            var placeholder = Loc.T(failed ? L.Common.ImageFailed : L.Common.Loading);
             var size = PrismType.Measure(placeholder, PrismFace.Label, PrismArt.LabelPixels());
-            PrismType.Draw(drawList, rect.Center - size * 0.5f, placeholder, PrismArt.Faint, PrismFace.Label,
-                PrismArt.LabelPixels());
+            if (size.X <= rect.Width)
+            {
+                PrismType.Draw(drawList, rect.Center - size * 0.5f, placeholder, PrismArt.Faint, PrismFace.Label,
+                    PrismArt.LabelPixels());
+            }
+
             return rect;
         }
 
         var now = ImGui.GetTime();
         if (!loadedAt.TryGetValue(url, out var seen))
         {
+            if (loadedAt.Count >= LoadedAtLimit)
+            {
+                loadedAt.Clear();
+            }
+
             seen = now;
             loadedAt[url] = seen;
         }
@@ -302,7 +499,8 @@ internal sealed partial class PrismApp : IResumableApp
     {
         var gutter = PrismArt.Gutter(scale);
         var height = PrismArt.StripUnits * scale;
-        var bottom = content.Max.Y - PrismArt.BottomMargin(scale) - fromBottom * (height + Metrics.Space.Md * scale);
+        var bottom = content.Max.Y - bottomChrome - PrismArt.BottomMargin(scale) -
+                     fromBottom * (height + Metrics.Space.Md * scale);
         return new Rect(new Vector2(content.Min.X + gutter, bottom - height), new Vector2(content.Max.X - gutter, bottom));
     }
 
@@ -339,13 +537,12 @@ internal sealed partial class PrismApp : IResumableApp
         }
 
         pendingSharedPhoto = null;
-        if (store.Week?.Phase != PrismPhases.Entering)
+        if (screen != PrismScreen.Compose)
         {
-            return;
+            StartCompose();
         }
 
-        StartPick();
-        pickSession.TakeImported(path);
+        composeSession.TakeImported(path);
     }
 
     private void OpenReport(string lookId)
@@ -360,6 +557,8 @@ internal sealed partial class PrismApp : IResumableApp
     public void Dispose()
     {
         pickSession.Dispose();
+        composeSession.Dispose();
         store.Dispose();
+        glams.Dispose();
     }
 }

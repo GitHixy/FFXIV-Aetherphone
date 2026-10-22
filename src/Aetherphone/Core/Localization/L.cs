@@ -10780,7 +10780,7 @@ internal static class L
 
     internal static class Prism
     {
-        public static readonly LocString ShareLabel = new("prism.shareLabel", "Enter in Prism");
+        public static readonly LocString ShareLabel = new("prism.shareLabel", "Post to Prism");
         public static readonly LocString SignInTitle = new("prism.signInTitle", "Sign in to take part");
         public static readonly LocString SignInRequired = new("prism.signInRequired",
             "Sign in to Aethernet in Settings to enter and judge glams");
@@ -10855,9 +10855,198 @@ internal static class L
         public static readonly LocString GuideRevealTitle = new("prism.guideRevealTitle", "The reveal");
         public static readonly LocString GuideRevealBody = new("prism.guideRevealBody",
             "Results play out as a countdown to first place. The podium and active judges earn Aether Coin.");
+        public static readonly LocString TabDiscover = new("prism.tabDiscover", "Discover");
+        public static readonly LocString TabWeek = new("prism.tabWeek", "This week");
+        public static readonly LocString TabWardrobe = new("prism.tabWardrobe", "Wardrobe");
+        public static readonly LocString TabMe = new("prism.tabMe", "Me");
+        public static readonly LocString ScopeNew = new("prism.scopeNew", "New");
+        public static readonly LocString ScopePopular = new("prism.scopePopular", "Popular");
+        public static readonly LocString SearchHint = new("prism.searchHint", "Search items or #tags");
+        public static readonly LocString GlamsTagged = new("prism.glamsTagged", "Glams tagged {0}");
+        public static readonly LocString NoMatches = new("prism.noMatches", "No matches found");
+        public static readonly LocString ScopeFollowing = new("prism.scopeFollowing", "Following");
+        public static readonly LocString FilterAll = new("prism.filterAll", "All");
+        public static readonly LocString FilterModded = new("prism.filterModded", "Modded");
+        public static readonly LocString FilterVanilla = new("prism.filterVanilla", "Vanilla");
+        public static readonly LocString PostGlam = new("prism.postGlam", "Post a glam");
+        public static readonly LocString DiscoverEmptyHint = new("prism.discoverEmptyHint", "No glams here yet. Post the one you're wearing and be the first.");
+        public static readonly LocString FollowingEmptyHint = new("prism.followingEmptyHint", "Follow players from their profile and their glams show up here.");
+        public static readonly LocString DeleteGlamTitle = new("prism.deleteGlamTitle", "Delete this glam?");
+        public static readonly LocString DeleteGlamBody = new("prism.deleteGlamBody", "It leaves your profile and everyone's saved glams.");
+        public static readonly LocString ReportGlam = new("prism.reportGlam", "Report this glam");
+        public static readonly LocString VanillaStamp = new("prism.vanillaStamp", "Vanilla");
+        public static readonly LocString ModdedStamp = new("prism.moddedStamp", "Modded");
+        public static readonly LocPlural TriedOnCount = new("prism.triedOnCount", "Tried on {0} time", "Tried on {0} times");
+        public static readonly LocString TakeOff = new("prism.takeOff", "Take it off");
+        public static readonly LocString Wearing = new("prism.wearing", "Wearing");
+        public static readonly LocString ModsNeedPenumbra = new("prism.modsNeedPenumbra", "Mods need Penumbra");
+        public static readonly LocString TryOnWithoutGlamourer = new("prism.tryOnWithoutGlamourer",
+            "Without Glamourer, Prism uses the game's Try On window, without mods.");
+        public static readonly LocString OpenStorage = new("prism.openStorage",
+            "Prism counts your dresser and armoire after you open them once.");
+        public static readonly LocString PostsAsVanilla = new("prism.postsAsVanilla",
+            "Mods are read through Penumbra. Without it, this glam posts as vanilla.");
+        public static readonly LocString DesignsAdded = new("prism.designsAdded", "Designs added: {0}");
+        public static readonly LocString YouOwnThis = new("prism.youOwnThis", "You have this one");
+        public static readonly LocString VendorPrice = new("prism.vendorPrice", "Sold by vendors for {0} gil");
+        public static readonly LocString Owned = new("prism.owned", "Owned");
+        public static readonly LocString Installed = new("prism.installed", "Installed");
+        public static readonly LocString AddToWardrobe = new("prism.addToWardrobe", "Add to wardrobe");
+        public static readonly LocString InWardrobe = new("prism.inWardrobe", "In your wardrobe");
+        public static readonly LocString BodyFemale = new("prism.bodyFemale", "{0}, female");
+        public static readonly LocString BodyMale = new("prism.bodyMale", "{0}, male");
+        public static readonly LocString MoreFrom = new("prism.moreFrom", "More from {0}");
+        public static readonly LocString InspiredBy = new("prism.inspiredBy", "Inspired by another glam");
+        public static readonly LocString FitsMe = new("prism.fitsMe", "Fits me");
+        public static readonly LocString StillTryingOn = new("prism.stillTryingOn",
+            "You're still trying something on, so it would go out as your gear. Take it off unless the photo shows it.");
+        public static readonly LocString CheckMarket = new("prism.checkMarket", "Check market");
+        public static readonly LocString GlamOfTheDay = new("prism.glamOfTheDay", "Glam of the day");
+        public static readonly LocPlural SeasonStanding = new("prism.seasonStanding", "{1}: rank {2}, {0:N0} point",
+            "{1}: rank {2}, {0:N0} points");
+        public static readonly LocString Rename = new("prism.rename", "Rename");
+        public static readonly LocString AddPhoto = new("prism.addPhoto", "Add a photo");
+        public static readonly LocString ChangePhoto = new("prism.changePhoto", "Change photo");
+        public static readonly LocString UsePhoto = new("prism.usePhoto", "Use this photo");
+        public static readonly LocString Rewards = new("prism.rewards", "Rewards");
+        public static readonly LocString RewardsHeadline = new("prism.rewardsHeadline", "Win the week");
+        public static readonly LocString RewardsIntro = new("prism.rewardsIntro",
+            "Every week Prism crowns its best glams. This is what they take home.");
+        public static readonly LocString RewardBadgeTitle = new("prism.rewardBadgeTitle", "Podium badges");
+        public static readonly LocString RewardBadgeBody = new("prism.rewardBadgeBody",
+            "Finish on a podium and a badge joins your profile, worn next to your name across Aetherphone.");
+        public static readonly LocString RewardFrameTitle = new("prism.rewardFrameTitle", "Winner's frame");
+        public static readonly LocString RewardFrameBody = new("prism.rewardFrameBody",
+            "Winners wear a Prism frame around their avatar for a while, so everyone can see who took the week.");
+        public static readonly LocString RewardCoinTitle = new("prism.rewardCoinTitle", "Aether Coin");
+        public static readonly LocString RewardCoinBody = new("prism.rewardCoinBody",
+            "Heat podiums and the final pay out Aether Coin, and judging heats earns a little too.");
+        public static readonly LocString RewardGilTitle = new("prism.rewardGilTitle", "Gil");
+        public static readonly LocString RewardGilBody = new("prism.rewardGilBody",
+            "The very best glams can win gil as well.");
+        public static readonly LocString TryOnGlam = new("prism.tryOnGlam", "Try on");
+        public static readonly LocString Save = new("prism.save", "Save");
+        public static readonly LocString Saved = new("prism.saved", "Saved");
+        public static readonly LocString Like = new("prism.like", "Like");
+        public static readonly LocPlural OwnPieces = new("prism.ownPieces", "You own {1} of {0} piece",
+            "You own {1} of {0} pieces");
+        public static readonly LocString ModsInstalled = new("prism.modsInstalled", "{0} of {1} mods installed");
+        public static readonly LocString GearHeading = new("prism.gearHeading", "Gear");
+        public static readonly LocString CharacterHeading = new("prism.characterHeading", "Character");
+        public static readonly LocString GetMod = new("prism.getMod", "Get it");
+        public static readonly LocString ModBy = new("prism.modBy", "{0} by {1}");
+        public static readonly LocString LeaveOutMod = new("prism.leaveOutMod", "Leave out");
+        public static readonly LocString AddBackMod = new("prism.addBackMod", "Add back");
+        public static readonly LocString PhotosHint = new("prism.photosHint", "Pick up to 4 photos. The first one is the cover.");
+        public static readonly LocString TitleLabel = new("prism.titleLabel", "Title");
+        public static readonly LocString TitleHint = new("prism.titleHint", "Name your glam");
+        public static readonly LocString TagsLabel = new("prism.tagsLabel", "Tags");
+        public static readonly LocString TagsHint = new("prism.tagsHint", "cute, purple, casual");
+        public static readonly LocString CapturedHeading = new("prism.capturedHeading", "From your character");
+        public static readonly LocString CapturedCounts = new("prism.capturedCounts", "Pieces {0}, mods {1}");
+        public static readonly LocString CapturedNote = new("prism.capturedNote", "Gear, dyes and mods are read from your character when you post, so wear the glam while you post it.");
+        public static readonly LocString Post = new("prism.post", "Post");
+        public static readonly LocString Posting = new("prism.posting", "Posting\u2026");
+        public static readonly LocString SavedEmptyHint = new("prism.savedEmptyHint", "Glams you save show up here.");
+        public static readonly LocString ProfileEmptyHint = new("prism.profileEmptyHint", "No glams posted yet.");
+        public static readonly LocString StatGlams = new("prism.statGlams", "Glams");
+        public static readonly LocString StatTriedOn = new("prism.statTriedOn", "Tried on");
+        public static readonly LocString StatLikes = new("prism.statLikes", "Likes");
+        public static readonly LocString PlacingsHeading = new("prism.placingsHeading", "Placings");
+        public static readonly LocPlural WornInGlams = new("prism.wornInGlams", "Worn in {0} glam", "Worn in {0} glams");
+        public static readonly LocString Follow = new("prism.follow", "Follow");
+        public static readonly LocString Following = new("prism.followingState", "Following");
+        public static readonly LocString WardrobeEmptyHint = new("prism.wardrobeEmptyHint", "Save what you're wearing, or bring in your Glamourer designs, and your outfits live here.");
+        public static readonly LocString PutOn = new("prism.putOn", "Put it on");
+        public static readonly LocString Favourite = new("prism.favourite", "Favourite");
+        public static readonly LocString Unfavourite = new("prism.unfavourite", "Unfavourite");
+        public static readonly LocString Favourites = new("prism.favourites", "Favourites");
+        public static readonly LocString SaveToGlamourer = new("prism.saveToGlamourer", "Save to Glamourer");
+        public static readonly LocString DeleteOutfit = new("prism.deleteOutfit", "Delete this outfit");
+        public static readonly LocString DeleteOutfitTitle = new("prism.deleteOutfitTitle", "Delete this outfit?");
+        public static readonly LocString OutfitNumber = new("prism.outfitNumber", "Outfit {0}");
+        public static readonly LocString SaveWearing = new("prism.saveWearing", "Save what I'm wearing");
+        public static readonly LocString ImportDesigns = new("prism.importDesigns", "Import Glamourer designs");
+        public static readonly LocString SurpriseMe = new("prism.surpriseMe", "Surprise me");
+        public static readonly LocString GuideIntroTitle = new("prism.guideIntroTitle", "Welcome to Prism");
+        public static readonly LocString GuideIntroBody = new("prism.guideIntroBody",
+            "Share glams, try on anyone's and keep a wardrobe of your own. There's a contest every week too.");
+        public static readonly LocString GuideTryTitle = new("prism.guideTryTitle", "Try on any glam");
+        public static readonly LocString GuideTryBody = new("prism.guideTryBody",
+            "Every glam lists its gear, dyes and mods. Try on puts it on your character with Glamourer, with the mods you have.");
+        public static readonly LocString GuidePostTitle = new("prism.guidePostTitle", "Post your own");
+        public static readonly LocString GuidePostBody = new("prism.guidePostBody",
+            "Pick up to four photos. Prism reads your gear, dyes and mods and links each mod to its page. It never hosts mod files.");
+        public static readonly LocString GuideWardrobeTitle = new("prism.guideWardrobeTitle", "Keep a wardrobe");
+        public static readonly LocString GuideWardrobeBody = new("prism.guideWardrobeBody",
+            "Save what you're wearing, bring in Glamourer designs or add any glam, then put it back on in one tap. Only you can see it.");
+        public static readonly LocString GetStarted = new("prism.getStarted", "Get started");
+        public static readonly LocString Skip = new("prism.skip", "Skip");
+        public static readonly LocString ResultsOut = new("prism.resultsOut", "Results are in");
+        public static readonly LocString JudgingClosed = new("prism.judgingClosed", "Judging closed");
+        public static readonly LocString WonBy = new("prism.wonBy", "Won by {0}");
+        public static readonly LocString NextTheme = new("prism.nextTheme", "Next theme");
         public static readonly LocString JudgeRewardEach = new("prism.judgeRewardEach", "+{0} Aether Coin for every heat you judge");
         public static readonly LocString JudgeRewardLeft = new("prism.judgeRewardLeft", "+{0} Aether Coin a heat, {1} left this week");
         public static readonly LocString JudgeRewardSpent = new("prism.judgeRewardSpent", "No judging Aether Coin left this week");
+        public static readonly LocPlural FrameDays =
+            new("prism.frameDays", "Yours to wear for {0} day", "Yours to wear for {0} days");
+        public static readonly LocString GilSent = new("prism.gilSent",
+            "Gil prizes are traded to you in game by the Aetherphone team. This can take a few days, since we meet each winner in game.");
+        public static readonly LocString GilChinese = new("prism.gilChinese",
+            "We can't trade on the Chinese servers, so winners there get extra Aether Coin instead of gil.");
+        public static readonly LocString WhatWinnersGet = new("prism.whatWinnersGet", "What winners get");
+        public static readonly LocString NoPodium = new("prism.noPodium", "Too few glams were entered this week for a podium.");
+        public static readonly LocString YourGear = new("prism.yourGear", "Your gear");
+        public static readonly LocString GearNote = new("prism.gearNote",
+            "Add each piece in your photo and pick its dyes. Everyone who sees your entry sees this list.");
+        public static readonly LocString YourMods = new("prism.yourMods", "Your mods");
+        public static readonly LocString ModsNote = new("prism.modsNote",
+            "Read from Penumbra. Leave out any you'd rather not credit.");
+        public static readonly LocString NoModsFound = new("prism.noModsFound", "No mods found on your character.");
+        public static readonly LocString AddPiece = new("prism.addPiece", "Add a piece");
+        public static readonly LocString RemovePiece = new("prism.removePiece", "Remove");
+        public static readonly LocString AddDye = new("prism.addDye", "Add dye");
+        public static readonly LocString NoDye = new("prism.noDye", "No dye");
+        public static readonly LocString DyeChannel = new("prism.dyeChannel", "Dye {0}");
+        public static readonly LocString SlotRing = new("prism.slotRing", "Ring");
+        public static readonly LocString AddYourGear = new("prism.addYourGear", "Add your gear");
+        public static readonly LocPlural GearSummary = new("prism.gearSummary", "Your gear, {0} piece",
+            "Your gear, {0} pieces");
+        public static readonly LocPlural ModsSummary = new("prism.modsSummary", "{0} mod credited", "{0} mods credited");
+        public static readonly LocString EditGear = new("prism.editGear", "Edit gear");
+        public static readonly LocString EditMods = new("prism.editMods", "Edit mods");
+        public static readonly LocString SaveOutfit = new("prism.saveOutfit", "Save");
+        public static readonly LocString WinnersOutfit = new("prism.winnersOutfit", "The winner's outfit");
+        public static readonly LocString OutfitCaveat = new("prism.outfitCaveat",
+            "Saved when they entered, so it may not match the photo.");
+        public static readonly LocString TrackVanilla = new("prism.trackVanilla", "Vanilla");
+        public static readonly LocString TrackModded = new("prism.trackModded", "Modded");
+        public static readonly LocString ChooseTrack = new("prism.chooseTrack", "Which contest?");
+        public static readonly LocString TrackVanillaRule = new("prism.trackVanillaRule",
+            "In-game gear, dyes and poses only. No Penumbra, Glamourer or other mods.");
+        public static readonly LocString TrackModdedRule = new("prism.trackModdedRule",
+            "Mods welcome, as long as it's your character.");
+        public static readonly LocString TrackMovedNote = new("prism.trackMovedNote",
+            "A reported Vanilla glam that uses mods gets moved to Modded.");
+        public static readonly LocString WithTrack = new("prism.withTrack", "{0} · {1}");
+        public static readonly LocString StatusMoved = new("prism.statusMoved", "Moved");
+        public static readonly LocString StatusMovedTitle = new("prism.statusMovedTitle",
+            "Your glam moved to the other contest");
+        public static readonly LocString ActivityLiked = new("prism.activityLiked", "liked your glam");
+        public static readonly LocString ActivityPlaced = new("prism.activityPlaced", "Your glam placed #{0} in {1}");
+        public static readonly LocString ActivityResults = new("prism.activityResults", "Results are in");
+        public static readonly LocString ActivityEmpty = new("prism.activityEmpty",
+            "Likes, follows and contest results show up here.");
+        public static readonly LocString Activity = new("prism.activity", "Activity");
+        public static readonly LocString ActivityToday = new("prism.activityToday", "Today");
+        public static readonly LocString ActivityThisWeek = new("prism.activityThisWeek", "This week");
+        public static readonly LocString ActivityThisMonth = new("prism.activityThisMonth", "This month");
+        public static readonly LocString ActivityEarlier = new("prism.activityEarlier", "Earlier");
+        public static readonly LocString PreviousGlam = new("prism.previousGlam", "Previous glam");
+        public static readonly LocString Published = new("prism.published", "Published");
+        public static readonly LocString NothingToSave = new("prism.nothingToSave", "Nothing equipped to save right now");
+        public static readonly LocString FavouritesEmptyHint = new("prism.favouritesEmptyHint", "Tap Favourite on an outfit and it shows up here.");
     }
 
     internal static class Announcements
@@ -11097,6 +11286,9 @@ internal static class L
         public static readonly LocString RulePrismFinalFirst = new("coin.rulePrismFinalFirst", "Prism final, 1st place");
         public static readonly LocString RulePrismFinalSecond = new("coin.rulePrismFinalSecond", "Prism final, 2nd place");
         public static readonly LocString RulePrismFinalThird = new("coin.rulePrismFinalThird", "Prism final, 3rd place");
+        public static readonly LocString RulePrismChineseGil = new("coin.rulePrismChineseGil", "Prism gil prize, paid in coins");
+        public static readonly LocString RulePrismChineseGilHint = new("coin.rulePrismChineseGilHint",
+            "A Prism gil prize won on a Chinese server, where we can't trade");
         public static readonly LocString RulePrismJudgeHint = new("coin.rulePrismJudgeHint", "Score every glam in a Prism heat or the final");
         public static readonly LocString RulePrismHeatHint = new("coin.rulePrismHeatHint", "Finish in the top three of your Prism heat");
         public static readonly LocString RulePrismFinalHint = new("coin.rulePrismFinalHint", "Finish in the top three of the Prism final");

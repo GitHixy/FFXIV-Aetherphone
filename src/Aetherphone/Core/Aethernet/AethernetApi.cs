@@ -23,6 +23,7 @@ internal sealed class AethernetApi
         Feedback = new FeedbackClient(net);
         Polls = new PollsClient(net);
         Prism = new PrismClient(net);
+        Glams = new GlamClient(net);
         Translation = new TranslationClient(net);
         Announcements = new AnnouncementsClient(net);
         Musters = new MusterClient(net);
@@ -50,6 +51,7 @@ internal sealed class AethernetApi
     public FeedbackClient Feedback { get; }
     public PollsClient Polls { get; }
     public PrismClient Prism { get; }
+    public GlamClient Glams { get; }
     public TranslationClient Translation { get; }
     public AnnouncementsClient Announcements { get; }
     public MusterClient Musters { get; }
