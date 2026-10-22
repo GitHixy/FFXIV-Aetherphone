@@ -12,8 +12,7 @@ internal sealed partial class CameraApp
 {
     private const ImGuiWindowFlags CropWindowFlags = ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
         | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoNav
-        | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoScrollWithMouse
-        | ImGuiWindowFlags.NoBringToFrontOnFocus;
+        | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoScrollWithMouse;
 
     private const float CropGripHalf = 16f;
     private const float CropMinimumSide = 96f;
@@ -196,6 +195,7 @@ internal sealed partial class CameraApp
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0f);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowMinSize, Vector2.One);
         ImGui.Begin(id, CropWindowFlags);
+        ImGuiP.BringWindowToDisplayFront(ImGuiP.GetCurrentWindowRead());
     }
 
     private static void EndCropWindow()
