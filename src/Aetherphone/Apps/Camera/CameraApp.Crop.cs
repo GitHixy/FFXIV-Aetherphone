@@ -63,7 +63,7 @@ internal sealed partial class CameraApp
 
     private void DrawCrop()
     {
-        if (ImGui.GetFrameCount() - drawnFrame > CropStaleFrames || ImGui.IsKeyPressed(ImGuiKey.Escape, false))
+        if (ImGui.GetFrameCount() - drawnFrame > CropStaleFrames)
         {
             CancelCrop();
             return;

@@ -7176,7 +7176,7 @@ internal static class L
             "The phone slides out of the way, counts down and takes the shot without itself in it. Esc stops the countdown.");
         public static readonly LocString CropTitle = new("camera.cropTitle", "Shoots any part of the screen");
         public static readonly LocString CropHint = new("camera.cropHint",
-            "The phone slides away and a box appears. Drag it over the part you want, pull its corners to resize, then take the shot. Esc cancels.");
+            "The phone slides away and a box appears. Drag it over the part you want, pull its corners to resize, then take the shot.");
         public static readonly LocString CropTake = new("camera.cropTake", "Take Photo");
         public static readonly LocString ShowGameUi = new("camera.showGameUi", "Show game UI");
         public static readonly LocString HideGameUi = new("camera.hideGameUi", "Hide game UI");

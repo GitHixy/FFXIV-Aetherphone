@@ -2901,7 +2901,7 @@
   "camera.screenTitle": "画面全体を撮影",
   "camera.screenHint": "スマホが画面から退き、カウントダウンのあと、スマホが写らない状態で撮影します。Escキーでカウントダウンを中止できます。",
   "camera.cropTitle": "画面の好きな範囲を撮影",
-  "camera.cropHint": "スマホが退いて枠が表示されます。撮りたい部分に枠をドラッグし、角を引いてサイズを変えてから撮影します。Escキーでキャンセルできます。",
+  "camera.cropHint": "スマホが退いて枠が表示されます。撮りたい部分に枠をドラッグし、角を引いてサイズを変えてから撮影します。",
   "camera.cropTake": "撮影",
   "camera.showGameUi": "ゲームのUIを表示",
   "camera.hideGameUi": "ゲームのUIを非表示",

@@ -2901,7 +2901,7 @@
   "camera.screenTitle": "Tüm ekranı çeker",
   "camera.screenHint": "Telefon kenara çekilir, geri sayar ve kendisi görünmeden fotoğrafı çeker. Esc geri sayımı iptal eder.",
   "camera.cropTitle": "Ekranın istediğin kısmını çeker",
-  "camera.cropHint": "Telefon kenara çekilir ve bir çerçeve belirir. Onu istediğin kısmın üzerine sürükle, köşelerinden çekerek boyutlandır, sonra fotoğrafı çek. Esc iptal eder.",
+  "camera.cropHint": "Telefon kenara çekilir ve bir çerçeve belirir. Onu istediğin kısmın üzerine sürükle, köşelerinden çekerek boyutlandır, sonra fotoğrafı çek.",
   "camera.cropTake": "Fotoğraf çek",
   "camera.showGameUi": "Oyun arayüzünü göster",
   "camera.hideGameUi": "Oyun arayüzünü gizle",

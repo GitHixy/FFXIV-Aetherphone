@@ -2901,7 +2901,7 @@
   "camera.screenTitle": "Capture tout l'écran",
   "camera.screenHint": "Le téléphone s'écarte, lance un compte à rebours et prend la photo sans apparaître dessus. Échap annule le compte à rebours.",
   "camera.cropTitle": "Capture n'importe quelle partie de l'écran",
-  "camera.cropHint": "Le téléphone s'écarte et un cadre apparaît. Faites-le glisser sur la zone voulue, tirez sur ses coins pour le redimensionner, puis prenez la photo. Échap annule.",
+  "camera.cropHint": "Le téléphone s'écarte et un cadre apparaît. Faites-le glisser sur la zone voulue, tirez sur ses coins pour le redimensionner, puis prenez la photo.",
   "camera.cropTake": "Prendre la photo",
   "camera.showGameUi": "Afficher l'interface du jeu",
   "camera.hideGameUi": "Masquer l'interface du jeu",
