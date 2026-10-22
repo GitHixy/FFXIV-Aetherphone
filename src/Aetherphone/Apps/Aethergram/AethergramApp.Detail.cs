@@ -22,6 +22,7 @@ internal sealed partial class AethergramApp
     private const float CommentTextGap = 3f;
     private const float CommentMetaGap = 8f;
     private const float CommentMediaGap = 6f;
+    private const float CommentReplyGap = 4f;
     private const float CommentHeartColumn = 40f;
     private const float CommentHeartSize = 16f;
     private const float CommentHeartHitRadius = 14f;
@@ -35,6 +36,7 @@ internal sealed partial class AethergramApp
     private static readonly TextStyle CommentNameStyle = TextStyles.Headline;
     private static readonly TextStyle CommentBodyStyle = TextStyles.Callout;
     private static readonly TextStyle CommentMetaStyle = TextStyles.Footnote;
+    private static readonly TextStyle CommentReplyStyle = TextStyles.FootnoteEmphasized;
     private static readonly TextStyle CommentCountStyle = TextStyles.Caption1;
     private static readonly TextStyle EarlierCommentsStyle = TextStyles.SubheadlineEmphasized;
 
@@ -176,7 +178,11 @@ internal sealed partial class AethergramApp
         var mediaHidden = CommentMediaHidden(comment.MediaUrl);
         var mediaHeight = mediaHidden ? 0f : CommentMedia.MeasureHeight(comment, textWidth, scale);
         var mediaGap = mediaHeight > 0f && (textHeight > 0f || linkHeight > 0f) ? CommentMediaGap * scale : 0f;
-        var contentHeight = nameHeight + textGap + textHeight + linkHeight + mediaGap + mediaHeight;
+        var canReply = !mine && comment.AuthorHandle.Length > 0;
+        var replyGap = canReply ? CommentReplyGap * scale : 0f;
+        var replyHeight = canReply ? Typography.LineHeight(CommentReplyStyle) : 0f;
+        var contentHeight = nameHeight + textGap + textHeight + linkHeight + mediaGap + mediaHeight + replyGap
+            + replyHeight;
         var rowHeight = padY * 2f + MathF.Max(contentHeight, radius * 2f);
         var rowMax = new Vector2(origin.X + width, origin.Y + rowHeight);
 
@@ -236,6 +242,12 @@ internal sealed partial class AethergramApp
             }
         }
 
+        if (canReply)
+        {
+            var replyTop = textTop + textHeight + linkHeight + mediaGap + mediaHeight + replyGap;
+            DrawCommentReply(drawList, comment.AuthorHandle, new Vector2(textLeft, replyTop), textWidth);
+        }
+
         var avatarExtent = new Vector2(radius, radius);
         if (UiInteract.HoverClick(avatarCenter - avatarExtent, avatarCenter + avatarExtent)
             || UiInteract.HoverClick(new Vector2(textLeft, nameTop), new Vector2(textLeft + nameWidth, nameTop + nameHeight)))
@@ -252,6 +264,34 @@ internal sealed partial class AethergramApp
 
         ImGui.SetCursorScreenPos(origin);
         ImGui.Dummy(new Vector2(width, rowHeight));
+    }
+
+    private void DrawCommentReply(ImDrawListPtr drawList, string handle, Vector2 position, float maxWidth)
+    {
+        var label = Typography.FitText(Loc.T(L.Aethergram.ReplyToComment), maxWidth, CommentReplyStyle);
+        var max = position + Typography.Measure(label, CommentReplyStyle);
+        var hovered = UiInteract.Hover(position, max);
+        Typography.Draw(drawList, position, label, hovered ? Ink.TitleInk : Ink.MutedInk, CommentReplyStyle);
+        if (UiInteract.HoverClick(position, max))
+        {
+            StartReply(handle);
+        }
+    }
+
+    private void StartReply(string handle)
+    {
+        var mention = "@" + handle + " ";
+        commentFocusPending = true;
+        if (commentDraft.StartsWith(mention, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var draft = mention + commentDraft;
+        if (draft.Length <= MaxCommentLength)
+        {
+            commentDraft = draft;
+        }
     }
 
     private void DrawCommentHeart(ImDrawListPtr drawList, CommentDto comment, Vector2 center)

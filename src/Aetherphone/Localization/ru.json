@@ -3147,6 +3147,7 @@
   "aethergram.send": "Отправить",
   "aethergram.sent": "Отправлено",
   "aethergram.replyToStory": "Ответить {0}",
+  "aethergram.replyToComment": "Ответить",
   "aethergram.repliedToYourStory": "Ответил(а) на вашу историю",
   "aethergram.youRepliedToStory": "Вы ответили на историю",
   "aethergram.storyUnavailable": "История недоступна",
