@@ -37,6 +37,7 @@ internal sealed partial class PrismApp
     private int gearResultCount;
     private int editingSlot;
     private int editingDye;
+    private float outfitScroll;
     private bool focusGearSearch;
     private CachedText dyeChannelText;
 
@@ -51,6 +52,10 @@ internal sealed partial class PrismApp
         if (!VanillaEntry)
         {
             captured = glamour.Capture();
+            if (screen == PrismScreen.Entry)
+            {
+                KeepEntryDrops();
+            }
         }
         else if (screen == PrismScreen.Entry && store.Week?.MyEntry is { } entry)
         {
@@ -63,10 +68,49 @@ internal sealed partial class PrismApp
 
     private void ResetEntryOutfit()
     {
-        droppedMods.Clear();
         captured = VanillaEntry ? Array.Empty<GlamGearDto>() : glamour.Capture();
+        KeepEntryDrops();
         LoadDraftGear(store.Week?.MyEntry?.Outfit);
         gearCatalog.EnsureBuilt();
+    }
+
+    private void KeepEntryDrops()
+    {
+        droppedMods.Clear();
+        if (VanillaEntry || store.Week?.MyEntry?.Outfit is not { } outfit)
+        {
+            return;
+        }
+
+        var sent = new HashSet<string>(StringComparer.Ordinal);
+        for (var index = 0; index < outfit.Length; index++)
+        {
+            var mods = outfit[index].Mods ?? Array.Empty<GlamModDto>();
+            for (var modIndex = 0; modIndex < mods.Length; modIndex++)
+            {
+                sent.Add(PostedMods.Key(mods[modIndex]));
+            }
+        }
+
+        SyncCapturedMods();
+        var sameLook = false;
+        for (var index = 0; index < capturedMods.Length; index++)
+        {
+            var key = capturedMods[index].Key;
+            if (sent.Contains(key))
+            {
+                sameLook = true;
+            }
+            else
+            {
+                droppedMods.Add(key);
+            }
+        }
+
+        if (!sameLook)
+        {
+            droppedMods.Clear();
+        }
     }
 
     private GlamGearDto[]? EntryOutfit() => VanillaEntry ? DraftOutfit() : EntryMods();
@@ -144,7 +188,7 @@ internal sealed partial class PrismApp
             var mods = gear[index].Mods ?? Array.Empty<GlamModDto>();
             for (var modIndex = 0; modIndex < mods.Length; modIndex++)
             {
-                if (seen.Add(PostedMods.Key(GearSlots.None, mods[modIndex])))
+                if (seen.Add(PostedMods.Key(mods[modIndex])))
                 {
                     kept.Add(mods[modIndex]);
                 }
@@ -215,7 +259,7 @@ internal sealed partial class PrismApp
 
         var editing = EditingEntryOutfit;
         var ready = !store.Busy && (!vanilla || !editing || DraftPieces() > 0);
-        if (PrismArt.Strip(drawList, strip, Loc.T(editing ? L.Prism.SaveOutfit : L.Prism.Done), string.Empty, true,
+        if (PrismArt.Strip(drawList, strip, Loc.T(editing ? L.Prism.Save : L.Prism.Done), string.Empty, true,
                 ready))
         {
             if (editing)
@@ -254,6 +298,11 @@ internal sealed partial class PrismApp
             var itemId = draftItems[index];
             var pick = default(GearPick);
             var known = itemId != 0 && gearCatalog.TryGet(itemId, out pick);
+            if (!known && itemId != 0 && GearItem(itemId, out var itemName, out var itemIcon))
+            {
+                pick = new GearPick(itemId, itemName, itemIcon, DyeChannels);
+            }
+
             var dyes = itemId == 0 ? 0 : known ? Math.Min((int)pick.Dyes, DyeChannels) : DyeChannels;
             var lines = dyes > 0 ? 3 : 2;
             var rowTop = top + pad;
@@ -265,7 +314,19 @@ internal sealed partial class PrismApp
                 continue;
             }
 
-            if (known)
+            var row = new Rect(new Vector2(left, top), new Vector2(left + width, rowBottom));
+            var hovered = UiInteract.Hover(row.Min, row.Max);
+            if (hovered)
+            {
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            }
+
+            if (UiInteract.Click(row.Min, row.Max, hovered))
+            {
+                OpenGearSearch(index);
+            }
+
+            if (pick.IconId != 0)
             {
                 GameIconTile.Draw(drawList, textures, pick.IconId, new Vector2(left, rowTop),
                     new Vector2(left + icon, rowTop + icon), 0f, scale);
@@ -278,16 +339,13 @@ internal sealed partial class PrismApp
 
             PrismType.Draw(drawList, new Vector2(textLeft, textTop), Loc.T(SlotNames[index]), PrismArt.Muted,
                 PrismFace.Label, labelPixels);
-            var name = itemId == 0 ? Loc.T(L.Prism.AddPiece) : pick.Name;
+            var name = itemId == 0 ? Loc.T(L.Prism.AddPiece) : pick.Name ?? string.Empty;
             var room = left + width - textLeft - (itemId != 0 ? removeWidth + pad : 0f);
-            if (PrismArt.Link(drawList, new Vector2(textLeft, textTop + labelLine),
-                    PrismType.FitLabel(name, labelPixels, room), itemId == 0 ? PrismArt.Muted : PrismArt.Fore, scale))
-            {
-                OpenGearSearch(index);
-            }
-
+            PrismType.Draw(drawList, new Vector2(textLeft, textTop + labelLine),
+                PrismType.FitLabel(name, labelPixels, room), hovered || itemId != 0 ? PrismArt.Fore : PrismArt.Muted,
+                PrismFace.Label, labelPixels);
             if (itemId != 0 && PrismArt.Link(drawList, new Vector2(left + width - removeWidth, textTop + labelLine),
-                    remove, PrismArt.Muted, scale))
+                    remove, PrismArt.Muted, scale, labelLine))
             {
                 draftItems[index] = 0;
                 draftStain0[index] = 0;
@@ -295,9 +353,10 @@ internal sealed partial class PrismApp
             }
 
             var x = textLeft;
+            var dyeRoom = (left + width - textLeft) / MathF.Max(dyes, 1) - Metrics.Space.Lg * scale;
             for (var channel = 0; channel < dyes; channel++)
             {
-                x = DrawDyeLink(drawList, x, textTop + labelLine * 2f, index, channel, labelPixels, scale);
+                x = DrawDyeLink(drawList, x, textTop + labelLine * 2f, dyeRoom, index, channel, labelPixels, scale);
             }
 
             PrismArt.Hairline(drawList, left, left + width, rowBottom, PrismArt.Faint, scale);
@@ -307,22 +366,23 @@ internal sealed partial class PrismApp
         return top;
     }
 
-    private float DrawDyeLink(ImDrawListPtr drawList, float left, float top, int slot, int channel, float labelPixels,
-        float scale)
+    private float DrawDyeLink(ImDrawListPtr drawList, float left, float top, float room, int slot, int channel,
+        float labelPixels, float scale)
     {
         var stain = channel == 0 ? draftStain0[slot] : draftStain1[slot];
-        var label = stain == 0 ? Loc.T(L.Prism.AddDye) : gearCatalog.DyeName(stain);
+        var line = PrismType.LineHeight(PrismFace.Label, labelPixels);
         var swatch = 0f;
         if (stain != 0 && DyeColor(stain) is { } color)
         {
             var radius = DyeSwatchUnits * scale;
-            var line = PrismType.LineHeight(PrismFace.Label, labelPixels);
             drawList.AddCircleFilled(new Vector2(left + radius, top + line * 0.5f), radius, color, DyeSegments);
             swatch = radius * 2f + Metrics.Space.Xs * scale;
         }
 
+        var label = PrismType.FitLabel(stain == 0 ? Loc.T(L.Prism.AddDye) : gearCatalog.DyeName(stain), labelPixels,
+            room - swatch);
         if (PrismArt.Link(drawList, new Vector2(left + swatch, top), label, stain == 0 ? PrismArt.Muted : PrismArt.Fore,
-                scale))
+                scale, line))
         {
             OpenDyePick(slot, channel);
         }
@@ -353,6 +413,7 @@ internal sealed partial class PrismApp
         gearQuery = string.Empty;
         gearResultsSlot = -1;
         focusGearSearch = true;
+        outfitScroll = bodyScroll;
         gearCatalog.EnsureBuilt();
         Go(PrismScreen.GearSearch);
     }
@@ -361,8 +422,15 @@ internal sealed partial class PrismApp
     {
         editingSlot = slot;
         editingDye = channel;
+        outfitScroll = bodyScroll;
         gearCatalog.EnsureBuilt();
         Go(PrismScreen.DyePick);
+    }
+
+    private void BackToOutfit()
+    {
+        Go(PrismScreen.Outfit, -1);
+        pendingScroll = outfitScroll;
     }
 
     private void DrawGearSearch(ImDrawListPtr drawList, Rect content, float scale)
@@ -449,7 +517,7 @@ internal sealed partial class PrismApp
             draftStain0[editingSlot] = 0;
         }
 
-        Go(PrismScreen.Outfit, -1);
+        BackToOutfit();
     }
 
     private void DrawDyePick(ImDrawListPtr drawList, Rect content, float scale)
@@ -534,7 +602,7 @@ internal sealed partial class PrismApp
                 draftStain1[editingSlot] = stainId;
             }
 
-            Go(PrismScreen.Outfit, -1);
+            BackToOutfit();
         }
 
         return row.Max.Y;
