@@ -560,7 +560,7 @@ internal static class L
             "Put a question to Eorzea and watch the votes land while you wait.");
         public static readonly LocString LoveIslandSub = new("storeCopy.loveislandSub", "PNX's Halloween festival");
         public static readonly LocString LoveIslandBody = new("storeCopy.loveislandBody",
-            "The companion for Love Island Eclipse on Materia: tonight's experiences with Teleport, the live #LoveIslandEclipse gallery, the linkshells to join, and the frame and badge you earn by sharing your night.");
+            "The companion for Love Island Eclipse on Materia: tonight's experiences with Teleport, the live #LoveIslandEclipse gallery, the syncshells to join, and the frame and badge you earn by sharing your night.");
         public static readonly LocString AnnouncementsSub = new("storeCopy.announcementsSub", "Word from the team");
         public static readonly LocString AnnouncementsBody = new("storeCopy.announcementsBody",
             "Release notes, downtime warnings and everything else the Aetherphone team wants you to know, delivered straight to your phone.");
@@ -2418,7 +2418,7 @@ internal static class L
         public static readonly LocString[] Release1400LoveIsland =
         {
             new("changelog.r1400.24",
-                "Added Love Island Eclipse, the companion app for PNX's Halloween festival on Materia: a countdown to the doors and the experience on now, every experience with Teleport and a reminder, the #LoveIslandEclipse gallery, the linkshells to ask for, and the frame, badge and Aether Coin you earn by posting during the night"),
+                "Added Love Island Eclipse, the companion app for PNX's Halloween festival on Materia: a countdown to the doors and the experience on now, every experience with Teleport and a reminder, the #LoveIslandEclipse gallery, the syncshells to join with their ID and password, and the frame, badge and Aether Coin you earn by posting during the night"),
             new("changelog.r1400.25",
                 "Added Keep it night to Love Island Eclipse, which holds Eorzea at night while the app is open during the event"),
         };
@@ -11116,10 +11116,9 @@ internal static class L
         public static readonly LocString AnnouncementsFrom = new("loveisland.announcementsFrom", "{0} from PNX");
         public static readonly LocString AnnouncementsBody = new("loveisland.announcementsBody",
             "Doors, stage changes, surprises. New ones arrive as a banner.");
-        public static readonly LocString LinkshellsTitle = new("loveisland.linkshellsTitle", "Linkshells");
-        public static readonly LocString LinkshellsBody = new("loveisland.linkshellsBody",
-            "The crew's linkshells for the night. Ask the contact for an invite.");
-        public static readonly LocString AskContact = new("loveisland.askContact", "Ask {0}");
+        public static readonly LocString SyncshellsTitle = new("loveisland.syncshellsTitle", "Syncshells");
+        public static readonly LocString SyncshellsBody = new("loveisland.syncshellsBody",
+            "The crew's syncshells for the night. Join with the ID and password in your sync plugin.");
         public static readonly LocString About = new("loveisland.about", "About");
         public static readonly LocString More = new("loveisland.more", "More");
         public static readonly LocString AboutFooter = new("loveisland.aboutFooter",
@@ -11198,8 +11197,11 @@ internal static class L
         public static readonly LocString LinkKofi = new("loveisland.linkKofi", "Ko-fi");
         public static readonly LocString LinkPatreon = new("loveisland.linkPatreon", "Patreon");
         public static readonly LocString LinkPartner = new("loveisland.linkPartner", "Partner site");
-        public static readonly LocString Linkshell = new("loveisland.linkshell", "Linkshell");
-        public static readonly LocString CrossWorldLinkshell = new("loveisland.crossWorldLinkshell", "Cross-world linkshell");
+        public static readonly LocString Syncshell = new("loveisland.syncshell", "Syncshell");
+        public static readonly LocString SyncshellId = new("loveisland.syncshellId", "Syncshell ID");
+        public static readonly LocString SyncshellPassword = new("loveisland.syncshellPassword", "Password");
+        public static readonly LocString CopySyncshellId = new("loveisland.copySyncshellId", "Copy ID");
+        public static readonly LocString CopySyncshellPassword = new("loveisland.copySyncshellPassword", "Copy password");
         public static readonly LocString AboutTitle = new("loveisland.aboutTitle", "About {0}");
         public static readonly LocString AwardNotification = new("loveisland.awardNotification",
             "You earned the frame and badge. Open Perks to see them.");
