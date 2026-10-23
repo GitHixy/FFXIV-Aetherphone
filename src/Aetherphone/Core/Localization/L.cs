@@ -10938,6 +10938,7 @@ internal static class L
         public static readonly LocString BodyNeeded = new("prism.bodyNeeded",
             "Choose the race and gender in your photo.");
         public static readonly LocString TrackNeeded = new("prism.trackNeeded", "Choose Modded or Vanilla.");
+        public static readonly LocString TrackGlamBy = new("prism.trackGlamBy", "Glam by {0}");
         public static readonly LocString GearNeeded = new("prism.gearNeeded", "Add each piece in your photo.");
         public static readonly LocString MoreFrom = new("prism.moreFrom", "More from {0}");
         public static readonly LocString InspiredBy = new("prism.inspiredBy", "Inspired by another glam");
@@ -11115,7 +11116,6 @@ internal static class L
         public static readonly LocString SeeYourGlam = new("prism.seeYourGlam", "See your glam");
         public static readonly LocString SeeResults = new("prism.seeResults", "See the results");
         public static readonly LocString EnterTrack = new("prism.enterTrack", "Enter {0}");
-        public static readonly LocString JudgeTrack = new("prism.judgeTrack", "Judge {0}");
         public static readonly LocString LastWeekWinner = new("prism.lastWeekWinner", "Last week's winner, {0}");
         public static readonly LocString LastWeekWinners = new("prism.lastWeekWinners", "Last week's winners");
         public static readonly LocString YourPicks = new("prism.yourPicks", "Your picks");
