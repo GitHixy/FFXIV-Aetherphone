@@ -83,11 +83,17 @@ internal sealed partial class PrismApp
     private static readonly int[] GuideLibraryTags =
     {
         FactBit(PrismFact.Modded) | FactBit(PrismFact.Female) | FactBit(PrismFact.Race) | FactBit(PrismFact.FitsMe),
-        FactBit(PrismFact.Modded) | FactBit(PrismFact.Female),
+        FactBit(PrismFact.Modded) | FactBit(PrismFact.Female) | FactBit(PrismFact.Male),
         FactBit(PrismFact.Vanilla) | FactBit(PrismFact.Female) | FactBit(PrismFact.Race) | FactBit(PrismFact.FitsMe),
-        FactBit(PrismFact.Vanilla) | FactBit(PrismFact.Male),
-        FactBit(PrismFact.Modded) | FactBit(PrismFact.Male) | FactBit(PrismFact.Race),
+        FactBit(PrismFact.Vanilla) | FactBit(PrismFact.Female),
+        FactBit(PrismFact.Modded) | FactBit(PrismFact.Female) | FactBit(PrismFact.Race),
         FactBit(PrismFact.Vanilla) | FactBit(PrismFact.Female) | FactBit(PrismFact.Race),
+    };
+
+    private static readonly PrismPicture[] GuideLibraryPictures =
+    {
+        PrismPicture.GuideLibraryFirst, PrismPicture.GuideLibrarySecond, PrismPicture.GuideLibraryThird,
+        PrismPicture.GuideLibraryFourth, PrismPicture.GuideLibraryFifth, PrismPicture.GuideLibrarySixth,
     };
 
     private static readonly uint[] GuideGear = { 19139, 0, 11102, 17492, 11116, 17493, 11137, 16039, 12364, 0, 0, 0 };
@@ -858,7 +864,7 @@ internal sealed partial class PrismApp
             var alpha = guideTileFade[index].Step(matches ? 1f : GuideDimAlpha, Motion.Appear, delta);
             var min = new Vector2(gridLeft + index % GuideLibraryColumns * (width + gap),
                 gridTop + index / GuideLibraryColumns * (height + gap));
-            DrawGuideCard(drawList, new Rect(min, min + new Vector2(width, height)), PrismPicture.None,
+            DrawGuideCard(drawList, new Rect(min, min + new Vector2(width, height)), GuideLibraryPictures[index],
                 Math.Clamp(alpha, GuideDimAlpha, 1f), Metrics.Radius.Md * scale, scale);
         }
 
