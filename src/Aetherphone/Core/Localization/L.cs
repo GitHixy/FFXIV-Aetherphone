@@ -2318,7 +2318,7 @@ internal static class L
             new("changelog.r1400.2",
                 "Added judging in Prism: rate anonymous glams in heats from Off theme to Nails it, with Aether Coin for every heat you judge"),
             new("changelog.r1400.3",
-                "Added the Prism reveal: heat winners go through to a final, and results arrive as a podium with your placing, the Aether Coin you won and a reveal you can replay"),
+                "Added the Prism reveal: heat winners go through to a final, and results arrive as a podium with your placing, the Aether Coin you won, a reveal you can replay and a gallery of the week's glams in placing order"),
             new("changelog.r1400.4",
                 "Added reporting a Prism glam, so moderators can take it out of the contest"),
             new("changelog.r1400.29",
@@ -2326,7 +2326,7 @@ internal static class L
             new("changelog.r1400.30",
                 "Added trying on any Prism glam in one tap through Glamourer and Penumbra with the mods you have, or through the game's Try On window without them"),
             new("changelog.r1400.31",
-                "Added posting your own Prism glam with up to four photos, with your gear, dyes and mods read from the game and each mod linked to its page"),
+                "Added posting your own Prism glam with up to four photos: choose Modded or Vanilla and the race and gender in the photo, then add the pieces with their dyes and any mods, or fill them in from your character"),
             new("changelog.r1400.32",
                 "Added a Prism wardrobe that keeps what you're wearing, your Glamourer designs and any glam you add, and puts an outfit back on in one tap"),
             new("changelog.r1400.33",
@@ -2334,7 +2334,7 @@ internal static class L
             new("changelog.r1400.34",
                 "Added the Prism rewards page, showing the badges, frames, Aether Coin and gil each week's winners take home"),
             new("changelog.r1400.35",
-                "Added Prism profiles with follows and placings, and an activity inbox with a home screen badge for new likes, follows and contest results"),
+                "Added Prism profiles with their own name, handle, bio and picture, a banner from one of your glams, follows and placings, and an activity inbox with a home screen badge for new likes, follows and contest results"),
         };
 
         public static readonly LocString[] Release1400Messaging =
