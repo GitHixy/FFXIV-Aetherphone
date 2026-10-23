@@ -10,10 +10,11 @@ internal sealed partial class PrismApp
 {
     private const int ShowcaseSize = 8;
     private const float ShowcaseCardShare = 0.4f;
+    private const float ShowcaseAdvanceSeconds = 3.5f;
     private const string ShowcaseRailId = "##prism.showcase";
 
     private readonly GlamDto[] showcase = new GlamDto[ShowcaseSize];
-    private readonly StridePager showcasePager = new();
+    private readonly StridePager showcasePager = new(loop: true);
     private int showcaseCount;
     private bool showcasePicked;
 
@@ -46,20 +47,26 @@ internal sealed partial class PrismApp
             return row.Max.Y;
         }
 
+        showcasePager.AutoAdvance(row, showcaseCount, delta, ShowcaseAdvanceSeconds);
         var interactive = !showcasePager.Dragging;
+        var value = showcasePager.Value;
+        var looping = showcaseCount > 1;
+        var first = looping ? (int)MathF.Floor(value) - 1 : 0;
+        var span = looping ? (int)MathF.Ceiling(width / stride) + 2 : 0;
         drawList.PushClipRect(row.Min, row.Max, true);
-        for (var index = 0; index < showcaseCount; index++)
+        for (var slot = first; slot <= first + span; slot++)
         {
-            var cardLeft = left + inset + (index - showcasePager.Value) * stride;
+            var cardLeft = left + inset + (slot - value) * stride;
             if (cardLeft + cardWidth < row.Min.X || cardLeft > row.Max.X)
             {
                 continue;
             }
 
+            var glam = showcase[StridePager.CardIndex(slot, showcaseCount)];
             var card = new Rect(new Vector2(cardLeft, top), new Vector2(cardLeft + cardWidth, top + height));
-            if (DrawShowcaseCard(drawList, card, showcase[index], interactive, scale))
+            if (DrawShowcaseCard(drawList, card, glam, interactive, scale))
             {
-                OpenGlam(showcase[index]);
+                OpenGlam(glam);
             }
         }
 

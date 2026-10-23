@@ -52,6 +52,7 @@ internal enum PrismScreen : byte
     BannerCrop,
     WardrobeEdit,
     WardrobeMods,
+    WardrobeDesigns,
 }
 
 internal sealed partial class PrismApp : IResumableApp
@@ -352,6 +353,9 @@ internal sealed partial class PrismApp : IResumableApp
                 break;
             case PrismScreen.WardrobeMods:
                 DrawWornMods(drawList, content, scale);
+                break;
+            case PrismScreen.WardrobeDesigns:
+                DrawDesignPicker(drawList, content, scale);
                 break;
             case PrismScreen.Activity:
                 DrawActivity(drawList, full, content, scale);

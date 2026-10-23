@@ -469,11 +469,7 @@ internal sealed partial class PrismApp
     {
         if (action == WardrobeAction.Import)
         {
-            if (wardrobe.StartImport(glamour) == 0)
-            {
-                ShellToast.Show(Loc.T(L.Prism.DesignsAdded, 0));
-            }
-
+            OpenDesignPicker();
             return;
         }
 
