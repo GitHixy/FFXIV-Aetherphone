@@ -33,6 +33,9 @@ internal sealed class GlamStore : IDisposable
     private const int MeRetrySeconds = 5;
     private const int BannerRetrySeconds = 5;
     private const int NotFoundStatus = 404;
+    private const int ShowcaseRetrySeconds = 30;
+    private const int ShowcaseModded = 0;
+    private const int ShowcaseVanilla = 1;
 
     private const int PhotoBaseSize = 1080;
     private const PostAspect GlamAspect = PostAspect.Portrait;
@@ -53,6 +56,12 @@ internal sealed class GlamStore : IDisposable
     private readonly FailureSlot profileFailure = new();
     private readonly RetryGate meGate = new(TimeSpan.FromSeconds(MeRetrySeconds));
     private readonly RetryGate bannerGate = new(TimeSpan.FromSeconds(BannerRetrySeconds));
+    private readonly GlamDto?[] showcase = new GlamDto?[2];
+    private readonly bool[] showcaseLoading = new bool[2];
+    private readonly RetryGate[] showcaseGates =
+    {
+        new(TimeSpan.FromSeconds(ShowcaseRetrySeconds)), new(TimeSpan.FromSeconds(ShowcaseRetrySeconds)),
+    };
     private readonly FeedLane<GlamDto>[] discover =
     {
         FeedLane<GlamDto>.ServerOrdered(), FeedLane<GlamDto>.ServerOrdered(), FeedLane<GlamDto>.ServerOrdered(),
@@ -644,6 +653,39 @@ internal sealed class GlamStore : IDisposable
             bannerMissing = fetched is null && failure.StatusCode == NotFoundStatus;
             bannerFailed = fetched is null && !bannerMissing;
         });
+    }
+
+    public GlamDto? Showcase(bool vanilla)
+    {
+        var slot = vanilla ? ShowcaseVanilla : ShowcaseModded;
+        var shown = Volatile.Read(ref showcase[slot]);
+        if (shown is not null || !session.IsSignedIn || Volatile.Read(ref showcaseLoading[slot]) ||
+            !showcaseGates[slot].TryPass())
+        {
+            return shown;
+        }
+
+        FetchShowcase(slot, vanilla);
+        return null;
+    }
+
+    private void FetchShowcase(int slot, bool vanilla)
+    {
+        Volatile.Write(ref showcaseLoading[slot], true);
+        work.Run("showcase", async token =>
+        {
+            var page = await client.FeedAsync(GlamClient.ScopePopular, vanilla, default, null, token)
+                .ConfigureAwait(false);
+            var items = page?.Items ?? Array.Empty<GlamDto>();
+            for (var index = 0; index < items.Length; index++)
+            {
+                if (items[index].Vanilla == vanilla && items[index].Photos is { Length: > 0 })
+                {
+                    Volatile.Write(ref showcase[slot], items[index]);
+                    return;
+                }
+            }
+        }, () => Volatile.Write(ref showcaseLoading[slot], false));
     }
 
     public void UpdateProfile(string displayName, string handle, string bio, GlamPhotoDraft? photo,
