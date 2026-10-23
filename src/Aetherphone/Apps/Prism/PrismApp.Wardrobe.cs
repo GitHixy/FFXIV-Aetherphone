@@ -22,6 +22,8 @@ internal sealed partial class PrismApp
     private const string FitLogoArtwork = "prism.fg";
     private const float FitLogoShare = 0.6f;
     private const float FitLogoAlpha = 0.9f;
+    private const float GridLogoShare = 0.42f;
+    private const float GridLogoHeightShare = 0.42f;
     private const int SheetCapacity = 2;
     private const float NewOutfitGlyphUnits = 14f;
 
@@ -229,6 +231,9 @@ internal sealed partial class PrismApp
             if (!DrawOutfitCover(list, photo, outfit.Cover))
             {
                 PrismArt.Placeholder(list, photo, false, scale);
+                AppIconTextures.TryDrawArtwork(list, FitLogoArtwork,
+                    new Vector2(photo.Center.X, photo.Min.Y + photo.Height * GridLogoHeightShare),
+                    photo.Width * GridLogoShare, Vector4.One with { W = FitLogoAlpha });
             }
 
             if (DrawGridTile(list, mark, photo, string.Empty, outfit.Name, string.Empty, PieceLabel(outfit.Gear),
