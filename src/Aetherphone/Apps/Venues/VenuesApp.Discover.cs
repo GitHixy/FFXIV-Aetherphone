@@ -66,7 +66,7 @@ internal sealed partial class VenuesApp
         "venues.category.4", "venues.category.5", "venues.category.6", "venues.category.7",
     };
 
-    private readonly VenuePager featuredPager = new();
+    private readonly StridePager featuredPager = new();
     private readonly VenueRail laterRail = new();
     private readonly VenueRail nearRail = new();
     private readonly VenueRail recentRail = new();
