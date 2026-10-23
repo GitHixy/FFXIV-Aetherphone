@@ -372,60 +372,6 @@ internal sealed partial class PrismApp
         }
     }
 
-    private static void DrivePager(Pager pager, Rect area, int count, ref bool pressed, ref Vector2 press,
-        float scale)
-    {
-        var delta = ImGui.GetIO().DeltaTime;
-        pager.Step(delta, count);
-        var mouse = ImGui.GetMousePos();
-        if (pager.Dragging)
-        {
-            pager.Drag(mouse.X, area.Width, count, delta);
-            if (!ImGui.IsMouseDown(ImGuiMouseButton.Left))
-            {
-                pager.Release(area.Width, count);
-            }
-
-            return;
-        }
-
-        if (UiInteract.Hover(area.Min, area.Max) && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-        {
-            pressed = true;
-            press = mouse;
-        }
-
-        if (!pressed || !ImGui.IsMouseDown(ImGuiMouseButton.Left))
-        {
-            pressed = false;
-            return;
-        }
-
-        var move = mouse - press;
-        if (MathF.Abs(move.X) <= PagerSlopUnits * scale || MathF.Abs(move.X) <= MathF.Abs(move.Y))
-        {
-            return;
-        }
-
-        pressed = false;
-        UiInteract.CancelPendingTap();
-        pager.Begin(press.X);
-    }
-
-    private static void DrawPagerDots(ImDrawListPtr drawList, Pager pager, Rect photo, int count, int page, Vector4 ink,
-        float scale)
-    {
-        var tap = Metrics.Size.TapTarget * scale;
-        var center = new Vector2(photo.Center.X, photo.Max.Y - tap * 0.5f);
-        PhotoCarousel.DrawDots(drawList, center, count, page, photo.Width, ink);
-        var hit = new Rect(new Vector2(center.X - tap * count * 0.5f, photo.Max.Y - tap),
-            new Vector2(center.X + tap * count * 0.5f, photo.Max.Y));
-        if (UiInteract.HoverClick(hit.Min, hit.Max))
-        {
-            pager.AnimateTo(ImGui.GetMousePos().X >= center.X ? page + 1 : page - 1, count);
-        }
-    }
-
     private static string TrackRule(string id) => id switch
     {
         PrismTracks.Vanilla => Loc.T(L.Prism.TrackVanillaRule),
