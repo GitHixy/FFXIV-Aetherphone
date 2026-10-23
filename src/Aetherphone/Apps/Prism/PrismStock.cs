@@ -9,11 +9,15 @@ internal enum PrismPicture : byte
     None,
     TrackModded,
     TrackVanilla,
+    GuideJudging,
 }
 
 internal static class PrismStock
 {
-    private static readonly string[] Files = { string.Empty, "track-modded.png", "track-vanilla.png" };
+    private static readonly string[] Files =
+    {
+        string.Empty, "track-modded.png", "track-vanilla.png", "guide-judging.png",
+    };
     private static readonly string[] Paths = BuildPaths();
 
     public static bool DrawRounded(ImDrawListPtr drawList, Rect rect, PrismPicture picture, float alpha,

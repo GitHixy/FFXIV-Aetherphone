@@ -507,7 +507,7 @@ internal sealed partial class PrismApp
         Typography.Draw(drawList,
             new Vector2(stage.Center.X - Typography.Measure(heat, PrismType.Caption).X * 0.5f, stage.Min.Y), heat,
             PrismArt.Muted, PrismType.Caption);
-        DrawGuideCard(drawList, photo, PrismPicture.None, 1f, scale);
+        DrawGuideCard(drawList, photo, PrismPicture.GuideJudging, 1f, scale);
         var rowTop = photo.Max.Y + Metrics.Space.Md * scale;
         var row = new Rect(new Vector2(stage.Min.X, rowTop), new Vector2(stage.Max.X, rowTop + size));
         var picked = DrawScoreButtons(drawList, row, guideScore,
