@@ -2328,7 +2328,7 @@ internal static class L
             new("changelog.r1400.31",
                 "Added posting your own Prism glam with up to four photos: choose Modded or Vanilla and the race and gender in the photo, then add the pieces with their dyes and any mods, or fill them in from your character"),
             new("changelog.r1400.32",
-                "Added a Prism wardrobe that keeps what you're wearing, your Glamourer designs and any glam you add, and puts an outfit back on in one tap"),
+                "Added a Prism wardrobe: build outfits piece by piece with their dyes and mods or fill them from what you're wearing, keep your Glamourer designs and any glam you add, and put an outfit back on in one tap"),
             new("changelog.r1400.33",
                 "Added Modded and Vanilla contests to Prism side by side, with a Vanilla entry listing its gear and dyes by hand"),
             new("changelog.r1400.34",
