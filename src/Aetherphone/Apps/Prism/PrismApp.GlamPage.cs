@@ -620,9 +620,7 @@ internal sealed partial class PrismApp
 
         if (saved is not null)
         {
-            Push(PrismScreen.WardrobeOutfit);
-            outfitId = saved.Id;
-            renaming = false;
+            OpenOutfit(saved.Id);
         }
         else if (wearing)
         {

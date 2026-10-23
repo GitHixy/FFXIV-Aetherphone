@@ -72,9 +72,12 @@ internal sealed partial class PrismApp
     private static bool HasOutfit(GlamGearDto[]? outfit) => outfit is { Length: > 0 };
 
     private GearDraft Draft =>
-        (screen is PrismScreen.GearSearch or PrismScreen.DyePick ? gearReturn : screen) == PrismScreen.Compose
-            ? glamGear
-            : entryGear;
+        (screen is PrismScreen.GearSearch or PrismScreen.DyePick ? gearReturn : screen) switch
+        {
+            PrismScreen.Compose => glamGear,
+            PrismScreen.WardrobeEdit => outfitGear,
+            _ => entryGear,
+        };
 
     private bool EditingEntryOutfit =>
         outfitReturn == PrismScreen.Entry && store.Week is { Phase: PrismPhases.Entering, MyEntry: not null };
@@ -158,12 +161,14 @@ internal sealed partial class PrismApp
 
     private GlamGearDto[]? EntryOutfit() => VanillaEntry ? DraftOutfit() : EntryMods();
 
-    private int DraftPieces()
+    private int DraftPieces() => PieceCount(Draft);
+
+    private static int PieceCount(GearDraft draft)
     {
         var count = 0;
-        for (var index = 0; index < Draft.Items.Length; index++)
+        for (var index = 0; index < draft.Items.Length; index++)
         {
-            if (Draft.Items[index] != 0)
+            if (draft.Items[index] != 0)
             {
                 count++;
             }
@@ -172,9 +177,11 @@ internal sealed partial class PrismApp
         return count;
     }
 
-    private void LoadDraftGear(GlamGearDto[]? outfit)
+    private void LoadDraftGear(GlamGearDto[]? outfit) => LoadGear(Draft, outfit);
+
+    private static void LoadGear(GearDraft draft, GlamGearDto[]? outfit)
     {
-        Draft.Clear();
+        draft.Clear();
         var gear = outfit ?? Array.Empty<GlamGearDto>();
         for (var index = 0; index < gear.Length; index++)
         {
@@ -184,9 +191,9 @@ internal sealed partial class PrismApp
                 continue;
             }
 
-            Draft.Items[slot] = gear[index].ItemId;
-            Draft.Stain0[slot] = gear[index].Stain0;
-            Draft.Stain1[slot] = gear[index].Stain1;
+            draft.Items[slot] = gear[index].ItemId;
+            draft.Stain0[slot] = gear[index].Stain0;
+            draft.Stain1[slot] = gear[index].Stain1;
         }
     }
 
@@ -203,16 +210,18 @@ internal sealed partial class PrismApp
         return -1;
     }
 
-    private GlamGearDto[] DraftOutfit()
+    private GlamGearDto[] DraftOutfit() => OutfitFrom(Draft);
+
+    private static GlamGearDto[] OutfitFrom(GearDraft draft)
     {
-        var gear = new GlamGearDto[DraftPieces()];
+        var gear = new GlamGearDto[PieceCount(draft)];
         var next = 0;
-        for (var index = 0; index < Draft.Items.Length; index++)
+        for (var index = 0; index < draft.Items.Length; index++)
         {
-            if (Draft.Items[index] != 0)
+            if (draft.Items[index] != 0)
             {
-                gear[next++] = new GlamGearDto((int)GearSlots.All[index], Draft.Items[index], Draft.Stain0[index],
-                    Draft.Stain1[index]);
+                gear[next++] = new GlamGearDto((int)GearSlots.All[index], draft.Items[index], draft.Stain0[index],
+                    draft.Stain1[index]);
             }
         }
 
