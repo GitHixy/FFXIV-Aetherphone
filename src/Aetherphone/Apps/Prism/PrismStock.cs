@@ -10,13 +10,17 @@ internal enum PrismPicture : byte
     TrackModded,
     TrackVanilla,
     GuideJudging,
+    GuidePodiumFirst,
+    GuidePodiumSecond,
+    GuidePodiumThird,
 }
 
 internal static class PrismStock
 {
     private static readonly string[] Files =
     {
-        string.Empty, "track-modded.png", "track-vanilla.png", "guide-judging.png",
+        string.Empty, "track-modded.png", "track-vanilla.png", "guide-judging.png", "guide-podium-first.png",
+        "guide-podium-second.png", "guide-podium-third.png",
     };
     private static readonly string[] Paths = BuildPaths();
 

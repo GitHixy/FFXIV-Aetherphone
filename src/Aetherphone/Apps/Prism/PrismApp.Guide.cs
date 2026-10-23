@@ -71,6 +71,10 @@ internal sealed partial class PrismApp
     private static readonly string[] GuideTrackIds = { PrismTracks.Modded, PrismTracks.Vanilla };
     private static readonly PrismFact[] GuideTrackFacts = { PrismFact.Modded, PrismFact.Vanilla };
     private static readonly int[] GuidePodiumRanks = { 2, 3, 1 };
+    private static readonly PrismPicture[] GuidePodiumPictures =
+    {
+        PrismPicture.GuidePodiumFirst, PrismPicture.GuidePodiumSecond, PrismPicture.GuidePodiumThird,
+    };
     private static readonly PrismFact[] GuideFilters =
     {
         PrismFact.FitsMe, PrismFact.Race, PrismFact.Male, PrismFact.Female, PrismFact.Modded, PrismFact.Vanilla,
@@ -568,7 +572,7 @@ internal sealed partial class PrismApp
                 new Vector2(middle + width * 0.5f, baseline));
             var delay = GuideRevealDelay + GuideRevealStagger * (GuidePodiumCount - rank);
             var lit = guideRevealed ? PrismMotion.At(age, delay, Motion.Sheet) : 0f;
-            DrawGuideCard(drawList, card, PrismPicture.None, 1f, scale);
+            DrawGuideCard(drawList, card, GuidePodiumPictures[rank - 1], 1f, scale);
             if (lit < PrismMotion.Settled)
             {
                 Squircle.Fill(drawList, card.Min, card.Max, radius,
