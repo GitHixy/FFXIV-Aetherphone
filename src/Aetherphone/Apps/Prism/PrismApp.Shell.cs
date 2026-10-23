@@ -23,12 +23,14 @@ internal readonly record struct PrismStop(
     GlamDto? Glam,
     GlamAuthorDto? Author,
     bool Saved,
+    bool Placings,
     GlamListKind Kind,
     uint ItemId,
     GlamModDto? Mod,
     string Tag,
     string Title,
     string OutfitId,
+    WeekGallery Gallery,
     float Scroll);
 
 internal sealed partial class PrismApp
@@ -57,7 +59,6 @@ internal sealed partial class PrismApp
     private PrismScreen bodyScreen;
     private PrismScreen drawingScreen;
     private float pendingScroll = KeepScroll;
-    private string? introWeek;
     private string wearingKey = string.Empty;
     private string wearingTitle = string.Empty;
     private string wearingGlamId = string.Empty;
@@ -67,11 +68,13 @@ internal sealed partial class PrismApp
 
     private static bool IsLibraryScreen(PrismScreen value) =>
         value is PrismScreen.GlamDetail or PrismScreen.Compose or PrismScreen.Profile or PrismScreen.GlamList
-            or PrismScreen.WardrobeOutfit or PrismScreen.WardrobeCover or PrismScreen.Rewards or PrismScreen.Activity;
+            or PrismScreen.WardrobeOutfit or PrismScreen.WardrobeCover or PrismScreen.Rewards or PrismScreen.Activity
+            or PrismScreen.Gallery or PrismScreen.EditProfile or PrismScreen.ProfilePhoto or PrismScreen.BannerPick
+            or PrismScreen.BannerCrop;
 
     private static bool ShowsTabBar(PrismScreen value) =>
         IsTabRoot(value) || value is PrismScreen.GlamDetail or PrismScreen.Profile or PrismScreen.GlamList
-            or PrismScreen.WardrobeOutfit or PrismScreen.Rewards or PrismScreen.Activity;
+            or PrismScreen.WardrobeOutfit or PrismScreen.Rewards or PrismScreen.Activity or PrismScreen.Gallery;
 
     private bool Wearing(string key) => glamour.TryingOn && key.Length > 0 && wearingKey == key;
 
@@ -188,13 +191,6 @@ internal sealed partial class PrismApp
         }
         else if (next == PrismTab.Week)
         {
-            var week = store.Week?.Id ?? string.Empty;
-            if (week != introWeek)
-            {
-                introWeek = week;
-                introDelay = IntroSeconds;
-            }
-
             store.Refresh();
         }
     }
@@ -207,8 +203,9 @@ internal sealed partial class PrismApp
             historyDepth--;
         }
 
-        history[historyDepth++] = new PrismStop(screen, glams.Detail, glams.Profile?.User, showSaved, listKind,
-            listItemId, listMod, listTag, listTitle, outfitId, bodyScreen == screen ? bodyScroll : 0f);
+        history[historyDepth++] = new PrismStop(screen, glams.Detail, glams.Profile?.User, showSaved, showPlacings,
+            listKind, listItemId, listMod, listTag, listTitle, outfitId, gallery,
+            bodyScreen == screen ? bodyScroll : 0f);
 
         Go(next);
     }
@@ -266,7 +263,8 @@ internal sealed partial class PrismApp
                 break;
             case PrismScreen.Me or PrismScreen.Profile when stop.Author is not null:
                 showSaved = stop.Saved;
-                glams.OpenProfile(stop.Author, stop.Saved);
+                showPlacings = stop.Placings;
+                glams.OpenProfile(stop.Screen == PrismScreen.Me ? glams.Me ?? stop.Author : stop.Author, stop.Saved);
                 break;
             case PrismScreen.GlamList:
                 listKind = stop.Kind;
@@ -278,6 +276,10 @@ internal sealed partial class PrismApp
                 break;
             case PrismScreen.WardrobeOutfit:
                 outfitId = stop.OutfitId;
+                break;
+            case PrismScreen.Gallery:
+                gallery = stop.Gallery;
+                glams.OpenWeek(gallery.WeekId, gallery.Track);
                 break;
         }
     }

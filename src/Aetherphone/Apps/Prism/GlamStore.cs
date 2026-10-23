@@ -27,9 +27,12 @@ internal sealed record GlamMore(string GlamId, GlamDto[] Items);
 internal sealed class GlamStore : IDisposable
 {
     public const int MaxPhotos = 4;
+    public const bool RevealsWholePhoto = false;
 
     private const int MoreLimit = 4;
     private const int MeRetrySeconds = 5;
+    private const int BannerRetrySeconds = 5;
+    private const int NotFoundStatus = 404;
 
     private const int PhotoBaseSize = 1080;
     private const PostAspect GlamAspect = PostAspect.Portrait;
@@ -49,6 +52,7 @@ internal sealed class GlamStore : IDisposable
     private readonly FailureSlot postFailure = new();
     private readonly FailureSlot profileFailure = new();
     private readonly RetryGate meGate = new(TimeSpan.FromSeconds(MeRetrySeconds));
+    private readonly RetryGate bannerGate = new(TimeSpan.FromSeconds(BannerRetrySeconds));
     private readonly FeedLane<GlamDto>[] discover =
     {
         FeedLane<GlamDto>.ServerOrdered(), FeedLane<GlamDto>.ServerOrdered(), FeedLane<GlamDto>.ServerOrdered(),
@@ -79,6 +83,10 @@ internal sealed class GlamStore : IDisposable
     private volatile string meFor = string.Empty;
     private volatile bool loadingMe;
     private volatile bool savingProfile;
+    private volatile GlamDto? banner;
+    private volatile string bannerFor = string.Empty;
+    private volatile bool bannerMissing;
+    private volatile bool bannerFailed;
     private volatile GlamAuthorDto[] people = Array.Empty<GlamAuthorDto>();
     private volatile string peopleFor = string.Empty;
     private volatile string peopleAsked = string.Empty;
@@ -349,6 +357,10 @@ internal sealed class GlamStore : IDisposable
     public void OpenTag(string tag) =>
         OpenList(TagKey(tag), (cursor, token, failure) => client.TagGlamsAsync(tag, cursor, token, failure));
 
+    public void OpenWeek(string weekId, string track) =>
+        OpenList(string.Concat("week:", weekId, "|", track),
+            (cursor, token, failure) => client.WeekGlamsAsync(weekId, track, cursor, token, failure));
+
     public void OpenMoreFrom(GlamDto glam)
     {
         if (moreFor == glam.Id || glam.Author is not { Id.Length: > 0 } author || !session.IsSignedIn)
@@ -536,7 +548,7 @@ internal sealed class GlamStore : IDisposable
             for (var index = 0; index < count; index++)
             {
                 var baked = ImageProcessor.BakeCroppedUpload(photos[index].Path, photos[index].Crop, width, height,
-                    PostAspects.RevealsWholeImage(GlamAspect), PhotoEdit.None);
+                    RevealsWholePhoto, PhotoEdit.None);
                 var upload = await media.UploadUrlAsync(baked.ContentType, PrismClient.MediaScope, token,
                     received => failure = received).ConfigureAwait(false);
                 if (upload is null || !await media.UploadImageAsync(upload.UploadUrl, baked.Bytes, baked.ContentType,
@@ -595,8 +607,47 @@ internal sealed class GlamStore : IDisposable
         }, () => loadingMe = false);
     }
 
+    public GlamDto? BannerGlam(string glamId, out bool missing)
+    {
+        if (IsSignedIn && bannerFor != glamId)
+        {
+            bannerGate.Reset();
+            FetchBanner(glamId);
+        }
+        else if (IsSignedIn && bannerFailed && bannerFor == glamId && bannerGate.TryPass())
+        {
+            FetchBanner(glamId);
+        }
+
+        missing = bannerMissing && bannerFor == glamId;
+        return banner is { } found && found.Id == glamId ? found : null;
+    }
+
+    private void FetchBanner(string glamId)
+    {
+        bannerFor = glamId;
+        banner = null;
+        bannerMissing = false;
+        bannerFailed = false;
+        bannerGate.TryPass();
+        work.Run("banner", async token =>
+        {
+            var failure = AepFailure.None;
+            var fetched = await client.GlamAsync(glamId, token, received => failure = received)
+                .ConfigureAwait(false);
+            if (bannerFor != glamId)
+            {
+                return;
+            }
+
+            banner = fetched;
+            bannerMissing = fetched is null && failure.StatusCode == NotFoundStatus;
+            bannerFailed = fetched is null && !bannerMissing;
+        });
+    }
+
     public void UpdateProfile(string displayName, string handle, string bio, GlamPhotoDraft? photo,
-        Action<bool> onComplete)
+        GlamBannerDto? bannerGlam, Action<bool> onComplete)
     {
         var owner = MyId;
         if (savingProfile || !IsSignedIn || owner.Length == 0)
@@ -621,14 +672,16 @@ internal sealed class GlamStore : IDisposable
             }
 
             var updated = await account.UpdateProfileAsync(
-                new UpdateProfileRequest(displayName, handle, bio, avatarUrl), token, null,
+                new UpdateProfileRequest(displayName, handle, bio, avatarUrl, BannerGlam: bannerGlam), token, null,
                 received => failure = received).ConfigureAwait(false);
             if (updated is null)
             {
                 return FailProfile(failure);
             }
 
-            AcceptMe(updated, owner);
+            AcceptMe(bannerGlam is null || updated.BannerGlam is not null
+                ? updated
+                : updated with { BannerGlam = bannerGlam }, owner);
             return true;
         }, onComplete, () => savingProfile = false);
     }
@@ -759,7 +812,7 @@ internal sealed class GlamStore : IDisposable
     }
 
     private static GlamAuthorDto Author(UserDto user, string id) =>
-        new(id, user.DisplayName, user.Handle, user.AvatarUrl ?? string.Empty, user.Bio);
+        new(id, user.DisplayName, user.Handle, user.AvatarUrl ?? string.Empty, user.Bio, user.BannerGlam);
 
     private void AcceptMe(UserDto user, string owner)
     {

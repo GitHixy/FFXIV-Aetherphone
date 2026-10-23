@@ -4,219 +4,271 @@ using Aetherphone.Core.Confirm;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Theme;
 using Aetherphone.Core.Wallpapers;
+using Aetherphone.Windows;
 using Aetherphone.Windows.Components;
 using Aetherphone.Windows.Widgets;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 
 namespace Aetherphone.Apps.Prism;
 
+internal enum WardrobeAction : byte
+{
+    Import,
+    Surprise,
+    Rename,
+    Photo,
+    Glamourer,
+    Delete,
+}
+
 internal sealed partial class PrismApp
 {
-    private const float CollageIconUnits = 40f;
-    private const int CollagePieces = 4;
+    private const string FitLogoArtwork = "prism.fg";
+    private const float FitLogoShare = 0.6f;
+    private const float FitLogoAlpha = 0.9f;
+    private const int SheetCapacity = 4;
+    private const float SaveGlyphUnits = 14f;
 
     private readonly WardrobeStore wardrobe;
     private readonly Random roulette = new();
+    private readonly ActionSheet wardrobeSheet = new();
+    private readonly ActionSheet.Item[] sheetItems = new ActionSheet.Item[SheetCapacity];
+    private readonly WardrobeAction[] sheetActions = new WardrobeAction[SheetCapacity];
+    private readonly ChipRail wardrobeRail = new();
+    private readonly string[] wardrobeChips = new string[2];
+    private readonly bool[] wardrobeChipActive = new bool[2];
+    private WardrobeOutfit? fitFor;
+    private string? fitLanguage;
+    private string fitMeta = string.Empty;
     private string outfitId = string.Empty;
     private bool favouritesOnly;
     private CachedText outfitNameText;
+    private CachedText allChipText;
+    private CachedText favouriteChipText;
     private bool renaming;
     private bool focusRename;
     private string renameText = string.Empty;
     private string coverFor = string.Empty;
+    private int sheetCount;
+    private PrismScreen sheetScreen;
+    private string sheetOutfit = string.Empty;
 
-    private void DrawWardrobe(ImDrawListPtr drawList, Rect content, float scale)
+    private void DrawWardrobe(ImDrawListPtr drawList, Rect full, Rect content, float scale)
     {
         wardrobe.Ensure();
-        var gutter = PrismArt.Gutter(scale);
-        var left = content.Min.X + gutter;
-        var right = content.Max.X - gutter;
-        var top = DrawMasthead(drawList, content, Loc.T(L.Prism.TabWardrobe), string.Empty, string.Empty, scale, out _);
-        var save = Loc.T(L.Prism.SaveWearing);
-        var height = PrismArt.StripUnits * scale;
-        var saveRect = new Rect(new Vector2(left, top), new Vector2(right, top + height));
-        var bottom = saveRect.Max.Y;
-        if (glamour.HasGlamourer)
-        {
-            var import = Loc.T(L.Prism.ImportDesigns);
-            var gap = Metrics.Space.Md * scale;
-            var half = (right - left - gap) * 0.5f;
-            var inset = height * 0.32f * 2f;
-            var labelPixels = PrismArt.LabelPixels();
-            var stacked = PrismType.Measure(save, PrismFace.Label, labelPixels).X + inset > half ||
-                          PrismType.Measure(import, PrismFace.Label, labelPixels).X + inset > half;
-            var importRect = stacked
-                ? new Rect(new Vector2(left, bottom + gap), new Vector2(right, bottom + gap + height))
-                : new Rect(new Vector2(left + half + gap, top), new Vector2(right, bottom));
-            if (!stacked)
-            {
-                saveRect = new Rect(saveRect.Min, new Vector2(left + half, bottom));
-            }
-
-            bottom = importRect.Max.Y;
-            if (PrismArt.Strip(drawList, importRect, import, string.Empty, false, !wardrobe.Importing) &&
-                wardrobe.StartImport(glamour) == 0)
-            {
-                ShellToast.Show(Loc.T(L.Prism.DesignsAdded, 0));
-            }
-        }
-
-        if (PrismArt.Strip(drawList, saveRect, save, "+", true))
-        {
-            SaveWearing();
-        }
-
+        GateWardrobeSheet();
         var imported = wardrobe.PumpImport(glamour);
         if (imported >= 0)
         {
             ShellToast.Show(Loc.T(L.Prism.DesignsAdded, imported));
         }
 
-        top = bottom + Metrics.Space.Lg * scale;
-        top = DrawWardrobeFilters(drawList, left, right, top, scale);
-        var body = new Rect(new Vector2(content.Min.X, top), content.Max);
+        var top = DrawWardrobeHeader(drawList, content, scale);
+        top = DrawWardrobeChips(content, top, scale);
+        var body = new Rect(new Vector2(full.Min.X, top), new Vector2(full.Max.X, content.Max.Y));
+        if (wardrobe.Loading || wardrobe.Importing || CountOutfits(favouritesOnly) > 0)
+        {
+            DrawOutfitGrid(body, scale);
+        }
+        else
+        {
+            DrawEmpty(drawList, new Rect(new Vector2(content.Min.X, top),
+                    new Vector2(content.Max.X, content.Max.Y - bottomChrome)),
+                favouritesOnly ? PhoneIcons.Star : IconGlyph.Of(FontAwesomeIcon.Tshirt),
+                Loc.T(favouritesOnly ? L.Prism.FavouritesEmptyTitle : L.Prism.WardrobeEmptyTitle),
+                Loc.T(favouritesOnly ? L.Prism.FavouritesEmptyHint : L.Prism.WardrobeEmptyHint),
+                favouritesOnly ? string.Empty : Loc.T(L.Prism.SaveWearing), ButtonStyle.Solid, scale, out var save);
+            if (save)
+            {
+                SaveWearing();
+            }
+        }
+
+        DrawWardrobeSheet(full);
+    }
+
+    private float DrawWardrobeHeader(ImDrawListPtr drawList, Rect content, float scale)
+    {
+        var height = Metrics.Size.TapTarget * scale;
+        var top = content.Min.Y + Metrics.Space.Sm * scale;
+        var middle = top + height * 0.5f;
+        var left = content.Min.X;
+        var right = content.Max.X;
+        var canImport = glamour.HasGlamourer && !wardrobe.Importing;
+        var canShuffle = wardrobe.Outfits.Length > 1;
+        if (canImport || canShuffle)
+        {
+            if (IconButton(drawList, new Vector2(right - height * 0.5f, middle), PhoneIcons.Dots, Loc.T(L.Prism.More), scale))
+            {
+                sheetCount = 0;
+                AddSheetAction(canImport, WardrobeAction.Import);
+                AddSheetAction(canShuffle, WardrobeAction.Surprise);
+                OpenWardrobeSheet(string.Empty);
+            }
+
+            right -= height + Metrics.Space.Xs * scale;
+        }
+
+        var save = Loc.T(L.Prism.SaveWearing);
+        var heading = Loc.T(L.Prism.TabWardrobe);
+        var pillHeight = Button.RegularHeight * scale;
+        var labelStyle = Button.LabelStyle(pillHeight);
+        var glyph = SaveGlyphUnits * scale;
+        var gap = Metrics.Space.Xs * scale;
+        var textWidth = Typography.Measure(save, labelStyle).X;
+        var saveWidth = glyph + gap + textWidth + Metrics.Space.Md * 2f * scale;
+        var labelled = left + Typography.Measure(heading, PrismType.Title).X + Metrics.Space.Md * scale <=
+                       right - saveWidth;
+        var saveLeft = labelled ? right - saveWidth : right - height;
+        bool saved;
+        if (labelled)
+        {
+            var hit = new Rect(new Vector2(saveLeft, top), new Vector2(right, top + height));
+            var hovered = UiInteract.Hover(hit.Min, hit.Max);
+            var pill = new Rect(new Vector2(saveLeft, middle - pillHeight * 0.5f),
+                new Vector2(right, middle + pillHeight * 0.5f));
+            var face = Button.Surface(drawList, pill, controls, ButtonStyle.Solid, ButtonRole.Normal, true, hovered,
+                ImGui.GetID("prism.saveWearing"));
+            var x = face.Face.Center.X - (glyph + gap + textWidth) * 0.5f;
+            PhoneIcon.Draw(drawList, new Vector2(x + glyph * 0.5f, face.Face.Center.Y), PhoneIcons.Plus, face.LabelInk,
+                glyph);
+            Typography.Draw(drawList,
+                new Vector2(x + glyph + gap, face.Face.Center.Y - Typography.LineHeight(labelStyle) * 0.5f), save,
+                face.LabelInk, labelStyle);
+            saved = UiInteract.Click(hit.Min, hit.Max, hovered);
+        }
+        else
+        {
+            saved = IconButton(drawList, new Vector2(right - height * 0.5f, middle), PhoneIcons.Plus, save, scale);
+        }
+        if (saved)
+        {
+            SaveWearing();
+        }
+
+        var title = Typography.FitText(heading, MathF.Max(1f, saveLeft - Metrics.Space.Md * scale - left),
+            PrismType.Title);
+        Typography.Draw(drawList, new Vector2(left, middle - Typography.LineHeight(PrismType.Title) * 0.5f), title,
+            PrismArt.Fore, PrismType.Title);
+        return top + height;
+    }
+
+    private float DrawWardrobeChips(Rect content, float top, float scale)
+    {
+        var all = wardrobe.Outfits.Length;
+        var favourites = CountOutfits(true);
+        var allKey = HashCode.Combine(all, Loc.Current.Code);
+        wardrobeChips[0] = allChipText.IsCurrent(allKey)
+            ? allChipText.Value
+            : allChipText.Store(allKey, string.Concat(Loc.T(L.Prism.FilterAll), " ", CountLabel(all)));
+        var favouriteKey = HashCode.Combine(favourites, Loc.Current.Code);
+        wardrobeChips[1] = favouriteChipText.IsCurrent(favouriteKey)
+            ? favouriteChipText.Value
+            : favouriteChipText.Store(favouriteKey,
+                string.Concat(Loc.T(L.Prism.Favourites), " ", CountLabel(favourites)));
+        wardrobeChipActive[0] = !favouritesOnly;
+        wardrobeChipActive[1] = favouritesOnly;
+        var row = new Rect(new Vector2(content.Min.X, top + Metrics.Space.Xs * scale),
+            new Vector2(content.Max.X, top + Metrics.Space.Xs * scale + Metrics.Size.TapTarget * scale));
+        var picked = wardrobeRail.Draw(row, ui, wardrobeChips, wardrobeChipActive);
+        if (picked >= 0)
+        {
+            favouritesOnly = picked == 1;
+        }
+
+        return row.Max.Y + Metrics.Space.Xs * scale;
+    }
+
+    private int CountOutfits(bool favourites)
+    {
+        var outfits = wardrobe.Outfits;
+        if (!favourites)
+        {
+            return outfits.Length;
+        }
+
+        var count = 0;
+        for (var index = 0; index < outfits.Length; index++)
+        {
+            if (outfits[index].Favourite)
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private void DrawOutfitGrid(Rect body, float scale)
+    {
         using var surface = BeginBody(body);
         var list = ImGui.GetWindowDrawList();
         var origin = ImGui.GetCursorScreenPos();
-        var width = ScrollLayout.StableContentWidth() - gutter * 2f;
-        var cursor = DrawOutfitGrid(list, origin.X + gutter, origin.Y, width, scale);
-        ImGui.Dummy(new Vector2(width, cursor - origin.Y + PrismArt.BottomMargin(scale)));
-    }
-
-    private float DrawWardrobeFilters(ImDrawListPtr drawList, float left, float right, float top, float scale)
-    {
-        var labelPixels = PrismArt.LabelPixels();
-        var labelLine = PrismType.LineHeight(PrismFace.Label, labelPixels);
-        var x = left;
-        for (var index = 0; index < 2; index++)
-        {
-            var favourites = index == 1;
-            var label = Loc.T(favourites ? L.Prism.Favourites : L.Prism.FilterAll);
-            var width = PrismType.Measure(label, PrismFace.Label, labelPixels).X;
-            var active = favouritesOnly == favourites;
-            if (PrismArt.Link(drawList, new Vector2(x, top), label, active ? PrismArt.Fore : PrismArt.Muted, scale))
-            {
-                favouritesOnly = favourites;
-            }
-
-            if (active)
-            {
-                PrismArt.Hairline(drawList, x, x + width, top + labelLine, PrismArt.Fore, scale);
-            }
-
-            x += width + Metrics.Space.Lg * scale;
-        }
-
-        var surprise = Loc.T(L.Prism.SurpriseMe);
-        if (wardrobe.Outfits.Length > 1 &&
-            PrismArt.Link(drawList, new Vector2(right - PrismType.Measure(surprise, PrismFace.Label, labelPixels).X, top),
-                surprise, PrismArt.Muted, scale))
-        {
-            var outfits = wardrobe.Outfits;
-            WearOutfit(outfits[roulette.Next(outfits.Length)]);
-        }
-
-        return top + labelLine + Metrics.Space.Lg * scale;
-    }
-
-    private float DrawOutfitGrid(ImDrawListPtr drawList, float left, float top, float width, float scale)
-    {
+        var width = ScrollLayout.StableContentWidth();
+        var gap = Metrics.Space.Xxs * scale;
+        var gridWidth = width - gap * 2f;
+        var line = GridLine(scale);
         var outfits = wardrobe.Outfits;
-        if (wardrobe.Loading || wardrobe.Importing)
-        {
-            PrismType.Draw(drawList, new Vector2(left, top), Loc.T(L.Common.Loading), PrismArt.Muted, PrismFace.Label,
-                PrismArt.LabelPixels());
-            return top + PrismType.LineHeight(PrismFace.Label, PrismArt.LabelPixels());
-        }
-
-        if (outfits.Length == 0)
-        {
-            var hint = PrismType.Sentences(Loc.T(L.Prism.WardrobeEmptyHint), TextStyles.Subheadline, width);
-            return top + Typography.DrawWrappedLeft(new Vector2(left, top), hint, PrismArt.Muted, TextStyles.Subheadline,
-                PrismType.BalancedWidth(hint, TextStyles.Subheadline, width));
-        }
-
-        var gap = Metrics.Space.Sm * scale;
-        var column = (width - gap * (GridColumns - 1)) / GridColumns;
-        var height = column / GlamStore.PhotoRatio;
-        var labelPixels = PrismArt.LabelPixels();
-        var labelLine = PrismType.LineHeight(PrismFace.Label, labelPixels);
-        var icon = CollageIconUnits * scale;
+        var busy = wardrobe.Loading || wardrobe.Importing;
+        var count = busy ? PlaceholderRows * GridColumns : outfits.Length;
         var shown = 0;
-        for (var index = 0; index < outfits.Length; index++)
+        for (var index = 0; index < count; index++)
         {
+            if (!busy && favouritesOnly && !outfits[index].Favourite)
+            {
+                continue;
+            }
+
+            var photo = GridCell(origin.X + gap, origin.Y, gridWidth, shown++, scale);
+            if (!ImGui.IsRectVisible(photo.Min, new Vector2(photo.Max.X, photo.Max.Y + line)))
+            {
+                continue;
+            }
+
+            if (busy)
+            {
+                PrismArt.Placeholder(list, photo, false, scale);
+                continue;
+            }
+
             var outfit = outfits[index];
-            if (favouritesOnly && !outfit.Favourite)
+            var mark = PrismMotion.Mark(list);
+            if (!DrawOutfitCover(list, photo, outfit.Cover))
             {
-                continue;
+                PrismArt.Placeholder(list, photo, false, scale);
             }
 
-            var x = left + shown % GridColumns * (column + gap);
-            var y = top + shown / GridColumns * (height + gap);
-            shown++;
-            var min = new Vector2(x, y);
-            var max = new Vector2(x + column, y + height);
-            if (!ImGui.IsRectVisible(min, max))
+            if (DrawGridTile(list, mark, photo, string.Empty, outfit.Name, string.Empty, PieceLabel(outfit.Gear),
+                    scale))
             {
-                continue;
-            }
-
-            var covered = DrawOutfitCover(drawList, new Rect(min, max), outfit.Cover);
-            if (covered)
-            {
-                drawList.AddRectFilledMultiColor(new Vector2(x, max.Y - height * TileShadeShare), max,
-                    ImGui.GetColorU32(TileClear), ImGui.GetColorU32(TileClear), ImGui.GetColorU32(TileShade),
-                    ImGui.GetColorU32(TileShade));
-            }
-            else
-            {
-                PrismArt.Swatch(drawList, new Rect(min, max), (int)(outfit.CreatedAtUnix % int.MaxValue));
-            }
-
-            var placed = covered ? CollagePieces : 0;
-            for (var pieceIndex = 0; pieceIndex < outfit.Gear.Length && placed < CollagePieces; pieceIndex++)
-            {
-                if (!GearItem(outfit.Gear[pieceIndex].ItemId, out _, out var iconId))
-                {
-                    continue;
-                }
-
-                var iconMin = new Vector2(min.X + gap + placed % 2 * (icon + gap), min.Y + gap + placed / 2 * (icon + gap));
-                GameIconTile.Draw(drawList, textures, iconId, iconMin, iconMin + new Vector2(icon, icon), 0f, scale);
-                placed++;
-            }
-
-            drawList.PushClipRect(min, max, true);
-            PrismType.Draw(drawList, new Vector2(x + gap, max.Y - gap - labelLine),
-                PrismType.FitLabel(outfit.Name, labelPixels, column - gap * 2f), PrismArt.PhotoFore, PrismFace.Label,
-                labelPixels);
-            drawList.PopClipRect();
-            var hovered = UiInteract.Hover(min, max);
-            if (hovered)
-            {
-                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-            }
-
-            if (UiInteract.Click(min, max, hovered))
-            {
-                Push(PrismScreen.WardrobeOutfit);
-                outfitId = outfit.Id;
-                renaming = false;
+                OpenOutfit(outfit.Id);
             }
         }
 
-        if (favouritesOnly && shown == 0)
-        {
-            var hint = PrismType.Sentences(Loc.T(L.Prism.FavouritesEmptyHint), TextStyles.Subheadline, width);
-            return top + Typography.DrawWrappedLeft(new Vector2(left, top), hint, PrismArt.Muted, TextStyles.Subheadline,
-                PrismType.BalancedWidth(hint, TextStyles.Subheadline, width));
-        }
-
-        var rows = (shown + GridColumns - 1) / GridColumns;
-        return top + rows * (height + gap);
+        ImGui.Dummy(new Vector2(width, GridHeight(gridWidth, shown, scale) + PrismArt.BottomMargin(scale)));
     }
 
-    private void DrawWardrobeOutfit(ImDrawListPtr drawList, Rect content, float scale)
+    private void OpenOutfit(string id)
+    {
+        Push(PrismScreen.WardrobeOutfit);
+        outfitId = id;
+        ResetPieces();
+        renaming = false;
+    }
+
+    private string PieceLabel(GlamGearDto[] gear)
+    {
+        var pieces = 0;
+        for (var index = 0; index < gear.Length; index++)
+        {
+            pieces += gear[index].ItemId != 0 ? 1 : 0;
+        }
+
+        return pieces > 0 ? CountLabel(pieces) : string.Empty;
+    }
+
+    private void DrawWardrobeOutfit(ImDrawListPtr drawList, Rect full, Rect content, float scale)
     {
         if (wardrobe.Find(outfitId) is not { } outfit)
         {
@@ -224,33 +276,88 @@ internal sealed partial class PrismApp
             return;
         }
 
-        var top = DrawHeader(drawList, content, string.Empty, string.Empty, true, scale);
-        var gutter = PrismArt.Gutter(scale);
-        var body = new Rect(new Vector2(content.Min.X, top), content.Max);
+        GateWardrobeSheet();
+        SyncFit(outfit);
+        var covered = outfit.Cover is { } cover && !wallpaperImages.Failed(cover.Path);
+        var top = covered ? PhotoTop(full, content) : content.Min.Y;
+        DrawFit(new Rect(new Vector2(full.Min.X, top), new Vector2(full.Max.X, content.Max.Y)), outfit, covered,
+            covered ? PhotoInset(full, content) : 0f, scale);
+        DrawWardrobeSheet(full);
+    }
+
+    private void DrawFit(Rect body, WardrobeOutfit outfit, bool covered, float topInset, float scale)
+    {
         using var surface = BeginBody(body);
         var list = ImGui.GetWindowDrawList();
         var origin = ImGui.GetCursorScreenPos();
-        var width = ScrollLayout.StableContentWidth() - gutter * 2f;
-        var left = origin.X + gutter;
-        var cursor = origin.Y;
-        if (outfit.Cover is { } cover && !wallpaperImages.Failed(cover.Path))
+        var width = ScrollLayout.StableContentWidth();
+        var heroTop = new Vector2(origin.X, BodyTop());
+        var hero = new Rect(heroTop, heroTop + new Vector2(width, width / GlamStore.PhotoRatio));
+        var inset = Metrics.Space.Lg * scale;
+        if (covered)
         {
-            var photo = new Rect(new Vector2(left, cursor),
-                new Vector2(left + width, cursor + width / GlamStore.PhotoRatio));
-            list.AddRectFilled(photo.Min, photo.Max,
-                ImGui.GetColorU32(Palette.WithAlpha(PrismArt.Fore, PickFillAlpha)));
-            DrawOutfitCover(list, photo, cover);
-            cursor = photo.Max.Y + Metrics.Space.Lg * scale;
+            if (!DrawOutfitCover(list, hero, outfit.Cover))
+            {
+                PrismArt.Placeholder(list, hero, false, scale);
+            }
+
+            if (!PrismArt.Light)
+            {
+                PrismArt.TopFog(list, hero, scale);
+            }
+
+            if (UiInteract.Click(hero.Min, hero.Max, piecesOpen && UiInteract.Hover(hero.Min, hero.Max)))
+            {
+                piecesOpen = false;
+            }
+
+            DrawPiecesLayer(list, hero, topInset, outfit.Gear, scale);
+            DrawPiecesChip(list, hero, scale);
+        }
+        else
+        {
+            PrismArt.Placeholder(list, hero, false, scale);
+            AppIconTextures.TryDrawArtwork(list, FitLogoArtwork, hero.Center, hero.Width * FitLogoShare,
+                Vector4.One with { W = FitLogoAlpha });
+            var radius = Metrics.Size.TapTarget * 0.5f * scale;
+            if (RoundButton.Icon(list, new Vector2(hero.Center.X, hero.Max.Y - inset - radius), radius,
+                    PhoneIcons.PhotoPlus, controls, ButtonStyle.Gray, Loc.T(L.Prism.AddPhoto)))
+            {
+                PickOutfitCover(outfit);
+            }
         }
 
-        cursor = DrawOutfitName(list, left, cursor, width, outfit, scale);
-        var height = PrismArt.StripUnits * scale;
-        var gap = Metrics.Space.Md * scale;
-        var half = (width - gap) * 0.5f;
-        var wear = new Rect(new Vector2(left, cursor), new Vector2(left + half, cursor + height));
-        var favourite = new Rect(new Vector2(left + half + gap, cursor), new Vector2(left + width, cursor + height));
+        DrawPhotoBack(list, hero, topInset, scale);
+
+        var left = origin.X + inset;
+        var right = origin.X + width - inset;
+        var cursor = DrawOutfitName(list, left, right, hero.Max.Y + inset, outfit, scale) + Metrics.Space.Xxs * scale;
+        Typography.Draw(list, new Vector2(left, cursor), Typography.FitText(fitMeta, right - left, PrismType.Caption),
+            PrismArt.Muted, PrismType.Caption);
+        cursor += Typography.LineHeight(PrismType.Caption) + inset;
+        cursor = DrawFitActions(list, left, right, cursor, outfit, scale);
+        if (!glamour.HasGlamourer)
+        {
+            cursor += Metrics.Space.Sm * scale + Typography.DrawWrappedLeft(new Vector2(left, cursor + Metrics.Space.Sm * scale),
+                Loc.T(L.Prism.TryOnWithoutGlamourer), PrismArt.Muted, PrismType.Caption, right - left);
+        }
+
+        cursor = DrawPieceSection(list, left, right, cursor + Metrics.Space.Xl * scale, outfit.Gear, scale);
+        cursor = DrawModSection(list, left, right, cursor, outfit.Gear, scale);
+        ImGui.Dummy(new Vector2(width, cursor - origin.Y + PrismArt.BottomMargin(scale)));
+    }
+
+    private float DrawFitActions(ImDrawListPtr drawList, float left, float right, float top, WardrobeOutfit outfit,
+        float scale)
+    {
+        var reach = Metrics.Size.TapTarget * scale;
+        var height = Button.LargeHeight * scale;
+        var middle = top + height * 0.5f;
         var wearing = Wearing(outfit.Id);
-        if (PrismArt.Strip(list, wear, Loc.T(wearing ? L.Prism.TakeOff : L.Prism.PutOn), string.Empty, true))
+        var wear = new Rect(new Vector2(left, top),
+            new Vector2(right - reach * 2f - Metrics.Space.Sm * scale, top + height));
+        if (DrawButton(drawList, wear, Loc.T(wearing ? L.Prism.TakeOff : L.Prism.PutOn), ButtonStyle.Solid, scale,
+                id: "prism.putOn"))
         {
             if (wearing)
             {
@@ -262,99 +369,70 @@ internal sealed partial class PrismApp
             }
         }
 
-        if (PrismArt.Strip(list, favourite, Loc.T(outfit.Favourite ? L.Prism.Unfavourite : L.Prism.Favourite),
-                string.Empty, false))
+        if (IconButton(drawList, new Vector2(right - reach * 1.5f, middle),
+                outfit.Favourite ? PhoneIcons.StarFilled : PhoneIcons.Star,
+                Loc.T(outfit.Favourite ? L.Prism.Unfavourite : L.Prism.Favourite), scale))
         {
             wardrobe.Update(outfit with { Favourite = !outfit.Favourite });
         }
 
-        cursor = wear.Max.Y + Metrics.Space.Md * scale;
-        if (!glamour.HasGlamourer)
+        if (IconButton(drawList, new Vector2(right - reach * 0.5f, middle), PhoneIcons.Pencil, Loc.T(L.Prism.Edit), scale))
         {
-            cursor += Typography.DrawWrappedLeft(new Vector2(left, cursor), Loc.T(L.Prism.TryOnWithoutGlamourer),
-                PrismArt.Muted, TextStyles.Footnote, width);
+            OpenFitSheet(outfit);
         }
 
-        cursor += Metrics.Space.Lg * scale;
-        cursor = DrawSectionLabel(list, left, cursor, width, 0, Loc.T(L.Prism.GearHeading), scale);
-        cursor = DrawGearList(list, left, cursor, width, outfit.Gear, true, scale) + Metrics.Space.Lg * scale;
-        if (outfit.State.Length > 0 && glamour.HasGlamourer &&
-            PrismArt.Link(list, new Vector2(left, cursor), Loc.T(L.Prism.SaveToGlamourer), PrismArt.Muted, scale))
-        {
-            SaveToGlamourer(outfit);
-        }
-
-        cursor += Metrics.Size.TapTarget * scale;
-        if (PrismArt.Link(list, new Vector2(left, cursor), Loc.T(L.Prism.DeleteOutfit), PrismArt.Muted, scale))
-        {
-            confirm.Ask(new ConfirmRequest
-            {
-                Title = Loc.T(L.Prism.DeleteOutfitTitle),
-                Message = outfit.Name,
-                ConfirmLabel = Loc.T(L.Common.Delete),
-                CancelLabel = Loc.T(L.Common.Cancel),
-                Danger = true,
-                Confirm = () =>
-                {
-                    wardrobe.Remove(outfit.Id);
-                    GoBack();
-                },
-            });
-        }
-
-        cursor += PrismType.LineHeight(PrismFace.Label, PrismArt.LabelPixels());
-        ImGui.Dummy(new Vector2(width, cursor - origin.Y + PrismArt.BottomMargin(scale)));
+        return top + height;
     }
 
-    private float DrawOutfitName(ImDrawListPtr drawList, float left, float top, float width, WardrobeOutfit outfit,
+    private void SyncFit(WardrobeOutfit outfit)
+    {
+        RefreshPieces(outfit.Id, outfit.Gear);
+        if (ReferenceEquals(outfit, fitFor) && ReferenceEquals(fitLanguage, Loc.Current.Code))
+        {
+            return;
+        }
+
+        fitFor = outfit;
+        fitLanguage = Loc.Current.Code;
+        var saved = Loc.T(L.Prism.SavedOn, TimeText.MonthDay(outfit.CreatedAtUnix));
+        fitMeta = totalPieces == 0 && totalMods == 0 ? saved
+            : totalMods == 0 ? string.Concat(PieceCountLine(), GlamMetaSeparator, saved)
+            : totalPieces == 0 ? string.Concat(ModCountLine(), GlamMetaSeparator, saved)
+            : string.Concat(PieceCountLine(), GlamMetaSeparator, ModCountLine(), GlamMetaSeparator, saved);
+    }
+
+    private float DrawOutfitName(ImDrawListPtr drawList, float left, float right, float top, WardrobeOutfit outfit,
         float scale)
     {
-        if (renaming)
+        if (!renaming)
         {
-            if (focusRename)
-            {
-                ImGui.SetKeyboardFocusHere();
-                focusRename = false;
-            }
-
-            top = DrawField(drawList, left, top, width, Loc.T(L.Prism.TitleLabel), outfit.Name, "##outfitName",
-                ref renameText, TitleMaxLength, scale);
-            if (PrismArt.Link(drawList, new Vector2(left, top), Loc.T(L.Prism.Done), PrismArt.Fore, scale))
-            {
-                renaming = false;
-                var name = renameText.Trim();
-                if (name.Length > 0 && name != outfit.Name)
-                {
-                    wardrobe.Update(outfit with { Name = name });
-                }
-            }
-
-            return top + Metrics.Size.TapTarget * scale;
+            return top + PrismType.DrawHero(drawList, new Vector2(left, top), outfit.Name, right - left, PrismArt.Fore);
         }
 
-        var pixels = PrismType.Fit(outfit.Name, PrismFace.Headline, width, DetailTitleUnits * scale,
-            DetailTitleMinUnits * scale, 2, out var lines);
-        top += PrismType.DrawLines(drawList, new Vector2(left, top), lines, PrismArt.Fore, PrismFace.Headline, pixels) +
-               Metrics.Space.Xs * scale;
-        var rename = Loc.T(L.Prism.Rename);
-        if (PrismArt.Link(drawList, new Vector2(left, top), rename, PrismArt.Muted, scale))
+        if (focusRename)
         {
-            renaming = true;
-            focusRename = true;
-            renameText = outfit.Name;
+            ImGui.SetKeyboardFocusHere();
+            focusRename = false;
         }
 
-        var photoLeft = left + PrismType.Measure(rename, PrismFace.Label, PrismArt.LabelPixels()).X +
-                        Metrics.Space.Xl * scale;
-        if (PrismArt.Link(drawList, new Vector2(photoLeft, top),
-                Loc.T(outfit.Cover is null ? L.Prism.AddPhoto : L.Prism.ChangePhoto), PrismArt.Muted, scale))
+        var done = Loc.T(L.Prism.Done);
+        var doneWidth = ButtonWidth([done], (right - left) * 0.4f, scale);
+        var bottom = DrawInput(drawList, left, top, right - left - doneWidth - Metrics.Space.Sm * scale, outfit.Name,
+            "##outfitName", ref renameText, TitleMaxLength, scale);
+        if (!DrawButton(drawList, new Rect(new Vector2(right - doneWidth, top), new Vector2(right, bottom)), done,
+                ButtonStyle.Plain, scale))
         {
-            Push(PrismScreen.WardrobeCover);
-            coverFor = outfit.Id;
-            composeSession.Open(true);
+            return bottom;
         }
 
-        return top + PrismType.LineHeight(PrismFace.Label, PrismArt.LabelPixels()) + Metrics.Space.Lg * scale;
+        renaming = false;
+        var name = renameText.Trim();
+        if (name.Length > 0 && name != outfit.Name)
+        {
+            wardrobe.Update(outfit with { Name = name });
+        }
+
+        return bottom;
     }
 
     private bool DrawOutfitCover(ImDrawListPtr drawList, Rect rect, WardrobeCover? cover)
@@ -370,6 +448,141 @@ internal sealed partial class PrismApp
         return true;
     }
 
+    private void PickOutfitCover(WardrobeOutfit outfit)
+    {
+        Push(PrismScreen.WardrobeCover);
+        coverFor = outfit.Id;
+        composeSession.Open(true);
+    }
+
+    private void OpenFitSheet(WardrobeOutfit outfit)
+    {
+        sheetCount = 0;
+        AddSheetAction(true, WardrobeAction.Rename);
+        AddSheetAction(true, WardrobeAction.Photo);
+        AddSheetAction(outfit.State.Length > 0 && glamour.HasGlamourer, WardrobeAction.Glamourer);
+        AddSheetAction(true, WardrobeAction.Delete);
+        OpenWardrobeSheet(outfit.Id);
+    }
+
+    private void AddSheetAction(bool shown, WardrobeAction action)
+    {
+        if (shown && sheetCount < SheetCapacity)
+        {
+            sheetActions[sheetCount++] = action;
+        }
+    }
+
+    private void OpenWardrobeSheet(string outfit)
+    {
+        sheetScreen = screen;
+        sheetOutfit = outfit;
+        wardrobeSheet.Open();
+    }
+
+    private void GateWardrobeSheet()
+    {
+        if (sheetScreen == screen)
+        {
+            wardrobeSheet.Gate();
+        }
+        else if (wardrobeSheet.IsOpen)
+        {
+            wardrobeSheet.Close();
+        }
+    }
+
+    private void DrawWardrobeSheet(Rect full)
+    {
+        if (sheetCount == 0 || sheetScreen != screen || !wardrobeSheet.CapturesPointer)
+        {
+            return;
+        }
+
+        for (var index = 0; index < sheetCount; index++)
+        {
+            var action = sheetActions[index];
+            sheetItems[index] = new ActionSheet.Item(Loc.T(SheetLabel(action)), Danger: action == WardrobeAction.Delete);
+        }
+
+        var picked = wardrobeSheet.Draw(full, ActionSheetStyle.From(ui),
+            new ReadOnlySpan<ActionSheet.Item>(sheetItems, 0, sheetCount), Loc.T(L.Common.Cancel), false);
+        if (picked >= 0)
+        {
+            RunSheetAction(sheetActions[picked]);
+        }
+    }
+
+    private LocString SheetLabel(WardrobeAction action) => action switch
+    {
+        WardrobeAction.Import => L.Prism.ImportDesigns,
+        WardrobeAction.Surprise => L.Prism.SurpriseMe,
+        WardrobeAction.Rename => L.Prism.Rename,
+        WardrobeAction.Photo => wardrobe.Find(sheetOutfit)?.Cover is null ? L.Prism.AddPhoto : L.Prism.ChangePhoto,
+        WardrobeAction.Glamourer => L.Prism.SaveToGlamourer,
+        _ => L.Prism.DeleteOutfit,
+    };
+
+    private void RunSheetAction(WardrobeAction action)
+    {
+        if (action == WardrobeAction.Import)
+        {
+            if (wardrobe.StartImport(glamour) == 0)
+            {
+                ShellToast.Show(Loc.T(L.Prism.DesignsAdded, 0));
+            }
+
+            return;
+        }
+
+        if (action == WardrobeAction.Surprise)
+        {
+            var outfits = wardrobe.Outfits;
+            if (outfits.Length > 0)
+            {
+                WearOutfit(outfits[roulette.Next(outfits.Length)]);
+            }
+
+            return;
+        }
+
+        if (wardrobe.Find(sheetOutfit) is not { } outfit)
+        {
+            return;
+        }
+
+        switch (action)
+        {
+            case WardrobeAction.Rename:
+                renaming = true;
+                focusRename = true;
+                renameText = outfit.Name;
+                break;
+            case WardrobeAction.Photo:
+                PickOutfitCover(outfit);
+                break;
+            case WardrobeAction.Glamourer:
+                SaveToGlamourer(outfit);
+                break;
+            default:
+                confirm.Ask(new ConfirmRequest
+                {
+                    Title = Loc.T(L.Prism.DeleteOutfitTitle),
+                    Message = outfit.Name,
+                    ConfirmLabel = Loc.T(L.Common.Delete),
+                    CancelLabel = Loc.T(L.Common.Cancel),
+                    Danger = true,
+                    Sheet = true,
+                    Confirm = () =>
+                    {
+                        wardrobe.Remove(outfit.Id);
+                        GoBack();
+                    },
+                });
+                break;
+        }
+    }
+
     private void DrawWardrobeCover(ImDrawListPtr drawList, Rect content, float scale)
     {
         if (wardrobe.Find(coverFor) is not { } outfit)
@@ -378,13 +591,7 @@ internal sealed partial class PrismApp
             return;
         }
 
-        composeSession.ConsumePendingImport();
-        var top = DrawHeader(drawList, content, string.Empty, string.Empty, true, scale);
-        var paneHeight = MathF.Min(content.Width, (content.Max.Y - top) * PickPaneFraction);
-        var pane = new Rect(new Vector2(content.Min.X, top), new Vector2(content.Max.X, top + paneHeight));
-        composeSession.DrawPickPane(pane, scale, PickStyle, GlamStore.PhotoRatio, false, true, Loc.T(L.Prism.AddPhoto));
-        var strip = StripRect(content, scale);
-        if (PrismArt.Strip(drawList, strip, Loc.T(L.Prism.UsePhoto), string.Empty, true, composeSession.HasSelection))
+        if (DrawPhotoPick(drawList, content, Loc.T(L.Prism.AddPhoto), GlamStore.PhotoRatio, scale))
         {
             var crop = composeSession.CropsArray()[0];
             wardrobe.Update(outfit with
@@ -392,15 +599,6 @@ internal sealed partial class PrismApp
                 Cover = new WardrobeCover(composeSession.FirstSelected, crop.Zoom, crop.CenterX, crop.CenterY),
             });
             GoBack();
-            return;
-        }
-
-        var gridRect = new Rect(new Vector2(content.Min.X, pane.Max.Y + Metrics.Space.Md * scale),
-            new Vector2(content.Max.X, strip.Min.Y - Metrics.Space.Lg * scale));
-        using (AppSurface.BeginEdgeToEdge(gridRect))
-        {
-            composeSession.DrawPickGrid(gridRect, scale, PickStyle, false, Loc.T(L.Common.ImportFromPc),
-                Loc.T(L.Prism.AddPhoto));
         }
     }
 
@@ -456,8 +654,7 @@ internal sealed partial class PrismApp
         var outfit = new WardrobeOutfit(Guid.NewGuid().ToString("N"), OutfitName(wardrobe.Outfits.Length + 1),
             glamour.ReadState(), Guid.Empty, gear, false, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
         wardrobe.Add(outfit);
-        Push(PrismScreen.WardrobeOutfit);
-        outfitId = outfit.Id;
+        OpenOutfit(outfit.Id);
         renaming = true;
         focusRename = true;
         renameText = outfit.Name;

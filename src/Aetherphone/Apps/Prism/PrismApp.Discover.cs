@@ -24,7 +24,6 @@ internal sealed partial class PrismApp
     private const int GridColumns = 2;
     private const int ExploreColumns = 3;
     private const int PlaceholderRows = 2;
-    private const float TileShadeShare = 0.4f;
     private const float HeaderDotShare = 0.32f;
     private const float HeaderDotRimUnits = 1.5f;
     private const float ContestRowUnits = 120f;
@@ -45,8 +44,6 @@ internal sealed partial class PrismApp
     {
         PrismFact.FitsMe, PrismFact.Race, PrismFact.Male, PrismFact.Female, PrismFact.Modded, PrismFact.Vanilla,
     };
-    private static readonly Vector4 TileShade = new(0f, 0f, 0f, 0.7f);
-    private static readonly Vector4 TileClear = new(0f, 0f, 0f, 0f);
 
     private readonly PullToRefresh discoverPull = new();
     private readonly ChipRail scopeRail = new();
@@ -124,12 +121,12 @@ internal sealed partial class PrismApp
         var left = content.Min.X + Metrics.Space.Lg * scale;
         DrawScopeTabs(drawList, new Rect(new Vector2(left, top),
             new Vector2(search.X - radius - Metrics.Space.Xs * scale, top + tap)), scale);
-        if (DrawHeaderIcon(drawList, search, radius, PhoneIcons.Search, Loc.T(L.Common.Search)))
+        if (IconButton(drawList, search, PhoneIcons.Search, Loc.T(L.Common.Search), scale, HoverLabelSide.Below))
         {
             OpenSearch();
         }
 
-        if (DrawHeaderIcon(drawList, heart, radius, PhoneIcons.Heart, Loc.T(L.Prism.Activity)))
+        if (IconButton(drawList, heart, PhoneIcons.Heart, Loc.T(L.Prism.Activity), scale, HoverLabelSide.Below))
         {
             OpenActivity();
         }
@@ -302,9 +299,6 @@ internal sealed partial class PrismApp
         glams.Refresh(discoverScope);
     }
 
-    private bool DrawHeaderIcon(ImDrawListPtr drawList, Vector2 center, float radius, string glyph, string tip) =>
-        RoundButton.Icon(drawList, center, radius, glyph, controls, ButtonStyle.Bare, tip, HoverLabelSide.Below);
-
     private void DrawScopeTabs(ImDrawListPtr drawList, Rect row, float scale)
     {
         var gap = Metrics.Space.Lg * scale;
@@ -460,10 +454,35 @@ internal sealed partial class PrismApp
 
         if (UiInteract.Click(row.Min, row.Max, hovered))
         {
-            OpenTab(PrismTab.Week);
+            RunContestRow(week);
         }
 
         return row.Max.Y + Metrics.Space.Xxs * scale;
+    }
+
+    private void RunContestRow(PrismWeekDto week)
+    {
+        if (store.Busy)
+        {
+            return;
+        }
+
+        if (PrismPhases.Judgeable(week.Phase))
+        {
+            StartJudging();
+        }
+        else if (week.MyEntry is not null)
+        {
+            Go(PrismScreen.Entry);
+        }
+        else if (HasTracks)
+        {
+            OpenTab(PrismTab.Week);
+        }
+        else
+        {
+            StartPick();
+        }
     }
 
     private PrismWeekDto? OpenContest() =>
@@ -515,7 +534,7 @@ internal sealed partial class PrismApp
     }
 
     private string ContestCover(PrismWeekDto week) =>
-        CoverPlacing(store.Results) is { ImageUrl.Length: > 0 } winner
+        CoverPlacing(ShownResults()) is { ImageUrl.Length: > 0 } winner
             ? winner.ImageUrl
             : week.MyEntry?.ImageUrl ?? string.Empty;
 
@@ -540,7 +559,7 @@ internal sealed partial class PrismApp
         var items = lane.Items;
         if (items.Length == 0 && lane.Loading)
         {
-            return DrawGridPlaceholders(drawList, left, top, width, scale);
+            return DrawGridPlaceholders(drawList, left, top, width, scale, ExploreColumns) + PrismArt.BottomMargin(scale);
         }
 
         if (items.Length == 0)
@@ -567,14 +586,20 @@ internal sealed partial class PrismApp
         var gridBottom = DrawGlamGrid(drawList, left, top, width, items, scale, first);
         if (lane.LoadingMore)
         {
-            var resume = ImGui.GetCursorScreenPos();
-            ImGui.SetCursorScreenPos(new Vector2(left, gridBottom));
-            InfiniteScroll.DrawLoadingRow(left + width * 0.5f, PrismArt.Muted);
-            gridBottom = ImGui.GetCursorScreenPos().Y;
-            ImGui.SetCursorScreenPos(resume);
+            gridBottom = DrawLoadingRowBelow(left, width, gridBottom);
         }
 
         return gridBottom + PrismArt.BottomMargin(scale);
+    }
+
+    private static float DrawLoadingRowBelow(float left, float width, float top)
+    {
+        var resume = ImGui.GetCursorScreenPos();
+        ImGui.SetCursorScreenPos(new Vector2(left, top));
+        InfiniteScroll.DrawLoadingRow(left + width * 0.5f, PrismArt.Muted);
+        var bottom = ImGui.GetCursorScreenPos().Y;
+        ImGui.SetCursorScreenPos(resume);
+        return bottom;
     }
 
     private float DrawGlamGrid(ImDrawListPtr drawList, float left, float top, float width, GlamDto[] items, float scale,
@@ -619,45 +644,32 @@ internal sealed partial class PrismApp
         return (width - gap * (columns - 1)) / columns / GlamStore.PhotoRatio + gap;
     }
 
-    private float DrawGridPlaceholders(ImDrawListPtr drawList, float left, float top, float width, float scale)
+    private float DrawGridPlaceholders(ImDrawListPtr drawList, float left, float top, float width, float scale,
+        int columns = GridColumns)
     {
-        for (var index = 0; index < PlaceholderRows * ExploreColumns; index++)
+        for (var index = 0; index < PlaceholderRows * columns; index++)
         {
-            PrismArt.Placeholder(drawList, GridCell(left, top, width, index, scale, ExploreColumns), false, scale);
+            PrismArt.Placeholder(drawList, GridCell(left, top, width, index, scale, columns), false, scale);
         }
 
-        return top + GridHeight(width, PlaceholderRows * ExploreColumns, scale, ExploreColumns) +
-               PrismArt.BottomMargin(scale);
+        return top + GridHeight(width, PlaceholderRows * columns, scale, columns);
     }
 
-    private string LaneAction()
-    {
-        if (!glams.IsSignedIn || screen is not (PrismScreen.Discover or PrismScreen.Me))
-        {
-            return string.Empty;
-        }
-
-        var discover = screen == PrismScreen.Discover;
-        return Loc.T(discover && AnyFilterOn() ? L.Prism.ClearFilters
-            : discover && discoverScope == GlamScope.Following ? L.Prism.ScopePopular
-            : screen == PrismScreen.Me && showSaved ? L.Prism.TabDiscover
+    private string LaneAction() =>
+        Loc.T(AnyFilterOn() ? L.Prism.ClearFilters
+            : discoverScope == GlamScope.Following ? L.Prism.ScopePopular
             : L.Prism.PostGlam);
-    }
 
     private void RunLaneAction()
     {
-        if (screen == PrismScreen.Discover && AnyFilterOn())
+        if (AnyFilterOn())
         {
             ClearFilters();
         }
-        else if (screen == PrismScreen.Discover && discoverScope == GlamScope.Following)
+        else if (discoverScope == GlamScope.Following)
         {
             discoverScope = GlamScope.Popular;
             RefreshDiscover(false);
-        }
-        else if (screen == PrismScreen.Me && showSaved)
-        {
-            OpenTab(PrismTab.Discover);
         }
         else
         {
