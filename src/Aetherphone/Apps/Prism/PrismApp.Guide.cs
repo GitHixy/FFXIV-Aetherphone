@@ -90,6 +90,11 @@ internal sealed partial class PrismApp
         FactBit(PrismFact.Vanilla) | FactBit(PrismFact.Female) | FactBit(PrismFact.Race),
     };
 
+    private static readonly PrismPicture[] GuideExploreSidePictures =
+    {
+        PrismPicture.GuideExploreSecond, PrismPicture.GuideExploreThird,
+    };
+
     private static readonly PrismPicture[] GuideLibraryPictures =
     {
         PrismPicture.GuideLibraryFirst, PrismPicture.GuideLibrarySecond, PrismPicture.GuideLibraryThird,
@@ -976,11 +981,11 @@ internal sealed partial class PrismApp
                 : MathF.Min(stage.Max.X - sideWidth * 0.5f, center.Center.X + shift + sideWidth * 0.5f);
             DrawGuideCard(drawList,
                 new Rect(new Vector2(middle - sideWidth * 0.5f, sideTop),
-                    new Vector2(middle + sideWidth * 0.5f, sideTop + sideHeight)), PrismPicture.None,
+                    new Vector2(middle + sideWidth * 0.5f, sideTop + sideHeight)), GuideExploreSidePictures[side],
                 GuideDimAlpha + (1f - GuideDimAlpha) * 0.5f, scale);
         }
 
-        DrawGuideCard(drawList, center, PrismPicture.None, 1f, scale);
+        DrawGuideCard(drawList, center, PrismPicture.GuideExploreFirst, 1f, scale);
     }
 
     private string PrizeLine(long[]? prizes, int index)
