@@ -18,7 +18,6 @@ internal sealed partial class PrismApp
 
     private CachedText deadlineText;
     private CachedText judgedText;
-    private CachedText coverByText;
 
     private void DrawCover(ImDrawListPtr drawList, Rect full, Rect content, float scale)
     {
@@ -172,14 +171,6 @@ internal sealed partial class PrismApp
         return judgedText.IsCurrent(key)
             ? judgedText.Value
             : judgedText.Store(key, Loc.Plural(L.Prism.HeatsJudged, count));
-    }
-
-    private string CoverByLine(PrismPlacingDto cover)
-    {
-        var key = HashCode.Combine(cover.Handle, cover.DisplayName, Loc.Current.Code);
-        return coverByText.IsCurrent(key)
-            ? coverByText.Value
-            : coverByText.Store(key, Loc.T(L.Prism.CoverBy, AtHandle(cover.Handle, cover.DisplayName)));
     }
 
     private static string AtHandle(string handle, string displayName) =>
