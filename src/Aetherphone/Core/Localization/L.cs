@@ -10940,6 +10940,11 @@ internal static class L
         public static readonly LocString TrackNeeded = new("prism.trackNeeded", "Choose Modded or Vanilla.");
         public static readonly LocString TrackGlamBy = new("prism.trackGlamBy", "Glam by {0}");
         public static readonly LocString GearNeeded = new("prism.gearNeeded", "Add each piece in your photo.");
+        public static readonly LocString DesignSearchHint = new("prism.designSearchHint", "Search your designs");
+        public static readonly LocString DesignsEmpty = new("prism.designsEmpty", "You have no Glamourer designs yet.");
+        public static readonly LocString DesignsNoMatch = new("prism.designsNoMatch", "No designs match your search.");
+        public static readonly LocString DesignsNeedGlamourer = new("prism.designsNeedGlamourer",
+            "Glamourer isn't running, so your designs can't be read.");
         public static readonly LocString MoreFrom = new("prism.moreFrom", "More from {0}");
         public static readonly LocString InspiredBy = new("prism.inspiredBy", "Inspired by another glam");
         public static readonly LocString FitsMe = new("prism.fitsMe", "Fits me");
