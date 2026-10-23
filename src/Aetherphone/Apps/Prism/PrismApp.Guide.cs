@@ -46,11 +46,17 @@ internal sealed partial class PrismApp
     private const float GuideSideShift = 0.42f;
     private const float GuidePillShare = 0.55f;
     private const float GuidePhotoFloorShare = 0.3f;
+    private const float GuideTallAspect = 0.56f;
+    private const float GuidePodiumFirstShare = 0.46f;
+    private const float GuidePodiumSideShare = 0.36f;
+    private const float GuidePodiumOverlapShare = 0.09f;
+    private const float GuideCollageShare = 0.6f;
+    private const float GuideVeilAlpha = 0.72f;
     private const int GuideJudgePhoto = 10;
     private const int GuideTryPhoto = 11;
     private const int GuideBuildPhoto = 8;
 
-    private static readonly TextStyle GuideBodyStyle = TextStyles.Body;
+    private static readonly TextStyle GuideBodyStyle = new(TextStyles.Title3.Scale, FontWeight.Regular);
 
     private static readonly LocString[] GuideTitles =
     {
@@ -67,7 +73,7 @@ internal sealed partial class PrismApp
     private static readonly int[] GuideTrackPhotos = { 2, 9 };
     private static readonly string[] GuideTrackIds = { PrismTracks.Modded, PrismTracks.Vanilla };
     private static readonly PrismFact[] GuideTrackFacts = { PrismFact.Modded, PrismFact.Vanilla };
-    private static readonly int[] GuidePodiumRanks = { 2, 1, 3 };
+    private static readonly int[] GuidePodiumRanks = { 2, 3, 1 };
     private static readonly int[] GuidePodiumPhotos = { 1, 0, 6 };
     private static readonly int[] GuideLibraryPhotos = { 4, 5, 7, 8, 12, 3 };
     private static readonly PrismFact[] GuideFilters =
@@ -198,7 +204,8 @@ internal sealed partial class PrismApp
         var bodyTop = textTop + PrismType.HeroHeight(title, width) + Metrics.Space.Sm * scale;
         var bodyHeight = Typography.MeasureWrappedBlock(body, GuideBodyStyle, width).Y;
         var bottom = content.Max.Y - PrismArt.BottomMargin(scale);
-        var button = new Rect(new Vector2(left, bottom - Button.LargeHeight * scale), new Vector2(content.Max.X, bottom));
+        var button = new Rect(new Vector2(left, bottom - Button.LargeHeight * scale),
+            new Vector2(content.Max.X, bottom));
         var stage = new Rect(new Vector2(left, bodyTop + bodyHeight + Metrics.Space.Xl * scale),
             new Vector2(content.Max.X, button.Min.Y - Metrics.Space.Xl * scale));
 
@@ -371,6 +378,9 @@ internal sealed partial class PrismApp
         Typography.Draw(drawList, new Vector2(left + glyph + gap, top), hint, PrismArt.Muted, PrismType.Caption);
     }
 
+    private static float GuideCenterTop(Rect stage, float blockHeight) =>
+        stage.Min.Y + MathF.Max(0f, (stage.Height - blockHeight) * 0.5f);
+
     private static Rect GuidePhotoRect(Rect stage, float top, float maxHeight)
     {
         var height = MathF.Max(0f, maxHeight);
@@ -418,19 +428,20 @@ internal sealed partial class PrismApp
         var gap = GuideCardGapUnits * scale;
         var hint = GuideHintLine(scale);
         var width = (stage.Width - gap) * 0.5f;
-        var height = MathF.Min(width / GuidePhotoAspect, stage.Height - hint);
+        var height = MathF.Min(width / GuideTallAspect, stage.Height - hint);
         if (height <= 0f)
         {
             return;
         }
 
-        width = MathF.Min(width, height * GuidePhotoAspect);
+        width = MathF.Min(width, height * GuideTallAspect);
+        var top = GuideCenterTop(stage, height + hint);
         var radius = GuideCardRadiusUnits * scale;
         var lit = PrismMotion.At((float)(ImGui.GetTime() - guideTrackAt), 0f, Motion.Appear);
         var left = stage.Center.X - width - gap * 0.5f;
         for (var index = 0; index < GuideTrackCount; index++)
         {
-            var min = new Vector2(left + index * (width + gap), stage.Min.Y);
+            var min = new Vector2(left + index * (width + gap), top);
             var card = new Rect(min, min + new Vector2(width, height));
             var picked = guideTrack == index;
             var alpha = guideTrack < 0 || picked ? 1f : 1f + (GuideDimAlpha - 1f) * lit;
@@ -454,7 +465,7 @@ internal sealed partial class PrismApp
             BurstFrom(new Vector2(card.Center.X, card.Max.Y - GuidePlateUnits * scale));
         }
 
-        DrawGuideHint(drawList, stage.Center.X, stage.Min.Y + height + Metrics.Space.Md * scale, scale);
+        DrawGuideHint(drawList, stage.Center.X, top + height + Metrics.Space.Md * scale, scale);
     }
 
     private static void DrawGuideTrackPlate(ImDrawListPtr drawList, Rect card, int index, float scale)
@@ -523,18 +534,22 @@ internal sealed partial class PrismApp
 
     private void DrawGuidePodium(ImDrawListPtr drawList, Rect stage, float scale)
     {
-        var gap = GuideCardGapUnits * scale;
         var plate = Typography.LineHeight(PrismType.Title) + Typography.LineHeight(PrismType.Caption) +
                     Metrics.Space.Xs * scale;
-        var width = (stage.Width - gap * (GuidePodiumCount - 1)) / GuidePodiumCount;
-        var tallest = MathF.Min(width / GuidePhotoAspect, stage.Height - plate - GuideHintLine(scale));
+        var hint = GuideHintLine(scale);
+        var firstWidth = stage.Width * GuidePodiumFirstShare;
+        var tallest = MathF.Min(firstWidth / GuideTallAspect, stage.Height - plate - hint);
         if (tallest <= 0f)
         {
             return;
         }
 
-        var baseline = stage.Min.Y + tallest;
-        var podium = new Rect(stage.Min, new Vector2(stage.Max.X, baseline + plate));
+        firstWidth = tallest * GuideTallAspect;
+        var sideWidth = firstWidth * GuidePodiumSideShare / GuidePodiumFirstShare;
+        var overlap = stage.Width * GuidePodiumOverlapShare;
+        var top = GuideCenterTop(stage, tallest + plate + hint);
+        var baseline = top + tallest;
+        var podium = new Rect(new Vector2(stage.Min.X, top), new Vector2(stage.Max.X, baseline + plate));
         if (!guideRevealed && GuideCardTapped(podium))
         {
             guideRevealed = true;
@@ -546,16 +561,25 @@ internal sealed partial class PrismApp
 
         var age = (float)(ImGui.GetTime() - guideRevealAt);
         var radius = GuideCardRadiusUnits * scale;
+        var reach = firstWidth * 0.5f + sideWidth * 0.5f - overlap;
         for (var slot = 0; slot < GuidePodiumCount; slot++)
         {
             var rank = GuidePodiumRanks[slot];
-            var share = rank == 1 ? 1f : rank == 2 ? GuideRunnerUpShare : GuideThirdShare;
-            var x = stage.Min.X + slot * (width + gap);
-            var card = new Rect(new Vector2(x, baseline - tallest * share), new Vector2(x + width, baseline));
+            var width = rank == 1 ? firstWidth : sideWidth;
+            var height = rank == 1 ? tallest
+                : width / GuideTallAspect * (rank == 2 ? 1f : GuideThirdShare / GuideRunnerUpShare);
+            var middle = stage.Center.X + (rank == 2 ? -reach : rank == 3 ? reach : 0f);
+            var card = new Rect(new Vector2(middle - width * 0.5f, baseline - height),
+                new Vector2(middle + width * 0.5f, baseline));
             var delay = GuideRevealDelay + GuideRevealStagger * (GuidePodiumCount - rank);
             var lit = guideRevealed ? PrismMotion.At(age, delay, Motion.Sheet) : 0f;
-            DrawGuideCard(drawList, card, GuidePodiumPhotos[rank - 1], GuideDimAlpha + (1f - GuideDimAlpha) * lit,
-                scale);
+            DrawGuideCard(drawList, card, GuidePodiumPhotos[rank - 1], 1f, scale);
+            if (lit < PrismMotion.Settled)
+            {
+                Squircle.Fill(drawList, card.Min, card.Max, radius,
+                    ImGui.GetColorU32(PrismArt.Page with { W = GuideVeilAlpha * (1f - lit) }));
+            }
+
             if (lit > PrismMotion.GrowEpsilon)
             {
                 PrismLight.Edge(drawList, card, radius, rank == 1 ? PrismGlow.Spectrum : PrismGlow.Pearl,
@@ -568,8 +592,9 @@ internal sealed partial class PrismApp
                 BurstFrom(new Vector2(card.Center.X, card.Min.Y + card.Height * 0.25f));
             }
 
-            DrawGuidePodiumPlate(drawList, new Vector2(card.Center.X, baseline + Metrics.Space.Xs * scale), width,
-                rank, lit);
+            var plateCenter = rank == 1 ? middle : middle + (rank == 2 ? -overlap : overlap) * 0.5f;
+            DrawGuidePodiumPlate(drawList, new Vector2(plateCenter, baseline + Metrics.Space.Xs * scale),
+                rank == 1 ? width : width - overlap, rank, lit);
         }
 
         DrawGuideHint(drawList, stage.Center.X, baseline + plate + Metrics.Space.Md * scale, scale);
@@ -808,11 +833,16 @@ internal sealed partial class PrismApp
 
         var tap = Metrics.Size.TapTarget * scale;
         var filterTop = bar.Max.Y + Metrics.Space.Sm * scale;
-        DrawGuideFilters(drawList, new Rect(new Vector2(stage.Min.X, filterTop), new Vector2(stage.Max.X, filterTop + tap)),
-            scale);
+        DrawGuideFilters(drawList,
+            new Rect(new Vector2(stage.Min.X, filterTop), new Vector2(stage.Max.X, filterTop + tap)), scale);
         var gap = Metrics.Space.Xs * scale;
         var gridTop = filterTop + tap + Metrics.Space.Sm * scale;
         var available = stage.Max.Y - GuideHintLine(scale) - gridTop;
+        if (available <= 0f)
+        {
+            return;
+        }
+
         var width = MathF.Min((stage.Width - gap * (GuideLibraryColumns - 1)) / GuideLibraryColumns,
             (available - gap * (GuideLibraryRows - 1)) / GuideLibraryRows * GuidePhotoAspect);
         if (width <= 0f)
@@ -890,7 +920,9 @@ internal sealed partial class PrismApp
 
     private void DrawGuideTheme(ImDrawListPtr drawList, Rect stage, PrismWeekDto week, float scale)
     {
-        var card = new Rect(stage.Min, new Vector2(stage.Max.X, stage.Min.Y + MathF.Min(stage.Height, stage.Width)));
+        var side = MathF.Min(stage.Height, stage.Width);
+        var cardTop = GuideCenterTop(stage, side);
+        var card = new Rect(new Vector2(stage.Min.X, cardTop), new Vector2(stage.Max.X, cardTop + side));
         PrismLight.Week(drawList, card, week.Id, PrismArt.Page, PrismArt.Fore, GuideMarkUnits * scale,
             GuideMarkShare);
         Squircle.Stroke(drawList, card.Min, card.Max, GuideCardRadiusUnits * scale,
@@ -921,7 +953,8 @@ internal sealed partial class PrismApp
 
     private void DrawGuideCollage(ImDrawListPtr drawList, Rect stage, float scale)
     {
-        var center = GuidePhotoRect(stage, stage.Min.Y, stage.Height);
+        var height = MathF.Min(stage.Height, stage.Width * GuideCollageShare / GuidePhotoAspect);
+        var center = GuidePhotoRect(stage, GuideCenterTop(stage, height), height);
         if (center.Height <= 0f)
         {
             return;
