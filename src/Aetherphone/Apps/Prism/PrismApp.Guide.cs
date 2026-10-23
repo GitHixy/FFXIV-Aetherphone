@@ -52,9 +52,6 @@ internal sealed partial class PrismApp
     private const float GuidePodiumOverlapShare = 0.09f;
     private const float GuideCollageShare = 0.6f;
     private const float GuideVeilAlpha = 0.72f;
-    private const int GuideJudgePhoto = 10;
-    private const int GuideTryPhoto = 11;
-    private const int GuideBuildPhoto = 8;
 
     private static readonly TextStyle GuideBodyStyle = new(TextStyles.Title3.Scale, FontWeight.Regular);
 
@@ -70,12 +67,10 @@ internal sealed partial class PrismApp
         L.Prism.GuideBuildBody, L.Prism.GuideLibraryBody, L.Prism.GuideThemeBody,
     };
 
-    private static readonly int[] GuideTrackPhotos = { 2, 9 };
+    private static readonly PrismPicture[] GuideTrackPictures = { PrismPicture.TrackModded, PrismPicture.TrackVanilla };
     private static readonly string[] GuideTrackIds = { PrismTracks.Modded, PrismTracks.Vanilla };
     private static readonly PrismFact[] GuideTrackFacts = { PrismFact.Modded, PrismFact.Vanilla };
     private static readonly int[] GuidePodiumRanks = { 2, 3, 1 };
-    private static readonly int[] GuidePodiumPhotos = { 1, 0, 6 };
-    private static readonly int[] GuideLibraryPhotos = { 4, 5, 7, 8, 12, 3 };
     private static readonly PrismFact[] GuideFilters =
     {
         PrismFact.FitsMe, PrismFact.Race, PrismFact.Male, PrismFact.Female, PrismFact.Modded, PrismFact.Vanilla,
@@ -91,14 +86,13 @@ internal sealed partial class PrismApp
         FactBit(PrismFact.Vanilla) | FactBit(PrismFact.Female) | FactBit(PrismFact.Race),
     };
 
-    private static readonly int[] GuideCollagePhotos = { 4, 0, 7 };
     private static readonly uint[] GuideGear = { 19139, 0, 11102, 17492, 11116, 17493, 11137, 16039, 12364, 0, 0, 0 };
 
     private readonly CachedText[] prizeTexts = new CachedText[PrismArt.PodiumRanks];
     private readonly GearDraft guideGear = new();
     private readonly PrismCountdown guideCountdown = new();
     private readonly Spring[] guideFilterFill = new Spring[GuideFilters.Length];
-    private readonly Spring[] guideTileFade = new Spring[GuideLibraryPhotos.Length];
+    private readonly Spring[] guideTileFade = new Spring[GuideLibraryTags.Length];
     private CachedText guideHeatText;
     private double guideLikedAt;
     private double guideTriedAt;
@@ -390,18 +384,19 @@ internal sealed partial class PrismApp
             new Vector2(stage.Center.X + width * 0.5f, top + height));
     }
 
-    private static void DrawGuideCard(ImDrawListPtr drawList, Rect card, int photo, float alpha, float scale) =>
-        DrawGuideCard(drawList, card, photo, alpha, GuideCardRadiusUnits * scale, scale);
+    private static void DrawGuideCard(ImDrawListPtr drawList, Rect card, PrismPicture picture, float alpha,
+        float scale) =>
+        DrawGuideCard(drawList, card, picture, alpha, GuideCardRadiusUnits * scale, scale);
 
-    private static void DrawGuideCard(ImDrawListPtr drawList, Rect card, int photo, float alpha, float radius,
-        float scale)
+    private static void DrawGuideCard(ImDrawListPtr drawList, Rect card, PrismPicture picture, float alpha,
+        float radius, float scale)
     {
         if (card.Width <= 0f || card.Height <= 0f)
         {
             return;
         }
 
-        if (!PrismStock.DrawRounded(drawList, card, photo, alpha, radius))
+        if (!PrismStock.DrawRounded(drawList, card, picture, alpha, radius))
         {
             PrismArt.Placeholder(drawList, card, false, scale, alpha);
         }
@@ -445,7 +440,7 @@ internal sealed partial class PrismApp
             var card = new Rect(min, min + new Vector2(width, height));
             var picked = guideTrack == index;
             var alpha = guideTrack < 0 || picked ? 1f : 1f + (GuideDimAlpha - 1f) * lit;
-            DrawGuideCard(drawList, card, GuideTrackPhotos[index], alpha, scale);
+            DrawGuideCard(drawList, card, GuideTrackPictures[index], alpha, scale);
             DrawGuideTrackPlate(drawList, card, index, scale);
             if (picked)
             {
@@ -512,7 +507,7 @@ internal sealed partial class PrismApp
         Typography.Draw(drawList,
             new Vector2(stage.Center.X - Typography.Measure(heat, PrismType.Caption).X * 0.5f, stage.Min.Y), heat,
             PrismArt.Muted, PrismType.Caption);
-        DrawGuideCard(drawList, photo, GuideJudgePhoto, 1f, scale);
+        DrawGuideCard(drawList, photo, PrismPicture.None, 1f, scale);
         var rowTop = photo.Max.Y + Metrics.Space.Md * scale;
         var row = new Rect(new Vector2(stage.Min.X, rowTop), new Vector2(stage.Max.X, rowTop + size));
         var picked = DrawScoreButtons(drawList, row, guideScore,
@@ -573,7 +568,7 @@ internal sealed partial class PrismApp
                 new Vector2(middle + width * 0.5f, baseline));
             var delay = GuideRevealDelay + GuideRevealStagger * (GuidePodiumCount - rank);
             var lit = guideRevealed ? PrismMotion.At(age, delay, Motion.Sheet) : 0f;
-            DrawGuideCard(drawList, card, GuidePodiumPhotos[rank - 1], 1f, scale);
+            DrawGuideCard(drawList, card, PrismPicture.None, 1f, scale);
             if (lit < PrismMotion.Settled)
             {
                 Squircle.Fill(drawList, card.Min, card.Max, radius,
@@ -638,7 +633,7 @@ internal sealed partial class PrismApp
             return;
         }
 
-        DrawGuideCard(drawList, photo, GuideTryPhoto, 1f, scale);
+        DrawGuideCard(drawList, photo, PrismPicture.None, 1f, scale);
         var tried = (float)(ImGui.GetTime() - guideTriedAt);
         if (guideWorn)
         {
@@ -769,7 +764,7 @@ internal sealed partial class PrismApp
         var photo = GuidePhotoRect(stage, stage.Min.Y, panelTop - Metrics.Space.Md * scale - stage.Min.Y);
         if (photo.Height >= stage.Height * GuidePhotoFloorShare)
         {
-            DrawGuideCard(drawList, photo, GuideBuildPhoto, 1f, scale);
+            DrawGuideCard(drawList, photo, PrismPicture.None, 1f, scale);
         }
 
         var panel = new Rect(new Vector2(stage.Min.X, panelTop), new Vector2(stage.Max.X, panelTop + panelHeight));
@@ -853,13 +848,13 @@ internal sealed partial class PrismApp
         var height = width / GuidePhotoAspect;
         var gridLeft = stage.Center.X - (width * GuideLibraryColumns + gap * (GuideLibraryColumns - 1)) * 0.5f;
         var delta = MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
-        for (var index = 0; index < GuideLibraryPhotos.Length; index++)
+        for (var index = 0; index < GuideLibraryTags.Length; index++)
         {
             var matches = (GuideLibraryTags[index] & guideFilters) == guideFilters;
             var alpha = guideTileFade[index].Step(matches ? 1f : GuideDimAlpha, Motion.Appear, delta);
             var min = new Vector2(gridLeft + index % GuideLibraryColumns * (width + gap),
                 gridTop + index / GuideLibraryColumns * (height + gap));
-            DrawGuideCard(drawList, new Rect(min, min + new Vector2(width, height)), GuideLibraryPhotos[index],
+            DrawGuideCard(drawList, new Rect(min, min + new Vector2(width, height)), PrismPicture.None,
                 Math.Clamp(alpha, GuideDimAlpha, 1f), Metrics.Radius.Md * scale, scale);
         }
 
@@ -971,11 +966,11 @@ internal sealed partial class PrismApp
                 : MathF.Min(stage.Max.X - sideWidth * 0.5f, center.Center.X + shift + sideWidth * 0.5f);
             DrawGuideCard(drawList,
                 new Rect(new Vector2(middle - sideWidth * 0.5f, sideTop),
-                    new Vector2(middle + sideWidth * 0.5f, sideTop + sideHeight)), GuideCollagePhotos[side * 2],
+                    new Vector2(middle + sideWidth * 0.5f, sideTop + sideHeight)), PrismPicture.None,
                 GuideDimAlpha + (1f - GuideDimAlpha) * 0.5f, scale);
         }
 
-        DrawGuideCard(drawList, center, GuideCollagePhotos[1], 1f, scale);
+        DrawGuideCard(drawList, center, PrismPicture.None, 1f, scale);
     }
 
     private string PrizeLine(long[]? prizes, int index)

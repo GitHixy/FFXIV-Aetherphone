@@ -4,18 +4,28 @@ using Dalamud.Bindings.ImGui;
 
 namespace Aetherphone.Apps.Prism;
 
+internal enum PrismPicture : byte
+{
+    None,
+    TrackModded,
+    TrackVanilla,
+}
+
 internal static class PrismStock
 {
-    public const int Count = 13;
-
+    private static readonly string[] Files = { string.Empty, "track-modded.png", "track-vanilla.png" };
     private static readonly string[] Paths = BuildPaths();
 
-    public static bool Draw(ImDrawListPtr drawList, Rect rect, int index, float alpha) =>
-        DrawRounded(drawList, rect, index, alpha, 0f);
-
-    public static bool DrawRounded(ImDrawListPtr drawList, Rect rect, int index, float alpha, float rounding)
+    public static bool DrawRounded(ImDrawListPtr drawList, Rect rect, PrismPicture picture, float alpha,
+        float rounding)
     {
-        var texture = Plugin.TextureProvider.GetFromFile(Paths[(index % Count + Count) % Count]).GetWrapOrDefault();
+        var path = Paths[(int)picture];
+        if (path.Length == 0)
+        {
+            return false;
+        }
+
+        var texture = Plugin.TextureProvider.GetFromFile(path).GetWrapOrDefault();
         if (texture is null || texture.Handle == nint.Zero)
         {
             return false;
@@ -31,10 +41,10 @@ internal static class PrismStock
     {
         var folder = Path.Combine(Plugin.PluginInterface.AssemblyLocation.DirectoryName ?? string.Empty, "Images",
             "Prism");
-        var paths = new string[Count];
-        for (var index = 0; index < Count; index++)
+        var paths = new string[Files.Length];
+        for (var index = 0; index < Files.Length; index++)
         {
-            paths[index] = Path.Combine(folder, $"glam-{index + 1:D2}.jpg");
+            paths[index] = Files[index].Length == 0 ? string.Empty : Path.Combine(folder, Files[index]);
         }
 
         return paths;
