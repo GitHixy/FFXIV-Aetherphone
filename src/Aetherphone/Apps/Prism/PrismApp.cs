@@ -180,6 +180,7 @@ internal sealed partial class PrismApp : IResumableApp
         }
 
         sinceRefresh = 0f;
+        ResetShowcase();
         store.ClearBallot();
         store.Refresh();
     }

@@ -28,9 +28,6 @@ internal sealed partial class PrismApp
     private const float HeaderDotRimUnits = 1.5f;
     private const float ContestRowUnits = 120f;
     private const float ContestThumbUnits = 88f;
-    private const float HeroPeekUnits = 28f;
-    private const float HeroShortestShare = 0.75f;
-    private const float HeroTallestShare = 2f;
     private const float EmptyDiscUnits = 34f;
     private const float EmptyActionUnits = 132f;
     private const float EmptyTextUnits = 300f;
@@ -64,7 +61,6 @@ internal sealed partial class PrismApp
     private readonly PrismCountdown rowCountdown = new();
     private Spring scopeLineLeft;
     private Spring scopeLineRight;
-    private bool todayResolved;
     private Action? refreshDiscoverNow;
     private CachedText contestCaption;
 
@@ -100,20 +96,20 @@ internal sealed partial class PrismApp
         var origin = ImGui.GetCursorScreenPos();
         var width = ScrollLayout.StableContentWidth();
         var outer = Metrics.Space.Xxs * scale;
-        var below = (OpenContest() is null ? 0f : ContestRowUnits * scale) + outer + HeroPeekUnits * scale;
-        var heroHeight = Math.Clamp(body.Height - bottomChrome - below, width * HeroShortestShare,
-            width * HeroTallestShare);
-        var cursor = DrawDayHero(list, origin.X, origin.Y, width, heroHeight, scale, out var hero);
-        cursor = DrawContestRow(list, origin.X, cursor, width, scale);
-        var items = lane.Items;
-        var first = hero is not null && items.Length > 0 && items[0].Id == hero.Id ? 1 : 0;
+        var cursor = DrawShowcase(list, origin.X, origin.Y + Metrics.Space.Xs * scale, width, scale);
+        cursor = DrawContestRow(list, origin.X, cursor + Metrics.Space.Sm * scale, width, scale);
         var filtered = AnyFilterOn();
         var following = discoverScope == GlamScope.Following;
         cursor = DrawLaneGrid(list, origin.X + outer, cursor, width - outer * 2f, lane,
             filtered ? L.Prism.FiltersEmptyHint : following ? L.Prism.FollowingEmptyHint : L.Prism.EmptyFeedHint,
-            scale, first,
+            scale,
             Loc.T(filtered ? L.Prism.NoMatches : following ? L.Prism.FollowingEmptyTitle : L.Prism.EmptyFeedTitle));
         ImGui.Dummy(new Vector2(width, cursor - origin.Y));
+        if (showcasePager.Owning)
+        {
+            surface.CancelDrag();
+        }
+
         if (InfiniteScroll.ReachedBottom())
         {
             glams.LoadMore(discoverScope);
@@ -397,73 +393,10 @@ internal sealed partial class PrismApp
             glams.Refresh(discoverScope);
         }
 
-        if (always || glams.Lane(GlamScope.Today).NeverLoaded)
+        if (always || glams.Lane(GlamScope.Showcase).NeverLoaded)
         {
-            glams.Refresh(GlamScope.Today);
+            glams.Refresh(GlamScope.Showcase);
         }
-    }
-
-    private float DrawDayHero(ImDrawListPtr drawList, float left, float top, float width, float height, float scale,
-        out GlamDto? hero)
-    {
-        hero = null;
-        var today = glams.Lane(GlamScope.Today);
-        if (today.Items.Length == 0)
-        {
-            if (!today.Loading)
-            {
-                todayResolved = true;
-            }
-
-            if (todayResolved)
-            {
-                return top;
-            }
-        }
-
-        var photo = new Rect(new Vector2(left, top), new Vector2(left + width, top + height));
-        if (today.Items.Length == 0)
-        {
-            PrismArt.Placeholder(drawList, photo, false, scale);
-            return photo.Max.Y;
-        }
-
-        var glam = today.Items[0];
-        hero = glam;
-        if (!ImGui.IsRectVisible(photo.Min, photo.Max))
-        {
-            return photo.Max.Y;
-        }
-
-        DrawLook(drawList, photo, Cover(glam), false, native: true);
-        var inset = Metrics.Space.Lg * scale;
-        var gap = Metrics.Space.Xxs * scale;
-        var textLeft = left + inset;
-        var textWidth = width - inset * 2f;
-        var caption = Typography.LineHeight(PrismType.Caption);
-        var byline = Typography.LineHeight(PrismType.Headline);
-        var block = caption + gap + PrismType.HeroHeight(glam.Title, textWidth) + gap + byline;
-        PrismArt.Scrim(drawList, photo, block, scale);
-        var y = photo.Max.Y - inset - block;
-        Typography.Draw(drawList, new Vector2(textLeft, y),
-            Typography.FitText(Loc.T(L.Prism.GlamOfTheDay), textWidth, PrismType.Caption), PrismArt.PhotoMuted,
-            PrismType.Caption);
-        y += caption + gap;
-        y += PrismType.DrawHero(drawList, new Vector2(textLeft, y), glam.Title, textWidth, PrismArt.PhotoFore) + gap;
-        var bylineMiddle = y + byline * 0.5f;
-        var handleEnd = DrawCountByline(drawList, textLeft, textLeft + textWidth, bylineMiddle, AuthorLine(glam.Author),
-            PhoneIcons.Heart, glam.Likes > 0 ? NumberText.Compact(glam.Likes) : string.Empty, PrismArt.PhotoFore,
-            PrismArt.PhotoFore, scale);
-        if (UiInteract.Click(photo.Min, photo.Max, HoverWash(drawList, photo)))
-        {
-            OpenGlam(glam);
-        }
-
-        var reach = Metrics.Size.TapTarget * scale * 0.5f;
-        ClickProfile(new Rect(new Vector2(textLeft, bylineMiddle - reach),
-            new Vector2(handleEnd, bylineMiddle + reach)), glam.Author);
-
-        return photo.Max.Y;
     }
 
     private void ClickProfile(Rect hit, GlamAuthorDto? author)
@@ -603,7 +536,7 @@ internal sealed partial class PrismApp
     }
 
     private float DrawLaneGrid(ImDrawListPtr drawList, float left, float top, float width, FeedLane<GlamDto> lane,
-        LocString emptyHint, float scale, int first = 0, string emptyTitle = "")
+        LocString emptyHint, float scale, string emptyTitle = "")
     {
         var items = lane.Items;
         if (items.Length == 0 && lane.Loading)
@@ -632,7 +565,7 @@ internal sealed partial class PrismApp
             return bottom + PrismArt.BottomMargin(scale);
         }
 
-        var gridBottom = DrawGlamGrid(drawList, left, top, width, items, scale, first);
+        var gridBottom = DrawGlamGrid(drawList, left, top, width, items, scale);
         if (lane.LoadingMore)
         {
             gridBottom = DrawLoadingRowBelow(left, width, gridBottom);
@@ -651,11 +584,9 @@ internal sealed partial class PrismApp
         return bottom;
     }
 
-    private float DrawGlamGrid(ImDrawListPtr drawList, float left, float top, float width, GlamDto[] items, float scale,
-        int first = 0)
+    private float DrawGlamGrid(ImDrawListPtr drawList, float left, float top, float width, GlamDto[] items, float scale)
     {
-        var shown = Math.Max(0, items.Length - first);
-        for (var index = 0; index < shown; index++)
+        for (var index = 0; index < items.Length; index++)
         {
             var photo = GridCell(left, top, width, index, scale, ExploreColumns);
             if (!ImGui.IsRectVisible(photo.Min, photo.Max))
@@ -663,7 +594,7 @@ internal sealed partial class PrismApp
                 continue;
             }
 
-            var glam = items[first + index];
+            var glam = items[index];
             if (DrawGridTile(drawList, photo, Cover(glam), string.Empty, PhoneIcons.HeartFilled,
                     glam.Likes > 0 ? NumberText.Compact(glam.Likes) : string.Empty, scale))
             {
@@ -671,7 +602,7 @@ internal sealed partial class PrismApp
             }
         }
 
-        return top + GridHeight(width, shown, scale, ExploreColumns);
+        return top + GridHeight(width, items.Length, scale, ExploreColumns);
     }
 
     private static Rect GridCell(float left, float top, float width, int index, float scale,
