@@ -774,7 +774,7 @@ internal sealed partial class PrismApp
         var photo = GuidePhotoRect(stage, stage.Min.Y, panelTop - Metrics.Space.Md * scale - stage.Min.Y);
         if (photo.Height >= stage.Height * GuidePhotoFloorShare)
         {
-            DrawGuideCard(drawList, photo, PrismPicture.None, 1f, scale);
+            DrawGuideCard(drawList, photo, PrismPicture.GuideWardrobe, 1f, scale);
         }
 
         var panel = new Rect(new Vector2(stage.Min.X, panelTop), new Vector2(stage.Max.X, panelTop + panelHeight));
