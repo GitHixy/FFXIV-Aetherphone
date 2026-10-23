@@ -637,7 +637,7 @@ internal sealed partial class PrismApp
             return;
         }
 
-        DrawGuideCard(drawList, photo, PrismPicture.None, 1f, scale);
+        DrawGuideCard(drawList, photo, PrismPicture.GuideTryOn, 1f, scale);
         var tried = (float)(ImGui.GetTime() - guideTriedAt);
         if (guideWorn)
         {
