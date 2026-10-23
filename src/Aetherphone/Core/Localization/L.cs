@@ -10950,7 +10950,6 @@ internal static class L
         public static readonly LocString StillTryingOn = new("prism.stillTryingOn",
             "You're still trying something on, so it would go out as your gear. Take it off unless the photo shows it.");
         public static readonly LocString CheckMarket = new("prism.checkMarket", "Check market");
-        public static readonly LocString GlamOfTheDay = new("prism.glamOfTheDay", "Glam of the day");
         public static readonly LocString Rename = new("prism.rename", "Rename");
         public static readonly LocString AddPhoto = new("prism.addPhoto", "Add a photo");
         public static readonly LocString ChangePhoto = new("prism.changePhoto", "Change photo");

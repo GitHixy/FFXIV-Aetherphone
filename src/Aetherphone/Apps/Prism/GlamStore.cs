@@ -14,7 +14,7 @@ namespace Aetherphone.Apps.Prism;
 
 internal enum GlamScope : byte
 {
-    Today,
+    Showcase,
     New,
     Popular,
     Following,
@@ -39,7 +39,7 @@ internal sealed class GlamStore : IDisposable
 
     private static readonly string[] ScopeKeys =
     {
-        GlamClient.ScopeToday, GlamClient.ScopeNew, GlamClient.ScopePopular, GlamClient.ScopeFollowing,
+        GlamClient.ScopePopular, GlamClient.ScopeNew, GlamClient.ScopePopular, GlamClient.ScopeFollowing,
     };
 
     private readonly AethernetSession session;
@@ -222,7 +222,7 @@ internal sealed class GlamStore : IDisposable
         epoch++;
         for (var index = 0; index < discover.Length; index++)
         {
-            if (index != (int)GlamScope.Today)
+            if (index != (int)GlamScope.Showcase)
             {
                 discover[index].Clear();
             }
@@ -238,10 +238,10 @@ internal sealed class GlamStore : IDisposable
         }
 
         var key = ScopeKeys[(int)scope];
-        var daily = scope == GlamScope.Today;
-        var only = daily ? null : vanillaOnly;
-        var fits = daily ? default : body;
-        var started = daily ? -1 : epoch;
+        var unfiltered = scope == GlamScope.Showcase;
+        var only = unfiltered ? null : vanillaOnly;
+        var fits = unfiltered ? default : body;
+        var started = unfiltered ? -1 : epoch;
         lane.Loading = true;
         work.Run("discover", async token =>
         {
@@ -283,10 +283,10 @@ internal sealed class GlamStore : IDisposable
     private void StartMore(GlamScope scope, FeedLane<GlamDto> lane, string cursor)
     {
         var key = ScopeKeys[(int)scope];
-        var daily = scope == GlamScope.Today;
-        var only = daily ? null : vanillaOnly;
-        var fits = daily ? default : body;
-        var started = daily ? -1 : epoch;
+        var unfiltered = scope == GlamScope.Showcase;
+        var only = unfiltered ? null : vanillaOnly;
+        var fits = unfiltered ? default : body;
+        var started = unfiltered ? -1 : epoch;
         lane.LoadingMore = true;
         work.Run("discover more", async token =>
         {
