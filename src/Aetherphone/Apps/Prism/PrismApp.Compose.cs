@@ -33,8 +33,7 @@ internal sealed partial class PrismApp
 
     private readonly PhotoComposeSession composeSession;
     private readonly HashSet<string> droppedMods = new(StringComparer.Ordinal);
-    private readonly List<GlamModDto> namedMods = new();
-    private readonly List<int> namedModSlots = new();
+    private readonly ModDraft composeMods = new();
     private readonly ChipRail modTypeRail = new();
     private readonly string[] modTypeLabels = new string[GearSlots.All.Length + 1];
     private readonly bool[] modTypeActive = new bool[GearSlots.All.Length + 1];
@@ -48,10 +47,8 @@ internal sealed partial class PrismApp
     private bool composeDetails;
     private bool focusTitle;
     private bool? composeVanilla;
-    private int modSlot = GearSlots.None;
     private string glamTitle = string.Empty;
     private string glamTags = string.Empty;
-    private string modName = string.Empty;
     private volatile int postOutcome;
     private string postingCover = string.Empty;
     private string postedCover = string.Empty;
@@ -72,15 +69,12 @@ internal sealed partial class PrismApp
         composeDetails = false;
         captured = Array.Empty<GlamGearDto>();
         glamGear.Clear();
-        namedMods.Clear();
-        namedModSlots.Clear();
-        modSlot = GearSlots.None;
+        composeMods.Clear();
         composeVanilla = null;
         composeRace = 0;
         composeGender = NoGender;
         glamTitle = string.Empty;
         glamTags = string.Empty;
-        modName = string.Empty;
         gearCatalog.EnsureBuilt();
         Push(PrismScreen.Compose);
     }
@@ -453,36 +447,37 @@ internal sealed partial class PrismApp
 
         top = DrawSectionTitle(drawList, left, left + width, top + Metrics.Space.Lg * scale, Loc.T(L.Prism.YourMods),
             string.Empty, scale) + Metrics.Space.Sm * scale;
-        return DrawNamedMods(drawList, left, top, width, scale) + PrismArt.BottomMargin(scale);
+        return DrawNamedMods(drawList, left, top, width, composeMods, glamGear, "##glamMod", scale) +
+               PrismArt.BottomMargin(scale);
     }
 
-    private int SyncModTypes()
+    private int SyncModTypes(GearDraft gear, ModDraft mods)
     {
         modTypeLabels[0] = Loc.T(L.Prism.CharacterHeading);
         modTypeSlots[0] = GearSlots.None;
         var count = 1;
-        var found = modSlot == GearSlots.None;
-        for (var index = 0; index < Draft.Items.Length; index++)
+        var found = mods.Slot == GearSlots.None;
+        for (var index = 0; index < gear.Items.Length; index++)
         {
-            if (Draft.Items[index] == 0)
+            if (gear.Items[index] == 0)
             {
                 continue;
             }
 
             modTypeLabels[count] = Loc.T(SlotNames[index]);
             modTypeSlots[count] = (int)GearSlots.All[index];
-            found |= modTypeSlots[count] == modSlot;
+            found |= modTypeSlots[count] == mods.Slot;
             count++;
         }
 
         if (!found)
         {
-            modSlot = GearSlots.None;
+            mods.Slot = GearSlots.None;
         }
 
         for (var index = 0; index < count; index++)
         {
-            modTypeActive[index] = modTypeSlots[index] == modSlot;
+            modTypeActive[index] = modTypeSlots[index] == mods.Slot;
         }
 
         return count;
@@ -494,47 +489,53 @@ internal sealed partial class PrismApp
         return Loc.T(index >= 0 ? SlotNames[index] : L.Prism.CharacterHeading);
     }
 
-    private float DrawNamedMods(ImDrawListPtr drawList, float left, float top, float width, float scale)
+    private float DrawNamedMods(ImDrawListPtr drawList, float left, float top, float width, ModDraft mods,
+        GearDraft gear, string inputId, float scale)
     {
         top += Typography.DrawWrappedLeft(new Vector2(left, top), Loc.T(L.Prism.ModTypeHint), PrismArt.Muted,
             PrismType.Body, width) + Metrics.Space.Sm * scale;
-        var types = SyncModTypes();
+        var types = SyncModTypes(gear, mods);
         var chips = new Rect(new Vector2(left, top), new Vector2(left + width, top + ChipRail.RowHeight * scale));
         var tapped = modTypeRail.Draw(chips, ui, modTypeLabels.AsSpan(0, types), modTypeActive.AsSpan(0, types));
         if (tapped >= 0)
         {
-            modSlot = modTypeSlots[tapped];
+            mods.Slot = modTypeSlots[tapped];
         }
 
         top = chips.Max.Y + Metrics.Space.Sm * scale;
         var add = Loc.T(L.Prism.AddMod);
         var addWidth = ButtonWidth([add], width * 0.5f, scale);
         var gap = Metrics.Space.Sm * scale;
-        var bottom = DrawInput(drawList, left, top, width - addWidth - gap, Loc.T(L.Prism.ModHint), "##glamMod",
-            ref modName, ModNameMaxLength, scale);
-        var ready = !string.IsNullOrWhiteSpace(modName) && namedMods.Count < MaxNamedMods;
+        var name = mods.Name;
+        var bottom = DrawInput(drawList, left, top, width - addWidth - gap, Loc.T(L.Prism.ModHint), inputId,
+            ref name, ModNameMaxLength, scale);
+        mods.Name = name;
+        var ready = !string.IsNullOrWhiteSpace(name) && mods.Count < MaxNamedMods;
         if (DrawButton(drawList, new Rect(new Vector2(left + width - addWidth, top), new Vector2(left + width, bottom)),
                 add, ButtonStyle.Tinted, scale, enabled: ready, id: "prism.addMod"))
         {
-            namedMods.Add(new GlamModDto(modName.Trim()));
-            namedModSlots.Add(modSlot);
-            modName = string.Empty;
+            mods.Add(new GlamModDto(name.Trim()), mods.Slot);
+            mods.Name = string.Empty;
         }
 
-        top = bottom + Metrics.Space.Sm * scale;
+        return DrawModList(drawList, left, bottom + Metrics.Space.Sm * scale, width, mods, scale);
+    }
+
+    private float DrawModList(ImDrawListPtr drawList, float left, float top, float width, ModDraft mods, float scale)
+    {
         var removeWidth = Metrics.Size.TapTarget * scale;
         var nameHeight = Typography.LineHeight(PrismType.Headline);
         var captionHeight = Typography.LineHeight(PrismType.Caption);
         var rowHeight = MathF.Max(Metrics.Size.TapTarget * scale, nameHeight + captionHeight);
         var room = MathF.Max(1f, width - removeWidth - Metrics.Space.Md * scale);
-        for (var index = 0; index < namedMods.Count; index++)
+        for (var index = 0; index < mods.Count; index++)
         {
             var textTop = top + (rowHeight - nameHeight - captionHeight) * 0.5f;
             Typography.Draw(drawList, new Vector2(left, textTop),
-                Typography.FitText(namedMods[index].Name, room, PrismType.Headline), PrismArt.Fore,
+                Typography.FitText(mods.Mods[index].Name, room, PrismType.Headline), PrismArt.Fore,
                 PrismType.Headline);
             Typography.Draw(drawList, new Vector2(left, textTop + nameHeight),
-                Typography.FitText(ModTypeName(namedModSlots[index]), room, PrismType.Caption), PrismArt.Muted,
+                Typography.FitText(ModTypeName(mods.Slots[index]), room, PrismType.Caption), PrismArt.Muted,
                 PrismType.Caption);
             ImGui.PushID(index);
             var removed = RoundButton.Icon(drawList,
@@ -544,8 +545,7 @@ internal sealed partial class PrismApp
             top += rowHeight;
             if (removed)
             {
-                namedMods.RemoveAt(index);
-                namedModSlots.RemoveAt(index--);
+                mods.RemoveAt(index--);
             }
         }
 
@@ -555,27 +555,9 @@ internal sealed partial class PrismApp
     private GlamGearDto[] ChosenGear()
     {
         var pieces = DraftOutfit();
-        if (composeVanilla == true || namedMods.Count == 0)
-        {
-            return pieces;
-        }
-
-        var character = new List<GlamModDto>();
-        for (var index = 0; index < namedMods.Count; index++)
-        {
-            var piece = Array.FindIndex(pieces, gear => gear.Slot == namedModSlots[index]);
-            if (piece < 0)
-            {
-                character.Add(namedMods[index]);
-                continue;
-            }
-
-            var mods = pieces[piece].Mods ?? Array.Empty<GlamModDto>();
-            pieces[piece] = pieces[piece] with { Mods = [.. mods, namedMods[index]] };
-        }
-
-        return character.Count == 0 ? pieces : [.. pieces, new GlamGearDto(GearSlots.None, Mods: character.ToArray())];
+        return composeVanilla == true ? pieces : composeMods.AttachTo(pieces);
     }
+
     private float DrawModRows(ImDrawListPtr drawList, float left, float top, float width, float scale)
     {
         var leaveOut = Loc.T(L.Prism.LeaveOutMod);
