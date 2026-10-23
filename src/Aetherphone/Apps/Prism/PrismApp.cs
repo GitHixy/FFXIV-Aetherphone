@@ -58,6 +58,10 @@ internal sealed partial class PrismApp : IResumableApp
     private const int NoticeLines = 3;
     private const int LoadedAtLimit = 512;
     private const int GuideVersion = 2;
+    private const float CoverFocus = 0.25f;
+    private const float BackChevronUnits = 15f;
+    private const int LabelWidthLimit = 64;
+    private const float GridLineUnits = 28f;
 
     private readonly PrismStore store;
     private readonly GlamStore glams;
@@ -88,6 +92,10 @@ internal sealed partial class PrismApp : IResumableApp
     private PrismScreen screen = PrismScreen.Cover;
     private PrismScreen pickReturn = PrismScreen.Cover;
     private readonly Dictionary<string, double> loadedAt = new(StringComparer.Ordinal);
+    private readonly Dictionary<(string Label, int Fonts, float TextScale), float> labelWidths = new();
+    private PhoneTheme? followedTheme;
+    private ControlInk controls;
+    private ControlInk photoControls;
     private string loadedWeek = string.Empty;
     private bool onPhoto;
     private float screenAge;
@@ -95,6 +103,9 @@ internal sealed partial class PrismApp : IResumableApp
     private INavigator navigation = null!;
     private string? pendingSharedPhoto;
     private float sinceRefresh;
+    private Vector2 pressedTile = new(float.NaN);
+    private bool tilePressed;
+    private float tileScale = 1f;
 
     public PrismApp(AethernetSession session, AethernetApi api, RemoteImageCache images, PhotoLibrary library,
         WallpaperImageCache wallpaperImages, Configuration configuration, ConfirmService confirm,
@@ -187,7 +198,7 @@ internal sealed partial class PrismApp : IResumableApp
     public void OnResumed()
     {
         sinceRefresh = 0f;
-        statsFor = null;
+        statsStale = true;
         store.Refresh();
         if (screen == PrismScreen.Discover && (glams.Lane(discoverScope).NeverLoaded || glams.Lane(discoverScope).Failed))
         {
@@ -208,6 +219,8 @@ internal sealed partial class PrismApp : IResumableApp
         var content = context.Content;
         var full = SceneChrome.ScreenFrom(content, context.Theme, scale);
         PrismArt.Follow(context.Theme);
+        FollowSkin(context.Theme);
+        FollowTheme(context.Theme);
         ImGui.GetWindowDrawList().AddRectFilled(full.Min, full.Max, ImGui.GetColorU32(PrismArt.Back));
         if (glams.IsSignedIn && screen != PrismScreen.Guide && launcher.TryConsume(Id, out var link))
         {
@@ -220,6 +233,8 @@ internal sealed partial class PrismApp : IResumableApp
             return;
         }
 
+        tileScale = PressFx.Scale(ImGui.GetID("prism.tilePress"), tilePressed, PressFx.CardPressedScale);
+        tilePressed = false;
         TickRefresh();
         ForgetLoadsOnNewWeek();
         ConsumeSharedPhoto();
@@ -228,9 +243,9 @@ internal sealed partial class PrismApp : IResumableApp
         screenAge += MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
         var enter = PrismMotion.At(screenAge, 0f, TransitionTiming.PresentSmoothTime);
         var bar = ShowsTabBar(screen);
-        var wearing = glamour.TryingOn && IsTabRoot(screen);
+        var wearing = glamour.TryingOn && bar;
         bottomChrome = bar
-            ? TabBar.ContentInset(scale) + (wearing ? (WearingBarUnits + WearingGapUnits) * scale : 0f)
+            ? TabBar.ContentInset(scale, TabBarUnits) + (wearing ? (WearingBarUnits + WearingGapUnits) * scale : 0f)
             : 0f;
         var stage = ScreenLayer.Begin("prism.stage", full, enter < TransitionTiming.InteractiveProgress);
         try
@@ -306,10 +321,10 @@ internal sealed partial class PrismApp : IResumableApp
                 DrawTrackChoice(drawList, content, scale);
                 break;
             case PrismScreen.Discover:
-                DrawDiscover(drawList, content, scale);
+                DrawDiscover(drawList, full, content, scale);
                 break;
             case PrismScreen.GlamDetail:
-                DrawGlamDetail(drawList, content, scale);
+                DrawGlamDetail(drawList, full, content, scale);
                 break;
             case PrismScreen.Compose:
                 DrawCompose(drawList, content, scale);
@@ -331,7 +346,7 @@ internal sealed partial class PrismApp : IResumableApp
                 DrawWardrobeCover(drawList, content, scale);
                 break;
             case PrismScreen.Activity:
-                DrawActivity(drawList, content, scale);
+                DrawActivity(drawList, full, content, scale);
                 break;
             default:
                 DrawCover(drawList, full, content, scale);
@@ -344,6 +359,7 @@ internal sealed partial class PrismApp : IResumableApp
         if (next != screen)
         {
             store.ClearFailure();
+            ResetPieces();
         }
 
         screen = next;
@@ -362,27 +378,9 @@ internal sealed partial class PrismApp : IResumableApp
         float height;
         if (back)
         {
-            var backClicked = PrismArt.Link(drawList, row.Min, Loc.T(L.Prism.Back), PrismArt.Muted, scale);
-            if (backClicked && screen == PrismScreen.Compose && composeDetails)
+            if (PrismArt.Link(drawList, row.Min, Loc.T(L.Prism.Back), PrismArt.Muted, scale))
             {
-                composeDetails = false;
-            }
-            else if (backClicked && IsLibraryScreen(screen))
-            {
-                GoBack();
-            }
-            else if (backClicked && screen is PrismScreen.GearSearch or PrismScreen.DyePick)
-            {
-                BackToOutfit();
-            }
-            else if (backClicked)
-            {
-                Go(screen switch
-                {
-                    PrismScreen.Pick => pickReturn,
-                    PrismScreen.Outfit => outfitReturn,
-                    _ => PrismScreen.Cover,
-                }, -1);
+                LeaveScreen();
             }
 
             height = PrismType.LineHeight(PrismFace.Label, PrismArt.LabelPixels());
@@ -402,31 +400,269 @@ internal sealed partial class PrismApp : IResumableApp
         return rule + HeaderGapUnits * scale;
     }
 
+    private void LeaveScreen()
+    {
+        if (piecesOpen && screen is PrismScreen.GlamDetail or PrismScreen.WardrobeOutfit)
+        {
+            piecesOpen = false;
+        }
+        else if (screen == PrismScreen.Compose && composeDetails)
+        {
+            composeDetails = false;
+        }
+        else if (IsLibraryScreen(screen))
+        {
+            GoBack();
+        }
+        else if (screen is PrismScreen.GearSearch or PrismScreen.DyePick)
+        {
+            BackToOutfit();
+        }
+        else
+        {
+            Go(screen switch
+            {
+                PrismScreen.Pick => pickReturn,
+                PrismScreen.Outfit => outfitReturn,
+                _ => PrismScreen.Cover,
+            }, -1);
+        }
+    }
+
+    private void FollowTheme(PhoneTheme theme)
+    {
+        if (ReferenceEquals(theme, followedTheme))
+        {
+            return;
+        }
+
+        followedTheme = theme;
+        controls = new ControlInk(PrismArt.Fore, PrismArt.Fore, PrismArt.Muted, theme.Danger);
+        photoControls = new ControlInk(PrismArt.PhotoFore, PrismArt.PhotoFore, PrismArt.PhotoMuted, theme.Danger);
+    }
+
+    private float DrawBackHeader(ImDrawListPtr drawList, Rect content, string title, float scale)
+    {
+        var tap = Metrics.Size.TapTarget * scale;
+        var hit = new Rect(content.Min, content.Min + new Vector2(tap, tap));
+        if (BackButton.Draw("prism.back", hit.Center, BackChevronUnits * scale, PrismArt.Fore,
+                UiInteract.Hover(hit.Min, hit.Max), scale))
+        {
+            LeaveScreen();
+        }
+
+        var fitted = Typography.FitText(title, MathF.Max(1f, content.Width - tap * 2f), PrismType.Headline);
+        var size = Typography.Measure(fitted, PrismType.Headline);
+        Typography.Draw(drawList, new Vector2(content.Center.X - size.X * 0.5f, hit.Center.Y - size.Y * 0.5f), fitted,
+            PrismArt.Fore, PrismType.Headline);
+        return hit.Max.Y;
+    }
+
+    private float DrawSectionTitle(ImDrawListPtr drawList, float left, float right, float top, string title,
+        string caption, float scale)
+    {
+        var height = Typography.LineHeight(PrismType.Title);
+        var room = right - left;
+        if (caption.Length > 0)
+        {
+            var fitted = Typography.FitText(caption, room * 0.5f, PrismType.Caption);
+            var size = Typography.Measure(fitted, PrismType.Caption);
+            Typography.Draw(drawList, new Vector2(right - size.X, top + (height - size.Y) * 0.5f), fitted,
+                PrismArt.Muted, PrismType.Caption);
+            room -= size.X + Metrics.Space.Sm * scale;
+        }
+
+        Typography.Draw(drawList, new Vector2(left, top),
+            Typography.FitText(title, MathF.Max(1f, room), PrismType.Title), PrismArt.Fore, PrismType.Title);
+        return top + height;
+    }
+
+    private static float PhotoTop(Rect full, Rect content) => PrismArt.Light ? content.Min.Y : full.Min.Y;
+
+    private static float PhotoInset(Rect full, Rect content) => content.Min.Y - PhotoTop(full, content);
+
+    private static bool DrawPhotoButton(ImDrawListPtr drawList, Rect photo, float topInset, int slot, string glyph,
+        string tooltip, float scale)
+    {
+        var radius = Metrics.Size.GlassButton * 0.5f * scale;
+        var reach = Metrics.Size.TapTarget * 0.5f * scale;
+        var inset = Metrics.Space.Md * scale + radius;
+        var step = (Metrics.Size.GlassButton + Metrics.Space.Sm) * scale;
+        var center = new Vector2(slot == 0 ? photo.Min.X + inset : photo.Max.X - inset - (slot - 1) * step,
+            photo.Min.Y + topInset + Metrics.Space.Xs * scale + radius);
+        var extent = new Vector2(reach, reach);
+        if (center.Y + reach > photo.Max.Y || !ImGui.IsRectVisible(center - extent, center + extent))
+        {
+            return false;
+        }
+
+        var light = PrismArt.Light;
+        return GlassCircle.Icon(drawList, ImGui.GetID(glyph), center, radius, PrismArt.GlassIconUnits * scale, glyph,
+            light ? PrismArt.Fore : PrismArt.PhotoFore, scale, light ? GlassTone.Light : GlassTone.Dark, tooltip,
+            HoverLabelSide.Below, hitRadius: reach, reserve: true);
+    }
+
+    private void DrawPhotoBack(ImDrawListPtr drawList, Rect photo, float topInset, float scale)
+    {
+        if (DrawPhotoButton(drawList, photo, topInset, 0, PhoneIcons.ChevronLeft, Loc.T(L.Prism.Back), scale))
+        {
+            LeaveScreen();
+        }
+    }
+
+    private float ButtonWidth(ReadOnlySpan<string> stateLabels, float cap, float scale)
+    {
+        var style = Button.LabelStyle(Button.LargeHeight * scale);
+        var textScale = Plugin.Fonts.BaseSize * Plugin.Fonts.Zoom * scale;
+        var widest = 0f;
+        for (var index = 0; index < stateLabels.Length; index++)
+        {
+            var key = (stateLabels[index], Plugin.Fonts.Generation, textScale);
+            if (!labelWidths.TryGetValue(key, out var width))
+            {
+                if (labelWidths.Count >= LabelWidthLimit)
+                {
+                    labelWidths.Clear();
+                }
+
+                width = Typography.Measure(stateLabels[index], style).X;
+                labelWidths[key] = width;
+            }
+
+            widest = MathF.Max(widest, width);
+        }
+
+        return MathF.Min(widest + Metrics.Space.Xl * scale, cap);
+    }
+
+    private bool DrawButton(ImDrawListPtr drawList, Rect rect, string label, ButtonStyle style, float scale,
+        bool enabled = true, bool overlay = false, ControlInk? ink = null, string? id = null,
+        UiSound tapSound = UiSound.Tap) =>
+        Button.Draw(drawList, rect, label, ink ?? controls, style, ButtonRole.Normal, enabled, overlay, id, 1f,
+            tapSound, MathF.Max(1f, rect.Width - Metrics.Space.Xl * scale));
+
+    private static TextStyle FitStyle(string text, float room, in TextStyle largest) =>
+        new(Typography.FitScale(text, room, largest.Scale, PrismType.Caption.Scale, largest.Weight), largest.Weight);
+
+    private static float GridLine(float scale) =>
+        MathF.Max(GridLineUnits * scale, Typography.LineHeight(PrismType.Headline));
+
+    private static Rect GridBand(Rect photo, float scale)
+    {
+        var inset = Metrics.Space.Lg * scale;
+        return new Rect(new Vector2(photo.Min.X + inset, photo.Max.Y - inset - GridLine(scale)),
+            new Vector2(photo.Max.X - inset, photo.Max.Y - inset));
+    }
+
+    private bool DrawGridTile(ImDrawListPtr drawList, Rect photo, string url, string label, string glyph, string count,
+        float scale) =>
+        DrawGridTile(drawList, PrismMotion.Mark(drawList), photo, url, label, glyph, count, scale);
+
+    private bool DrawGridTile(ImDrawListPtr drawList, int mark, Rect photo, string url, string label, string glyph,
+        string count, float scale)
+    {
+        if (!ImGui.IsRectVisible(photo.Min, photo.Max))
+        {
+            return false;
+        }
+
+        DrawLook(drawList, photo, url, false);
+        var hovered = HoverWash(drawList, photo);
+        if (label.Length > 0)
+        {
+            var band = GridBand(photo, scale);
+            PrismArt.Scrim(drawList, photo, band.Height, scale);
+            DrawCountByline(drawList, band.Min.X, band.Max.X, band.Center.Y, label, glyph, count, PrismArt.PhotoFore,
+                PrismArt.PhotoFore, scale);
+        }
+        else if (count.Length > 0)
+        {
+            DrawTileCount(drawList, photo, glyph, count, scale);
+        }
+
+        var pressed = hovered && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !DragScrollHost.AnyDragging;
+        if (pressed)
+        {
+            pressedTile = photo.Min;
+            tilePressed = true;
+        }
+
+        if (photo.Min == pressedTile)
+        {
+            PrismMotion.Grow(drawList, mark, photo.Center, tileScale);
+        }
+
+        return UiInteract.Click(photo.Min, photo.Max, hovered);
+    }
+
+    private static void DrawTileCount(ImDrawListPtr drawList, Rect photo, string glyph, string count, float scale)
+    {
+        var line = Typography.LineHeight(PrismType.Caption);
+        var inset = Metrics.Space.Sm * scale;
+        PrismArt.Scrim(drawList, photo, line + inset, scale);
+        var glyphSize = PrismArt.InlineIconUnits * scale;
+        var middle = photo.Max.Y - inset - line * 0.5f;
+        PhoneIcon.Draw(drawList, new Vector2(photo.Min.X + inset + glyphSize * 0.5f, middle), glyph, PrismArt.PhotoFore,
+            glyphSize);
+        Typography.Draw(drawList, new Vector2(photo.Min.X + inset + glyphSize + Metrics.Space.Xxs * scale,
+            middle - line * 0.5f), count, PrismArt.PhotoFore, PrismType.Caption);
+    }
+
+    private float DrawCountByline(ImDrawListPtr drawList, float left, float right, float middle, string label,
+        string glyph, string count, Vector4 ink, Vector4 countInk, float scale)
+    {
+        if (count.Length > 0)
+        {
+            var size = Typography.Measure(count, PrismType.Caption);
+            Typography.Draw(drawList, new Vector2(right - size.X, middle - size.Y * 0.5f), count, countInk,
+                PrismType.Caption);
+            right -= size.X + Metrics.Space.Xxs * scale;
+            if (glyph.Length > 0)
+            {
+                var glyphSize = PrismArt.InlineIconUnits * scale;
+                PhoneIcon.Draw(drawList, new Vector2(right - glyphSize * 0.5f, middle), glyph, countInk, glyphSize);
+                right -= glyphSize;
+            }
+
+            right -= Metrics.Space.Sm * scale;
+        }
+
+        var fitted = Typography.FitText(label, MathF.Max(1f, right - left), PrismType.Headline);
+        var fittedSize = Typography.Measure(fitted, PrismType.Headline);
+        Typography.Draw(drawList, new Vector2(left, middle - fittedSize.Y * 0.5f), fitted, ink, PrismType.Headline);
+        return left + fittedSize.X;
+    }
+
+    private static bool HoverWash(ImDrawListPtr drawList, Rect rect) => HoverWash(drawList, rect, rect, 0f);
+
+    private static bool HoverWash(ImDrawListPtr drawList, Rect hit, Rect wash, float rounding)
+    {
+        if (!UiInteract.Hover(hit.Min, hit.Max))
+        {
+            return false;
+        }
+
+        drawList.AddRectFilled(wash.Min, wash.Max,
+            ImGui.GetColorU32(Surfaces.Fill(PrismArt.Fore, FillLevel.Quaternary)), rounding);
+        ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+        return true;
+    }
+
     private Rect DrawLook(ImDrawListPtr drawList, Rect rect, string url, bool contain, float alpha = 1f,
-        float zoom = 1f, Vector2? pivot = null)
+        float zoom = 1f, Vector2? pivot = null, bool native = false)
     {
         if (url.Length == 0)
         {
             return rect;
         }
 
-        var texture = images.Sized(url, MathF.Max(rect.Width, rect.Height));
+        var drawnPixels = MathF.Max(rect.Width, rect.Height);
+        var texture = native && drawnPixels > TextureSizes.SizeOf(TextureSizes.LevelCount)
+            ? images.Get(url) ?? images.Nearest(url, drawnPixels)
+            : images.Sized(url, drawnPixels);
         if (texture is null)
         {
-            var failed = images.Failed(url);
-            if (!failed && !contain)
-            {
-                return rect;
-            }
-
-            var placeholder = Loc.T(failed ? L.Common.ImageFailed : L.Common.Loading);
-            var size = PrismType.Measure(placeholder, PrismFace.Label, PrismArt.LabelPixels());
-            if (size.X <= rect.Width)
-            {
-                PrismType.Draw(drawList, rect.Center - size * 0.5f, placeholder, PrismArt.Faint, PrismFace.Label,
-                    PrismArt.LabelPixels());
-            }
-
+            PrismArt.Placeholder(drawList, rect, images.Failed(url), UiScale.Current, alpha);
             return rect;
         }
 
@@ -442,8 +678,14 @@ internal sealed partial class PrismApp : IResumableApp
             loadedAt[url] = seen;
         }
 
-        alpha *= PrismMotion.At((float)(now - seen), 0f, Motion.Appear);
         var frame = contain ? ImageFit.CenteredRect(rect, texture.Size.X / MathF.Max(1f, texture.Size.Y)) : rect;
+        var fade = PrismMotion.At((float)(now - seen), 0f, Motion.Appear);
+        if (fade < PrismMotion.Settled)
+        {
+            PrismArt.Placeholder(drawList, frame, false, UiScale.Current, alpha);
+        }
+
+        alpha *= fade;
         var (uv0, uv1) = contain
             ? (Vector2.Zero, Vector2.One)
             : ImageFit.Cover(texture.Size.X, texture.Size.Y, rect.Width, rect.Height);

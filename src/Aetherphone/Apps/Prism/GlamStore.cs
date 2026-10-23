@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet;
 using Aetherphone.Core.Aethernet.Clients;
@@ -28,6 +29,7 @@ internal sealed class GlamStore : IDisposable
     public const int MaxPhotos = 4;
 
     private const int MoreLimit = 4;
+    private const int MeRetrySeconds = 5;
 
     private const int PhotoBaseSize = 1080;
     private const PostAspect GlamAspect = PostAspect.Portrait;
@@ -38,12 +40,15 @@ internal sealed class GlamStore : IDisposable
     };
 
     private readonly AethernetSession session;
+    private readonly AccountClient account;
     private readonly GlamClient client;
     private readonly MediaClient media;
     private readonly SafetyClient safety;
     private readonly SocialClient social;
     private readonly StoreWork work = new("Glams");
     private readonly FailureSlot postFailure = new();
+    private readonly FailureSlot profileFailure = new();
+    private readonly RetryGate meGate = new(TimeSpan.FromSeconds(MeRetrySeconds));
     private readonly FeedLane<GlamDto>[] discover =
     {
         FeedLane<GlamDto>.ServerOrdered(), FeedLane<GlamDto>.ServerOrdered(), FeedLane<GlamDto>.ServerOrdered(),
@@ -51,6 +56,8 @@ internal sealed class GlamStore : IDisposable
     };
     private readonly FeedLane<GlamDto> list = FeedLane<GlamDto>.ServerOrdered();
     private readonly HashSet<string> triedOn = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, bool> follows = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, bool> followLookups = new(StringComparer.Ordinal);
 
     private Func<string?, CancellationToken, Action<AepFailure>?, Task<GlamPage?>>? listFetch;
     private volatile string listKey = string.Empty;
@@ -67,12 +74,23 @@ internal sealed class GlamStore : IDisposable
     private volatile bool posting;
     private volatile bool postFailed;
     private volatile int epoch;
+    private volatile string followsFor = string.Empty;
+    private volatile GlamAuthorDto? me;
+    private volatile string meFor = string.Empty;
+    private volatile bool loadingMe;
+    private volatile bool savingProfile;
+    private volatile GlamAuthorDto[] people = Array.Empty<GlamAuthorDto>();
+    private volatile string peopleFor = string.Empty;
+    private volatile string peopleAsked = string.Empty;
+    private volatile bool peopleLoading;
+    private volatile bool peopleFailed;
     private bool? vanillaOnly;
-    private (int Race, int Gender) body;
+    private (int Race, int? Gender) body;
 
     public GlamStore(AethernetSession session, AethernetApi api)
     {
         this.session = session;
+        account = api.Account;
         client = api.Glams;
         media = api.Media;
         safety = api.Safety;
@@ -85,9 +103,27 @@ internal sealed class GlamStore : IDisposable
 
     public string MyId => session.CurrentUser?.Id ?? string.Empty;
 
+    public GlamAuthorDto? Me => meFor.Length > 0 && meFor == MyId ? me : null;
+
+    public bool SavingProfile => savingProfile;
+
+    public string ProfileFailureText => profileFailure.Text();
+
+    public GlamAuthorDto[] People => people;
+
+    public string PeopleFor => peopleFor;
+
+    public string PeopleAsked => peopleAsked;
+
+    public bool PeopleLoading => peopleLoading;
+
+    public bool PeopleFailed => peopleFailed;
+
     public bool? VanillaOnly => vanillaOnly;
 
-    public bool FitsBody => body.Race > 0;
+    public int Race => body.Race;
+
+    public int? Gender => body.Gender;
 
     public GlamDto? Detail => detail;
 
@@ -112,6 +148,39 @@ internal sealed class GlamStore : IDisposable
 
     public string PostFailureText => postFailure.Text();
 
+    public bool? Follows(GlamAuthorDto author)
+    {
+        var owner = MyId;
+        if (owner != followsFor)
+        {
+            followsFor = owner;
+            follows.Clear();
+            followLookups.Clear();
+        }
+
+        if (follows.TryGetValue(author.Id, out var known))
+        {
+            return known;
+        }
+
+        if (session.IsSignedIn && followLookups.TryAdd(author.Id, true))
+        {
+            LookUpFollow(author.Id, owner);
+        }
+
+        return null;
+    }
+
+    private void LookUpFollow(string userId, string owner) =>
+        work.Run("follow state", async token =>
+        {
+            var fetched = await client.ProfileAsync(userId, token).ConfigureAwait(false);
+            if (fetched is not null && followsFor == owner)
+            {
+                follows.TryAdd(userId, fetched.Following);
+            }
+        });
+
     public FeedLane<GlamDto> Lane(GlamScope scope) => discover[(int)scope];
 
     public FeedLane<GlamDto> List => list;
@@ -129,7 +198,7 @@ internal sealed class GlamStore : IDisposable
         ClearDiscover();
     }
 
-    public void SetBody(int race, int gender)
+    public void SetBody(int race, int? gender)
     {
         if (body == (race, gender))
         {
@@ -195,12 +264,16 @@ internal sealed class GlamStore : IDisposable
     public void LoadMore(GlamScope scope)
     {
         var lane = discover[(int)scope];
-        var cursor = lane.Cursor;
-        if (!session.IsSignedIn || cursor is null || lane.Loading || lane.LoadingMore)
+        if (!session.IsSignedIn || lane.Cursor is not { } cursor || lane.Loading || lane.LoadingMore)
         {
             return;
         }
 
+        StartMore(scope, lane, cursor);
+    }
+
+    private void StartMore(GlamScope scope, FeedLane<GlamDto> lane, string cursor)
+    {
         var key = ScopeKeys[(int)scope];
         var daily = scope == GlamScope.Today;
         var only = daily ? null : vanillaOnly;
@@ -247,6 +320,7 @@ internal sealed class GlamStore : IDisposable
             if (fetched is not null && profile?.User?.Id == userId)
             {
                 profile = fetched with { User = fetched.User ?? author };
+                follows[userId] = fetched.Following;
             }
         });
     }
@@ -270,8 +344,10 @@ internal sealed class GlamStore : IDisposable
         });
     }
 
+    public static string TagKey(string tag) => "tag:" + tag;
+
     public void OpenTag(string tag) =>
-        OpenList("tag:" + tag, (cursor, token, failure) => client.TagGlamsAsync(tag, cursor, token, failure));
+        OpenList(TagKey(tag), (cursor, token, failure) => client.TagGlamsAsync(tag, cursor, token, failure));
 
     public void OpenMoreFrom(GlamDto glam)
     {
@@ -310,13 +386,17 @@ internal sealed class GlamStore : IDisposable
 
     public void LoadMoreList()
     {
-        var cursor = list.Cursor;
-        var fetch = listFetch;
-        if (fetch is null || cursor is null || list.Loading || list.LoadingMore)
+        if (listFetch is not { } fetch || list.Cursor is not { } cursor || list.Loading || list.LoadingMore)
         {
             return;
         }
 
+        StartMoreList(fetch, cursor);
+    }
+
+    private void StartMoreList(Func<string?, CancellationToken, Action<AepFailure>?, Task<GlamPage?>> fetch,
+        string cursor)
+    {
         var key = listKey;
         list.LoadingMore = true;
         work.Run("list more", async token =>
@@ -411,6 +491,7 @@ internal sealed class GlamStore : IDisposable
 
     public void SetFollow(GlamAuthorDto author, bool follow)
     {
+        follows[author.Id] = follow;
         if (profile is { } current && current.User?.Id == author.Id)
         {
             profile = current with { Following = follow };
@@ -421,7 +502,13 @@ internal sealed class GlamStore : IDisposable
             var done = follow
                 ? await social.FollowAsync(author.Id, token).ConfigureAwait(false) is not null
                 : await social.UnfollowAsync(author.Id, token).ConfigureAwait(false);
-            if (!done && profile is { } latest && latest.User?.Id == author.Id)
+            if (done)
+            {
+                return;
+            }
+
+            follows[author.Id] = !follow;
+            if (profile is { } latest && latest.User?.Id == author.Id)
             {
                 profile = latest with { Following = !follow };
             }
@@ -488,6 +575,104 @@ internal sealed class GlamStore : IDisposable
 
     public void Report(string glamId, ReportReason reason, Action<bool> done) =>
         work.Run("report", token => safety.ReportAsync(GlamClient.ReportTarget, glamId, reason, token), done);
+
+    public void EnsureMe()
+    {
+        var owner = MyId;
+        if (!IsSignedIn || owner.Length == 0 || loadingMe || Me is not null || !meGate.TryPass())
+        {
+            return;
+        }
+
+        loadingMe = true;
+        work.Run("me", async token =>
+        {
+            var fetched = await account.MeAsync(token).ConfigureAwait(false);
+            if (fetched is not null && owner == MyId)
+            {
+                AcceptMe(fetched, owner);
+            }
+        }, () => loadingMe = false);
+    }
+
+    public void UpdateProfile(string displayName, string handle, string bio, GlamPhotoDraft? photo,
+        Action<bool> onComplete)
+    {
+        var owner = MyId;
+        if (savingProfile || !IsSignedIn || owner.Length == 0)
+        {
+            return;
+        }
+
+        savingProfile = true;
+        profileFailure.Clear();
+        work.Run("profile update", async token =>
+        {
+            var failure = AepFailure.None;
+            string? avatarUrl = null;
+            if (photo is { } picked)
+            {
+                avatarUrl = await AvatarUpload.UploadAsync(media, picked.Path, picked.Crop, token,
+                    received => failure = received).ConfigureAwait(false);
+                if (avatarUrl is null)
+                {
+                    return FailProfile(failure);
+                }
+            }
+
+            var updated = await account.UpdateProfileAsync(
+                new UpdateProfileRequest(displayName, handle, bio, avatarUrl), token, null,
+                received => failure = received).ConfigureAwait(false);
+            if (updated is null)
+            {
+                return FailProfile(failure);
+            }
+
+            AcceptMe(updated, owner);
+            return true;
+        }, onComplete, () => savingProfile = false);
+    }
+
+    public void SearchPeople(string query, bool retry = false)
+    {
+        if (!IsSignedIn || query.Length == 0 || (query == peopleAsked && !retry))
+        {
+            return;
+        }
+
+        peopleAsked = query;
+        peopleLoading = true;
+        peopleFailed = false;
+        work.Run("people", async token =>
+        {
+            var result = await account.SearchAsync(query, token).ConfigureAwait(false);
+            if (peopleAsked != query)
+            {
+                return;
+            }
+
+            if (result?.Users is not { } users)
+            {
+                peopleFailed = true;
+                return;
+            }
+
+            var found = new GlamAuthorDto[users.Length];
+            for (var index = 0; index < users.Length; index++)
+            {
+                found[index] = Author(users[index], users[index].Id);
+            }
+
+            people = found;
+            peopleFor = query;
+        }, () =>
+        {
+            if (peopleAsked == query)
+            {
+                peopleLoading = false;
+            }
+        });
+    }
 
     public void RefreshSeason()
     {
@@ -571,6 +756,26 @@ internal sealed class GlamStore : IDisposable
         {
             detail = null;
         }
+    }
+
+    private static GlamAuthorDto Author(UserDto user, string id) =>
+        new(id, user.DisplayName, user.Handle, user.AvatarUrl ?? string.Empty, user.Bio);
+
+    private void AcceptMe(UserDto user, string owner)
+    {
+        var mine = Author(user, owner);
+        me = mine;
+        meFor = owner;
+        if (profile is { } current && current.User?.Id == owner)
+        {
+            profile = current with { User = mine };
+        }
+    }
+
+    private bool FailProfile(AepFailure failure)
+    {
+        profileFailure.Set(failure.Failed ? failure : AepFailure.Transport(AepFailureKind.Offline));
+        return false;
     }
 
     private bool FailPost(AepFailure failure)
