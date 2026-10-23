@@ -85,7 +85,7 @@ internal sealed partial class PrismApp
         FactBit(PrismFact.Modded) | FactBit(PrismFact.Female) | FactBit(PrismFact.Race) | FactBit(PrismFact.FitsMe),
         FactBit(PrismFact.Modded) | FactBit(PrismFact.Female) | FactBit(PrismFact.Male),
         FactBit(PrismFact.Vanilla) | FactBit(PrismFact.Female) | FactBit(PrismFact.Race) | FactBit(PrismFact.FitsMe),
-        FactBit(PrismFact.Vanilla) | FactBit(PrismFact.Female),
+        FactBit(PrismFact.Vanilla) | FactBit(PrismFact.Male),
         FactBit(PrismFact.Modded) | FactBit(PrismFact.Female) | FactBit(PrismFact.Race),
         FactBit(PrismFact.Vanilla) | FactBit(PrismFact.Female) | FactBit(PrismFact.Race),
     };
