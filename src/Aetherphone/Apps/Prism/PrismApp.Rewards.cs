@@ -44,7 +44,6 @@ internal sealed partial class PrismApp
     private const float HeatIconUnits = 44f;
     private const float GilIconShare = 0.95f;
 
-    private static readonly int[] PodiumOrder = { 2, 1, 3 };
     private static readonly Vector4 FirstGlow = new(0.80f, 0.72f, 1f, 0.26f);
     private static readonly Vector4 PedestalPearl = new(1f, 0.97f, 0.92f, 1f);
 
