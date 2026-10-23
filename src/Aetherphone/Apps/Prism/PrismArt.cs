@@ -45,17 +45,22 @@ internal static class PrismArt
     private const float ScrimShare = 0.35f;
     private const float FailedGlyphShare = 0.3f;
     private const float TryOnHoldSeconds = 0.9f;
-    private const float TryOnDim = 0.45f;
-    private const float TryOnBandShare = 0.35f;
-    private const float TryOnBandPeak = 0.3f;
+    private const float TryOnDim = 0.3f;
+    private const float TryOnDimDelay = 0.04f;
+    private const float TryOnBandDelay = 0.1f;
+    private const float TryOnBandSmooth = 0.32f;
+    private const float TryOnLabelDelay = 0.28f;
+    private const float TryOnBandShare = 0.42f;
+    private const float TryOnBandPeak = 0.22f;
     private const float RefractionBandShare = 0.6f;
-    private const float RefractionBandPeak = 0.45f;
+    private const float RefractionBandPeak = 0.25f;
     private const float IconStrokeUnits = 1.8f;
     private const int IconMaxPoints = 64;
     private const int IconCapSegments = 6;
     private const float ArcStepDegrees = 22.5f;
     private const float TileIconShare = 0.58f;
     private const float ToggleRestAlpha = 0.7f;
+    private const float ToggleEdgeShare = 0.62f;
 
     public static readonly Vector4 Bone = new(0.957f, 0.945f, 0.918f, 1f);
     public static readonly Vector4 Ink = new(0.067f, 0.067f, 0.067f, 1f);
@@ -106,10 +111,7 @@ internal static class PrismArt
 
     public static void OverPhoto(bool photo) => inks = photo ? PhotoInks : themeInks;
 
-    private static readonly Vector4[] Spectrum =
-    {
-        AccentRing.Red, AccentRing.Orange, AccentRing.Gold, AccentRing.Green, AccentRing.Azure, AccentRing.Violet,
-    };
+    private static readonly Vector4[] Spectrum = PrismLight.Hues;
 
     private static readonly uint[] SpectrumPacked = PackAll(Spectrum);
 
@@ -248,6 +250,35 @@ internal static class PrismArt
         drawList.PopClipRect();
     }
 
+    private static void RisingBand(ImDrawListPtr drawList, Rect photo, float progress)
+    {
+        if (progress <= 0f || progress >= PrismMotion.Settled)
+        {
+            return;
+        }
+
+        var alpha = MathF.Sin(MathF.PI * progress) * TryOnBandPeak;
+        var band = photo.Height * TryOnBandShare;
+        var top = photo.Max.Y - progress * (photo.Height + band);
+        var bar = band / Spectrum.Length;
+        drawList.PushClipRect(photo.Min, photo.Max, true);
+        for (var index = 0; index < Spectrum.Length; index++)
+        {
+            var min = new Vector2(photo.Min.X, top + bar * index);
+            var max = new Vector2(photo.Max.X, min.Y + bar);
+            if (max.Y <= photo.Min.Y || min.Y >= photo.Max.Y)
+            {
+                continue;
+            }
+
+            var from = BandColor(index, alpha);
+            var to = BandColor(index + 1, alpha);
+            drawList.AddRectFilledMultiColor(min, max, from, from, to, to);
+        }
+
+        drawList.PopClipRect();
+    }
+
     private static uint BandColor(int stop, float alpha) =>
         (SpectrumPacked[Math.Min(stop, Spectrum.Length - 1)] & 0x00FFFFFFu) |
         ((uint)(alpha * BandShape[stop] * 255f + 0.5f) << 24);
@@ -346,10 +377,11 @@ internal static class PrismArt
             return;
         }
 
-        var sweep = PrismMotion.At(age, 0f, Motion.Sheet);
-        var show = sweep * (1f - PrismMotion.At(age, TryOnHoldSeconds, Motion.Appear));
-        drawList.AddRectFilled(photo.Min, photo.Max, Palette.Pack(ShadeClear with { W = TryOnDim * show }));
-        Bands(drawList, photo, sweep, TryOnBandShare, TryOnBandPeak);
+        var release = 1f - PrismMotion.At(age, TryOnHoldSeconds, Motion.Appear);
+        var dim = PrismMotion.At(age, TryOnDimDelay, Motion.Sheet) * release;
+        var show = PrismMotion.At(age, TryOnLabelDelay, Motion.Appear) * release;
+        drawList.AddRectFilled(photo.Min, photo.Max, Palette.Pack(ShadeClear with { W = TryOnDim * dim }));
+        RisingBand(drawList, photo, PrismMotion.At(age, TryOnBandDelay, TryOnBandSmooth));
         var line = Typography.LineHeight(PrismType.Headline);
         var gap = Metrics.Space.Xs * scale;
         var room = photo.Width - Metrics.Space.Lg * scale * 2f - line - gap;
@@ -425,6 +457,13 @@ internal static class PrismArt
         var ink = Vector4.Lerp(rest, Fore, MathF.Max(hover, fill));
         var strokes = FactIcons[(int)fact];
         var shape = FactFills[(int)fact];
+        if (fact is PrismFact.Modded or PrismFact.Vanilla)
+        {
+            PrismLight.CircleEdge(drawList, center, size * ToggleEdgeShare,
+                fact == PrismFact.Modded ? PrismGlow.Spectrum : PrismGlow.Pearl, PrismLight.EdgeAlpha * fill,
+                UiScale.Current);
+        }
+
         if (fill > 0.001f)
         {
             FillShapes(drawList, center, size, strokes, shape, ink with { W = ink.W * fill });

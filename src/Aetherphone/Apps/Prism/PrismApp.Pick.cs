@@ -13,6 +13,9 @@ namespace Aetherphone.Apps.Prism;
 
 internal sealed partial class PrismApp
 {
+    private const float EnterShardAngle = 2.1f;
+    private const float EnterShardSpread = 1.1f;
+    private const float EnterShardSpeed = 360f;
     private const float PickPaneFraction = 0.52f;
 
     private const float PickFillAlpha = 0.08f;
@@ -23,6 +26,7 @@ internal sealed partial class PrismApp
         new(PrismArt.Fore, PrismArt.Muted, Palette.WithAlpha(PrismArt.Fore, PickFillAlpha), PrismArt.Faint, false);
 
     private volatile int entryOutcome;
+    private Vector2 enterShardOrigin;
     private CachedText outfitLinkText;
     private CachedText pickHeadingText;
 
@@ -63,6 +67,8 @@ internal sealed partial class PrismApp
                   Metrics.Space.Sm * scale;
         if (entered)
         {
+            var corner = Metrics.Size.TapTarget * scale * 0.5f;
+            enterShardOrigin = new Vector2(content.Max.X - corner, content.Min.Y + corner);
             RememberEntryDrops();
             store.Enter(pickSession.FirstSelected, pickSession.CropsArray()[0], EntryOutfit(), entryRace, entryGender,
                 entrySettled);
@@ -185,6 +191,7 @@ internal sealed partial class PrismApp
         entryOutcome = OutcomePending;
         if (outcome == OutcomeSent)
         {
+            shards.Burst(enterShardOrigin, EnterShardAngle, EnterShardSpread, EnterShardSpeed, ShardLifeSeconds);
             pickIntake.Discard();
             Go(PrismScreen.Entry);
         }

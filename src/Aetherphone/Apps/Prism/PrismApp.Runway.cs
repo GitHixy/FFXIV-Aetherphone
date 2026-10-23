@@ -16,6 +16,14 @@ internal sealed partial class PrismApp
     private const float ScoreDone = 0.97f;
     private const float ScorePitchLow = 0.84f;
     private const float ScorePitchStep = 0.08f;
+    private const float ScoreReach = 0.3f;
+    private const float ScorePeak = 0.55f;
+    private const float ScoreRingUnits = 1.4f;
+    private const float TopScoreReach = 0.6f;
+    private const float TopScorePeak = 0.9f;
+    private const float TopScoreRingUnits = 2f;
+    private const float ScoreShardSpread = 1.8f;
+    private const float ScoreShardSpeed = 300f;
     private const float TurnShift = 0.35f;
     private const float TurnIdle = 10f;
     private const float DoneTextDelay = 0.12f;
@@ -55,11 +63,15 @@ internal sealed partial class PrismApp
     private float inspectHold;
     private Vector2 inspectFocus;
     private Spring scoreFill = new(0f);
+    private double scoreLightAt = PrismMotion.LongAgo;
+    private Vector2 scoreLightCenter;
+    private bool scoreLightTop;
     private long heatCoins;
     private CachedText lookCounter;
     private CachedText rateCaption;
     private CachedText picksCaption;
     private CachedText heatTitle;
+    private CachedText heatCaption;
     private CachedText coinCounter;
     private CachedText rewardText;
 
@@ -301,9 +313,19 @@ internal sealed partial class PrismApp
             {
                 UiFeedback.PlayPitched(UiSound.Tap, ScorePitchLow + ScorePitchStep * index);
                 picked = index + 1;
+                scoreLightAt = ImGui.GetTime();
+                scoreLightCenter = center;
+                scoreLightTop = index == PrismArt.Stars - 1;
+                if (scoreLightTop)
+                {
+                    shards.Burst(center, -MathF.PI * 0.5f, ScoreShardSpread, ScoreShardSpeed, ShardLifeSeconds);
+                }
             }
         }
 
+        var age = (float)(ImGui.GetTime() - scoreLightAt);
+        DrawLightRing(drawList, scoreLightCenter, size * 0.5f, age, scoreLightTop ? TopScoreReach : ScoreReach,
+            scoreLightTop ? TopScorePeak : ScorePeak, (scoreLightTop ? TopScoreRingUnits : ScoreRingUnits) * scale);
         return picked;
     }
 
@@ -697,8 +719,12 @@ internal sealed partial class PrismApp
                 Plain[Math.Min(total, Plain.Length - 1)]));
     }
 
-    private string RateCaption(int current, int total) =>
-        FactLine(ref rateCaption, LookCounter(current, total), Loc.T(L.Prism.InspectHint));
+    private string RateCaption(int current, int total)
+    {
+        var look = FactLine(ref rateCaption, LookCounter(current, total), Loc.T(L.Prism.InspectHint));
+        var heat = store.Ballot is { } ballot ? HeatTitle(ballot) : string.Empty;
+        return heat.Length > 0 ? FactLine(ref heatCaption, heat, look) : look;
+    }
 
     private string PicksCaption(PrismBallotDto ballot)
     {
@@ -740,13 +766,15 @@ internal sealed partial class PrismApp
 
     private string HeatTitle(PrismBallotDto ballot)
     {
-        var key = HashCode.Combine(ballot.Stage, ballot.HeatLabel, Loc.Current.Code);
+        var key = HashCode.Combine(ballot.Stage, ballot.HeatLabel, ballot.HeatIndex, ballot.HeatCount,
+            Loc.Current.Code);
         if (heatTitle.IsCurrent(key))
         {
             return heatTitle.Value;
         }
 
         var text = ballot.Stage == PrismPhases.StageFinal ? Loc.T(L.Prism.FinalTitle)
+            : ballot.HeatCount > 0 ? Loc.T(L.Prism.HeatOf, ballot.HeatIndex, ballot.HeatCount)
             : ballot.HeatLabel.Length > 0 ? Loc.T(L.Prism.HeatName, ballot.HeatLabel) : string.Empty;
         return heatTitle.Store(key, text);
     }

@@ -34,6 +34,11 @@ internal sealed partial class PrismApp
     private const float EmptyDiscUnits = 34f;
     private const float EmptyActionUnits = 132f;
     private const float EmptyTextUnits = 300f;
+    private const float ScopeLineUnits = 2f;
+    private const float ContestMarkUnits = 30f;
+    private const float ContestMarkShare = 0.45f;
+    private const float ContestTileUnits = 32f;
+    private const int CountdownUnitsShown = 3;
     private const int RaceCount = 8;
     private const int MaleGender = 0;
     private const int FemaleGender = 1;
@@ -55,6 +60,10 @@ internal sealed partial class PrismApp
     private readonly DropdownMenu.Item[] raceItems = new DropdownMenu.Item[RaceCount + 1];
     private GlamScope discoverScope = GlamScope.New;
     private bool fitsMe;
+    private bool scopeLineShown;
+    private readonly PrismCountdown rowCountdown = new();
+    private Spring scopeLineLeft;
+    private Spring scopeLineRight;
     private bool todayResolved;
     private Action? refreshDiscoverNow;
     private CachedText contestCaption;
@@ -320,9 +329,19 @@ internal sealed partial class PrismApp
         else
         {
             var x = row.Min.X;
+            var lineLeft = x;
+            var lineRight = x;
+            var lineTop = row.Center.Y;
             for (var index = 0; index < ScopeNames.Length; index++)
             {
                 var size = Typography.Measure(scopeLabels[index], PrismType.Title);
+                if (scopeActive[index])
+                {
+                    lineLeft = x;
+                    lineRight = x + size.X;
+                    lineTop = row.Center.Y + size.Y * 0.5f + Metrics.Space.Xxs * scale;
+                }
+
                 var hit = new Rect(new Vector2(x - gap * 0.5f, row.Min.Y),
                     new Vector2(x + size.X + gap * 0.5f, row.Max.Y));
                 var hovered = UiInteract.Hover(hit.Min, hit.Max);
@@ -340,6 +359,8 @@ internal sealed partial class PrismApp
 
                 x += size.X + gap;
             }
+
+            DrawScopeLine(drawList, lineLeft, lineRight, lineTop, scale);
         }
 
         if (picked < 0 || scopeActive[picked])
@@ -350,6 +371,21 @@ internal sealed partial class PrismApp
         discoverScope = ShownScopes[picked];
         pendingScroll = 0f;
         RefreshDiscover(false);
+    }
+
+    private void DrawScopeLine(ImDrawListPtr drawList, float left, float right, float top, float scale)
+    {
+        if (!scopeLineShown)
+        {
+            scopeLineLeft.SnapTo(left);
+            scopeLineRight.SnapTo(right);
+            scopeLineShown = true;
+        }
+
+        var delta = MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
+        PrismLight.Strip(drawList, scopeLineLeft.Step(left, Motion.Release, delta),
+            scopeLineRight.Step(right, Motion.Release, delta), top, MathF.Max(1f, ScopeLineUnits * scale),
+            PrismLight.TabAlpha);
     }
 
     private void RefreshDiscoverAlways() => RefreshDiscover(true);
@@ -504,10 +540,12 @@ internal sealed partial class PrismApp
         }
         else
         {
-            PrismArt.Placeholder(drawList, thumb, false, scale);
-            PhoneIcon.Draw(drawList, thumb.Center, PhoneIcons.Crown, PrismArt.Muted, PrismArt.IconUnits * scale);
+            PrismLight.Week(drawList, thumb, week.Id, PrismArt.Page, PrismArt.Fore, ContestMarkUnits * scale,
+                ContestMarkShare);
         }
 
+        var deadline = PrismCountdown.Deadline(week);
+        var remaining = PrismCountdown.Remaining(deadline);
         var entered = week.Phase == PrismPhases.Entering && week.MyEntry is not null;
         var label = Loc.T(week.Phase == PrismPhases.Final ? L.Prism.JudgeFinal
             : week.Phase != PrismPhases.Entering ? L.Prism.JudgeHeat
@@ -517,20 +555,31 @@ internal sealed partial class PrismApp
         var captionHeight = Typography.LineHeight(PrismType.Caption);
         var themeLine = Typography.LineHeight(PrismType.Title);
         var pillHeight = Button.RegularHeight * scale;
+        var pillWidth = MathF.Min(Typography.Measure(label, Button.LabelStyle(pillHeight)).X + pillHeight, room);
+        var tiles = remaining > 0 &&
+                    room - pillWidth - Metrics.Space.Sm * scale >= ContestTileUnits * CountdownUnitsShown * scale;
         var gap = Metrics.Space.Xxs * scale;
         var y = row.Center.Y - (captionHeight + gap + themeLine + Metrics.Space.Sm * scale + pillHeight) * 0.5f;
-        Typography.Draw(drawList, new Vector2(textLeft, y),
-            Typography.FitText(ContestCaption(week), room, PrismType.Caption), PrismArt.Muted, PrismType.Caption);
+        var caption = tiles
+            ? Loc.T(week.Phase == PrismPhases.Entering ? L.Prism.TabWeek : DeadlineLabel(week.Phase))
+            : ContestCaption(week);
+        Typography.Draw(drawList, new Vector2(textLeft, y), Typography.FitText(caption, room, PrismType.Caption),
+            PrismArt.Muted, PrismType.Caption);
         y += captionHeight + gap;
         var themeStyle = FitStyle(week.Title, room, PrismType.Title);
         Typography.Draw(drawList, new Vector2(textLeft, y + (themeLine - Typography.LineHeight(themeStyle)) * 0.5f),
             Typography.FitText(week.Title, room, themeStyle), PrismArt.Fore, themeStyle);
         y += themeLine + Metrics.Space.Sm * scale;
-        var pillWidth = MathF.Min(Typography.Measure(label, Button.LabelStyle(pillHeight)).X + pillHeight, room);
         var pill = new Rect(new Vector2(textLeft, y), new Vector2(textLeft + pillWidth, y + pillHeight));
         Button.DrawLabel(drawList, Button.Surface(drawList, pill, controls,
             entered ? ButtonStyle.Gray : ButtonStyle.Solid, ButtonRole.Normal, true, hovered,
             ImGui.GetID("prism.contestRow")), label);
+        if (tiles)
+        {
+            rowCountdown.DrawCompact(drawList,
+                new Rect(new Vector2(pill.Max.X + Metrics.Space.Sm * scale, pill.Min.Y),
+                    new Vector2(row.Max.X - inset, pill.Max.Y)), deadline, scale);
+        }
     }
 
     private string ContestCover(PrismWeekDto week) =>

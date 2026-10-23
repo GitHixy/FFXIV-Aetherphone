@@ -7,6 +7,7 @@ using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
 using Aetherphone.Windows.Widgets;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 
 namespace Aetherphone.Apps.Prism;
 
@@ -25,7 +26,12 @@ internal sealed partial class PrismApp
     private const float PrintRiseUnits = 40f;
     private const float RevealZoom = 0.12f;
     private const float RevealDim = 0.6f;
-    private const float FlashAlpha = 0.5f;
+    private const float FlashAlpha = 0.25f;
+    private const float PodiumLightDelay = 0.26f;
+    private const float PodiumLightStagger = 0.18f;
+    private const float PodiumDimFloor = 0.26f;
+    private const float PodiumRimDelay = 0.95f;
+    private const float PlacedPearlAlpha = 0.42f;
     private const float NumeralDelay = 0.15f;
     private const float RevealPageSeconds = 5f;
     private const float RevealHoldSeconds = 0.25f;
@@ -44,12 +50,14 @@ internal sealed partial class PrismApp
     private readonly List<PrismPlacingDto> finalOrder = new();
     private readonly List<PrismPlacingDto> heatOrder = new();
 
+    private static readonly string PodiumGlyph = IconGlyph.Of(FontAwesomeIcon.Trophy);
     private static readonly Vector4 PodiumShade = new(0f, 0f, 0f, 0.6f);
     private static readonly Vector4 PodiumClear = new(0f, 0f, 0f, 0f);
 
     private PrismResultsDto? orderedFor;
     private string profileGlamId = string.Empty;
     private int revealIndex;
+    private double podiumLitAt = PrismMotion.LongAgo;
     private int soundedPage = -1;
     private float revealPageSeconds;
     private float revealHoldSeconds;
@@ -282,6 +290,7 @@ internal sealed partial class PrismApp
         configuration.PrismRevealedWeek = results.WeekId;
         configuration.PrismRevealedRevision = results.Revision;
         configuration.Save();
+        podiumLitAt = ImGui.GetTime();
         Go(PrismScreen.Final);
     }
 
@@ -295,6 +304,12 @@ internal sealed partial class PrismApp
 
         FollowPlacingProfile();
         SyncOrder(results);
+        if (finalOrder.Count == 0 && heatOrder.Count == 0 && results.MyHeatRank <= 0)
+        {
+            DrawNoPodium(drawList, full, content, results, scale);
+            return;
+        }
+
         var top = DrawBackHeader(drawList, content, results.Title, scale);
         var body = new Rect(new Vector2(full.Min.X, top), new Vector2(full.Max.X, content.Max.Y));
         using var surface = BeginBody(body);
@@ -304,12 +319,6 @@ internal sealed partial class PrismApp
         var left = origin.X + content.Min.X - full.Min.X;
         var right = left + width;
         var cursor = origin.Y + Metrics.Space.Sm * scale;
-        if (finalOrder.Count == 0 && heatOrder.Count == 0 && results.MyHeatRank <= 0)
-        {
-            cursor += Typography.DrawWrappedLeft(new Vector2(left, cursor), Loc.T(L.Prism.NoPodium), PrismArt.Muted,
-                PrismType.Body, width) + Metrics.Space.Xl * scale;
-        }
-
         if (finalOrder.Count > 0)
         {
             cursor = DrawSectionTitle(list, left, right, cursor, Loc.T(L.Prism.FinalTitle), string.Empty, scale) +
@@ -377,6 +386,53 @@ internal sealed partial class PrismApp
         ImGui.Dummy(new Vector2(width, cursor - origin.Y));
     }
 
+    private void DrawNoPodium(ImDrawListPtr drawList, Rect full, Rect content, PrismResultsDto results, float scale)
+    {
+        var tap = Metrics.Size.TapTarget * scale;
+        PrismLight.Week(drawList,
+            new Rect(full.Min, new Vector2(full.Max.X, content.Min.Y + tap + Metrics.Space.Sm * scale)),
+            results.WeekId, PrismArt.Page, PrismArt.Fore, 0f, 0f);
+        var top = DrawBackHeader(drawList, content, results.Title, scale);
+        var gallery = results.EntryCount > 0;
+        var links = (gallery ? 2f : 1f) * tap + PrismArt.BottomMargin(scale);
+        var area = new Rect(new Vector2(content.Min.X, top),
+            new Vector2(content.Max.X, content.Max.Y - bottomChrome - links));
+        var bottom = DrawEmpty(drawList, area, PodiumGlyph, Loc.T(L.Prism.NoPodiumTitle), Loc.T(L.Prism.NoPodium),
+            ContestAction(store.Week), ButtonStyle.Solid, scale, out var acted) + Metrics.Space.Sm * scale;
+        if (acted)
+        {
+            OpenTab(PrismTab.Week);
+        }
+
+        if (gallery && CenteredLink(drawList, content, ref bottom, Loc.T(L.Prism.AllGlams), scale))
+        {
+            OpenGallery(results.WeekId, store.Track, results.Title);
+        }
+
+        if (CenteredLink(drawList, content, ref bottom, Loc.T(L.Prism.WhatWinnersGet), scale))
+        {
+            OpenRewards();
+        }
+    }
+
+    private bool CenteredLink(ImDrawListPtr drawList, Rect content, ref float top, string label, float scale)
+    {
+        var tap = Metrics.Size.TapTarget * scale;
+        var rect = PlainRect(new Vector2(content.Center.X, top + tap * 0.5f), label, content.Width, 0.5f, scale);
+        top += tap;
+        return DrawButton(drawList, rect, label, ButtonStyle.Plain, scale);
+    }
+
+    private static string ContestAction(PrismWeekDto? week) => week is not { Id.Length: > 0 } ? string.Empty
+        : week.Phase switch
+        {
+            PrismPhases.Entering when week.MyEntry is null => Loc.T(L.Prism.EnterThisWeek),
+            PrismPhases.Entering => Loc.T(L.Prism.SeeYourGlam),
+            PrismPhases.Judging => Loc.T(L.Prism.JudgeHeat),
+            PrismPhases.Final => Loc.T(L.Prism.JudgeFinal),
+            _ => string.Empty,
+        };
+
     private float DrawPodium(ImDrawListPtr drawList, float left, float top, float width, float scale)
     {
         var gap = Metrics.Space.Sm * scale;
@@ -385,11 +441,13 @@ internal sealed partial class PrismApp
         var nameLine = Typography.LineHeight(PrismType.Headline);
         var numeralPixels = PodiumNumeralUnits * scale;
         var count = Math.Min(PodiumSize, finalOrder.Count);
+        var age = (float)(ImGui.GetTime() - podiumLitAt);
         for (var index = 0; index < count; index++)
         {
             var placing = finalOrder[index];
             var x = left + index * (column + gap);
             var photo = new Rect(new Vector2(x, top), new Vector2(x + column, top + photoHeight));
+            var mark = PrismMotion.Mark(drawList);
             DrawLook(drawList, photo, placing.ImageUrl, false);
             TapForOutfit(photo.Min, photo.Max, placing);
             var shade = new Vector2(photo.Min.X, photo.Max.Y - photoHeight * PodiumShadeShare);
@@ -408,6 +466,21 @@ internal sealed partial class PrismApp
             Typography.Draw(drawList, new Vector2(x, creditTop + nameLine),
                 Typography.FitText(PlacingDetail(placing), column, PrismType.Caption), PrismArt.Muted,
                 PrismType.Caption);
+            var lit = PrismMotion.At(age, PodiumLightDelay + PodiumLightStagger * (count - 1 - index), Motion.Sheet);
+            if (lit < PrismMotion.Settled)
+            {
+                PrismMotion.Shift(drawList, mark, Vector2.Zero, PodiumDimFloor + (1f - PodiumDimFloor) * lit);
+            }
+
+            var rim = PrismMotion.At(age, PodiumRimDelay, Motion.Sheet);
+            if (placing.Rank == 1)
+            {
+                PrismLight.Edge(drawList, photo, 0f, PrismGlow.Spectrum, PrismLight.EdgeAlpha * rim, scale);
+            }
+            else if (placing.Rank is > 1 and <= PodiumSize)
+            {
+                PrismLight.Edge(drawList, photo, 0f, PrismGlow.Pearl, PlacedPearlAlpha * rim, scale);
+            }
         }
 
         return top + photoHeight + Metrics.Space.Sm * scale + nameLine + Typography.LineHeight(PrismType.Caption) +

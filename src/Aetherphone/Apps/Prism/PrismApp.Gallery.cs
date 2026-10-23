@@ -35,6 +35,10 @@ internal sealed partial class PrismApp
             return;
         }
 
+        var tap = Metrics.Size.TapTarget * scale;
+        var lightBottom = content.Min.Y + tap + Metrics.Space.Sm * scale + (HasTracks ? Metrics.Space.Xs * scale + tap : 0f);
+        PrismLight.Week(drawList, new Rect(full.Min, new Vector2(full.Max.X, lightBottom)), gallery.WeekId,
+            PrismArt.Page, PrismArt.Fore, 0f, 0f);
         var top = DrawBackHeader(drawList, content, gallery.Title.Length > 0 ? gallery.Title : WeekTitle(gallery.WeekId),
             scale);
         if (HasTracks)
@@ -64,7 +68,7 @@ internal sealed partial class PrismApp
         galleryTracks[0] = PrismTracks.Name(PrismTracks.Modded);
         galleryTracks[1] = PrismTracks.Name(PrismTracks.Vanilla);
         var selected = gallery.Track == PrismTracks.Vanilla ? 1 : 0;
-        var picked = DrawSegments("prism.gallery.tracks", row, galleryTracks, selected);
+        var picked = DrawTrackSegments("prism.gallery.tracks", row, galleryTracks, selected, UiScale.Current);
         if (picked != selected)
         {
             gallery = gallery with { Track = picked == 1 ? PrismTracks.Vanilla : PrismTracks.Modded };

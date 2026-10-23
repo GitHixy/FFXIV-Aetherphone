@@ -384,8 +384,8 @@ internal sealed partial class PrismApp
             false => 0,
             null => -1,
         };
-        var picked = DrawSegments("prism.composeKind",
-            new Rect(new Vector2(left, top), new Vector2(left + width, top + tap)), kindLabels, shown);
+        var picked = DrawTrackSegments("prism.composeKind",
+            new Rect(new Vector2(left, top), new Vector2(left + width, top + tap)), kindLabels, shown, scale);
         if (picked >= 0)
         {
             composeVanilla = picked == 1;
