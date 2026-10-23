@@ -10,7 +10,10 @@ internal static class PrismStock
 
     private static readonly string[] Paths = BuildPaths();
 
-    public static bool Draw(ImDrawListPtr drawList, Rect rect, int index, float alpha)
+    public static bool Draw(ImDrawListPtr drawList, Rect rect, int index, float alpha) =>
+        DrawRounded(drawList, rect, index, alpha, 0f);
+
+    public static bool DrawRounded(ImDrawListPtr drawList, Rect rect, int index, float alpha, float rounding)
     {
         var texture = Plugin.TextureProvider.GetFromFile(Paths[(index % Count + Count) % Count]).GetWrapOrDefault();
         if (texture is null || texture.Handle == nint.Zero)
@@ -19,8 +22,8 @@ internal static class PrismStock
         }
 
         var (uv0, uv1) = ImageFit.Cover(texture.Size.X, texture.Size.Y, rect.Width, rect.Height);
-        drawList.AddImage(texture.Handle, rect.Min, rect.Max, uv0, uv1,
-            ImGui.GetColorU32(new Vector4(1f, 1f, 1f, alpha)));
+        drawList.AddImageRounded(texture.Handle, rect.Min, rect.Max, uv0, uv1,
+            ImGui.GetColorU32(new Vector4(1f, 1f, 1f, alpha)), rounding);
         return true;
     }
 

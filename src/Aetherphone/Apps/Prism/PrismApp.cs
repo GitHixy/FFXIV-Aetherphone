@@ -59,7 +59,7 @@ internal sealed partial class PrismApp : IResumableApp
     private const float ShardLifeSeconds = 0.45f;
     private const float RefreshSeconds = 120f;
     private const int LoadedAtLimit = 512;
-    private const int GuideVersion = 2;
+    private const int GuideVersion = 3;
     private const float CoverFocus = 0.25f;
     private const float BackChevronUnits = 15f;
     private const int LabelWidthLimit = 64;
