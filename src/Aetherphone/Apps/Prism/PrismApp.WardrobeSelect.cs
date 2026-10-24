@@ -17,6 +17,7 @@ internal sealed partial class PrismApp
     private const float SelectActionShare = 0.34f;
 
     private readonly HashSet<string> selectedOutfits = new(StringComparer.Ordinal);
+    private readonly HashSet<string> shownOutfitIds = new(StringComparer.Ordinal);
     private int[] shownOutfits = Array.Empty<int>();
     private WardrobeOutfit[]? shownOutfitsFor;
     private string shownOutfitsQuery = string.Empty;
@@ -52,6 +53,7 @@ internal sealed partial class PrismApp
         var query = wardrobeQuery.Trim();
         var compare = Loc.Culture.CompareInfo;
         var count = 0;
+        shownOutfitIds.Clear();
         for (var index = 0; index < outfits.Length; index++)
         {
             var outfit = outfits[index];
@@ -66,12 +68,13 @@ internal sealed partial class PrismApp
             }
 
             shownOutfits[count++] = index;
+            shownOutfitIds.Add(outfit.Id);
         }
 
         shownOutfitCount = count;
-        if (changed && selectedOutfits.Count > 0)
+        if (selectedOutfits.Count > 0)
         {
-            selectedOutfits.RemoveWhere(id => wardrobe.Find(id) is null);
+            selectedOutfits.IntersectWith(shownOutfitIds);
         }
 
         selectionStale = true;
