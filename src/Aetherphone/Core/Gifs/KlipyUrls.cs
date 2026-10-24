@@ -24,6 +24,11 @@ internal static class KlipyUrls
         return Root(settings) + "/gifs/share/" + Uri.EscapeDataString(slug);
     }
 
+    public static string Report(GifSettings settings, string slug)
+    {
+        return Root(settings) + "/gifs/report/" + Uri.EscapeDataString(slug);
+    }
+
     public static string LocaleOf(string cultureName)
     {
         var separator = cultureName.LastIndexOf('-');

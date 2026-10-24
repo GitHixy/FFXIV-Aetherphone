@@ -1,6 +1,8 @@
 using Aetherphone.Core;
+using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Gifs;
 using Aetherphone.Core.Localization;
+using Aetherphone.Core.Report;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
@@ -191,6 +193,23 @@ internal sealed partial class ChirperApp
     }
 
     private bool HeldGif(string? url) => KlipyReveals.ShouldHold(url, configuration.KlipyGifsAllowed);
+
+    private Action<ReportReason>? GifReportForwarder(PostDto post)
+    {
+        var slug = post.GifSlug;
+        if (slug is null || post.GifUrl is null || HeldGif(post.GifUrl))
+        {
+            return null;
+        }
+
+        return reason =>
+        {
+            if (KlipyReportReasons.For(reason.Category) is { } klipyReason)
+            {
+                gifSearch.ForwardReport(slug, klipyReason);
+            }
+        };
+    }
 
     private bool DrawHeldGifTile(ImDrawListPtr drawList, string url, Rect rect, float rounding, ImDrawFlags corners)
     {

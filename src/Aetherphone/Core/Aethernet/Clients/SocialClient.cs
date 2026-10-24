@@ -261,12 +261,12 @@ internal sealed partial class SocialClient
         return net.PostAsync("/posts", new CreatePostRequest(text, quotedPostId, mediaKeys, mediaWidth, mediaHeight), AethernetJsonContext.Default.CreatePostRequest, AethernetJsonContext.Default.PostDto, token, null, onFailure);
     }
 
-    public Task<PostDto?> CreateGifPostAsync(string text, string? quotedPostId, string gifUrl, int width, int height,
-        bool sensitive, CancellationToken token, Action<AepFailure>? onFailure = null)
+    public Task<PostDto?> CreateGifPostAsync(string text, string? quotedPostId, string gifUrl, string gifSlug,
+        int width, int height, bool sensitive, CancellationToken token, Action<AepFailure>? onFailure = null)
     {
         return net.PostAsync("/posts",
             new CreatePostRequest(text, quotedPostId, MediaWidth: width, MediaHeight: height, Sensitive: sensitive,
-                GifUrl: gifUrl),
+                GifUrl: gifUrl, GifSlug: gifSlug),
             AethernetJsonContext.Default.CreatePostRequest, AethernetJsonContext.Default.PostDto, token, null, onFailure);
     }
 

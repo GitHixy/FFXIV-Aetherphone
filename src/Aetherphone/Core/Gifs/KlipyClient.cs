@@ -31,4 +31,11 @@ internal sealed class KlipyClient
             new KlipyShareRequest(settings.CustomerId, query), KlipyJsonContext.Default.KlipyShareRequest, null,
             token);
     }
+
+    public Task<bool> ReportAsync(GifSettings settings, string slug, string reason, CancellationToken token)
+    {
+        return http.SendJsonForStatusAsync(HttpMethod.Post, KlipyUrls.Report(settings, slug),
+            new KlipyReportRequest(settings.CustomerId, reason), KlipyJsonContext.Default.KlipyReportRequest, null,
+            token);
+    }
 }
