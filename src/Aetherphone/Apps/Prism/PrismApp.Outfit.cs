@@ -284,7 +284,7 @@ internal sealed partial class PrismApp
                 Loc.T(vanilla ? L.Prism.GearNote : L.Prism.ModsNote), PrismArt.Muted, PrismType.Body, width) +
                       Metrics.Space.Lg * scale;
             cursor = vanilla
-                ? DrawGearSlots(list, left, cursor, width, scale)
+                ? DrawEntryGear(list, left, cursor, width, scale)
                 : DrawEntryMods(list, left, cursor, width, scale);
             ImGui.Dummy(new Vector2(width, cursor - origin.Y + PrismArt.BottomMargin(scale)));
         }
@@ -302,6 +302,18 @@ internal sealed partial class PrismApp
 
             Go(outfitReturn, -1);
         }
+    }
+
+    private float DrawEntryGear(ImDrawListPtr drawList, float left, float top, float width, float scale)
+    {
+        var fill = new Rect(new Vector2(left, top), new Vector2(left + width, top + Button.RegularHeight * scale));
+        if (DrawButton(drawList, fill, Loc.T(L.Prism.FillFromWearing), ButtonStyle.Tinted, scale,
+                id: "prism.entry.fill"))
+        {
+            FillFromWearing(Draft);
+        }
+
+        return DrawGearSlots(drawList, left, fill.Max.Y + Metrics.Space.Lg * scale, width, scale);
     }
 
     private float DrawEntryMods(ImDrawListPtr drawList, float left, float top, float width, float scale)
