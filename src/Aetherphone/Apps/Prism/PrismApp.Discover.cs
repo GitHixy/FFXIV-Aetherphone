@@ -3,6 +3,7 @@ using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Animation;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Social;
+using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
 using Aetherphone.Windows.Widgets;
 using Dalamud.Bindings.ImGui;
@@ -37,6 +38,8 @@ internal sealed partial class PrismApp
     private const float ContestTileUnits = 32f;
     private const int CountdownUnitsShown = 3;
     private const int ScopeShrinkSteps = 8;
+    private const float FabRadiusUnits = 27f;
+    private const float FabDeepShare = 0.18f;
     private const int RaceCount = 8;
     private const int MaleGender = 0;
     private const int FemaleGender = 1;
@@ -86,7 +89,19 @@ internal sealed partial class PrismApp
         var top = DrawDiscoverHeader(drawList, content, scale);
         top = DrawFilterRow(drawList, content, top, scale) + Metrics.Space.Xs * scale;
         DrawDiscoverFeed(new Rect(new Vector2(content.Min.X, top), content.Max), scale);
+        DrawComposeFab(content);
         DrawRaceMenu(full);
+    }
+
+    private void DrawComposeFab(Rect content)
+    {
+        var area = new Rect(content.Min, new Vector2(content.Max.X, content.Max.Y - bottomChrome));
+        if (ComposeFab.Draw(area, "##prismComposeFab", PrismArt.Fore, PhoneIcons.Plus, Loc.T(L.Prism.PostGlam),
+                "prism.compose", Palette.Mix(PrismArt.Fore, PrismArt.Back, FabDeepShare), FabRadiusUnits, true,
+                PrismArt.OnFore))
+        {
+            StartCompose();
+        }
     }
 
     private void DrawDiscoverFeed(Rect body, float scale)
@@ -107,7 +122,7 @@ internal sealed partial class PrismApp
             filtered ? L.Prism.FiltersEmptyHint : following ? L.Prism.FollowingEmptyHint : L.Prism.EmptyFeedHint,
             scale,
             Loc.T(filtered ? L.Prism.NoMatches : following ? L.Prism.FollowingEmptyTitle : L.Prism.EmptyFeedTitle));
-        ImGui.Dummy(new Vector2(width, cursor - origin.Y));
+        ImGui.Dummy(new Vector2(width, cursor - origin.Y + (FabRadiusUnits * 2f + Metrics.Space.Lg) * scale));
         if (showcasePager.Owning)
         {
             surface.CancelDrag();
