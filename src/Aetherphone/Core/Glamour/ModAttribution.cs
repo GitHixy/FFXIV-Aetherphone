@@ -178,9 +178,41 @@ internal static class ModAttribution
     private static bool SameName(string candidate, ReadOnlySpan<char> name) =>
         candidate.AsSpan().Trim().Equals(name, StringComparison.OrdinalIgnoreCase);
 
-    private static bool Prefixed(ReadOnlySpan<char> installed, ReadOnlySpan<char> posted) =>
-        !installed.IsEmpty && (installed.StartsWith(posted, StringComparison.OrdinalIgnoreCase) ||
-                               posted.StartsWith(installed, StringComparison.OrdinalIgnoreCase));
+    private static bool Prefixed(ReadOnlySpan<char> installed, ReadOnlySpan<char> posted)
+    {
+        if (installed.IsEmpty)
+        {
+            return false;
+        }
+
+        var installedLonger = installed.Length >= posted.Length;
+        var longer = installedLonger ? installed : posted;
+        var shorter = installedLonger ? posted : installed;
+        return longer.StartsWith(shorter, StringComparison.OrdinalIgnoreCase) && IsDecoration(longer[shorter.Length..]);
+    }
+
+    private static bool IsDecoration(ReadOnlySpan<char> rest)
+    {
+        var trimmed = rest.TrimStart();
+        if (trimmed.IsEmpty)
+        {
+            return true;
+        }
+
+        var first = trimmed[0];
+        if (first is '-' or '(' or '[' or '{' or '|' or ':' or '_' or '/' or '~')
+        {
+            return true;
+        }
+
+        var spaced = trimmed.Length < rest.Length;
+        if (char.IsDigit(first))
+        {
+            return spaced;
+        }
+
+        return spaced && first is 'v' or 'V' && trimmed.Length > 1 && char.IsDigit(trimmed[1]);
+    }
 
     private static void Add(Dictionary<int, HashSet<string>> foldersBySlot, int slot, string folder)
     {

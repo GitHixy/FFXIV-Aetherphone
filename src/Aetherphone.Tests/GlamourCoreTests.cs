@@ -151,6 +151,26 @@ public sealed class GlamourCoreTests
         Assert.Equal(string.Empty, ModAttribution.MatchFolder(installed, links, posted));
     }
 
+    [Theory]
+    [InlineData("Bunny Dress", "Bunny Dress Shoes", false)]
+    [InlineData("Rue", "Rue+ 2.2.5", false)]
+    [InlineData("Bunny Dress", "Bunny Dress - Edited", true)]
+    [InlineData("Bunny Dress", "Bunny Dress (private edit)", true)]
+    [InlineData("Bunny Dress", "Bunny Dress v2", true)]
+    [InlineData("Bunny Dress 1.2", "Bunny Dress", true)]
+    [InlineData("Bunny Dress", "Bunny Dresser", false)]
+    public void TheWebsiteFallbackOnlyAcceptsAnEditOrVersionTag(string installedName, string postedName, bool matches)
+    {
+        var installed = new Dictionary<string, string> { ["mod"] = installedName };
+        var links = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["mod"] = "https://www.patreon.com/lacey",
+        };
+        var posted = new GlamModDto(postedName, "Lacey", Link: "https://www.patreon.com/lacey");
+
+        Assert.Equal(matches ? "mod" : string.Empty, ModAttribution.MatchFolder(installed, links, posted));
+    }
+
     [Fact]
     public void AModWithoutALinkNeverUsesTheWebsiteFallback()
     {
