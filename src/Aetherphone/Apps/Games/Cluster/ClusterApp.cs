@@ -150,7 +150,7 @@ internal sealed class ClusterApp : IMiniGame
         motions.Advance(context.RawDeltaSeconds);
         var scale = UiScale.Current;
         Layout(context.Safe, scale);
-        DrawStage(ImGui.GetWindowDrawList(), context, scale, false);
+        DrawBoard(ImGui.GetWindowDrawList(), context, scale, false);
     }
 
     public void Draw(in GameContext context)
@@ -661,6 +661,14 @@ internal sealed class ClusterApp : IMiniGame
 
     private void DrawStage(ImDrawListPtr drawList, in GameContext context, float scale, bool interactive)
     {
+        DrawBoard(drawList, context, scale, interactive);
+        var button = ClusterRenderer.ButtonRect(dock, scale);
+        ClusterRenderer.DrawButton(drawList, button, Loc.T(L.Cluster.Shuffle), run.ChargeFraction, run.ShuffleReady,
+            interactive && buttonHovered, buttonFlash, Accent, scale);
+    }
+
+    private void DrawBoard(ImDrawListPtr drawList, in GameContext context, float scale, bool interactive)
+    {
         DrawHeat();
         BoardPlate.Draw(drawList, plate, BoardPlate.Radius * scale, scale, Accent, context.Backdrop.Ink);
         DrawWells(drawList, scale);
@@ -673,10 +681,6 @@ internal sealed class ClusterApp : IMiniGame
             ClusterRenderer.DrawCursor(drawList, grid.CellCenter(cursorColumn, cursorRow) +
                 motions.Offset(cursor) * grid.Pitch, PieceHalf(), Accent, scale);
         }
-
-        var button = ClusterRenderer.ButtonRect(dock, scale);
-        ClusterRenderer.DrawButton(drawList, button, Loc.T(L.Cluster.Shuffle), run.ChargeFraction, run.ShuffleReady,
-            interactive && buttonHovered, buttonFlash, Accent, scale);
     }
 
     private void DrawHeat()
