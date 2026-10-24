@@ -21,13 +21,13 @@ internal sealed partial class ChirperApp
     private readonly GifSearch gifSearch;
     private readonly ActionSheet gifSourceSheet = new();
     private readonly ActionSheet.Item[] gifSourceItems = new ActionSheet.Item[2];
-    private ChirperGifSheet? gifSheet;
+    private GifPickerSheet? gifSheet;
     private GifTarget gifTarget;
     private GifPick? composeGif;
     private GifPick? commentGifRestore;
     private Action? commentGifSearch;
 
-    private ChirperGifSheet GifSheet => gifSheet ??= new ChirperGifSheet(gifSearch, images, configuration);
+    private GifPickerSheet GifSheet => gifSheet ??= new GifPickerSheet(gifSearch, images, configuration);
 
     private bool GifSheetsCapture => gifSourceSheet.CapturesPointer || (gifSheet?.CapturesPointer ?? false);
 

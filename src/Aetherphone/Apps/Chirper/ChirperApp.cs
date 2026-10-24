@@ -304,12 +304,12 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         RemoteImageCache images, PhotoLibrary library, SocialLauncher launcher, GameData gameData,
         Configuration configuration, SocialNotificationService social, WallpaperImageCache wallpaperImages,
         ConfirmService confirm, TranslationService translation, ReportService report, ConductGateService conduct,
-        RealtimeSignalBus realtimeSignals, HttpService http)
+        RealtimeSignalBus realtimeSignals, GifSearch gifs)
     {
         this.translation = translation;
         this.confirm = confirm;
         store = new ChirperStore(session, net.Account, net.Social, net.Safety, net.Media, realtimeSignals);
-        gifSearch = new GifSearch(session, net.Gifs, new KlipyClient(http));
+        gifSearch = gifs;
         store.SetFeedRegions(SocialRegion.FilterCsv(configuration.ChirperFeedRegionMask));
         composeMentions = new MentionAutocomplete(store.NewMentionSuggestions());
         commentMentions = new MentionAutocomplete(store.NewMentionSuggestions());
@@ -2654,6 +2654,5 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     public void Dispose()
     {
         store.Dispose();
-        gifSearch.Dispose();
     }
 }

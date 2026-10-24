@@ -730,6 +730,7 @@ internal static class L
         public static readonly LocString SysPhoto = new("dm.sysPhoto", "{0} changed the group photo");
         public static readonly LocString SysDescription = new("dm.sysDescription", "{0} changed the group description");
         public static readonly LocString LocationPreview = new("dm.locationPreview", "Location");
+        public static readonly LocString GifPreview = new("dm.gifPreview", "GIF");
         public static readonly LocString LocationShared = new("dm.locationShared", "Shared location");
         public static readonly LocString LocationOpenMap = new("dm.locationOpenMap", "Open map");
         public static readonly LocString LocationWard = new("dm.locationWard", "Ward {0}");
@@ -2318,12 +2319,12 @@ internal static class L
         public static readonly LocString ConsentTitle = new("gifs.consentTitle", "Search GIFs with KLIPY?");
         public static readonly LocString ConsentBody = new("gifs.consentBody", "GIF search comes from KLIPY, an outside GIF library. It stays off until you turn it on.");
         public static readonly LocString ConsentSearches = new("gifs.consentSearches", "What you type in GIF search goes from this PC straight to KLIPY, with an anonymous id from Aethernet. Never your name or character.");
-        public static readonly LocString ConsentImages = new("gifs.consentImages", "GIF images load from KLIPY's servers, which see your IP address. Until you turn this on, KLIPY GIFs in chirps wait for a tap.");
+        public static readonly LocString ConsentImages = new("gifs.consentImages", "GIF images load from KLIPY's servers, which see your IP address. Until you turn this on, KLIPY GIFs in posts, comments and messages wait for a tap.");
         public static readonly LocString ConsentSettings = new("gifs.consentSettings", "Change this any time in Settings > Privacy.");
         public static readonly LocString ConsentAccept = new("gifs.consentAccept", "Turn on GIF search");
         public static readonly LocString ConsentDecline = new("gifs.consentDecline", "Not now");
         public static readonly LocString Setting = new("gifs.setting", "GIFs from KLIPY");
-        public static readonly LocString SettingHint = new("gifs.settingHint", "Search GIFs in Chirper and show KLIPY GIFs in chirps and replies. Searches and images load straight from KLIPY, which sees your IP address.");
+        public static readonly LocString SettingHint = new("gifs.settingHint", "Search GIFs in Chirper, Aethergram and ChocoChat, and show KLIPY GIFs in posts, comments and messages. Searches and images load straight from KLIPY, which sees your IP address.");
     }
 
     internal static class Changelog
@@ -2371,6 +2372,8 @@ internal static class L
         {
             new("changelog.r1400.5",
                 "Added hiding messages from people you blocked in ChocoChat group chats: each shows as a short row you can tap to read, and they no longer notify you"),
+            new("changelog.r1400.58",
+                "Added GIFs from KLIPY to ChocoChat chats, group chats included, and to Aethergram messages"),
             new("changelog.r1400.6",
                 "Fixed voice messages recorded with Automatic gain distorting when you raise your voice and staying quiet afterwards"),
         };
@@ -2489,14 +2492,14 @@ internal static class L
                 "Added a Replies tab to Activity, and grouped your notifications under Today, This week, This month and Earlier"),
             new("changelog.r1400.56",
                 "Added polls: ask a question with two to four answers that stay open from an hour to a week, and see the results once you vote"),
-            new("changelog.r1400.57",
-                "Added GIF search from KLIPY for chirps and replies. It stays off until you turn it on, and until then GIFs from KLIPY wait for a tap before they load"),
             new("changelog.r1400.47",
                 "Fixed the Mentions tab in Activity staying empty when your latest notifications had no mentions: it now looks further back"),
         };
 
         public static readonly LocString[] Release1400Social =
         {
+            new("changelog.r1400.57",
+                "Added GIF search from KLIPY for chirps, replies and Aethergram comments. It stays off until you turn it on, and until then GIFs from KLIPY wait for a tap before they load"),
             new("changelog.r1400.38",
                 "Fixed followers and following lists that did not load leaving no way to try again: they now offer Retry, as does a search through one that stops partway, contributed by hellovvn"),
         };

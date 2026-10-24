@@ -1,5 +1,6 @@
 using Aetherphone.Core;
 using Aetherphone.Core.Animation;
+using Aetherphone.Core.Gifs;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Maps;
 using Aetherphone.Core.Media;
@@ -134,6 +135,15 @@ internal interface IChatTranscriptMedia
     void OnImageClick(string messageId);
 }
 
+internal interface IChatTranscriptGifs
+{
+    IDalamudTextureWrap? Texture(string url, float drawnWidth);
+
+    bool Held(string url);
+
+    void Reveal(string url);
+}
+
 internal interface IChatTranscriptSenders
 {
     void DrawAvatar(ImDrawListPtr drawList, in TranscriptMessage message, Vector2 center, float radius);
@@ -221,6 +231,7 @@ internal readonly ref struct ChatTranscriptModel
     public bool FullSenderNames { get; init; }
     public ChatBubbleStyle Bubbles { get; init; }
     public IChatTranscriptMedia? Media { get; init; }
+    public IChatTranscriptGifs? Gifs { get; init; }
     public IChatTranscriptInteractions? Interactions { get; init; }
     public IChatTranscriptVoice? Voice { get; init; }
     public IChatTranscriptPaging? Paging { get; init; }
@@ -240,6 +251,7 @@ internal sealed class ChatTranscript
     private const int KindPost = 4;
     private const int KindStoryReply = 5;
     private const int KindLocation = ChatText.LocationKind;
+    private const int KindGif = ChatText.GifKind;
     private const float StampTextScale = 0.70f;
     private const float StampTickBox = 14f;
     private const float StampTickGap = 3f;
@@ -458,6 +470,11 @@ internal sealed class ChatTranscript
                          && AdShare.TryParse(message.Body, out var adId))
                 {
                     DrawAdBubble(message, index, adId, model);
+                }
+                else if ((message.Flags & TranscriptFlags.Deleted) == 0 && model.Gifs is not null
+                         && GifShare.TryParse(message.Body, out var gif))
+                {
+                    DrawPictureBubble(message, index, model, gif.Width, gif.Height, string.Empty, gif.Url);
                 }
                 else
                 {
@@ -1995,15 +2012,20 @@ internal sealed class ChatTranscript
         ImGui.SetCursorScreenPos(new Vector2(start.X, start.Y + bubbleHeight + chipRow + BubbleGap * scale));
     }
 
-    private void DrawImageBubble(TranscriptMessage message, int index, in ChatTranscriptModel model)
+    private void DrawImageBubble(TranscriptMessage message, int index, in ChatTranscriptModel model) =>
+        DrawPictureBubble(message, index, model, message.MediaWidth, message.MediaHeight, message.Body ?? string.Empty,
+            null);
+
+    private void DrawPictureBubble(TranscriptMessage message, int index, in ChatTranscriptModel model, int mediaWidth,
+        int mediaHeight, string caption, string? gifUrl)
     {
         var scale = UiScale.Current;
         var mine = message.SenderId == model.MyUserId;
         var drawList = ImGui.GetWindowDrawList();
         var available = rowWidth;
         var padding = 5f * scale;
-        var aspect = message.MediaWidth > 0 && message.MediaHeight > 0
-            ? (float)message.MediaHeight / message.MediaWidth
+        var aspect = mediaWidth > 0 && mediaHeight > 0
+            ? (float)mediaHeight / mediaWidth
             : 1f;
         var frameWidth = available * 0.62f;
         var imageWidth = frameWidth;
@@ -2013,7 +2035,6 @@ internal sealed class ChatTranscript
         var cropInset = aspect > shownAspect ? (1f - shownAspect / aspect) * 0.5f : 0f;
         var header = TakeSenderHeader(message, frameWidth - 8f * scale, scale);
         var headerBlock = header.Height > 0f ? header.Height + 2f * scale : 0f;
-        var caption = message.Body ?? string.Empty;
         var stamp = MeasureStamp(message, mine, scale);
         var captionLayout = caption.Length > 0 ? LinkText.LayoutFor(caption, frameWidth / CaptionTextScale) : null;
         var captionTextHeight = captionLayout is not null
@@ -2048,13 +2069,13 @@ internal sealed class ChatTranscript
         var imageMin = scaledMin + new Vector2(padding * fx.Pop, (padding + headerBlock + forwardBlock) * fx.Pop);
         var imageMax = imageMin + new Vector2(imageWidth * fx.Pop, imageHeight * fx.Pop);
         var rounding = 10f * scale * fx.Pop;
-        var texture = model.Media?.Texture(message.Id);
-        if (texture is null)
+        if (gifUrl is not null)
         {
-            Squircle.Fill(drawList, imageMin, imageMax, rounding,
-                ImGui.GetColorU32(ChatInk.Wash(model.Theme, 0.08f * fx.Alpha)));
-            AppSkin.Icon((imageMin + imageMax) * 0.5f, IconGlyph.Of(FontAwesomeIcon.Image),
-                Palette.WithAlpha(model.MutedInk, fx.Alpha), 1.2f);
+            DrawGifFrame(drawList, gifUrl, imageMin, imageMax, rounding, cropInset, entrance, fx, model);
+        }
+        else if (model.Media?.Texture(message.Id) is not { } texture)
+        {
+            DrawPicturePlaceholder(drawList, imageMin, imageMax, rounding, fx, model);
         }
         else
         {
@@ -2121,6 +2142,43 @@ internal sealed class ChatTranscript
         ImGui.SetCursorScreenPos(new Vector2(start.X, start.Y + bubbleHeight + chipRow + BubbleGap * scale));
     }
 
+    private void DrawGifFrame(ImDrawListPtr drawList, string url, Vector2 imageMin, Vector2 imageMax, float rounding,
+        float cropInset, float entrance, in BubblePop fx, in ChatTranscriptModel model)
+    {
+        var gifs = model.Gifs!;
+        if (gifs.Held(url))
+        {
+            GifHold.Draw(drawList, new Rect(imageMin, imageMax), rounding, ImDrawFlags.RoundCornersAll,
+                ChatInk.Wash(model.Theme, 0.08f * fx.Alpha));
+            if (entrance >= 1f && Hovering(imageMin, imageMax) && UiInteract.Click(imageMin, imageMax, true, false))
+            {
+                gifs.Reveal(url);
+            }
+
+            return;
+        }
+
+        var texture = gifs.Texture(url, imageMax.X - imageMin.X);
+        if (texture is null)
+        {
+            DrawPicturePlaceholder(drawList, imageMin, imageMax, rounding, fx, model);
+            return;
+        }
+
+        drawList.AddImageRounded(texture.Handle, imageMin, imageMax, new Vector2(0f, cropInset),
+            new Vector2(1f, 1f - cropInset), ImGui.GetColorU32(new Vector4(1f, 1f, 1f, fx.Alpha)), rounding,
+            ImDrawFlags.RoundCornersAll);
+    }
+
+    private static void DrawPicturePlaceholder(ImDrawListPtr drawList, Vector2 imageMin, Vector2 imageMax,
+        float rounding, in BubblePop fx, in ChatTranscriptModel model)
+    {
+        Squircle.Fill(drawList, imageMin, imageMax, rounding,
+            ImGui.GetColorU32(ChatInk.Wash(model.Theme, 0.08f * fx.Alpha)));
+        AppSkin.Icon((imageMin + imageMax) * 0.5f, IconGlyph.Of(FontAwesomeIcon.Image),
+            Palette.WithAlpha(model.MutedInk, fx.Alpha), 1.2f);
+    }
+
     private void DrawTypingBubble(float reveal, in ChatTranscriptModel model)
     {
         var scale = UiScale.Current;
@@ -2167,7 +2225,7 @@ internal sealed class ChatTranscript
 
         var senderSize = Typography.Measure(message.ReplySenderName, QuoteSenderScale, FontWeight.SemiBold);
         var previewSize = Typography.Measure(message.ReplyBody, QuotePreviewScale);
-        var iconWidth = message.ReplyKind is KindImage or KindVoice or KindLocation ? 15f * scale : 0f;
+        var iconWidth = message.ReplyKind is KindImage or KindVoice or KindLocation or KindGif ? 15f * scale : 0f;
         var innerWidth = MathF.Max(senderSize.X, iconWidth + previewSize.X);
         var desired = 3f * scale + 7f * scale + innerWidth + 8f * scale;
         var height = 5f * scale * 2f + senderSize.Y + 1f * scale + previewSize.Y;
@@ -2199,13 +2257,14 @@ internal sealed class ChatTranscript
         var previewInk = mine ? new Vector4(1f, 1f, 1f, 0.78f) : Palette.WithAlpha(model.MutedInk, 0.95f);
         var previewTop = quoteMin.Y + 5f * scale + quote.SenderHeight + 1f * scale;
         var previewLeft = textLeft;
-        if (message.ReplyKind is KindImage or KindVoice or KindLocation)
+        if (message.ReplyKind is KindImage or KindVoice or KindLocation or KindGif)
         {
             var iconCenter = new Vector2(textLeft + 5f * scale, previewTop + 7f * scale);
             var glyph = message.ReplyKind switch
             {
                 KindVoice => IconGlyph.Of(FontAwesomeIcon.Microphone),
                 KindLocation => IconGlyph.Of(FontAwesomeIcon.MapMarkerAlt),
+                KindGif => IconGlyph.Of(FontAwesomeIcon.Image),
                 _ => IconGlyph.Of(FontAwesomeIcon.Camera),
             };
             AppSkin.Icon(drawList, fx.Apply(iconCenter), glyph,
