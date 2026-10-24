@@ -157,37 +157,31 @@ internal sealed partial class PrismApp
 
         var left = content.Min.X;
         var width = content.Width;
+        var photoTop = DrawRunwayHeader(drawList, content, looks.Length, look.Id, scale) + Metrics.Space.Xs * scale;
         var captionLine = Typography.LineHeight(PrismType.Caption);
         var size = MathF.Max(Metrics.Size.TapTarget * scale,
             MathF.Min(ScoreButtonUnits * scale,
                 (width - Metrics.Space.Sm * scale * (PrismArt.Stars - 1)) / PrismArt.Stars));
+        var caption = RateCaption(lookIndex + 1, looks.Length);
+        var captionHeight = Typography.MeasureWrappedBlock(caption, PrismType.Caption, width).Y;
         var question = Loc.T(L.Prism.RateHint);
         var questionHeight = Typography.MeasureWrappedBlock(question, PrismType.Title, width).Y;
-        var below = Metrics.Space.Lg * scale * 3f + captionLine * 2f + Metrics.Space.Xxs * scale + questionHeight +
-                    size + Metrics.Space.Xs * scale;
-        var photoTop = content.Min.Y;
-        var blockTop = MathF.Max(photoTop, content.Max.Y - below);
-        var photo = new Rect(new Vector2(full.Min.X, photoTop),
-            new Vector2(full.Max.X, MathF.Min(photoTop + full.Width / PrismStore.EntryRatio, blockTop)));
-        var captionTop = blockTop + Metrics.Space.Lg * scale;
-        var questionTop = captionTop + captionLine + Metrics.Space.Xxs * scale;
+        var previousHeight = Button.LargeHeight * scale;
+        var controls = Metrics.Space.Lg * scale * 2f + captionHeight + Metrics.Space.Xxs * scale + questionHeight +
+                       size + Metrics.Space.Xs * scale + captionLine + Metrics.Space.Sm * scale + previousHeight;
+        var room = content.Max.Y - Metrics.Space.Sm * scale - controls - photoTop;
+        var photoHeight = MathF.Max(Metrics.Size.TapTarget * scale,
+            MathF.Min(full.Width / PrismStore.EntryRatio, room));
+        var photoHalf = MathF.Min(full.Width, photoHeight * PrismStore.EntryRatio) * 0.5f;
+        var photo = new Rect(new Vector2(full.Center.X - photoHalf, photoTop),
+            new Vector2(full.Center.X + photoHalf, photoTop + photoHeight));
+        var captionTop = photo.Max.Y + Metrics.Space.Lg * scale;
+        var questionTop = captionTop + captionHeight + Metrics.Space.Xxs * scale;
         var rowTop = questionTop + questionHeight + Metrics.Space.Lg * scale;
         var row = new Rect(new Vector2(left, rowTop), new Vector2(content.Max.X, rowTop + size));
         var anchorsTop = row.Max.Y + Metrics.Space.Xs * scale;
         DrawTurningLook(drawList, photo, look, PrismMotion.At(turnAge, 0f, Motion.PageSettle), delta);
-        DrawRunwayChrome(drawList, photo, looks.Length, look.Id, scale);
-        var previous = Loc.T(L.Prism.PreviousGlam);
-        var back = PlainRect(new Vector2(content.Max.X, captionTop + captionLine * 0.5f), previous, width * 0.5f, 1f,
-            scale);
-        var caption = Typography.FitText(RateCaption(lookIndex + 1, looks.Length),
-            MathF.Max(1f, back.Min.X - left), PrismType.Caption);
-        Typography.Draw(drawList, new Vector2(left, captionTop), caption, PrismArt.Muted, PrismType.Caption);
-        if (!reviewing && lookIndex > 0 && chosen == 0 && !store.Busy &&
-            DrawButton(drawList, back, previous, ButtonStyle.Plain, scale))
-        {
-            StepTo(lookIndex - 1, -1);
-        }
-
+        Typography.DrawWrappedLeft(new Vector2(left, captionTop), caption, PrismArt.Muted, PrismType.Caption, width);
         Typography.DrawWrappedLeft(new Vector2(left, questionTop), question, PrismArt.Fore, PrismType.Title, width);
         var fill = chosen > 0 ? scoreFill.Step(1f, Motion.Release, delta) : 0f;
         var picked = DrawScoreButtons(drawList, row, chosen, fill, !store.Busy, scale);
@@ -203,6 +197,18 @@ internal sealed partial class PrismApp
         Typography.Draw(drawList,
             new Vector2(content.Max.X - Typography.Measure(high, PrismType.Caption).X, anchorsTop), high,
             PrismArt.Muted, PrismType.Caption);
+        if (!reviewing && lookIndex > 0 && chosen == 0 && !store.Busy)
+        {
+            var previous = Loc.T(L.Prism.PreviousGlam);
+            var previousTop = anchorsTop + captionLine + Metrics.Space.Sm * scale;
+            var back = PlainRect(new Vector2(content.Center.X, previousTop + previousHeight * 0.5f), previous, width,
+                0.5f, scale);
+            if (DrawButton(drawList, back, previous, ButtonStyle.Plain, scale))
+            {
+                StepTo(lookIndex - 1, -1);
+            }
+        }
+
         DrawLookMenu(full);
         if (chosen > 0 && fill >= ScoreDone)
         {
@@ -210,15 +216,12 @@ internal sealed partial class PrismApp
         }
     }
 
-    private void DrawRunwayChrome(ImDrawListPtr drawList, Rect photo, int total, string lookId, float scale)
+    private float DrawRunwayHeader(ImDrawListPtr drawList, Rect content, int total, string lookId, float scale)
     {
-        var reach = Metrics.Size.TapTarget * 0.5f * scale;
-        var side = (Metrics.Space.Md + Metrics.Size.GlassButton * 0.5f + Metrics.Space.Xs) * scale + reach;
-        var barsTop = photo.Min.Y + Metrics.Space.Xs * scale + Metrics.Size.GlassButton * 0.5f * scale;
-        PrismArt.OverPhoto(true);
-        PrismArt.StoryBars(drawList, photo.Min.X + side, photo.Max.X - side, barsTop, total, lookIndex, 1f, scale);
-        PrismArt.OverPhoto(false);
-        if (DrawPhotoButton(drawList, photo, 0, PhoneIcons.ChevronLeft, Loc.T(L.Prism.Back), scale))
+        var tap = Metrics.Size.TapTarget * scale;
+        var hit = new Rect(content.Min, content.Min + new Vector2(tap, tap));
+        if (BackButton.Draw("prism.back", hit.Center, BackChevronUnits * scale, PrismArt.Fore,
+                UiInteract.Hover(hit.Min, hit.Max), scale))
         {
             if (reviewing)
             {
@@ -230,12 +233,18 @@ internal sealed partial class PrismApp
             }
         }
 
-        if (DrawPhotoButton(drawList, photo, 1, PhoneIcons.Dots, Loc.T(L.Prism.ReportGlam), scale))
+        var dots = new Vector2(content.Max.X - tap * 0.5f, hit.Center.Y);
+        if (IconButton(drawList, dots, PhoneIcons.Dots, Loc.T(L.Prism.ReportGlam), scale, HoverLabelSide.Below))
         {
             lookMenuId = lookId;
             lookMenuItems[0] = new ActionSheet.Item(Loc.T(L.Prism.ReportGlam), PhoneIcons.Flag, true);
             lookMenu.Open();
         }
+
+        var gap = Metrics.Space.Sm * scale;
+        PrismArt.StoryBars(drawList, hit.Max.X + gap, dots.X - tap * 0.5f - gap,
+            hit.Center.Y - PrismArt.HairlineWidth(scale), total, lookIndex, 1f, scale);
+        return hit.Max.Y;
     }
 
     private void DrawLookMenu(Rect full)
