@@ -699,8 +699,19 @@ internal static partial class Typography
             if (ImGui.CalcTextSize(builder.ToString()).X > maxWidth)
             {
                 builder.Length -= token.Length + separatorLength;
+                var carried = CarriedCharacter(builder, token, separatorLength, maxWidth);
+                if (carried != '\0')
+                {
+                    builder.Length--;
+                }
+
                 lines.Add(builder.ToString());
                 builder.Clear();
+                if (carried != '\0')
+                {
+                    builder.Append(carried);
+                }
+
                 AppendToken(token, maxWidth, lines, builder);
             }
         }
@@ -709,6 +720,22 @@ internal static partial class Typography
         {
             lines.Add(builder.ToString());
         }
+    }
+
+    private static char CarriedCharacter(StringBuilder builder, string token, int separatorLength, float maxWidth)
+    {
+        if (separatorLength != 0 || builder.Length < 2)
+        {
+            return '\0';
+        }
+
+        var last = builder[builder.Length - 1];
+        if (!LineBreakRules.KeepsWithNext(last, token))
+        {
+            return '\0';
+        }
+
+        return ImGui.CalcTextSize(string.Concat(last.ToString(), token)).X <= maxWidth ? last : '\0';
     }
 
     private static void AppendToken(string token, float maxWidth, List<string> lines, StringBuilder builder)
