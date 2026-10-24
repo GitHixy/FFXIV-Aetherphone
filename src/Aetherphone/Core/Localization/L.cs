@@ -10119,6 +10119,14 @@ internal static class L
         public static readonly LocString GemShower = new("games.delve.gemShower", "Gem shower!");
         public static readonly LocString TimeLeft = new("games.delve.timeLeft", "Time left");
         public static readonly LocString Foes = new("games.delve.foes", "Foes crushed");
+        public static readonly LocString Guide1Title = new("games.delve.guide1Title", "Dig through dirt");
+        public static readonly LocString Guide1Body = new("games.delve.guide1Body", "Drag, or hold WASD or the arrow keys, to tunnel through dirt. Steel walls never give way.");
+        public static readonly LocString Guide2Title = new("games.delve.guide2Title", "Open the exit");
+        public static readonly LocString Guide2Body = new("games.delve.guide2Body", "Grab enough gems to open the exit and get in before time runs out. Extra gems and spare time earn more stars.");
+        public static readonly LocString Guide3Title = new("games.delve.guide3Title", "Mind the boulders");
+        public static readonly LocString Guide3Body = new("games.delve.guide3Body", "Boulders fall once nothing holds them and crush anything below, you included. Push them sideways to clear a path.");
+        public static readonly LocString Guide4Title = new("games.delve.guide4Title", "Crush your foes");
+        public static readonly LocString Guide4Body = new("games.delve.guide4Body", "Never touch a bat or slime: they explode. Drop a boulder on one instead; a crushed slime bursts into gems.");
     }
 
     internal static class MoogleClicker
