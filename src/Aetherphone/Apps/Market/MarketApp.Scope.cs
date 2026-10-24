@@ -9,6 +9,7 @@ using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
 using Aetherphone.Windows.Widgets;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 
 namespace Aetherphone.Apps.Market;
 
@@ -19,7 +20,9 @@ internal sealed partial class MarketApp
     private const float ScopePillPad = 12f;
     private const float ScopeGlyphSize = 16f;
     private const float ScopeChevronSize = 12f;
-    private const float ScopeBackShare = 0.46f;
+    private const float ScopeBackGlyphSize = 11f;
+    private const float ScopeLabelSlack = 1f;
+    private const string ScopeBackId = "market.scope.back";
     private const string ScopeSeparator = " · ";
     private const float PickerHeaderHeight = 44f;
     private const float PickerPadX = 20f;
@@ -113,22 +116,35 @@ internal sealed partial class MarketApp
         var trackHeight = ScopeTrackHeight * scale;
         var top = row.Center.Y - trackHeight * 0.5f;
         var bottom = top + trackHeight;
+        var gap = ScopeButtonGap * scale;
+        var scope = Scope;
+        var title = ScopeTitle(in scope);
         var pillRight = row.Max.X;
         var local = watchlist.LocalScope;
         if (local.IsValid)
         {
-            var label = BackLabel(local.ApiName);
-            var labelWidth = Typography.Measure(label, Button.LabelStyle(trackHeight)).X;
-            var buttonWidth = MathF.Min(labelWidth + trackHeight, row.Width * ScopeBackShare);
+            var localTitle = ScopeTitle(in local);
+            var label = BackLabel(localTitle);
+            var labelStyle = Button.LabelStyle(trackHeight);
+            var slack = ScopeLabelSlack * scale;
+            var fullWidth = MathF.Ceiling(Typography.Measure(label, labelStyle).X) + slack + trackHeight;
+            var compact = row.Width - fullWidth - gap < PillMinimumWidth(title, scale);
+            var buttonWidth = compact
+                ? trackHeight + ScopeBackGlyphSize * scale + Metrics.Space.Xs * scale +
+                  MathF.Ceiling(Typography.Measure(localTitle, labelStyle).X) + slack
+                : fullWidth;
             var button = new Rect(new Vector2(row.Max.X - buttonWidth, top), new Vector2(row.Max.X, bottom));
-            UiAnchors.Report("market.scope.back", button);
-            if (Button.Draw(drawList, button, label, ui.Ink, ButtonStyle.Tinted,
-                    labelRoom: MathF.Max(1f, buttonWidth - trackHeight)))
+            UiAnchors.Report(ScopeBackId, button);
+            var pressed = compact
+                ? DrawCompactBack(drawList, button, localTitle, label, in labelStyle, scale)
+                : Button.Draw(drawList, button, label, ui.Ink, ButtonStyle.Tinted, id: ScopeBackId,
+                    labelRoom: buttonWidth - trackHeight);
+            if (pressed)
             {
                 watchlist.ReturnToLocal();
             }
 
-            pillRight = button.Min.X - ScopeButtonGap * scale;
+            pillRight = button.Min.X - gap;
         }
 
         var pill = new Rect(new Vector2(row.Min.X, top), new Vector2(pillRight, bottom));
@@ -150,7 +166,7 @@ internal sealed partial class MarketApp
         PhoneIcon.Draw(drawList, chevronCenter, PhoneIcons.ChevronDown, ui.MutedInk, chevron);
         var textLeft = pill.Min.X + pad + glyph + Metrics.Space.Sm * scale;
         var textRight = chevronCenter.X - chevron * 0.5f - Metrics.Space.Sm * scale;
-        DrawScopeName(drawList, textLeft, textRight, pill.Center.Y, Scope);
+        DrawScopeName(drawList, textLeft, textRight, pill.Center.Y, title, ScopeParent(in scope));
         if (hovered)
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
@@ -162,19 +178,46 @@ internal sealed partial class MarketApp
         }
     }
 
-    private void DrawScopeName(ImDrawListPtr drawList, float left, float right, float centerY, in MarketScope scope)
+    private static float PillMinimumWidth(string title, float scale) =>
+        (ScopePillPad * 2f + ScopeGlyphSize + ScopeChevronSize + Metrics.Space.Sm * 2f) * scale +
+        Typography.Measure(title, TextStyles.SubheadlineEmphasized).X;
+
+    private bool DrawCompactBack(ImDrawListPtr drawList, Rect button, string name, string tooltip,
+        in TextStyle style, float scale)
+    {
+        var key = ImGui.GetID(ScopeBackId);
+        var hovered = UiInteract.Hover(button.Min, button.Max);
+        var face = Button.Surface(drawList, button, ui.Ink, ButtonStyle.Tinted, ButtonRole.Normal, true, hovered,
+            key);
+        var glyph = ScopeBackGlyphSize * scale;
+        var spacing = Metrics.Space.Xs * scale;
+        var nameWidth = Typography.Measure(name, style).X;
+        var left = face.Face.Center.X - (glyph + spacing + nameWidth) * 0.5f;
+        var centerY = face.Face.Center.Y;
+        ProgressRing.CenterIcon(drawList, new Vector2(left + glyph * 0.5f, centerY), FontAwesomeIcon.LocationArrow,
+            face.LabelInk, glyph);
+        Typography.Draw(drawList, new Vector2(left + glyph + spacing, centerY - Typography.LineHeight(style) * 0.5f),
+            name, face.LabelInk, style);
+        HoverTooltip.Show(key, button, tooltip, hovered, HoverLabelSide.Above);
+        return UiInteract.Click(button.Min, button.Max, hovered);
+    }
+
+    private void DrawScopeName(ImDrawListPtr drawList, float left, float right, float centerY, string title,
+        string parent)
     {
         var room = MathF.Max(1f, right - left);
         var nameStyle = TextStyles.SubheadlineEmphasized;
-        var title = scope.Kind == MarketScopeKind.Region ? RegionTitle(scope.ApiName) : scope.ApiName;
         var name = Typography.FitText(title, room, nameStyle);
         var nameWidth = Typography.Measure(name, nameStyle).X;
         Typography.Draw(drawList, new Vector2(left, centerY - Typography.LineHeight(nameStyle) * 0.5f), name,
             ui.TitleInk, nameStyle);
-        var parent = ScopeParent(in scope);
+        if (parent.Length == 0)
+        {
+            return;
+        }
+
         var separatorWidth = Typography.Measure(ScopeSeparator, TextStyles.Subheadline).X;
-        var parentRoom = room - nameWidth - separatorWidth;
-        if (parent.Length == 0 || parentRoom <= separatorWidth)
+        if (nameWidth + separatorWidth + Typography.Measure(parent, TextStyles.Subheadline).X > room)
         {
             return;
         }
@@ -182,9 +225,12 @@ internal sealed partial class MarketApp
         var parentTop = centerY - Typography.LineHeight(TextStyles.Subheadline) * 0.5f;
         Typography.Draw(drawList, new Vector2(left + nameWidth, parentTop), ScopeSeparator, ui.MutedInk,
             TextStyles.Subheadline);
-        Typography.Draw(drawList, new Vector2(left + nameWidth + separatorWidth, parentTop),
-            Typography.FitText(parent, parentRoom, TextStyles.Subheadline), ui.MutedInk, TextStyles.Subheadline);
+        Typography.Draw(drawList, new Vector2(left + nameWidth + separatorWidth, parentTop), parent, ui.MutedInk,
+            TextStyles.Subheadline);
     }
+
+    private string ScopeTitle(in MarketScope scope) =>
+        scope.Kind == MarketScopeKind.Region ? RegionTitle(scope.ApiName) : scope.ApiName;
 
     private string ScopeParent(in MarketScope scope)
     {
