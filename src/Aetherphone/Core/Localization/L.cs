@@ -10970,8 +10970,6 @@ internal static class L
         public static readonly LocString ClearFilters = new("prism.clearFilters", "Clear filters");
         public static readonly LocString FiltersEmptyHint = new("prism.filtersEmptyHint",
             "No glams fit every filter you picked. Turn one off to see more.");
-        public static readonly LocString StillTryingOn = new("prism.stillTryingOn",
-            "You're still trying something on, so it would go out as your gear. Take it off unless the photo shows it.");
         public static readonly LocString CheckMarket = new("prism.checkMarket", "Check market");
         public static readonly LocString AddPhoto = new("prism.addPhoto", "Add a photo");
         public static readonly LocString ChangePhoto = new("prism.changePhoto", "Change photo");
@@ -10995,12 +10993,6 @@ internal static class L
         public static readonly LocString TitleHint = new("prism.titleHint", "Name your glam");
         public static readonly LocString TagsLabel = new("prism.tagsLabel", "Tags");
         public static readonly LocString TagsHint = new("prism.tagsHint", "cute, purple, casual");
-        public static readonly LocString CapturedHeading = new("prism.capturedHeading", "From your character");
-        public static readonly LocString CapturedCounts = new("prism.capturedCounts", "Pieces {0}, mods {1}");
-        public static readonly LocString CapturedNote = new("prism.capturedNote", "Gear, dyes and mods are read from your character when you post, so wear the glam while you post it.");
-        public static readonly LocString AutoCaptureLabel = new("prism.autoCaptureLabel", "Fill in from my character");
-        public static readonly LocString AutoCaptureHint = new("prism.autoCaptureHint",
-            "Reads your gear, dyes and mods through Glamourer and Penumbra.");
         public static readonly LocString NewOutfit = new("prism.newOutfit", "New outfit");
         public static readonly LocString EditOutfit = new("prism.editOutfit", "Edit outfit");
         public static readonly LocString OutfitNameLabel = new("prism.outfitNameLabel", "Name");
