@@ -173,7 +173,7 @@ internal sealed class ClusterApp : IMiniGame
         {
             if (ending)
             {
-                endTimer += raw;
+                endTimer += playing ? context.DeltaSeconds : 0f;
                 if (endTimer >= EndSeconds)
                 {
                     Finish(session);
@@ -551,7 +551,7 @@ internal sealed class ClusterApp : IMiniGame
 
         if (clear.BoardFinished)
         {
-            OnBoardFinished(in clear, context, scale);
+            OnBoardFinished(clear.Leftovers, clear.Bonus, context, scale);
         }
     }
 
@@ -565,9 +565,9 @@ internal sealed class ClusterApp : IMiniGame
         particles.Sparkle(button.Center, 14, GamePalette.Lighten(Accent, 0.5f), 180f * scale, 2.4f, 0.6f);
     }
 
-    private void OnBoardFinished(in ClusterClear clear, in GameContext context, float scale)
+    private void OnBoardFinished(int leftovers, int bonus, in GameContext context, float scale)
     {
-        var perfect = clear.Leftovers == 0;
+        var perfect = leftovers == 0;
         var color = perfect ? Gold : GamePalette.Lighten(Accent, 0.3f);
         ShowBanner(Loc.T(perfect ? L.Cluster.PerfectClear : L.Cluster.BoardClear), color, BannerHigh);
         UiFeedback.Play(perfect ? UiSound.GameWin : UiSound.GameClear);
@@ -575,9 +575,9 @@ internal sealed class ClusterApp : IMiniGame
         context.Fx.Sweep();
         particles.Confetti(new Vector2(grid.Center.X, grid.Bounds.Min.Y), perfect ? 70 : 36, ClusterRenderer.Palette,
             520f * scale, 3.4f, 1.3f);
-        if (clear.Bonus > 0)
+        if (bonus > 0)
         {
-            fx.AddText(GameNumber.Signed(clear.Bonus), grid.Center + new Vector2(0f, grid.Pitch * 1.3f), Gold, 1.4f);
+            fx.AddText(GameNumber.Signed(bonus), grid.Center + new Vector2(0f, grid.Pitch * 1.3f), Gold, 1.4f);
         }
 
         leftoverAge = 0f;
@@ -585,7 +585,8 @@ internal sealed class ClusterApp : IMiniGame
 
     private void Shuffle(in GameContext context, float scale)
     {
-        if (!run.TryShuffle())
+        var barBefore = run.Bar;
+        if (!run.TryShuffle(out var finish))
         {
             return;
         }
@@ -601,6 +602,14 @@ internal sealed class ClusterApp : IMiniGame
         fx.Shockwave(grid.Center, grid.Width * 0.65f, GamePalette.Lighten(Accent, 0.4f), 0.55f, 4f);
         particles.Streaks(button.Center, 16, GamePalette.Lighten(Accent, 0.5f), 420f * scale, 2.4f, 0.5f,
             MathF.PI * 0.8f, -MathF.PI * 0.5f);
+        if (!finish.Finished)
+        {
+            return;
+        }
+
+        gainFrom = MathF.Min(shownBar, barBefore);
+        gainAlpha = 1f;
+        OnBoardFinished(finish.Leftovers, finish.Bonus, context, scale);
     }
 
     private void WarnLowBar(in GameContext context, float deltaSeconds)
