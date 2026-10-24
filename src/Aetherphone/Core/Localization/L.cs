@@ -11175,6 +11175,17 @@ internal static class L
             "Every glam from this week shows up here in placing order once the results are in.");
         public static readonly LocString GalleryEmptyHint = new("prism.galleryEmptyHint",
             "Nobody entered this contest that week.");
+        public static readonly LocString WardrobeSearchHint = new("prism.wardrobeSearchHint", "Search your outfits");
+        public static readonly LocString WardrobeNoMatch = new("prism.wardrobeNoMatch", "No outfits match your search.");
+        public static readonly LocPlural OutfitsSelected = new("prism.outfitsSelected", "{0} selected", "{0} selected");
+        public static readonly LocString SelectAll = new("prism.selectAll", "Select all");
+        public static readonly LocString DeselectAll = new("prism.deselectAll", "Deselect all");
+        public static readonly LocPlural DeleteOutfits = new("prism.deleteOutfits", "Delete {0} outfit",
+            "Delete {0} outfits");
+        public static readonly LocPlural DeleteOutfitsTitle = new("prism.deleteOutfitsTitle", "Delete {0} outfit?",
+            "Delete {0} outfits?");
+        public static readonly LocString DeleteOutfitsBody = new("prism.deleteOutfitsBody",
+            "Your Glamourer designs stay in Glamourer.");
     }
 
     internal static class Announcements

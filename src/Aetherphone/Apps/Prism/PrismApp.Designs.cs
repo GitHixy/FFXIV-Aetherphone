@@ -44,7 +44,8 @@ internal sealed partial class PrismApp
             return;
         }
 
-        top = DrawDesignSearch(drawList, content, top, scale);
+        top = DrawSearchField(drawList, content, top, DesignSearchId, Loc.T(L.Prism.DesignSearchHint),
+            ref designQuery, DesignQueryMaxLength, ref designSearchFocus, ref designSearchEdge, scale);
         designPicker.Filter(Loc.Culture.CompareInfo, designQuery);
         top = DrawDesignCount(drawList, content, top, scale);
         LocString? notice = !glamour.HasGlamourer ? L.Prism.DesignsNeedGlamourer
@@ -62,7 +63,8 @@ internal sealed partial class PrismApp
         DrawDesignRows(new Rect(new Vector2(content.Min.X, top), content.Max), scale);
     }
 
-    private float DrawDesignSearch(ImDrawListPtr drawList, Rect content, float top, float scale)
+    private float DrawSearchField(ImDrawListPtr drawList, Rect content, float top, string id, string hint,
+        ref string query, int maxLength, ref bool focusPending, ref Spring edge, float scale)
     {
         var field = new Rect(new Vector2(content.Min.X, top),
             new Vector2(content.Max.X, top + Metrics.Size.TapTarget * scale));
@@ -71,15 +73,15 @@ internal sealed partial class PrismApp
         var glyph = PrismArt.RowIconUnits * scale;
         PhoneIcon.Draw(drawList, new Vector2(field.Min.X + inset + glyph * 0.5f, field.Center.Y), PhoneIcons.Search,
             PrismArt.Muted, glyph);
-        if (designSearchFocus)
+        if (focusPending)
         {
             ImGui.SetKeyboardFocusHere();
-            designSearchFocus = false;
+            focusPending = false;
         }
 
-        GlassField.Text(field, DesignSearchId, Loc.T(L.Prism.DesignSearchHint), ref designQuery, PrismArt.Fore,
-            PrismArt.Muted, inset + glyph + Metrics.Space.Sm * scale, DesignQueryMaxLength);
-        var focus = designSearchEdge.Step(ImGui.IsItemActive() ? 1f : 0f, Motion.Appear,
+        GlassField.Text(field, id, hint, ref query, PrismArt.Fore, PrismArt.Muted,
+            inset + glyph + Metrics.Space.Sm * scale, maxLength);
+        var focus = edge.Step(ImGui.IsItemActive() ? 1f : 0f, Motion.Appear,
             MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds));
         PrismLight.PillEdge(drawList, SearchBar.Capsule(field), PrismGlow.Spectrum, PrismLight.FieldAlpha * focus,
             scale);
