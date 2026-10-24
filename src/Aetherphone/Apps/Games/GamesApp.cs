@@ -759,17 +759,9 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
                 var action = levelSelect.IsOpen || guide.IsOpen
                     ? IntroAction.None
                     : intro.Draw(drawList, gameContext, accent, scale);
-                if (action == IntroAction.Play)
+                if (action == IntroAction.Play && StartRunOrGuide(game, spec))
                 {
-                    if (spec.Guide is { } firstGuide && !stats.GuideSeen(spec.Id))
-                    {
-                        guide.Open(firstGuide, GuideOrigin.BeforePlay);
-                    }
-                    else
-                    {
-                        StartRun(game);
-                        break;
-                    }
+                    break;
                 }
 
                 if (action == IntroAction.Leaderboard)
@@ -788,7 +780,7 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
                 var chosen = levelSelect.Draw(drawList, gameContext, accent, scale);
                 if (chosen > 0 && session.SelectLevel(chosen))
                 {
-                    StartRun(game);
+                    StartRunOrGuide(game, spec);
                 }
 
                 break;
@@ -867,6 +859,19 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
             default:
                 break;
         }
+    }
+
+    private bool StartRunOrGuide(IMiniGame game, in GameSpec spec)
+    {
+        if (spec.Guide is { } firstGuide && !stats.GuideSeen(spec.Id))
+        {
+            levelSelect.Close();
+            guide.Open(firstGuide, GuideOrigin.BeforePlay);
+            return false;
+        }
+
+        StartRun(game);
+        return true;
     }
 
     private GuideExit DrawGuide(ImDrawListPtr drawList, in GameContext gameContext, in GameSpec spec, Vector4 accent,
