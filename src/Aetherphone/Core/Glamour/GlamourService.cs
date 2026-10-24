@@ -430,6 +430,20 @@ internal sealed class GlamourService : IDisposable
         return mods;
     }
 
+    public void WarmModLinks()
+    {
+        if (!HasPenumbra)
+        {
+            return;
+        }
+
+        SyncMods();
+        if (linkIndex.Stale(modsVersion))
+        {
+            linkIndex.Build(modsVersion, penumbra.ModDirectory(), penumbra.ModList());
+        }
+    }
+
     private string Match(Dictionary<string, string> installed, GlamModDto mod)
     {
         var folder = ModAttribution.MatchByName(installed, mod);

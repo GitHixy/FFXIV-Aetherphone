@@ -185,6 +185,7 @@ internal sealed partial class PrismApp : IResumableApp
 
         sinceRefresh = 0f;
         ResetShowcase();
+        glamour.WarmModLinks();
         store.ClearBallot();
         store.Refresh();
     }
