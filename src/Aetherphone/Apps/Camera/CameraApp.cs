@@ -7,10 +7,12 @@ using Aetherphone.Core.Media;
 using Aetherphone.Core.Notifications;
 using Aetherphone.Core.Onboarding;
 using Aetherphone.Core.Photos;
+using Aetherphone.Core.Platform;
 using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
 using Aetherphone.Windows.Widgets;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Plugin.Services;
@@ -103,6 +105,7 @@ internal sealed partial class CameraApp : IPhoneApp
     private int captureWatchdogTicks;
     private Rect pendingCaptureRect;
     private bool captureHooksAttached;
+    private bool escapeHeld;
     private float requestedShotDelay;
 
     public CameraApp(PhotoCaptureService capture, PhotoLibrary library, Configuration configuration,
@@ -455,7 +458,7 @@ internal sealed partial class CameraApp : IPhoneApp
             return;
         }
 
-        if (PhoneAside.Requested && ImGui.IsKeyPressed(ImGuiKey.Escape, false))
+        if (PhoneAside.Requested && EscapePressed())
         {
             timerEndsAt = 0d;
             DetachCaptureHooks();
@@ -477,6 +480,21 @@ internal sealed partial class CameraApp : IPhoneApp
         }
 
         CameraChrome.Countdown(drawList, captureRect.Center, Digits(shown), scale);
+    }
+
+    private static bool EscapeDown() => ImGui.IsKeyDown(ImGuiKey.Escape) || GameKeys.Down(VirtualKey.ESCAPE);
+
+    private bool EscapePressed()
+    {
+        var down = EscapeDown();
+        var pressed = down && !escapeHeld;
+        escapeHeld = down;
+        if (down)
+        {
+            GameKeys.Swallow(VirtualKey.ESCAPE);
+        }
+
+        return pressed;
     }
 
     private void DrawFlight(ImDrawListPtr drawList, float delta, float scale)
@@ -569,6 +587,7 @@ internal sealed partial class CameraApp : IPhoneApp
         if (seconds > 0)
         {
             timerShown = 0;
+            escapeHeld = EscapeDown();
             timerEndsAt = ImGui.GetTime() + seconds;
             return;
         }

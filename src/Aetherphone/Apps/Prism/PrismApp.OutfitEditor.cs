@@ -1,6 +1,7 @@
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Confirm;
+using Aetherphone.Core.Glamour;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Notifications;
 using Aetherphone.Windows.Components;
@@ -296,7 +297,7 @@ internal sealed partial class PrismApp
     {
         coverForEditor = true;
         Push(PrismScreen.WardrobeCover);
-        composeSession.Open(true);
+        OpenPhotoPick();
     }
 
     private void OpenWornMods(ModDraft target)
@@ -310,6 +311,11 @@ internal sealed partial class PrismApp
         var seen = new HashSet<string>(StringComparer.Ordinal);
         for (var index = 0; index < gear.Length; index++)
         {
+            if (gear[index].Slot == GearSlots.None)
+            {
+                continue;
+            }
+
             var mods = gear[index].Mods ?? Array.Empty<GlamModDto>();
             for (var modIndex = 0; modIndex < mods.Length; modIndex++)
             {
@@ -360,34 +366,16 @@ internal sealed partial class PrismApp
 
     private float DrawWornModRow(ImDrawListPtr drawList, float left, float top, float width, int index, float scale)
     {
-        var nameHeight = Typography.LineHeight(PrismType.Headline);
-        var captionHeight = Typography.LineHeight(PrismType.Caption);
-        var height = MathF.Max(Metrics.Size.TapTarget * scale, nameHeight + captionHeight) + Metrics.Space.Sm * scale;
-        var row = new Rect(new Vector2(left, top), new Vector2(left + width, top + height));
-        if (!ImGui.IsRectVisible(row.Min, row.Max))
-        {
-            return row.Max.Y;
-        }
-
         var picked = wornPicked[index];
-        var check = WornCheckUnits * scale;
-        var hovered = HoverWash(drawList, row);
-        PhoneIcon.Draw(drawList, new Vector2(left + check * 0.5f, row.Center.Y),
-            picked ? PhoneIcons.CircleCheck : PhoneIcons.Circle, picked ? PrismArt.Fore : PrismArt.Muted, check);
-        var textLeft = left + check + Metrics.Space.Md * scale;
-        var room = MathF.Max(1f, row.Max.X - textLeft);
-        var textTop = row.Center.Y - (nameHeight + captionHeight) * 0.5f;
-        Typography.Draw(drawList, new Vector2(textLeft, textTop),
-            Typography.FitText(wornMods[index].Mod.Name, room, PrismType.Headline), PrismArt.Fore, PrismType.Headline);
-        Typography.Draw(drawList, new Vector2(textLeft, textTop + nameHeight),
-            Typography.FitText(wornCaptions[index], room, PrismType.Caption), PrismArt.Muted, PrismType.Caption);
-        if (UiInteract.Click(row.Min, row.Max, hovered))
+        var bottom = DrawModTick(drawList, left, top, width, wornMods[index].Mod.Name, wornCaptions[index], picked,
+            scale, out var toggled);
+        if (toggled)
         {
             wornPicked[index] = !picked;
             wornPickedCount += picked ? -1 : 1;
         }
 
-        return row.Max.Y;
+        return bottom;
     }
 
     private void SyncWornCaptions()
@@ -401,9 +389,7 @@ internal sealed partial class PrismApp
         wornCaptions.Clear();
         for (var index = 0; index < wornMods.Count; index++)
         {
-            var mod = wornMods[index];
-            var slot = ModTypeName(mod.Slot);
-            wornCaptions.Add(mod.Mod.Author.Length > 0 ? string.Concat(slot, GlamMetaSeparator, mod.Mod.Author) : slot);
+            wornCaptions.Add(ModCaption(wornMods[index].Slot, wornMods[index].Mod.Author));
         }
     }
 

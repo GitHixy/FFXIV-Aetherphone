@@ -78,6 +78,40 @@ internal sealed class Pager
         scroll.Velocity = velocity;
     }
 
+    public void ReleaseNearest(float width, int pageCount)
+    {
+        if (!dragging)
+        {
+            return;
+        }
+
+        dragging = false;
+        var value = scroll.Value;
+        var target = (int)MathF.Round(value);
+        if (MathF.Abs(velocity * width) > FlingVelocity)
+        {
+            var direction = MathF.Sign(velocity);
+            target = direction > 0 ? (int)MathF.Ceiling(value) : (int)MathF.Floor(value);
+            if (target == dragStartPage)
+            {
+                target += direction;
+            }
+        }
+
+        page = Math.Clamp(target, 0, Math.Max(0, pageCount - 1));
+        scroll.Velocity = velocity;
+    }
+
+    public void Shift(int pages)
+    {
+        var carried = scroll.Velocity;
+        scroll.SnapTo(scroll.Value + pages);
+        scroll.Velocity = carried;
+        page += pages;
+        dragStartValue += pages;
+        dragStartPage += pages;
+    }
+
     public void Cancel()
     {
         dragging = false;

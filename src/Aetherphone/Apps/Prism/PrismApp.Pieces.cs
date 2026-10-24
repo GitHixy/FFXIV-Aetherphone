@@ -60,6 +60,7 @@ internal sealed partial class PrismApp
     private int[] pieceOrder = Array.Empty<int>();
     private int pieceTileCount;
     private bool piecesOpen;
+    private bool piecesTryOn;
     private Spring piecesReveal;
     private Spring cardReveal;
     private int cardTile = -1;
@@ -412,7 +413,8 @@ internal sealed partial class PrismApp
         if (single is not null)
         {
             var dyes = (single.Stain0 != 0 ? 1 : 0) + (single.Stain1 != 0 ? 1 : 0);
-            body = (dyes + 1) * caption + Metrics.Space.Sm * scale + tap + (market ? tap : 0f);
+            var actions = (piecesTryOn ? 1 : 0) + (market ? 1 : 0);
+            body = (dyes + 1) * caption + (actions > 0 ? Metrics.Space.Sm * scale + actions * tap : 0f);
         }
         else
         {
@@ -458,13 +460,17 @@ internal sealed partial class PrismApp
         Typography.Draw(drawList, new Vector2(left + glyph, cursor),
             Typography.FitText(Loc.T(OwnershipLine(ownership)), inner - glyph, PrismType.Caption), PrismArt.PhotoMuted,
             PrismType.Caption);
-        cursor += caption;
-        var button = new Rect(new Vector2(left, cursor + Metrics.Space.Sm * scale),
-            new Vector2(left + inner, cursor + Metrics.Space.Sm * scale + tap));
-        if (DrawButton(drawList, button, Loc.T(L.Prism.TryOnPiece), ButtonStyle.Tinted, scale, overlay: true,
-                ink: photoControls, id: "prism.tryOnPiece") && ready)
+        cursor += caption + Metrics.Space.Sm * scale;
+        if (piecesTryOn)
         {
-            TryOnPiece(single, statsFor ?? string.Empty);
+            var button = new Rect(new Vector2(left, cursor), new Vector2(left + inner, cursor + tap));
+            if (DrawButton(drawList, button, Loc.T(L.Prism.TryOnPiece), ButtonStyle.Tinted, scale, overlay: true,
+                    ink: photoControls, id: "prism.tryOnPiece") && ready)
+            {
+                TryOnPiece(single, statsFor ?? string.Empty);
+            }
+
+            cursor = button.Max.Y;
         }
 
         if (!market)
@@ -473,8 +479,8 @@ internal sealed partial class PrismApp
         }
 
         var label = Loc.T(L.Prism.CheckMarket);
-        var link = new Rect(new Vector2(left, button.Max.Y),
-            new Vector2(left + ButtonWidth([label], inner, scale), button.Max.Y + tap));
+        var link = new Rect(new Vector2(left, cursor),
+            new Vector2(left + ButtonWidth([label], inner, scale), cursor + tap));
         if (DrawButton(drawList, link, label, ButtonStyle.Plain, scale, overlay: true, ink: photoControls,
                 id: "prism.pieceMarket") && ready)
         {

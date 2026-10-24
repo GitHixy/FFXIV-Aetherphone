@@ -1,4 +1,5 @@
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Core.Glamour;
 
 namespace Aetherphone.Apps.Prism;
 
@@ -21,40 +22,42 @@ internal static class PostedMods
         return kept.ToArray();
     }
 
-    public static GlamGearDto[] Without(GlamGearDto[] gear, HashSet<string> dropped)
+    public static WornMod[] GearMods(GlamGearDto[] capture)
     {
-        if (dropped.Count == 0)
+        var listed = new List<WornMod>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        for (var index = 0; index < capture.Length; index++)
         {
-            return gear;
-        }
-
-        var kept = new List<GlamGearDto>(gear.Length);
-        for (var index = 0; index < gear.Length; index++)
-        {
-            var piece = gear[index];
-            if (piece.Mods is not { Length: > 0 } mods)
+            var piece = capture[index];
+            if (piece.Slot == GearSlots.None || piece.Mods is not { } mods)
             {
-                kept.Add(piece);
                 continue;
             }
 
-            var shared = new List<GlamModDto>(mods.Length);
             for (var modIndex = 0; modIndex < mods.Length; modIndex++)
             {
-                if (!dropped.Contains(Key(mods[modIndex])))
+                if (seen.Add(Key(mods[modIndex])))
                 {
-                    shared.Add(mods[modIndex]);
+                    listed.Add(new WornMod(mods[modIndex], piece.Slot));
                 }
             }
-
-            if (piece.ItemId == 0 && shared.Count == 0)
-            {
-                continue;
-            }
-
-            kept.Add(piece with { Mods = shared.Count > 0 ? shared.ToArray() : null });
         }
 
-        return kept.ToArray();
+        return listed.ToArray();
+    }
+
+    public static GlamGearDto[]? Credited(GlamGearDto[] capture, HashSet<string> picked)
+    {
+        var listed = GearMods(capture);
+        var credited = new List<GlamModDto>(listed.Length);
+        for (var index = 0; index < listed.Length; index++)
+        {
+            if (picked.Contains(Key(listed[index].Mod)))
+            {
+                credited.Add(listed[index].Mod);
+            }
+        }
+
+        return credited.Count == 0 ? null : new[] { new GlamGearDto(GearSlots.None, Mods: credited.ToArray()) };
     }
 }

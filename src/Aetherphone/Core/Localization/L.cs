@@ -358,6 +358,7 @@ internal static class L
         public static readonly LocString Dailies = new("app.dailies", "Dailies");
         public static readonly LocString Games = new("app.games", "Games");
         public static readonly LocString Notifications = new("app.notifications", "Notifications");
+        public static readonly LocString NotificationsHome = new("app.notificationsHome", "Alerts");
         public static readonly LocString News = new("app.news", "News");
         public static readonly LocString Fishing = new("app.fishing", "Fishing");
         public static readonly LocString Maps = new("app.maps", "Maps");
@@ -369,6 +370,7 @@ internal static class L
         public static readonly LocString Polls = new("app.polls", "Polls");
         public static readonly LocString Prism = new("app.prism", "Prism");
         public static readonly LocString Announcements = new("app.announcements", "Announcements");
+        public static readonly LocString AnnouncementsHome = new("app.announcementsHome", "Updates");
         public static readonly LocString Muster = new("app.muster", "Muster");
         public static readonly LocString YellowPages = new("app.yellowpages", "Yellow Pages");
         public static readonly LocString Calendar = new("app.calendar", "Calendar");
@@ -2324,9 +2326,9 @@ internal static class L
             new("changelog.r1400.29",
                 "Added the Prism glam library: browse new, popular and followed glams, filter to Modded, Vanilla or ones that fit your character, and search by item or #tag, contributed by t3sco"),
             new("changelog.r1400.30",
-                "Added trying on any Prism glam in one tap through Glamourer and Penumbra with the mods you have, or through the game's Try On window without them"),
+                "Added trying on any vanilla Prism glam in one tap through Glamourer, or through the game's Try On window without it"),
             new("changelog.r1400.31",
-                "Added posting your own Prism glam with up to four photos: choose Modded or Vanilla and the race and gender in the photo, then add the pieces with their dyes and any mods, or fill them in from your character"),
+                "Added posting your own Prism glam with up to four photos: choose Modded or Vanilla and the race and gender in the photo, then add the pieces with their dyes and any mods, or fill them in from your character, and edit it later from its page"),
             new("changelog.r1400.32",
                 "Added a Prism wardrobe: build outfits piece by piece with their dyes and mods or fill them from what you're wearing, keep your Glamourer designs and any glam you add, and put an outfit back on in one tap"),
             new("changelog.r1400.33",
@@ -10999,9 +11001,6 @@ internal static class L
         public static readonly LocString GearHeading = new("prism.gearHeading", "Gear");
         public static readonly LocString CharacterHeading = new("prism.characterHeading", "Character");
         public static readonly LocString GetMod = new("prism.getMod", "Get it");
-        public static readonly LocString ModBy = new("prism.modBy", "{0} by {1}");
-        public static readonly LocString LeaveOutMod = new("prism.leaveOutMod", "Leave out");
-        public static readonly LocString AddBackMod = new("prism.addBackMod", "Add back");
         public static readonly LocString PhotosHint = new("prism.photosHint", "Pick up to 4 photos. The first one is the cover.");
         public static readonly LocString TitleLabel = new("prism.titleLabel", "Title");
         public static readonly LocString TitleHint = new("prism.titleHint", "Name your glam");
@@ -11067,7 +11066,7 @@ internal static class L
             "Add each piece in your photo and pick its dyes. Everyone who sees your entry sees this list.");
         public static readonly LocString YourMods = new("prism.yourMods", "Your mods");
         public static readonly LocString ModsNote = new("prism.modsNote",
-            "Read from Penumbra. Leave out any you'd rather not credit.");
+            "Read from Penumbra. Tick the mods you want to credit.");
         public static readonly LocString NoModsFound = new("prism.noModsFound", "No mods found on your character.");
         public static readonly LocString AddPiece = new("prism.addPiece", "Add a piece");
         public static readonly LocString RemovePiece = new("prism.removePiece", "Remove");
@@ -11175,6 +11174,23 @@ internal static class L
             "Every glam from this week shows up here in placing order once the results are in.");
         public static readonly LocString GalleryEmptyHint = new("prism.galleryEmptyHint",
             "Nobody entered this contest that week.");
+        public static readonly LocString AddYourMods = new("prism.addYourMods", "Add your mods");
+        public static readonly LocString EditGlamAction = new("prism.editGlamAction", "Edit");
+        public static readonly LocString EditGlamTitle = new("prism.editGlamTitle", "Edit glam");
+        public static readonly LocString SavingGlam = new("prism.savingGlam", "Saving…");
+        public static readonly LocString TrackLocked = new("prism.trackLocked",
+            "Modded or vanilla stays as you posted it.");
+        public static readonly LocString WardrobeSearchHint = new("prism.wardrobeSearchHint", "Search your outfits");
+        public static readonly LocString WardrobeNoMatch = new("prism.wardrobeNoMatch", "No outfits match your search.");
+        public static readonly LocPlural OutfitsSelected = new("prism.outfitsSelected", "{0} selected", "{0} selected");
+        public static readonly LocString SelectAll = new("prism.selectAll", "Select all");
+        public static readonly LocString DeselectAll = new("prism.deselectAll", "Deselect all");
+        public static readonly LocPlural DeleteOutfits = new("prism.deleteOutfits", "Delete {0} outfit",
+            "Delete {0} outfits");
+        public static readonly LocPlural DeleteOutfitsTitle = new("prism.deleteOutfitsTitle", "Delete {0} outfit?",
+            "Delete {0} outfits?");
+        public static readonly LocString DeleteOutfitsBody = new("prism.deleteOutfitsBody",
+            "Your Glamourer designs stay in Glamourer.");
     }
 
     internal static class Announcements

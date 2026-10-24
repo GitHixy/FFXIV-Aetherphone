@@ -6,8 +6,8 @@ internal readonly record struct DesignChoice(Guid Id, string Name, string Folder
 
 internal sealed class DesignPicker
 {
-    private const CompareOptions MatchOptions = CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace |
-                                                CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth;
+    public const CompareOptions MatchOptions = CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace |
+                                               CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth;
     private const char FolderSeparator = '/';
 
     private DesignChoice[] choices = Array.Empty<DesignChoice>();

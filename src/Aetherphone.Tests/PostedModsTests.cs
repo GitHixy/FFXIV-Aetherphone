@@ -1,5 +1,6 @@
 using Aetherphone.Apps.Prism;
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Core.Glamour;
 using Xunit;
 
 namespace Aetherphone.Tests;
@@ -7,56 +8,77 @@ namespace Aetherphone.Tests;
 public sealed class PostedModsTests
 {
     private static readonly GlamModDto Coat = new("Starlit Coat", "Bea");
+    private static readonly GlamModDto Boots = new("Moon Boots", "Dee");
     private static readonly GlamModDto Body = new("Silhouette Body", "Cee");
     private static readonly GlamModDto Hair = new("Long Braid", "Rin");
 
     private static GlamGearDto[] Outfit() => new[]
     {
         new GlamGearDto(3, 45123, 12, 0, Mods: new[] { Coat }),
-        new GlamGearDto(6, 45124),
-        new GlamGearDto(-1, Mods: new[] { Body, Hair }),
+        new GlamGearDto(6, 45124, Mods: new[] { Boots }),
+        new GlamGearDto(GearSlots.None, Mods: new[] { Body, Hair }),
     };
 
-    [Fact]
-    public void NothingLeftOutSendsTheCaptureUntouched()
+    private static HashSet<string> Picked(params GlamModDto[] mods)
     {
-        var gear = Outfit();
-        Assert.Same(gear, PostedMods.Without(gear, new HashSet<string>(StringComparer.Ordinal)));
+        var picked = new HashSet<string>(StringComparer.Ordinal);
+        for (var index = 0; index < mods.Length; index++)
+        {
+            picked.Add(PostedMods.Key(mods[index]));
+        }
+
+        return picked;
     }
 
     [Fact]
-    public void ALeftOutModNeverLeavesTheClient()
+    public void OnlyGearModsAreListedForAnEntry()
     {
-        var dropped = new HashSet<string>(StringComparer.Ordinal) { PostedMods.Key(Body), PostedMods.Key(Coat) };
-        var posted = PostedMods.Without(Outfit(), dropped);
+        var listed = PostedMods.GearMods(Outfit());
 
-        Assert.Equal(3, posted.Length);
-        Assert.Equal(45123u, posted[0].ItemId);
-        Assert.Null(posted[0].Mods);
-        Assert.Equal(new[] { Hair }, posted[2].Mods);
+        Assert.Equal(2, listed.Length);
+        Assert.Equal(new WornMod(Coat, 3), listed[0]);
+        Assert.Equal(new WornMod(Boots, 6), listed[1]);
     }
 
     [Fact]
-    public void ACharacterSlotWithEveryModLeftOutIsDropped()
+    public void NothingTickedCreditsNothing()
     {
-        var dropped = new HashSet<string>(StringComparer.Ordinal) { PostedMods.Key(Body), PostedMods.Key(Hair) };
-        var posted = PostedMods.Without(Outfit(), dropped);
-
-        Assert.Equal(2, posted.Length);
-        Assert.DoesNotContain(posted, piece => piece.Slot == -1);
+        Assert.Null(PostedMods.Credited(Outfit(), Picked()));
     }
 
     [Fact]
-    public void ALeftOutModLeavesEverySlotItCovers()
+    public void AnUntickedModNeverLeavesTheClient()
+    {
+        var credited = PostedMods.Credited(Outfit(), Picked(Coat));
+
+        Assert.NotNull(credited);
+        Assert.Single(credited!);
+        Assert.Equal(new[] { Coat }, credited[0].Mods);
+    }
+
+    [Fact]
+    public void ACharacterModIsNeverSentEvenWhenTicked()
+    {
+        var credited = PostedMods.Credited(Outfit(), Picked(Body, Hair, Boots));
+
+        Assert.NotNull(credited);
+        Assert.Equal(new[] { Boots }, credited![0].Mods);
+    }
+
+    [Fact]
+    public void AModCoveringTwoSlotsIsListedAndSentOnce()
     {
         var gear = new[]
         {
             new GlamGearDto(3, 45123, Mods: new[] { Coat }),
             new GlamGearDto(4, 45125, Mods: new[] { Coat, Hair }),
         };
-        var posted = PostedMods.Without(gear, new HashSet<string>(StringComparer.Ordinal) { PostedMods.Key(Coat) });
 
-        Assert.Null(posted[0].Mods);
-        Assert.Equal(new[] { Hair }, posted[1].Mods);
+        var listed = PostedMods.GearMods(gear);
+        var credited = PostedMods.Credited(gear, Picked(Coat, Hair));
+
+        Assert.Equal(2, listed.Length);
+        Assert.Equal(3, listed[0].Slot);
+        Assert.Equal(new[] { Coat, Hair }, credited![0].Mods);
     }
 }

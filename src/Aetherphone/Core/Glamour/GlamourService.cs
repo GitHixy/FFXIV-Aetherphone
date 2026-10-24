@@ -12,6 +12,9 @@ internal sealed class GlamourService : IDisposable
     private readonly GlamourerBridge glamourer;
     private readonly Dictionary<int, HashSet<string>> foldersBySlot = new();
     private readonly ModMetaCache modMeta = new();
+    private readonly ModLinkIndex linkIndex = new();
+    private int modsVersion;
+    private int linksVersion;
     private bool penumbraReady;
     private bool glamourerReady;
     private bool probed;
@@ -44,6 +47,15 @@ internal sealed class GlamourService : IDisposable
     }
 
     public bool TryingOn => tryingOn && !SnapshotStale();
+
+    public int ModsGeneration
+    {
+        get
+        {
+            SyncMods();
+            return modsVersion + linksVersion;
+        }
+    }
 
     public GlamGearDto[] Capture() => Capture(out _, out _);
 
@@ -131,7 +143,7 @@ internal sealed class GlamourService : IDisposable
             for (var modIndex = 0; modIndex < mods.Length; modIndex++)
             {
                 total++;
-                if (installed is null || ModAttribution.MatchFolder(installed, mods[modIndex]).Length == 0)
+                if (installed is null || Match(installed, mods[modIndex]).Length == 0)
                 {
                     missing++;
                 }
@@ -141,8 +153,7 @@ internal sealed class GlamourService : IDisposable
         return missing;
     }
 
-    public bool HasMod(GlamModDto mod) =>
-        HasPenumbra && ModAttribution.MatchFolder(penumbra.ModList(), mod).Length > 0;
+    public bool HasMod(GlamModDto mod) => HasPenumbra && Match(penumbra.ModList(), mod).Length > 0;
 
     public static int OwnedPieces(GlamGearDto[] gear, out int total, HashSet<uint>? owned = null)
     {
@@ -290,6 +301,7 @@ internal sealed class GlamourService : IDisposable
     public void Dispose()
     {
         Revert();
+        linkIndex.Dispose();
         penumbra.Dispose();
         glamourer.Dispose();
     }
@@ -390,7 +402,7 @@ internal sealed class GlamourService : IDisposable
 
             for (var modIndex = 0; modIndex < mods.Length; modIndex++)
             {
-                var folder = ModAttribution.MatchFolder(installed, mods[modIndex]);
+                var folder = Match(installed, mods[modIndex]);
                 if (folder.Length > 0 && penumbra.SetTemporary(folder, ModAttribution.Settings(mods[modIndex].Options)))
                 {
                     applied = true;
@@ -418,12 +430,57 @@ internal sealed class GlamourService : IDisposable
         return mods;
     }
 
+    public void WarmModLinks()
+    {
+        if (!HasPenumbra)
+        {
+            return;
+        }
+
+        SyncMods();
+        if (linkIndex.Stale(modsVersion))
+        {
+            linkIndex.Build(modsVersion, penumbra.ModDirectory(), penumbra.ModList());
+        }
+    }
+
+    private string Match(Dictionary<string, string> installed, GlamModDto mod)
+    {
+        var folder = ModAttribution.MatchByName(installed, mod);
+        if (folder.Length > 0 || !ModAttribution.HasLink(mod))
+        {
+            return folder;
+        }
+
+        SyncMods();
+        if (linkIndex.Stale(modsVersion))
+        {
+            linkIndex.Build(modsVersion, penumbra.ModDirectory(), installed);
+        }
+
+        return linkIndex.Links is { } links ? ModAttribution.MatchByLink(installed, links, mod) : string.Empty;
+    }
+
+    private void SyncMods()
+    {
+        if (penumbra.ConsumeModsChanged())
+        {
+            modsVersion++;
+        }
+
+        if (linkIndex.TakeReady())
+        {
+            linksVersion++;
+        }
+    }
+
     private void Refresh()
     {
         if (!probed || penumbra.ConsumeReady() || penumbra.ConsumeDisposing())
         {
             penumbraReady = penumbra.Probe();
             modMeta.Clear();
+            modsVersion++;
         }
 
         if (!probed || glamourer.ConsumeReady() || glamourer.ConsumeDisposing())

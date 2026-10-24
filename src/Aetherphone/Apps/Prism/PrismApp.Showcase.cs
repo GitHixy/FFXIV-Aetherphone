@@ -101,7 +101,7 @@ internal sealed partial class PrismApp
         var eligible = 0;
         for (var index = 0; index < pool.Length; index++)
         {
-            if (Cover(pool[index]).Length > 0)
+            if (ShowcaseEligible(pool[index]))
             {
                 eligible++;
             }
@@ -112,7 +112,7 @@ internal sealed partial class PrismApp
         var remaining = eligible;
         for (var index = 0; index < pool.Length && count < wanted; index++)
         {
-            if (Cover(pool[index]).Length == 0)
+            if (!ShowcaseEligible(pool[index]))
             {
                 continue;
             }
@@ -136,6 +136,8 @@ internal sealed partial class PrismApp
         showcasePicked = count > 0;
     }
 
+    private bool ShowcaseEligible(GlamDto glam) => Cover(glam).Length > 0 && !glams.IsRemoved(glam.Id);
+
     private GlamDto[]? ShowcasePool()
     {
         var popular = glams.Lane(GlamScope.Showcase);
@@ -147,12 +149,14 @@ internal sealed partial class PrismApp
         return popular.Loading || popular.NeverLoaded ? null : glams.Lane(GlamScope.New).Items;
     }
 
-    private void DropFailedShowcase()
+    private void DropFailedShowcase() => DropShowcase(null);
+
+    private void DropShowcase(string? removedId)
     {
         var kept = 0;
         for (var index = 0; index < showcaseCount; index++)
         {
-            if (images.Failed(Cover(showcase[index])))
+            if (showcase[index].Id == removedId || images.Failed(Cover(showcase[index])))
             {
                 continue;
             }

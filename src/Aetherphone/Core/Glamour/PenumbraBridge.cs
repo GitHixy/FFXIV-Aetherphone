@@ -29,8 +29,12 @@ internal sealed class PenumbraBridge : IDisposable
     private readonly ICallGateSubscriber<int, int, object> redrawGate;
     private readonly ICallGateSubscriber<object> initializedGate;
     private readonly ICallGateSubscriber<object> disposedGate;
+    private readonly ICallGateSubscriber<string, object> modAddedGate;
+    private readonly ICallGateSubscriber<string, object> modDeletedGate;
+    private readonly ICallGateSubscriber<string, string, object> modMovedGate;
     private volatile bool readySignaled;
     private volatile bool disposingSignaled;
+    private int modsSignaled;
 
     public PenumbraBridge(IDalamudPluginInterface pluginInterface)
     {
@@ -53,9 +57,17 @@ internal sealed class PenumbraBridge : IDisposable
         redrawGate = pluginInterface.GetIpcSubscriber<int, int, object>("Penumbra.RedrawObject.V5");
         initializedGate = pluginInterface.GetIpcSubscriber<object>("Penumbra.Initialized");
         disposedGate = pluginInterface.GetIpcSubscriber<object>("Penumbra.Disposed");
+        modAddedGate = pluginInterface.GetIpcSubscriber<string, object>("Penumbra.ModAdded");
+        modDeletedGate = pluginInterface.GetIpcSubscriber<string, object>("Penumbra.ModDeleted");
+        modMovedGate = pluginInterface.GetIpcSubscriber<string, string, object>("Penumbra.ModMoved");
         initializedGate.Subscribe(OnReady);
         disposedGate.Subscribe(OnDisposing);
+        modAddedGate.Subscribe(OnModChanged);
+        modDeletedGate.Subscribe(OnModChanged);
+        modMovedGate.Subscribe(OnModMoved);
     }
+
+    public bool ConsumeModsChanged() => Interlocked.Exchange(ref modsSignaled, 0) != 0;
 
     public bool ConsumeReady()
     {
@@ -150,6 +162,9 @@ internal sealed class PenumbraBridge : IDisposable
     {
         initializedGate.Unsubscribe(OnReady);
         disposedGate.Unsubscribe(OnDisposing);
+        modAddedGate.Unsubscribe(OnModChanged);
+        modDeletedGate.Unsubscribe(OnModChanged);
+        modMovedGate.Unsubscribe(OnModMoved);
     }
 
     private static T Call<T>(Func<T> call, T fallback, string name)
@@ -168,4 +183,8 @@ internal sealed class PenumbraBridge : IDisposable
     private void OnReady() => readySignaled = true;
 
     private void OnDisposing() => disposingSignaled = true;
+
+    private void OnModChanged(string directory) => Interlocked.Exchange(ref modsSignaled, 1);
+
+    private void OnModMoved(string from, string to) => Interlocked.Exchange(ref modsSignaled, 1);
 }

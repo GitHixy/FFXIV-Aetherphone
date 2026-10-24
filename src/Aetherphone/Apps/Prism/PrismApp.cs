@@ -138,6 +138,7 @@ internal sealed partial class PrismApp : IResumableApp
         composeSession = new PhotoComposeSession(library, wallpaperImages);
         wardrobe = new WardrobeStore(Plugin.PluginInterface.ConfigDirectory.FullName);
         postSettled = SettlePost;
+        glamEditSettled = SettleGlamEdit;
         viewerPage = ViewerPage;
         withdraw = store.Withdraw;
         ballotSettled = SettleBallot;
@@ -184,6 +185,7 @@ internal sealed partial class PrismApp : IResumableApp
 
         sinceRefresh = 0f;
         ResetShowcase();
+        glamour.WarmModLinks();
         store.ClearBallot();
         store.Refresh();
     }
@@ -213,6 +215,7 @@ internal sealed partial class PrismApp : IResumableApp
     public void OnClosed()
     {
         pickIntake.Discard();
+        composeIntake.Discard();
         photoViewer.Close();
     }
 
@@ -243,6 +246,7 @@ internal sealed partial class PrismApp : IResumableApp
         ForgetLoadsOnNewWeek();
         ConsumeSharedPhoto();
         ConsumePostOutcome();
+        ConsumeGlamEditOutcome();
 
         screenAge += MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
         var enter = PrismMotion.At(screenAge, 0f, TransitionTiming.PresentSmoothTime);
@@ -387,6 +391,7 @@ internal sealed partial class PrismApp : IResumableApp
         {
             store.ClearFailure();
             ResetPieces();
+            ExitOutfitSelect();
             profileGlamId = string.Empty;
         }
 
@@ -402,6 +407,11 @@ internal sealed partial class PrismApp : IResumableApp
         if (piecesOpen && screen is PrismScreen.GlamDetail or PrismScreen.WardrobeOutfit)
         {
             piecesOpen = false;
+        }
+        else if (screen == PrismScreen.Compose && editingGlam is not null)
+        {
+            editingGlam = null;
+            GoBack();
         }
         else if (screen == PrismScreen.Compose && composeDetails)
         {
@@ -738,10 +748,16 @@ internal sealed partial class PrismApp : IResumableApp
         loadedAt.Clear();
     }
 
+    private bool InComposeSubScreen =>
+        screen is PrismScreen.GearSearch or PrismScreen.DyePick
+            ? gearReturn == PrismScreen.Compose
+            : screen == PrismScreen.WardrobeMods && ReferenceEquals(wornTarget, composeMods);
+
     private void ConsumeSharedPhoto()
     {
         var path = pendingSharedPhoto;
-        if (string.IsNullOrEmpty(path))
+        if (string.IsNullOrEmpty(path) || InComposeSubScreen ||
+            (screen == PrismScreen.Compose && editingGlam is not null))
         {
             return;
         }

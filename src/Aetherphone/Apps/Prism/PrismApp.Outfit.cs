@@ -55,12 +55,12 @@ internal sealed partial class PrismApp
     private readonly GearDraft glamGear = new();
     private readonly GearPick[] gearResults = new GearPick[GearSearchLimit];
     private readonly GearCatalog gearCatalog = new(Plugin.DataManager);
-    private readonly HashSet<string> entryDrops = new(StringComparer.Ordinal);
+    private readonly HashSet<string> entryPicks = new(StringComparer.Ordinal);
     private PrismScreen outfitReturn = PrismScreen.Cover;
     private PrismScreen gearReturn = PrismScreen.Outfit;
     private string gearQuery = string.Empty;
     private string gearResultsQuery = string.Empty;
-    private string entryDropsWeek = string.Empty;
+    private string entryPicksWeek = string.Empty;
     private int gearResultsSlot = -1;
     private int gearResultCount;
     private int editingSlot;
@@ -90,7 +90,7 @@ internal sealed partial class PrismApp
             captured = glamour.Capture();
             if (screen == PrismScreen.Entry)
             {
-                KeepEntryDrops();
+                KeepEntryPicks();
             }
         }
         else if (screen == PrismScreen.Entry && store.Week?.MyEntry is { } entry)
@@ -105,58 +105,47 @@ internal sealed partial class PrismApp
     private void ResetEntryOutfit()
     {
         captured = VanillaEntry ? Array.Empty<GlamGearDto>() : glamour.Capture();
-        KeepEntryDrops();
+        KeepEntryPicks();
         LoadDraftGear(store.Week?.MyEntry?.Outfit);
         gearCatalog.EnsureBuilt();
     }
 
-    private void KeepEntryDrops()
+    private void KeepEntryPicks()
     {
-        droppedMods.Clear();
+        pickedMods.Clear();
         var week = store.Week;
         if (VanillaEntry || week?.MyEntry is not { } entry)
         {
             return;
         }
 
-        if (entryDropsWeek == week.Id)
+        if (entryPicksWeek == week.Id)
         {
-            droppedMods.UnionWith(entryDrops);
+            pickedMods.UnionWith(entryPicks);
             return;
         }
 
-        var sent = new HashSet<string>(StringComparer.Ordinal);
         var outfit = entry.Outfit ?? Array.Empty<GlamGearDto>();
         for (var index = 0; index < outfit.Length; index++)
         {
             var mods = outfit[index].Mods ?? Array.Empty<GlamModDto>();
             for (var modIndex = 0; modIndex < mods.Length; modIndex++)
             {
-                sent.Add(PostedMods.Key(mods[modIndex]));
-            }
-        }
-
-        SyncCapturedMods();
-        for (var index = 0; index < capturedMods.Length; index++)
-        {
-            var key = capturedMods[index].Key;
-            if (!sent.Contains(key))
-            {
-                droppedMods.Add(key);
+                pickedMods.Add(PostedMods.Key(mods[modIndex]));
             }
         }
     }
 
-    private void RememberEntryDrops()
+    private void RememberEntryPicks()
     {
         if (VanillaEntry)
         {
             return;
         }
 
-        entryDrops.Clear();
-        entryDrops.UnionWith(droppedMods);
-        entryDropsWeek = store.Week?.Id ?? string.Empty;
+        entryPicks.Clear();
+        entryPicks.UnionWith(pickedMods);
+        entryPicksWeek = store.Week?.Id ?? string.Empty;
     }
 
     private GlamGearDto[]? EntryOutfit() => VanillaEntry ? DraftOutfit() : EntryMods();
@@ -228,25 +217,7 @@ internal sealed partial class PrismApp
         return gear;
     }
 
-    private GlamGearDto[]? EntryMods()
-    {
-        var gear = PostedMods.Without(captured, droppedMods);
-        var kept = new List<GlamModDto>();
-        var seen = new HashSet<string>(StringComparer.Ordinal);
-        for (var index = 0; index < gear.Length; index++)
-        {
-            var mods = gear[index].Mods ?? Array.Empty<GlamModDto>();
-            for (var modIndex = 0; modIndex < mods.Length; modIndex++)
-            {
-                if (seen.Add(PostedMods.Key(mods[modIndex])))
-                {
-                    kept.Add(mods[modIndex]);
-                }
-            }
-        }
-
-        return kept.Count == 0 ? null : new[] { new GlamGearDto(GearSlots.None, Mods: kept.ToArray()) };
-    }
+    private GlamGearDto[]? EntryMods() => PostedMods.Credited(captured, pickedMods);
 
     private void OpenGlam(PrismPlacingDto placing)
     {
@@ -313,7 +284,7 @@ internal sealed partial class PrismApp
         {
             if (editing)
             {
-                RememberEntryDrops();
+                RememberEntryPicks();
                 store.ShareOutfit(EntryOutfit());
             }
 

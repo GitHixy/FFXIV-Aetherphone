@@ -54,6 +54,7 @@ internal sealed class GlamStore : IDisposable
     private readonly StoreWork work = new("Glams");
     private readonly FailureSlot postFailure = new();
     private readonly FailureSlot profileFailure = new();
+    private readonly FailureSlot saveFailure = new();
     private readonly RetryGate meGate = new(TimeSpan.FromSeconds(MeRetrySeconds));
     private readonly RetryGate bannerGate = new(TimeSpan.FromSeconds(BannerRetrySeconds));
     private readonly GlamDto?[] showcase = new GlamDto?[2];
@@ -71,6 +72,7 @@ internal sealed class GlamStore : IDisposable
     private readonly HashSet<string> triedOn = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, bool> follows = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, bool> followLookups = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, bool> removedIds = new(StringComparer.Ordinal);
 
     private Func<string?, CancellationToken, Action<AepFailure>?, Task<GlamPage?>>? listFetch;
     private volatile string listKey = string.Empty;
@@ -86,6 +88,9 @@ internal sealed class GlamStore : IDisposable
     private volatile GlamSeasonDto? season;
     private volatile bool posting;
     private volatile bool postFailed;
+    private volatile GlamDto? updated;
+    private volatile bool saving;
+    private volatile bool saveFailed;
     private volatile int epoch;
     private volatile string followsFor = string.Empty;
     private volatile GlamAuthorDto? me;
@@ -165,6 +170,14 @@ internal sealed class GlamStore : IDisposable
 
     public string PostFailureText => postFailure.Text();
 
+    public GlamDto? Updated => updated;
+
+    public bool Saving => saving;
+
+    public bool SaveFailed => saveFailed;
+
+    public string SaveFailureText => saveFailure.Text();
+
     public bool? Follows(GlamAuthorDto author)
     {
         var owner = MyId;
@@ -199,6 +212,8 @@ internal sealed class GlamStore : IDisposable
         });
 
     public FeedLane<GlamDto> Lane(GlamScope scope) => discover[(int)scope];
+
+    public bool IsRemoved(string glamId) => removedIds.ContainsKey(glamId);
 
     public FeedLane<GlamDto> List => list;
 
@@ -588,6 +603,36 @@ internal sealed class GlamStore : IDisposable
         }, onComplete, () => posting = false);
     }
 
+    public void Update(GlamDto glam, GlamGearDto[] gear, string title, string[] tags, int race, int gender,
+        Action<bool> onComplete)
+    {
+        if (saving || glam.Id.Length == 0 || !session.IsSignedIn)
+        {
+            return;
+        }
+
+        saving = true;
+        saveFailed = false;
+        updated = null;
+        saveFailure.Clear();
+        work.Run("update", async token =>
+        {
+            var failure = AepFailure.None;
+            var saved = await client.UpdateAsync(glam.Id, new UpdateGlamRequest(title, gear, tags, race, gender),
+                token, received => failure = received).ConfigureAwait(false);
+            if (saved is null)
+            {
+                saveFailure.Set(failure.Failed ? failure : AepFailure.Transport(AepFailureKind.Offline));
+                saveFailed = true;
+                return false;
+            }
+
+            Replace(saved);
+            updated = saved;
+            return true;
+        }, onComplete, () => saving = false);
+    }
+
     public void Delete(GlamDto glam)
     {
         Remove(glam.Id);
@@ -679,7 +724,8 @@ internal sealed class GlamStore : IDisposable
             var items = page?.Items ?? Array.Empty<GlamDto>();
             for (var index = 0; index < items.Length; index++)
             {
-                if (items[index].Vanilla == vanilla && items[index].Photos is { Length: > 0 })
+                if (items[index].Vanilla == vanilla && items[index].Photos is { Length: > 0 } &&
+                    !removedIds.ContainsKey(items[index].Id))
                 {
                     Volatile.Write(ref showcase[slot], items[index]);
                     return;
@@ -841,12 +887,26 @@ internal sealed class GlamStore : IDisposable
 
     private void Remove(string glamId)
     {
+        removedIds[glamId] = true;
         for (var index = 0; index < discover.Length; index++)
         {
             discover[index].Items = CopyOnWrite.RemoveById(discover[index].Items, glamId);
         }
 
         list.Items = CopyOnWrite.RemoveById(list.Items, glamId);
+        if (more is { } shown)
+        {
+            more = shown with { Items = CopyOnWrite.RemoveById(shown.Items, glamId) };
+        }
+
+        for (var slot = 0; slot < showcase.Length; slot++)
+        {
+            if (Volatile.Read(ref showcase[slot])?.Id == glamId)
+            {
+                Volatile.Write(ref showcase[slot], null);
+            }
+        }
+
         if (detail?.Id == glamId)
         {
             detail = null;

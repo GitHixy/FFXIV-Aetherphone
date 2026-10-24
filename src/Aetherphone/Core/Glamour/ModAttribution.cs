@@ -122,17 +122,96 @@ internal static class ModAttribution
         return settings;
     }
 
-    public static string MatchFolder(Dictionary<string, string> installed, GlamModDto mod)
+    public static string MatchFolder(Dictionary<string, string> installed, Dictionary<string, string>? links,
+        GlamModDto mod)
     {
-        foreach (var (folder, name) in installed)
+        var folder = MatchByName(installed, mod);
+        return folder.Length > 0 || links is null ? folder : MatchByLink(installed, links, mod);
+    }
+
+    public static string MatchByName(Dictionary<string, string> installed, GlamModDto mod)
+    {
+        var name = mod.Name.AsSpan().Trim();
+        if (name.IsEmpty)
         {
-            if (string.Equals(name, mod.Name, StringComparison.OrdinalIgnoreCase))
+            return string.Empty;
+        }
+
+        foreach (var (folder, listed) in installed)
+        {
+            if (SameName(listed, name) || SameName(folder, name))
             {
                 return folder;
             }
         }
 
         return string.Empty;
+    }
+
+    public static bool HasLink(GlamModDto mod) => !LinkOf(mod.Link).IsEmpty;
+
+    public static string MatchByLink(Dictionary<string, string> installed, Dictionary<string, string> links,
+        GlamModDto mod)
+    {
+        var link = LinkOf(mod.Link);
+        var name = mod.Name.AsSpan().Trim();
+        if (link.IsEmpty || name.IsEmpty)
+        {
+            return string.Empty;
+        }
+
+        foreach (var (folder, listed) in installed)
+        {
+            if (links.TryGetValue(folder, out var website) &&
+                LinkOf(website).Equals(link, StringComparison.OrdinalIgnoreCase) &&
+                (Prefixed(listed.AsSpan().Trim(), name) || Prefixed(folder.AsSpan().Trim(), name)))
+            {
+                return folder;
+            }
+        }
+
+        return string.Empty;
+    }
+
+    private static ReadOnlySpan<char> LinkOf(string link) => link.AsSpan().Trim().TrimEnd('/');
+
+    private static bool SameName(string candidate, ReadOnlySpan<char> name) =>
+        candidate.AsSpan().Trim().Equals(name, StringComparison.OrdinalIgnoreCase);
+
+    private static bool Prefixed(ReadOnlySpan<char> installed, ReadOnlySpan<char> posted)
+    {
+        if (installed.IsEmpty)
+        {
+            return false;
+        }
+
+        var installedLonger = installed.Length >= posted.Length;
+        var longer = installedLonger ? installed : posted;
+        var shorter = installedLonger ? posted : installed;
+        return longer.StartsWith(shorter, StringComparison.OrdinalIgnoreCase) && IsDecoration(longer[shorter.Length..]);
+    }
+
+    private static bool IsDecoration(ReadOnlySpan<char> rest)
+    {
+        var trimmed = rest.TrimStart();
+        if (trimmed.IsEmpty)
+        {
+            return true;
+        }
+
+        var first = trimmed[0];
+        if (first is '-' or '(' or '[' or '{' or '|' or ':' or '_' or '/' or '~')
+        {
+            return true;
+        }
+
+        var spaced = trimmed.Length < rest.Length;
+        if (char.IsDigit(first))
+        {
+            return spaced;
+        }
+
+        return spaced && first is 'v' or 'V' && trimmed.Length > 1 && char.IsDigit(trimmed[1]);
     }
 
     private static void Add(Dictionary<int, HashSet<string>> foldersBySlot, int slot, string folder)

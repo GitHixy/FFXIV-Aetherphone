@@ -25,6 +25,7 @@ internal sealed partial class AnnouncementsApp : IResumableApp
     public string Id => AnnouncementsStore.AppId;
     public Vector4 Accent => AppAccents.For(Id);
     public string DisplayName => Loc.T(L.Apps.Announcements);
+    public string HomeLabel => Loc.T(L.Apps.AnnouncementsHome);
     public string Glyph => "An";
     public int BadgeCount => store.UnreadCount;
     public bool HasBadge => true;

@@ -90,6 +90,11 @@ internal sealed class GlamClient
         net.PostAsync("/prism/glams", request, AethernetJsonContext.Default.CreateGlamRequest,
             AethernetJsonContext.Default.GlamDto, token, null, onFailure);
 
+    public Task<GlamDto?> UpdateAsync(string glamId, UpdateGlamRequest request, CancellationToken token,
+        Action<AepFailure>? onFailure = null) =>
+        net.SendJsonAsync(HttpMethod.Put, GlamPath(glamId), request, AethernetJsonContext.Default.UpdateGlamRequest,
+            AethernetJsonContext.Default.GlamDto, token, null, onFailure);
+
     public Task<bool> DeleteAsync(string glamId, CancellationToken token, Action<AepFailure>? onFailure = null) =>
         net.SendAsync(HttpMethod.Delete, GlamPath(glamId), token, null, onFailure);
 
