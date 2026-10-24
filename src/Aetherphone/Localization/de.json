@@ -11096,6 +11096,8 @@
   "failure.feedbackLength": "Dein Feedback darf höchstens {0} Zeichen haben.",
   "failure.feedbackTooManyImages": "Du kannst höchstens {0} Bilder anhängen.",
   "failure.prismGlamDailyLimit": "Du hast das heutige Limit für Projektionen erreicht ({0}). Nach dem täglichen Reset kannst du wieder posten.",
+  "failure.prismGlamPhotosLocked": "Eine Wettbewerbsprojektion behält das Foto, das bewertet wurde.",
+  "failure.prismGlamUnderReview": "Diese Projektion wird gerade geprüft, daher können ihre Fotos jetzt nicht geändert werden.",
   "failure.tokenExpired": "Deine Sitzung ist abgelaufen. Melde dich erneut an und versuche es noch einmal.",
   "failure.sessionRevoked": "Du wurdest abgemeldet. Melde dich erneut an, um fortzufahren.",
   "failure.socialDisabled": "Die sozialen Apps sind vorübergehend abgeschaltet. Versuche es später erneut.",

@@ -14958,6 +14958,8 @@ internal static class L
         public static readonly LocString FeedbackLength = new("failure.feedbackLength", "Keep your feedback to {0} characters.");
         public static readonly LocString FeedbackTooManyImages = new("failure.feedbackTooManyImages", "You can attach at most {0} images.");
         public static readonly LocString PrismGlamDailyLimit = new("failure.prismGlamDailyLimit", "You've reached today's glam limit ({0}). You can post again after the daily reset.");
+        public static readonly LocString PrismGlamPhotosLocked = new("failure.prismGlamPhotosLocked", "A contest glam keeps the photo that was judged.");
+        public static readonly LocString PrismGlamUnderReview = new("failure.prismGlamUnderReview", "This glam is being reviewed, so its photos can't change right now.");
     }
 
     internal static class Rolladeck

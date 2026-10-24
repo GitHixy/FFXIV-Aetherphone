@@ -11096,6 +11096,8 @@
   "failure.feedbackLength": "Keep your feedback to {0} characters.",
   "failure.feedbackTooManyImages": "You can attach at most {0} images.",
   "failure.prismGlamDailyLimit": "You've reached today's glam limit ({0}). You can post again after the daily reset.",
+  "failure.prismGlamPhotosLocked": "A contest glam keeps the photo that was judged.",
+  "failure.prismGlamUnderReview": "This glam is being reviewed, so its photos can't change right now.",
   "failure.tokenExpired": "Your session expired. Sign in again, then try again.",
   "failure.sessionRevoked": "You were signed out. Sign in again to continue.",
   "failure.socialDisabled": "The social apps are temporarily switched off. Try again later.",

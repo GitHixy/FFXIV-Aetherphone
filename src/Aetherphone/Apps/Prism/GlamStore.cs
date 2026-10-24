@@ -618,23 +618,10 @@ internal sealed class GlamStore : IDisposable
         postFailure.Clear();
         work.Run("post", async token =>
         {
-            var (width, height) = PostAspects.Size(GlamAspect, PhotoBaseSize);
-            var count = Math.Min(photos.Length, MaxPhotos);
-            var uploaded = new GlamPhotoRequest[count];
-            var failure = AepFailure.None;
-            for (var index = 0; index < count; index++)
+            var (uploaded, failure) = await UploadPhotosAsync(photos, token).ConfigureAwait(false);
+            if (uploaded is null)
             {
-                var baked = ImageProcessor.BakeCroppedUpload(photos[index].Path, photos[index].Crop, width, height,
-                    RevealsWholePhoto, PhotoEdit.None);
-                var upload = await media.UploadUrlAsync(baked.ContentType, PrismClient.MediaScope, token,
-                    received => failure = received).ConfigureAwait(false);
-                if (upload is null || !await media.UploadImageAsync(upload.UploadUrl, baked.Bytes, baked.ContentType,
-                        token, received => failure = received).ConfigureAwait(false))
-                {
-                    return FailPost(failure);
-                }
-
-                uploaded[index] = new GlamPhotoRequest(upload.Key, baked.Width, baked.Height);
+                return FailPost(failure);
             }
 
             var created = await client.CreateAsync(new CreateGlamRequest(title, uploaded, gear, tags, race, gender, vanilla,
@@ -657,7 +644,7 @@ internal sealed class GlamStore : IDisposable
     }
 
     public void Update(GlamDto glam, GlamGearDto[] gear, string title, string[] tags, int race, int gender,
-        Action<bool> onComplete)
+        GlamPhotoDraft[]? photos, Action<bool> onComplete)
     {
         if (saving || glam.Id.Length == 0 || !session.IsSignedIn)
         {
@@ -671,19 +658,53 @@ internal sealed class GlamStore : IDisposable
         work.Run("update", async token =>
         {
             var failure = AepFailure.None;
-            var saved = await client.UpdateAsync(glam.Id, new UpdateGlamRequest(title, gear, tags, race, gender),
-                token, received => failure = received).ConfigureAwait(false);
+            GlamPhotoRequest[]? uploaded = null;
+            if (photos is { Length: > 0 })
+            {
+                (uploaded, failure) = await UploadPhotosAsync(photos, token).ConfigureAwait(false);
+                if (uploaded is null)
+                {
+                    return FailSave(failure);
+                }
+            }
+
+            var saved = await client.UpdateAsync(glam.Id,
+                new UpdateGlamRequest(title, gear, tags, race, gender, uploaded), token,
+                received => failure = received).ConfigureAwait(false);
             if (saved is null)
             {
-                saveFailure.Set(failure.Failed ? failure : AepFailure.Transport(AepFailureKind.Offline));
-                saveFailed = true;
-                return false;
+                return FailSave(failure);
             }
 
             Replace(saved);
             updated = saved;
             return true;
         }, onComplete, () => saving = false);
+    }
+
+    private async Task<(GlamPhotoRequest[]? Photos, AepFailure Failure)> UploadPhotosAsync(GlamPhotoDraft[] photos,
+        CancellationToken token)
+    {
+        var (width, height) = PostAspects.Size(GlamAspect, PhotoBaseSize);
+        var count = Math.Min(photos.Length, MaxPhotos);
+        var uploaded = new GlamPhotoRequest[count];
+        var failure = AepFailure.None;
+        for (var index = 0; index < count; index++)
+        {
+            var baked = ImageProcessor.BakeCroppedUpload(photos[index].Path, photos[index].Crop, width, height,
+                RevealsWholePhoto, PhotoEdit.None);
+            var upload = await media.UploadUrlAsync(baked.ContentType, PrismClient.MediaScope, token,
+                received => failure = received).ConfigureAwait(false);
+            if (upload is null || !await media.UploadImageAsync(upload.UploadUrl, baked.Bytes, baked.ContentType,
+                    token, received => failure = received).ConfigureAwait(false))
+            {
+                return (null, failure);
+            }
+
+            uploaded[index] = new GlamPhotoRequest(upload.Key, baked.Width, baked.Height);
+        }
+
+        return (uploaded, failure);
     }
 
     public void Delete(GlamDto glam)
@@ -1013,6 +1034,13 @@ internal sealed class GlamStore : IDisposable
     private bool FailProfile(AepFailure failure)
     {
         profileFailure.Set(failure.Failed ? failure : AepFailure.Transport(AepFailureKind.Offline));
+        return false;
+    }
+
+    private bool FailSave(AepFailure failure)
+    {
+        saveFailure.Set(failure.Failed ? failure : AepFailure.Transport(AepFailureKind.Offline));
+        saveFailed = true;
         return false;
     }
 

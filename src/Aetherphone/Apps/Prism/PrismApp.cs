@@ -409,6 +409,10 @@ internal sealed partial class PrismApp : IResumableApp
         {
             piecesOpen = false;
         }
+        else if (screen == PrismScreen.Compose && editingGlam is not null && editPicking)
+        {
+            editPicking = false;
+        }
         else if (screen == PrismScreen.Compose && editingGlam is not null)
         {
             editingGlam = null;

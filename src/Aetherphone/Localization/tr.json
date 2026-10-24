@@ -11096,6 +11096,8 @@
   "failure.feedbackLength": "Geri bildirimin en fazla {0} karakter olabilir.",
   "failure.feedbackTooManyImages": "En fazla {0} görsel ekleyebilirsin.",
   "failure.prismGlamDailyLimit": "Bugünkü glam sınırına ulaştın ({0}). Günlük sıfırlamadan sonra yeniden paylaşabilirsin.",
+  "failure.prismGlamPhotosLocked": "Yarışma glamı, değerlendirilen fotoğrafı korur.",
+  "failure.prismGlamUnderReview": "Bu glam inceleniyor, bu yüzden fotoğrafları şu anda değiştirilemez.",
   "failure.tokenExpired": "Oturumun sona erdi. Tekrar giriş yapıp dene.",
   "failure.sessionRevoked": "Oturumun kapatıldı. Devam etmek için tekrar giriş yap.",
   "failure.socialDisabled": "Sosyal uygulamalar geçici olarak kapalı. Daha sonra tekrar dene.",

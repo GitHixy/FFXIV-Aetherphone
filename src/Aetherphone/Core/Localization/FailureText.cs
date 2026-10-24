@@ -100,6 +100,8 @@ internal static class FailureCodes
     public const string FeedbackLength = "feedback_length";
     public const string FeedbackTooManyImages = "feedback_too_many_images";
     public const string PrismGlamDailyLimit = "prism_glam_daily_limit";
+    public const string PrismGlamPhotosLocked = "prism_glam_photos_locked";
+    public const string PrismGlamUnderReview = "prism_glam_under_review";
 }
 
 internal sealed class FailureSlot
@@ -359,6 +361,10 @@ internal static class FailureText
                 return Valued(L.Failure.FeedbackTooManyImages, failure);
             case FailureCodes.PrismGlamDailyLimit:
                 return Valued(L.Failure.PrismGlamDailyLimit, failure);
+            case FailureCodes.PrismGlamPhotosLocked:
+                return Loc.T(L.Failure.PrismGlamPhotosLocked);
+            case FailureCodes.PrismGlamUnderReview:
+                return Loc.T(L.Failure.PrismGlamUnderReview);
             default:
                 return FromStatus(failure);
         }
