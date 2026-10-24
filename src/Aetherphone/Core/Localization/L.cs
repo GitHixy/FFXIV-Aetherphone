@@ -10686,9 +10686,9 @@ internal static class L
         public static readonly LocString StateLine = new("plugin.stateLine", "{0}: {1}");
         public static readonly LocString MusicUsage = new("plugin.musicUsage", "Type {0} music followed by play, pause, next, or prev.");
         public static readonly LocString NothingPlaying = new("plugin.nothingPlaying", "Nothing is playing.");
-        public static readonly LocString NetworkRestarting = new("plugin.networkRestarting", "Aethernet is restarting for an update. Your phone will reconnect on its own in a moment.");
-        public static readonly LocString NetworkLost = new("plugin.networkLost", "Lost connection to Aethernet. Your phone keeps retrying and will post here once it is back.");
-        public static readonly LocString NetworkBack = new("plugin.networkBack", "Reconnected to Aethernet. Everything is back to normal.");
+        public static readonly LocString NetworkRestarting = new("plugin.networkRestarting", "Aethernet is restarting to apply an update. Messages, calls and online games may be interrupted for a short time, and anything sent meanwhile may not go through. The connection will be restored automatically.");
+        public static readonly LocString NetworkLost = new("plugin.networkLost", "Connection to Aethernet lost. Messages, calls and other online features are unavailable until it is restored. Reconnecting automatically.");
+        public static readonly LocString NetworkBack = new("plugin.networkBack", "Connection to Aethernet restored. All online features are available again. If anything failed to send during the interruption, please send it again.");
         public static readonly LocString TellUsage = new("plugin.tellUsage", "Target a player, or type {0} tell followed by their name and world.");
         public static readonly LocString WorldNotFound = new("plugin.worldNotFound", "No world named {0}.");
         public static readonly LocString CallUsage = new("plugin.callUsage", "Type {0} call followed by a contact name.");
