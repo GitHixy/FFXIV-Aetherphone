@@ -748,10 +748,16 @@ internal sealed partial class PrismApp : IResumableApp
         loadedAt.Clear();
     }
 
+    private bool InComposeSubScreen =>
+        screen is PrismScreen.GearSearch or PrismScreen.DyePick
+            ? gearReturn == PrismScreen.Compose
+            : screen == PrismScreen.WardrobeMods && ReferenceEquals(wornTarget, composeMods);
+
     private void ConsumeSharedPhoto()
     {
         var path = pendingSharedPhoto;
-        if (string.IsNullOrEmpty(path) || (screen == PrismScreen.Compose && editingGlam is not null))
+        if (string.IsNullOrEmpty(path) || InComposeSubScreen ||
+            (screen == PrismScreen.Compose && editingGlam is not null))
         {
             return;
         }
