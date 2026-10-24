@@ -114,7 +114,9 @@ internal sealed partial class ChirperApp
         }
 
         var isAuthor = store.Me is { } me && me.Id == post.AuthorId;
-        var canVote = store.IsSignedIn && ChirperPolls.CanVote(poll, isAuthor, nowUnix) && !store.PollVotePending(post.Id);
+        var pending = store.TryGetPendingPollVote(post.Id, out var pendingOption);
+        var shownVote = ChirperPolls.ShownVote(poll, pending, pendingOption);
+        var canVote = store.IsSignedIn && !pending && ChirperPolls.CanVote(poll, isAuthor, nowUnix);
         var deltaSeconds = MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
         PrimePollView(view, resultsVisible);
         var reveal = view.Reveal.Step(resultsVisible ? 1f : 0f, Motion.Appear, deltaSeconds);
@@ -124,7 +126,7 @@ internal sealed partial class ChirperApp
         for (var index = 0; index < poll.Options.Length; index++)
         {
             var row = new Rect(new Vector2(left, rowTop), new Vector2(left + width, rowTop + rowHeight));
-            if (DrawPollRow(drawList, poll, view, index, row, canVote, reveal, deltaSeconds, scale))
+            if (DrawPollRow(drawList, poll, view, index, shownVote, row, canVote, reveal, deltaSeconds, scale))
             {
                 store.VotePoll(post, index);
             }
@@ -153,10 +155,10 @@ internal sealed partial class ChirperApp
     }
 
     private static bool DrawPollRow(ImDrawListPtr drawList, PostPollDto poll, ChirperPollView view, int optionIndex,
-        Rect row, bool canVote, float reveal, float deltaSeconds, float scale)
+        int shownVote, Rect row, bool canVote, float reveal, float deltaSeconds, float scale)
     {
         var radius = row.Height * 0.5f;
-        var mine = poll.MyVote == optionIndex;
+        var mine = shownVote == optionIndex;
         var showResults = reveal > PollRevealEpsilon;
         var winner = view.Ended && showResults && view.Leaders[optionIndex];
         var hovered = canVote && UiInteract.Hover(row.Min, row.Max);

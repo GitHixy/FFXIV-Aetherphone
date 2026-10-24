@@ -36,7 +36,8 @@ internal sealed class ChirperPollView
     public void Sync(PostPollDto poll, long nowUnix)
     {
         var code = Loc.Current.Code;
-        var contentChanged = !ReferenceEquals(Source, poll) || !string.Equals(languageCode, code, StringComparison.Ordinal);
+        var contentChanged = Source is null || !ChirperPolls.SameState(Source, poll)
+            || !string.Equals(languageCode, code, StringComparison.Ordinal);
         if (contentChanged)
         {
             Source = poll;

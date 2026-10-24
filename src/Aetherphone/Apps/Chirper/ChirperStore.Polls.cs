@@ -7,9 +7,11 @@ namespace Aetherphone.Apps.Chirper;
 
 internal sealed partial class ChirperStore
 {
+    private const int PollRefreshCap = 256;
+
     private readonly object pollGate = new();
-    private readonly HashSet<string> pollVotesInFlight = new(StringComparer.Ordinal);
-    private readonly HashSet<string> pollRefreshes = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, int> pendingPollVotes = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, PollRefreshState> pollRefreshes = new(StringComparer.Ordinal);
     private AepFailureBox? pollVoteFailure;
 
     public void ComposePoll(string text, PostPollInput poll, Action<bool> onComplete,
@@ -35,11 +37,11 @@ internal sealed partial class ChirperStore
         }, onComplete, () => posting = false);
     }
 
-    public bool PollVotePending(string postId)
+    public bool TryGetPendingPollVote(string postId, out int optionIndex)
     {
         lock (pollGate)
         {
-            return pollVotesInFlight.Contains(postId);
+            return pendingPollVotes.TryGetValue(postId, out optionIndex);
         }
     }
 
@@ -50,35 +52,31 @@ internal sealed partial class ChirperStore
         return box is not null;
     }
 
+    // The tapped choice shows at once as a pending vote on every copy of the chirp, because the
+    // overlay is keyed by post id rather than held on one card. The server's answer then lands on
+    // every copy by id, and a failure simply drops the overlay, so nothing is left to roll back.
     public void VotePoll(PostDto post, int optionIndex)
     {
-        if (post.Poll is not { } previous)
+        if (post.Poll is not { } poll || optionIndex < 0 || optionIndex >= poll.Options.Length)
         {
             return;
         }
 
         var isAuthor = Me is { } me && me.Id == post.AuthorId;
-        if (!ChirperPolls.CanVote(previous, isAuthor, DateTimeOffset.UtcNow.ToUnixTimeSeconds()))
+        if (!ChirperPolls.CanVote(poll, isAuthor, DateTimeOffset.UtcNow.ToUnixTimeSeconds()))
         {
             return;
         }
 
-        var optimistic = ChirperPolls.ApplyLocalVote(previous, optionIndex);
-        if (ReferenceEquals(optimistic, previous))
-        {
-            return;
-        }
-
+        var postId = post.Id;
         lock (pollGate)
         {
-            if (!pollVotesInFlight.Add(post.Id))
+            if (!pendingPollVotes.TryAdd(postId, optionIndex))
             {
                 return;
             }
         }
 
-        var postId = post.Id;
-        MapPollEverywhere(postId, previous, optimistic);
         work.Run("poll vote", async token =>
         {
             var reported = AepFailure.None;
@@ -86,11 +84,10 @@ internal sealed partial class ChirperStore
                 .ConfigureAwait(false);
             if (counted is not null)
             {
-                MapPollEverywhere(postId, optimistic, counted);
+                ApplyPollEverywhere(postId, counted);
                 return;
             }
 
-            MapPollEverywhere(postId, optimistic, previous);
             Interlocked.Exchange(ref pollVoteFailure, new AepFailureBox(reported.Failed
                 ? reported
                 : AepFailure.Transport(AepFailureKind.Offline)));
@@ -103,22 +100,44 @@ internal sealed partial class ChirperStore
         {
             lock (pollGate)
             {
-                pollVotesInFlight.Remove(postId);
+                pendingPollVotes.Remove(postId);
             }
         });
     }
 
+    // An ended poll whose tallies the server still hid asks again, but never more often than the
+    // backoff allows, so a card drawn every frame cannot turn into a request every frame.
     public void RequestPollRefresh(string postId)
     {
+        var nowTick = Environment.TickCount64;
         lock (pollGate)
         {
-            if (!pollRefreshes.Add(postId))
+            var known = pollRefreshes.TryGetValue(postId, out var state);
+            if (known && (state.InFlight || nowTick < state.DueTick))
             {
                 return;
             }
+
+            if (!known && pollRefreshes.Count >= PollRefreshCap)
+            {
+                pollRefreshes.Clear();
+            }
+
+            var attempts = state.Attempts + 1;
+            pollRefreshes[postId] = new PollRefreshState(attempts,
+                nowTick + ChirperPolls.RefreshBackoffMilliseconds(attempts), true);
         }
 
-        work.Run("poll refresh", token => RefetchPollPostAsync(postId, token));
+        work.Run("poll refresh", token => RefetchPollPostAsync(postId, token), () =>
+        {
+            lock (pollGate)
+            {
+                if (pollRefreshes.TryGetValue(postId, out var settled))
+                {
+                    pollRefreshes[postId] = settled with { InFlight = false };
+                }
+            }
+        });
     }
 
     private async Task RefetchPollPostAsync(string postId, CancellationToken token)
@@ -130,15 +149,15 @@ internal sealed partial class ChirperStore
         }
 
         ReplacePost(fresh);
-        MapReferencedEverywhere(postId, host => ChirperPolls.WithPoll(host, poll));
+        ApplyPollEverywhere(postId, poll);
     }
 
-    private void MapPollEverywhere(string postId, PostPollDto expected, PostPollDto next)
+    private void ApplyPollEverywhere(string postId, PostPollDto poll)
     {
-        PostDto Swap(PostDto host) => host.Poll is { } current
-            ? ChirperPolls.WithPoll(host, ChirperPolls.Swap(current, expected, next))
-            : host;
+        PostDto Swap(PostDto host) => ChirperPolls.WithPoll(host, poll);
         MapPostEverywhere(postId, Swap);
         MapReferencedEverywhere(postId, Swap);
     }
+
+    private readonly record struct PollRefreshState(int Attempts, long DueTick, bool InFlight);
 }
