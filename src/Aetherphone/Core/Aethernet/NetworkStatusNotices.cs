@@ -1,11 +1,14 @@
 using Aetherphone.Core.Localization;
+using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Plugin.Services;
 
 namespace Aetherphone.Core.Aethernet;
 
 internal sealed class NetworkStatusNotices : IDisposable
 {
-    private const string ChatTag = "Aetherphone";
+    private const ushort RestartingUiColor = 577;
+    private const ushort LostUiColor = 508;
+    private const ushort BackOnlineUiColor = 575;
 
     private readonly AethernetSession session;
     private readonly RealtimeSignalBus signals;
@@ -76,15 +79,21 @@ internal sealed class NetworkStatusNotices : IDisposable
             return;
         }
 
-        chat.Print(Loc.T(TextFor(notice)), ChatTag);
+        chat.Print(MessageFor(notice), AepConstants.DisplayName, AepConstants.ChatTagUiColor);
     }
 
-    private static LocString TextFor(NetworkNotice notice) => notice switch
+    private static SeString MessageFor(NetworkNotice notice) => notice switch
     {
-        NetworkNotice.Restarting => L.Plugin.NetworkRestarting,
-        NetworkNotice.Lost => L.Plugin.NetworkLost,
-        _ => L.Plugin.NetworkBack,
+        NetworkNotice.Restarting => Message(L.Plugin.NetworkRestarting, RestartingUiColor),
+        NetworkNotice.Lost => Message(L.Plugin.NetworkLost, LostUiColor),
+        _ => Message(L.Plugin.NetworkBack, BackOnlineUiColor),
     };
+
+    private static SeString Message(LocString text, ushort uiColor) => new SeStringBuilder()
+        .AddIcon(BitmapFontIcon.Aethernet)
+        .AddText(" ")
+        .AddUiForeground(Loc.T(text), uiColor)
+        .Build();
 
     public void Dispose()
     {
