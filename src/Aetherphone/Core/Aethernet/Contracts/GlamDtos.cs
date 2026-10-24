@@ -61,6 +61,8 @@ internal sealed record CreateGlamRequest(
     bool Vanilla,
     string InspiredBy);
 
+internal sealed record UpdateGlamRequest(string Title, GlamGearDto[] Gear, string[] Tags, int Race, int Gender);
+
 internal sealed record GlamPlacingDto(string WeekId = "", string Title = "", int Rank = 0, string Track = "");
 
 internal sealed record GlamProfileDto(

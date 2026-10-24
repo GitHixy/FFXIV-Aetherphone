@@ -1,5 +1,6 @@
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Core.Animation;
 using Aetherphone.Core.Game;
 using Aetherphone.Core.Glamour;
 using Aetherphone.Core.Localization;
@@ -25,6 +26,7 @@ internal sealed partial class PrismApp
     private const float ComposePhotoHeightShare = 0.36f;
     private const int ModNameMaxLength = 80;
     private const int MaxNamedMods = 20;
+    private const float LockedTrackAlpha = 0.5f;
     private const string ComposeRaceId = "prism.composeRace";
     private const string ComposeGenderId = "prism.composeGender";
 
@@ -40,7 +42,11 @@ internal sealed partial class PrismApp
     private GlamGearDto[]? capturedModsFor;
     private string? capturedModsLanguage;
     private readonly Action<bool> postSettled;
+    private readonly Action<bool> glamEditSettled;
     private GlamGearDto[] captured = Array.Empty<GlamGearDto>();
+    private GlamDto? editingGlam;
+    private volatile int glamEditOutcome;
+    private int savingDraft;
     private bool composeDetails;
     private bool focusTitle;
     private bool? composeVanilla;
@@ -56,6 +62,7 @@ internal sealed partial class PrismApp
     private void StartCompose()
     {
         composeDraft++;
+        editingGlam = null;
         composeSession.Open(false);
         composeSession.MaxPhotos = GlamStore.MaxPhotos;
         composeDetails = false;
@@ -70,12 +77,33 @@ internal sealed partial class PrismApp
         Push(PrismScreen.Compose);
     }
 
+    private void StartGlamEdit(GlamDto glam)
+    {
+        composeDraft++;
+        editingGlam = glam;
+        glamEditOutcome = OutcomePending;
+        composeDetails = true;
+        focusTitle = false;
+        var gear = glam.Gear ?? Array.Empty<GlamGearDto>();
+        LoadGear(glamGear, gear);
+        composeMods.Load(gear);
+        composeVanilla = glam.Vanilla;
+        composeRace = glam.Race;
+        composeGender = glam.Race > 0 && glam.Gender is MaleGender or FemaleGender ? glam.Gender : NoGender;
+        glamTitle = glam.Title;
+        glamTags = glam.Tags is { Length: > 0 } tags ? string.Join(", ", tags) : string.Empty;
+        gearCatalog.EnsureBuilt();
+        Push(PrismScreen.Compose);
+    }
+
     private void SettlePost(bool succeeded) => postOutcome = succeeded ? OutcomeSent : OutcomeFailed;
+
+    private void SettleGlamEdit(bool succeeded) => glamEditOutcome = succeeded ? OutcomeSent : OutcomeFailed;
 
     private void DrawCompose(ImDrawListPtr drawList, Rect content, float scale)
     {
         composeSession.ConsumePendingImport();
-        if (composeDetails)
+        if (composeDetails || editingGlam is not null)
         {
             DrawComposeDetails(drawList, content, scale);
             return;
@@ -182,15 +210,22 @@ internal sealed partial class PrismApp
     private void DrawComposeDetails(ImDrawListPtr drawList, Rect content, float scale)
     {
         bodyRaceMenu.Gate();
+        var editing = editingGlam is not null;
+        var busy = editing ? glams.Saving : glams.Posting;
         var bodyChosen = BodyChosen(composeRace, composeGender);
         var gearReady = composeVanilla != true || DraftPieces() > 0;
-        var ready = !string.IsNullOrWhiteSpace(glamTitle) && !glams.Posting && composeVanilla is not null &&
+        var ready = !string.IsNullOrWhiteSpace(glamTitle) && !busy && composeVanilla is not null &&
                     bodyChosen && gearReady;
+        var busyLabel = !busy ? string.Empty : Loc.T(editing ? L.Prism.SavingGlam : L.Prism.Posting);
         var top = DrawActionHeader(drawList, content, PhoneIcons.ChevronLeft, Loc.T(L.Prism.Back),
-            Loc.T(L.Prism.PostGlam), PhoneIcons.Check, Loc.T(L.Prism.Post), ready,
-            glams.Posting ? Loc.T(L.Prism.Posting) : string.Empty, UiSound.Shutter, scale, out var post) +
-                  Metrics.Space.Sm * scale;
-        if (post)
+            Loc.T(editing ? L.Prism.EditGlamTitle : L.Prism.PostGlam), PhoneIcons.Check,
+            Loc.T(editing ? L.Prism.Save : L.Prism.Post), ready, busyLabel, editing ? UiSound.Tap : UiSound.Shutter,
+            scale, out var post) + Metrics.Space.Sm * scale;
+        if (post && editing)
+        {
+            SaveGlamEdit();
+        }
+        else if (post)
         {
             PostGlam();
         }
@@ -200,9 +235,12 @@ internal sealed partial class PrismApp
         var bottom = content.Max.Y - PrismArt.BottomMargin(scale);
         var failureHeight = 0f;
         var notice = string.Empty;
-        if (glams.PostFailed && !glams.Posting && postingDraft == composeDraft)
+        var failed = editing
+            ? glams.SaveFailed && !glams.Saving && savingDraft == composeDraft
+            : glams.PostFailed && !glams.Posting && postingDraft == composeDraft;
+        if (failed)
         {
-            var reason = glams.PostFailureText;
+            var reason = editing ? glams.SaveFailureText : glams.PostFailureText;
             notice = reason.Length > 0 ? reason : Loc.T(L.Common.LoadFailedHint);
         }
         else if (composeVanilla is null)
@@ -233,8 +271,11 @@ internal sealed partial class PrismApp
             var list = ImGui.GetWindowDrawList();
             var origin = ImGui.GetCursorScreenPos();
             var bodyWidth = ScrollLayout.StableContentWidth();
-            var cursor = DrawComposePhotos(list, origin.X, origin.Y, bodyWidth,
-                content.Height * ComposePhotoHeightShare, scale) + Metrics.Space.Lg * scale;
+            var photoHeight = content.Height * ComposePhotoHeightShare;
+            var photosBottom = editingGlam is { } glam
+                ? DrawEditPhotos(list, origin.X, origin.Y, bodyWidth, photoHeight, glam, scale)
+                : DrawComposePhotos(list, origin.X, origin.Y, bodyWidth, photoHeight, scale);
+            var cursor = photosBottom + Metrics.Space.Lg * scale;
             if (focusTitle)
             {
                 ImGui.SetKeyboardFocusHere();
@@ -245,7 +286,7 @@ internal sealed partial class PrismApp
                 "##glamTitle", ref glamTitle, TitleMaxLength, scale);
             cursor = DrawField(list, origin.X, cursor, bodyWidth, Loc.T(L.Prism.TagsLabel), Loc.T(L.Prism.TagsHint),
                 "##glamTags", ref glamTags, TagsMaxLength, scale);
-            cursor = DrawTrackChoice(origin.X, cursor, bodyWidth, scale);
+            cursor = DrawTrackChoice(list, origin.X, cursor, bodyWidth, editing, scale);
             cursor = DrawBodyField(list, origin.X, cursor, bodyWidth, ComposeRaceId, ComposeGenderId,
                 ref composeRace, ref composeGender, scale);
             cursor = DrawChosenGear(list, origin.X, cursor, bodyWidth, scale);
@@ -295,6 +336,30 @@ internal sealed partial class PrismApp
         return top + cardHeight;
     }
 
+    private float DrawEditPhotos(ImDrawListPtr drawList, float left, float top, float width, float maxHeight,
+        GlamDto glam, float scale)
+    {
+        var photos = glam.Photos ?? Array.Empty<GlamPhotoDto>();
+        var count = Math.Min(photos.Length, GlamStore.MaxPhotos);
+        if (count == 0)
+        {
+            return top;
+        }
+
+        var gap = Metrics.Space.Xs * scale;
+        var cardWidth = MathF.Min(MathF.Min(width * ComposePhotoShare, maxHeight * GlamStore.PhotoRatio),
+            (width - gap * (count - 1)) / count);
+        var cardHeight = cardWidth / GlamStore.PhotoRatio;
+        var start = left + (width - cardWidth * count - gap * (count - 1)) * 0.5f;
+        for (var index = 0; index < count; index++)
+        {
+            var min = new Vector2(start + index * (cardWidth + gap), top);
+            DrawLook(drawList, new Rect(min, min + new Vector2(cardWidth, cardHeight)), photos[index].Url, false);
+        }
+
+        return top + cardHeight;
+    }
+
     private float DrawField(ImDrawListPtr drawList, float left, float top, float width, string label, string hint,
         string id, ref string text, int maxLength, float scale)
     {
@@ -313,7 +378,8 @@ internal sealed partial class PrismApp
         return field.Max.Y;
     }
 
-    private float DrawTrackChoice(float left, float top, float width, float scale)
+    private float DrawTrackChoice(ImDrawListPtr drawList, float left, float top, float width, bool locked,
+        float scale)
     {
         var tap = Metrics.Size.TapTarget * scale;
         kindLabels[0] = Loc.T(L.Prism.ModdedStamp);
@@ -324,8 +390,22 @@ internal sealed partial class PrismApp
             false => 0,
             null => -1,
         };
-        var picked = DrawTrackSegments("prism.composeKind",
-            new Rect(new Vector2(left, top), new Vector2(left + width, top + tap)), kindLabels, shown, scale);
+        var row = new Rect(new Vector2(left, top), new Vector2(left + width, top + tap));
+        if (locked)
+        {
+            var mark = PrismMotion.Mark(drawList);
+            using (InputShield.Engage())
+            {
+                DrawTrackSegments("prism.composeKind", row, kindLabels, shown, scale);
+            }
+
+            PrismMotion.Shift(drawList, mark, Vector2.Zero, LockedTrackAlpha);
+            return row.Max.Y + Metrics.Space.Xs * scale + Typography.DrawWrappedLeft(
+                new Vector2(left, row.Max.Y + Metrics.Space.Xs * scale), Loc.T(L.Prism.TrackLocked), PrismArt.Muted,
+                PrismType.Caption, width) + Metrics.Space.Lg * scale;
+        }
+
+        var picked = DrawTrackSegments("prism.composeKind", row, kindLabels, shown, scale);
         if (picked >= 0)
         {
             composeVanilla = picked == 1;
@@ -553,6 +633,47 @@ internal sealed partial class PrismApp
         postingCover = count > 0 ? photos[0].Path : string.Empty;
         glams.Post(photos, gear, glamTitle.Trim(), SplitTags(glamTags), composeRace, composeGender, vanilla,
             glamour.TryingOn ? wearingGlamId : string.Empty, postSettled);
+    }
+
+    private void SaveGlamEdit()
+    {
+        if (editingGlam is not { } glam)
+        {
+            return;
+        }
+
+        glamEditOutcome = OutcomePending;
+        savingDraft = composeDraft;
+        glams.Update(glam, ChosenGear(), glamTitle.Trim(), SplitTags(glamTags), composeRace, composeGender,
+            glamEditSettled);
+    }
+
+    private void ConsumeGlamEditOutcome()
+    {
+        var outcome = glamEditOutcome;
+        if (outcome == OutcomePending)
+        {
+            return;
+        }
+
+        glamEditOutcome = OutcomePending;
+        if (outcome != OutcomeSent || glams.Updated is not { } saved)
+        {
+            return;
+        }
+
+        UiFeedback.Play(UiSound.Success);
+        if (screen != PrismScreen.Compose || savingDraft != composeDraft || editingGlam?.Id != saved.Id)
+        {
+            return;
+        }
+
+        editingGlam = null;
+        GoBack();
+        if (screen == PrismScreen.GlamDetail)
+        {
+            ShowGlam(saved);
+        }
     }
 
     private static string[] SplitTags(string text)

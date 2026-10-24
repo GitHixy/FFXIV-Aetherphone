@@ -11175,6 +11175,11 @@ internal static class L
             "Every glam from this week shows up here in placing order once the results are in.");
         public static readonly LocString GalleryEmptyHint = new("prism.galleryEmptyHint",
             "Nobody entered this contest that week.");
+        public static readonly LocString EditGlamAction = new("prism.editGlamAction", "Edit");
+        public static readonly LocString EditGlamTitle = new("prism.editGlamTitle", "Edit glam");
+        public static readonly LocString SavingGlam = new("prism.savingGlam", "Saving…");
+        public static readonly LocString TrackLocked = new("prism.trackLocked",
+            "Modded or vanilla stays as you posted it.");
     }
 
     internal static class Announcements

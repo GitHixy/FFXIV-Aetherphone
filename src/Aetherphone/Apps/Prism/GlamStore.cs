@@ -54,6 +54,7 @@ internal sealed class GlamStore : IDisposable
     private readonly StoreWork work = new("Glams");
     private readonly FailureSlot postFailure = new();
     private readonly FailureSlot profileFailure = new();
+    private readonly FailureSlot saveFailure = new();
     private readonly RetryGate meGate = new(TimeSpan.FromSeconds(MeRetrySeconds));
     private readonly RetryGate bannerGate = new(TimeSpan.FromSeconds(BannerRetrySeconds));
     private readonly GlamDto?[] showcase = new GlamDto?[2];
@@ -86,6 +87,9 @@ internal sealed class GlamStore : IDisposable
     private volatile GlamSeasonDto? season;
     private volatile bool posting;
     private volatile bool postFailed;
+    private volatile GlamDto? updated;
+    private volatile bool saving;
+    private volatile bool saveFailed;
     private volatile int epoch;
     private volatile string followsFor = string.Empty;
     private volatile GlamAuthorDto? me;
@@ -164,6 +168,14 @@ internal sealed class GlamStore : IDisposable
     public bool PostFailed => postFailed;
 
     public string PostFailureText => postFailure.Text();
+
+    public GlamDto? Updated => updated;
+
+    public bool Saving => saving;
+
+    public bool SaveFailed => saveFailed;
+
+    public string SaveFailureText => saveFailure.Text();
 
     public bool? Follows(GlamAuthorDto author)
     {
@@ -586,6 +598,36 @@ internal sealed class GlamStore : IDisposable
             posted = created;
             return true;
         }, onComplete, () => posting = false);
+    }
+
+    public void Update(GlamDto glam, GlamGearDto[] gear, string title, string[] tags, int race, int gender,
+        Action<bool> onComplete)
+    {
+        if (saving || glam.Id.Length == 0 || !session.IsSignedIn)
+        {
+            return;
+        }
+
+        saving = true;
+        saveFailed = false;
+        updated = null;
+        saveFailure.Clear();
+        work.Run("update", async token =>
+        {
+            var failure = AepFailure.None;
+            var saved = await client.UpdateAsync(glam.Id, new UpdateGlamRequest(title, gear, tags, race, gender),
+                token, received => failure = received).ConfigureAwait(false);
+            if (saved is null)
+            {
+                saveFailure.Set(failure.Failed ? failure : AepFailure.Transport(AepFailureKind.Offline));
+                saveFailed = true;
+                return false;
+            }
+
+            Replace(saved);
+            updated = saved;
+            return true;
+        }, onComplete, () => saving = false);
     }
 
     public void Delete(GlamDto glam)

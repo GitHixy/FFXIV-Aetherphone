@@ -138,6 +138,7 @@ internal sealed partial class PrismApp : IResumableApp
         composeSession = new PhotoComposeSession(library, wallpaperImages);
         wardrobe = new WardrobeStore(Plugin.PluginInterface.ConfigDirectory.FullName);
         postSettled = SettlePost;
+        glamEditSettled = SettleGlamEdit;
         viewerPage = ViewerPage;
         withdraw = store.Withdraw;
         ballotSettled = SettleBallot;
@@ -243,6 +244,7 @@ internal sealed partial class PrismApp : IResumableApp
         ForgetLoadsOnNewWeek();
         ConsumeSharedPhoto();
         ConsumePostOutcome();
+        ConsumeGlamEditOutcome();
 
         screenAge += MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
         var enter = PrismMotion.At(screenAge, 0f, TransitionTiming.PresentSmoothTime);
@@ -402,6 +404,11 @@ internal sealed partial class PrismApp : IResumableApp
         if (piecesOpen && screen is PrismScreen.GlamDetail or PrismScreen.WardrobeOutfit)
         {
             piecesOpen = false;
+        }
+        else if (screen == PrismScreen.Compose && editingGlam is not null)
+        {
+            editingGlam = null;
+            GoBack();
         }
         else if (screen == PrismScreen.Compose && composeDetails)
         {
@@ -741,7 +748,7 @@ internal sealed partial class PrismApp : IResumableApp
     private void ConsumeSharedPhoto()
     {
         var path = pendingSharedPhoto;
-        if (string.IsNullOrEmpty(path))
+        if (string.IsNullOrEmpty(path) || (screen == PrismScreen.Compose && editingGlam is not null))
         {
             return;
         }

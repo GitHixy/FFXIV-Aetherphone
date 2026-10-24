@@ -22,6 +22,7 @@ internal enum GlamMenuAction : byte
     Wardrobe,
     Report,
     Delete,
+    Edit,
 }
 
 internal sealed partial class PrismApp
@@ -38,7 +39,7 @@ internal sealed partial class PrismApp
     private const float TryOnShardSpread = 0.53f;
     private const float TryOnShardSpeed = 420f;
     private const int AvatarSegments = 32;
-    private const int GlamMenuSize = 3;
+    private const int GlamMenuSize = 4;
     private const float LikeBloomSeconds = 0.9f;
     private const float LikeHoldSeconds = 0.45f;
     private const float LikeStamp = 0.35f;
@@ -745,6 +746,11 @@ internal sealed partial class PrismApp
         }
 
         var mine = glam.Author?.Id == glams.MyId;
+        if (mine)
+        {
+            AddGlamMenuItem(GlamMenuAction.Edit, Loc.T(L.Prism.EditGlamAction), PhoneIcons.Pencil, false);
+        }
+
         AddGlamMenuItem(mine ? GlamMenuAction.Delete : GlamMenuAction.Report,
             Loc.T(mine ? L.Common.Delete : L.Prism.ReportGlam), mine ? PhoneIcons.Trash : PhoneIcons.Flag, true);
         glamMenu.Open();
@@ -781,6 +787,9 @@ internal sealed partial class PrismApp
                 break;
             case GlamMenuAction.Wardrobe:
                 AddToWardrobe(glam, key);
+                break;
+            case GlamMenuAction.Edit:
+                StartGlamEdit(glam);
                 break;
             case GlamMenuAction.Delete:
                 confirm.Ask(new ConfirmRequest
