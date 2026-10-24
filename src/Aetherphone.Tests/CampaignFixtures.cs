@@ -17,10 +17,10 @@ internal static class CampaignFixtures
         new(id, "DJ " + id, "Set " + id, "Main island", startsAt, endsAt, null, twitch);
 
     public static CampaignDto Campaign(CampaignExperienceDto[]? experiences = null, long updatedAt = Start - 10L * Hour,
-        CampaignTextDto[]? texts = null, CampaignDjSetDto[]? djSets = null) =>
+        CampaignTextDto[]? texts = null, CampaignDjSetDto[]? djSets = null, bool liveOnAir = false) =>
         new("love-island-eclipse", "loveisland", "Love Island Eclipse", "A Halloween festival", "About text",
             "#cf255b", null, null, null, null, null, null, Array.Empty<CampaignLinkDto>(), "LoveIslandEclipse", Start,
-            End, Retire, "Materia (OCE)", null, null, false, false, 30, false,
+            End, Retire, "Materia (OCE)", null, null, liveOnAir, false, 30, false,
             new CampaignRewardDto("badge", "Eclipse badge", "frame", "Eclipse frame", 500),
             texts ?? Array.Empty<CampaignTextDto>(),
             experiences ?? new[]
