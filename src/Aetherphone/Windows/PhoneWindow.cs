@@ -239,12 +239,22 @@ internal sealed class PhoneWindow : Window
         Flags = minimized || locked || holdStill
             ? BaseFlags | ImGuiWindowFlags.NoMove
             : BaseFlags;
+        if (minimized && !configuration.MinimizedAlwaysOnTop)
+        {
+            Flags |= ImGuiWindowFlags.NoBringToFrontOnFocus;
+        }
+
         if (PhoneAside.Requested)
         {
             Flags |= ImGuiWindowFlags.NoInputs;
         }
 
         Components.DragScrollHost.Enabled = locked;
+        if (lastPhase == MinimizePhase.Minimized && phase != MinimizePhase.Minimized)
+        {
+            BringToFront();
+        }
+
         if (phase == MinimizePhase.None && lastPhase == MinimizePhase.Expanding)
         {
             RequestPosition(maximizedPosition);

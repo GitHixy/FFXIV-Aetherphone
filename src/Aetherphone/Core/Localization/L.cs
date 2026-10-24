@@ -2395,6 +2395,8 @@ internal static class L
         {
             new("changelog.r1400.15",
                 "Added a line in game chat when Aethernet restarts for an update or loses its connection, and another when it is back, which you can turn off with Network status in chat in Settings"),
+            new("changelog.r1400.43",
+                "Added Lock position and Always on top to Settings > Minimized phone, to keep the mini phone where you put it or let other windows sit over it, contributed by hellovvn"),
             new("changelog.r1400.20",
                 "Changed apps that are switched on or off for everyone to appear or disappear within seconds instead of a few minutes"),
             new("changelog.r1400.16",
@@ -10638,6 +10640,10 @@ internal static class L
         public static readonly LocString MinimapZoomHint = new("minimized.minimapZoomHint", "Scroll the wheel over the map to zoom, or use the plus and minus buttons that fade in when you hover it.");
         public static readonly LocString NoMap = new("minimized.noMap", "No map here");
         public static readonly LocString ResizeHint = new("minimized.resizeHint", "Drag its bottom right corner to make the minimized phone bigger or smaller.");
+        public static readonly LocString Placement = new("minimized.placement", "Placement");
+        public static readonly LocString LockPosition = new("minimized.lockPosition", "Lock position");
+        public static readonly LocString AlwaysOnTop = new("minimized.alwaysOnTop", "Always on top");
+        public static readonly LocString PlacementHint = new("minimized.placementHint", "Lock position keeps the mini phone where it is, and taps still open it. Turn off Always on top to let other windows sit over it.");
         public static readonly LocString DemoCaller = new("minimized.demoCaller", "Raid leader");
     }
 
