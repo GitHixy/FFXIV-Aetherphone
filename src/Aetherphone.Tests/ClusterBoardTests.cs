@@ -249,6 +249,69 @@ public sealed class ClusterBoardTests
     }
 
     [Fact]
+    public void ARegroupOnALateBoardNeverLeavesItDead()
+    {
+        var group = new int[ClusterBoard.MaxCells];
+        var shuffled = 0;
+        for (ulong seed = 1; seed <= 6000; seed++)
+        {
+            var random = GameRandom.FromSeed(seed);
+            var picker = GameRandom.FromSeed(seed * 31 + 7);
+            var level = 1 + (int)(seed % 8);
+            var board = new ClusterBoard();
+            board.Fill(ClusterPace.ColumnsFor(level), ClusterPace.RowsFor(level), ClusterPace.ColorsFor(level),
+                ref random);
+            if (!ClearDownToLateBoard(board, ref random, ref picker, group))
+            {
+                continue;
+            }
+
+            var counts = ColorCounts(board);
+            board.Regroup(ref random);
+            shuffled++;
+
+            Assert.Equal(counts, ColorCounts(board));
+            Assert.True(board.HasMove(), $"seed {seed} level {level} left {board.Count}");
+            Assert.False(board.Finished, $"seed {seed}");
+        }
+
+        Assert.True(shuffled > 1000, $"only {shuffled} late boards were shuffled");
+    }
+
+    [Fact]
+    public void AShuffleNeverLeavesTheRunOnADeadBoard()
+    {
+        var shuffled = 0;
+        for (ulong seed = 1; seed <= 400; seed++)
+        {
+            var run = new ClusterRun();
+            run.Reset(GameRandom.FromSeed(seed));
+            var picker = GameRandom.FromSeed(seed * 13 + 1);
+            for (var turn = 0; turn < 600 && !run.Over; turn++)
+            {
+                SkipBusy(run);
+                var late = run.Board.Count * 4 <= run.Board.CellCount + run.Board.CellCount / 2;
+                if (run.ShuffleReady && late)
+                {
+                    Assert.True(run.TryShuffle(out _));
+                    shuffled++;
+                    Assert.True(run.Board.HasMove() || run.Pending != ClusterPending.None, $"seed {seed}");
+                    break;
+                }
+
+                run.Board.LargestGroup(out var largest);
+                var cell = run.ShuffleReady ? RandomGroupCell(run.Board, ref picker) : largest;
+                if (!run.TryClear(cell, out _))
+                {
+                    run.Step(1f / 60f);
+                }
+            }
+        }
+
+        Assert.True(shuffled > 50, $"only {shuffled} shuffles reached a late board");
+    }
+
+    [Fact]
     public void ARegroupOnAFullBoardLeavesNoLonePiece()
     {
         for (ulong seed = 1; seed <= 60; seed++)
@@ -470,13 +533,13 @@ public sealed class ClusterBoardTests
         SkipBusy(run);
 
         Assert.False(run.ShuffleReady);
-        Assert.False(run.TryShuffle());
+        Assert.False(run.TryShuffle(out _));
         var filled = PlayUntil(run, clear => clear.ChargeFilled);
         SkipBusy(run);
 
         Assert.True(filled.ChargeFilled);
         Assert.True(run.ShuffleReady);
-        Assert.True(run.TryShuffle());
+        Assert.True(run.TryShuffle(out _));
         Assert.False(run.ShuffleReady);
         Assert.Equal(0f, run.ChargeFraction);
         Assert.Equal(1, run.Shuffles);
@@ -577,7 +640,7 @@ public sealed class ClusterBoardTests
             wait = 0f;
             if (run.ShuffleReady)
             {
-                run.TryShuffle();
+                run.TryShuffle(out _);
                 continue;
             }
 
@@ -586,6 +649,48 @@ public sealed class ClusterBoardTests
         }
 
         return run;
+    }
+
+    private static bool ClearDownToLateBoard(ClusterBoard board, ref GameRandom random, ref GameRandom picker,
+        int[] group)
+    {
+        var target = (int)(board.CellCount * picker.Range(0.08f, 0.4f));
+        while (board.Count > target)
+        {
+            var cell = RandomGroupCell(board, ref picker);
+            if (cell < 0)
+            {
+                return false;
+            }
+
+            var size = board.FindGroup(cell, group);
+            board.Remove(group.AsSpan(0, size));
+            if (board.Finished)
+            {
+                return false;
+            }
+
+            if (!board.HasMove())
+            {
+                board.Reshuffle(ref random);
+            }
+        }
+
+        return board.HasMove();
+    }
+
+    private static int RandomGroupCell(ClusterBoard board, ref GameRandom picker)
+    {
+        var candidates = new List<int>();
+        for (var cell = 0; cell < board.CellCount; cell++)
+        {
+            if (board.At(cell) != ClusterBoard.Empty && board.GroupSize(cell) >= ClusterBoard.MinGroup)
+            {
+                candidates.Add(cell);
+            }
+        }
+
+        return candidates.Count == 0 ? -1 : candidates[picker.Next(candidates.Count)];
     }
 
     private static ClusterClear PlayUntil(ClusterRun run, Func<ClusterClear, bool> stop)

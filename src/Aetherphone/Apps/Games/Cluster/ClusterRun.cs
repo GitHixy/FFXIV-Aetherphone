@@ -21,6 +21,8 @@ internal enum ClusterPending : byte
 internal readonly record struct ClusterClear(int Size, int Points, int Multiplier, bool MultiplierRose, float Refill,
     bool BoardFinished, int Leftovers, int Bonus, bool ChargeFilled);
 
+internal readonly record struct ClusterFinish(bool Finished, int Leftovers, int Bonus, float Refill);
+
 internal sealed class ClusterRun
 {
     public const float ComboWindowSeconds = 1.5f;
@@ -170,31 +172,16 @@ internal sealed class ClusterRun
         Cleared += size;
         BestGroup = Math.Max(BestGroup, size);
         AddCharge(ClusterPace.Charge(size));
-        var bonus = 0;
-        var leftovers = 0;
-        var finished = Board.Finished;
-        if (finished)
-        {
-            leftovers = Board.Count;
-            bonus = ClusterPace.BoardBonus(Level, leftovers);
-            Score += bonus;
-            Boards++;
-            refill += leftovers == 0 ? ClusterPace.PerfectClearRefill : ClusterPace.BoardClearRefill;
-            Hold(ClusterPending.NextBoard, BoardClearSeconds);
-        }
-        else if (!Board.HasMove())
-        {
-            Hold(ClusterPending.Reshuffle, ReshuffleDelay);
-        }
-
         Bar = MathF.Min(1f, Bar + refill);
-        result = new ClusterClear(size, points, multiplier, multiplier > multiplierBefore, refill, finished, leftovers,
-            bonus, !chargeBefore && ShuffleReady);
+        var finish = SettleBoard(ReshuffleDelay);
+        result = new ClusterClear(size, points, multiplier, multiplier > multiplierBefore, refill + finish.Refill,
+            finish.Finished, finish.Leftovers, finish.Bonus, !chargeBefore && ShuffleReady);
         return true;
     }
 
-    public bool TryShuffle()
+    public bool TryShuffle(out ClusterFinish finish)
     {
+        finish = default;
         if (!AcceptsInput || !ShuffleReady)
         {
             return false;
@@ -204,7 +191,30 @@ internal sealed class ClusterRun
         Shuffles++;
         Board.Regroup(ref random);
         busySeconds = ShuffleSeconds;
+        finish = SettleBoard(ShuffleSeconds);
         return true;
+    }
+
+    private ClusterFinish SettleBoard(float reshuffleDelay)
+    {
+        if (Board.Finished)
+        {
+            var leftovers = Board.Count;
+            var bonus = ClusterPace.BoardBonus(Level, leftovers);
+            var refill = leftovers == 0 ? ClusterPace.PerfectClearRefill : ClusterPace.BoardClearRefill;
+            Score += bonus;
+            Boards++;
+            Bar = MathF.Min(1f, Bar + refill);
+            Hold(ClusterPending.NextBoard, BoardClearSeconds);
+            return new ClusterFinish(true, leftovers, bonus, refill);
+        }
+
+        if (!Board.HasMove())
+        {
+            Hold(ClusterPending.Reshuffle, reshuffleDelay);
+        }
+
+        return default;
     }
 
     private void AddCharge(int amount)

@@ -293,6 +293,11 @@ internal sealed class ClusterBoard
             }
         }
 
+        if (!HasMove() && CanFormGroup)
+        {
+            ForceGroup(occupied);
+        }
+
         Version++;
     }
 
