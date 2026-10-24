@@ -51,6 +51,10 @@ internal static class PinballGuide
     private const float FeverDrain = 0.3f;
     private const float SpinnerTurns = 3f;
     private const float SpinShare = 0.2f;
+    private const float LiftStart = 0.27f;
+    private const float LiftEnd = 0.34f;
+    private const float DropStart = 0.41f;
+    private const float DropEnd = 0.48f;
     private const float ApronY = 11.96f;
     private const float ThumbY = 10.95f;
     private const float LeftThumbX = 0.85f;
@@ -75,6 +79,7 @@ internal static class PinballGuide
     private static readonly Rect FlipFocus = new(new Vector2(0f, 8.1f), new Vector2(5.4f, 12.32f));
     private static readonly Rect JackpotFocus = new(new Vector2(0f, 2f), new Vector2(6.1f, 7.7f));
     private static readonly Rect FeverFocus = new(new Vector2(0f, 2.2f), new Vector2(6.1f, 8.3f));
+    private static readonly Rect OrbitFocus = new(Vector2.Zero, new Vector2(6.1f, 6.1f));
     private static readonly Vector2 LaunchTop = new(PinballTable.LaneCenterX, 7.4f);
     private static readonly Vector2 SwipeFrom = new(PinballTable.LaneCenterX, 10.25f);
     private static readonly Vector2 SwipeTo = new(PinballTable.LaneCenterX, 11.55f);
@@ -249,7 +254,9 @@ internal static class PinballGuide
     private static void DrawFeverPage(ImDrawListPtr drawList, Rect art, float seconds, Vector4 accent, float scale)
     {
         var phase = GuideKit.Loop(seconds, FeverPeriod);
-        var camera = Frame(art, FeverFocus);
+        var lift = Easing.SmoothStep(GuideKit.Window(phase, LiftStart, LiftEnd)) -
+                   Easing.SmoothStep(GuideKit.Window(phase, DropStart, DropEnd));
+        var camera = Frame(art, Rect.Lerp(FeverFocus, OrbitFocus, lift));
         var rampMade = RampAt + (RampEnd - RampAt) * RampMadeShare;
         var pose = TablePose.Rest();
         pose.FeverActive = phase >= FeverAt;
