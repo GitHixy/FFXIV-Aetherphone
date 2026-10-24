@@ -255,6 +255,40 @@ internal sealed class GlamStore : IDisposable
 
     public bool IsRemoved(string glamId) => removedIds.ContainsKey(glamId);
 
+    private GlamDto[] Visible(GlamDto[]? items)
+    {
+        if (items is null || items.Length == 0)
+        {
+            return Array.Empty<GlamDto>();
+        }
+
+        var kept = 0;
+        for (var index = 0; index < items.Length; index++)
+        {
+            if (!removedIds.ContainsKey(items[index].Id))
+            {
+                kept++;
+            }
+        }
+
+        if (kept == items.Length)
+        {
+            return items;
+        }
+
+        var visible = new GlamDto[kept];
+        var next = 0;
+        for (var index = 0; index < items.Length; index++)
+        {
+            if (!removedIds.ContainsKey(items[index].Id))
+            {
+                visible[next++] = items[index];
+            }
+        }
+
+        return visible;
+    }
+
     public FeedLane<GlamDto> List => list;
 
     public string ListKey => listKey;
@@ -323,7 +357,7 @@ internal sealed class GlamStore : IDisposable
                 return;
             }
 
-            lane.ApplyRefresh(page.Items ?? Array.Empty<GlamDto>(), page.NextCursor);
+            lane.ApplyRefresh(Visible(page.Items), page.NextCursor);
         }, () =>
         {
             if (started < 0 || started == epoch)
@@ -357,7 +391,7 @@ internal sealed class GlamStore : IDisposable
             var page = await client.FeedAsync(key, only, fits, cursor, token).ConfigureAwait(false);
             if (page is not null && (started < 0 || started == epoch))
             {
-                lane.ApplyMore(page.Items ?? Array.Empty<GlamDto>(), page.NextCursor);
+                lane.ApplyMore(Visible(page.Items), page.NextCursor);
             }
         }, () =>
         {
@@ -446,7 +480,7 @@ internal sealed class GlamStore : IDisposable
             var kept = new List<GlamDto>(MoreLimit);
             for (var index = 0; index < items.Length && kept.Count < MoreLimit; index++)
             {
-                if (items[index].Id != glamId)
+                if (items[index].Id != glamId && !removedIds.ContainsKey(items[index].Id))
                 {
                     kept.Add(items[index]);
                 }
@@ -480,7 +514,7 @@ internal sealed class GlamStore : IDisposable
             var page = await fetch(cursor, token, null).ConfigureAwait(false);
             if (page is not null && key == listKey)
             {
-                list.ApplyMore(page.Items ?? Array.Empty<GlamDto>(), page.NextCursor);
+                list.ApplyMore(Visible(page.Items), page.NextCursor);
             }
         }, () =>
         {
@@ -940,7 +974,7 @@ internal sealed class GlamStore : IDisposable
                 return;
             }
 
-            list.ApplyRefresh(page.Items ?? Array.Empty<GlamDto>(), page.NextCursor);
+            list.ApplyRefresh(Visible(page.Items), page.NextCursor);
         }, () =>
         {
             if (opened == listOpened)

@@ -22,6 +22,11 @@ internal sealed partial class PrismApp
 
     private void PurgeGlam(string glamId)
     {
+        if (glams.Detail?.Id == glamId)
+        {
+            photoViewer.Close();
+        }
+
         glams.Purge(glamId);
         DropShowcase(glamId);
         DropHistory(glamId);
@@ -35,6 +40,24 @@ internal sealed partial class PrismApp
         if (editBannerGlam?.Id == glamId)
         {
             editBannerGlam = null;
+        }
+
+        if (editingGlam?.Id == glamId)
+        {
+            editingGlam = null;
+            if (screen == PrismScreen.Compose)
+            {
+                GoBack();
+            }
+        }
+
+        if (cropGlam?.Id == glamId)
+        {
+            cropGlam = null;
+            if (screen == PrismScreen.BannerCrop)
+            {
+                GoBack();
+            }
         }
     }
 
