@@ -9238,6 +9238,9 @@ internal static class L
         public static readonly LocString TourWatchTitle = new("market.tourWatchTitle", "Watch it");
         public static readonly LocString TourWatchBody =
             new("market.tourWatchBody", "Tap + to add the item to your watchlist. Its price and 7 day trend then sit on the Market home and in the Market Watch widget.");
+        public static readonly LocString ScopeTitle = new("market.scopeTitle", "Where to Price");
+        public static readonly LocString OtherScopes = new("market.otherScopes", "Price another world");
+        public static readonly LocString BackTo = new("market.backTo", "Back to {0}");
     }
 
     internal static class Games
