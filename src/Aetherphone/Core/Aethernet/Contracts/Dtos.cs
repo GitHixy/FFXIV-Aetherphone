@@ -256,7 +256,11 @@ internal sealed record PostDto(
     long? EditedAtUnix = null,
     long? PinnedAtUnix = null,
     long? ArchivedAtUnix = null,
-    PostPollDto? Poll = null) : IIdentified;
+    PostPollDto? Poll = null,
+    string? GifUrl = null) : IIdentified
+{
+    [JsonIgnore] public string[]? GifMedia { get; } = GifUrl is null ? null : new[] { GifUrl };
+}
 
 internal sealed record FeedPage(
     PostDto[] Items,
@@ -366,7 +370,11 @@ internal sealed record CommentDto(
     string? MediaUrl = null,
     int MediaWidth = 0,
     int MediaHeight = 0,
-    string? Lang = null) : IIdentified;
+    string? Lang = null,
+    string? GifUrl = null) : IIdentified
+{
+    [JsonIgnore] public string? Media => MediaUrl ?? GifUrl;
+}
 
 internal sealed record CreateCommentRequest(
     string Text,
