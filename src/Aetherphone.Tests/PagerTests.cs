@@ -26,4 +26,49 @@ public sealed class PagerTests
 
         Assert.Equal(1, pager.Page);
     }
+
+    [Fact]
+    public void ReleasingAMultiCardDragSettlesNearWhereItWasLetGo()
+    {
+        const int railPages = 12;
+        var pager = new Pager();
+        pager.SnapTo(4, railPages);
+        pager.Begin(0f);
+        for (var step = 1; step <= 60; step++)
+        {
+            pager.Drag(-Width * 3f * step / 60f, Width, railPages, Frame);
+        }
+
+        pager.ReleaseNearest(Width, railPages);
+
+        Assert.InRange(pager.Page, 7, 8);
+    }
+
+    [Fact]
+    public void AQuickShortFlickStillMovesOneCard()
+    {
+        const int railPages = 12;
+        var pager = new Pager();
+        pager.SnapTo(4, railPages);
+        pager.Begin(0f);
+        pager.Drag(-Width * 0.1f, Width, railPages, Frame);
+        pager.ReleaseNearest(Width, railPages);
+
+        Assert.Equal(5, pager.Page);
+    }
+
+    [Fact]
+    public void ShiftingMidDragKeepsTheGestureContinuous()
+    {
+        const int railPages = 24;
+        var pager = new Pager();
+        pager.SnapTo(9, railPages);
+        pager.Begin(0f);
+        pager.Drag(-Width * 0.5f, Width, railPages, Frame);
+        var before = pager.Value;
+        pager.Shift(-8);
+        pager.Drag(-Width * 0.5f, Width, railPages, Frame);
+
+        Assert.Equal(before - 8f, pager.Value, 3);
+    }
 }

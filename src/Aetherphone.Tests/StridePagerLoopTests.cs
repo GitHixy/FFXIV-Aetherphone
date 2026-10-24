@@ -16,27 +16,32 @@ public sealed class StridePagerLoopTests
         Assert.Equal(card, StridePager.CardIndex(virtualIndex, count));
 
     [Theory]
-    [InlineData(0, 8, 8)]
-    [InlineData(15, 8, 15)]
-    [InlineData(16, 8, 8)]
-    [InlineData(23, 8, 15)]
-    [InlineData(7, 8, 15)]
-    public void WrapPageKeepsTheMiddleCopy(int page, int count, int wrapped) =>
-        Assert.Equal(wrapped, StridePager.WrapPage(page, count));
+    [InlineData(0f, 8, 8)]
+    [InlineData(7.4f, 8, 8)]
+    [InlineData(7.6f, 8, 0)]
+    [InlineData(15.4f, 8, 0)]
+    [InlineData(15.6f, 8, -8)]
+    [InlineData(23f, 8, -8)]
+    [InlineData(1.4f, 2, 2)]
+    [InlineData(3.6f, 2, -2)]
+    public void WrapShiftKeepsTheValueInTheMiddleCopy(float value, int count, int shift) =>
+        Assert.Equal(shift, StridePager.WrapShift(value, count));
 
     [Fact]
     public void WrappingNeverChangesTheCardShown()
     {
         for (var page = 0; page < 24; page++)
         {
-            Assert.Equal(StridePager.CardIndex(page, 8), StridePager.CardIndex(StridePager.WrapPage(page, 8), 8));
+            var shifted = page + StridePager.WrapShift(page, 8);
+            Assert.Equal(StridePager.CardIndex(page, 8), StridePager.CardIndex(shifted, 8));
         }
     }
 
     [Fact]
-    public void EmptyRailsStayAtZero()
+    public void EmptyAndSingleRailsNeverShift()
     {
         Assert.Equal(0, StridePager.CardIndex(5, 0));
-        Assert.Equal(0, StridePager.WrapPage(5, 0));
+        Assert.Equal(0, StridePager.WrapShift(5f, 0));
+        Assert.Equal(0, StridePager.WrapShift(5f, 1));
     }
 }

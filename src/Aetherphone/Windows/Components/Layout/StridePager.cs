@@ -8,7 +8,6 @@ internal sealed class StridePager
 {
     private const float SwipeSlop = 10f;
     private const int LoopCopies = 3;
-    private const float SettleEpsilon = 0.001f;
     private const float ManualPauseSeconds = 4f;
 
     private readonly Pager pager = new();
@@ -31,7 +30,11 @@ internal sealed class StridePager
     public static int CardIndex(int virtualIndex, int count) =>
         count <= 0 ? 0 : (virtualIndex % count + count) % count;
 
-    public static int WrapPage(int page, int count) => count <= 0 ? 0 : count + CardIndex(page, count);
+    public static int WrapShift(float value, int count) =>
+        count <= 1 ? 0
+        : value < count - 0.5f ? count
+        : value > count * 2 - 0.5f ? -count
+        : 0;
 
     public void Reset()
     {
@@ -96,7 +99,7 @@ internal sealed class StridePager
         {
             if (pager.Dragging)
             {
-                pager.Release(stride, Pages(count));
+                pager.ReleaseNearest(stride, Pages(count));
                 quiet = -ManualPauseSeconds;
                 UiInteract.BlockThisFrame();
             }
@@ -125,15 +128,10 @@ internal sealed class StridePager
 
     private void Wrap(int count)
     {
-        if (count <= 1 || Owning || MathF.Abs(pager.Value - pager.Page) > SettleEpsilon)
+        var shift = WrapShift(pager.Value, count);
+        if (shift != 0)
         {
-            return;
-        }
-
-        var wrapped = WrapPage(pager.Page, count);
-        if (wrapped != pager.Page)
-        {
-            pager.SnapTo(wrapped, Pages(count));
+            pager.Shift(shift);
         }
     }
 

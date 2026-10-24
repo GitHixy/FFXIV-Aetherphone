@@ -7,6 +7,7 @@ internal sealed class Pager
     private const float VelocitySmoothing = 0.6f;
     private const float RubberLimit = 0.36f;
     private const float RubberGive = 0.62f;
+    private const float ProjectionSeconds = 0.2f;
 
     private readonly float settleTime;
     private Spring scroll;
@@ -76,6 +77,34 @@ internal sealed class Pager
 
         page = Math.Clamp(target, 0, Math.Max(0, pageCount - 1));
         scroll.Velocity = velocity;
+    }
+
+    public void ReleaseNearest(float width, int pageCount)
+    {
+        if (!dragging)
+        {
+            return;
+        }
+
+        dragging = false;
+        var target = (int)MathF.Round(scroll.Value + velocity * ProjectionSeconds);
+        if (target == dragStartPage && MathF.Abs(velocity * width) > FlingVelocity)
+        {
+            target = dragStartPage + MathF.Sign(velocity);
+        }
+
+        page = Math.Clamp(target, 0, Math.Max(0, pageCount - 1));
+        scroll.Velocity = velocity;
+    }
+
+    public void Shift(int pages)
+    {
+        var carried = scroll.Velocity;
+        scroll.SnapTo(scroll.Value + pages);
+        scroll.Velocity = carried;
+        page += pages;
+        dragStartValue += pages;
+        dragStartPage += pages;
     }
 
     public void Cancel()
