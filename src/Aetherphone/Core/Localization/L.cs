@@ -11084,6 +11084,7 @@ internal static class L
         public static readonly LocString FinalTitle = new("prism.finalTitle", "The final");
         public static readonly LocString Back = new("prism.back", "Back");
         public static readonly LocString YourLook = new("prism.yourLook", "Your glam");
+        public static readonly LocString YourGlams = new("prism.yourGlams", "Your glams");
         public static readonly LocString ReplayReveal = new("prism.replayReveal", "Replay the reveal");
         public static readonly LocString Submitting = new("prism.submitting", "Sending your scores…");
         public static readonly LocString HeatName = new("prism.heatName", "Heat {0}");
