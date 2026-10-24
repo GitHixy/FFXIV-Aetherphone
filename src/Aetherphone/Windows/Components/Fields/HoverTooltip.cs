@@ -115,13 +115,15 @@ internal static class HoverTooltip
         var height = textSize.Y + 2f * padY;
         var gap = 7f * scale;
         var rise = (1f - alpha) * 4f * scale;
-        var centerY = side == HoverLabelSide.Above
-            ? target.Min.Y - gap - height * 0.5f + rise
-            : target.Max.Y + gap + height * 0.5f - rise;
-        var centerX = right - left > width
-            ? Math.Clamp(target.Center.X, left + width * 0.5f, right - width * 0.5f)
-            : (left + right) * 0.5f;
-        var center = new Vector2(centerX, centerY);
+        if ((side == HoverLabelSide.Left && target.Min.X - gap - width < left) ||
+            (side == HoverLabelSide.Right && target.Max.X + gap + width > right))
+        {
+            side = HoverLabelSide.Below;
+        }
+
+        var center = side is HoverLabelSide.Left or HoverLabelSide.Right
+            ? SideCenter(target, side, width, gap, rise)
+            : StackCenter(target, side, width, height, gap, rise, left, right);
         var min = new Vector2(center.X - width * 0.5f, center.Y - height * 0.5f);
         var max = new Vector2(center.X + width * 0.5f, center.Y + height * 0.5f);
         var rounding = MathF.Min(height, lineSize.Y + 2f * padY) * 0.5f;
@@ -137,6 +139,26 @@ internal static class HoverTooltip
         {
             Typography.Draw(dl, center - lineSize * 0.5f, label, color, style);
         }
+    }
+
+    private static Vector2 SideCenter(Rect target, HoverLabelSide side, float width, float gap, float rise)
+    {
+        var centerX = side == HoverLabelSide.Left
+            ? target.Min.X - gap - width * 0.5f + rise
+            : target.Max.X + gap + width * 0.5f - rise;
+        return new Vector2(centerX, target.Center.Y);
+    }
+
+    private static Vector2 StackCenter(Rect target, HoverLabelSide side, float width, float height, float gap,
+        float rise, float left, float right)
+    {
+        var centerY = side == HoverLabelSide.Above
+            ? target.Min.Y - gap - height * 0.5f + rise
+            : target.Max.Y + gap + height * 0.5f - rise;
+        var centerX = right - left > width
+            ? Math.Clamp(target.Center.X, left + width * 0.5f, right - width * 0.5f)
+            : (left + right) * 0.5f;
+        return new Vector2(centerX, centerY);
     }
 
     private static float Step(uint key, bool hovered)
