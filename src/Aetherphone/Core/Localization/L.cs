@@ -2481,6 +2481,8 @@ internal static class L
                 "Added a notice when someone in your party or nearby posts a table code, which opens Live and joins the table in one tap"),
             new("changelog.r1400.17",
                 "Changed blackjack so other players' hands turn face up as soon as they finish their turn"),
+            new("changelog.r1400.64",
+                "Changed Copy invite to copy a readable invite with your table code, which makes sense in game chat or Discord and joins the table when pasted into Live"),
             new("changelog.r1400.21",
                 "Fixed the win or loss amount at a blackjack seat covering that seat's cards and total"),
         };

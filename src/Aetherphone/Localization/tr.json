@@ -1219,6 +1219,7 @@
   "changelog.r1400.15": "Aethernet bir güncelleme için yeniden başladığında ya da bağlantısını kaybettiğinde oyun sohbetine bir satır, geri geldiğinde de bir satır daha eklendi; Ayarlar'daki Sohbette ağ durumu ile kapatılabilir",
   "changelog.r1400.16": "Durum çubuğundaki saatin ekran başlıklarıyla hizalı olmaması düzeltildi",
   "changelog.r1400.17": "Blackjack'te diğer oyuncuların elleri artık sıralarını bitirir bitirmez açılıyor",
+  "changelog.r1400.64": "Daveti kopyala artık masa kodunu içeren okunabilir bir davet kopyalıyor; oyun sohbetinde ya da Discord'da anlaşılır ve Canlı bölümüne yapıştırınca masaya katılır",
   "changelog.r1400.18": "Ödeme yapmadan önce bir oyundan çıktığında Ödeme için çok kısa oynandı notunun hiç görünmemesi düzeltildi",
   "changelog.r1400.19": "Arayüz sesleri kapatıldığında Oyun seslerinin de susması düzeltildi",
   "changelog.r1400.20": "Herkes için açılan veya kapatılan uygulamalar artık birkaç dakika yerine birkaç saniye içinde görünüyor ya da kayboluyor",

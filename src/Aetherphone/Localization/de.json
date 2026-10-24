@@ -1219,6 +1219,7 @@
   "changelog.r1400.15": "Eine Zeile im Spielchat hinzugefügt, wenn Aethernet für ein Update neu startet oder die Verbindung verliert, und eine weitere, wenn es wieder da ist; abschaltbar mit Netzwerkstatus im Chat in den Einstellungen",
   "changelog.r1400.16": "Behoben, dass die Uhr in der Statusleiste nicht bündig mit den Bildschirmtiteln war",
   "changelog.r1400.17": "Beim Blackjack werden die Hände der anderen Spieler jetzt aufgedeckt, sobald sie ihren Zug beendet haben",
+  "changelog.r1400.64": "Einladung kopieren kopiert jetzt eine lesbare Einladung mit deinem Tischcode, die im Spielchat oder auf Discord verständlich ist und beim Einfügen unter Live direkt an den Tisch führt",
   "changelog.r1400.18": "Behoben, dass der Hinweis Zu kurz gespielt, um zu zählen nie erschien, wenn du ein Spiel verlässt, bevor es auszahlt",
   "changelog.r1400.19": "Behoben, dass Spielsounds verstummten, wenn Bedienungstöne ausgeschaltet waren",
   "changelog.r1400.20": "Apps, die für alle ein- oder ausgeschaltet werden, erscheinen oder verschwinden jetzt innerhalb von Sekunden statt nach einigen Minuten",

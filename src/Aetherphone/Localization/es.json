@@ -1219,6 +1219,7 @@
   "changelog.r1400.15": "Se añadió una línea en el chat del juego cuando Aethernet se reinicia por una actualización o pierde la conexión, y otra cuando vuelve, que puedes desactivar con Estado de la red en el chat en Ajustes",
   "changelog.r1400.16": "Corregido que el reloj de la barra de estado no se alineara con los títulos de pantalla",
   "changelog.r1400.17": "Se cambió el blackjack para que las manos de los demás jugadores se pongan boca arriba en cuanto terminan su turno",
+  "changelog.r1400.64": "Se cambió Copiar invitación para que copie una invitación legible con el código de tu mesa, que se entiende en el chat del juego o en Discord y te une a la mesa al pegarla en En vivo",
   "changelog.r1400.18": "Corregido que el aviso Sesión demasiado corta para pagar nunca apareciera al salir de un juego antes de que pague",
   "changelog.r1400.19": "Corregido que los Sonidos de juegos se silenciaran al desactivar Sonidos de la interfaz",
   "changelog.r1400.20": "Se cambió para que las apps que se activan o desactivan para todos aparezcan o desaparezcan en segundos en lugar de unos minutos",
