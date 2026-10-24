@@ -6030,6 +6030,7 @@
   "prism.trackModdedRule": "Моды разрешены, если это ваш персонаж.",
   "prism.withTrack": "{0} · {1}",
   "prism.statusMoved": "Перенесён",
+  "prism.resultsAreOut": "Итоги подведены",
   "prism.statusMovedTitle": "Ваш гламур перенесён в другой конкурс",
   "prism.activityLiked": "оценил(а) ваш гламур",
   "prism.activityPlaced": "Ваш гламур занял {0}-е место в конкурсе «{1}»",

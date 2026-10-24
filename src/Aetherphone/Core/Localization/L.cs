@@ -11296,6 +11296,7 @@ internal static class L
             "Mods welcome, as long as it's your character.");
         public static readonly LocString WithTrack = new("prism.withTrack", "{0} · {1}");
         public static readonly LocString StatusMoved = new("prism.statusMoved", "Moved");
+        public static readonly LocString ResultsAreOut = new("prism.resultsAreOut", "Results are out");
         public static readonly LocString StatusMovedTitle = new("prism.statusMovedTitle",
             "Your glam moved to the other contest");
         public static readonly LocString ActivityLiked = new("prism.activityLiked", "liked your glam");

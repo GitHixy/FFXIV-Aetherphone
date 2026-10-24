@@ -6030,6 +6030,7 @@
   "prism.trackModdedRule": "自分のキャラクターであれば、モッドも歓迎です。",
   "prism.withTrack": "{0} · {1}",
   "prism.statusMoved": "移動済み",
+  "prism.resultsAreOut": "結果発表済み",
   "prism.statusMovedTitle": "あなたのミラプリはもう一方のコンテストに移されました",
   "prism.activityLiked": "あなたのミラプリにいいねしました",
   "prism.activityPlaced": "あなたのミラプリは{1}で{0}位になりました",

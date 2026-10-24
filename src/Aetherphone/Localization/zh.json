@@ -6030,6 +6030,7 @@
   "prism.trackModdedRule": "欢迎使用模组，只要是你自己的角色。",
   "prism.withTrack": "{0} · {1}",
   "prism.statusMoved": "已移动",
+  "prism.resultsAreOut": "结果已公布",
   "prism.statusMovedTitle": "你的幻化已移到另一个比赛",
   "prism.activityLiked": "赞了你的幻化",
   "prism.activityPlaced": "你的幻化在{1}中获得第{0}名",

@@ -6030,6 +6030,7 @@
   "prism.trackModdedRule": "Los mods son bienvenidos, siempre que sea tu personaje.",
   "prism.withTrack": "{0} · {1}",
   "prism.statusMoved": "Movido",
+  "prism.resultsAreOut": "Ya hay resultados",
   "prism.statusMovedTitle": "Tu glamour pasó al otro concurso",
   "prism.activityLiked": "le gustó tu glamour",
   "prism.activityPlaced": "Tu glamour quedó en {0}.º lugar en {1}",

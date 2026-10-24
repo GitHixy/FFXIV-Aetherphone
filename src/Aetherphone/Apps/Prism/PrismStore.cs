@@ -52,6 +52,7 @@ internal sealed class PrismStore : IDisposable
     private readonly FailureSlot weekFailure = new();
     private readonly FailureSlot actionFailure = new();
     private readonly ConcurrentDictionary<string, PrismResultsDto?> lastWeekResults = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, PrismResultsDto?> weekResults = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<(string Week, string Code), string> weekTitles = new();
 
     private volatile PrismWeekDto? rawWeek;
@@ -61,6 +62,9 @@ internal sealed class PrismStore : IDisposable
     private volatile PrismBallotDto? ballot;
     private volatile string lastWeekId = string.Empty;
     private volatile string lastWeekLanguage = string.Empty;
+    private volatile string weekResultsId = string.Empty;
+    private volatile string weekResultsLanguage = string.Empty;
+    private long weekResultsRevision;
     private volatile bool loading;
     private volatile bool loadedOnce;
     private volatile bool weekFailed;
@@ -257,6 +261,56 @@ internal sealed class PrismStore : IDisposable
                 if (lastWeekLanguage == lang)
                 {
                     lastWeekResults.TryRemove(new KeyValuePair<string, PrismResultsDto?>(id, null));
+                }
+            });
+        }
+    }
+
+    public PrismResultsDto? WeekResults(string trackId) =>
+        week is { Id.Length: > 0 } current && weekResults.TryGetValue(trackId, out var held) &&
+        held?.WeekId == current.Id
+            ? held
+            : null;
+
+    public void LoadWeekResults()
+    {
+        if (rawWeek is not { } raw || !ResultsOut(raw))
+        {
+            return;
+        }
+
+        var weekId = raw.Id;
+        var revision = raw.ResultsRevision;
+        var lang = Loc.Current.Code;
+        if (weekResultsId != weekId || weekResultsRevision != revision || weekResultsLanguage != lang)
+        {
+            weekResults.Clear();
+            weekResultsId = weekId;
+            weekResultsRevision = revision;
+            weekResultsLanguage = lang;
+        }
+
+        var tracks = PrismTracks.Of(raw);
+        for (var index = 0; index < tracks.Length; index++)
+        {
+            var id = tracks[index].Id;
+            if (tracks[index].MyEntry is null || !weekResults.TryAdd(id, null))
+            {
+                continue;
+            }
+
+            work.Run("week results", async token =>
+            {
+                var fetched = await client.ResultsAsync(weekId, lang, id, token).ConfigureAwait(false);
+                if (fetched is not null && weekResultsId == weekId && weekResultsLanguage == lang)
+                {
+                    weekResults[id] = fetched;
+                }
+            }, () =>
+            {
+                if (weekResultsId == weekId && weekResultsLanguage == lang)
+                {
+                    weekResults.TryRemove(new KeyValuePair<string, PrismResultsDto?>(id, null));
                 }
             });
         }

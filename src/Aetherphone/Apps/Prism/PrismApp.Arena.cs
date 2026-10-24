@@ -170,8 +170,7 @@ internal sealed partial class PrismApp
         _ => 3,
     };
 
-    private static float DrawContestPrompt(ImDrawListPtr drawList, float left, float top, float width, string phase,
-        float scale)
+    private static float DrawContestPrompt(float left, float top, float width, string phase, float scale)
     {
         var prompt = phase switch
         {
@@ -185,9 +184,8 @@ internal sealed partial class PrismApp
             return top;
         }
 
-        Typography.Draw(drawList, new Vector2(left, top), Typography.FitText(prompt, width, PrismType.Title),
-            PrismArt.Fore, PrismType.Title);
-        return top + Typography.LineHeight(PrismType.Title) + Metrics.Space.Sm * scale;
+        return top + Typography.DrawWrappedLeft(new Vector2(left, top), prompt, PrismArt.Fore, PrismType.Title, width) +
+               Metrics.Space.Sm * scale;
     }
 
     private float DrawLastWeekPodiums(ImDrawListPtr drawList, float left, float top, float width, PrismWeekDto week,

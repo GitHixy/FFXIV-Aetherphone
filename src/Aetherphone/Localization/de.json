@@ -6030,6 +6030,7 @@
   "prism.trackModdedRule": "Mods sind willkommen, solange es dein Charakter ist.",
   "prism.withTrack": "{0} · {1}",
   "prism.statusMoved": "Verschoben",
+  "prism.resultsAreOut": "Ergebnisse sind da",
   "prism.statusMovedTitle": "Deine Projektion ist in den anderen Wettbewerb gewechselt",
   "prism.activityLiked": "gefällt deine Projektion",
   "prism.activityPlaced": "Deine Projektion hat in {1} Platz {0} belegt",
