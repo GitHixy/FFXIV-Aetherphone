@@ -153,6 +153,10 @@ internal static class L
         public static readonly LocString MessagesAudienceHint = new("social.messagesAudienceHint", "Controls who can start a new conversation with you on Aethergram. People you have replied to can always message you.");
         public static readonly LocString ActivityTitle = new("social.activityTitle", "Activity");
         public static readonly LocString ActivityEmpty = new("social.activityEmpty", "Nothing here yet. Interactions with your posts will show up here");
+        public static readonly LocString ActivityToday = new("social.activityToday", "Today");
+        public static readonly LocString ActivityThisWeek = new("social.activityThisWeek", "This week");
+        public static readonly LocString ActivityThisMonth = new("social.activityThisMonth", "This month");
+        public static readonly LocString ActivityEarlier = new("social.activityEarlier", "Earlier");
         public static readonly LocString FollowRequests = new("social.followRequests", "Follow requests");
         public static readonly LocString FollowRequestsCount = new("social.followRequestsCount", "Follow requests ({0})");
         public static readonly LocString RequestedFollow = new("social.requestedFollow", "requested to follow you");
@@ -2439,6 +2443,10 @@ internal static class L
         {
             new("changelog.r1400.45",
                 "Added saving chirps: pick Save chirp in a chirp's menu and find it again in the new Saved tab on your profile"),
+            new("changelog.r1400.46",
+                "Added a Replies tab to Activity, and grouped your notifications under Today, This week, This month and Earlier"),
+            new("changelog.r1400.47",
+                "Fixed the Mentions tab in Activity staying empty when your latest notifications had no mentions: it now looks further back"),
         };
 
         public static readonly LocString[] Release1400Social =
@@ -7333,6 +7341,7 @@ internal static class L
         public static readonly LocString ActivityAll = new("chirper.activityAll", "All");
         public static readonly LocString ReactionsAll = new("chirper.reactionsAll", "All");
         public static readonly LocString ActivityMentions = new("chirper.activityMentions", "Mentions");
+        public static readonly LocString ActivityReplies = new("chirper.activityReplies", "Replies");
         public static readonly LocString HandleAvailable = new("chirper.handleAvailable", "Available");
         public static readonly LocString NameLabel = new("chirper.nameLabel", "Name");
         public static readonly LocString HandleShort = new("chirper.handleShort", "Handle");
@@ -7466,10 +7475,6 @@ internal static class L
         public static readonly LocString YouRepliedToStory = new("aethergram.youRepliedToStory", "You replied to their story");
         public static readonly LocString StoryUnavailable = new("aethergram.storyUnavailable", "Story unavailable");
         public static readonly LocString PrivateTitle = new("aethergram.privateTitle", "This account is private");
-        public static readonly LocString ActivityToday = new("aethergram.activityToday", "Today");
-        public static readonly LocString ActivityThisWeek = new("aethergram.activityThisWeek", "This week");
-        public static readonly LocString ActivityThisMonth = new("aethergram.activityThisMonth", "This month");
-        public static readonly LocString ActivityEarlier = new("aethergram.activityEarlier", "Earlier");
         public static readonly LocString PrivateSubtitle = new("aethergram.privateSubtitle", "Follow this account to see their photos");
         public static readonly LocString SavedTitle = new("aethergram.savedTitle", "Saved");
         public static readonly LocString SavedEmpty = new("aethergram.savedEmpty", "Nothing saved yet");

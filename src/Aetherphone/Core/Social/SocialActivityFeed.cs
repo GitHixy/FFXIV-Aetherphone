@@ -26,6 +26,10 @@ internal sealed class SocialActivityFeed
 
     public bool Loaded => loaded;
 
+    public bool Loading => loading;
+
+    public bool HasOlder => nextCursor is not null;
+
     public void Invalidate()
     {
         loaded = false;

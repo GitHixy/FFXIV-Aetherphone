@@ -13,6 +13,13 @@ namespace Aetherphone.Apps.Chirper;
 
 internal sealed partial class ChirperApp
 {
+    private enum ActivityFilter : byte
+    {
+        All,
+        Mentions,
+        Replies,
+    }
+
     private const float BackChipRadius = SocialChrome.BackChipRadius;
     private const float UserRowHeight = 62f;
     private const float FollowPillHeight = 31f;
@@ -54,7 +61,7 @@ internal sealed partial class ChirperApp
     private static Vector4 UnreadTint => SeasonalTheme.Halloween ? MoonlitUnreadTint : StandardUnreadTint;
 
     private readonly UserListSearch userListSearch = new();
-    private bool mentionsOnly;
+    private ActivityFilter activityFilter;
     private Spring activitySegment;
     private string editDisplay = string.Empty;
     private string editHandle = string.Empty;
@@ -514,16 +521,19 @@ internal sealed partial class ChirperApp
             root ? WordmarkStyle : ScreenTitleStyle);
         var rowTop = area.Min.Y + AppHeader.Height * scale;
         var row = new Rect(new Vector2(area.Min.X, rowTop), new Vector2(area.Max.X, rowTop + FeedTabRowHeight * scale));
-        var picked = UnderlineTabs.Draw(row, Loc.T(L.Chirper.ActivityAll), Loc.T(L.Chirper.ActivityMentions),
-            mentionsOnly, ref activitySegment, ChirperInk.Shared, FeedTabsStyle);
+        var picked = UnderlineTabs.Draw(row,
+            [Loc.T(L.Chirper.ActivityAll), Loc.T(L.Chirper.ActivityMentions), Loc.T(L.Chirper.ActivityReplies)],
+            (int)activityFilter, ref activitySegment, ChirperInk.Shared, FeedTabsStyle);
         if (picked >= 0)
         {
-            mentionsOnly = picked == 1;
+            activityFilter = (ActivityFilter)picked;
         }
 
         var body = new Rect(new Vector2(area.Min.X, row.Max.Y), area.Max);
         activityFeed.EnsureFresh(social.Latest);
         var items = activityFeed.Items;
+        var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var bucket = ActivityBucket.None;
         var shown = 0;
         using (AppSurface.BeginEdgeToEdge(body))
         {
@@ -534,14 +544,20 @@ internal sealed partial class ChirperApp
                     continue;
                 }
 
+                var itemBucket = ActivityBuckets.For(items[index].CreatedAtUnix, now);
+                if (itemBucket != bucket)
+                {
+                    bucket = itemBucket;
+                    DrawSectionLabel(Loc.T(ActivityBuckets.Label(bucket)));
+                }
+
                 DrawActivityRow(items[index]);
                 shown++;
             }
 
             if (shown == 0)
             {
-                Typography.DrawWrappedCentered(new Vector2(body.Center.X, body.Min.Y + 90f * scale),
-                    Loc.T(L.Social.ActivityEmpty), ChirperInk.MutedInk, MetaStyle, body.Width - 64f * scale);
+                DrawActivityEmpty(body);
                 return;
             }
 
@@ -553,6 +569,20 @@ internal sealed partial class ChirperApp
         }
     }
 
+    private void DrawActivityEmpty(Rect body)
+    {
+        var scale = UiScale.Current;
+        var searching = activityFeed.HasOlder || !activityFeed.Loaded;
+        if (activityFeed.HasOlder)
+        {
+            activityFeed.LoadOlder();
+        }
+
+        Typography.DrawWrappedCentered(new Vector2(body.Center.X, body.Min.Y + 90f * scale),
+            Loc.T(searching ? L.Common.Loading : L.Social.ActivityEmpty), ChirperInk.MutedInk, MetaStyle,
+            body.Width - 64f * scale);
+    }
+
     private bool ShowsActivity(NotificationDto item)
     {
         if (item.App != Id || SocialActivity.IsModerationNotice(item.Type))
@@ -560,9 +590,12 @@ internal sealed partial class ChirperApp
             return false;
         }
 
-        return !mentionsOnly
-            || item.Type == SocialActivity.TypeMention
-            || item.Type == SocialActivity.TypeCommentMention;
+        return activityFilter switch
+        {
+            ActivityFilter.Mentions => item.Type is SocialActivity.TypeMention or SocialActivity.TypeCommentMention,
+            ActivityFilter.Replies => item.Type == SocialActivity.TypeComment,
+            _ => true,
+        };
     }
 
     private void DrawActivityRow(NotificationDto item)
