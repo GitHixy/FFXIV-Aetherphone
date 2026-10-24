@@ -9,7 +9,7 @@ namespace Aetherphone.Apps.Settings;
 
 internal static class LiquidGlassPreview
 {
-    public const float HeightFraction = 0.62f;
+    public const float HeightFraction = 0.5f;
 
     private const int ActiveTab = 0;
     private const float VisibleDarkness = 0.001f;

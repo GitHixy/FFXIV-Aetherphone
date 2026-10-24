@@ -21,6 +21,7 @@ internal sealed class LiquidGlassPage : ISettingsPage
     private const float TuningLabelFraction = 0.42f;
     private readonly Configuration configuration;
     private readonly WallpaperLibrary wallpapers;
+    private float cardWidth;
 
     public LiquidGlassPage(Configuration configuration, WallpaperLibrary wallpapers)
     {
@@ -37,11 +38,11 @@ internal sealed class LiquidGlassPage : ISettingsPage
     {
         var scale = UiScale.Current;
         var theme = context.Theme;
-        using (AppSurface.Begin(body))
+        var scrollTop = DrawPreview(body, theme, scale) + Metrics.Space.Sm * scale;
+        using (AppSurface.Begin(new Rect(new Vector2(body.Min.X, scrollTop), body.Max)))
         {
+            cardWidth = ImGui.GetContentRegionAvail().X;
             ImGui.Dummy(new Vector2(0f, Metrics.Space.Md * scale));
-            DrawPreview(theme, scale);
-            ImGui.Dummy(new Vector2(0f, CardGap * scale));
             DrawRealGlassCard(theme);
             ImGui.Dummy(new Vector2(0f, CardGap * scale));
             DrawAmountCard(theme, scale);
@@ -55,13 +56,13 @@ internal sealed class LiquidGlassPage : ISettingsPage
         }
     }
 
-    private void DrawPreview(PhoneTheme theme, float scale)
+    private float DrawPreview(Rect body, PhoneTheme theme, float scale)
     {
-        var origin = ImGui.GetCursorScreenPos();
-        var width = ImGui.GetContentRegionAvail().X;
-        var size = new Vector2(width, width * LiquidGlassPreview.HeightFraction);
-        ImGui.Dummy(size);
-        LiquidGlassPreview.Draw(ImGui.GetWindowDrawList(), new Rect(origin, origin + size), theme, wallpapers, scale);
+        var min = new Vector2(body.Min.X, body.Min.Y + Metrics.Space.Md * scale);
+        var width = cardWidth > 0f ? MathF.Min(cardWidth, body.Width) : body.Width;
+        var picture = new Rect(min, min + new Vector2(width, width * LiquidGlassPreview.HeightFraction));
+        LiquidGlassPreview.Draw(ImGui.GetWindowDrawList(), picture, theme, wallpapers, scale);
+        return picture.Max.Y;
     }
 
     private void DrawAmountCard(PhoneTheme theme, float scale)
