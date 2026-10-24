@@ -36,6 +36,7 @@ internal sealed partial class PrismApp
     private const float ContestMarkShare = 0.45f;
     private const float ContestTileUnits = 32f;
     private const int CountdownUnitsShown = 3;
+    private const int ScopeShrinkSteps = 8;
     private const int RaceCount = 8;
     private const int MaleGender = 0;
     private const int FemaleGender = 1;
@@ -58,6 +59,8 @@ internal sealed partial class PrismApp
     private GlamScope discoverScope = GlamScope.New;
     private bool fitsMe;
     private bool scopeLineShown;
+    private int scopeStyleKey;
+    private float scopeStyleScale;
     private readonly PrismCountdown rowCountdown = new();
     private Spring scopeLineLeft;
     private Spring scopeLineRight;
@@ -306,17 +309,16 @@ internal sealed partial class PrismApp
 
     private void DrawScopeTabs(ImDrawListPtr drawList, Rect row, float scale)
     {
-        var gap = Metrics.Space.Lg * scale;
-        var total = -gap;
+        var gap = Metrics.Space.Md * scale;
         for (var index = 0; index < ScopeNames.Length; index++)
         {
             scopeLabels[index] = Loc.T(ScopeNames[index]);
             scopeActive[index] = discoverScope == ShownScopes[index];
-            total += Typography.Measure(scopeLabels[index], PrismType.Title).X + gap;
         }
 
         var picked = -1;
-        if (total > row.Width)
+        var style = ScopeStyle(row.Width, gap);
+        if (style is not { } fitted)
         {
             var half = ChipRail.RowHeight * scale * 0.5f;
             picked = scopeRail.Draw(new Rect(new Vector2(row.Min.X, row.Center.Y - half),
@@ -330,7 +332,7 @@ internal sealed partial class PrismApp
             var lineTop = row.Center.Y;
             for (var index = 0; index < ScopeNames.Length; index++)
             {
-                var size = Typography.Measure(scopeLabels[index], PrismType.Title);
+                var size = Typography.Measure(scopeLabels[index], fitted);
                 if (scopeActive[index])
                 {
                     lineLeft = x;
@@ -347,7 +349,7 @@ internal sealed partial class PrismApp
                 }
 
                 Typography.Draw(drawList, new Vector2(x, row.Center.Y - size.Y * 0.5f), scopeLabels[index],
-                    scopeActive[index] || hovered ? PrismArt.Fore : PrismArt.Muted, PrismType.Title);
+                    scopeActive[index] || hovered ? PrismArt.Fore : PrismArt.Muted, fitted);
                 if (UiInteract.Click(hit.Min, hit.Max, hovered))
                 {
                     picked = index;
@@ -367,6 +369,41 @@ internal sealed partial class PrismApp
         discoverScope = ShownScopes[picked];
         pendingScroll = 0f;
         RefreshDiscover(false);
+    }
+
+    private TextStyle? ScopeStyle(float room, float gap)
+    {
+        var key = HashCode.Combine(Loc.Current.Code, (int)room, (int)gap, Plugin.Fonts.Generation,
+            ImGui.GetFontSize());
+        if (key != scopeStyleKey)
+        {
+            scopeStyleKey = key;
+            scopeStyleScale = FitScopeScale(room, gap);
+        }
+
+        return scopeStyleScale > 0f ? new TextStyle(scopeStyleScale, PrismType.Title.Weight) : null;
+    }
+
+    private float FitScopeScale(float room, float gap)
+    {
+        var largest = PrismType.Title.Scale;
+        var smallest = PrismType.Headline.Scale;
+        for (var step = 0; step <= ScopeShrinkSteps; step++)
+        {
+            var size = largest - (largest - smallest) * step / ScopeShrinkSteps;
+            var total = -gap;
+            for (var index = 0; index < scopeLabels.Length; index++)
+            {
+                total += Typography.Measure(scopeLabels[index], size, PrismType.Title.Weight).X + gap;
+            }
+
+            if (total <= room)
+            {
+                return size;
+            }
+        }
+
+        return 0f;
     }
 
     private void DrawScopeLine(ImDrawListPtr drawList, float left, float right, float top, float scale)
