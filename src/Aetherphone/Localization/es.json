@@ -1154,6 +1154,7 @@
   "changelog.r1400.38": "Corregido que las listas de seguidores y seguidos que no cargaban no dejaran volver a intentarlo: ahora ofrecen Reintentar, igual que una búsqueda en ellas que se detiene a medias, contribuido por hellovvn",
   "changelog.r1400.39": "Se añadió un botón Responder bajo los comentarios que empieza tu comentario con su @nombre de usuario, contribuido por hellovvn",
   "changelog.r1400.40": "Se cambiaron los iconos de las barras de pestañas y de las cabeceras a un mismo tamaño óptico, para que los iconos rellenos y de contorno se vean parejos, contribuido por t3sco",
+  "changelog.r1400.48": "Se cambió para que las pantallas que no cargan por un breve corte de conexión lo intenten una vez más por sí solas antes de mostrar un error",
   "changelog.r1400.41": "Se corrigió que los iconos quedaran ligeramente descentrados en sus botones y temblaran al pasar el cursor, contribuido por t3sco",
   "changelog.r1400.43": "Se añadieron Bloquear posición y Siempre visible en Ajustes > Teléfono minimizado, para dejar el miniteléfono donde lo pusiste o permitir que otras ventanas queden encima, contribuido por hellovvn",
   "changelog.r1400.44": "Corregido que la opción Orden del juego de Colecciones mostrara primero lo más reciente: en Accesorios faciales ahora sigue la lista del juego y las demás categorías empiezan en Más recientes primero, contribuido por jambalong",

@@ -96,11 +96,12 @@ if (page is null)
 
 Each frame, the list screen copies the store's failure into its `FailureSlot` and draws a "Couldn't load this" panel with the slot's text and a Retry button that calls `store.Refresh()`.
 
-Three answers need their own handling:
+Four answers need their own handling:
 
 - **Refusals as data.** Sign-in verification, the game rooms, and the casino answer an expected refusal with HTTP 200 and a reason in the body. A `null` from them is always a transport problem, never a rule.
 - **An app switched off.** `AppAvailability` reads the server's app flags and hides any app reported as off. A call into such an app fails with 503 and the code `app_disabled`. Show it as temporary, never as a sign-out.
 - **Rate limits.** A 429 on a GET pauses every GET to that host until `Retry-After` passes (at most 30 seconds), so unrelated features can look broken meanwhile; the `RateLimitPill` under the status bar counts down. A 429 on a write fails only that call. A 429 without `Retry-After` pauses nothing, and a GET is retried once.
+- **Gateway hiccups.** A GET that comes back 502, 504, 520 to 527 or 530, or loses its connection partway, is retried once after a second or two (`TransientFailures`). Writes and the 503 of a switched-off app are never retried.
 
 ## Adding an endpoint
 

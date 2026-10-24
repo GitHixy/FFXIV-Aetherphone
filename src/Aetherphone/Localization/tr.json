@@ -1154,6 +1154,7 @@
   "changelog.r1400.38": "Yüklenemeyen takipçi ve takip edilenler listelerinin yeniden deneme imkânı vermemesi düzeltildi: artık Tekrar dene sunuyorlar, yarıda kalan bir liste araması da öyle, katkı: hellovvn",
   "changelog.r1400.39": "Yorumların altına, yorumunu kişinin @kullanıcı adıyla başlatan Yanıtla düğmesi eklendi, katkı: hellovvn",
   "changelog.r1400.40": "Sekme çubuğu ve başlık simgeleri aynı optik boyuta getirildi, böylece dolgulu ve çizgi simgeler yan yana dengeli görünüyor, katkı: t3sco",
+  "changelog.r1400.48": "Kısa bir bağlantı aksaması yüzünden yüklenemeyen ekranlar artık hata göstermeden önce kendiliğinden bir kez daha deniyor",
   "changelog.r1400.41": "Simgelerin düğmelerinde hafifçe ortadan kayık durması ve üzerine gelince titremesi düzeltildi, katkı: t3sco",
   "changelog.r1400.43": "Ayarlar > Küçültülmüş telefon altına Konumu kilitle ve Her zaman üstte eklendi; mini telefon bıraktığınız yerde kalabilir ya da diğer pencereler üstüne gelebilir, katkı: hellovvn",
   "changelog.r1400.44": "Koleksiyonlar'daki Oyun sırası sıralamasının önce en yenileri göstermesi düzeltildi: Yüz Aksesuarları'nda artık oyundaki listeyi izliyor, diğer kategoriler Önce en yeniler ile açılıyor, katkı: jambalong",
