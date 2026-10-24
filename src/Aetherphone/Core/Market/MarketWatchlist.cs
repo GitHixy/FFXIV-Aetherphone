@@ -1,4 +1,5 @@
 using Aetherphone.Core.Game;
+using Aetherphone.Core.Localization;
 
 namespace Aetherphone.Core.Market;
 
@@ -58,6 +59,15 @@ internal sealed class MarketWatchlist
     public MarketScope Scope => Choice.Scope;
 
     public bool IsRemote => Choice.Remote;
+
+    public string Title(in MarketScope scope) =>
+        scope.Kind == MarketScopeKind.Region ? RegionTitle(scope.ApiName) : scope.ApiName;
+
+    public string RegionTitle(string apiName)
+    {
+        var region = Geography.Region(apiName);
+        return region is null ? apiName : Loc.T(region.Label);
+    }
 
     public MarketScope LocalScope
     {
