@@ -10098,6 +10098,14 @@ internal static class L
         public static readonly LocString MysteryBallSave = new("games.pinball.mysteryBallSave", "Mystery: ball save");
         public static readonly LocString SuperJackpot = new("games.pinball.superJackpot", "Super jackpot!");
         public static readonly LocString SuperJackpotLit = new("games.pinball.superJackpotLit", "Super jackpot lit");
+        public static readonly LocString Guide1Title = new("games.pinball.guide1Title", "Launch the ball");
+        public static readonly LocString Guide1Body = new("games.pinball.guide1Body", "Drag the plunger down or hold Space, then let go. A harder pull launches the ball faster.");
+        public static readonly LocString Guide2Title = new("games.pinball.guide2Title", "Keep it in play");
+        public static readonly LocString Guide2Body = new("games.pinball.guide2Body", "Tap the left or right side, or press A and D, to flip. A run has three balls, so keep each one out of the drain.");
+        public static readonly LocString Guide3Title = new("games.pinball.guide3Title", "Light the jackpot");
+        public static readonly LocString Guide3Body = new("games.pinball.guide3Body", "Drop both banks of targets to light the jackpot, then shoot the ramp to collect it.");
+        public static readonly LocString Guide4Title = new("games.pinball.guide4Title", "Combo into Fever");
+        public static readonly LocString Guide4Body = new("games.pinball.guide4Body", "Chain ramps, orbits and the saucer to combo and raise the playfield multiplier. Every hit fills the Fever ring, and Fever doubles your points.");
     }
 
     internal static class Crates
