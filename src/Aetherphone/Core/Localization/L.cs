@@ -10548,6 +10548,40 @@ internal static class L
         public static readonly LocString FourthPlace = new("games.minigolf.fourthPlace", "4th");
     }
 
+    internal static class Harvest
+    {
+        public static readonly LocString Title = new("games.harvest.title", "Harvest");
+        public static readonly LocString Hook = new("games.harvest.hook", "Steer your chocobo's basket under falling ore, logs and crystals. Jump boulders, duck birds and ride the fever rain through six lands.");
+        public static readonly LocString Meadow = new("games.harvest.meadow", "Meadow");
+        public static readonly LocString Highlands = new("games.harvest.highlands", "Highlands");
+        public static readonly LocString Mire = new("games.harvest.mire", "Mire");
+        public static readonly LocString Glacier = new("games.harvest.glacier", "Glacier");
+        public static readonly LocString Storm = new("games.harvest.storm", "Stormlands");
+        public static readonly LocString Dunes = new("games.harvest.dunes", "Dunes");
+        public static readonly LocString MeadowTwist = new("games.harvest.meadowTwist", "Calm skies, slow drops");
+        public static readonly LocString HighlandsTwist = new("games.harvest.highlandsTwist", "Wind drifts the drops");
+        public static readonly LocString MireTwist = new("games.harvest.mireTwist", "Fog hides drops until late");
+        public static readonly LocString GlacierTwist = new("games.harvest.glacierTwist", "Slippery ice keeps you sliding");
+        public static readonly LocString StormTwist = new("games.harvest.stormTwist", "Sparks stun, let them fall");
+        public static readonly LocString DunesTwist = new("games.harvest.dunesTwist", "Mirages cast no shadow");
+        public static readonly LocString Fever = new("games.harvest.fever", "Fever!");
+        public static readonly LocString Miss = new("games.harvest.miss", "Miss");
+        public static readonly LocString Ouch = new("games.harvest.ouch", "Ouch!");
+        public static readonly LocString Stunned = new("games.harvest.stunned", "Stunned!");
+        public static readonly LocString Mirage = new("games.harvest.mirage", "Mirage!");
+        public static readonly LocString Dodge = new("games.harvest.dodge", "Dodged!");
+        public static readonly LocString Caught = new("games.harvest.caught", "Caught");
+        public static readonly LocString Fevers = new("games.harvest.fevers", "Fevers");
+        public static readonly LocString Guide1Title = new("games.harvest.guide1Title", "Fill the basket");
+        public static readonly LocString Guide1Body = new("games.harvest.guide1Body", "Drag, click or press A and D to slide under falling materials. Three misses end the run.");
+        public static readonly LocString Guide2Title = new("games.harvest.guide2Title", "Jump and duck");
+        public static readonly LocString Guide2Body = new("games.harvest.guide2Body", "Swipe up or press W to hop boulders, swipe down or hold S to duck birds. Three hits end the run.");
+        public static readonly LocString Guide3Title = new("games.harvest.guide3Title", "Combo and fever");
+        public static readonly LocString Guide3Body = new("games.harvest.guide3Body", "Catch without missing to climb to x4. A full fever meter starts a golden bonus rain.");
+        public static readonly LocString Guide4Title = new("games.harvest.guide4Title", "Six lands");
+        public static readonly LocString Guide4Body = new("games.harvest.guide4Body", "The land changes every 30 seconds: wind, fog, ice, sparks and mirages. Read the banner, then adapt.");
+    }
+
     internal static class Herd
     {
         public static readonly LocString Title = new("games.herd.title", "Herd");
