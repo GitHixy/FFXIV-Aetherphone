@@ -72,6 +72,7 @@ internal sealed class GlamStore : IDisposable
     private readonly HashSet<string> triedOn = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, bool> follows = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, bool> followLookups = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, bool> removedIds = new(StringComparer.Ordinal);
 
     private Func<string?, CancellationToken, Action<AepFailure>?, Task<GlamPage?>>? listFetch;
     private volatile string listKey = string.Empty;
@@ -211,6 +212,8 @@ internal sealed class GlamStore : IDisposable
         });
 
     public FeedLane<GlamDto> Lane(GlamScope scope) => discover[(int)scope];
+
+    public bool IsRemoved(string glamId) => removedIds.ContainsKey(glamId);
 
     public FeedLane<GlamDto> List => list;
 
@@ -721,7 +724,8 @@ internal sealed class GlamStore : IDisposable
             var items = page?.Items ?? Array.Empty<GlamDto>();
             for (var index = 0; index < items.Length; index++)
             {
-                if (items[index].Vanilla == vanilla && items[index].Photos is { Length: > 0 })
+                if (items[index].Vanilla == vanilla && items[index].Photos is { Length: > 0 } &&
+                    !removedIds.ContainsKey(items[index].Id))
                 {
                     Volatile.Write(ref showcase[slot], items[index]);
                     return;
@@ -883,6 +887,7 @@ internal sealed class GlamStore : IDisposable
 
     private void Remove(string glamId)
     {
+        removedIds[glamId] = true;
         for (var index = 0; index < discover.Length; index++)
         {
             discover[index].Items = CopyOnWrite.RemoveById(discover[index].Items, glamId);

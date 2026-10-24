@@ -101,7 +101,7 @@ internal sealed partial class PrismApp
         var eligible = 0;
         for (var index = 0; index < pool.Length; index++)
         {
-            if (Cover(pool[index]).Length > 0)
+            if (ShowcaseEligible(pool[index]))
             {
                 eligible++;
             }
@@ -112,7 +112,7 @@ internal sealed partial class PrismApp
         var remaining = eligible;
         for (var index = 0; index < pool.Length && count < wanted; index++)
         {
-            if (Cover(pool[index]).Length == 0)
+            if (!ShowcaseEligible(pool[index]))
             {
                 continue;
             }
@@ -135,6 +135,8 @@ internal sealed partial class PrismApp
         showcaseCount = count;
         showcasePicked = count > 0;
     }
+
+    private bool ShowcaseEligible(GlamDto glam) => Cover(glam).Length > 0 && !glams.IsRemoved(glam.Id);
 
     private GlamDto[]? ShowcasePool()
     {
