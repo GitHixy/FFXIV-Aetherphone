@@ -20,6 +20,7 @@ internal sealed partial class ChirperApp
         Chirps,
         Media,
         Likes,
+        Saved,
     }
 
     private const float ProfileBannerHeight = 120f;
@@ -41,12 +42,15 @@ internal sealed partial class ChirperApp
     private static readonly TextStyle FollowedByStyle = TextStyles.Footnote;
     private static readonly TextStyle TabStyle = TextStyles.Headline;
     private static readonly TextStyle TabIdleStyle = TextStyles.BodyEmphasized;
+    private static readonly TextStyle TabMinStyle = TextStyles.SubheadlineEmphasized;
     private static readonly Vector4 BannerScrim = new(0f, 0f, 0f, 0.4f);
     private static readonly Vector4 BannerVeil = new(0.031f, 0.067f, 0.122f, 0.55f);
 
     private ProfileTab profileTab;
     private Spring profileTabSlide;
     private Spring profileHeaderReveal;
+
+    private bool ShowsProfilePosts => profileTab is ProfileTab.Chirps or ProfileTab.Media;
 
     private void DrawProfile(Rect area, string userId, bool root = false)
     {
@@ -90,18 +94,21 @@ internal sealed partial class ChirperApp
                 case ProfileTab.Likes:
                     DrawLikedPosts(area);
                     break;
+                case ProfileTab.Saved:
+                    DrawSavedPosts(area);
+                    break;
                 default:
                     DrawProfilePosts(store.ProfilePosts, area);
                     break;
             }
 
-            if (profileTab != ProfileTab.Likes && store.ProfileLoadingMore)
+            if (ShowsProfilePosts && store.ProfileLoadingMore)
             {
                 InfiniteScroll.DrawLoadingRow(area.Center.X, ChirperInk.MutedInk);
             }
 
             ImGui.Dummy(new Vector2(0f, 24f * scale));
-            if (profileTab != ProfileTab.Likes && InfiniteScroll.ReachedBottom() && store.HasMoreProfilePosts
+            if (ShowsProfilePosts && InfiniteScroll.ReachedBottom() && store.HasMoreProfilePosts
                 && !store.ProfileLoadingMore)
             {
                 store.LoadMoreProfilePosts();
@@ -417,16 +424,16 @@ internal sealed partial class ChirperApp
             store.ToggleFollow(user);
         }
     }
-    private void DrawProfileTabs(bool showLikes)
+    private void DrawProfileTabs(bool own)
     {
         var scale = UiScale.Current;
         var drawList = ImGui.GetWindowDrawList();
         var origin = ImGui.GetCursorScreenPos();
         var width = ImGui.GetContentRegionAvail().X;
         var height = ProfileTabHeight * scale;
-        var tabCount = showLikes ? 3 : 2;
+        var tabCount = own ? 4 : 2;
         var tabWidth = width / tabCount;
-        if (!showLikes && profileTab == ProfileTab.Likes)
+        if (!own && !ShowsProfilePosts)
         {
             profileTab = ProfileTab.Chirps;
         }
@@ -438,18 +445,23 @@ internal sealed partial class ChirperApp
         {
             ProfileTab.Media => Loc.T(L.Chirper.MediaTab),
             ProfileTab.Likes => Loc.T(L.Chirper.LikesTab),
+            ProfileTab.Saved => Loc.T(L.Chirper.SavedTab),
             _ => Loc.T(L.Chirper.ChirpsTitle),
         };
         DrawProfileTab(drawList, origin.X, tabWidth, centerY, height, Loc.T(L.Chirper.ChirpsTitle), ProfileTab.Chirps);
         DrawProfileTab(drawList, origin.X + tabWidth, tabWidth, centerY, height, Loc.T(L.Chirper.MediaTab),
             ProfileTab.Media);
-        if (showLikes)
+        if (own)
         {
             DrawProfileTab(drawList, origin.X + tabWidth * 2f, tabWidth, centerY, height, Loc.T(L.Chirper.LikesTab),
                 ProfileTab.Likes);
+            DrawProfileTab(drawList, origin.X + tabWidth * 3f, tabWidth, centerY, height, Loc.T(L.Chirper.SavedTab),
+                ProfileTab.Saved);
         }
 
-        var underlineWidth = Typography.Measure(activeLabel, TabStyle).X + 24f * scale;
+        var underlineWidth = MathF.Min(
+            Typography.Measure(activeLabel, FitTabStyle(activeLabel, tabWidth - 12f * scale, TabStyle)).X + 24f * scale,
+            tabWidth);
         var underlineCenterX = origin.X + tabWidth * (0.5f + profileTabSlide.Value);
         var underlineTop = origin.Y + height - ProfileTabUnderline * scale;
         Squircle.Fill(drawList, new Vector2(underlineCenterX - underlineWidth * 0.5f, underlineTop),
@@ -464,12 +476,13 @@ internal sealed partial class ChirperApp
         string label, ProfileTab tab)
     {
         var active = profileTab == tab;
-        var style = active ? TabStyle : TabIdleStyle;
+        var labelWidth = MathF.Max(1f, width - 12f * UiScale.Current);
+        var style = FitTabStyle(label, labelWidth, active ? TabStyle : TabIdleStyle);
         var min = new Vector2(left, centerY - height * 0.5f);
         var max = new Vector2(left + width, centerY + height * 0.5f);
         var hovered = UiInteract.Hover(min, max);
         var ink = active ? ChirperInk.AccentLink : hovered ? ChirperInk.BodyInk : ChirperInk.MutedInk;
-        var fitted = Typography.FitText(label, MathF.Max(1f, width - 12f * UiScale.Current), style);
+        var fitted = Typography.FitText(label, labelWidth, style);
         Typography.DrawCentered(drawList, new Vector2(left + width * 0.5f, centerY - 1.5f * UiScale.Current), fitted,
             ink, style);
         if (hovered)
@@ -483,12 +496,19 @@ internal sealed partial class ChirperApp
         }
     }
 
+    private static TextStyle FitTabStyle(string label, float maxWidth, TextStyle style) =>
+        style with { Scale = Typography.FitScale(label, maxWidth, style.Scale, TabMinStyle.Scale, style.Weight) };
+
     private void SelectProfileTab(ProfileTab tab)
     {
         profileTab = tab;
         if (tab == ProfileTab.Likes && likedRevalidateGate.TryPass())
         {
             store.RefreshLiked();
+        }
+        else if (tab == ProfileTab.Saved && savedRevalidateGate.TryPass())
+        {
+            store.RefreshSaved();
         }
     }
 
@@ -529,25 +549,41 @@ internal sealed partial class ChirperApp
 
     private void DrawLikedPosts(Rect body)
     {
-        var scale = UiScale.Current;
-        var posts = store.LikedPosts;
-        if (posts.Length == 0)
-        {
-            Typography.DrawWrappedCentered(new Vector2(body.Center.X, ImGui.GetCursorScreenPos().Y + 40f * scale),
-                store.LikedLoading ? Loc.T(L.Common.Loading) : Loc.T(L.Chirper.LikesEmpty), ChirperInk.MutedInk,
-                MetaStyle, body.Width - 64f * scale);
-            return;
-        }
-
-        DrawProfilePosts(posts, body);
-        if (store.LikedLoadingMore)
-        {
-            InfiniteScroll.DrawLoadingRow(body.Center.X, ChirperInk.MutedInk);
-        }
-        else if (store.HasMoreLiked && InfiniteScroll.ReachedBottom())
+        if (DrawOwnPostList(body, store.LikedPosts, store.LikedLoading, store.LikedLoadingMore, store.HasMoreLiked,
+                L.Chirper.LikesEmpty))
         {
             store.LoadMoreLiked();
         }
+    }
+
+    private void DrawSavedPosts(Rect body)
+    {
+        if (DrawOwnPostList(body, store.SavedPosts, store.SavedLoading, store.SavedLoadingMore, store.HasMoreSaved,
+                L.Chirper.SavedEmpty))
+        {
+            store.LoadMoreSaved();
+        }
+    }
+
+    private bool DrawOwnPostList(Rect body, PostDto[] posts, bool loading, bool loadingMore, bool hasMore,
+        LocString empty)
+    {
+        var scale = UiScale.Current;
+        if (posts.Length == 0)
+        {
+            Typography.DrawWrappedCentered(new Vector2(body.Center.X, ImGui.GetCursorScreenPos().Y + 40f * scale),
+                Loc.T(loading ? L.Common.Loading : empty), ChirperInk.MutedInk, MetaStyle, body.Width - 64f * scale);
+            return false;
+        }
+
+        DrawProfilePosts(posts, body);
+        if (loadingMore)
+        {
+            InfiniteScroll.DrawLoadingRow(body.Center.X, ChirperInk.MutedInk);
+            return false;
+        }
+
+        return hasMore && InfiniteScroll.ReachedBottom();
     }
 
     private void DrawProfileMediaGrid(PostDto[] posts, Rect body)

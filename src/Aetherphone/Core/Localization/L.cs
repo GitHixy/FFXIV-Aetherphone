@@ -2435,6 +2435,12 @@ internal static class L
                 "Fixed Skywatcher and its widget showing another district's name and forecast, or a blank name, inside a house, apartment or workshop, contributed by YozoraCho"),
         };
 
+        public static readonly LocString[] Release1400Chirper =
+        {
+            new("changelog.r1400.45",
+                "Added saving chirps: pick Save chirp in a chirp's menu and find it again in the new Saved tab on your profile"),
+        };
+
         public static readonly LocString[] Release1400Social =
         {
             new("changelog.r1400.38",
@@ -7336,6 +7342,11 @@ internal static class L
         public static readonly LocString TabProfile = new("chirper.tabProfile", "Profile");
         public static readonly LocString LikesTab = new("chirper.likesTab", "Likes");
         public static readonly LocString LikesEmpty = new("chirper.likesEmpty", "Chirps you react to will show up here");
+        public static readonly LocString SavedTab = new("chirper.savedTab", "Saved");
+        public static readonly LocString SavedEmpty = new("chirper.savedEmpty", "Chirps you save will show up here");
+        public static readonly LocString SaveChirp = new("chirper.saveChirp", "Save chirp");
+        public static readonly LocString UnsaveChirp = new("chirper.unsaveChirp", "Remove from saved");
+        public static readonly LocString SavedToast = new("chirper.savedToast", "Saved to your profile");
         public static readonly LocString ChangeBanner = new("chirper.changeBanner", "Change banner");
         public static readonly LocPlural Reposts = new("chirper.reposts", "{0} repost", "{0} reposts");
         public static readonly LocPlural RepliesCount = new("chirper.repliesCount", "{0} reply", "{0} replies");

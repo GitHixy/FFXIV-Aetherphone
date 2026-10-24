@@ -1367,6 +1367,7 @@ internal abstract class SocialFeedStore : IDisposable
         followingLane.Items = MapSaved(followingLane.Items, postId, saved);
         profileLane.Items = MapSaved(profileLane.Items, postId, saved);
         taggedLane.Items = MapSaved(taggedLane.Items, postId, saved);
+        hashtagLane.Items = MapSaved(hashtagLane.Items, postId, saved);
         likedLane.Items = MapSaved(likedLane.Items, postId, saved);
         savedLane.Items = saved
             ? MapSaved(savedLane.Items, postId, true)
