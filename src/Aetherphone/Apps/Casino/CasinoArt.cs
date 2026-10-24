@@ -52,10 +52,14 @@ internal static class CasinoArt
         _ => AccentRing.Emerald,
     };
 
-    public static void GameTile(ImDrawListPtr drawList, string gameId, Vector2 center, float size, float alpha = 1f)
+    public static void GameTile(ImDrawListPtr drawList, string gameId, Vector2 center, float size, float alpha = 1f) =>
+        GameTile(drawList, gameId, TintOf(gameId), center, size, alpha);
+
+    public static void GameTile(ImDrawListPtr drawList, string gameId, Vector4 tint, Vector2 center, float size,
+        float alpha = 1f)
     {
         var half = new Vector2(size * 0.5f, size * 0.5f);
-        var surface = IconTile.Surface(TintOf(gameId));
+        var surface = IconTile.Surface(tint);
         IconTile.FillShaded(drawList, center - half, center + half, size * Metrics.Radius.TileFactor, surface, alpha);
         CasinoGlyphs.Draw(drawList, gameId, center, size * GlyphExtentFactor,
             ImGui.GetColorU32(White with { W = alpha }), ImGui.GetColorU32(surface with { W = alpha }));

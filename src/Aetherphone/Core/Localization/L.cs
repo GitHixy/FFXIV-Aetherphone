@@ -2463,6 +2463,8 @@ internal static class L
 
         public static readonly LocString[] Release1400Gamba =
         {
+            new("changelog.r1400.63",
+                "Added roll games to Host: Deathroll, Elimination, Higher or Lower and Coin Flip, played with /random in game chat so players need no plugin. Your phone reads every roll, keeps the turns, can post each turn in chat and can put a payout in your Book"),
             new("changelog.r1400.50",
                 "Added posting a table code in party, say or yell, from Invite on Your table (which now also holds Copy invite) or from a venue table's sheet"),
             new("changelog.r1400.51",
@@ -13452,6 +13454,120 @@ internal static class L
         public static readonly LocString CloseTitle = new("casino.book.closeTitle", "Close this book?");
         public static readonly LocString CloseBody = new("casino.book.closeBody", "The ledger stays readable for 30 days after it closes.");
         public static readonly LocString RecordHostHint = new("casino.book.recordHostHint", "Trade the gil in game first, then record it here. Patrons who use the app appear here once they open this book from the Venues app or with its code; anyone else goes in as a guest.");
+    }
+
+    internal static class Rolls
+    {
+        public static readonly LocString SectionTitle = new("casino.rolls.sectionTitle", "Roll games");
+        public static readonly LocString SectionLine = new("casino.rolls.sectionLine", "Played with /random in game chat, no plugin needed");
+        public static readonly LocString OpenEyebrow = new("casino.rolls.openEyebrow", "Roll game open");
+        public static readonly LocString Resume = new("casino.rolls.resume", "Open");
+        public static readonly LocString GameElimination = new("casino.rolls.gameElimination", "Elimination");
+        public static readonly LocString GameHigherLower = new("casino.rolls.gameHigherLower", "Higher or Lower");
+        public static readonly LocString GameCoinFlip = new("casino.rolls.gameCoinFlip", "Coin Flip");
+        public static readonly LocString MetaDeathroll = new("casino.rolls.metaDeathroll", "A duel or the house");
+        public static readonly LocString MetaElimination = new("casino.rolls.metaElimination", "2 to 24 players");
+        public static readonly LocString MetaHouse = new("casino.rolls.metaHouse", "Against the house");
+        public static readonly LocString LineDeathroll = new("casino.rolls.lineDeathroll", "Roll under the last roll. Whoever rolls a 1 loses.");
+        public static readonly LocString LineElimination = new("casino.rolls.lineElimination", "Everyone rolls and the lowest is out, until one is left.");
+        public static readonly LocString LineHigherLower = new("casino.rolls.lineHigherLower", "Call higher or lower than the house's roll, then roll.");
+        public static readonly LocString LineCoinFlip = new("casino.rolls.lineCoinFlip", "Call heads or tails, then flip with /random 2.");
+        public static readonly LocString RulesDeathroll = new("casino.rolls.rulesDeathroll", "The first roll is /random {0}. Each next roll goes up to the number just rolled, and whoever rolls a 1 loses.");
+        public static readonly LocString RulesElimination = new("casino.rolls.rulesElimination", "Every round, each player rolls /random {0}. The lowest roll is out and ties roll again. The last player left wins the pot.");
+        public static readonly LocString RulesHigherLower = new("casino.rolls.rulesHigherLower", "You roll /random {0} for the house. The player calls higher or lower, then rolls /random {0}. The same number is a push.");
+        public static readonly LocString RulesCoinFlip = new("casino.rolls.rulesCoinFlip", "The player calls heads or tails, then the flip is /random 2: 1 is heads and 2 is tails.");
+        public static readonly LocString Bet = new("casino.rolls.bet", "Bet per player");
+        public static readonly LocString BetHint = new("casino.rolls.betHint", "Leave it at no stake to play for fun. Players trade the gil to you before they roll.");
+        public static readonly LocString Pays = new("casino.rolls.pays", "The house pays");
+        public static readonly LocString PaysValue = new("casino.rolls.paysValue", "{0}x");
+        public static readonly LocString PaysHint = new("casino.rolls.paysHint", "A player who beats the house gets this many times their bet.");
+        public static readonly LocString AgainstHeading = new("casino.rolls.againstHeading", "Played against");
+        public static readonly LocString AgainstPlayers = new("casino.rolls.againstPlayers", "Each other");
+        public static readonly LocString AgainstHouse = new("casino.rolls.againstHouse", "The house");
+        public static readonly LocString FlipHeading = new("casino.rolls.flipHeading", "Who flips");
+        public static readonly LocString FlipPlayer = new("casino.rolls.flipPlayer", "The player");
+        public static readonly LocString AnnounceHeading = new("casino.rolls.announceHeading", "Announce in chat");
+        public static readonly LocString AnnounceOff = new("casino.rolls.announceOff", "Off");
+        public static readonly LocString ChannelParty = new("casino.rolls.channelParty", "Party");
+        public static readonly LocString ChannelSay = new("casino.rolls.channelSay", "Say");
+        public static readonly LocString ChannelYell = new("casino.rolls.channelYell", "Yell");
+        public static readonly LocString AnnounceHint = new("casino.rolls.announceHint", "The phone posts each turn and the result, so players without the plugin can follow along.");
+        public static readonly LocString OpenGame = new("casino.rolls.openGame", "Open game");
+        public static readonly LocString SetupLine = new("casino.rolls.setupLine", "Once the game is open, players join by rolling /random.");
+        public static readonly LocString PlayersHeading = new("casino.rolls.playersHeading", "Players");
+        public static readonly LocString PlayersEmpty = new("casino.rolls.playersEmpty", "Nobody yet. Players join when they roll /random.");
+        public static readonly LocString RollsHeading = new("casino.rolls.rollsHeading", "Rolls");
+        public static readonly LocString RollsEmpty = new("casino.rolls.rollsEmpty", "Rolls from game chat show up here.");
+        public static readonly LocString PromptJoin = new("casino.rolls.promptJoin", "Waiting for players to roll /random");
+        public static readonly LocString PromptReady = new("casino.rolls.promptReady", "Ready to start");
+        public static readonly LocString PromptTurn = new("casino.rolls.promptTurn", "{0}: roll /random {1}");
+        public static readonly LocString PromptHouseRoll = new("casino.rolls.promptHouseRoll", "Your roll for the house: /random {0}");
+        public static readonly LocString PromptEveryone = new("casino.rolls.promptEveryone", "Round {0}: {1} still to roll /random {2}");
+        public static readonly LocString PromptTie = new("casino.rolls.promptTie", "Tie at {0}: roll /random {1} again");
+        public static readonly LocString PromptCallHigherLower = new("casino.rolls.promptCallHigherLower", "{0} calls higher or lower than {1}");
+        public static readonly LocString PromptCallCoin = new("casino.rolls.promptCallCoin", "{0} calls heads or tails");
+        public static readonly LocString PromptWins = new("casino.rolls.promptWins", "{0} wins");
+        public static readonly LocString PromptWinsGil = new("casino.rolls.promptWinsGil", "{0} wins {1} gil");
+        public static readonly LocString PromptHouseWins = new("casino.rolls.promptHouseWins", "The house wins");
+        public static readonly LocString PromptPush = new("casino.rolls.promptPush", "A push: the bet goes back");
+        public static readonly LocString Start = new("casino.rolls.start", "Start");
+        public static readonly LocString CallPlayers = new("casino.rolls.callPlayers", "Call for players");
+        public static readonly LocString RollFor = new("casino.rolls.rollFor", "Roll /random {0}");
+        public static readonly LocString Higher = new("casino.rolls.higher", "Higher");
+        public static readonly LocString Lower = new("casino.rolls.lower", "Lower");
+        public static readonly LocString Heads = new("casino.rolls.heads", "Heads");
+        public static readonly LocString Tails = new("casino.rolls.tails", "Tails");
+        public static readonly LocString PlayAgain = new("casino.rolls.playAgain", "Play again");
+        public static readonly LocString NewPlayers = new("casino.rolls.newPlayers", "New players");
+        public static readonly LocString End = new("casino.rolls.end", "End game");
+        public static readonly LocString Record = new("casino.rolls.record", "Record payout in the Book");
+        public static readonly LocString Recorded = new("casino.rolls.recorded", "Payout sent to the Book");
+        public static readonly LocString Remove = new("casino.rolls.remove", "Remove");
+        public static readonly LocString Drop = new("casino.rolls.drop", "Drop");
+        public static readonly LocString StatusIn = new("casino.rolls.statusIn", "In");
+        public static readonly LocString StatusTurn = new("casino.rolls.statusTurn", "Turn");
+        public static readonly LocString StatusToRoll = new("casino.rolls.statusToRoll", "To roll");
+        public static readonly LocString StatusOut = new("casino.rolls.statusOut", "Out");
+        public static readonly LocString StatusWinner = new("casino.rolls.statusWinner", "Winner");
+        public static readonly LocString StatusTie = new("casino.rolls.statusTie", "Tie");
+        public static readonly LocString HouseTag = new("casino.rolls.houseTag", "House");
+        public static readonly LocString VerdictJoined = new("casino.rolls.verdictJoined", "Joined");
+        public static readonly LocString VerdictAlreadyIn = new("casino.rolls.verdictAlreadyIn", "Already in");
+        public static readonly LocString VerdictTableFull = new("casino.rolls.verdictTableFull", "Game full");
+        public static readonly LocString VerdictNotInGame = new("casino.rolls.verdictNotInGame", "Not playing");
+        public static readonly LocString VerdictNotTheirTurn = new("casino.rolls.verdictNotTheirTurn", "Not their turn");
+        public static readonly LocString VerdictWrongRange = new("casino.rolls.verdictWrongRange", "Wrong range");
+        public static readonly LocString VerdictAlreadyRolled = new("casino.rolls.verdictAlreadyRolled", "Already rolled");
+        public static readonly LocString VerdictNotWaiting = new("casino.rolls.verdictNotWaiting", "Game over");
+        public static readonly LocString RolledOutOf = new("casino.rolls.rolledOutOf", "/random {0}");
+        public static readonly LocString ChatJoinCall = new("casino.rolls.chatJoinCall", "{0}: roll /random to join!");
+        public static readonly LocString ChatStartDuel = new("casino.rolls.chatStartDuel", "{0} from {1}: {2} against {3}. {2}, roll /random {1}.");
+        public static readonly LocString ChatStartHouseDeathroll = new("casino.rolls.chatStartHouseDeathroll", "{0} from {1} against the house. {2}, roll /random {1}.");
+        public static readonly LocString ChatStartElimination = new("casino.rolls.chatStartElimination", "{0} with {1} players: everyone roll /random {2}.");
+        public static readonly LocString ChatStartHigherLower = new("casino.rolls.chatStartHigherLower", "{0}: {1} plays. The house rolls first.");
+        public static readonly LocString ChatStartCoin = new("casino.rolls.chatStartCoin", "{0}: {1}, call heads or tails.");
+        public static readonly LocString ChatTurn = new("casino.rolls.chatTurn", "{0}, roll /random {1}.");
+        public static readonly LocString ChatOut = new("casino.rolls.chatOut", "{0} is out with {1}. {2} left: roll /random {3}.");
+        public static readonly LocString ChatDropped = new("casino.rolls.chatDropped", "{0} is out. {1} left: roll /random {2}.");
+        public static readonly LocString ChatTie = new("casino.rolls.chatTie", "Tie at {0}. {1}, roll /random {2} again.");
+        public static readonly LocString ChatBase = new("casino.rolls.chatBase", "The house rolled {0}. {1}, higher or lower?");
+        public static readonly LocString ChatCalled = new("casino.rolls.chatCalled", "{0} calls {1}. {2}, roll /random {3}.");
+        public static readonly LocString ChatCalledRoll = new("casino.rolls.chatCalledRoll", "{0} calls {1}. Now roll /random {2}.");
+        public static readonly LocString WordHigher = new("casino.rolls.wordHigher", "higher");
+        public static readonly LocString WordLower = new("casino.rolls.wordLower", "lower");
+        public static readonly LocString WordHeads = new("casino.rolls.wordHeads", "heads");
+        public static readonly LocString WordTails = new("casino.rolls.wordTails", "tails");
+        public static readonly LocString ChatRolled = new("casino.rolls.chatRolled", "{0} rolled {1}.");
+        public static readonly LocString ChatRolledOne = new("casino.rolls.chatRolledOne", "{0} rolled a 1.");
+        public static readonly LocString ChatHouseRolledOne = new("casino.rolls.chatHouseRolledOne", "The house rolled a 1.");
+        public static readonly LocString ChatHeads = new("casino.rolls.chatHeads", "Heads!");
+        public static readonly LocString ChatTails = new("casino.rolls.chatTails", "Tails!");
+        public static readonly LocString ChatWin = new("casino.rolls.chatWin", "{0} wins!");
+        public static readonly LocString ChatWinGil = new("casino.rolls.chatWinGil", "{0} wins {1} gil!");
+        public static readonly LocString ChatHouseWins = new("casino.rolls.chatHouseWins", "The house wins.");
+        public static readonly LocString ChatPush = new("casino.rolls.chatPush", "{0} rolled {1}, the same number. It's a push.");
+        public static readonly LocString ChatLastStanding = new("casino.rolls.chatLastStanding", "{0} is the last one standing and wins!");
+        public static readonly LocString ChatLastStandingGil = new("casino.rolls.chatLastStandingGil", "{0} is the last one standing and wins {1} gil!");
     }
 
     internal static class Catalogs

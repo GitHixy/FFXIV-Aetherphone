@@ -16,6 +16,7 @@ Paths are under src/Aetherphone unless they start with src/.
 | Apps/Casino/Strip/StripCatalog.cs | The Floor's shelves |
 | Apps/Casino/Tables/ | Card tables, the host sheet, the door, the ledger pages |
 | Apps/Casino/Venue/ | Venue rooms, the Host tab's cards, broadcast, tournaments |
+| Apps/Casino/Rolls/, Core/Casino/Rolls/ | Roll games: setup and game pages; the chat roll reader, the table engine and its chat lines |
 | Core/Casino/CasinoStore.cs, CasinoPlayStore.cs | Floor state, chips in and out, the solo game stores |
 | Core/Casino/*Rules.cs, CasinoVerifier.cs | Rules mirrors and the fairness verifier |
 | Core/Aethernet/Clients/CasinoClient*.cs, Core/Aethernet/Contracts/Casino*Dtos.cs | Casino routes and wire records, one file per area |
@@ -163,6 +164,7 @@ Folders are under src/Aetherphone/Apps/Casino.
 | Daily spin | Free | Cabinets/ | Once a day; pays wallet coins. |
 | Dice table, Deathroll, Raffle | Venue room | Venue/ | Hosted rooms on free play or gil. |
 | Book | Hosted ledger | Tables/ | A gil ledger with trade sync and no game. |
+| Deathroll, Elimination, Higher or Lower, Coin Flip | Roll game | Rolls/ | Played with /random in game chat; no server, nothing counts. |
 
 ## Hosting tables
 
@@ -174,6 +176,8 @@ The server checks every setting and host action; the client lays out the choices
 
 **Codes in chat.** Invite on the door and Post the code in chat on a venue table's sheet open `ChatCodePost`, which sends a line in the host's language through party, say or yell. The line carries the code as `[Gamba CODE]` (`CasinoChatCodes`), the one part that never changes with the language, so players without the plugin can read it and every phone can find it. The door's sheet also keeps Copy invite. `CasinoChatInvites` listens to party, cross-world party, say and yell, ignores the player's own lines, and raises one notification per code per 15 minutes; tapping it opens Live and runs the same `JoinByCode` as typing the code, so knocks and invite-only rules still apply.
 
+**Roll games.** The Host tab's Roll games posters run a game in game chat, so players need no plugin: Deathroll (a duel, or a player against the host), Elimination (the lowest roll each round is out, ties roll again), Higher or Lower and Coin Flip against the host. Nothing goes to the server and nothing counts for levels or missions; the host's phone is the referee. `ChatRolls` listens only while a game is open, reads /random lines from the system log and /dice lines from any chat channel, and hands each roll to `RollTable`, which keeps the players, the turns and the result. `RollLines` reads a roll from the line's structure, not its wording: the rolled number follows icon 73, a /dice line starts with icon 54, and any other number is the range, so every client language reads the same way. A roll out of turn or of the wrong range shows in the log and changes nothing. With a channel picked, each turn and the result go out through `ChatSender` one line per 1.2 seconds from the framework tick, never from inside the chat handler. Record payout puts a player's win into the Book of the host's open gil table.
+
 **The ledger page.** `TableLedger` lists a gil table's entries (in or out, the other side, the kind, the amount, a RECORDED or OWED pill). A tap gives the host the entry's one action: Remove, Mark paid or Mark unpaid. "Missed a trade? Add it by hand" records an entry for a player, or for a guest by character name, since most patrons have no plugin. Players see the rows read only; My gil ledger (`GilLedgerView`) gathers every recent entry they are a side of.
 
 **Trade sync.** Off by default, and shown only to the host of a gil table. While it is on, `TradeWindowReader` reads the game's trade window (read only), `TradeSyncTracker` spots a completed trade that moved gil, and `CasinoTradeSync` sends it; the server decides which ledger entry it becomes. The window is read only while the host is at one of their gil tables (its room, door or ledger page, or its card on the Live and Host pages) or was within the last twelve hours; the table is remembered in the configuration across restarts and forgotten when the host closes it, so a table left open stops picking up the host's unrelated trades, and a trade whose partner name could not be read is never sent. The host sees a "{kind} recorded" card with Undo, and a notification. If recording fails after a few retries, a "Trade not recorded" notification asks the host to add it by hand. Nothing in the game is clicked, and log lines carry amounts, never names.
@@ -184,7 +188,7 @@ Gamba has four tabs (`CasinoTab`); every other page is a `CasinoRoute` on the ro
 
 - **Floor** (CasinoApp.Lobby.cs, Strip/): resume card, chips hero with Get chips, level card, claims and daily streak, shortcuts, the Cards, Slots and Quick bets shelves, the jackpot marquee, live rooms, and the Fair play and loss limit links.
 - **Live** (CasinoApp.Live.cs, Live/): big wins, join by code or invite, your table, clocked rooms, challenges, house tables and player tables.
-- **Host** (CasinoApp.Host.cs, Venue/): your open table, or Host again and the game posters, then My gil ledger.
+- **Host** (CasinoApp.Host.cs, Venue/): your open table, or Host again and the game posters, then the roll games (CasinoApp.Rolls.cs, Rolls/) and My gil ledger.
 - **Cashier** (CashierPanel.cs): both balances, Buy chips or Cash out, one coin field and a confirm sheet. Partial cash out needs the `cashier.partial` feature. Every stage's chips capsule opens the same panel as a drawer.
 
 The bonus claim and daily spin home widgets live in Apps/Casino/Widgets/.
