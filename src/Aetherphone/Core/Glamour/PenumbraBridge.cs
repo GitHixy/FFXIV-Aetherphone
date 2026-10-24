@@ -153,7 +153,6 @@ internal sealed class PenumbraBridge : IDisposable
             catch (Exception exception)
             {
                 AepLog.Warning($"Penumbra GetCurrentModSettingsWithTemp failed: {exception.Message}");
-                return null;
             }
         }
 
