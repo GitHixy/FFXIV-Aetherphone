@@ -482,9 +482,11 @@ internal sealed partial class CameraApp : IPhoneApp
         CameraChrome.Countdown(drawList, captureRect.Center, Digits(shown), scale);
     }
 
+    private static bool EscapeDown() => ImGui.IsKeyDown(ImGuiKey.Escape) || GameKeys.Down(VirtualKey.ESCAPE);
+
     private bool EscapePressed()
     {
-        var down = ImGui.IsKeyDown(ImGuiKey.Escape) || GameKeys.Down(VirtualKey.ESCAPE);
+        var down = EscapeDown();
         var pressed = down && !escapeHeld;
         escapeHeld = down;
         if (down)
@@ -585,7 +587,7 @@ internal sealed partial class CameraApp : IPhoneApp
         if (seconds > 0)
         {
             timerShown = 0;
-            escapeHeld = false;
+            escapeHeld = EscapeDown();
             timerEndsAt = ImGui.GetTime() + seconds;
             return;
         }
