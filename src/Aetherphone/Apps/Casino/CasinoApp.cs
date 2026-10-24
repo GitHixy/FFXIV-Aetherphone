@@ -116,11 +116,14 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         Core.Lodestone.LodestoneService lodestone, Core.Casino.HoldemStore holdemStore,
         Core.Casino.CasinoVenueStore casinoVenue, Core.Casino.CasinoTradeSync tradeSync,
         Core.Report.ReportService report, Core.Casino.CasinoFloorStore floor, Configuration configuration,
-        Core.Casino.CasinoFameChoiceStore fameChoice)
+        Core.Casino.CasinoFameChoiceStore fameChoice, Core.Casino.Rolls.ChatRolls chatRolls)
     {
         this.floor = floor;
         this.configuration = configuration;
         this.fameChoice = fameChoice;
+        this.chatRolls = chatRolls;
+        rollSetup = new Rolls.RollSetupPage(chatRolls);
+        rollGame = new Rolls.RollGamePage(chatRolls, casinoTables);
         fameView = new Strip.FameView(floor);
         fameConsent = new Strip.FameConsentSheet(fameChoice);
         stage.Feed = floor;
@@ -917,6 +920,12 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             case CasinoScreen.HostRules:
                 DrawHostRules(navBar.Body);
                 break;
+            case CasinoScreen.RollSetup:
+                DrawRollSetup(navBar.Body);
+                break;
+            case CasinoScreen.RollGame:
+                DrawRollGame(navBar.Body);
+                break;
         }
 
         AppHeader.EndLargeTitle(in navBar, context, "casino.page.nav", RouteTitle(route), NavBarStyle.From(ui),
@@ -983,6 +992,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         CasinoScreen.RoundDetail => Loc.T(L.Casino.RoundDetailTitle),
         CasinoScreen.Fame => Loc.T(L.Club.FameTitle),
         CasinoScreen.HostRules => Loc.T(L.HostSetup.RulesTitle),
+        CasinoScreen.RollSetup or CasinoScreen.RollGame => RollTitle(route.Screen),
         CasinoScreen.DailySpin => Loc.T(L.Casino.GameDailySpin),
         CasinoScreen.Cabinet => Loc.T(GameName(route.GameId)),
         _ => TabTitle(routes.Tab),

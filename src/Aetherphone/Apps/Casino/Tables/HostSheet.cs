@@ -488,50 +488,13 @@ internal sealed class HostSheet
     private void DrawJoin(AppSkin ui, float width, float scale)
     {
         HostCards.Heading(ui, Loc.T(L.Tables.HostListing), string.Empty, width, scale);
-        var origin = ImGui.GetCursorScreenPos();
-        var drawList = ImGui.GetWindowDrawList();
-        var gap = HostFlowLayout.ChoiceGap * scale;
-        var labelWidth = MathF.Max(1f,
-            HostFlowLayout.ColumnWidth(width, HostFlowLayout.Columns, gap) - HostFlowLayout.CardPad * scale);
-        var labelBlock = 0f;
-        for (var index = 0; index < Listings.Length; index++)
+        var picked = HostCards.IconChoices(ui, "listing", ListingTitles, ListingIcons,
+            Array.IndexOf(Listings, draft.Listing), width, scale);
+        if (picked >= 0)
         {
-            labelBlock = MathF.Max(labelBlock, Typography.MeasureWrappedBlock(Loc.T(ListingTitles[index]),
-                TextStyles.SubheadlineEmphasized, labelWidth).Y);
+            draft.Listing = Listings[picked];
         }
 
-        var height = HostFlowLayout.JoinTileHeight(scale, labelBlock);
-        var radius = Metrics.Radius.Card * scale;
-        var icon = HostFlowLayout.JoinIcon * scale;
-        var innerGap = HostFlowLayout.JoinInnerGap * scale;
-        for (var index = 0; index < Listings.Length; index++)
-        {
-            var listing = Listings[index];
-            var selected = draft.Listing == listing;
-            var cell = HostFlowLayout.GridCell(origin.X, origin.Y, width, index, HostFlowLayout.Columns, height, gap);
-            using (UiScope.PushId(index))
-            {
-                var hovered = CasinoArt.PressCard(ImGui.GetID("listing"), cell.Min, cell.Max, out var pressedMin,
-                    out var pressedMax);
-                var face = new Rect(pressedMin, pressedMax);
-                HostCards.ChoiceSurface(drawList, ui, face, radius, ui.Accent, selected, hovered, scale);
-                var ink = selected ? ui.TitleInk : ui.BodyInk;
-                var title = Loc.T(ListingTitles[index]);
-                var titleBlock = Typography.MeasureWrappedBlock(title, TextStyles.SubheadlineEmphasized, labelWidth).Y;
-                var top = face.Center.Y - (icon + innerGap + titleBlock) * 0.5f;
-                ProgressRing.CenterIcon(drawList, new Vector2(face.Center.X, top + icon * 0.5f), ListingIcons[index],
-                    ink, icon);
-                Typography.DrawWrappedCentered(drawList, title, TextStyles.SubheadlineEmphasized, ink,
-                    new Vector2(face.Center.X, top + icon + innerGap), labelWidth);
-                if (UiInteract.Click(cell.Min, cell.Max, hovered))
-                {
-                    draft.Listing = listing;
-                }
-            }
-        }
-
-        ImGui.SetCursorScreenPos(origin);
-        ImGui.Dummy(new Vector2(width, height));
         HostCards.Gap(HostFlowLayout.CardGap, scale);
         HostCards.Hint(ui, Loc.T(HostRules.ListingHint(draft.Listing)), width);
     }

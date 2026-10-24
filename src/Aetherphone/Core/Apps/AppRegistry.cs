@@ -149,7 +149,7 @@ internal static class AppRegistry
             services.CasinoTurns, services.CasinoLauncher, services.GameStats, services.Confirm,
             services.Conduct, services.RemoteImages, services.Lodestone, services.Holdem, services.CasinoVenue,
             services.CasinoTrade, services.Report, services.CasinoFloor, services.Configuration,
-            services.CasinoFameChoice));
+            services.CasinoFameChoice, services.ChatRolls));
         var appStore = new AppStoreApp(services.Installer, services.Confirm, apps);
         apps.Add(appStore);
         apps.Add(new HousingApp(services.Housing, services.Configuration, services.Confirm));

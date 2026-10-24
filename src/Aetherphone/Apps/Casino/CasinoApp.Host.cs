@@ -45,6 +45,8 @@ internal sealed partial class CasinoApp
                 top = DrawHostGames(drawList, new Vector2(origin.X, top), width, scale) + gap;
             }
 
+            top = DrawRollGames(drawList, new Vector2(origin.X, top), width, scale) + gap;
+
             top = DrawMyLedgerRow(drawList, new Vector2(origin.X, top), width, scale);
             Coin.CoinArt.Reserve(origin, width, top + Coin.CoinArt.BottomPad * scale);
         }
