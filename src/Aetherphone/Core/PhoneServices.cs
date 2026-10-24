@@ -11,6 +11,7 @@ using Aetherphone.Core.Fishing;
 using Aetherphone.Core.Game;
 using Aetherphone.Core.GameChat;
 using Aetherphone.Core.Games;
+using Aetherphone.Core.Gifs;
 using Aetherphone.Core.Glamour;
 using Aetherphone.Core.Health;
 using Aetherphone.Core.Honorific;
@@ -152,6 +153,7 @@ internal sealed class PhoneServices : IDisposable
     public required AppAvailability Availability { get; init; }
     public required CharacterSessionManager CharacterSwitcher { get; init; }
     public required AethernetApi Aethernet { get; init; }
+    public required GifSearch Gifs { get; init; }
     public required KeyVault KeyVault { get; init; }
 
     public required DeviceLinkWatcher DeviceLinks { get; init; }
@@ -580,6 +582,7 @@ internal sealed class PhoneServices : IDisposable
             Availability = availability,
             CharacterSwitcher = characterSwitcher,
             Aethernet = aethernet,
+            Gifs = new GifSearch(aethernetSession, aethernet.Gifs, new KlipyClient(http)),
             KeyVault = keyVault,
             DeviceLinks = deviceLinks,
             EncryptionGuide = encryptionGuide,
@@ -690,6 +693,7 @@ internal sealed class PhoneServices : IDisposable
         StreamSignals.Dispose();
         Calls.Dispose();
         Contacts.Dispose();
+        Gifs.Dispose();
         CollectionsJournal.Dispose();
         Collections.Dispose();
         InventoryCapture.Dispose();

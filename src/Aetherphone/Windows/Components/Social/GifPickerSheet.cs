@@ -4,13 +4,12 @@ using Aetherphone.Core.Localization;
 using Aetherphone.Core.Media;
 using Aetherphone.Core.Net;
 using Aetherphone.Core.Theme;
-using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 
-namespace Aetherphone.Apps.Chirper;
+namespace Aetherphone.Windows.Components;
 
-internal sealed class ChirperGifSheet
+internal sealed class GifPickerSheet
 {
     private const ImGuiWindowFlags OverlayFlags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse |
                                                   ImGuiWindowFlags.NoBackground;
@@ -32,6 +31,8 @@ internal sealed class ChirperGifSheet
     private const float HoverAlpha = 0.12f;
     private const int Columns = 2;
 
+    private static readonly Vector4 White = new(1f, 1f, 1f, 1f);
+
     private readonly Sheet sheet = new();
     private readonly GifSearch search;
     private readonly RemoteImageCache images;
@@ -49,7 +50,7 @@ internal sealed class ChirperGifSheet
     private byte[] tileColumns = Array.Empty<byte>();
     private float gridHeight;
 
-    public ChirperGifSheet(GifSearch search, RemoteImageCache images, Configuration configuration)
+    public GifPickerSheet(GifSearch search, RemoteImageCache images, Configuration configuration)
     {
         this.search = search;
         this.images = images;
@@ -93,7 +94,7 @@ internal sealed class ChirperGifSheet
         }
 
         ImGui.SetCursorScreenPos(screen.Min);
-        using (ImRaii.Child("##chirperGifSheet", screen.Size, false, OverlayFlags))
+        using (ImRaii.Child("##gifPickerSheet", screen.Size, false, OverlayFlags))
         {
             var veil = SheetMetrics.VeilFor(true);
             var frame = sheet.Begin(ImGui.GetWindowDrawList(), screen, ui.Theme,
@@ -146,9 +147,9 @@ internal sealed class ChirperGifSheet
         }
 
         var accepted = Button.Draw(frame.DrawList, acceptRect, Loc.T(L.Gifs.ConsentAccept), ui.Ink,
-            ButtonStyle.Prominent, id: "chirper.gifs.consent.accept", opacity: frame.Opacity);
+            ButtonStyle.Prominent, id: "gifs.consent.accept", opacity: frame.Opacity);
         var declined = Button.Draw(frame.DrawList, declineRect, Loc.T(L.Gifs.ConsentDecline), ui.Ink,
-            ButtonStyle.Gray, id: "chirper.gifs.consent.decline", opacity: frame.Opacity);
+            ButtonStyle.Gray, id: "gifs.consent.decline", opacity: frame.Opacity);
         if (!frame.Interactive)
         {
             return;
@@ -180,7 +181,7 @@ internal sealed class ChirperGifSheet
         var heroMin = new Vector2(center - hero * 0.5f, y);
         var heroMax = heroMin + new Vector2(hero, hero);
         Squircle.Fill(drawList, heroMin, heroMax, hero * Metrics.Radius.TileFactor, ImGui.GetColorU32(ui.Accent));
-        Typography.DrawCentered(drawList, (heroMin + heroMax) * 0.5f, "GIF", ChirperInk.White, TextStyles.Title2);
+        Typography.DrawCentered(drawList, (heroMin + heroMax) * 0.5f, "GIF", White, TextStyles.Title2);
         y += hero + Metrics.Space.Lg * scale;
         y += Typography.DrawWrappedCentered(new Vector2(center, y), Loc.T(L.Gifs.ConsentTitle), ink,
             TextStyles.Title3, width);
@@ -217,7 +218,7 @@ internal sealed class ChirperGifSheet
             focusQuery = false;
         }
 
-        SearchField.Draw(searchRect, "##chirperGifQuery", Loc.T(L.Gifs.SearchHint), ref draft, Surfaces.Fill(ink,
+        SearchField.Draw(searchRect, "##gifPickerQuery", Loc.T(L.Gifs.SearchHint), ref draft, Surfaces.Fill(ink,
                 FillLevel.Tertiary), muted, ink, Palette.WithAlpha(ink, ink.W * HoverAlpha), ui.Theme.AppBackground,
             GifQuery.MaxLength, focus);
         var now = ImGui.GetTime();
@@ -392,7 +393,7 @@ internal sealed class ChirperGifSheet
         var rect = new Rect(new Vector2(topCenter.X - width * 0.5f, topCenter.Y),
             new Vector2(topCenter.X + width * 0.5f, topCenter.Y + Button.SmallHeight * scale));
         return Button.Draw(ImGui.GetWindowDrawList(), rect, label, ui.Ink, ButtonStyle.Tinted,
-            id: "chirper.gifs.retry", opacity: opacity);
+            id: "gifs.retry", opacity: opacity);
     }
 
     private static void DrawMessage(Rect body, string message, Vector4 muted)

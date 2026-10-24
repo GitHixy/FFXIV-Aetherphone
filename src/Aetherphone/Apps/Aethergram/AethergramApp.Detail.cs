@@ -174,7 +174,7 @@ internal sealed partial class AethergramApp
             : commentLayout?.Size.Y ?? Typography.MeasureWrapped(commentText, textWidth, CommentBodyStyle.Scale);
         var textGap = textHeight > 0f ? CommentTextGap * scale : 0f;
         var linkHeight = TranslateLink.Height(translation, commentKey, comment.Lang, scale);
-        var mediaHidden = CommentMediaHidden(comment.MediaUrl);
+        var mediaHidden = CommentMediaHidden(comment.Media);
         var mediaHeight = mediaHidden ? 0f : CommentMedia.MeasureHeight(comment, textWidth, scale);
         var mediaGap = mediaHeight > 0f && (textHeight > 0f || linkHeight > 0f) ? CommentMediaGap * scale : 0f;
         var canReply = !mine && comment.AuthorHandle.Length > 0;
@@ -230,14 +230,15 @@ internal sealed partial class AethergramApp
                 new Vector2(textLeft, textTop + textHeight), textWidth, Ink.MutedInk, Ink.AccentLink, scale);
         }
 
-        if (comment.MediaUrl is { } commentMediaUrl && !mediaHidden)
+        if (comment.Media is { } commentMediaUrl && !mediaHidden)
         {
+            var held = HeldGif(commentMediaUrl);
             var mediaRect = CommentMedia.Draw(drawList, images, comment,
                 new Vector2(textLeft, textTop + textHeight + linkHeight + mediaGap), textWidth, scale, Ink.ThumbFill,
-                Ink.MutedInk);
+                Ink.MutedInk, held);
             if (UiInteract.HoverClick(mediaRect.Min, mediaRect.Max))
             {
-                photoViewer.Open(this, () => GifMedia.Texture(images, commentMediaUrl, ImGui.GetTime()));
+                OpenCommentMedia(commentMediaUrl, held);
             }
         }
 
@@ -347,6 +348,8 @@ internal sealed partial class AethergramApp
             commentAttachment.Restore(returnedAttachment);
         }
 
+        PrepareCommentGifs();
+
         var scale = UiScale.Current;
         if (commentFailure.Failed)
         {
@@ -369,7 +372,7 @@ internal sealed partial class AethergramApp
 
         var style = new CommentComposerStyle(AppSkin.Transparent, Ink.FieldFill, Ink.TitleInk, Ink.Accent,
             AppSkin.Transparent, Ink.White, true, 11f, 56f, 1f, 19f);
-        var canSend = !string.IsNullOrWhiteSpace(commentDraft) || commentAttachment.Path is not null;
+        var canSend = !string.IsNullOrWhiteSpace(commentDraft) || commentAttachment.HasAttachment;
         var delta = MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
         commentSendReveal.Step(canSend ? 1f : 0f, Motion.Appear, delta);
         var hint = post.AuthorDisplayName.Length > 0 || post.AuthorHandle.Length > 0
@@ -383,10 +386,17 @@ internal sealed partial class AethergramApp
         {
             var text = commentDraft;
             var attachmentPath = commentAttachment.Path;
+            var attachedGif = commentAttachment.Gif;
             var postId = post.Id;
             commentDraft = string.Empty;
             commentAttachment.Clear();
             commentFailure.Clear();
+            if (attachedGif is not null)
+            {
+                SubmitCommentGif(postId, text, attachedGif);
+                return;
+            }
+
             store.AddComment(postId, text, attachmentPath, accepted =>
             {
                 if (accepted)

@@ -5,6 +5,7 @@ using Aetherphone.Core.Animation;
 using Aetherphone.Core.Apps;
 using Aetherphone.Core.Confirm;
 using Aetherphone.Core.Crypto;
+using Aetherphone.Core.Gifs;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Lodestone;
 using Aetherphone.Core.Media;
@@ -71,6 +72,7 @@ internal sealed partial class MessageApp : IResumableApp, ISpotlightConversation
     private readonly EncryptionSetupLauncher encryptionSetup;
     private readonly SettingsLauncher settingsLauncher;
     private readonly MessagePopouts popouts;
+    private readonly GifSearch gifs;
     private readonly AppSkin ui = new(AppPalettes.Message);
     private readonly TabBar tabBar = new();
     private readonly TabItem[] tabItems = new TabItem[TabCount];
@@ -107,9 +109,11 @@ internal sealed partial class MessageApp : IResumableApp, ISpotlightConversation
         ReportService report,
         WallpaperImageCache wallpaperImages, MusterStore musters, MusterLauncher musterLauncher,
         SocialNotificationService socialNotifications, EncryptionSetupLauncher encryptionSetup,
-        EncryptionHelpService encryptionHelp, SettingsLauncher settingsLauncher, MessagePopouts popouts)
+        EncryptionHelpService encryptionHelp, SettingsLauncher settingsLauncher, MessagePopouts popouts,
+        GifSearch gifs)
     {
         this.popouts = popouts;
+        this.gifs = gifs;
         this.translation = translation;
         this.socialNotifications = socialNotifications;
         this.musterLauncher = musterLauncher;

@@ -8,6 +8,7 @@ using Aetherphone.Core.Conduct;
 using Aetherphone.Core.Confirm;
 using Aetherphone.Core.Crypto;
 using Aetherphone.Core.Game;
+using Aetherphone.Core.Gifs;
 using Aetherphone.Core.Home;
 using Aetherphone.Core.Honorific;
 using Aetherphone.Core.Localization;
@@ -256,9 +257,10 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         PhoneVisibility visibility, RealtimeSignalBus realtimeSignals,
         WallpaperImageCache wallpaperImages, ConfirmService confirm, TranslationService translation,
         ReportService report, ConductGateService conduct,
-        AppInstaller installer, EncryptionHelpService encryptionHelp)
+        AppInstaller installer, EncryptionHelpService encryptionHelp, GifSearch gifs)
     {
         this.translation = translation;
+        this.gifs = gifs;
         store = new AethergramStore(session, net.Account, net.Social, net.Grams, net.Safety, net.Media, realtimeSignals);
         store.SetFeedRegions(SocialRegion.FilterCsv(configuration.AethergramFeedRegionMask));
         store.SetFeedSensitive(configuration.AethergramShowSensitivePosts, activeScope);
@@ -429,7 +431,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         }
 
         DrawNight(screen, context.Content.Min.Y);
-        using (InputShield.Engage(avatarLightbox.Expanded))
+        using (InputShield.Engage(avatarLightbox.Expanded || GifSheetCaptures))
         using (intro.FadeContent())
         {
             router.Draw(SceneChrome.AppAreaFrom(context.Content, theme, UiScale.Current), AppSkin.Transparent,
@@ -447,6 +449,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         DrawPostSheet(screen);
         DrawFeedExplainer(screen);
         DrawCommentSheet(screen);
+        DrawGifSheet(screen);
         DrawProfileMenu(screen);
         DrawProfileActionSheet(screen);
         DrawInboxRowSheet(screen);
@@ -687,7 +690,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
 
     private bool HiddenByMediaPreference(CommentDto comment)
     {
-        return comment.Text.Length == 0 && CommentMediaHidden(comment.MediaUrl);
+        return comment.Text.Length == 0 && CommentMediaHidden(comment.Media);
     }
 
     private bool CommentMediaHidden(string? mediaUrl)
