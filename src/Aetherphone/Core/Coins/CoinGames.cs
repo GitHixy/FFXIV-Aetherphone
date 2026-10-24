@@ -64,6 +64,7 @@ internal static class CoinGames
         "lander",
         "minigolf",
         "cluster",
+        "harvest",
     ];
 
     public static string FeaturedFor(int dayIndex)

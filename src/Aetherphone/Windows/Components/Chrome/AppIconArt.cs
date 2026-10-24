@@ -207,6 +207,9 @@ internal static class AppIconArt
             case "cluster":
                 ClusterIcon.Draw(dl, center, extent, inkColor, holeColor);
                 return true;
+            case "harvest":
+                HarvestIcon.Draw(dl, center, extent, inkColor, holeColor);
+                return true;
             default:
                 return false;
         }

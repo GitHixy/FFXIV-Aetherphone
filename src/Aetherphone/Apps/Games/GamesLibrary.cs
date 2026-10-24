@@ -164,6 +164,7 @@ internal sealed class GamesLibrary
         new("online.crater", 2026, 10, 8),
         new("online.minigolf", 2026, 10, 8),
         new("cluster", 2026, 10, 24),
+        new("harvest", 2026, 10, 24),
     };
 
     private static readonly int GenreCount = GameGenres.Shelves.Length;
@@ -806,6 +807,7 @@ internal sealed class GamesLibrary
             case "lander":
             case "pegfall":
             case "cluster":
+            case "harvest":
                 return Score(stats.Get(gameId).BestScore, out value);
             case "match3":
                 return Score(Math.Max(stats.Get(gameId).BestScore, stats.Get(GemSwapApp.BlitzStatId).BestScore),
