@@ -60,6 +60,7 @@ Aethernet opened on 2 July 2026. By the end of the season, players on 113 worlds
       <ul>
         <li>For You and Latest timelines, with a Following filter</li>
         <li>Rechirps, quotes, replies and hashtags</li>
+        <li>Save chirps to find them again on your profile</li>
         <li>Photos, GIFs and thirteen reactions</li>
         <li>Paste an image with Ctrl+V or drag one in from File Explorer</li>
         <li>Chirps in other languages translated with one tap</li>

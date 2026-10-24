@@ -56,6 +56,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         BadgeProgress,
         Pin,
         Unpin,
+        Save,
+        Unsave,
     }
 
     private enum ActionGlyph
@@ -76,7 +78,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     private const int MaxPostLength = 300;
     private const int MaxCommentLength = 500;
     private const int FeedBodyMaxLines = 6;
-    private const int PostSheetMaxItems = 5;
+    private const int PostSheetMaxItems = 6;
     private const float TopBarButtonRadius = 18f;
     private const float FeedTabRowHeight = 44f;
     private const float LatestScopeRowHeight = 40f;
@@ -295,6 +297,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     private bool trendingRequested;
     private readonly RetryGate[] tabRevalidateGates = BuildTabRevalidateGates();
     private readonly RetryGate likedRevalidateGate = new(TimeSpan.FromSeconds(TabRevalidateCooldownSeconds));
+    private readonly RetryGate savedRevalidateGate = new(TimeSpan.FromSeconds(TabRevalidateCooldownSeconds));
 
     public ChirperApp(AethernetSession session, AethernetApi net, LodestoneService lodestone,
         RemoteImageCache images, PhotoLibrary library, SocialLauncher launcher, GameData gameData,
@@ -386,6 +389,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         }
 
         likedRevalidateGate.Reset();
+        savedRevalidateGate.Reset();
 
         if (store.IsSignedIn)
         {
@@ -902,6 +906,15 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             AddSheetItem(PostSheetAction.Reactions, Loc.T(L.Chirper.ViewReactions), false);
         }
 
+        if (post.Saved)
+        {
+            AddSheetItem(PostSheetAction.Unsave, Loc.T(L.Chirper.UnsaveChirp), false);
+        }
+        else
+        {
+            AddSheetItem(PostSheetAction.Save, Loc.T(L.Chirper.SaveChirp), false);
+        }
+
         var mine = store.Me is { } me && me.Id == post.AuthorId;
         if (mine)
         {
@@ -998,6 +1011,14 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             case PostSheetAction.Unpin:
                 store.UnpinPost(post.Id,
                     unpinned => toast.Show(Loc.T(unpinned ? L.Social.UnpinnedToast : L.Social.UnpinFailed)));
+                break;
+            case PostSheetAction.Save:
+                store.SetSaved(post.Id, true);
+                savedRevalidateGate.Reset();
+                toast.Show(Loc.T(L.Chirper.SavedToast));
+                break;
+            case PostSheetAction.Unsave:
+                store.SetSaved(post.Id, false);
                 break;
         }
     }
