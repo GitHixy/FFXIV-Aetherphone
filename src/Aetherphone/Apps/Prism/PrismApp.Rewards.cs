@@ -111,10 +111,9 @@ internal sealed partial class PrismApp
     private void DrawRewards(ImDrawListPtr drawList, Rect full, Rect content, float scale)
     {
         SyncRewards();
-        var entering = store.Week is { Phase: PrismPhases.Entering, MyEntry: null };
         if (!rewardsAny)
         {
-            DrawNoRewards(drawList, content, entering, scale);
+            DrawNoRewards(drawList, content, scale);
             return;
         }
 
@@ -122,8 +121,7 @@ internal sealed partial class PrismApp
         PrismLight.Week(drawList, new Rect(full.Min, new Vector2(full.Max.X, washBottom)), store.Week?.Id ?? string.Empty,
             PrismArt.Page, PrismArt.Fore, 0f, 0f);
         var top = DrawBackHeader(drawList, content, Loc.T(L.Prism.Rewards), scale);
-        var button = ActionRect(content, scale);
-        var bottom = entering ? button.Min.Y - Metrics.Space.Md * scale : content.Max.Y - bottomChrome;
+        var bottom = content.Max.Y - bottomChrome;
         using (BeginBody(new Rect(new Vector2(full.Min.X, top), new Vector2(full.Max.X, bottom))))
         {
             var list = ImGui.GetWindowDrawList();
@@ -152,30 +150,14 @@ internal sealed partial class PrismApp
             ImGui.SetCursorScreenPos(origin);
             ImGui.Dummy(new Vector2(width, cursor - origin.Y + PrismArt.BottomMargin(scale)));
         }
-
-        if (!entering)
-        {
-            return;
-        }
-
-        PrismLight.Primary(drawList, button, !store.Busy, scale);
-        if (DrawButton(drawList, button, EnterLabel(), ButtonStyle.Solid, scale, enabled: !store.Busy,
-                id: "prism.rewards.enter"))
-        {
-            StartPick();
-        }
     }
 
-    private void DrawNoRewards(ImDrawListPtr drawList, Rect content, bool entering, float scale)
+    private void DrawNoRewards(ImDrawListPtr drawList, Rect content, float scale)
     {
         var top = DrawBackHeader(drawList, content, Loc.T(L.Prism.Rewards), scale);
         var area = new Rect(new Vector2(content.Min.X, top), new Vector2(content.Max.X, content.Max.Y - bottomChrome));
-        DrawEmpty(drawList, area, RewardsGlyph, string.Empty, Loc.T(L.Prism.NoRewardsHint),
-            entering ? EnterLabel() : string.Empty, ButtonStyle.Solid, scale, out var enter);
-        if (enter && !store.Busy)
-        {
-            StartPick();
-        }
+        DrawEmpty(drawList, area, RewardsGlyph, string.Empty, Loc.T(L.Prism.NoRewardsHint), string.Empty,
+            ButtonStyle.Solid, scale, out _);
     }
 
     private float DrawRewardTracks(float left, float top, float width, float scale)
