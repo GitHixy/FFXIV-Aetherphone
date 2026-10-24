@@ -372,6 +372,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         composeAttachments.Clear();
         composePicking = false;
         composeSensitive = false;
+        composePoll.Reset();
         store.ClearDiscover();
         trendingRequested = false;
         feedScrollY = 0f;
@@ -612,6 +613,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         composeIntake.Discard();
         composePicking = false;
         composeSensitive = false;
+        composePoll.Reset();
         composeFocus = true;
         router.Push(ChirperRoute.Compose);
     }
@@ -1355,7 +1357,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         var hasQuote = post.QuotedPostId is not null;
         var quoteHeight = hasQuote ? QuotedCardHeight(post.ReferencedPost, contentWidth) : 0f;
         var quoteTop = mediaTop + mediaHeight + (hasQuote ? 9f * scale : 0f);
-        var contentBody = quoteTop + quoteHeight;
+        var pollHeight = PollBlockHeight(post, isThreadHead);
+        var contentBody = quoteTop + quoteHeight + pollHeight;
         var hasReactions = post.TotalReactions > 0;
         var reactionsTop = contentBody + (hasReactions ? (isThreadHead ? 12f : 9f) * scale : 0f);
         var expandProgress = isThreadHead ? 1f : ReactionsExpandProgress(post);
@@ -1488,6 +1491,11 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         {
             DrawQuotedCard(drawList, new Vector2(contentLeft, quoteTop), contentWidth, quoteHeight,
                 post.ReferencedPost, true, post.Id);
+        }
+
+        if (pollHeight > 0f)
+        {
+            DrawPollBlock(drawList, post, contentLeft, quoteTop + quoteHeight, contentWidth, isThreadHead);
         }
 
         if (hasReactions)
@@ -2542,6 +2550,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         composeIntake.Discard();
         composePicking = false;
         composeSensitive = false;
+        composePoll.Reset();
         composeFocus = true;
         router.Push(ChirperRoute.Compose);
     }
@@ -2636,6 +2645,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         composeIntake.Discard();
         composePicking = false;
         composeSensitive = false;
+        composePoll.Reset();
         AddComposeAttachment(path);
         composeFocus = true;
         router.Push(ChirperRoute.Compose);

@@ -288,7 +288,51 @@ internal sealed class GameData
         return string.Empty;
     }
 
-    private static string RegionNameFromId(uint region) =>
+    public WorldSheetRow[] WorldRows()
+    {
+        if (!GameSheets.Available)
+        {
+            return Array.Empty<WorldSheetRow>();
+        }
+
+        var sheet = data.GetExcelSheet<World>();
+        var rows = new List<WorldSheetRow>(sheet.Count);
+        foreach (var world in sheet)
+        {
+            if (world.RowId == 0)
+            {
+                continue;
+            }
+
+            rows.Add(new WorldSheetRow(world.RowId, world.Name.ExtractText(), world.DataCenter.RowId, world.IsPublic));
+        }
+
+        return rows.ToArray();
+    }
+
+    public DataCenterSheetRow[] DataCenterRows()
+    {
+        if (!GameSheets.Available)
+        {
+            return Array.Empty<DataCenterSheetRow>();
+        }
+
+        var sheet = data.GetExcelSheet<WorldDCGroupType>();
+        var rows = new List<DataCenterSheetRow>(sheet.Count);
+        foreach (var group in sheet)
+        {
+            if (group.RowId == 0)
+            {
+                continue;
+            }
+
+            rows.Add(new DataCenterSheetRow(group.RowId, group.Name.ExtractText(), group.Region.RowId));
+        }
+
+        return rows.ToArray();
+    }
+
+    public static string RegionNameFromId(uint region) =>
         region switch
         {
             1 => "Japan",

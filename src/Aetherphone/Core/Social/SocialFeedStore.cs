@@ -1916,6 +1916,24 @@ internal abstract partial class SocialFeedStore : IDisposable
         }
     }
 
+    protected void MapReferencedEverywhere(string postId, Func<PostDto, PostDto> transform)
+    {
+        bool Match(PostDto host) => host.ReferencedPost is { } referenced && referenced.Id == postId;
+        PostDto Nest(PostDto host) => host with { ReferencedPost = transform(host.ReferencedPost!) };
+        forYouLane.Items = CopyOnWrite.Map(forYouLane.Items, Match, Nest);
+        latestLane.Items = CopyOnWrite.Map(latestLane.Items, Match, Nest);
+        followingLane.Items = CopyOnWrite.Map(followingLane.Items, Match, Nest);
+        profileLane.Items = CopyOnWrite.Map(profileLane.Items, Match, Nest);
+        savedLane.Items = CopyOnWrite.Map(savedLane.Items, Match, Nest);
+        taggedLane.Items = CopyOnWrite.Map(taggedLane.Items, Match, Nest);
+        hashtagLane.Items = CopyOnWrite.Map(hashtagLane.Items, Match, Nest);
+        likedLane.Items = CopyOnWrite.Map(likedLane.Items, Match, Nest);
+        if (detailPost is { } current && Match(current))
+        {
+            detailPost = Nest(current);
+        }
+    }
+
     protected void ReplacePost(PostDto updated)
     {
         forYouLane.Items = CopyOnWrite.Replace(forYouLane.Items, updated);

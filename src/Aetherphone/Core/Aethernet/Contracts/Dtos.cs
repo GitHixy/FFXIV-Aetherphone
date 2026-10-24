@@ -187,6 +187,7 @@ internal sealed record CreatePostRequest(
     int MediaWidth = 0,
     int MediaHeight = 0,
     bool Sensitive = false,
+    PostPollInput? Poll = null,
     string? GifUrl = null);
 
 internal sealed record SetSensitiveRequest(bool Sensitive);
@@ -254,7 +255,8 @@ internal sealed record PostDto(
     string? Lang = null,
     long? EditedAtUnix = null,
     long? PinnedAtUnix = null,
-    long? ArchivedAtUnix = null) : IIdentified;
+    long? ArchivedAtUnix = null,
+    PostPollDto? Poll = null) : IIdentified;
 
 internal sealed record FeedPage(
     PostDto[] Items,

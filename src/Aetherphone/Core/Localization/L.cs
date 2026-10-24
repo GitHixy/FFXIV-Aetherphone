@@ -7304,6 +7304,25 @@ internal static class L
         public static readonly LocString ImportFromPc = new("chirper.importFromPc", "Import from PC");
         public static readonly LocString AddPhotos = new("chirper.addPhotos", "Add photos");
         public static readonly LocString MaxPhotos = new("chirper.maxPhotos", "A chirp can carry up to {0} photos.");
+        public static readonly LocString AddPoll = new("chirper.addPoll", "Add a poll");
+        public static readonly LocString RemovePoll = new("chirper.removePoll", "Remove poll");
+        public static readonly LocString PollQuestionHint = new("chirper.pollQuestionHint", "Ask a question…");
+        public static readonly LocString PollOptionHint = new("chirper.pollOptionHint", "Option {0}");
+        public static readonly LocString PollAddOption = new("chirper.pollAddOption", "Add option");
+        public static readonly LocString PollRemoveOption = new("chirper.pollRemoveOption", "Remove option");
+        public static readonly LocString PollLength = new("chirper.pollLength", "Poll length");
+        public static readonly LocString PollOneHour = new("chirper.pollOneHour", "1 hour");
+        public static readonly LocString PollSixHours = new("chirper.pollSixHours", "6 hours");
+        public static readonly LocString PollOneDay = new("chirper.pollOneDay", "1 day");
+        public static readonly LocString PollThreeDays = new("chirper.pollThreeDays", "3 days");
+        public static readonly LocString PollSevenDays = new("chirper.pollSevenDays", "7 days");
+        public static readonly LocString PollRidesAlone = new("chirper.pollRidesAlone", "Remove the photos to add a poll.");
+        public static readonly LocString PollBlocksMedia = new("chirper.pollBlocksMedia", "Remove the poll to add photos or a GIF.");
+        public static readonly LocString PollNotOnQuote = new("chirper.pollNotOnQuote", "A quote can't carry a poll.");
+        public static readonly LocString PollOptionEmpty = new("chirper.pollOptionEmpty", "Fill in every option, or remove the empty one.");
+        public static readonly LocString PollOptionTooLong = new("chirper.pollOptionTooLong", "Keep each option to {0} characters.");
+        public static readonly LocString PollOptionDuplicate = new("chirper.pollOptionDuplicate", "Each option has to say something different.");
+        public static readonly LocString PollEnds = new("chirper.pollEnds", "Ends {0}");
         public static readonly LocString MoveAndScale = new("chirper.moveAndScale", "Move and Scale");
         public static readonly LocString GestureHint = new("chirper.gestureHint", "Drag to move · scroll to zoom");
         public static readonly LocString Use = new("chirper.use", "Use");
@@ -9261,6 +9280,9 @@ internal static class L
         public static readonly LocString TourWatchTitle = new("market.tourWatchTitle", "Watch it");
         public static readonly LocString TourWatchBody =
             new("market.tourWatchBody", "Tap + to add the item to your watchlist. Its price and 7 day trend then sit on the Market home and in the Market Watch widget.");
+        public static readonly LocString ScopeTitle = new("market.scopeTitle", "Where to Price");
+        public static readonly LocString OtherScopes = new("market.otherScopes", "Price another world");
+        public static readonly LocString BackTo = new("market.backTo", "Back to {0}");
     }
 
     internal static class Games
@@ -9897,6 +9919,14 @@ internal static class L
         public static readonly LocString StagePaperclip = new("coil.stagePaperclip", "Paperclip");
         public static readonly LocString StageFigureEight = new("coil.stageFigureEight", "Figure Eight");
         public static readonly LocString StageRipple = new("coil.stageRipple", "Ripple");
+        public static readonly LocString Guide1Title = new("coil.guide1Title", "Aim and fire");
+        public static readonly LocString Guide1Body = new("coil.guide1Body", "Click where you want to shoot. The marble joins the chain right where it hits.");
+        public static readonly LocString Guide2Title = new("coil.guide2Title", "Match three");
+        public static readonly LocString Guide2Body = new("coil.guide2Body", "Pop three or more of one color. Matching colors across a gap roll back together and can pop again for a chain bonus.");
+        public static readonly LocString Guide3Title = new("coil.guide3Title", "Swap and power up");
+        public static readonly LocString Guide3Body = new("coil.guide3Body", "Press Space or right-click to swap in your next marble. Pop glowing marbles for power-ups like Freeze.");
+        public static readonly LocString Guide4Title = new("coil.guide4Title", "Mind the vortex");
+        public static readonly LocString Guide4Body = new("coil.guide4Body", "If the chain reaches the vortex, you lose a life. Pop every marble to clear the stage.");
     }
 
     internal static class Updraft
@@ -10113,6 +10143,14 @@ internal static class L
         public static readonly LocString MysteryBallSave = new("games.pinball.mysteryBallSave", "Mystery: ball save");
         public static readonly LocString SuperJackpot = new("games.pinball.superJackpot", "Super jackpot!");
         public static readonly LocString SuperJackpotLit = new("games.pinball.superJackpotLit", "Super jackpot lit");
+        public static readonly LocString Guide1Title = new("games.pinball.guide1Title", "Launch the ball");
+        public static readonly LocString Guide1Body = new("games.pinball.guide1Body", "Drag the plunger down or hold Space, then let go. A harder pull launches the ball faster.");
+        public static readonly LocString Guide2Title = new("games.pinball.guide2Title", "Keep it in play");
+        public static readonly LocString Guide2Body = new("games.pinball.guide2Body", "Tap the left or right side, or press A and D, to flip. A run has three balls, so keep each one out of the drain.");
+        public static readonly LocString Guide3Title = new("games.pinball.guide3Title", "Light the jackpot");
+        public static readonly LocString Guide3Body = new("games.pinball.guide3Body", "Drop both banks of targets to light the jackpot, then shoot the ramp to collect it.");
+        public static readonly LocString Guide4Title = new("games.pinball.guide4Title", "Combo into Fever");
+        public static readonly LocString Guide4Body = new("games.pinball.guide4Body", "Chain ramps, orbits and the saucer to combo and raise the playfield multiplier. Every hit fills the Fever ring, and Fever doubles your points.");
     }
 
     internal static class Crates
@@ -10142,6 +10180,14 @@ internal static class L
         public static readonly LocString GemShower = new("games.delve.gemShower", "Gem shower!");
         public static readonly LocString TimeLeft = new("games.delve.timeLeft", "Time left");
         public static readonly LocString Foes = new("games.delve.foes", "Foes crushed");
+        public static readonly LocString Guide1Title = new("games.delve.guide1Title", "Dig through dirt");
+        public static readonly LocString Guide1Body = new("games.delve.guide1Body", "Drag, or hold WASD or the arrow keys, to tunnel through dirt. Steel walls never give way.");
+        public static readonly LocString Guide2Title = new("games.delve.guide2Title", "Open the exit");
+        public static readonly LocString Guide2Body = new("games.delve.guide2Body", "Grab enough gems to open the exit and get in before time runs out. Extra gems and spare time earn more stars.");
+        public static readonly LocString Guide3Title = new("games.delve.guide3Title", "Mind the boulders");
+        public static readonly LocString Guide3Body = new("games.delve.guide3Body", "Boulders fall once nothing holds them and crush anything below, you included. Push them sideways to clear a path.");
+        public static readonly LocString Guide4Title = new("games.delve.guide4Title", "Crush your foes");
+        public static readonly LocString Guide4Body = new("games.delve.guide4Body", "Never touch a bat or slime: they explode. Drop a boulder on one instead; a crushed slime bursts into gems.");
     }
 
     internal static class MoogleClicker
@@ -10231,6 +10277,14 @@ internal static class L
         public static readonly LocString LastLife = new("games.claim.lastLife", "Last life!");
         public static readonly LocString BestClaim = new("games.claim.bestClaim", "Best claim");
         public static readonly LocString SlowLines = new("games.claim.slowLines", "Slow lines");
+        public static readonly LocString Guide1Title = new("games.claim.guide1Title", "Cut and claim");
+        public static readonly LocString Guide1Body = new("games.claim.guide1Body", "Turn on Fast (or hold Space), steer into the field and reach an edge again. You claim the side without the boss; 75% clears the level.");
+        public static readonly LocString Guide2Title = new("games.claim.guide2Title", "Slow lines pay double");
+        public static readonly LocString Guide2Body = new("games.claim.guide2Body", "Draw the whole line on Slow (or hold Shift) to double its points. It takes twice as long, so pick a safe moment.");
+        public static readonly LocString Guide3Title = new("games.claim.guide3Title", "Dodge the boss");
+        public static readonly LocString Guide3Body = new("games.claim.guide3Body", "If the boss touches your line or you before the line closes, you lose a life. Keep cuts short while it is near.");
+        public static readonly LocString Guide4Title = new("games.claim.guide4Title", "Sparks and the fuse");
+        public static readonly LocString Guide4Body = new("games.claim.guide4Body", "Sparks only hit you on the edge, so slip into the field to dodge them. Stop mid-line and a fuse burns toward you, so keep moving.");
     }
 
     internal static class Lander
@@ -10460,6 +10514,14 @@ internal static class L
         public static readonly LocString Knockouts = new("games.fuse.knockouts", "Knockouts");
         public static readonly LocString Crates = new("games.fuse.crates", "Crates broken");
         public static readonly LocString PowerUps = new("games.fuse.powerUps", "Power-ups");
+        public static readonly LocString Guide1Title = new("games.fuse.guide1Title", "Drop and run");
+        public static readonly LocString Guide1Body = new("games.fuse.guide1Body", "Move with the pad or WASD and drop a bomb with the button or Space. Then get clear, because its fire knocks out anyone, you included.");
+        public static readonly LocString Guide2Title = new("games.fuse.guide2Title", "Blasts and chains");
+        public static readonly LocString Guide2Body = new("games.fuse.guide2Body", "Blasts shoot out in four straight lines and break the first crate they hit. A blast that reaches another bomb sets it off too.");
+        public static readonly LocString Guide3Title = new("games.fuse.guide3Title", "Grab power-ups");
+        public static readonly LocString Guide3Body = new("games.fuse.guide3Body", "Broken crates can drop an extra bomb, a bigger blast, more speed, or a kick that sends bombs sliding. Walk over one to take it.");
+        public static readonly LocString Guide4Title = new("games.fuse.guide4Title", "Last one standing");
+        public static readonly LocString Guide4Body = new("games.fuse.guide4Body", "Outlast the other moogles to win a round; two rounds win the match. Late in a round, blocks fall from the edges and crush anyone below.");
     }
 
     internal static class Snip
@@ -10532,6 +10594,14 @@ internal static class L
         public static readonly LocString Paused = new("games.herd.paused", "Paused: tap moogles to give skills");
         public static readonly LocString NukeArmed = new("games.herd.nukeArmed", "Tap again to pop them all");
         public static readonly LocString GoalReached = new("games.herd.goalReached", "Goal reached!");
+        public static readonly LocString Guide1Title = new("games.herd.guide1Title", "Lead them home");
+        public static readonly LocString Guide1Body = new("games.herd.guide1Body", "Moogles drop from the door and walk on, turning back at walls. Get enough of them into the hut before time runs out.");
+        public static readonly LocString Guide2Title = new("games.herd.guide2Title", "Hand out skills");
+        public static readonly LocString Guide2Body = new("games.herd.guide2Body", "Pick a skill below or press 1 to 6, then tap a moogle to give it. Each level has only a few of each.");
+        public static readonly LocString Guide3Title = new("games.herd.guide3Title", "Mind the drop");
+        public static readonly LocString Guide3Body = new("games.herd.guide3Body", "A fall from too high splats a moogle, and water sinks it. Give it Float first for a soft landing.");
+        public static readonly LocString Guide4Title = new("games.herd.guide4Title", "Pause and plan");
+        public static readonly LocString Guide4Body = new("games.herd.guide4Body", "Space or the pause button freezes time, and skills still work while paused. F speeds the herd up.");
     }
 
     internal static class Tempo
@@ -10551,6 +10621,33 @@ internal static class L
         public static readonly LocString Jumps = new("games.tempo.jumps", "Jumps");
         public static readonly LocString Checkpoints = new("games.tempo.checkpoints", "Checkpoints");
         public static readonly LocString PracticeHint = new("games.tempo.practiceHint", "Tap the flag to drop a checkpoint, the cross to lift the last one");
+    }
+
+    internal static class Cluster
+    {
+        public static readonly LocString Title = new("games.cluster.title", "Cluster");
+        public static readonly LocString Hook = new("games.cluster.hook", "Tap groups of three or more touching pieces before the bar runs dry. Bigger groups score far more.");
+        public static readonly LocString Shuffle = new("games.cluster.shuffle", "Shuffle");
+        public static readonly LocString ShuffleReady = new("games.cluster.shuffleReady", "Shuffle ready!");
+        public static readonly LocString BoardClear = new("games.cluster.boardClear", "Board clear!");
+        public static readonly LocString PerfectClear = new("games.cluster.perfectClear", "Perfect clear!");
+        public static readonly LocString NewColor = new("games.cluster.newColor", "New color!");
+        public static readonly LocString BiggerBoard = new("games.cluster.biggerBoard", "Bigger board!");
+        public static readonly LocString NoGroups = new("games.cluster.noGroups", "No groups, shuffling");
+        public static readonly LocString Great = new("games.cluster.great", "Great!");
+        public static readonly LocString Huge = new("games.cluster.huge", "Huge!");
+        public static readonly LocString Massive = new("games.cluster.massive", "Massive!");
+        public static readonly LocString OutOfTime = new("games.cluster.outOfTime", "Out of time!");
+        public static readonly LocString BestGroup = new("games.cluster.bestGroup", "Best group");
+        public static readonly LocString Boards = new("games.cluster.boards", "Boards");
+        public static readonly LocString Guide1Title = new("games.cluster.guide1Title", "Tap a group");
+        public static readonly LocString Guide1Body = new("games.cluster.guide1Body", "Tap three or more touching pieces of one color to clear them. Points grow with the square of the group, so build big ones.");
+        public static readonly LocString Guide2Title = new("games.cluster.guide2Title", "Fall and close in");
+        public static readonly LocString Guide2Body = new("games.cluster.guide2Body", "Pieces above drop into the gaps, and empty columns slide in from the sides.");
+        public static readonly LocString Guide3Title = new("games.cluster.guide3Title", "Beat the bar");
+        public static readonly LocString Guide3Body = new("games.cluster.guide3Body", "The bar drains faster on every board. Each clear refills it, more for bigger groups.");
+        public static readonly LocString Guide4Title = new("games.cluster.guide4Title", "Shuffle");
+        public static readonly LocString Guide4Body = new("games.cluster.guide4Body", "Big clears charge Shuffle. Tap it or press E to regroup the board into larger clusters.");
     }
 
     internal static class Nameplate
@@ -14801,6 +14898,9 @@ internal static class L
         public static readonly LocString ContactOwnNumber = new("failure.contactOwnNumber", "That's your own number.");
         public static readonly LocString CasinoLimitOutOfRange = new("failure.casinoLimitOutOfRange", "Pick a limit within {0}.");
         public static readonly LocString PollClosed = new("failure.pollClosed", "This poll is closed.");
+        public static readonly LocString PollAlreadyVoted = new("failure.pollAlreadyVoted", "You already voted on this poll.");
+        public static readonly LocString PostPollInvalid = new("failure.postPollInvalid", "Check the poll options and how long it runs.");
+        public static readonly LocString PostPollWithMedia = new("failure.postPollWithMedia", "A poll can't share a chirp with photos, a GIF or a quote.");
         public static readonly LocString PhotoTagRejected = new("failure.photoTagRejected", "That person can't be tagged.");
         public static readonly LocString VelvetRequestsClosed = new("failure.velvetRequestsClosed", "This person isn't taking new connections.");
         public static readonly LocString VelvetRequestsMutualsOnly = new("failure.velvetRequestsMutualsOnly", "This person only accepts connections from mutual contacts.");

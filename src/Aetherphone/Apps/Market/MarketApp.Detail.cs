@@ -344,8 +344,7 @@ internal sealed partial class MarketApp
         var hasVendor = index.TryGet(view.ItemId, out var item) && item.VendorPrice > 0;
         var hasCheaper = market.TryFindCheaperScope(view.ItemId, scope, hq, cheapest, out var cheaperPrice,
             out var cheaperWorld);
-        var hasTax = market.TryGetLowestTax(gameData.WorldName(gameData.LocalCurrentWorldId), out var taxRate,
-            out var taxCity) && cheapest > 0;
+        var hasTax = market.TryGetLowestTax(TaxWorld(scope), out var taxRate, out var taxCity) && cheapest > 0;
         var rows = (hasVendor ? 1 : 0) + (hasCheaper ? 1 : 0) + (hasTax ? 1 : 0);
         if (rows == 0)
         {
@@ -385,6 +384,16 @@ internal sealed partial class MarketApp
         }
 
         return max.Y;
+    }
+
+    private string TaxWorld(in MarketScope scope)
+    {
+        if (scope.Kind == MarketScopeKind.World)
+        {
+            return scope.ApiName;
+        }
+
+        return watchlist.IsRemote ? string.Empty : gameData.WorldName(gameData.LocalCurrentWorldId);
     }
 
     private void DrawInsightRow(ImDrawListPtr drawList, float left, float width, float cardTop, int rowIndex,

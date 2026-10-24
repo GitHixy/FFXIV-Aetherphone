@@ -372,6 +372,8 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
     public List<CallLogEntry> CallLog { get; set; } = new();
     public long CallLogSeenUnix { get; set; }
     public MarketScopeKind MarketScope { get; set; } = MarketScopeKind.DataCenter;
+    public MarketScopeKind MarketPinnedScopeKind { get; set; }
+    public string MarketPinnedScope { get; set; } = string.Empty;
     public bool MarketHqOnly { get; set; }
     public List<uint> MarketFavorites { get; set; } = new();
     public List<uint> MarketRecents { get; set; } = new();
