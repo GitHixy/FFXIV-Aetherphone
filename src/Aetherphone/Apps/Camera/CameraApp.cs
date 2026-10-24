@@ -458,12 +458,17 @@ internal sealed partial class CameraApp : IPhoneApp
             return;
         }
 
-        if (PhoneAside.Requested && EscapePressed())
+        if (PhoneAside.Requested)
         {
-            timerEndsAt = 0d;
-            DetachCaptureHooks();
-            UiFeedback.Play(UiSound.ToggleOff);
-            return;
+            GameKeyboardHold.ThisFrame();
+            if (EscapePressed())
+            {
+                timerEndsAt = 0d;
+                GameKeyboardHold.UntilReleased(VirtualKey.ESCAPE);
+                DetachCaptureHooks();
+                UiFeedback.Play(UiSound.ToggleOff);
+                return;
+            }
         }
 
         var shown = (int)Math.Ceiling(remaining);
@@ -482,7 +487,7 @@ internal sealed partial class CameraApp : IPhoneApp
         CameraChrome.Countdown(drawList, captureRect.Center, Digits(shown), scale);
     }
 
-    private static bool EscapeDown() => ImGui.IsKeyDown(ImGuiKey.Escape) || GameKeys.Down(VirtualKey.ESCAPE);
+    private static bool EscapeDown() => ImGui.IsKeyDown(ImGuiKey.Escape) || GameKeys.HeldInGame(VirtualKey.ESCAPE);
 
     private bool EscapePressed()
     {
@@ -589,6 +594,11 @@ internal sealed partial class CameraApp : IPhoneApp
             timerShown = 0;
             escapeHeld = EscapeDown();
             timerEndsAt = ImGui.GetTime() + seconds;
+            if (PhoneAside.Requested)
+            {
+                GameKeyboardHold.ThisFrame();
+            }
+
             return;
         }
 

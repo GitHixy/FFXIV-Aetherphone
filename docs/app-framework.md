@@ -132,7 +132,7 @@ private void DrawView(RecipeScreen screen, Rect area, int depth)
 
 Most apps paint their own dark gradient. `AppPalette` is a readonly struct of colors, `AppPalettes` holds one preset per themed app, and `AppSkin` paints with it: construct it once, assign `ui.Theme = context.Theme` each frame, then call `ui.Backdrop`, `ui.Body`, `ui.Card` and the button helpers. [Design accents](design-accents.md) explains where accents and palettes come from.
 
-Only apps drawn on plain system surfaces set `WantsSystemTheme => true`: Settings, Notes, Calendar, Maps, Photos and Announcements. The others always get the dark theme, because the gradient backdrops are designed against dark chrome.
+Only apps drawn on plain system surfaces set `WantsSystemTheme => true`: Settings, Notes, Calendar, Maps, Photos and Updates (app id `announcements`). The others always get the dark theme, because the gradient backdrops are designed against dark chrome.
 
 ## Badges
 

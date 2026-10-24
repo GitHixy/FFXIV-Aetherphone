@@ -8,7 +8,6 @@ internal interface IPhoneApp : IDisposable
 {
     string Id { get; }
     string DisplayName { get; }
-    string HomeLabel => DisplayName;
     string Glyph { get; }
     Vector4 Accent => AppAccents.For(Id);
     int BadgeCount { get; }
