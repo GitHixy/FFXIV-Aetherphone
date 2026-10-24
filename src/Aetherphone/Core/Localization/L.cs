@@ -10232,6 +10232,14 @@ internal static class L
         public static readonly LocString LastLife = new("games.claim.lastLife", "Last life!");
         public static readonly LocString BestClaim = new("games.claim.bestClaim", "Best claim");
         public static readonly LocString SlowLines = new("games.claim.slowLines", "Slow lines");
+        public static readonly LocString Guide1Title = new("games.claim.guide1Title", "Cut and claim");
+        public static readonly LocString Guide1Body = new("games.claim.guide1Body", "Turn on Fast (or hold Space), steer into the field and reach an edge again. You claim the side without the boss; 75% clears the level.");
+        public static readonly LocString Guide2Title = new("games.claim.guide2Title", "Slow lines pay double");
+        public static readonly LocString Guide2Body = new("games.claim.guide2Body", "Draw the whole line on Slow (or hold Shift) to double its points. It takes twice as long, so pick a safe moment.");
+        public static readonly LocString Guide3Title = new("games.claim.guide3Title", "Dodge the boss");
+        public static readonly LocString Guide3Body = new("games.claim.guide3Body", "If the boss touches your line or you before the line closes, you lose a life. Keep cuts short while it is near.");
+        public static readonly LocString Guide4Title = new("games.claim.guide4Title", "Sparks and the fuse");
+        public static readonly LocString Guide4Body = new("games.claim.guide4Body", "Sparks only hit you on the edge, so slip into the field to dodge them. Stop mid-line and a fuse burns toward you, so keep moving.");
     }
 
     internal static class Lander
