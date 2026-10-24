@@ -8,12 +8,16 @@ internal static class RealGlassMaterials
     public const float AccentTintAmount = 0.55f;
     public const float FrostedFrost = 1f;
     public const int FrostedBlurLevels = 4;
+    public const float WallpaperLightLift = 0.2f;
+    public const float WallpaperSmokeAmount = 0.4f;
+    public static readonly Glasswork.Color WallpaperSmoke = new(0.05f, 0.06f, 0.09f);
     private const float CapsuleTolerance = 0.5f;
 
-    public static GlassMaterial Build(RealGlassKind kind, GlassTone tone, Vector4 accent, float opacity, float amount,
-        float radius, Vector2 size)
+    public static GlassMaterial Build(RealGlassKind kind, GlassTone tone, bool onWallpaper, Vector4 accent,
+        float opacity, float amount, GlassTuning tuning, float radius, Vector2 size)
     {
-        var material = Base(kind, tone == GlassTone.Light, accent).WithAmount(amount);
+        var material = Base(kind, tone, onWallpaper, accent).WithAmount(amount);
+        Tune(ref material, tuning);
         material.Opacity = Math.Clamp(opacity, 0f, 1f);
         material.CornerExponent = CornerExponent(radius, size);
         return material;
@@ -26,16 +30,42 @@ internal static class RealGlassMaterials
             ? Glasswork.CornerCurve.CircularExponent
             : Glasswork.CornerCurve.ContinuousExponent;
 
-    private static GlassMaterial Base(RealGlassKind kind, bool light, Vector4 accent)
+    private static GlassMaterial Base(RealGlassKind kind, GlassTone tone, bool onWallpaper, Vector4 accent)
     {
         switch (kind)
         {
             case RealGlassKind.Frosted:
-                return GlassMaterial.ForAppearance(light) with { Frost = FrostedFrost, BlurLevels = FrostedBlurLevels };
+                return Surface(tone, onWallpaper) with { Frost = FrostedFrost, BlurLevels = FrostedBlurLevels };
             case RealGlassKind.Accent:
-                return GlassMaterial.Tinted(Glasswork.Color.FromVector4(accent), AccentTintAmount, light);
+                return GlassMaterial.Tinted(Glasswork.Color.FromVector4(accent), AccentTintAmount,
+                    InkIsDark(tone, onWallpaper));
             default:
-                return GlassMaterial.ForAppearance(light);
+                return Surface(tone, onWallpaper);
         }
+    }
+
+    private static GlassMaterial Surface(GlassTone tone, bool onWallpaper)
+    {
+        if (!onWallpaper)
+        {
+            return GlassMaterial.ForAppearance(tone == GlassTone.Light);
+        }
+
+        return tone == GlassTone.Light
+            ? GlassMaterial.Regular with { Lift = WallpaperLightLift }
+            : GlassMaterial.Tinted(WallpaperSmoke, WallpaperSmokeAmount);
+    }
+
+    private static bool InkIsDark(GlassTone tone, bool onWallpaper) => tone == GlassTone.Light && !onWallpaper;
+
+    private static void Tune(ref GlassMaterial material, GlassTuning tuning)
+    {
+        material.Specular *= GlassTuning.Multiplier(tuning.Highlight);
+        material.EdgeLineStrength = MathF.Min(material.EdgeLineStrength * GlassTuning.Multiplier(tuning.Edges),
+            GlassTuning.MaximumEdgeLine);
+        material.Lift += GlassTuning.LiftShift(tuning.Brightness);
+        material.Depth *= GlassTuning.Multiplier(tuning.Refraction);
+        material.Dispersion *= GlassTuning.Multiplier(tuning.ColorSplit);
+        material.ShadowOpacity *= GlassTuning.Multiplier(tuning.Shadow);
     }
 }

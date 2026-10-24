@@ -1,4 +1,5 @@
 using Aetherphone.Core;
+using Aetherphone.Core.Shell;
 using Aetherphone.Core.Theme;
 using Aetherphone.Core.Wallpapers;
 using Aetherphone.Windows.Components;
@@ -29,7 +30,11 @@ internal static class LiquidGlassPreview
         }
 
         var backdrop = WallpaperBackdrop.Snapshot();
-        WallpaperRenderer.RecordBackdrop(picture, light, dark, aspect, darkness);
+        if (!RealGlass.Ready)
+        {
+            WallpaperRenderer.RecordBackdrop(picture, light, dark, aspect, darkness);
+        }
+
         DrawTabBar(drawList, picture, theme, scale);
         WallpaperBackdrop.Restore(backdrop);
         Squircle.Stroke(drawList, picture.Min, picture.Max, radius, ImGui.GetColorU32(theme.Separator),

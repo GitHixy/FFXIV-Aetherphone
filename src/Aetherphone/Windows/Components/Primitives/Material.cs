@@ -79,7 +79,8 @@ internal static class Material
             return;
         }
 
-        if (RealGlass.TryDraw(drawList, min, max, radius, RealGlassKind.Frosted, GlassTone.Dark, default, opacity))
+        if (RealGlass.TryDraw(drawList, min, max, radius, RealGlassKind.Frosted, GlassTone.Dark,
+                WallpaperBackdrop.Available, default, opacity))
         {
             return;
         }
@@ -114,7 +115,8 @@ internal static class Material
             return;
         }
 
-        if (RealGlass.TryDraw(drawList, min, max, radius, RealGlassKind.Accent, GlassTone.Dark, accent, opacity))
+        if (RealGlass.TryDraw(drawList, min, max, radius, RealGlassKind.Accent, GlassTone.Dark,
+                WallpaperBackdrop.Available, accent, opacity))
         {
             return;
         }
@@ -136,7 +138,8 @@ internal static class Material
             return;
         }
 
-        if (RealGlass.TryDraw(drawList, min, max, radius, RealGlassKind.Liquid, tone, default, opacity))
+        if (RealGlass.TryDraw(drawList, min, max, radius, RealGlassKind.Liquid, tone, WallpaperBackdrop.Available,
+                default, opacity))
         {
             return;
         }

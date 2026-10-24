@@ -95,7 +95,7 @@ internal sealed partial class GamesApp
         var transform = LaunchMorph.Transform(source, area, progress, icon);
         using (var playing = OpenLaunchLayer(router.LayerId(router.Depth - 1), area, progress, in transform))
         {
-            using var glassSuspension = RealGlass.Suspend(!transform.IsIdentity);
+            using var glassPlacement = RealGlass.Transform(in transform);
             drawView(router.Current, area, router.Depth);
             playing.Transform(in transform);
         }
