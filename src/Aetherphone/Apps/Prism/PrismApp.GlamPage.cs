@@ -169,6 +169,12 @@ internal sealed partial class PrismApp
             return;
         }
 
+        if (glams.DetailGone)
+        {
+            DrawGlamGone(drawList, content, scale);
+            return;
+        }
+
         if (glams.DetailPending || glams.DetailMissing)
         {
             DrawGlamLoading(drawList, content, glam, glams.DetailMissing, scale);
@@ -184,6 +190,13 @@ internal sealed partial class PrismApp
         }
 
         DrawGlamMenu(full, glam, key);
+    }
+
+    private void DrawGlamGone(ImDrawListPtr drawList, Rect content, float scale)
+    {
+        var top = DrawBackHeader(drawList, content, string.Empty, scale) + Metrics.Space.Lg * scale;
+        Typography.DrawWrappedLeft(new Vector2(content.Min.X, top), Loc.T(L.Prism.GlamGone), PrismArt.Muted,
+            PrismType.Body, content.Width);
     }
 
     private void DrawGlamLoading(ImDrawListPtr drawList, Rect content, GlamDto glam, bool missing, float scale)
@@ -810,7 +823,7 @@ internal sealed partial class PrismApp
                     Confirm = () =>
                     {
                         glams.Delete(glam);
-                        DropShowcase(glam.Id);
+                        PurgeGlam(glam.Id);
                         GoBack();
                     },
                 });

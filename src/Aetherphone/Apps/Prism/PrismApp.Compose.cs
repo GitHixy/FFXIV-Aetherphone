@@ -49,6 +49,8 @@ internal sealed partial class PrismApp
     private GlamDto? editingGlam;
     private volatile int glamEditOutcome;
     private int savingDraft;
+    private bool editPicking;
+    private bool editPhotosChanged;
     private bool composeDetails;
     private bool focusTitle;
     private bool? composeVanilla;
@@ -66,6 +68,8 @@ internal sealed partial class PrismApp
         composeDraft++;
         composeIntake.Discard();
         editingGlam = null;
+        editPicking = false;
+        editPhotosChanged = false;
         composeSession.Open(false);
         composeSession.MaxPhotos = GlamStore.MaxPhotos;
         composeDetails = false;
@@ -84,6 +88,8 @@ internal sealed partial class PrismApp
     {
         composeDraft++;
         editingGlam = glam;
+        editPicking = false;
+        editPhotosChanged = false;
         glamEditOutcome = OutcomePending;
         composeDetails = true;
         focusTitle = false;
@@ -106,6 +112,12 @@ internal sealed partial class PrismApp
     private void DrawCompose(ImDrawListPtr drawList, Rect content, float scale)
     {
         composeSession.ConsumePendingImport();
+        if (editingGlam is not null && editPicking)
+        {
+            DrawEditPhotoPick(drawList, content, scale);
+            return;
+        }
+
         if (composeDetails || editingGlam is not null)
         {
             DrawComposeDetails(drawList, content, scale);
@@ -122,18 +134,52 @@ internal sealed partial class PrismApp
             focusTitle = true;
         }
 
+        DrawComposePickBody(content, top, Loc.T(L.Prism.PostGlam), scale);
+    }
+
+    private void DrawEditPhotoPick(ImDrawListPtr drawList, Rect content, float scale)
+    {
+        TakeComposeIntake(content);
+        var title = Loc.T(L.Prism.ChangePhoto);
+        var top = DrawActionHeader(drawList, content, PhoneIcons.X, Loc.T(L.Common.Cancel), title, PhoneIcons.Check,
+            Loc.T(L.Prism.Done), composeSession.HasSelection, string.Empty, UiSound.Tap, scale, out var done) +
+            Metrics.Space.Sm * scale;
+        if (done)
+        {
+            editPicking = false;
+            editPhotosChanged = true;
+            return;
+        }
+
+        DrawComposePickBody(content, top, title, scale);
+    }
+
+    private void StartEditPhotos()
+    {
+        if (!editPhotosChanged)
+        {
+            composeIntake.Discard();
+            composeSession.Open(false);
+            composeSession.MaxPhotos = GlamStore.MaxPhotos;
+        }
+
+        editPicking = true;
+    }
+
+    private void DrawComposePickBody(Rect content, float top, string title, float scale)
+    {
         top += Typography.DrawWrappedLeft(new Vector2(content.Min.X, top), Loc.T(L.Prism.PhotosHint), PrismArt.Muted,
             PrismType.Body, content.Width) + Metrics.Space.Md * scale;
         var paneHeight = MathF.Min(content.Width, (content.Max.Y - top) * PickPaneFraction);
         var pane = new Rect(new Vector2(content.Min.X, top), new Vector2(content.Max.X, top + paneHeight));
         composeSession.DrawPickPane(pane, scale, PickStyle, GlamStore.PhotoRatio, GlamStore.RevealsWholePhoto, true,
-            Loc.T(L.Prism.PostGlam));
+            title);
         var gridRect = new Rect(new Vector2(content.Min.X, pane.Max.Y + Metrics.Space.Md * scale),
             new Vector2(content.Max.X, content.Max.Y - PrismArt.BottomMargin(scale)));
         using (AppSurface.BeginEdgeToEdge(gridRect, smoothWheel: true))
         {
             if (composeSession.DrawPickGrid(gridRect, scale, PickStyle, true, Loc.T(L.Common.ImportFromPc),
-                    Loc.T(L.Prism.PostGlam), ComposePasteLabel()))
+                    title, ComposePasteLabel()))
             {
                 composeIntake.Paste(library);
             }
@@ -249,8 +295,9 @@ internal sealed partial class PrismApp
         var busy = editing ? glams.Saving : glams.Posting;
         var bodyChosen = BodyChosen(composeRace, composeGender);
         var gearReady = composeVanilla != true || DraftPieces() > 0;
+        var photosReady = !editing || !editPhotosChanged || composeSession.SelectedCount > 0;
         var ready = !string.IsNullOrWhiteSpace(glamTitle) && !busy && composeVanilla is not null &&
-                    bodyChosen && gearReady;
+                    bodyChosen && gearReady && photosReady;
         var busyLabel = !busy ? string.Empty : Loc.T(editing ? L.Prism.SavingGlam : L.Prism.Posting);
         var top = DrawActionHeader(drawList, content, PhoneIcons.ChevronLeft, Loc.T(L.Prism.Back),
             Loc.T(editing ? L.Prism.EditGlamTitle : L.Prism.PostGlam), PhoneIcons.Check,
@@ -308,7 +355,7 @@ internal sealed partial class PrismApp
             var bodyWidth = ScrollLayout.StableContentWidth();
             var photoHeight = content.Height * ComposePhotoHeightShare;
             var photosBottom = editingGlam is { } glam
-                ? DrawEditPhotos(list, origin.X, origin.Y, bodyWidth, photoHeight, glam, scale)
+                ? DrawEditPhotoBlock(list, origin.X, origin.Y, bodyWidth, photoHeight, glam, scale)
                 : DrawComposePhotos(list, origin.X, origin.Y, bodyWidth, photoHeight, scale);
             var cursor = photosBottom + Metrics.Space.Lg * scale;
             if (focusTitle)
@@ -361,14 +408,52 @@ internal sealed partial class PrismApp
             }
 
             var hovered = HoverWash(drawList, card);
-            if (UiInteract.Click(card.Min, card.Max, hovered))
+            if (!UiInteract.Click(card.Min, card.Max, hovered))
             {
-                composeSession.SelectCurrent(index);
+                continue;
+            }
+
+            composeSession.SelectCurrent(index);
+            if (editingGlam is not null)
+            {
+                editPicking = true;
+            }
+            else
+            {
                 composeDetails = false;
             }
         }
 
         return top + cardHeight;
+    }
+
+    private float DrawEditPhotoBlock(ImDrawListPtr drawList, float left, float top, float width, float maxHeight,
+        GlamDto glam, float scale)
+    {
+        if (editPhotosChanged && composeSession.SelectedCount == 0)
+        {
+            editPhotosChanged = false;
+        }
+
+        var bottom = (editPhotosChanged
+            ? DrawComposePhotos(drawList, left, top, width, maxHeight, scale)
+            : DrawEditPhotos(drawList, left, top, width, maxHeight, glam, scale)) + Metrics.Space.Sm * scale;
+        if (glam.WeekId.Length > 0)
+        {
+            return bottom + Typography.DrawWrappedLeft(new Vector2(left, bottom),
+                Loc.T(L.Failure.PrismGlamPhotosLocked), PrismArt.Muted, PrismType.Body, width);
+        }
+
+        var label = Loc.T(L.Prism.ChangePhoto);
+        var buttonWidth = ButtonWidth([label], width, scale);
+        var rect = new Rect(new Vector2(left + (width - buttonWidth) * 0.5f, bottom),
+            new Vector2(left + (width + buttonWidth) * 0.5f, bottom + Button.LargeHeight * scale));
+        if (DrawButton(drawList, rect, label, ButtonStyle.Plain, scale, enabled: !glams.Saving, id: "prism.editPhotos"))
+        {
+            StartEditPhotos();
+        }
+
+        return rect.Max.Y;
     }
 
     private float DrawEditPhotos(ImDrawListPtr drawList, float left, float top, float width, float maxHeight,
@@ -462,7 +547,15 @@ internal sealed partial class PrismApp
             FillFromWearing(glamGear);
         }
 
-        top = DrawGearSlots(drawList, left, fill.Max.Y + Metrics.Space.Lg * scale, width, scale);
+        var fromWardrobe = new Rect(new Vector2(left, fill.Max.Y + Metrics.Space.Sm * scale),
+            new Vector2(left + width, fill.Max.Y + Metrics.Space.Sm * scale + Button.RegularHeight * scale));
+        if (DrawButton(drawList, fromWardrobe, Loc.T(L.Prism.FillFromWardrobe), ButtonStyle.Tinted, scale,
+                id: "prism.compose.wardrobe"))
+        {
+            OpenWardrobePick();
+        }
+
+        top = DrawGearSlots(drawList, left, fromWardrobe.Max.Y + Metrics.Space.Lg * scale, width, scale);
         if (composeVanilla != false)
         {
             return top + PrismArt.BottomMargin(scale);
@@ -666,10 +759,8 @@ internal sealed partial class PrismApp
         capturedMods = mods;
     }
 
-    private void PostGlam()
+    private GlamPhotoDraft[] ComposePhotoDrafts()
     {
-        var vanilla = composeVanilla == true;
-        var gear = ChosenGear();
         var paths = composeSession.SelectedArray();
         var crops = composeSession.CropsArray();
         var count = Math.Min(paths.Length, GlamStore.MaxPhotos);
@@ -679,9 +770,17 @@ internal sealed partial class PrismApp
             photos[index] = new GlamPhotoDraft(paths[index], index < crops.Length ? crops[index] : default);
         }
 
+        return photos;
+    }
+
+    private void PostGlam()
+    {
+        var vanilla = composeVanilla == true;
+        var gear = ChosenGear();
+        var photos = ComposePhotoDrafts();
         postOutcome = OutcomePending;
         postingDraft = composeDraft;
-        postingCover = count > 0 ? photos[0].Path : string.Empty;
+        postingCover = photos.Length > 0 ? photos[0].Path : string.Empty;
         glams.Post(photos, gear, glamTitle.Trim(), SplitTags(glamTags), composeRace, composeGender, vanilla,
             glamour.TryingOn ? wearingGlamId : string.Empty, postSettled);
     }
@@ -696,7 +795,7 @@ internal sealed partial class PrismApp
         glamEditOutcome = OutcomePending;
         savingDraft = composeDraft;
         glams.Update(glam, ChosenGear(), glamTitle.Trim(), SplitTags(glamTags), composeRace, composeGender,
-            glamEditSettled);
+            editPhotosChanged ? ComposePhotoDrafts() : null, glamEditSettled);
     }
 
     private void ConsumeGlamEditOutcome()
@@ -713,6 +812,7 @@ internal sealed partial class PrismApp
             return;
         }
 
+        RefreshGlamCopies(saved);
         UiFeedback.Play(UiSound.Success);
         if (screen != PrismScreen.Compose || savingDraft != composeDraft || editingGlam?.Id != saved.Id)
         {

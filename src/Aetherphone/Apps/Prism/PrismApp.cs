@@ -53,6 +53,7 @@ internal enum PrismScreen : byte
     WardrobeEdit,
     WardrobeMods,
     WardrobeDesigns,
+    WardrobePick,
 }
 
 internal sealed partial class PrismApp : IResumableApp
@@ -115,10 +116,10 @@ internal sealed partial class PrismApp : IResumableApp
         WallpaperImageCache wallpaperImages, Configuration configuration, ConfirmService confirm,
         ReportService report, GameData gameData, ITextureProvider textures, GlamourService glamour,
         MarketItemIndex marketIndex, MarketLauncher marketLauncher, ShareService share,
-        SocialNotificationService social, SocialLauncher launcher)
+        SocialNotificationService social, SocialLauncher launcher, RealtimeSignalBus signals)
     {
         store = new PrismStore(session, api);
-        glams = new GlamStore(session, api);
+        glams = new GlamStore(session, api, signals);
         this.glamour = glamour;
         this.images = images;
         this.library = library;
@@ -229,6 +230,7 @@ internal sealed partial class PrismApp : IResumableApp
         FollowSkin(context.Theme);
         FollowTheme(context.Theme);
         ImGui.GetWindowDrawList().AddRectFilled(full.Min, full.Max, ImGui.GetColorU32(PrismArt.Back));
+        DrainRemovals();
         if (glams.IsSignedIn && screen != PrismScreen.Guide && launcher.TryConsume(Id, out var link))
         {
             OpenLink(link);
@@ -361,6 +363,9 @@ internal sealed partial class PrismApp : IResumableApp
             case PrismScreen.WardrobeDesigns:
                 DrawDesignPicker(drawList, content, scale);
                 break;
+            case PrismScreen.WardrobePick:
+                DrawWardrobePick(drawList, full, content, scale);
+                break;
             case PrismScreen.Activity:
                 DrawActivity(drawList, full, content, scale);
                 break;
@@ -407,6 +412,10 @@ internal sealed partial class PrismApp : IResumableApp
         if (piecesOpen && screen is PrismScreen.GlamDetail or PrismScreen.WardrobeOutfit)
         {
             piecesOpen = false;
+        }
+        else if (screen == PrismScreen.Compose && editingGlam is not null && editPicking)
+        {
+            editPicking = false;
         }
         else if (screen == PrismScreen.Compose && editingGlam is not null)
         {
@@ -751,7 +760,8 @@ internal sealed partial class PrismApp : IResumableApp
     private bool InComposeSubScreen =>
         screen is PrismScreen.GearSearch or PrismScreen.DyePick
             ? gearReturn == PrismScreen.Compose
-            : screen == PrismScreen.WardrobeMods && ReferenceEquals(wornTarget, composeMods);
+            : screen == PrismScreen.WardrobePick ||
+              (screen == PrismScreen.WardrobeMods && ReferenceEquals(wornTarget, composeMods));
 
     private void ConsumeSharedPhoto()
     {

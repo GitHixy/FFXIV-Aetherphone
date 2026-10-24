@@ -424,6 +424,14 @@ internal sealed partial class PrismApp
             StartOutfitEdit(outfit);
         }
 
+        var canPost = glams.IsSignedIn;
+        if (canPost && RoundButton.Icon(drawList, new Vector2(left + radius * 0.5f + tap * 2f, top + radius), radius,
+                PhoneIcons.Send, controls, ButtonStyle.Bare, Loc.T(L.Prism.PostGlam), HoverLabelSide.Below,
+                overlay: pinned) && !blocked)
+        {
+            PostOutfit(outfit);
+        }
+
         if (MathF.Abs(slide) > PrismMotion.GrowEpsilon)
         {
             PrismMotion.Shift(drawList, iconsMark, new Vector2(slide, 0f), 1f);
@@ -431,7 +439,7 @@ internal sealed partial class PrismApp
 
         var putOn = Loc.T(L.Prism.PutOn);
         var takeOff = Loc.T(L.Prism.TakeOff);
-        var cap = MathF.Max(1f, right - start - tap * 3f);
+        var cap = MathF.Max(1f, right - start - tap * (canPost ? 4f : 3f));
         var width = MathF.Min(ButtonWidth([putOn, takeOff], cap, scale), cap);
         var pill = new Rect(new Vector2(right - width, top), new Vector2(right, top + tap));
         var wearing = Wearing(outfit.Id);
@@ -599,7 +607,7 @@ internal sealed partial class PrismApp
             return;
         }
 
-        if (outfit.DesignId != Guid.Empty && glamour.ApplyDesign(outfit.DesignId))
+        if (outfit.DesignId != Guid.Empty && glamour.ApplyDesign(outfit.DesignId, outfit.Gear))
         {
             return;
         }

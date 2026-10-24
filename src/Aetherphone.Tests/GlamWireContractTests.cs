@@ -113,4 +113,16 @@ public sealed class GlamWireContractTests
         Assert.Equal(1, season?.Standings?[0].Rank);
         Assert.Equal(40, season?.Me?.Rank);
     }
+
+    [Fact]
+    public void AnEditSendsPhotosOnlyWhenTheAuthorChangedThem()
+    {
+        var kept = JsonSerializer.Serialize(new UpdateGlamRequest("Title", [], [], 6, 1),
+            AethernetJsonContext.Default.UpdateGlamRequest);
+        Assert.DoesNotContain("photos", kept);
+        var swapped = JsonSerializer.Serialize(
+            new UpdateGlamRequest("Title", [], [], 6, 1, [new GlamPhotoRequest("prism/u_1/p.jpg", 810, 1080)]),
+            AethernetJsonContext.Default.UpdateGlamRequest);
+        Assert.Contains("\"photos\":[{\"key\":\"prism/u_1/p.jpg\",\"width\":810,\"height\":1080}]", swapped);
+    }
 }

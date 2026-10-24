@@ -36,6 +36,7 @@ internal sealed class GlamStore : IDisposable
     private const int ShowcaseRetrySeconds = 30;
     private const int ShowcaseModded = 0;
     private const int ShowcaseVanilla = 1;
+    private const int RemovalBacklog = 256;
 
     private const int PhotoBaseSize = 1080;
     private const PostAspect GlamAspect = PostAspect.Portrait;
@@ -51,6 +52,8 @@ internal sealed class GlamStore : IDisposable
     private readonly MediaClient media;
     private readonly SafetyClient safety;
     private readonly SocialClient social;
+    private readonly RealtimeSignalBus signals;
+    private readonly ConcurrentQueue<ContentRemovalSignal> removals = new();
     private readonly StoreWork work = new("Glams");
     private readonly FailureSlot postFailure = new();
     private readonly FailureSlot profileFailure = new();
@@ -80,6 +83,7 @@ internal sealed class GlamStore : IDisposable
     private volatile GlamDto? posted;
     private volatile bool detailPending;
     private volatile bool detailMissing;
+    private volatile bool detailGone;
     private volatile GlamMore? more;
     private volatile string moreFor = string.Empty;
     private volatile int listOpened;
@@ -109,15 +113,49 @@ internal sealed class GlamStore : IDisposable
     private bool? vanillaOnly;
     private (int Race, int? Gender) body;
 
-    public GlamStore(AethernetSession session, AethernetApi api)
+    public GlamStore(AethernetSession session, AethernetApi api, RealtimeSignalBus signals)
     {
         this.session = session;
+        this.signals = signals;
         account = api.Account;
         client = api.Glams;
         media = api.Media;
         safety = api.Safety;
         social = api.Social;
+        signals.ContentRemoved += OnContentRemoved;
     }
+
+    private void OnContentRemoved(ContentRemovalSignal removal)
+    {
+        if (!string.Equals(removal.App, SocialActivity.PrismApp, StringComparison.Ordinal) ||
+            removal.ContentId is not { Length: > 0 } contentId)
+        {
+            return;
+        }
+
+        if (string.Equals(removal.Kind, ContentRemovalKinds.Glam, StringComparison.Ordinal))
+        {
+            removedIds[contentId] = true;
+        }
+        else if (!string.Equals(removal.Kind, ContentRemovalKinds.Look, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        QueueRemoval(removal);
+    }
+
+    private void QueueRemoval(ContentRemovalSignal removal)
+    {
+        if (removals.Count >= RemovalBacklog)
+        {
+            removals.TryDequeue(out _);
+        }
+
+        removals.Enqueue(removal);
+    }
+
+    public bool TryTakeRemoval(out ContentRemovalSignal removal) => removals.TryDequeue(out removal);
 
     public static float PhotoRatio => PostAspects.Ratio(GlamAspect);
 
@@ -154,6 +192,8 @@ internal sealed class GlamStore : IDisposable
     public bool DetailPending => detailPending;
 
     public bool DetailMissing => detailMissing;
+
+    public bool DetailGone => detailGone;
 
     public GlamDto[] MoreFrom(string glamId) =>
         more is { } shown && shown.GlamId == glamId ? shown.Items : Array.Empty<GlamDto>();
@@ -457,6 +497,7 @@ internal sealed class GlamStore : IDisposable
         var glamId = glam.Id;
         detailPending = glamId.Length > 0 && glam.Photos is not { Length: > 0 };
         detailMissing = false;
+        detailGone = false;
         if (glamId.Length == 0)
         {
             return;
@@ -464,7 +505,8 @@ internal sealed class GlamStore : IDisposable
 
         work.Run("glam", async token =>
         {
-            var fetched = await client.GlamAsync(glamId, token).ConfigureAwait(false);
+            var failure = AepFailure.None;
+            var fetched = await client.GlamAsync(glamId, token, received => failure = received).ConfigureAwait(false);
             if (detail?.Id != glamId)
             {
                 return;
@@ -474,6 +516,11 @@ internal sealed class GlamStore : IDisposable
             {
                 Replace(fetched);
             }
+            else if (failure.StatusCode == NotFoundStatus)
+            {
+                detailGone = true;
+                Gone(glamId);
+            }
             else if (detailPending)
             {
                 detailMissing = true;
@@ -481,6 +528,12 @@ internal sealed class GlamStore : IDisposable
 
             detailPending = false;
         });
+    }
+
+    private void Gone(string glamId)
+    {
+        removedIds[glamId] = true;
+        QueueRemoval(new ContentRemovalSignal(SocialActivity.PrismApp, ContentRemovalKinds.Glam, glamId, null));
     }
 
     public void ToggleLike(GlamDto glam)
@@ -565,23 +618,10 @@ internal sealed class GlamStore : IDisposable
         postFailure.Clear();
         work.Run("post", async token =>
         {
-            var (width, height) = PostAspects.Size(GlamAspect, PhotoBaseSize);
-            var count = Math.Min(photos.Length, MaxPhotos);
-            var uploaded = new GlamPhotoRequest[count];
-            var failure = AepFailure.None;
-            for (var index = 0; index < count; index++)
+            var (uploaded, failure) = await UploadPhotosAsync(photos, token).ConfigureAwait(false);
+            if (uploaded is null)
             {
-                var baked = ImageProcessor.BakeCroppedUpload(photos[index].Path, photos[index].Crop, width, height,
-                    RevealsWholePhoto, PhotoEdit.None);
-                var upload = await media.UploadUrlAsync(baked.ContentType, PrismClient.MediaScope, token,
-                    received => failure = received).ConfigureAwait(false);
-                if (upload is null || !await media.UploadImageAsync(upload.UploadUrl, baked.Bytes, baked.ContentType,
-                        token, received => failure = received).ConfigureAwait(false))
-                {
-                    return FailPost(failure);
-                }
-
-                uploaded[index] = new GlamPhotoRequest(upload.Key, baked.Width, baked.Height);
+                return FailPost(failure);
             }
 
             var created = await client.CreateAsync(new CreateGlamRequest(title, uploaded, gear, tags, race, gender, vanilla,
@@ -604,7 +644,7 @@ internal sealed class GlamStore : IDisposable
     }
 
     public void Update(GlamDto glam, GlamGearDto[] gear, string title, string[] tags, int race, int gender,
-        Action<bool> onComplete)
+        GlamPhotoDraft[]? photos, Action<bool> onComplete)
     {
         if (saving || glam.Id.Length == 0 || !session.IsSignedIn)
         {
@@ -618,13 +658,22 @@ internal sealed class GlamStore : IDisposable
         work.Run("update", async token =>
         {
             var failure = AepFailure.None;
-            var saved = await client.UpdateAsync(glam.Id, new UpdateGlamRequest(title, gear, tags, race, gender),
-                token, received => failure = received).ConfigureAwait(false);
+            GlamPhotoRequest[]? uploaded = null;
+            if (photos is { Length: > 0 })
+            {
+                (uploaded, failure) = await UploadPhotosAsync(photos, token).ConfigureAwait(false);
+                if (uploaded is null)
+                {
+                    return FailSave(failure);
+                }
+            }
+
+            var saved = await client.UpdateAsync(glam.Id,
+                new UpdateGlamRequest(title, gear, tags, race, gender, uploaded), token,
+                received => failure = received).ConfigureAwait(false);
             if (saved is null)
             {
-                saveFailure.Set(failure.Failed ? failure : AepFailure.Transport(AepFailureKind.Offline));
-                saveFailed = true;
-                return false;
+                return FailSave(failure);
             }
 
             Replace(saved);
@@ -633,9 +682,34 @@ internal sealed class GlamStore : IDisposable
         }, onComplete, () => saving = false);
     }
 
+    private async Task<(GlamPhotoRequest[]? Photos, AepFailure Failure)> UploadPhotosAsync(GlamPhotoDraft[] photos,
+        CancellationToken token)
+    {
+        var (width, height) = PostAspects.Size(GlamAspect, PhotoBaseSize);
+        var count = Math.Min(photos.Length, MaxPhotos);
+        var uploaded = new GlamPhotoRequest[count];
+        var failure = AepFailure.None;
+        for (var index = 0; index < count; index++)
+        {
+            var baked = ImageProcessor.BakeCroppedUpload(photos[index].Path, photos[index].Crop, width, height,
+                RevealsWholePhoto, PhotoEdit.None);
+            var upload = await media.UploadUrlAsync(baked.ContentType, PrismClient.MediaScope, token,
+                received => failure = received).ConfigureAwait(false);
+            if (upload is null || !await media.UploadImageAsync(upload.UploadUrl, baked.Bytes, baked.ContentType,
+                    token, received => failure = received).ConfigureAwait(false))
+            {
+                return (null, failure);
+            }
+
+            uploaded[index] = new GlamPhotoRequest(upload.Key, baked.Width, baked.Height);
+        }
+
+        return (uploaded, failure);
+    }
+
     public void Delete(GlamDto glam)
     {
-        Remove(glam.Id);
+        Purge(glam.Id);
         work.Run("delete", token => client.DeleteAsync(glam.Id, token));
     }
 
@@ -697,6 +771,10 @@ internal sealed class GlamStore : IDisposable
             banner = fetched;
             bannerMissing = fetched is null && failure.StatusCode == NotFoundStatus;
             bannerFailed = fetched is null && !bannerMissing;
+            if (bannerMissing)
+            {
+                Gone(glamId);
+            }
         });
     }
 
@@ -829,6 +907,7 @@ internal sealed class GlamStore : IDisposable
 
     public void Dispose()
     {
+        signals.ContentRemoved -= OnContentRemoved;
         work.Dispose();
     }
 
@@ -879,15 +958,40 @@ internal sealed class GlamStore : IDisposable
         }
 
         list.Items = CopyOnWrite.Replace(list.Items, glam);
+        if (more is { } shown)
+        {
+            more = shown with { Items = CopyOnWrite.Replace(shown.Items, glam) };
+        }
+
+        for (var slot = 0; slot < showcase.Length; slot++)
+        {
+            if (Volatile.Read(ref showcase[slot])?.Id == glam.Id)
+            {
+                Volatile.Write(ref showcase[slot], glam);
+            }
+        }
+
+        if (banner?.Id == glam.Id)
+        {
+            banner = glam;
+        }
+
         if (detail?.Id == glam.Id)
         {
             detail = glam;
         }
     }
 
-    private void Remove(string glamId)
+    public void Purge(string glamId)
     {
         removedIds[glamId] = true;
+        if (bannerFor == glamId)
+        {
+            banner = null;
+            bannerMissing = true;
+            bannerFailed = false;
+        }
+
         for (var index = 0; index < discover.Length; index++)
         {
             discover[index].Items = CopyOnWrite.RemoveById(discover[index].Items, glamId);
@@ -909,7 +1013,7 @@ internal sealed class GlamStore : IDisposable
 
         if (detail?.Id == glamId)
         {
-            detail = null;
+            detailGone = true;
         }
     }
 
@@ -930,6 +1034,13 @@ internal sealed class GlamStore : IDisposable
     private bool FailProfile(AepFailure failure)
     {
         profileFailure.Set(failure.Failed ? failure : AepFailure.Transport(AepFailureKind.Offline));
+        return false;
+    }
+
+    private bool FailSave(AepFailure failure)
+    {
+        saveFailure.Set(failure.Failed ? failure : AepFailure.Transport(AepFailureKind.Offline));
+        saveFailed = true;
         return false;
     }
 

@@ -90,16 +90,14 @@ internal static class ModAttribution
             return null;
         }
 
-        var options = new List<GlamOptionDto>(settings.Count);
+        var options = new GlamOptionDto[settings.Count];
+        var index = 0;
         foreach (var (group, picked) in settings)
         {
-            if (picked.Count > 0)
-            {
-                options.Add(new GlamOptionDto(group, picked.ToArray()));
-            }
+            options[index++] = new GlamOptionDto(group, picked.ToArray());
         }
 
-        return options.Count == 0 ? null : options.ToArray();
+        return options;
     }
 
     public static Dictionary<string, IReadOnlyList<string>> Settings(GlamOptionDto[]? options)
@@ -113,7 +111,7 @@ internal static class ModAttribution
         for (var index = 0; index < options.Length; index++)
         {
             var option = options[index];
-            if (option.Group.Length > 0 && option.Picked is { Length: > 0 } picked)
+            if (option.Group.Length > 0 && option.Picked is { } picked)
             {
                 settings[option.Group] = picked;
             }

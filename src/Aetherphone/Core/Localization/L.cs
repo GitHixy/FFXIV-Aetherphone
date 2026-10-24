@@ -335,6 +335,8 @@ internal static class L
         public static readonly LocString NoticeNameResetHandle = new("moderation.notice.nameResetHandle", "You are now {0}");
         public static readonly LocString NoticeNameResetWhere = new("moderation.notice.nameResetWhere", "Reset on: {0}");
         public static readonly LocString NoticeNameResetLabel = new("moderation.notice.nameResetLabel", "New handle");
+        public static readonly LocString NoticeRemovedGlam = new("moderation.notice.removedGlam", "Your glam was removed");
+        public static readonly LocString NoticeRemovedLook = new("moderation.notice.removedLook", "Your contest look was removed");
     }
 
     internal static class Apps
@@ -11390,6 +11392,8 @@ internal static class L
             "Delete {0} outfits?");
         public static readonly LocString DeleteOutfitsBody = new("prism.deleteOutfitsBody",
             "Your Glamourer designs stay in Glamourer.");
+        public static readonly LocString GlamGone = new("prism.glamGone", "This glam is no longer available.");
+        public static readonly LocString FillFromWardrobe = new("prism.fillFromWardrobe", "Fill from wardrobe");
     }
 
     internal static class Announcements
@@ -14955,6 +14959,9 @@ internal static class L
         public static readonly LocString PatreonAlreadyLinked = new("failure.patreonAlreadyLinked", "That Patreon account is already linked.");
         public static readonly LocString FeedbackLength = new("failure.feedbackLength", "Keep your feedback to {0} characters.");
         public static readonly LocString FeedbackTooManyImages = new("failure.feedbackTooManyImages", "You can attach at most {0} images.");
+        public static readonly LocString PrismGlamDailyLimit = new("failure.prismGlamDailyLimit", "You've reached today's glam limit ({0}). You can post again after the daily reset.");
+        public static readonly LocString PrismGlamPhotosLocked = new("failure.prismGlamPhotosLocked", "A contest glam keeps the photo that was judged.");
+        public static readonly LocString PrismGlamUnderReview = new("failure.prismGlamUnderReview", "This glam is being reviewed, so its photos can't change right now.");
     }
 
     internal static class Rolladeck

@@ -276,7 +276,7 @@ internal sealed class GlamourService : IDisposable
         return applied;
     }
 
-    public bool ApplyDesign(Guid id)
+    public bool ApplyDesign(Guid id, GlamGearDto[] gear)
     {
         if (!HasGlamourer)
         {
@@ -285,8 +285,26 @@ internal sealed class GlamourService : IDisposable
 
         var replacing = Prepare();
         var applied = glamourer.ApplyDesign(id);
-        WearMods(Array.Empty<GlamGearDto>(), replacing);
+        WearMods(applied ? gear : Array.Empty<GlamGearDto>(), replacing);
         return applied;
+    }
+
+    public bool TryReadOptions(GlamModDto mod, out GlamOptionDto[]? options)
+    {
+        options = null;
+        if (!HasPenumbra || !penumbra.TryPlayerCollection(out var collection))
+        {
+            return false;
+        }
+
+        var folder = Match(penumbra.ModList(), mod);
+        if (folder.Length == 0 || penumbra.CurrentOptions(collection, folder) is not { } settings)
+        {
+            return false;
+        }
+
+        options = ModAttribution.Options(settings);
+        return true;
     }
 
     public Dictionary<Guid, (string, string, uint, bool)> Designs() =>
