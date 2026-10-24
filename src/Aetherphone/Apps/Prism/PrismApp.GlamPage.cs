@@ -69,6 +69,7 @@ internal sealed partial class PrismApp
     private bool statsStale;
     private GlamGearDto[]? statsGear;
     private bool statsStorage;
+    private int statsMods;
     private CachedText triedText;
     private CachedText raceText;
     private CachedText moreText;
@@ -230,8 +231,9 @@ internal sealed partial class PrismApp
     {
         piecesTryOn = tryOn;
         var storage = OwnedItems.StorageLoaded;
+        var mods = glamour.ModsGeneration;
         var sameGlam = statsFor == key && ReferenceEquals(statsGear, gear);
-        if (sameGlam && statsStorage == storage && !statsStale)
+        if (sameGlam && statsStorage == storage && statsMods == mods && !statsStale)
         {
             return;
         }
@@ -245,6 +247,7 @@ internal sealed partial class PrismApp
         statsFor = key;
         statsGear = gear;
         statsStorage = storage;
+        statsMods = mods;
         statsStale = false;
         modLines.Clear();
         modBylines.Clear();

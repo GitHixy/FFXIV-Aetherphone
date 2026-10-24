@@ -122,11 +122,24 @@ internal static class ModAttribution
         return settings;
     }
 
-    public static string MatchFolder(Dictionary<string, string> installed, GlamModDto mod)
+    public static string MatchFolder(Dictionary<string, string> installed, Dictionary<string, string>? links,
+        GlamModDto mod)
     {
-        foreach (var (folder, name) in installed)
+        var folder = MatchByName(installed, mod);
+        return folder.Length > 0 || links is null ? folder : MatchByLink(installed, links, mod);
+    }
+
+    public static string MatchByName(Dictionary<string, string> installed, GlamModDto mod)
+    {
+        var name = mod.Name.AsSpan().Trim();
+        if (name.IsEmpty)
         {
-            if (string.Equals(name, mod.Name, StringComparison.OrdinalIgnoreCase))
+            return string.Empty;
+        }
+
+        foreach (var (folder, listed) in installed)
+        {
+            if (SameName(listed, name) || SameName(folder, name))
             {
                 return folder;
             }
@@ -134,6 +147,40 @@ internal static class ModAttribution
 
         return string.Empty;
     }
+
+    public static bool HasLink(GlamModDto mod) => !LinkOf(mod.Link).IsEmpty;
+
+    public static string MatchByLink(Dictionary<string, string> installed, Dictionary<string, string> links,
+        GlamModDto mod)
+    {
+        var link = LinkOf(mod.Link);
+        var name = mod.Name.AsSpan().Trim();
+        if (link.IsEmpty || name.IsEmpty)
+        {
+            return string.Empty;
+        }
+
+        foreach (var (folder, listed) in installed)
+        {
+            if (links.TryGetValue(folder, out var website) &&
+                LinkOf(website).Equals(link, StringComparison.OrdinalIgnoreCase) &&
+                (Prefixed(listed.AsSpan().Trim(), name) || Prefixed(folder.AsSpan().Trim(), name)))
+            {
+                return folder;
+            }
+        }
+
+        return string.Empty;
+    }
+
+    private static ReadOnlySpan<char> LinkOf(string link) => link.AsSpan().Trim().TrimEnd('/');
+
+    private static bool SameName(string candidate, ReadOnlySpan<char> name) =>
+        candidate.AsSpan().Trim().Equals(name, StringComparison.OrdinalIgnoreCase);
+
+    private static bool Prefixed(ReadOnlySpan<char> installed, ReadOnlySpan<char> posted) =>
+        !installed.IsEmpty && (installed.StartsWith(posted, StringComparison.OrdinalIgnoreCase) ||
+                               posted.StartsWith(installed, StringComparison.OrdinalIgnoreCase));
 
     private static void Add(Dictionary<int, HashSet<string>> foldersBySlot, int slot, string folder)
     {
