@@ -473,13 +473,49 @@ internal sealed class PrismStore : IDisposable
 
     public void PurgeLook(string lookId, string? weekId)
     {
+        DropFromBallot(lookId);
         if (rawWeek is not { } raw || (!EnteredWith(raw, lookId) && weekId != raw.Id && weekId != raw.PreviousWeekId))
         {
             return;
         }
 
         lastWeekResults.Clear();
+        weekResults.Clear();
         Refresh();
+    }
+
+    private void DropFromBallot(string lookId)
+    {
+        if (ballot is not { Looks: { } looks } open)
+        {
+            return;
+        }
+
+        var kept = 0;
+        for (var index = 0; index < looks.Length; index++)
+        {
+            if (looks[index].Id != lookId)
+            {
+                kept++;
+            }
+        }
+
+        if (kept == looks.Length)
+        {
+            return;
+        }
+
+        var remaining = new PrismLookDto[kept];
+        var next = 0;
+        for (var index = 0; index < looks.Length; index++)
+        {
+            if (looks[index].Id != lookId)
+            {
+                remaining[next++] = looks[index];
+            }
+        }
+
+        ballot = open with { Looks = remaining };
     }
 
     private static bool EnteredWith(PrismWeekDto raw, string lookId)
