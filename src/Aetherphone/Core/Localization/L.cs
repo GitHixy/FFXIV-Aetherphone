@@ -2447,6 +2447,8 @@ internal static class L
                 "Added Love Island Eclipse, the companion app for PNX's Halloween festival on Materia: a countdown to the doors and the experience on now, every experience with Teleport and a reminder, the #LoveIslandEclipse gallery, the syncshells to join with their ID and password, and the frame, badge and Aether Coin you earn by posting during the night"),
             new("changelog.r1400.25",
                 "Added Keep it night to Love Island Eclipse, which holds Eorzea at night while the app is open during the event"),
+            new("changelog.r1400.42",
+                "Added a DJs tab to Love Island Eclipse that lists every set with who plays when and which ones stream, and the Live DJ card on Tonight now follows that list"),
         };
 
         public static readonly LocString[] Release1330Chirper =
@@ -11186,6 +11188,7 @@ internal static class L
     internal static class LoveIsland
     {
         public static readonly LocString TabTonight = new("loveisland.tabTonight", "Tonight");
+        public static readonly LocString TabDjs = new("loveisland.tabDjs", "DJs");
         public static readonly LocString TabExperiences = new("loveisland.tabExperiences", "Experiences");
         public static readonly LocString TabGallery = new("loveisland.tabGallery", "Gallery");
         public static readonly LocString TabPerks = new("loveisland.tabPerks", "Perks");
@@ -11203,7 +11206,7 @@ internal static class L
         public static readonly LocString LiveDj = new("loveisland.liveDj", "Live DJ");
         public static readonly LocString NoStream = new("loveisland.noStream", "No stream scheduled");
         public static readonly LocString StreamHint = new("loveisland.streamHint",
-            "The experiences list marks which ones stream.");
+            "The DJs tab lists every set and who streams.");
         public static readonly LocString WatchTwitch = new("loveisland.watchTwitch", "Watch on Twitch");
         public static readonly LocString ShareTitle = new("loveisland.shareTitle", "Share your night");
         public static readonly LocString ShareBody = new("loveisland.shareBody",
@@ -11226,6 +11229,8 @@ internal static class L
             "An event by PNX with Aetherphone and The Emporium. This app leaves your phone a few days after the event; your frame and badge stay.");
         public static readonly LocString ExperiencesSub = new("loveisland.experiencesSub", "times in your timezone");
         public static readonly LocString NothingScheduled = new("loveisland.nothingScheduled", "Nothing scheduled yet.");
+        public static readonly LocString DjsSub = new("loveisland.djsSub", "who plays when, times in your timezone");
+        public static readonly LocString NoDjs = new("loveisland.noDjs", "No DJ sets yet.");
         public static readonly LocString WhoIsOn = new("loveisland.whoIsOn", "Who is on");
         public static readonly LocString RemindMe = new("loveisland.remindMe", "Remind me {0} min before");
         public static readonly LocString DcTravelNote = new("loveisland.dcTravelNote",
