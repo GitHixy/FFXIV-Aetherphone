@@ -599,7 +599,7 @@ internal sealed partial class PrismApp
             return;
         }
 
-        if (outfit.DesignId != Guid.Empty && glamour.ApplyDesign(outfit.DesignId))
+        if (outfit.DesignId != Guid.Empty && glamour.ApplyDesign(outfit.DesignId, outfit.Gear))
         {
             return;
         }

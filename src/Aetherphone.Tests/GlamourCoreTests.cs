@@ -98,9 +98,10 @@ public sealed class GlamourCoreTests
             ["Empty"] = new(),
         });
         Assert.NotNull(options);
-        Assert.Equal(2, options!.Length);
+        Assert.Equal(3, options!.Length);
         var settings = ModAttribution.Settings(options);
         Assert.Equal(new[] { "Bow", "Lace" }, settings["Extras"]);
+        Assert.Empty(settings["Empty"]);
         Assert.Null(ModAttribution.Options(null));
         Assert.Empty(ModAttribution.Settings(null));
     }

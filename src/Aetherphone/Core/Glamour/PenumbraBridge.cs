@@ -1,5 +1,6 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
+using Dalamud.Plugin.Ipc.Exceptions;
 
 namespace Aetherphone.Core.Glamour;
 
@@ -23,6 +24,8 @@ internal sealed class PenumbraBridge : IDisposable
     private readonly ICallGateSubscriber<int, (bool, bool, (Guid, string))> collectionGate;
     private readonly ICallGateSubscriber<Guid, string, string, bool, (int, (bool, int, Dictionary<string, List<string>>, bool)?)>
         settingsGate;
+    private readonly ICallGateSubscriber<Guid, string, string, bool, bool, int,
+        (int, (bool, int, Dictionary<string, List<string>>, bool, bool)?)> settingsWithTemporaryGate;
     private readonly ICallGateSubscriber<int, string, string,
         (bool, bool, int, IReadOnlyDictionary<string, IReadOnlyList<string>>), string, int, int> temporaryGate;
     private readonly ICallGateSubscriber<int, int, int> clearTemporaryGate;
@@ -34,6 +37,7 @@ internal sealed class PenumbraBridge : IDisposable
     private readonly ICallGateSubscriber<string, string, object> modMovedGate;
     private volatile bool readySignaled;
     private volatile bool disposingSignaled;
+    private volatile bool temporarySettingsUnreadable;
     private int modsSignaled;
 
     public PenumbraBridge(IDalamudPluginInterface pluginInterface)
@@ -50,6 +54,8 @@ internal sealed class PenumbraBridge : IDisposable
         settingsGate = pluginInterface
             .GetIpcSubscriber<Guid, string, string, bool, (int, (bool, int, Dictionary<string, List<string>>, bool)?)>(
                 "Penumbra.GetCurrentModSettings.V5");
+        settingsWithTemporaryGate = pluginInterface.GetIpcSubscriber<Guid, string, string, bool, bool, int,
+            (int, (bool, int, Dictionary<string, List<string>>, bool, bool)?)>("Penumbra.GetCurrentModSettingsWithTemp");
         temporaryGate = pluginInterface.GetIpcSubscriber<int, string, string,
             (bool, bool, int, IReadOnlyDictionary<string, IReadOnlyList<string>>), string, int, int>(
             "Penumbra.SetTemporaryModSettingsPlayer.V5");
@@ -101,6 +107,7 @@ internal sealed class PenumbraBridge : IDisposable
         try
         {
             var (breaking, _) = apiVersionGate.InvokeFunc();
+            temporarySettingsUnreadable = false;
             return breaking == SupportedBreakingVersion;
         }
         catch (Exception exception)
@@ -131,9 +138,28 @@ internal sealed class PenumbraBridge : IDisposable
 
     public Dictionary<string, List<string>>? CurrentOptions(Guid collection, string directory)
     {
+        if (!temporarySettingsUnreadable)
+        {
+            try
+            {
+                var (_, current) = settingsWithTemporaryGate.InvokeFunc(collection, directory, string.Empty, false,
+                    false, SettingsKey);
+                return current?.Item3;
+            }
+            catch (Exception exception) when (exception is IpcNotReadyError or IpcTypeMismatchError)
+            {
+                temporarySettingsUnreadable = true;
+            }
+            catch (Exception exception)
+            {
+                AepLog.Warning($"Penumbra GetCurrentModSettingsWithTemp failed: {exception.Message}");
+                return null;
+            }
+        }
+
         var (_, settings) = Call(() => settingsGate.InvokeFunc(collection, directory, string.Empty, false), default,
             "GetCurrentModSettings");
-        return settings is { Item1: true } found ? found.Item3 : null;
+        return settings?.Item3;
     }
 
     public bool SetTemporary(string directory, IReadOnlyDictionary<string, IReadOnlyList<string>> options)

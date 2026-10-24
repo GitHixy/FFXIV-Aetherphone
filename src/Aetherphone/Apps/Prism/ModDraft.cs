@@ -5,6 +5,8 @@ namespace Aetherphone.Apps.Prism;
 
 internal sealed class ModDraft
 {
+    private readonly List<bool> fresh = new();
+
     public List<GlamModDto> Mods { get; } = new();
 
     public List<int> Slots { get; } = new();
@@ -19,20 +21,36 @@ internal sealed class ModDraft
     {
         Mods.Clear();
         Slots.Clear();
+        fresh.Clear();
         Name = string.Empty;
         Slot = GearSlots.None;
     }
 
-    public void Add(GlamModDto mod, int slot)
-    {
-        Mods.Add(mod);
-        Slots.Add(slot);
-    }
+    public void Add(GlamModDto mod, int slot) => Append(mod, slot, true);
 
     public void RemoveAt(int index)
     {
         Mods.RemoveAt(index);
         Slots.RemoveAt(index);
+        fresh.RemoveAt(index);
+    }
+
+    public void RecaptureAdded(GlamourService glamour)
+    {
+        for (var index = 0; index < Mods.Count; index++)
+        {
+            if (fresh[index] && glamour.TryReadOptions(Mods[index], out var options))
+            {
+                Mods[index] = Mods[index] with { Options = options };
+            }
+        }
+    }
+
+    private void Append(GlamModDto mod, int slot, bool added)
+    {
+        Mods.Add(mod);
+        Slots.Add(slot);
+        fresh.Add(added);
     }
 
     public bool Contains(string key)
@@ -56,7 +74,7 @@ internal sealed class ModDraft
             var mods = gear[index].Mods ?? Array.Empty<GlamModDto>();
             for (var modIndex = 0; modIndex < mods.Length; modIndex++)
             {
-                Add(mods[modIndex], gear[index].Slot);
+                Append(mods[modIndex], gear[index].Slot, false);
             }
         }
     }

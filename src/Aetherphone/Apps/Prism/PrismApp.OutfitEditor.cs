@@ -237,6 +237,7 @@ internal sealed partial class PrismApp
         var pieces = OutfitFrom(outfitGear);
         var keepsState = SamePieces(pieces, outfitStatePieces);
         var keepsDesign = SamePieces(pieces, outfitLoadedPieces);
+        outfitMods.RecaptureAdded(glamour);
         var gear = outfitMods.AttachTo(pieces);
         var name = outfitNameDraft.Trim();
         if (editingOutfit is { } existing)
