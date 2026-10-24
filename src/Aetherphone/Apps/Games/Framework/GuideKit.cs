@@ -19,6 +19,12 @@ internal static class GuideKit
     private const float TrailSpacing = 0.06f;
     private const float ArrowHead = 9f;
     private const float ArrowWidth = 2.5f;
+    private const float SpaceWidth = 3.2f;
+    private const float GlyphShare = 0.42f;
+    private const float GlyphStroke = 2f;
+    private const float MarkStroke = 3f;
+    private static readonly Vector4 Good = new(0.30f, 0.78f, 0.45f, 1f);
+    private static readonly Vector4 Bad = new(0.92f, 0.32f, 0.32f, 1f);
     private static readonly Vector4 Finger = new(1f, 1f, 1f, 0.92f);
     private static readonly Vector4 FingerShadow = new(0f, 0f, 0f, 0.35f);
     private static readonly Vector4 KeyFace = new(0.26f, 0.26f, 0.32f, 0.95f);
@@ -31,6 +37,13 @@ internal static class GuideKit
 
     public static Vector2 Point(Rect art, float x, float y) =>
         new(art.Min.X + art.Width * x, art.Min.Y + art.Height * y);
+
+    public static Rect Fit(Rect art, float aspect)
+    {
+        var width = MathF.Min(art.Width, art.Height * aspect);
+        var half = new Vector2(width, width / aspect) * 0.5f;
+        return new Rect(art.Center - half, art.Center + half);
+    }
 
     public static void Tap(ImDrawListPtr drawList, Vector2 center, float phase, float scale)
     {
@@ -74,6 +87,79 @@ internal static class GuideKit
     {
         var width = MathF.Max(KeySize * scale, Typography.Measure(label, TextStyles.SubheadlineEmphasized).X +
                                                 KeyPadX * 2f * scale);
+        var face = Cap(drawList, center, width, down, accent, scale);
+        Typography.DrawCentered(drawList, face.Center, label, StageInks.Strong, TextStyles.SubheadlineEmphasized);
+        return face;
+    }
+
+    public static Rect ArrowKey(ImDrawListPtr drawList, Vector2 center, Vector2 direction, bool down,
+        Vector4 accent, float scale)
+    {
+        var face = Cap(drawList, center, KeySize * scale, down, accent, scale);
+        var length = direction.Length();
+        if (length <= 0.001f)
+        {
+            return face;
+        }
+
+        var forward = direction / length;
+        var side = new Vector2(-forward.Y, forward.X);
+        var size = KeySize * scale * GlyphShare;
+        var tip = face.Center + forward * size * 0.5f;
+        var back = face.Center - forward * size * 0.4f;
+        drawList.AddTriangleFilled(tip, back + side * size * 0.45f, back - side * size * 0.45f,
+            ImGui.GetColorU32(StageInks.Strong));
+        return face;
+    }
+
+    public static Rect SpaceKey(ImDrawListPtr drawList, Vector2 center, bool down, Vector4 accent, float scale)
+    {
+        var face = Cap(drawList, center, KeySize * SpaceWidth * scale, down, accent, scale);
+        var half = KeySize * scale * GlyphShare;
+        var baseline = face.Center.Y + half * 0.25f;
+        var rise = half * 0.35f;
+        var color = ImGui.GetColorU32(StageInks.Strong);
+        var thickness = GlyphStroke * scale;
+        drawList.AddLine(new Vector2(face.Center.X - half, baseline - rise), new Vector2(face.Center.X - half, baseline),
+            color, thickness);
+        drawList.AddLine(new Vector2(face.Center.X - half, baseline), new Vector2(face.Center.X + half, baseline), color,
+            thickness);
+        drawList.AddLine(new Vector2(face.Center.X + half, baseline), new Vector2(face.Center.X + half, baseline - rise),
+            color, thickness);
+        return face;
+    }
+
+    public static void Check(ImDrawListPtr drawList, Vector2 center, float size, float scale)
+    {
+        Badge(drawList, center, size, Good);
+        var half = size * 0.5f;
+        var color = ImGui.GetColorU32(StageInks.Strong);
+        var thickness = MarkStroke * scale;
+        var corner = center + new Vector2(-half * 0.12f, half * 0.38f);
+        drawList.AddLine(center + new Vector2(-half * 0.5f, 0f), corner, color, thickness);
+        drawList.AddLine(corner, center + new Vector2(half * 0.52f, -half * 0.42f), color, thickness);
+    }
+
+    public static void Cross(ImDrawListPtr drawList, Vector2 center, float size, float scale)
+    {
+        Badge(drawList, center, size, Bad);
+        var reach = size * 0.22f;
+        var color = ImGui.GetColorU32(StageInks.Strong);
+        var thickness = MarkStroke * scale;
+        drawList.AddLine(center - new Vector2(reach, reach), center + new Vector2(reach, reach), color, thickness);
+        drawList.AddLine(center + new Vector2(-reach, reach), center + new Vector2(reach, -reach), color, thickness);
+    }
+
+    private static void Badge(ImDrawListPtr drawList, Vector2 center, float size, Vector4 fill)
+    {
+        drawList.AddCircleFilled(center + new Vector2(0f, size * 0.06f), size * 0.5f, ImGui.GetColorU32(FingerShadow),
+            32);
+        drawList.AddCircleFilled(center, size * 0.5f, ImGui.GetColorU32(fill), 32);
+    }
+
+    private static Rect Cap(ImDrawListPtr drawList, Vector2 center, float width, bool down, Vector4 accent,
+        float scale)
+    {
         var half = new Vector2(width, KeySize * scale) * 0.5f;
         var drop = KeyDrop * scale;
         var lift = down ? drop : 0f;
@@ -84,8 +170,6 @@ internal static class GuideKit
         var faceMax = center + half + new Vector2(0f, lift);
         Squircle.Fill(drawList, faceMin, faceMax, radius,
             ImGui.GetColorU32(down ? Palette.Mix(KeyFace, accent, 0.45f) : KeyFace));
-        Typography.DrawCentered(drawList, (faceMin + faceMax) * 0.5f, label, StageInks.Strong,
-            TextStyles.SubheadlineEmphasized);
         return new Rect(faceMin, faceMax);
     }
 

@@ -9896,6 +9896,14 @@ internal static class L
         public static readonly LocString StagePaperclip = new("coil.stagePaperclip", "Paperclip");
         public static readonly LocString StageFigureEight = new("coil.stageFigureEight", "Figure Eight");
         public static readonly LocString StageRipple = new("coil.stageRipple", "Ripple");
+        public static readonly LocString Guide1Title = new("coil.guide1Title", "Aim and fire");
+        public static readonly LocString Guide1Body = new("coil.guide1Body", "Click where you want to shoot. The marble joins the chain right where it hits.");
+        public static readonly LocString Guide2Title = new("coil.guide2Title", "Match three");
+        public static readonly LocString Guide2Body = new("coil.guide2Body", "Pop three or more of one color. Matching colors across a gap roll back together and can pop again for a chain bonus.");
+        public static readonly LocString Guide3Title = new("coil.guide3Title", "Swap and power up");
+        public static readonly LocString Guide3Body = new("coil.guide3Body", "Press Space or right-click to swap in your next marble. Pop glowing marbles for power-ups like Freeze.");
+        public static readonly LocString Guide4Title = new("coil.guide4Title", "Mind the vortex");
+        public static readonly LocString Guide4Body = new("coil.guide4Body", "If the chain reaches the vortex, you lose a life. Pop every marble to clear the stage.");
     }
 
     internal static class Updraft
@@ -10112,6 +10120,14 @@ internal static class L
         public static readonly LocString MysteryBallSave = new("games.pinball.mysteryBallSave", "Mystery: ball save");
         public static readonly LocString SuperJackpot = new("games.pinball.superJackpot", "Super jackpot!");
         public static readonly LocString SuperJackpotLit = new("games.pinball.superJackpotLit", "Super jackpot lit");
+        public static readonly LocString Guide1Title = new("games.pinball.guide1Title", "Launch the ball");
+        public static readonly LocString Guide1Body = new("games.pinball.guide1Body", "Drag the plunger down or hold Space, then let go. A harder pull launches the ball faster.");
+        public static readonly LocString Guide2Title = new("games.pinball.guide2Title", "Keep it in play");
+        public static readonly LocString Guide2Body = new("games.pinball.guide2Body", "Tap the left or right side, or press A and D, to flip. A run has three balls, so keep each one out of the drain.");
+        public static readonly LocString Guide3Title = new("games.pinball.guide3Title", "Light the jackpot");
+        public static readonly LocString Guide3Body = new("games.pinball.guide3Body", "Drop both banks of targets to light the jackpot, then shoot the ramp to collect it.");
+        public static readonly LocString Guide4Title = new("games.pinball.guide4Title", "Combo into Fever");
+        public static readonly LocString Guide4Body = new("games.pinball.guide4Body", "Chain ramps, orbits and the saucer to combo and raise the playfield multiplier. Every hit fills the Fever ring, and Fever doubles your points.");
     }
 
     internal static class Crates
@@ -10141,6 +10157,14 @@ internal static class L
         public static readonly LocString GemShower = new("games.delve.gemShower", "Gem shower!");
         public static readonly LocString TimeLeft = new("games.delve.timeLeft", "Time left");
         public static readonly LocString Foes = new("games.delve.foes", "Foes crushed");
+        public static readonly LocString Guide1Title = new("games.delve.guide1Title", "Dig through dirt");
+        public static readonly LocString Guide1Body = new("games.delve.guide1Body", "Drag, or hold WASD or the arrow keys, to tunnel through dirt. Steel walls never give way.");
+        public static readonly LocString Guide2Title = new("games.delve.guide2Title", "Open the exit");
+        public static readonly LocString Guide2Body = new("games.delve.guide2Body", "Grab enough gems to open the exit and get in before time runs out. Extra gems and spare time earn more stars.");
+        public static readonly LocString Guide3Title = new("games.delve.guide3Title", "Mind the boulders");
+        public static readonly LocString Guide3Body = new("games.delve.guide3Body", "Boulders fall once nothing holds them and crush anything below, you included. Push them sideways to clear a path.");
+        public static readonly LocString Guide4Title = new("games.delve.guide4Title", "Crush your foes");
+        public static readonly LocString Guide4Body = new("games.delve.guide4Body", "Never touch a bat or slime: they explode. Drop a boulder on one instead; a crushed slime bursts into gems.");
     }
 
     internal static class MoogleClicker
@@ -10230,6 +10254,14 @@ internal static class L
         public static readonly LocString LastLife = new("games.claim.lastLife", "Last life!");
         public static readonly LocString BestClaim = new("games.claim.bestClaim", "Best claim");
         public static readonly LocString SlowLines = new("games.claim.slowLines", "Slow lines");
+        public static readonly LocString Guide1Title = new("games.claim.guide1Title", "Cut and claim");
+        public static readonly LocString Guide1Body = new("games.claim.guide1Body", "Turn on Fast (or hold Space), steer into the field and reach an edge again. You claim the side without the boss; 75% clears the level.");
+        public static readonly LocString Guide2Title = new("games.claim.guide2Title", "Slow lines pay double");
+        public static readonly LocString Guide2Body = new("games.claim.guide2Body", "Draw the whole line on Slow (or hold Shift) to double its points. It takes twice as long, so pick a safe moment.");
+        public static readonly LocString Guide3Title = new("games.claim.guide3Title", "Dodge the boss");
+        public static readonly LocString Guide3Body = new("games.claim.guide3Body", "If the boss touches your line or you before the line closes, you lose a life. Keep cuts short while it is near.");
+        public static readonly LocString Guide4Title = new("games.claim.guide4Title", "Sparks and the fuse");
+        public static readonly LocString Guide4Body = new("games.claim.guide4Body", "Sparks only hit you on the edge, so slip into the field to dodge them. Stop mid-line and a fuse burns toward you, so keep moving.");
     }
 
     internal static class Lander
@@ -10459,6 +10491,14 @@ internal static class L
         public static readonly LocString Knockouts = new("games.fuse.knockouts", "Knockouts");
         public static readonly LocString Crates = new("games.fuse.crates", "Crates broken");
         public static readonly LocString PowerUps = new("games.fuse.powerUps", "Power-ups");
+        public static readonly LocString Guide1Title = new("games.fuse.guide1Title", "Drop and run");
+        public static readonly LocString Guide1Body = new("games.fuse.guide1Body", "Move with the pad or WASD and drop a bomb with the button or Space. Then get clear, because its fire knocks out anyone, you included.");
+        public static readonly LocString Guide2Title = new("games.fuse.guide2Title", "Blasts and chains");
+        public static readonly LocString Guide2Body = new("games.fuse.guide2Body", "Blasts shoot out in four straight lines and break the first crate they hit. A blast that reaches another bomb sets it off too.");
+        public static readonly LocString Guide3Title = new("games.fuse.guide3Title", "Grab power-ups");
+        public static readonly LocString Guide3Body = new("games.fuse.guide3Body", "Broken crates can drop an extra bomb, a bigger blast, more speed, or a kick that sends bombs sliding. Walk over one to take it.");
+        public static readonly LocString Guide4Title = new("games.fuse.guide4Title", "Last one standing");
+        public static readonly LocString Guide4Body = new("games.fuse.guide4Body", "Outlast the other moogles to win a round; two rounds win the match. Late in a round, blocks fall from the edges and crush anyone below.");
     }
 
     internal static class Snip
@@ -10531,6 +10571,14 @@ internal static class L
         public static readonly LocString Paused = new("games.herd.paused", "Paused: tap moogles to give skills");
         public static readonly LocString NukeArmed = new("games.herd.nukeArmed", "Tap again to pop them all");
         public static readonly LocString GoalReached = new("games.herd.goalReached", "Goal reached!");
+        public static readonly LocString Guide1Title = new("games.herd.guide1Title", "Lead them home");
+        public static readonly LocString Guide1Body = new("games.herd.guide1Body", "Moogles drop from the door and walk on, turning back at walls. Get enough of them into the hut before time runs out.");
+        public static readonly LocString Guide2Title = new("games.herd.guide2Title", "Hand out skills");
+        public static readonly LocString Guide2Body = new("games.herd.guide2Body", "Pick a skill below or press 1 to 6, then tap a moogle to give it. Each level has only a few of each.");
+        public static readonly LocString Guide3Title = new("games.herd.guide3Title", "Mind the drop");
+        public static readonly LocString Guide3Body = new("games.herd.guide3Body", "A fall from too high splats a moogle, and water sinks it. Give it Float first for a soft landing.");
+        public static readonly LocString Guide4Title = new("games.herd.guide4Title", "Pause and plan");
+        public static readonly LocString Guide4Body = new("games.herd.guide4Body", "Space or the pause button freezes time, and skills still work while paused. F speeds the herd up.");
     }
 
     internal static class Tempo
