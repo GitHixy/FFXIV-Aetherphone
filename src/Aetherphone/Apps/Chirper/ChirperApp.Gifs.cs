@@ -79,6 +79,12 @@ internal sealed partial class ChirperApp
 
     private void OpenComposeGifSource()
     {
+        if (composePoll.Active)
+        {
+            toast.Show(ComposeGifRefusal());
+            return;
+        }
+
         if (!gifSearch.Available)
         {
             OpenComposePicker(true);
@@ -106,6 +112,12 @@ internal sealed partial class ChirperApp
         {
             commentAttachment.AttachGif(pick);
             replyFocusPending = true;
+            return;
+        }
+
+        if (composePoll.Active)
+        {
+            toast.Show(ComposeGifRefusal());
             return;
         }
 

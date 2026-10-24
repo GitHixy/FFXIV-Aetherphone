@@ -1147,6 +1147,7 @@
   "gifs.loadFailed": "GIFを読み込めませんでした",
   "gifs.unavailable": "GIF検索は現在利用できません。",
   "gifs.tapToShow": "GIF・タップして表示",
+  "gifs.pollBlockedByGif": "投票を追加するにはGIFを外してください。",
   "gifs.consentTitle": "KLIPYでGIFを検索しますか？",
   "gifs.consentBody": "GIF検索には外部のGIFライブラリ、KLIPYを利用します。オンにするまでオフのままです。",
   "gifs.consentSearches": "GIF検索に入力した内容は、Aethernetが発行する匿名IDを添えて、このPCからKLIPYへ直接送られます。名前やキャラクターが送られることはありません。",

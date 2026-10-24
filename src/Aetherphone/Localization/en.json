@@ -1147,6 +1147,7 @@
   "gifs.loadFailed": "Couldn't load GIFs",
   "gifs.unavailable": "GIF search isn't available right now.",
   "gifs.tapToShow": "GIF, tap to show",
+  "gifs.pollBlockedByGif": "Remove the GIF to add a poll.",
   "gifs.consentTitle": "Search GIFs with KLIPY?",
   "gifs.consentBody": "GIF search comes from KLIPY, an outside GIF library. It stays off until you turn it on.",
   "gifs.consentSearches": "What you type in GIF search goes from this PC straight to KLIPY, with an anonymous id from Aethernet. Never your name or character.",

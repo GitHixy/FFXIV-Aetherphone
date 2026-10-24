@@ -1147,6 +1147,7 @@
   "gifs.loadFailed": "Не удалось загрузить GIF",
   "gifs.unavailable": "Поиск GIF сейчас недоступен.",
   "gifs.tapToShow": "GIF, нажмите, чтобы показать",
+  "gifs.pollBlockedByGif": "Уберите GIF, чтобы добавить опрос.",
   "gifs.consentTitle": "Искать GIF через KLIPY?",
   "gifs.consentBody": "Поиск GIF работает через KLIPY, внешнюю библиотеку GIF. Он выключен, пока вы его не включите.",
   "gifs.consentSearches": "То, что вы вводите в поиске GIF, отправляется с этого ПК напрямую в KLIPY вместе с анонимным идентификатором от Aethernet. Ваше имя и персонаж не передаются.",

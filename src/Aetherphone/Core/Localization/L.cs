@@ -2314,6 +2314,7 @@ internal static class L
         public static readonly LocString LoadFailed = new("gifs.loadFailed", "Couldn't load GIFs");
         public static readonly LocString Unavailable = new("gifs.unavailable", "GIF search isn't available right now.");
         public static readonly LocString TapToShow = new("gifs.tapToShow", "GIF, tap to show");
+        public static readonly LocString PollBlockedByGif = new("gifs.pollBlockedByGif", "Remove the GIF to add a poll.");
         public static readonly LocString ConsentTitle = new("gifs.consentTitle", "Search GIFs with KLIPY?");
         public static readonly LocString ConsentBody = new("gifs.consentBody", "GIF search comes from KLIPY, an outside GIF library. It stays off until you turn it on.");
         public static readonly LocString ConsentSearches = new("gifs.consentSearches", "What you type in GIF search goes from this PC straight to KLIPY, with an anonymous id from Aethernet. Never your name or character.");

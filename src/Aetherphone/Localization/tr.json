@@ -1147,6 +1147,7 @@
   "gifs.loadFailed": "GIF'ler yüklenemedi",
   "gifs.unavailable": "GIF araması şu anda kullanılamıyor.",
   "gifs.tapToShow": "GIF, göstermek için dokun",
+  "gifs.pollBlockedByGif": "Anket eklemek için GIF'i kaldır.",
   "gifs.consentTitle": "KLIPY ile GIF aransın mı?",
   "gifs.consentBody": "GIF araması, harici bir GIF kütüphanesi olan KLIPY'den gelir. Sen açana kadar kapalı kalır.",
   "gifs.consentSearches": "GIF aramasına yazdıkların bu bilgisayardan doğrudan KLIPY'ye, Aethernet'in verdiği anonim bir kimlikle gider. Adın veya karakterin asla gitmez.",

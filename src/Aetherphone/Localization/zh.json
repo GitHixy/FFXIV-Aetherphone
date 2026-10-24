@@ -1147,6 +1147,7 @@
   "gifs.loadFailed": "无法加载 GIF",
   "gifs.unavailable": "GIF 搜索暂时不可用。",
   "gifs.tapToShow": "GIF，点按显示",
+  "gifs.pollBlockedByGif": "移除 GIF 后才能添加投票。",
   "gifs.consentTitle": "使用 KLIPY 搜索 GIF？",
   "gifs.consentBody": "GIF 搜索来自外部 GIF 库 KLIPY。在你开启之前，它会保持关闭。",
   "gifs.consentSearches": "你在 GIF 搜索中输入的内容会从这台电脑直接发送到 KLIPY，并附带一个来自 Aethernet 的匿名 ID。绝不会发送你的名字或角色。",

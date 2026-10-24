@@ -1147,6 +1147,7 @@
   "gifs.loadFailed": "Impossible de charger les GIF",
   "gifs.unavailable": "La recherche de GIF n'est pas disponible pour le moment.",
   "gifs.tapToShow": "GIF, touche pour afficher",
+  "gifs.pollBlockedByGif": "Retire le GIF pour ajouter un sondage.",
   "gifs.consentTitle": "Rechercher des GIF avec KLIPY ?",
   "gifs.consentBody": "La recherche de GIF vient de KLIPY, une bibliothèque de GIF externe. Elle reste désactivée tant que tu ne l'actives pas.",
   "gifs.consentSearches": "Ce que tu tapes dans la recherche de GIF part directement de ce PC vers KLIPY, avec un identifiant anonyme fourni par Aethernet. Jamais ton nom ni ton personnage.",
