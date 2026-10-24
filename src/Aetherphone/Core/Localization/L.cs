@@ -11276,6 +11276,8 @@ internal static class L
         public static readonly LocString AddDye = new("prism.addDye", "Add dye");
         public static readonly LocString NoDye = new("prism.noDye", "No dye");
         public static readonly LocString DyeChannel = new("prism.dyeChannel", "Dye {0}");
+        public static readonly LocString DyeSearchHint = new("prism.dyeSearchHint", "Search dyes");
+        public static readonly LocString AllDyes = new("prism.allDyes", "All dyes");
         public static readonly LocString SlotRing = new("prism.slotRing", "Ring");
         public static readonly LocString AddYourGear = new("prism.addYourGear", "Add your gear");
         public static readonly LocPlural GearSummary = new("prism.gearSummary", "Your gear, {0} piece",

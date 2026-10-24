@@ -6012,6 +6012,8 @@
   "prism.addDye": "Ajouter une teinture",
   "prism.noDye": "Aucune teinture",
   "prism.dyeChannel": "Teinture {0}",
+  "prism.dyeSearchHint": "Rechercher une teinture",
+  "prism.allDyes": "Toutes les teintures",
   "prism.slotRing": "Bague",
   "prism.addYourGear": "Ajoutez votre équipement",
   "prism.gearSummary.one": "Votre équipement, {0} pièce",

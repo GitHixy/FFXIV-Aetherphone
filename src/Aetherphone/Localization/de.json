@@ -6012,6 +6012,8 @@
   "prism.addDye": "Farbe hinzufügen",
   "prism.noDye": "Keine Farbe",
   "prism.dyeChannel": "Farbe {0}",
+  "prism.dyeSearchHint": "Farben durchsuchen",
+  "prism.allDyes": "Alle Farben",
   "prism.slotRing": "Ring",
   "prism.addYourGear": "Ausrüstung hinzufügen",
   "prism.gearSummary.one": "Deine Ausrüstung, {0} Teil",

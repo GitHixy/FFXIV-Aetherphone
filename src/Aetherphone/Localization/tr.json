@@ -6012,6 +6012,8 @@
   "prism.addDye": "Boya ekle",
   "prism.noDye": "Boya yok",
   "prism.dyeChannel": "Boya {0}",
+  "prism.dyeSearchHint": "Boya ara",
+  "prism.allDyes": "Tüm boyalar",
   "prism.slotRing": "Yüzük",
   "prism.addYourGear": "Ekipmanını ekle",
   "prism.gearSummary.one": "Ekipmanın, {0} parça",

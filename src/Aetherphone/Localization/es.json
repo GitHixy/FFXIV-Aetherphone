@@ -6012,6 +6012,8 @@
   "prism.addDye": "Añadir tinte",
   "prism.noDye": "Sin tinte",
   "prism.dyeChannel": "Tinte {0}",
+  "prism.dyeSearchHint": "Buscar tintes",
+  "prism.allDyes": "Todos los tintes",
   "prism.slotRing": "Anillo",
   "prism.addYourGear": "Añade tu equipo",
   "prism.gearSummary.one": "Tu equipo, {0} pieza",

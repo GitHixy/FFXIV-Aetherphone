@@ -6012,6 +6012,8 @@
   "prism.addDye": "添加染色",
   "prism.noDye": "无染色",
   "prism.dyeChannel": "染色 {0}",
+  "prism.dyeSearchHint": "搜索染色",
+  "prism.allDyes": "全部染色",
   "prism.slotRing": "戒指",
   "prism.addYourGear": "添加你的装备",
   "prism.gearSummary.one": "你的装备（{0} 件）",

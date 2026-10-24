@@ -6012,6 +6012,8 @@
   "prism.addDye": "Add dye",
   "prism.noDye": "No dye",
   "prism.dyeChannel": "Dye {0}",
+  "prism.dyeSearchHint": "Search dyes",
+  "prism.allDyes": "All dyes",
   "prism.slotRing": "Ring",
   "prism.addYourGear": "Add your gear",
   "prism.gearSummary.one": "Your gear, {0} piece",

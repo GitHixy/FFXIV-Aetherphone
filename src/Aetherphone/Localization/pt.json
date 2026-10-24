@@ -6012,6 +6012,8 @@
   "prism.addDye": "Adicionar tintura",
   "prism.noDye": "Sem tintura",
   "prism.dyeChannel": "Tintura {0}",
+  "prism.dyeSearchHint": "Pesquisar tinturas",
+  "prism.allDyes": "Todas as tinturas",
   "prism.slotRing": "Anel",
   "prism.addYourGear": "Adicione seu equipamento",
   "prism.gearSummary.one": "Seu equipamento, {0} peça",

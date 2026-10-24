@@ -6012,6 +6012,8 @@
   "prism.addDye": "Добавить краску",
   "prism.noDye": "Без краски",
   "prism.dyeChannel": "Краска {0}",
+  "prism.dyeSearchHint": "Поиск красок",
+  "prism.allDyes": "Все краски",
   "prism.slotRing": "Кольцо",
   "prism.addYourGear": "Добавьте снаряжение",
   "prism.gearSummary.one": "Ваше снаряжение, вещей: {0}",

@@ -6012,6 +6012,8 @@
   "prism.addDye": "染色を追加",
   "prism.noDye": "染色なし",
   "prism.dyeChannel": "染色{0}",
+  "prism.dyeSearchHint": "染色を検索",
+  "prism.allDyes": "すべての染色",
   "prism.slotRing": "指",
   "prism.addYourGear": "あなたの装備を追加",
   "prism.gearSummary.one": "あなたの装備（{0}点）",
