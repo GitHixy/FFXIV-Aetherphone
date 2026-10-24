@@ -374,7 +374,7 @@ internal sealed class AppSwitcher
             }
 
             var transform = LayerTransform.Fit(screen, card.DrawRect, clip, card.Alpha);
-            using var glassSuspension = RealGlass.Suspend(!transform.IsIdentity);
+            using var glassPlacement = RealGlass.Transform(in transform);
             using var layer = ScreenLayer.Begin(card.LayerId, screen, true);
             if (ShowsLivePreview(card))
             {

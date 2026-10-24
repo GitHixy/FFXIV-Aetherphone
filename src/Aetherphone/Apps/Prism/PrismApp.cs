@@ -262,7 +262,7 @@ internal sealed partial class PrismApp : IResumableApp
         var stage = ScreenLayer.Begin("prism.stage", full, enter < TransitionTiming.InteractiveProgress);
         try
         {
-            using var glassSuspension = RealGlass.Suspend(!stageTransform.IsIdentity);
+            using var glassPlacement = RealGlass.Transform(in stageTransform);
             onPhoto = false;
             using var inset = AppSurface.ReserveBottom(bottomChrome);
             using var host = TabBar.Host(bar);

@@ -2032,6 +2032,16 @@ internal static class L
         public static readonly LocString LiquidGlassHint = new("settings.liquidGlassHint", "Choose how glass looks across the phone. Clear shows more of what is behind it; Tinted adds frost and contrast so text stays easy to read.");
         public static readonly LocString RealGlass = new("settings.realGlass", "Real Glass");
         public static readonly LocString RealGlassHint = new("settings.realGlassHint", "Glass bends and blurs what is really behind it, using a little GPU time every frame. Leave it off to keep the classic look.");
+        public static readonly LocString GlassFineTuning = new("settings.glassFineTuning", "Fine Tuning");
+        public static readonly LocString GlassFineTuningHint = new("settings.glassFineTuningHint", "Cursor Light turns the highlight toward your mouse. Every slider starts in the middle, and Reset puts them all back.");
+        public static readonly LocString GlassCursorLight = new("settings.glassCursorLight", "Cursor Light");
+        public static readonly LocString GlassHighlight = new("settings.glassHighlight", "Highlight");
+        public static readonly LocString GlassEdges = new("settings.glassEdges", "Edges");
+        public static readonly LocString GlassBrightness = new("settings.glassBrightness", "Brightness");
+        public static readonly LocString GlassRefraction = new("settings.glassRefraction", "Refraction");
+        public static readonly LocString GlassColorSplit = new("settings.glassColorSplit", "Color Split");
+        public static readonly LocString GlassShadow = new("settings.glassShadow", "Shadow");
+        public static readonly LocString GlassResetTuning = new("settings.glassResetTuning", "Reset Fine Tuning");
         public static readonly LocString Notifications = new("settings.notifications", "Notifications and Badges");
         public static readonly LocString DoNotDisturb = new("settings.doNotDisturb", "Do Not Disturb");
         public static readonly LocString Vibration = new("settings.vibration", "Vibration");

@@ -242,6 +242,7 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
     public long HalloweenTreatDue { get; set; }
     public bool RealGlass { get; set; }
     public float GlassAmount { get; set; } = GlassAmountCurve.Neutral;
+    public GlassTuning GlassTuning { get; set; } = new();
     public string AccentName { get; set; } = "Violet";
     public string AccentCustomHex { get; set; } = string.Empty;
     public string PhoneCaseName { get; set; } = "Titanium";

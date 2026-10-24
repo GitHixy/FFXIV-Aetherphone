@@ -13,6 +13,7 @@ public sealed class RealGlassMaterialsTests
     private const float Tolerance = 1e-4f;
     private static readonly Vector2 Bar = new(320f, 56f);
     private static readonly Vector4 Accent = new(0.2f, 0.5f, 0.9f, 0.7f);
+    private static readonly GlassTuning Neutral = new();
     private const float PanelRadius = 48f;
     private static readonly Vector2 PanelMin = new(100f, 80f);
     private static readonly Vector2 PanelMax = new(500f, 920f);
@@ -56,8 +57,8 @@ public sealed class RealGlassMaterialsTests
     [Fact]
     public void AccentWashesThePresetWithTheOpaqueAccent()
     {
-        var material = RealGlassMaterials.Build(RealGlassKind.Accent, GlassTone.Dark, Accent, 1f, NeutralAmount,
-            Radius, Bar);
+        var material = RealGlassMaterials.Build(RealGlassKind.Accent, GlassTone.Dark, false, Accent, 1f,
+            NeutralAmount, Neutral, Radius, Bar);
 
         Assert.Equal(Accent.X, material.Tint.R);
         Assert.Equal(Accent.Y, material.Tint.G);
@@ -69,8 +70,8 @@ public sealed class RealGlassMaterialsTests
     [Fact]
     public void AccentOnALightToneTakesTheLightPreset()
     {
-        var material = RealGlassMaterials.Build(RealGlassKind.Accent, GlassTone.Light, Accent, 1f, NeutralAmount,
-            Radius, Bar);
+        var material = RealGlassMaterials.Build(RealGlassKind.Accent, GlassTone.Light, false, Accent, 1f,
+            NeutralAmount, Neutral, Radius, Bar);
 
         Assert.True(material.LightAppearance);
         Assert.Equal(RealGlassMaterials.AccentTintAmount, material.TintAmount);
@@ -82,8 +83,8 @@ public sealed class RealGlassMaterialsTests
     [InlineData(-1f, 0f)]
     public void OpacityPassesThroughClamped(float opacity, float expected)
     {
-        var material = RealGlassMaterials.Build(RealGlassKind.Liquid, GlassTone.Dark, default, opacity, NeutralAmount,
-            Radius, Bar);
+        var material = RealGlassMaterials.Build(RealGlassKind.Liquid, GlassTone.Dark, false, default, opacity,
+            NeutralAmount, Neutral, Radius, Bar);
 
         Assert.Equal(expected, material.Opacity);
     }
@@ -132,10 +133,10 @@ public sealed class RealGlassMaterialsTests
     [Fact]
     public void BuildAppliesTheCornerExponentOfTheShape()
     {
-        var squircle = RealGlassMaterials.Build(RealGlassKind.Liquid, GlassTone.Dark, default, 1f, NeutralAmount,
-            Radius, Bar);
-        var capsule = RealGlassMaterials.Build(RealGlassKind.Liquid, GlassTone.Dark, default, 1f, NeutralAmount,
-            Bar.Y * 0.5f, Bar);
+        var squircle = RealGlassMaterials.Build(RealGlassKind.Liquid, GlassTone.Dark, false, default, 1f,
+            NeutralAmount, Neutral, Radius, Bar);
+        var capsule = RealGlassMaterials.Build(RealGlassKind.Liquid, GlassTone.Dark, false, default, 1f,
+            NeutralAmount, Neutral, Bar.Y * 0.5f, Bar);
 
         Assert.Equal(Glasswork.CornerCurve.ContinuousExponent, squircle.CornerExponent);
         Assert.Equal(Glasswork.CornerCurve.CircularExponent, capsule.CornerExponent);
@@ -163,6 +164,92 @@ public sealed class RealGlassMaterialsTests
         Assert.False(shape.IsRing);
     }
 
-    private static GlassMaterial Build(RealGlassKind kind, GlassTone tone, float amount) =>
-        RealGlassMaterials.Build(kind, tone, default, 1f, amount, Radius, Bar);
+    [Fact]
+    public void LightGlassOnTheWallpaperUsesTheWhiteInkPresetWithASoftFilm()
+    {
+        var material = Build(RealGlassKind.Liquid, GlassTone.Light, NeutralAmount, true);
+
+        Assert.False(material.LightAppearance);
+        Assert.Equal(RealGlassMaterials.WallpaperLightLift, material.Lift);
+    }
+
+    [Fact]
+    public void DarkGlassOnTheWallpaperIsSmoked()
+    {
+        var material = Build(RealGlassKind.Liquid, GlassTone.Dark, NeutralAmount, true);
+
+        Assert.False(material.LightAppearance);
+        Assert.Equal(RealGlassMaterials.WallpaperSmokeAmount, material.TintAmount);
+        Assert.Equal(RealGlassMaterials.WallpaperSmoke.R, material.Tint.R);
+    }
+
+    [Fact]
+    public void TintedLightGlassOnTheWallpaperSmokesInsteadOfTurningMilky()
+    {
+        var neutral = Build(RealGlassKind.Liquid, GlassTone.Light, NeutralAmount, true);
+        var tinted = Build(RealGlassKind.Liquid, GlassTone.Light, 1f, true);
+
+        Assert.True(tinted.Lift <= neutral.Lift);
+        Assert.True(tinted.TintAmount > neutral.TintAmount);
+    }
+
+    [Fact]
+    public void LightGlassInAnAppKeepsTheDarkInkPreset()
+    {
+        var material = Build(RealGlassKind.Liquid, GlassTone.Light, NeutralAmount, false);
+
+        Assert.True(material.LightAppearance);
+        Assert.Equal(GlassMaterial.RegularLight.Lift, material.Lift);
+    }
+
+    [Fact]
+    public void NeutralTuningLeavesTheMaterialAlone()
+    {
+        var material = Build(RealGlassKind.Liquid, GlassTone.Dark, NeutralAmount);
+
+        Assert.Equal(GlassMaterial.Regular.Specular, material.Specular);
+        Assert.Equal(GlassMaterial.Regular.EdgeLineStrength, material.EdgeLineStrength);
+        Assert.Equal(GlassMaterial.Regular.Lift, material.Lift);
+        Assert.Equal(GlassMaterial.Regular.Depth, material.Depth);
+        Assert.Equal(GlassMaterial.Regular.Dispersion, material.Dispersion);
+        Assert.Equal(GlassMaterial.Regular.ShadowOpacity, material.ShadowOpacity);
+    }
+
+    [Fact]
+    public void TuningScalesEachKnob()
+    {
+        var tuning = new GlassTuning { Highlight = 0f, Refraction = 1f, ColorSplit = 0.25f, Shadow = 1f };
+        var material = RealGlassMaterials.Build(RealGlassKind.Liquid, GlassTone.Dark, false, default, 1f,
+            NeutralAmount, tuning, Radius, Bar);
+
+        Assert.Equal(0f, material.Specular);
+        Assert.Equal(GlassMaterial.Regular.Depth * 2f, material.Depth, Tolerance);
+        Assert.Equal(GlassMaterial.Regular.Dispersion * 0.5f, material.Dispersion, Tolerance);
+        Assert.Equal(GlassMaterial.Regular.ShadowOpacity * 2f, material.ShadowOpacity, Tolerance);
+    }
+
+    [Fact]
+    public void EdgesNeverPassAFullLine()
+    {
+        var tuning = new GlassTuning { Edges = 1f };
+        var material = RealGlassMaterials.Build(RealGlassKind.Liquid, GlassTone.Light, false, default, 1f, 1f,
+            tuning, Radius, Bar);
+
+        Assert.Equal(GlassTuning.MaximumEdgeLine, material.EdgeLineStrength);
+    }
+
+    [Theory]
+    [InlineData(0f, -GlassTuning.BrightnessReach)]
+    [InlineData(1f, GlassTuning.BrightnessReach)]
+    public void BrightnessShiftsTheLift(float brightness, float shift)
+    {
+        var tuning = new GlassTuning { Brightness = brightness };
+        var material = RealGlassMaterials.Build(RealGlassKind.Liquid, GlassTone.Dark, false, default, 1f,
+            NeutralAmount, tuning, Radius, Bar);
+
+        Assert.Equal(GlassMaterial.Regular.Lift + shift, material.Lift, Tolerance);
+    }
+
+    private static GlassMaterial Build(RealGlassKind kind, GlassTone tone, float amount, bool onWallpaper = false) =>
+        RealGlassMaterials.Build(kind, tone, onWallpaper, default, 1f, amount, Neutral, Radius, Bar);
 }
