@@ -204,6 +204,9 @@ internal static class AppIconArt
             case "tempo":
                 DrawTempo(dl, center, extent, inkColor, holeColor);
                 return true;
+            case "harvest":
+                HarvestIcon.Draw(dl, center, extent, inkColor, holeColor);
+                return true;
             default:
                 return false;
         }
