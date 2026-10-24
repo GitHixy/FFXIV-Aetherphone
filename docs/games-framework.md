@@ -123,6 +123,12 @@ A game declares one `GameSpec` as a static field. The fields that matter most:
 
 The rest (a kind, a countdown or a caption per mode, a unit such as Strokes, modes that only apply to solo play) is named in GameSpec.cs.
 
+### How to play
+
+A game whose rules need more than the hook line passes a `GameGuide` as the spec's `guide`: two to five `GuidePage`s, each a title, a body and a `GuideArt` method that draws a looping diagram into the page's art panel with the game's own pieces. `StageGuide` shows it the first time the player presses Play (Skip starts the run, the last page's button reads Play), from How to play on the intro, and from the pause menu (the last page reads Got it and returns to the pause menu). Pages advance with the buttons, a tap on the art, or the arrow keys; Escape and the back chip close the guide. Closing it any way marks it seen in `GameStatsStore.MarkGuideSeen`, so it shows on its own only once per game.
+
+Art methods are static, take `(drawList, art, seconds, accent, scale)` and loop on `GuideKit.Loop(seconds, period)`. `GuideKit` draws the shared marks: `Tap` (a finger press with a ripple), `Swipe`, `Key` (a key cap, pressed or not) and `Arrow`. The guide clips the art to its panel and fades it with the page, so an art method draws at full alpha and never allocates. Declare the guide in a static field above the spec, since static fields initialize in order.
+
 ## Session flow
 
 A run moves through five states. The host draws every overlay; the game only draws its world.

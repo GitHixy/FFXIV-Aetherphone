@@ -9601,6 +9601,10 @@ internal static class L
         public static readonly LocString TapWhenReady = new("stage.tapWhenReady", "Tap when ready");
         public static readonly LocString SeatWins = new("stage.seatWins", "{0} wins");
         public static readonly LocString LeaderboardsOff = new("stage.leaderboardsOff", "Leaderboards off");
+        public static readonly LocString HowToPlay = new("stage.howToPlay", "How to play");
+        public static readonly LocString GuideBack = new("stage.guideBack", "Back");
+        public static readonly LocString GuideSkip = new("stage.guideSkip", "Skip");
+        public static readonly LocString GuideDone = new("stage.guideDone", "Got it");
     }
 
     internal static class Leaderboard

@@ -380,6 +380,7 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
     public List<GameStatRecord> GameStats { get; set; } = new();
     public List<GameModeChoice> GameModeChoices { get; set; } = new();
     public List<GameLevelProgress> GameLevelProgress { get; set; } = new();
+    public List<string> GameGuidesSeen { get; set; } = new();
     public int DailyChallengeStreak { get; set; }
     public int DailyChallengeLastDay { get; set; }
     public ulong DailyChallengeHistory { get; set; }

@@ -147,6 +147,7 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
     private readonly ScreenFx fx;
     private readonly StageIntro intro = new();
     private readonly StagePause pause = new();
+    private readonly StageGuide guide = new();
     private readonly StageChrome chrome = new();
     private readonly LevelSelect levelSelect = new();
     private readonly StageHandoff handoff = new();
@@ -751,11 +752,20 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
             {
                 var gameContext = new GameContext(full, safe, theme, 0f, rawSeconds, session, hud, fx, backdrop,
                     chrome);
-                var action = levelSelect.IsOpen ? IntroAction.None : intro.Draw(drawList, gameContext, accent, scale);
+                var action = levelSelect.IsOpen || guide.IsOpen
+                    ? IntroAction.None
+                    : intro.Draw(drawList, gameContext, accent, scale);
                 if (action == IntroAction.Play)
                 {
-                    StartRun(game);
-                    break;
+                    if (spec.Guide is { } firstGuide && !stats.GuideSeen(spec.Id))
+                    {
+                        guide.Open(firstGuide, GuideOrigin.BeforePlay);
+                    }
+                    else
+                    {
+                        StartRun(game);
+                        break;
+                    }
                 }
 
                 if (action == IntroAction.Leaderboard)
@@ -765,6 +775,10 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
                 else if (action == IntroAction.Levels)
                 {
                     levelSelect.Open();
+                }
+                else if (action == IntroAction.HowToPlay && spec.Guide is { } introGuide)
+                {
+                    guide.Open(introGuide, GuideOrigin.Intro);
                 }
 
                 var chosen = levelSelect.Draw(drawList, gameContext, accent, scale);
@@ -809,12 +823,32 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
         }
 
         handoff.Draw(drawList, full, session, rawSeconds, scale);
-        var pauseAction = pause.Draw(drawList, full, theme, accent, rawSeconds, session.State == StageFlow.Paused,
-            session.RankedMode, scale);
+        var pausedGuide = guide.IsOpen && guide.Origin == GuideOrigin.Pause;
+        var pauseAction = pause.Draw(drawList, full, theme, accent, rawSeconds,
+            session.State == StageFlow.Paused && !pausedGuide, session.RankedMode, spec.Guide is not null, scale);
+        var guideContext = new GameContext(full, safe, theme, 0f, rawSeconds, session, hud, fx, backdrop, chrome);
+        if (DrawGuide(drawList, guideContext, spec, accent, scale) == GuideExit.Play
+            && session.State == StageFlow.Intro)
+        {
+            StartRun(game);
+        }
+
+        if (guide.IsOpen && guide.Origin == GuideOrigin.Pause && session.State != StageFlow.Paused)
+        {
+            guide.Close();
+        }
+
         switch (pauseAction)
         {
             case PauseAction.Resume:
                 session.Resume();
+                break;
+            case PauseAction.HowToPlay:
+                if (spec.Guide is { } pauseGuide)
+                {
+                    guide.Open(pauseGuide, GuideOrigin.Pause);
+                }
+
                 break;
             case PauseAction.Restart:
                 SettleRun();
@@ -829,6 +863,18 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
             default:
                 break;
         }
+    }
+
+    private GuideExit DrawGuide(ImDrawListPtr drawList, in GameContext gameContext, in GameSpec spec, Vector4 accent,
+        float scale)
+    {
+        var exit = guide.Draw(drawList, gameContext, accent, scale);
+        if (exit != GuideExit.None)
+        {
+            stats.MarkGuideSeen(spec.Id);
+        }
+
+        return exit;
     }
 
     private StageResult BuildStageResult(in GameSpec spec, Vector4 accent)
@@ -912,7 +958,12 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
         var radius = StageLayout.ChipRadius * scale;
         if (chrome.BackChip(drawList, StageLayout.BackChipCenter(full, scale), radius, theme, scale))
         {
-            if (levelSelect.IsOpen)
+            if (guide.IsOpen)
+            {
+                guide.Close();
+                stats.MarkGuideSeen(currentGame?.Spec.Id ?? string.Empty);
+            }
+            else if (levelSelect.IsOpen)
             {
                 levelSelect.Close();
             }
@@ -1169,6 +1220,7 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
         stageHud.Reset();
         intro.Begin(spec);
         pause.Reset();
+        guide.Reset();
         levelSelect.Reset();
         handoff.Reset();
         resultProgress = 0f;
