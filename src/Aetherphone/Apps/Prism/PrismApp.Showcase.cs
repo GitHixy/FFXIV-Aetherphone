@@ -147,12 +147,14 @@ internal sealed partial class PrismApp
         return popular.Loading || popular.NeverLoaded ? null : glams.Lane(GlamScope.New).Items;
     }
 
-    private void DropFailedShowcase()
+    private void DropFailedShowcase() => DropShowcase(null);
+
+    private void DropShowcase(string? removedId)
     {
         var kept = 0;
         for (var index = 0; index < showcaseCount; index++)
         {
-            if (images.Failed(Cover(showcase[index])))
+            if (showcase[index].Id == removedId || images.Failed(Cover(showcase[index])))
             {
                 continue;
             }
