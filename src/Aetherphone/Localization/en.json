@@ -5340,7 +5340,7 @@
   "games.fuse.crates": "Crates broken",
   "games.fuse.powerUps": "Power-ups",
   "games.fuse.guide1Title": "Drop and run",
-  "games.fuse.guide1Body": "Move with the pad or WASD and drop a bomb with the button or Space. Then get clear, because its fire knocks out anyone, you included.",
+  "games.fuse.guide1Body": "Move with the pad or the arrow keys and drop a bomb with the button or Space. Then get clear, because its fire knocks out anyone, you included.",
   "games.fuse.guide2Title": "Blasts and chains",
   "games.fuse.guide2Body": "Blasts shoot out in four straight lines and break the first crate they hit. A blast that reaches another bomb sets it off too.",
   "games.fuse.guide3Title": "Grab power-ups",

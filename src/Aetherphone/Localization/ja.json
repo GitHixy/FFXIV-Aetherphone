@@ -5340,7 +5340,7 @@
   "games.fuse.crates": "壊した木箱",
   "games.fuse.powerUps": "パワーアップ",
   "games.fuse.guide1Title": "置いて逃げる",
-  "games.fuse.guide1Body": "パッドかWASDで移動し、ボタンかスペースで爆弾を置こう。炎は自分も含めて誰でも倒すので、すぐに離れよう。",
+  "games.fuse.guide1Body": "パッドか矢印キーで移動し、ボタンかスペースで爆弾を置こう。炎は自分も含めて誰でも倒すので、すぐに離れよう。",
   "games.fuse.guide2Title": "爆風と連鎖",
   "games.fuse.guide2Body": "爆風は十字に4方向へ伸び、最初に当たった木箱を壊す。別の爆弾に届くと、その爆弾も誘爆する。",
   "games.fuse.guide3Title": "パワーアップを取る",
