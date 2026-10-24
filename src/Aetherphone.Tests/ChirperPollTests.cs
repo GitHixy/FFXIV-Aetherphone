@@ -94,52 +94,78 @@ public sealed class ChirperPollTests
     }
 
     [Fact]
-    public void AnOptimisticVoteOnHiddenResultsMarksTheChoiceWithoutInventingCounts()
+    public void APendingVoteShowsOnEveryUnvotedCopyAndDisappearsWhenDropped()
     {
-        var before = Poll();
+        var forYouCopy = Poll();
+        var latestCopy = Poll();
 
-        var after = ChirperPolls.ApplyLocalVote(before, 1);
-
-        Assert.Equal(1, after.MyVote);
-        Assert.Equal(before.TotalVotes + 1, after.TotalVotes);
-        Assert.Null(after.Counts);
-        Assert.False(ChirperPolls.ResultsVisible(after));
+        Assert.Equal(1, ChirperPolls.ShownVote(forYouCopy, true, 1));
+        Assert.Equal(1, ChirperPolls.ShownVote(latestCopy, true, 1));
+        Assert.Equal(-1, ChirperPolls.ShownVote(latestCopy, false, 1));
+        Assert.Equal(0, ChirperPolls.ShownVote(Poll(new[] { 1, 0 }, myVote: 0), true, 1));
     }
 
     [Fact]
-    public void AnOptimisticVoteOnVisibleResultsBumpsACopy()
+    public void TheServerAnswerLandsOnEveryCopyOfTheChirp()
     {
-        var counts = new[] { 3, 1 };
-        var before = Poll(counts);
+        var counted = Poll(new[] { 2, 5 }, myVote: 1);
+        var feedCopy = Post("c1", Poll());
+        var repostedCopy = Post("c1", Poll());
 
-        var after = ChirperPolls.ApplyLocalVote(before, 0);
+        var updatedFeed = ChirperPolls.WithPoll(feedCopy, counted);
+        var updatedRepost = ChirperPolls.WithPoll(repostedCopy, counted);
 
-        Assert.Equal(new[] { 4, 1 }, after.Counts);
-        Assert.Equal(5, after.TotalVotes);
-        Assert.Equal(new[] { 3, 1 }, counts);
+        Assert.Same(counted, updatedFeed.Poll);
+        Assert.Same(counted, updatedRepost.Poll);
+        Assert.Same(updatedFeed, ChirperPolls.WithPoll(updatedFeed, Poll(new[] { 2, 5 }, myVote: 1)));
     }
 
     [Fact]
-    public void AnOptimisticVoteIgnoresASecondVoteOrAMissingOption()
+    public void TwoCopiesWithTheSameNumbersAreTheSameState()
     {
-        var voted = Poll(myVote: 0);
-        var open = Poll();
+        var first = Poll(new[] { 3, 1 }, myVote: 0);
+        var second = Poll(new[] { 3, 1 }, myVote: 0);
 
-        Assert.Same(voted, ChirperPolls.ApplyLocalVote(voted, 1));
-        Assert.Same(open, ChirperPolls.ApplyLocalVote(open, 2));
-        Assert.Same(open, ChirperPolls.ApplyLocalVote(open, -1));
+        Assert.NotSame(first, second);
+        Assert.True(ChirperPolls.SameState(first, second));
+        Assert.False(ChirperPolls.SameState(first, Poll(new[] { 3, 2 }, myVote: 0)));
+        Assert.False(ChirperPolls.SameState(first, Poll(new[] { 3, 1 })));
+        Assert.False(ChirperPolls.SameState(Poll(), Poll(new[] { 0, 0 })));
+        Assert.False(ChirperPolls.SameState(Poll(), Poll(ended: true)));
     }
 
     [Fact]
-    public void ARollbackRestoresOnlyTheOptimisticState()
+    public void AnEndedPollAsksAgainOnAGrowingBackoff()
     {
-        var previous = Poll();
-        var optimistic = ChirperPolls.ApplyLocalVote(previous, 0);
-        var fresher = Poll(new[] { 1, 1 }, myVote: 0);
-
-        Assert.Same(previous, ChirperPolls.Swap(optimistic, optimistic, previous));
-        Assert.Same(fresher, ChirperPolls.Swap(fresher, optimistic, previous));
+        Assert.Equal(5_000L, ChirperPolls.RefreshBackoffMilliseconds(1));
+        Assert.Equal(15_000L, ChirperPolls.RefreshBackoffMilliseconds(2));
+        Assert.Equal(45_000L, ChirperPolls.RefreshBackoffMilliseconds(3));
+        Assert.Equal(300_000L, ChirperPolls.RefreshBackoffMilliseconds(10));
+        Assert.Equal(300_000L, ChirperPolls.RefreshBackoffMilliseconds(int.MaxValue));
     }
+
+    [Fact]
+    public void ACopyWithTheSameNumbersKeepsTheCachedLabels()
+    {
+        var view = new ChirperPollView();
+        view.Sync(Poll(new[] { 3, 1 }, myVote: 0, endsAt: Now + 3 * Hour), Now);
+        var percents = view.Percents;
+        var first = view.Percents[0];
+        var footer = view.Footer;
+
+        view.Sync(Poll(new[] { 3, 1 }, myVote: 0, endsAt: Now + 3 * Hour), Now);
+
+        Assert.Same(percents, view.Percents);
+        Assert.Same(first, view.Percents[0]);
+        Assert.Same(footer, view.Footer);
+
+        view.Sync(Poll(new[] { 3, 2 }, myVote: 0, endsAt: Now + 3 * Hour), Now);
+        Assert.Equal("60%", view.Percents[0]);
+    }
+
+    private static PostDto Post(string id, PostPollDto poll) =>
+        new(id, "author", string.Empty, string.Empty, "Author", "author", "question", 100, Array.Empty<int>(), 0, -1, 0,
+            null, 0, 0, null, 0, false, Poll: poll);
 
     [Fact]
     public void OnlyANonAuthorWhoHasNotVotedOnAnOpenPollCanVote()

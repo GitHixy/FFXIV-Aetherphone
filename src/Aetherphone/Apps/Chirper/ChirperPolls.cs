@@ -10,6 +10,10 @@ internal static class ChirperPolls
     public const int MaxOptionLength = 40;
     public const int DefaultDurationIndex = 2;
 
+    private const long RefreshFirstBackoffMilliseconds = 5_000L;
+    private const long RefreshMaxBackoffMilliseconds = 300_000L;
+    private const long RefreshBackoffFactor = 3L;
+
     public static readonly int[] DurationHours = { 1, 6, 24, 72, 168 };
 
     public static readonly LocString[] DurationLabels =
@@ -35,29 +39,68 @@ internal static class ChirperPolls
         return counts is not null && optionIndex >= 0 && optionIndex < counts.Length ? counts[optionIndex] : 0;
     }
 
-    public static PostPollDto ApplyLocalVote(PostPollDto poll, int optionIndex)
+    public static int ShownVote(PostPollDto poll, bool pending, int pendingOption) =>
+        poll.MyVote >= 0 ? poll.MyVote : pending ? pendingOption : -1;
+
+    public static PostDto WithPoll(PostDto post, PostPollDto poll) =>
+        post.Poll is not null && SameState(post.Poll, poll) ? post : post with { Poll = poll };
+
+    public static bool SameState(PostPollDto left, PostPollDto right)
     {
-        if (poll.MyVote >= 0 || optionIndex < 0 || optionIndex >= poll.Options.Length)
+        if (ReferenceEquals(left, right))
         {
-            return poll;
+            return true;
         }
 
-        int[]? counts = null;
-        if (poll.Counts is { } current)
+        return left.MyVote == right.MyVote
+            && left.TotalVotes == right.TotalVotes
+            && left.Ended == right.Ended
+            && left.EndsAtUnix == right.EndsAtUnix
+            && SameItems(left.Options, right.Options)
+            && SameCounts(left.Counts, right.Counts);
+    }
+
+    public static long RefreshBackoffMilliseconds(int attempts)
+    {
+        var delay = RefreshFirstBackoffMilliseconds;
+        for (var attempt = 1; attempt < attempts && delay < RefreshMaxBackoffMilliseconds; attempt++)
         {
-            counts = (int[])current.Clone();
-            if (optionIndex < counts.Length)
+            delay *= RefreshBackoffFactor;
+        }
+
+        return Math.Min(delay, RefreshMaxBackoffMilliseconds);
+    }
+
+    private static bool SameItems(string[] left, string[] right)
+    {
+        if (ReferenceEquals(left, right))
+        {
+            return true;
+        }
+
+        if (left.Length != right.Length)
+        {
+            return false;
+        }
+
+        for (var index = 0; index < left.Length; index++)
+        {
+            if (!string.Equals(left[index], right[index], StringComparison.Ordinal))
             {
-                counts[optionIndex]++;
+                return false;
             }
         }
 
-        return poll with { MyVote = optionIndex, TotalVotes = poll.TotalVotes + 1, Counts = counts };
+        return true;
     }
 
-    public static PostPollDto Swap(PostPollDto current, PostPollDto expected, PostPollDto replacement) =>
-        ReferenceEquals(current, expected) ? replacement : current;
+    private static bool SameCounts(int[]? left, int[]? right)
+    {
+        if (left is null || right is null)
+        {
+            return left is null && right is null;
+        }
 
-    public static PostDto WithPoll(PostDto post, PostPollDto poll) =>
-        ReferenceEquals(post.Poll, poll) ? post : post with { Poll = poll };
+        return left.AsSpan().SequenceEqual(right);
+    }
 }
