@@ -198,11 +198,11 @@ internal sealed class FolderOverlay
             return;
         }
 
-        var vertexStart = drawList.VtxBuffer.Size;
         var nameField = new Rect(header.Min,
             new Vector2(header.Max.X, header.Min.Y + GlassField.HeightUnits * scale));
         GlassField.Surface(drawList, nameField, GlassField.Radius(nameField), scale,
-            WallpaperLegibility.Strength(theme), 1f);
+            WallpaperLegibility.Strength(theme), alpha);
+        var vertexStart = drawList.VtxBuffer.Size;
         if (GlassField.Title(nameField, "##folderName", Loc.T(L.Home.NewFolder), ref nameBuffer, theme, scale,
                 NameMaxLength, ImGuiInputTextFlags.EnterReturnsTrue))
         {

@@ -226,7 +226,6 @@ internal sealed class PhoneServices : IDisposable
     public required ShareService Share { get; init; }
     public required ConductGateService Conduct { get; init; }
     public required WallpaperLibrary Wallpapers { get; init; }
-    public required LiveBackdrop LiveBackdrop { get; init; }
     public required WallpaperImageCache WallpaperImages { get; init; }
     public required Hunts.HuntsService Hunts { get; init; }
     public required Timers.GameTimers GameTimers { get; init; }
@@ -255,7 +254,6 @@ internal sealed class PhoneServices : IDisposable
         var customWallpaperDirectory = new DirectoryInfo(Path.Combine(configDirectory.FullName, "Wallpapers"));
         var wallpapers = new WallpaperLibrary(textures, builtInWallpaperDirectory, customWallpaperDirectory,
             configuration);
-        var liveBackdrop = new LiveBackdrop(textures, configuration);
         var themes = new ThemeProvider(configuration, wallpapers);
         var gameData = new GameData(dataManager, objectTable, framework);
         var maps = new MapData(dataManager, clientState);
@@ -650,7 +648,6 @@ internal sealed class PhoneServices : IDisposable
             Share = new ShareService(installer),
             Conduct = new ConductGateService(configuration),
             Wallpapers = wallpapers,
-            LiveBackdrop = liveBackdrop,
             WallpaperImages = wallpaperImages,
             Hunts = hunts,
             GameTimers = gameTimers,
@@ -777,7 +774,6 @@ internal sealed class PhoneServices : IDisposable
         Loadout.Dispose();
         Availability.Dispose();
         Http.Dispose();
-        LiveBackdrop.Dispose();
         Wallpapers.Dispose();
         WallpaperImages.Dispose();
         HuntsMapMarkers.Dispose();

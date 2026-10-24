@@ -1,3 +1,4 @@
+using Aetherphone.Core.Shell;
 using Aetherphone.Core.Theme;
 using Dalamud.Bindings.ImGui;
 
@@ -78,7 +79,13 @@ internal static class Material
             return;
         }
 
-        Squircle.Fill(drawList, min, max, radius, ImGui.GetColorU32(FrostedFill with { W = FrostedFill.W * opacity }));
+        if (RealGlass.TryDraw(drawList, min, max, radius, RealGlassKind.Frosted, GlassTone.Dark, default, opacity))
+        {
+            return;
+        }
+
+        Squircle.Fill(drawList, min, max, radius,
+            ImGui.GetColorU32(FrostedFill with { W = ClassicAlpha(FrostedFill.W) * opacity }));
         EdgeSquircle(drawList, min, max, radius, scale, opacity);
     }
 
@@ -107,6 +114,11 @@ internal static class Material
             return;
         }
 
+        if (RealGlass.TryDraw(drawList, min, max, radius, RealGlassKind.Accent, GlassTone.Dark, accent, opacity))
+        {
+            return;
+        }
+
         Squircle.Fill(drawList, min, max, radius, ImGui.GetColorU32(accent with { W = opacity }));
         GlassRim(drawList, min, max, radius, scale, GlassTone.Dark, opacity);
         PointerLight(drawList, min, max, radius, scale, GlassTone.Dark, opacity);
@@ -120,6 +132,11 @@ internal static class Material
         GlassTone tone, float brightness, float opacity = 1f)
     {
         if (opacity <= 0f)
+        {
+            return;
+        }
+
+        if (RealGlass.TryDraw(drawList, min, max, radius, RealGlassKind.Liquid, tone, default, opacity))
         {
             return;
         }
@@ -149,7 +166,7 @@ internal static class Material
             tint = tone == GlassTone.Light ? tint with { W = tint.W + FallbackBody } : FrostedFill;
         }
 
-        Squircle.Fill(drawList, min, max, radius, ImGui.GetColorU32(tint with { W = tint.W * opacity }));
+        Squircle.Fill(drawList, min, max, radius, ImGui.GetColorU32(tint with { W = ClassicAlpha(tint.W) * opacity }));
         GlassRim(drawList, min, max, radius, scale, tone, opacity);
         PointerLight(drawList, min, max, radius, scale, tone, opacity);
     }
@@ -159,7 +176,7 @@ internal static class Material
     {
         WallpaperBackdrop.Fill(drawList, min, max, radius, opacity, 1f, 0f, 0f);
         var lift = tone == GlassTone.Light ? GroundLiftLight : GroundLiftDark;
-        Squircle.Fill(drawList, min, max, radius, ImGui.GetColorU32(lift with { W = lift.W * opacity }));
+        Squircle.Fill(drawList, min, max, radius, ImGui.GetColorU32(lift with { W = ClassicAlpha(lift.W) * opacity }));
         GroundRim(drawList, min, max, radius, scale, tone, opacity);
     }
 
@@ -174,24 +191,8 @@ internal static class Material
             1f * scale, 1f * scale);
     }
 
-    public static bool LiquidGlassBand(ImDrawListPtr drawList, Vector2 min, Vector2 max, float radius, float band,
-        GlassTone tone, float opacity = 1f)
-    {
-        if (opacity <= 0f || band <= 0f)
-        {
-            return false;
-        }
-
-        if (!WallpaperBackdrop.FillEdge(drawList, min, max, radius, band, opacity))
-        {
-            return false;
-        }
-
-        var local = WallpaperBackdrop.Brightness(min, max);
-        var tint = BodyTint(tone, local >= 0f ? WallpaperLegibility.Normalize(local) : 0f);
-        Squircle.FillEdge(drawList, min, max, radius, band, ImGui.GetColorU32(tint with { W = tint.W * opacity }));
-        return true;
-    }
+    private static float ClassicAlpha(float alpha) =>
+        MathF.Min(alpha * GlassAmountCurve.ClassicTint(RealGlass.Amount), 1f);
 
     private static Vector4 BodyTint(GlassTone tone, float brightness)
     {

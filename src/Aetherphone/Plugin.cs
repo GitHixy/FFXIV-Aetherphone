@@ -63,7 +63,6 @@ public sealed class Plugin : IDalamudPlugin
     internal static Configuration Cfg { get; set; } = null!;
     internal static FontService Fonts { get; set; } = null!;
     internal static WallpaperLibrary Wallpapers { get; set; } = null!;
-    internal static LiveBackdrop LiveBackdrop { get; set; } = null!;
     internal static DeviceStatus Device { get; set; } = null!;
     internal static UpdateCheckService Updates { get; set; } = null!;
     internal static PhotoWindow PhotoWindow { get; set; } = null!;
@@ -136,7 +135,7 @@ public sealed class Plugin : IDalamudPlugin
                 PhoneSizeCatalog.ZoomFor(Cfg.PhoneWidth));
             EmojiCatalog.Load();
             Wallpapers = services.Wallpapers;
-            LiveBackdrop = services.LiveBackdrop;
+            RealGlass.Initialize(PluginInterface, Log, Cfg);
             videoSuite = new VideoSuite(services, Cfg, ChatGui);
             services.SongResolver.Attach(videoSuite.Screen.Engine.Dependencies);
             Framework.Update += OnVideoFrameworkUpdate;
@@ -216,6 +215,7 @@ public sealed class Plugin : IDalamudPlugin
             };
             CommandManager.AddHandler(AepConstants.PrimaryCommand, primaryCommand);
             CommandManager.AddHandler(AepConstants.AliasCommand, new CommandInfo(OnCommand) { ShowInHelp = false });
+            PluginInterface.UiBuilder.Draw += RealGlass.BeginFrame;
             PluginInterface.UiBuilder.Draw += windowSystem.Draw;
             PluginInterface.UiBuilder.Draw += FilePicker.Draw;
             PluginInterface.UiBuilder.Draw += linkpearlHotkey.Tick;
@@ -248,6 +248,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private void TearDownPartialConstruction()
     {
+        PluginInterface.UiBuilder.Draw -= RealGlass.BeginFrame;
         PluginInterface.UiBuilder.Draw -= windowSystem.Draw;
         PluginInterface.UiBuilder.Draw -= FilePicker.Draw;
         if (linkpearlHotkey is not null)
@@ -285,6 +286,7 @@ public sealed class Plugin : IDalamudPlugin
         serverBar?.Dispose();
         linkpearlPresence?.Dispose();
         windowSystem.RemoveAllWindows();
+        RealGlass.Dispose();
         videoDebugWindow?.Dispose();
         videoSuite?.Dispose();
         DxHandler.Dispose();
@@ -412,6 +414,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public void Dispose()
     {
+        PluginInterface.UiBuilder.Draw -= RealGlass.BeginFrame;
         PluginInterface.UiBuilder.Draw -= windowSystem.Draw;
         PluginInterface.UiBuilder.Draw -= FilePicker.Draw;
         PluginInterface.UiBuilder.Draw -= linkpearlHotkey.Tick;
@@ -434,6 +437,7 @@ public sealed class Plugin : IDalamudPlugin
         linkpearlPopouts.Dispose();
         messagePopouts.Dispose();
         windowSystem.RemoveAllWindows();
+        RealGlass.Dispose();
         videoDebugWindow.Dispose();
         videoSuite.Dispose();
         DxHandler.Dispose();

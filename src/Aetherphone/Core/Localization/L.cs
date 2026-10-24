@@ -2026,11 +2026,12 @@ internal static class L
         public static readonly LocString PhoneSize = new("settings.phoneSize", "Phone Size");
         public static readonly LocString ClockFormat = new("settings.clockFormat", "Clock");
         public static readonly LocString Use24HourClock = new("settings.use24HourClock", "24-hour time");
-        public static readonly LocString LiveGlass = new("settings.liveGlass", "Live glass (experimental)");
-        public static readonly LocString LiveGlassHint = new("settings.liveGlassHint", "Glass inside apps blurs what is really behind the phone instead of the app colour. Uses a little GPU time every frame; turn it off if the game stutters.");
-        public static readonly LocString LiveGlassSourceWorld = new("settings.liveGlassSourceWorld", "Game world");
-        public static readonly LocString LiveGlassSourceComposite = new("settings.liveGlassSourceComposite", "Whole screen");
-        public static readonly LocString LiveGlassReadout = new("settings.liveGlassReadout", "Live glass pass");
+        public static readonly LocString LiquidGlass = new("settings.liquidGlass", "Liquid Glass");
+        public static readonly LocString LiquidGlassClear = new("settings.liquidGlassClear", "Clear");
+        public static readonly LocString LiquidGlassTinted = new("settings.liquidGlassTinted", "Tinted");
+        public static readonly LocString LiquidGlassHint = new("settings.liquidGlassHint", "Choose how glass looks across the phone. Clear shows more of what is behind it; Tinted adds frost and contrast so text stays easy to read.");
+        public static readonly LocString RealGlass = new("settings.realGlass", "Real Glass");
+        public static readonly LocString RealGlassHint = new("settings.realGlassHint", "Glass bends and blurs what is really behind it, using a little GPU time every frame. Leave it off to keep the classic look.");
         public static readonly LocString Notifications = new("settings.notifications", "Notifications and Badges");
         public static readonly LocString DoNotDisturb = new("settings.doNotDisturb", "Do Not Disturb");
         public static readonly LocString Vibration = new("settings.vibration", "Vibration");
