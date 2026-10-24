@@ -34,6 +34,8 @@ internal sealed partial class MarketApp
     private const float WorldPriceColumnWidth = 72f;
     private const int MaxWorlds = 8;
     private const int PreviewRows = 5;
+    private const float CopyNameGlyph = 13f;
+    private const string CopyNameId = "market.detail.copyName";
 
     private readonly NavBarButton[] detailButtons = new NavBarButton[2];
     private readonly List<uint> detailPrefetch = new(1);
@@ -173,12 +175,16 @@ internal sealed partial class MarketApp
         var left = origin.X + pad;
         var right = max.X - pad;
         MarketArt.ItemIcon(drawList, textures, ui, view.IconId, new Vector2(left, origin.Y + pad), iconSize, scale);
+        var copyRadius = RoundButton.SmallRadius * scale;
+        DrawCopyName(drawList, new Vector2(right - copyRadius, origin.Y + pad + copyRadius), copyRadius, view.Name,
+            scale);
         var textLeft = left + iconSize + HeroGap * scale;
         var textWidth = MathF.Max(1f, right - textLeft);
+        var eyebrowWidth = MathF.Max(1f, textWidth - copyRadius * 2f - Metrics.Space.Sm * scale);
         var top = origin.Y + pad + (topBlock - textBlock) * 0.5f;
         var eyebrow = MarketText.Format(hq ? L.Market.CheapestHqIn : L.Market.CheapestIn, scope.ApiName);
         Typography.Draw(drawList, new Vector2(textLeft, top),
-            Typography.FitText(eyebrow, textWidth, TextStyles.FootnoteEmphasized), ui.MutedInk,
+            Typography.FitText(eyebrow, eyebrowWidth, TextStyles.FootnoteEmphasized), ui.MutedInk,
             TextStyles.FootnoteEmphasized);
         top += eyebrowHeight;
         var cheapest = snapshot.Min(hq);
@@ -208,6 +214,20 @@ internal sealed partial class MarketApp
         }
 
         return max.Y;
+    }
+
+    private void DrawCopyName(ImDrawListPtr drawList, Vector2 center, float radius, string name, float scale)
+    {
+        UiAnchors.Report(CopyNameId, new Rect(center - new Vector2(radius, radius), center + new Vector2(radius, radius)));
+        if (!RoundButton.FontIcon(drawList, CopyNameId, center, radius, FontAwesomeIcon.Copy, CopyNameGlyph * scale,
+                ui.Ink, ButtonStyle.Gray, Loc.T(L.Market.CopyName)))
+        {
+            return;
+        }
+
+        ImGui.SetClipboardText(name);
+        UiFeedback.Play(UiSound.Success);
+        ShellToast.Show(Loc.T(L.Common.Copied));
     }
 
     private void DrawHeroChange(ImDrawListPtr drawList, Vector2 origin, float width, float height, long cheapest,
