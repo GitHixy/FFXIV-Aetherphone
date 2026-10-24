@@ -7,6 +7,7 @@ internal sealed class ScreenController : IDisposable
 {
     private readonly Func<bool> hideNameplates;
     private const float NameplateHideRadius = 3.0f;
+    private bool hiding;
 
     internal VideoEngine Engine { get; }
 
@@ -19,7 +20,17 @@ internal sealed class ScreenController : IDisposable
 
     private void OnNamePlateUpdate(INamePlateUpdateContext context, IReadOnlyList<INamePlateUpdateHandler> handlers)
     {
-        if (!hideNameplates() || !Engine.IsActive || !Engine.ScreenVisible)
+        var hide = hideNameplates() && Engine.IsActive && Engine.ScreenVisible;
+        if (hide != hiding)
+        {
+            hiding = hide;
+            if (!hide)
+            {
+                Plugin.NamePlateGui.RequestRedraw();
+            }
+        }
+
+        if (!hide)
         {
             return;
         }
@@ -43,6 +54,11 @@ internal sealed class ScreenController : IDisposable
     public void Dispose()
     {
         Plugin.NamePlateGui.OnNamePlateUpdate -= OnNamePlateUpdate;
+        if (hiding)
+        {
+            Plugin.NamePlateGui.RequestRedraw();
+        }
+
         Engine.Dispose();
     }
 }
