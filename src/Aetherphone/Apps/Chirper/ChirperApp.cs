@@ -924,7 +924,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         var mine = store.Me is { } me && me.Id == post.AuthorId;
         if (mine)
         {
-            var canVeil = !post.SensitiveLocked && PostMedia.Photos(post.MediaUrls, post.MediaUrl).Length > 0;
+            var canVeil = !post.SensitiveLocked && PostMedia.Photos(post).Length > 0;
             if (canVeil)
             {
                 AddSheetItem(PostSheetAction.Sensitive,
@@ -1351,7 +1351,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             ? 10f * scale + Typography.LineHeight(DateStyle)
             : 0f;
         var afterText = textTop + textHeight + translateHeight + dateHeight;
-        var photos = PostMedia.Photos(post.MediaUrls, post.MediaUrl);
+        var photos = PostMedia.Photos(post);
         var mediaHeight = MediaBlockHeight(photos.Length, isThreadHead);
         var mediaTop = afterText + (photos.Length > 0 ? 9f * scale : 0f);
         var hasQuote = post.QuotedPostId is not null;
@@ -2263,7 +2263,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             return padY * 2f + headerHeight;
         }
 
-        var quotedPhotos = PostMedia.Photos(quoted.MediaUrls, quoted.MediaUrl);
+        var quotedPhotos = PostMedia.Photos(quoted);
         var hasMedia = quotedPhotos.Length > 0 && !HiddenByMediaPreference(quotedPhotos);
         var innerWidth = width - padX * 2f - (hasMedia ? QuoteThumbSize * scale + 8f * scale : 0f);
         var bodyLine = Typography.LineHeight(QuoteBodyStyle);
@@ -2300,7 +2300,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             return;
         }
 
-        var quotedPhotos = PostMedia.Photos(quoted.MediaUrls, quoted.MediaUrl);
+        var quotedPhotos = PostMedia.Photos(quoted);
         if (HiddenByMediaPreference(quotedPhotos))
         {
             quotedPhotos = Array.Empty<string>();
@@ -2386,7 +2386,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     private bool HiddenByMediaPreference(PostDto post)
     {
         var target = post.RepostOfId is not null && post.ReferencedPost is not null ? post.ReferencedPost : post;
-        return HiddenByMediaPreference(PostMedia.Photos(target.MediaUrls, target.MediaUrl));
+        return HiddenByMediaPreference(PostMedia.Photos(target));
     }
 
     private bool HiddenByMediaPreference(string[] photos)
@@ -2401,7 +2401,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
 
     private bool HiddenByMediaPreference(CommentDto comment)
     {
-        return comment.Text.Length == 0 && CommentMediaHidden(comment.MediaUrl);
+        return comment.Text.Length == 0 && CommentMediaHidden(comment.Media);
     }
 
     private bool CommentMediaHidden(string? mediaUrl)

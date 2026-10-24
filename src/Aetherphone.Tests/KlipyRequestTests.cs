@@ -2,6 +2,7 @@ using System.Text.Json;
 using Aetherphone.Core.Aethernet;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Gifs;
+using Aetherphone.Core.Media;
 using Xunit;
 
 namespace Aetherphone.Tests;
@@ -75,6 +76,46 @@ public sealed class KlipyRequestTests
 
         Assert.Equal(new GifConfigDto(true, "k", "c", "high"), on);
         Assert.Equal(new GifConfigDto(false), off);
+    }
+
+    [Fact]
+    public void AGifChirpFromTheServerRendersThroughThePhotoPathFromGifUrl()
+    {
+        const string gif = "https://static.klipy.com/ii/a/b.gif";
+        var post = JsonSerializer.Deserialize("{\"id\":\"p1\",\"authorId\":\"u1\",\"authorName\":\"\",\"authorWorld\":\"\","
+            + "\"authorDisplayName\":\"A\",\"authorHandle\":\"a\",\"text\":\"\",\"createdAtUnix\":1,\"reactionCounts\":[],"
+            + "\"totalReactions\":0,\"myReaction\":-1,\"kind\":0,\"mediaUrl\":null,\"mediaWidth\":498,\"mediaHeight\":280,"
+            + "\"authorAvatarUrl\":null,\"commentCount\":0,\"isFollowing\":false,\"scanStatus\":\"clean\",\"mediaUrls\":[],"
+            + "\"gifUrl\":\"" + gif + "\"}", AethernetJsonContext.Default.PostDto);
+        var photo = JsonSerializer.Deserialize("{\"id\":\"p2\",\"authorId\":\"u1\",\"authorName\":\"\",\"authorWorld\":\"\","
+            + "\"authorDisplayName\":\"A\",\"authorHandle\":\"a\",\"text\":\"\",\"createdAtUnix\":1,\"reactionCounts\":[],"
+            + "\"totalReactions\":0,\"myReaction\":-1,\"kind\":0,\"mediaUrl\":\"https://media.test/a.png\",\"mediaWidth\":1,"
+            + "\"mediaHeight\":1,\"authorAvatarUrl\":null,\"commentCount\":0,\"isFollowing\":false,\"scanStatus\":\"clean\","
+            + "\"mediaUrls\":[\"https://media.test/a.png\"]}", AethernetJsonContext.Default.PostDto);
+
+        Assert.NotNull(post);
+        Assert.Null(post.MediaUrl);
+        var photos = PostMedia.Photos(post);
+        Assert.Equal(new[] { gif }, photos);
+        Assert.Same(photos, PostMedia.Photos(post));
+        Assert.True(GifMedia.IsGif(photos[0]));
+        Assert.Equal(new[] { "https://media.test/a.png" }, PostMedia.Photos(photo!));
+        Assert.Null(photo!.GifMedia);
+        Assert.DoesNotContain("gifMedia", JsonSerializer.Serialize(post, AethernetJsonContext.Default.PostDto),
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AGifReplyFromTheServerExposesItsMediaFromGifUrl()
+    {
+        var reply = JsonSerializer.Deserialize("{\"id\":\"c1\",\"postId\":\"p1\",\"authorId\":\"u1\",\"authorName\":\"\","
+            + "\"authorDisplayName\":\"A\",\"authorHandle\":\"a\",\"authorAvatarUrl\":null,\"text\":\"\","
+            + "\"createdAtUnix\":1,\"likeCount\":0,\"liked\":false,\"mediaUrl\":null,\"mediaWidth\":220,"
+            + "\"mediaHeight\":124,\"gifUrl\":\"https://static.klipy.com/ii/a/c.gif\"}",
+            AethernetJsonContext.Default.CommentDto);
+
+        Assert.Equal("https://static.klipy.com/ii/a/c.gif", reply!.Media);
+        Assert.Equal("https://media.test/x.png", (reply with { MediaUrl = "https://media.test/x.png", GifUrl = null }).Media);
     }
 
     [Fact]

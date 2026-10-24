@@ -13,7 +13,7 @@ internal static class CommentMedia
 
     public static float MeasureHeight(CommentDto comment, float availableWidth, float scale)
     {
-        if (comment.MediaUrl is null)
+        if (comment.Media is null)
         {
             return 0f;
         }
@@ -33,19 +33,19 @@ internal static class CommentMedia
             return rect;
         }
 
-        var texture = GifMedia.Texture(images, comment.MediaUrl, ImGui.GetTime());
+        var texture = GifMedia.Texture(images, comment.Media, ImGui.GetTime());
         if (texture is null)
         {
             Squircle.Fill(drawList, rect.Min, rect.Max, rounding, ImGui.GetColorU32(placeholderFill));
             Typography.DrawCentered(rect.Center,
-                Loc.T(images.Failed(comment.MediaUrl) ? L.Common.ImageFailed : L.Common.Loading), mutedInk, 0.8f);
+                Loc.T(images.Failed(comment.Media) ? L.Common.ImageFailed : L.Common.Loading), mutedInk, 0.8f);
         }
         else
         {
             ImageFit.DrawLetterboxed(drawList, texture, rect, Vector2.Zero, Vector2.One, rounding);
         }
 
-        if (GifMedia.IsGif(comment.MediaUrl))
+        if (GifMedia.IsGif(comment.Media))
         {
             GifBadge.Draw(drawList, rect);
         }

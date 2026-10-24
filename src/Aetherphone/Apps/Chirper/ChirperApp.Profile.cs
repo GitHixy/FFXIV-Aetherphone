@@ -606,7 +606,7 @@ internal sealed partial class ChirperApp
                 continue;
             }
 
-            var photos = PostMedia.Photos(post.MediaUrls, post.MediaUrl);
+            var photos = PostMedia.Photos(post);
             if (photos.Length == 0 || HiddenByMediaPreference(photos))
             {
                 continue;
