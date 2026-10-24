@@ -175,7 +175,7 @@ internal sealed partial class PrismApp
 
         glamMenu.Gate();
         var key = WearKey(glam);
-        RefreshPieces(key, glam.Gear ?? Array.Empty<GlamGearDto>());
+        RefreshPieces(key, glam.Gear ?? Array.Empty<GlamGearDto>(), glam.Vanilla);
         using (BeginBody(new Rect(new Vector2(full.Min.X, PhotoTop(full, content)), new Vector2(full.Max.X, content.Max.Y))))
         {
             DrawGlamBody(ImGui.GetWindowDrawList(), full, content, glam, key, scale);
@@ -226,8 +226,9 @@ internal sealed partial class PrismApp
         ImGui.Dummy(new Vector2(full.Width, cursor - origin.Y + PrismArt.BottomMargin(scale)));
     }
 
-    private void RefreshPieces(string key, GlamGearDto[] gear)
+    private void RefreshPieces(string key, GlamGearDto[] gear, bool tryOn)
     {
+        piecesTryOn = tryOn;
         var storage = OwnedItems.StorageLoaded;
         var sameGlam = statsFor == key && ReferenceEquals(statsGear, gear);
         if (sameGlam && statsStorage == storage && !statsStale)
@@ -556,6 +557,11 @@ internal sealed partial class PrismApp
             PrismMotion.Shift(drawList, iconsMark, new Vector2(slide, 0f), 1f);
         }
 
+        if (!glam.Vanilla)
+        {
+            return;
+        }
+
         pillLabels[0] = Loc.T(L.Prism.TryOnGlam);
         pillLabels[1] = Loc.T(L.Prism.AddToWardrobe);
         pillLabels[2] = Loc.T(L.Prism.InWardrobe);
@@ -813,7 +819,7 @@ internal sealed partial class PrismApp
         {
             top += Typography.DrawWrappedLeft(new Vector2(left, top), meta, PrismArt.Muted, PrismType.Caption, width);
         }
-        if (!glamour.HasGlamourer)
+        if (glam.Vanilla && !glamour.HasGlamourer)
         {
             top += Metrics.Space.Xs * scale + Typography.DrawWrappedLeft(
                 new Vector2(left, top + Metrics.Space.Xs * scale), Loc.T(L.Prism.TryOnWithoutGlamourer),
@@ -1101,7 +1107,7 @@ internal sealed partial class PrismApp
 
         var tap = Metrics.Size.TapTarget * scale;
         var wand = new Vector2(right - tap * 0.25f, row.Center.Y);
-        var hit = new Rect(row.Min, new Vector2(wand.X - tap * 0.5f, row.Max.Y));
+        var hit = new Rect(row.Min, new Vector2(piecesTryOn ? wand.X - tap * 0.5f : right, row.Max.Y));
         var hovered = HighlightRow(drawList, hit, scale);
         var icon = PieceTileUnits * scale;
         var iconMin = new Vector2(left, row.Center.Y - icon * 0.5f);
@@ -1117,8 +1123,8 @@ internal sealed partial class PrismApp
             OwnedState(piece.ItemId), PrismArt.Fore, PrismArt.Back, scale);
         using (UiScope.PushId(index))
         {
-            if (RoundButton.Icon(drawList, wand, tap * 0.5f, PhoneIcons.Wand, controls, ButtonStyle.Bare,
-                    Loc.T(L.Prism.TryOnPiece), HoverLabelSide.Below, glyphInk: PrismArt.Muted))
+            if (piecesTryOn && RoundButton.Icon(drawList, wand, tap * 0.5f, PhoneIcons.Wand, controls,
+                    ButtonStyle.Bare, Loc.T(L.Prism.TryOnPiece), HoverLabelSide.Below, glyphInk: PrismArt.Muted))
             {
                 TryOnPiece(piece, statsFor ?? string.Empty);
             }

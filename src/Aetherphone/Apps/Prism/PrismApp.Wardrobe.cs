@@ -380,7 +380,7 @@ internal sealed partial class PrismApp
 
     private void SyncFit(WardrobeOutfit outfit)
     {
-        RefreshPieces(outfit.Id, outfit.Gear);
+        RefreshPieces(outfit.Id, outfit.Gear, tryOn: true);
         if (ReferenceEquals(outfit, fitFor) && ReferenceEquals(fitLanguage, Loc.Current.Code))
         {
             return;
