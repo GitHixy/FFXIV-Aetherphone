@@ -111,6 +111,7 @@ internal sealed partial class PrismApp
     private void ShowGlam(GlamDto glam)
     {
         glams.Open(glam);
+        glamMenu.CloseImmediately();
         photoPager.SnapTo(0, 1);
         pinReveal.SnapTo(0f);
         pillLabel = string.Empty;
@@ -171,12 +172,14 @@ internal sealed partial class PrismApp
 
         if (glams.DetailGone)
         {
+            glamMenu.CloseImmediately();
             DrawGlamGone(drawList, content, scale);
             return;
         }
 
         if (glams.DetailPending || glams.DetailMissing)
         {
+            glamMenu.CloseImmediately();
             DrawGlamLoading(drawList, content, glam, glams.DetailMissing, scale);
             return;
         }
