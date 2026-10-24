@@ -302,13 +302,12 @@ internal sealed partial class PrismApp
         GateWardrobeSheet();
         SyncFit(outfit);
         var covered = outfit.Cover is { } cover && !wallpaperImages.Failed(cover.Path);
-        var top = covered ? PhotoTop(full, content) : content.Min.Y;
-        DrawFit(new Rect(new Vector2(full.Min.X, top), new Vector2(full.Max.X, content.Max.Y)), content.Min.Y, outfit,
-            covered, covered ? PhotoInset(full, content) : 0f, scale);
+        DrawFit(new Rect(new Vector2(full.Min.X, content.Min.Y), new Vector2(full.Max.X, content.Max.Y)), content.Min.Y,
+            outfit, covered, scale);
         DrawWardrobeSheet(full);
     }
 
-    private void DrawFit(Rect body, float pinTop, WardrobeOutfit outfit, bool covered, float topInset, float scale)
+    private void DrawFit(Rect body, float pinTop, WardrobeOutfit outfit, bool covered, float scale)
     {
         using var surface = BeginBody(body);
         var list = ImGui.GetWindowDrawList();
@@ -324,17 +323,12 @@ internal sealed partial class PrismApp
                 PrismArt.Placeholder(list, hero, false, scale);
             }
 
-            if (!PrismArt.Light)
-            {
-                PrismArt.TopFog(list, hero, scale);
-            }
-
             if (UiInteract.Click(hero.Min, hero.Max, piecesOpen && UiInteract.Hover(hero.Min, hero.Max)))
             {
                 piecesOpen = false;
             }
 
-            DrawPiecesLayer(list, hero, topInset, outfit.Gear, scale);
+            DrawPiecesLayer(list, hero, outfit.Gear, scale);
             DrawPiecesChip(list, hero, scale);
         }
         else
@@ -350,7 +344,7 @@ internal sealed partial class PrismApp
             }
         }
 
-        DrawPhotoBack(list, hero, topInset, scale);
+        DrawPhotoBack(list, hero, scale);
 
         var left = origin.X + inset;
         var right = origin.X + width - inset;

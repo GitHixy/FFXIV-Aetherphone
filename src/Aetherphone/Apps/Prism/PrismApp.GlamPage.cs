@@ -178,7 +178,7 @@ internal sealed partial class PrismApp
         glamMenu.Gate();
         var key = WearKey(glam);
         RefreshPieces(key, glam.Gear ?? Array.Empty<GlamGearDto>(), glam.Vanilla);
-        using (BeginBody(new Rect(new Vector2(full.Min.X, PhotoTop(full, content)), new Vector2(full.Max.X, content.Max.Y))))
+        using (BeginBody(new Rect(new Vector2(full.Min.X, content.Min.Y), new Vector2(full.Max.X, content.Max.Y))))
         {
             DrawGlamBody(ImGui.GetWindowDrawList(), full, content, glam, key, scale);
         }
@@ -209,7 +209,7 @@ internal sealed partial class PrismApp
         var photo = new Rect(new Vector2(full.Min.X, photoTop),
             new Vector2(full.Max.X, photoTop + full.Width / GlamStore.PhotoRatio));
         var gear = glam.Gear ?? Array.Empty<GlamGearDto>();
-        DrawGlamPhoto(drawList, photo, PhotoInset(full, content), glam, gear, key, scale);
+        DrawGlamPhoto(drawList, photo, glam, gear, key, scale);
         var left = full.Min.X + Metrics.Space.Lg * scale;
         var right = full.Max.X - Metrics.Space.Lg * scale;
         var rowTop = photo.Max.Y + Metrics.Space.Sm * scale;
@@ -257,8 +257,8 @@ internal sealed partial class PrismApp
         BuildPieces(gear);
     }
 
-    private void DrawGlamPhoto(ImDrawListPtr drawList, Rect photo, float topInset, GlamDto glam, GlamGearDto[] gear,
-        string key, float scale)
+    private void DrawGlamPhoto(ImDrawListPtr drawList, Rect photo, GlamDto glam, GlamGearDto[] gear, string key,
+        float scale)
     {
         var photos = glam.Photos ?? Array.Empty<GlamPhotoDto>();
         var count = photos.Length;
@@ -285,11 +285,6 @@ internal sealed partial class PrismApp
         }
 
         drawList.PopClipRect();
-        if (!PrismArt.Light)
-        {
-            PrismArt.TopFog(drawList, photo, scale);
-        }
-
         DrawPhotoTaps(photo, glam, count);
         DrawPublished(drawList, photo, glam, Cover(glam), scale);
         var dots = new Vector2(photo.Center.X, photo.Max.Y - (Metrics.Space.Md + PrismArt.ChipUnits * 0.5f) * scale);
@@ -303,16 +298,16 @@ internal sealed partial class PrismApp
                 (float)(ImGui.GetTime() - tryOnAt), scale);
         }
 
-        DrawPiecesLayer(drawList, photo, topInset, gear, scale);
+        DrawPiecesLayer(drawList, photo, gear, scale);
         DrawPiecesChip(drawList, photo, scale);
-        DrawPhotoBack(drawList, photo, topInset, scale);
+        DrawPhotoBack(drawList, photo, scale);
 
         if (glam.Id.Length == 0)
         {
             return;
         }
 
-        if (DrawPhotoButton(drawList, photo, topInset, 1, PhoneIcons.Dots, Loc.T(L.Prism.More), scale))
+        if (DrawPhotoButton(drawList, photo, 1, PhoneIcons.Dots, Loc.T(L.Prism.More), scale))
         {
             OpenGlamMenu(glam, key);
         }

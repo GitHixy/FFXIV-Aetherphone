@@ -185,7 +185,7 @@ internal sealed partial class PrismApp
         SyncProfileCover(author?.Id ?? string.Empty, lane, mine ? OwnBanner() : author?.BannerGlam);
         var covered = profileCover is not null || profile is { GlamCount: > 0 } ||
                       profile is null && !showSaved && lane.Loading;
-        var top = covered ? PhotoTop(full, content) : content.Min.Y;
+        var top = content.Min.Y;
         profileMenu.Gate();
         if (!covered && !mine)
         {
@@ -198,13 +198,12 @@ internal sealed partial class PrismApp
             }
         }
 
-        DrawProfileBody(new Rect(new Vector2(full.Min.X, top), new Vector2(full.Max.X, content.Max.Y)), full, content,
-            profile, covered, mine, scale);
+        DrawProfileBody(new Rect(new Vector2(full.Min.X, top), new Vector2(full.Max.X, content.Max.Y)), profile,
+            covered, mine, scale);
         DrawProfileMenu(full, author);
     }
 
-    private void DrawProfileBody(Rect body, Rect full, Rect content, GlamProfileDto? profile, bool covered, bool mine,
-        float scale)
+    private void DrawProfileBody(Rect body, GlamProfileDto? profile, bool covered, bool mine, float scale)
     {
         var author = profile?.User;
         var lane = glams.List;
@@ -222,7 +221,7 @@ internal sealed partial class PrismApp
         {
             var photoTop = new Vector2(origin.X, BodyTop());
             var photo = new Rect(photoTop, photoTop + new Vector2(width, width * CoverShare));
-            DrawProfileCover(list, photo, PhotoInset(full, content), profile, mine, scale);
+            DrawProfileCover(list, photo, profile, mine, scale);
             cursor = DrawProfileStats(list, left, right, photo.Max.Y + Metrics.Space.Xs * scale, profile, mine, scale);
         }
         else
@@ -345,14 +344,13 @@ internal sealed partial class PrismApp
     private string ProfileHandle(GlamAuthorDto? author) =>
         author is { Handle.Length: > 0 } ? AuthorLine(author) : string.Empty;
 
-    private void DrawProfileCover(ImDrawListPtr drawList, Rect photo, float topInset, GlamProfileDto? profile,
-        bool mine, float scale)
+    private void DrawProfileCover(ImDrawListPtr drawList, Rect photo, GlamProfileDto? profile, bool mine, float scale)
     {
         if (profileCover is { } cover)
         {
             var focus = coverBanner is { } chosen && chosen.GlamId == cover.Id
-                ? new Vector2(chosen.FocusX, BannerFocus(photo, topInset, chosen.FocusY))
-                : new Vector2(ImageFit.CenterFocus, ProfileFocus(photo, topInset));
+                ? new Vector2(chosen.FocusX, BannerFocus(photo, chosen.FocusY))
+                : new Vector2(ImageFit.CenterFocus, ProfileFocus(photo));
             DrawLook(drawList, photo, Cover(cover), false, native: true, focusY: focus.Y, focusX: focus.X);
             if (UiInteract.Click(photo.Min, photo.Max))
             {
@@ -362,11 +360,6 @@ internal sealed partial class PrismApp
         else
         {
             PrismArt.Placeholder(drawList, photo, false, scale);
-        }
-
-        if (!PrismArt.Light)
-        {
-            PrismArt.TopFog(drawList, photo, scale);
         }
 
         var author = profile?.User;
@@ -381,7 +374,7 @@ internal sealed partial class PrismApp
             followWidth > 0f ? right - followWidth - Metrics.Space.Sm * scale : right, scale);
         if (mine)
         {
-            if (DrawPhotoButton(drawList, photo, topInset, 1, PhoneIcons.Pencil, Loc.T(L.Prism.EditProfile), scale))
+            if (DrawPhotoButton(drawList, photo, 1, PhoneIcons.Pencil, Loc.T(L.Prism.EditProfile), scale))
             {
                 OpenEditProfile();
             }
@@ -389,13 +382,13 @@ internal sealed partial class PrismApp
             return;
         }
 
-        DrawPhotoBack(drawList, photo, topInset, scale);
+        DrawPhotoBack(drawList, photo, scale);
         if (author is null)
         {
             return;
         }
 
-        if (DrawPhotoButton(drawList, photo, topInset, 1, PhoneIcons.Dots, Loc.T(L.Prism.More), scale))
+        if (DrawPhotoButton(drawList, photo, 1, PhoneIcons.Dots, Loc.T(L.Prism.More), scale))
         {
             OpenProfileMenu();
         }
@@ -434,21 +427,13 @@ internal sealed partial class PrismApp
         }
     }
 
-    private static float BannerFocus(Rect photo, float topInset, float focus)
-    {
-        var overflow = photo.Width / GlamStore.PhotoRatio - photo.Height;
-        return overflow <= 0f
-            ? ImageFit.CenterFocus
-            : Math.Clamp((focus * (overflow + topInset) - topInset) / overflow, 0f, 1f);
-    }
+    private static float BannerFocus(Rect photo, float focus) =>
+        photo.Width / GlamStore.PhotoRatio <= photo.Height ? ImageFit.CenterFocus : Math.Clamp(focus, 0f, 1f);
 
-    private static float ProfileFocus(Rect photo, float topInset)
-    {
-        var shown = photo.Height / MathF.Max(1f, photo.Width) * GlamStore.PhotoRatio;
-        return shown >= 1f
+    private static float ProfileFocus(Rect photo) =>
+        photo.Height / MathF.Max(1f, photo.Width) * GlamStore.PhotoRatio >= 1f
             ? ImageFit.CenterFocus
-            : MathF.Max(0f, ProfileCoverFocus - topInset / MathF.Max(1f, photo.Height) * shown / (1f - shown));
-    }
+            : ProfileCoverFocus;
 
     private void OpenProfileMenu()
     {

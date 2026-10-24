@@ -485,19 +485,15 @@ internal sealed partial class PrismApp : IResumableApp
         return top + height;
     }
 
-    private static float PhotoTop(Rect full, Rect content) => PrismArt.Light ? content.Min.Y : full.Min.Y;
-
-    private static float PhotoInset(Rect full, Rect content) => content.Min.Y - PhotoTop(full, content);
-
-    private static bool DrawPhotoButton(ImDrawListPtr drawList, Rect photo, float topInset, int slot, string glyph,
-        string tooltip, float scale)
+    private static bool DrawPhotoButton(ImDrawListPtr drawList, Rect photo, int slot, string glyph, string tooltip,
+        float scale)
     {
         var radius = Metrics.Size.GlassButton * 0.5f * scale;
         var reach = Metrics.Size.TapTarget * 0.5f * scale;
         var inset = Metrics.Space.Md * scale + radius;
         var step = (Metrics.Size.GlassButton + Metrics.Space.Sm) * scale;
         var center = new Vector2(slot == 0 ? photo.Min.X + inset : photo.Max.X - inset - (slot - 1) * step,
-            photo.Min.Y + topInset + Metrics.Space.Xs * scale + radius);
+            photo.Min.Y + Metrics.Space.Xs * scale + radius);
         var extent = new Vector2(reach, reach);
         if (center.Y + reach > photo.Max.Y || !ImGui.IsRectVisible(center - extent, center + extent))
         {
@@ -510,9 +506,9 @@ internal sealed partial class PrismApp : IResumableApp
             HoverLabelSide.Below, hitRadius: reach, reserve: true);
     }
 
-    private void DrawPhotoBack(ImDrawListPtr drawList, Rect photo, float topInset, float scale)
+    private void DrawPhotoBack(ImDrawListPtr drawList, Rect photo, float scale)
     {
-        if (DrawPhotoButton(drawList, photo, topInset, 0, PhoneIcons.ChevronLeft, Loc.T(L.Prism.Back), scale))
+        if (DrawPhotoButton(drawList, photo, 0, PhoneIcons.ChevronLeft, Loc.T(L.Prism.Back), scale))
         {
             LeaveScreen();
         }
