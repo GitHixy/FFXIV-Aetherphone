@@ -87,6 +87,21 @@ internal sealed partial class PrismApp
             photo.Width * GridLogoShare, Vector4.One with { W = FitLogoAlpha });
     }
 
+    private void PostOutfit(WardrobeOutfit outfit)
+    {
+        StartCompose();
+        FillFromOutfit(outfit);
+        if (composeMods.Count > 0)
+        {
+            composeVanilla = false;
+        }
+
+        if (outfit.Cover is { } cover && !wallpaperImages.Failed(cover.Path) && File.Exists(cover.Path))
+        {
+            composeSession.TakeImported(cover.Path);
+        }
+    }
+
     private void FillFromOutfit(WardrobeOutfit outfit)
     {
         LoadGear(glamGear, outfit.Gear);
