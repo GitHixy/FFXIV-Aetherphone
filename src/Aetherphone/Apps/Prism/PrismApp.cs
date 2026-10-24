@@ -390,6 +390,7 @@ internal sealed partial class PrismApp : IResumableApp
         {
             store.ClearFailure();
             ResetPieces();
+            ExitOutfitSelect();
             profileGlamId = string.Empty;
         }
 

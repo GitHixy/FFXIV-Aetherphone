@@ -142,24 +142,14 @@ internal sealed class WardrobeStore
         Commit(updated);
     }
 
-    public void Remove(string id)
+    public void Remove(string id) => Keep(outfit => outfit.Id != id);
+
+    public void RemoveMany(IReadOnlySet<string> ids)
     {
-        if (loading)
+        if (ids.Count > 0)
         {
-            return;
+            Keep(outfit => !ids.Contains(outfit.Id));
         }
-
-        var current = outfits;
-        var kept = new List<WardrobeOutfit>(current.Length);
-        for (var index = 0; index < current.Length; index++)
-        {
-            if (current[index].Id != id)
-            {
-                kept.Add(current[index]);
-            }
-        }
-
-        Commit(kept.ToArray());
     }
 
     public int StartImport(List<(Guid Id, string Name)> designs)
@@ -222,6 +212,26 @@ internal sealed class WardrobeStore
         }
 
         return false;
+    }
+
+    private void Keep(Func<WardrobeOutfit, bool> wanted)
+    {
+        if (loading)
+        {
+            return;
+        }
+
+        var current = outfits;
+        var kept = new List<WardrobeOutfit>(current.Length);
+        for (var index = 0; index < current.Length; index++)
+        {
+            if (wanted(current[index]))
+            {
+                kept.Add(current[index]);
+            }
+        }
+
+        Commit(kept.ToArray());
     }
 
     private void Commit(WardrobeOutfit[] next)
