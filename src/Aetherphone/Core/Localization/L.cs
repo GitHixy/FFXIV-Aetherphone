@@ -2427,6 +2427,10 @@ internal static class L
 
         public static readonly LocString[] Release1400Gamba =
         {
+            new("changelog.r1400.50",
+                "Added posting a table code in party, say or yell, from Invite on Your table (which now also holds Copy invite) or from a venue table's sheet"),
+            new("changelog.r1400.51",
+                "Added a notice when someone in your party or nearby posts a table code, which opens Live and joins the table in one tap"),
             new("changelog.r1400.17",
                 "Changed blackjack so other players' hands turn face up as soon as they finish their turn"),
             new("changelog.r1400.21",
@@ -11985,6 +11989,8 @@ internal static class L
         public static readonly LocString NotifyAdmittedBody = new("casino.notify.admittedBody", "The host let you in. Open the table to join.");
         public static readonly LocString NotifyDeniedTitle = new("casino.notify.deniedTitle", "Request declined");
         public static readonly LocString NotifyDeniedBody = new("casino.notify.deniedBody", "The host did not let you in this time.");
+        public static readonly LocString NotifyInviteTitle = new("casino.notify.inviteTitle", "Table invite");
+        public static readonly LocString NotifyInviteBody = new("casino.notify.inviteBody", "{0} posted a table code in chat. Tap to join.");
         public static readonly LocString ReasonFull = new("casino.reasonFull", "Every seat at that table is taken. Another one will have room.");
         public static readonly LocString ReasonInviteOnly = new("casino.reasonInviteOnly", "That table is invite only. Ask the host to let you in.");
         public static readonly LocString ReasonDenied = new("casino.reasonDenied", "The host has not opened the door this time.");
@@ -12808,6 +12814,16 @@ internal static class L
         public static readonly LocString CodeCopied = new("casino.tables.codeCopied", "Copied");
         public static readonly LocString CodeHint = new("casino.tables.codeHint", "Tell friends to enter this code in {0} > Live.");
         public static readonly LocString CodePending = new("casino.tables.codePending", "Getting your code");
+        public static readonly LocString InviteAction = new("casino.tables.inviteAction", "Invite");
+        public static readonly LocString InviteTitle = new("casino.tables.inviteTitle", "Invite players");
+        public static readonly LocString PostParty = new("casino.tables.postParty", "Post code in party chat");
+        public static readonly LocString PostSay = new("casino.tables.postSay", "Post code in say");
+        public static readonly LocString PostYell = new("casino.tables.postYell", "Post code in yell");
+        public static readonly LocString ChatInvite = new("casino.tables.chatInvite", "Join my table: {0}. Enter the code in Aetherphone under {1} > Live.");
+        public static readonly LocString CodePosted = new("casino.tables.codePosted", "Code posted in chat");
+        public static readonly LocString CodePostFailed = new("casino.tables.codePostFailed", "Couldn't post in chat");
+        public static readonly LocString PostCodeTitle = new("casino.tables.postCodeTitle", "Post the code in chat");
+        public static readonly LocString PostCodeLine = new("casino.tables.postCodeLine", "Party, say or yell. Players who have Aetherphone get a notice to join.");
         public static readonly LocString ReasonCodeUnknown = new("casino.tables.reasonCodeUnknown", "No open table uses that code. Check the letters and try again.");
         public static readonly LocString HostedBy = new("casino.tables.hostedBy", "Hosted by {0}");
         public static readonly LocString ControlCoDealers = new("casino.tables.controlCoDealers", "Co-dealers");

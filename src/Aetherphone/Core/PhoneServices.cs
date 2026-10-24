@@ -134,6 +134,7 @@ internal sealed class PhoneServices : IDisposable
     public required Casino.CasinoSpinStore CasinoSpin { get; init; }
     public required Casino.CasinoTurnNotifier CasinoTurns { get; init; }
     public required Casino.CasinoKnockNotifier CasinoKnocks { get; init; }
+    public required Casino.CasinoChatInvites CasinoChatInvites { get; init; }
     public required Casino.CasinoVenueStore CasinoVenue { get; init; }
     public required Casino.CasinoTradeSync CasinoTrade { get; init; }
     public required Casino.CasinoLauncher CasinoLauncher { get; init; }
@@ -437,6 +438,8 @@ internal sealed class PhoneServices : IDisposable
             Apps.AppAccents.For("casino"));
         var casinoKnocks = new Casino.CasinoKnockNotifier(aethernetSession, casinoApi.Casino, casinoTables,
             notifications, Apps.AppAccents.For("casino"));
+        var casinoChatInvites = new Casino.CasinoChatInvites(chatGui, aethernetSession, notifications, gameData,
+            installer.Gate("casino"), Apps.AppAccents.For("casino"));
         var casinoVenue = new Casino.CasinoVenueStore(aethernetSession, casinoApi.Casino, casinoApi.Safety, casinoRooms,
             casinoTables, new Casino.HousingPositionReader());
         var casinoTrade = new Casino.CasinoTradeSync(configuration, aethernetSession, casinoApi.Casino, casinoTables,
@@ -558,6 +561,7 @@ internal sealed class PhoneServices : IDisposable
             CasinoSpin = casinoSpin,
             CasinoTurns = casinoTurns,
             CasinoKnocks = casinoKnocks,
+            CasinoChatInvites = casinoChatInvites,
             CasinoVenue = casinoVenue,
             CasinoTrade = casinoTrade,
             CasinoLauncher = new Casino.CasinoLauncher(),
@@ -747,6 +751,7 @@ internal sealed class PhoneServices : IDisposable
         CasinoFloor.Dispose();
         CasinoTrade.Dispose();
         CasinoVenue.Dispose();
+        CasinoChatInvites.Dispose();
         CasinoKnocks.Dispose();
         CasinoTurns.Dispose();
         Holdem.Dispose();
