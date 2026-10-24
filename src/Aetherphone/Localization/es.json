@@ -6117,6 +6117,7 @@
   "prism.deleteOutfitsTitle.one": "¿Eliminar {0} atuendo?",
   "prism.deleteOutfitsTitle.other": "¿Eliminar {0} atuendos?",
   "prism.deleteOutfitsBody": "Tus diseños de Glamourer se quedan en Glamourer.",
+  "prism.glamGone": "Este glamour ya no está disponible.",
   "announcements.signInRequired": "Inicia sesión en Aethernet en Configuración para leer los anuncios",
   "announcements.signInTitle": "Necesitas iniciar sesión",
   "announcements.emptyTitle": "Aún no hay anuncios",

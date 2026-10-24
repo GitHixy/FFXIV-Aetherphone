@@ -6117,6 +6117,7 @@
   "prism.deleteOutfitsTitle.one": "{0} kıyafet silinsin mi?",
   "prism.deleteOutfitsTitle.other": "{0} kıyafet silinsin mi?",
   "prism.deleteOutfitsBody": "Glamourer tasarımların Glamourer'da kalır.",
+  "prism.glamGone": "Bu glam artık mevcut değil.",
   "announcements.signInRequired": "Duyuruları okumak için Ayarlar'dan Aethernet'e giriş yapın",
   "announcements.signInTitle": "Giriş gerekli",
   "announcements.emptyTitle": "Henüz duyuru yok",

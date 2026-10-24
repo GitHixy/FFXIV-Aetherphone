@@ -6117,6 +6117,7 @@
   "prism.deleteOutfitsTitle.one": "删除 {0} 套服装？",
   "prism.deleteOutfitsTitle.other": "删除 {0} 套服装？",
   "prism.deleteOutfitsBody": "你的 Glamourer 设计会保留在 Glamourer 中。",
+  "prism.glamGone": "这套幻化已不可用。",
   "announcements.signInRequired": "请在设置中登录Aethernet以阅读公告",
   "announcements.signInTitle": "需要登录",
   "announcements.emptyTitle": "暂无公告",

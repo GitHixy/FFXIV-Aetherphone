@@ -83,6 +83,7 @@ internal sealed class GlamStore : IDisposable
     private volatile GlamDto? posted;
     private volatile bool detailPending;
     private volatile bool detailMissing;
+    private volatile bool detailGone;
     private volatile GlamMore? more;
     private volatile string moreFor = string.Empty;
     private volatile int listOpened;
@@ -191,6 +192,8 @@ internal sealed class GlamStore : IDisposable
     public bool DetailPending => detailPending;
 
     public bool DetailMissing => detailMissing;
+
+    public bool DetailGone => detailGone;
 
     public GlamDto[] MoreFrom(string glamId) =>
         more is { } shown && shown.GlamId == glamId ? shown.Items : Array.Empty<GlamDto>();
@@ -494,6 +497,7 @@ internal sealed class GlamStore : IDisposable
         var glamId = glam.Id;
         detailPending = glamId.Length > 0 && glam.Photos is not { Length: > 0 };
         detailMissing = false;
+        detailGone = false;
         if (glamId.Length == 0)
         {
             return;
@@ -501,7 +505,8 @@ internal sealed class GlamStore : IDisposable
 
         work.Run("glam", async token =>
         {
-            var fetched = await client.GlamAsync(glamId, token).ConfigureAwait(false);
+            var failure = AepFailure.None;
+            var fetched = await client.GlamAsync(glamId, token, received => failure = received).ConfigureAwait(false);
             if (detail?.Id != glamId)
             {
                 return;
@@ -511,6 +516,11 @@ internal sealed class GlamStore : IDisposable
             {
                 Replace(fetched);
             }
+            else if (failure.StatusCode == NotFoundStatus)
+            {
+                detailGone = true;
+                Gone(glamId);
+            }
             else if (detailPending)
             {
                 detailMissing = true;
@@ -518,6 +528,12 @@ internal sealed class GlamStore : IDisposable
 
             detailPending = false;
         });
+    }
+
+    private void Gone(string glamId)
+    {
+        removedIds[glamId] = true;
+        QueueRemoval(new ContentRemovalSignal(SocialActivity.PrismApp, ContentRemovalKinds.Glam, glamId, null));
     }
 
     public void ToggleLike(GlamDto glam)
@@ -734,6 +750,10 @@ internal sealed class GlamStore : IDisposable
             banner = fetched;
             bannerMissing = fetched is null && failure.StatusCode == NotFoundStatus;
             bannerFailed = fetched is null && !bannerMissing;
+            if (bannerMissing)
+            {
+                Gone(glamId);
+            }
         });
     }
 
@@ -954,7 +974,7 @@ internal sealed class GlamStore : IDisposable
 
         if (detail?.Id == glamId)
         {
-            detail = null;
+            detailGone = true;
         }
     }
 

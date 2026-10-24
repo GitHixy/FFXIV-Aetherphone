@@ -6117,6 +6117,7 @@
   "prism.deleteOutfitsTitle.one": "Delete {0} outfit?",
   "prism.deleteOutfitsTitle.other": "Delete {0} outfits?",
   "prism.deleteOutfitsBody": "Your Glamourer designs stay in Glamourer.",
+  "prism.glamGone": "This glam is no longer available.",
   "announcements.signInRequired": "Sign in to Aethernet in Settings to read announcements",
   "announcements.signInTitle": "Sign in required",
   "announcements.emptyTitle": "No announcements yet",
