@@ -713,6 +713,7 @@ internal sealed partial class PrismApp
             return;
         }
 
+        RefreshGlamCopies(saved);
         UiFeedback.Play(UiSound.Success);
         if (screen != PrismScreen.Compose || savingDraft != composeDraft || editingGlam?.Id != saved.Id)
         {

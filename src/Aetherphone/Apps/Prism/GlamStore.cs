@@ -937,6 +937,24 @@ internal sealed class GlamStore : IDisposable
         }
 
         list.Items = CopyOnWrite.Replace(list.Items, glam);
+        if (more is { } shown)
+        {
+            more = shown with { Items = CopyOnWrite.Replace(shown.Items, glam) };
+        }
+
+        for (var slot = 0; slot < showcase.Length; slot++)
+        {
+            if (Volatile.Read(ref showcase[slot])?.Id == glam.Id)
+            {
+                Volatile.Write(ref showcase[slot], glam);
+            }
+        }
+
+        if (banner?.Id == glam.Id)
+        {
+            banner = glam;
+        }
+
         if (detail?.Id == glam.Id)
         {
             detail = glam;
