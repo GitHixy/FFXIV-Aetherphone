@@ -53,6 +53,7 @@ internal enum PrismScreen : byte
     WardrobeEdit,
     WardrobeMods,
     WardrobeDesigns,
+    WardrobePick,
 }
 
 internal sealed partial class PrismApp : IResumableApp
@@ -361,6 +362,9 @@ internal sealed partial class PrismApp : IResumableApp
                 break;
             case PrismScreen.WardrobeDesigns:
                 DrawDesignPicker(drawList, content, scale);
+                break;
+            case PrismScreen.WardrobePick:
+                DrawWardrobePick(drawList, full, content, scale);
                 break;
             case PrismScreen.Activity:
                 DrawActivity(drawList, full, content, scale);
@@ -756,7 +760,8 @@ internal sealed partial class PrismApp : IResumableApp
     private bool InComposeSubScreen =>
         screen is PrismScreen.GearSearch or PrismScreen.DyePick
             ? gearReturn == PrismScreen.Compose
-            : screen == PrismScreen.WardrobeMods && ReferenceEquals(wornTarget, composeMods);
+            : screen == PrismScreen.WardrobePick ||
+              (screen == PrismScreen.WardrobeMods && ReferenceEquals(wornTarget, composeMods));
 
     private void ConsumeSharedPhoto()
     {

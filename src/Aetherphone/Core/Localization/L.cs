@@ -11392,6 +11392,7 @@ internal static class L
         public static readonly LocString DeleteOutfitsBody = new("prism.deleteOutfitsBody",
             "Your Glamourer designs stay in Glamourer.");
         public static readonly LocString GlamGone = new("prism.glamGone", "This glam is no longer available.");
+        public static readonly LocString FillFromWardrobe = new("prism.fillFromWardrobe", "Fill from wardrobe");
     }
 
     internal static class Announcements

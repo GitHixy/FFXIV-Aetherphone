@@ -6118,6 +6118,7 @@
   "prism.deleteOutfitsTitle.other": "{0} Outfits löschen?",
   "prism.deleteOutfitsBody": "Deine Glamourer-Designs bleiben in Glamourer.",
   "prism.glamGone": "Diese Projektion ist nicht mehr verfügbar.",
+  "prism.fillFromWardrobe": "Aus der Garderobe übernehmen",
   "announcements.signInRequired": "Melde dich in den Einstellungen bei Aethernet an, um Ankündigungen zu lesen",
   "announcements.signInTitle": "Anmeldung erforderlich",
   "announcements.emptyTitle": "Noch keine Ankündigungen",

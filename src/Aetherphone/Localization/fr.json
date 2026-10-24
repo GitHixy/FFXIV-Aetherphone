@@ -6118,6 +6118,7 @@
   "prism.deleteOutfitsTitle.other": "Supprimer {0} tenues ?",
   "prism.deleteOutfitsBody": "Vos designs Glamourer restent dans Glamourer.",
   "prism.glamGone": "Ce mirage n'est plus disponible.",
+  "prism.fillFromWardrobe": "Remplir depuis la garde-robe",
   "announcements.signInRequired": "Connectez-vous à Aethernet dans les Paramètres pour lire les annonces",
   "announcements.signInTitle": "Connexion requise",
   "announcements.emptyTitle": "Aucune annonce pour le moment",

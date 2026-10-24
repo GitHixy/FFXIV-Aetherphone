@@ -6118,6 +6118,7 @@
   "prism.deleteOutfitsTitle.other": "{0}件の装いを削除しますか？",
   "prism.deleteOutfitsBody": "Glamourerのデザインはそのまま残ります。",
   "prism.glamGone": "このミラプリはもう表示できません。",
+  "prism.fillFromWardrobe": "ワードローブから入力",
   "announcements.signInRequired": "お知らせを読むには設定からAethernetにログインしてください",
   "announcements.signInTitle": "ログインが必要です",
   "announcements.emptyTitle": "まだお知らせはありません",

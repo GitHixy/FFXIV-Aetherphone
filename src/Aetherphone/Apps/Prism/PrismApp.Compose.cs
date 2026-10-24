@@ -547,7 +547,15 @@ internal sealed partial class PrismApp
             FillFromWearing(glamGear);
         }
 
-        top = DrawGearSlots(drawList, left, fill.Max.Y + Metrics.Space.Lg * scale, width, scale);
+        var fromWardrobe = new Rect(new Vector2(left, fill.Max.Y + Metrics.Space.Sm * scale),
+            new Vector2(left + width, fill.Max.Y + Metrics.Space.Sm * scale + Button.RegularHeight * scale));
+        if (DrawButton(drawList, fromWardrobe, Loc.T(L.Prism.FillFromWardrobe), ButtonStyle.Tinted, scale,
+                id: "prism.compose.wardrobe"))
+        {
+            OpenWardrobePick();
+        }
+
+        top = DrawGearSlots(drawList, left, fromWardrobe.Max.Y + Metrics.Space.Lg * scale, width, scale);
         if (composeVanilla != false)
         {
             return top + PrismArt.BottomMargin(scale);

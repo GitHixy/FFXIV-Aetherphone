@@ -6118,6 +6118,7 @@
   "prism.deleteOutfitsTitle.other": "Excluir {0} visuais?",
   "prism.deleteOutfitsBody": "Seus designs do Glamourer continuam no Glamourer.",
   "prism.glamGone": "Este glamour não está mais disponível.",
+  "prism.fillFromWardrobe": "Preencher com o guarda-roupa",
   "announcements.signInRequired": "Entre no Aethernet em Ajustes para ler os avisos",
   "announcements.signInTitle": "É necessário entrar",
   "announcements.emptyTitle": "Nenhum aviso ainda",

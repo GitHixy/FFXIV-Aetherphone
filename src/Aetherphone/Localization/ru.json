@@ -6118,6 +6118,7 @@
   "prism.deleteOutfitsTitle.other": "Удалить нарядов: {0}?",
   "prism.deleteOutfitsBody": "Ваши дизайны Glamourer останутся в Glamourer.",
   "prism.glamGone": "Этот гламур больше недоступен.",
+  "prism.fillFromWardrobe": "Заполнить из гардероба",
   "announcements.signInRequired": "Войдите в Aethernet в Настройках, чтобы читать объявления",
   "announcements.signInTitle": "Требуется вход",
   "announcements.emptyTitle": "Пока нет объявлений",
