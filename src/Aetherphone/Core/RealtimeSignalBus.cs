@@ -34,6 +34,8 @@ internal static class ContentRemovalKinds
     public const string Post = "post";
     public const string Comment = "comment";
     public const string Story = "story";
+    public const string Glam = "glam";
+    public const string Look = "look";
 }
 
 internal sealed class RealtimeSignalBus

@@ -7555,6 +7555,8 @@
   "moderation.notice.nameResetHandle": "You are now {0}",
   "moderation.notice.nameResetWhere": "Reset on: {0}",
   "moderation.notice.nameResetLabel": "New handle",
+  "moderation.notice.removedGlam": "Your glam was removed",
+  "moderation.notice.removedLook": "Your contest look was removed",
   "safety.title": "Moderation and safety",
   "safety.unreadSummary": "{0} unread",
   "safety.empty": "Your account has no warnings, restrictions, suspensions, or other moderation actions.",

@@ -7555,6 +7555,8 @@
   "moderation.notice.nameResetHandle": "Du bist jetzt {0}",
   "moderation.notice.nameResetWhere": "Zurückgesetzt bei: {0}",
   "moderation.notice.nameResetLabel": "Neues Handle",
+  "moderation.notice.removedGlam": "Deine Projektion wurde entfernt",
+  "moderation.notice.removedLook": "Dein Wettbewerbsbeitrag wurde entfernt",
   "safety.title": "Moderation und Sicherheit",
   "safety.unreadSummary": "{0} ungelesen",
   "safety.empty": "Hier ist nichts. Kein Moderator hat etwas an deinem Konto vorgenommen.",

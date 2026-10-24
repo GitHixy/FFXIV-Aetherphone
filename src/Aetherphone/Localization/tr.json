@@ -7555,6 +7555,8 @@
   "moderation.notice.nameResetHandle": "Artık {0} olarak görünüyorsun",
   "moderation.notice.nameResetWhere": "Sıfırlanan yerler: {0}",
   "moderation.notice.nameResetLabel": "Yeni kullanıcı adı",
+  "moderation.notice.removedGlam": "Glamın kaldırıldı",
+  "moderation.notice.removedLook": "Yarışma katılımın kaldırıldı",
   "safety.title": "Moderasyon ve güvenlik",
   "safety.unreadSummary": "{0} okunmamış",
   "safety.empty": "Burada bir şey yok. Hesabına dair bir moderatör işlemi yapılmamış.",

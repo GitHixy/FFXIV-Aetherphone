@@ -7555,6 +7555,8 @@
   "moderation.notice.nameResetHandle": "現在の表示は {0} です",
   "moderation.notice.nameResetWhere": "リセットされた場所: {0}",
   "moderation.notice.nameResetLabel": "新しいハンドル",
+  "moderation.notice.removedGlam": "あなたのミラプリが削除されました",
+  "moderation.notice.removedLook": "あなたのコンテスト応募が削除されました",
   "safety.title": "モデレーションと安全",
   "safety.unreadSummary": "未読 {0} 件",
   "safety.empty": "ここには何もありません。あなたのアカウントにモデレーターの対応はありません。",

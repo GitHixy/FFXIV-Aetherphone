@@ -115,10 +115,10 @@ internal sealed partial class PrismApp : IResumableApp
         WallpaperImageCache wallpaperImages, Configuration configuration, ConfirmService confirm,
         ReportService report, GameData gameData, ITextureProvider textures, GlamourService glamour,
         MarketItemIndex marketIndex, MarketLauncher marketLauncher, ShareService share,
-        SocialNotificationService social, SocialLauncher launcher)
+        SocialNotificationService social, SocialLauncher launcher, RealtimeSignalBus signals)
     {
         store = new PrismStore(session, api);
-        glams = new GlamStore(session, api);
+        glams = new GlamStore(session, api, signals);
         this.glamour = glamour;
         this.images = images;
         this.library = library;
@@ -229,6 +229,7 @@ internal sealed partial class PrismApp : IResumableApp
         FollowSkin(context.Theme);
         FollowTheme(context.Theme);
         ImGui.GetWindowDrawList().AddRectFilled(full.Min, full.Max, ImGui.GetColorU32(PrismArt.Back));
+        DrainRemovals();
         if (glams.IsSignedIn && screen != PrismScreen.Guide && launcher.TryConsume(Id, out var link))
         {
             OpenLink(link);

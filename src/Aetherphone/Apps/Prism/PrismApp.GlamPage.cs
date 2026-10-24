@@ -810,7 +810,7 @@ internal sealed partial class PrismApp
                     Confirm = () =>
                     {
                         glams.Delete(glam);
-                        DropShowcase(glam.Id);
+                        PurgeGlam(glam.Id);
                         GoBack();
                     },
                 });

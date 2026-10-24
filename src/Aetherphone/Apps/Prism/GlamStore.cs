@@ -36,6 +36,7 @@ internal sealed class GlamStore : IDisposable
     private const int ShowcaseRetrySeconds = 30;
     private const int ShowcaseModded = 0;
     private const int ShowcaseVanilla = 1;
+    private const int RemovalBacklog = 256;
 
     private const int PhotoBaseSize = 1080;
     private const PostAspect GlamAspect = PostAspect.Portrait;
@@ -51,6 +52,8 @@ internal sealed class GlamStore : IDisposable
     private readonly MediaClient media;
     private readonly SafetyClient safety;
     private readonly SocialClient social;
+    private readonly RealtimeSignalBus signals;
+    private readonly ConcurrentQueue<ContentRemovalSignal> removals = new();
     private readonly StoreWork work = new("Glams");
     private readonly FailureSlot postFailure = new();
     private readonly FailureSlot profileFailure = new();
@@ -109,15 +112,49 @@ internal sealed class GlamStore : IDisposable
     private bool? vanillaOnly;
     private (int Race, int? Gender) body;
 
-    public GlamStore(AethernetSession session, AethernetApi api)
+    public GlamStore(AethernetSession session, AethernetApi api, RealtimeSignalBus signals)
     {
         this.session = session;
+        this.signals = signals;
         account = api.Account;
         client = api.Glams;
         media = api.Media;
         safety = api.Safety;
         social = api.Social;
+        signals.ContentRemoved += OnContentRemoved;
     }
+
+    private void OnContentRemoved(ContentRemovalSignal removal)
+    {
+        if (!string.Equals(removal.App, SocialActivity.PrismApp, StringComparison.Ordinal) ||
+            removal.ContentId is not { Length: > 0 } contentId)
+        {
+            return;
+        }
+
+        if (string.Equals(removal.Kind, ContentRemovalKinds.Glam, StringComparison.Ordinal))
+        {
+            removedIds[contentId] = true;
+        }
+        else if (!string.Equals(removal.Kind, ContentRemovalKinds.Look, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        QueueRemoval(removal);
+    }
+
+    private void QueueRemoval(ContentRemovalSignal removal)
+    {
+        if (removals.Count >= RemovalBacklog)
+        {
+            removals.TryDequeue(out _);
+        }
+
+        removals.Enqueue(removal);
+    }
+
+    public bool TryTakeRemoval(out ContentRemovalSignal removal) => removals.TryDequeue(out removal);
 
     public static float PhotoRatio => PostAspects.Ratio(GlamAspect);
 
@@ -635,7 +672,7 @@ internal sealed class GlamStore : IDisposable
 
     public void Delete(GlamDto glam)
     {
-        Remove(glam.Id);
+        Purge(glam.Id);
         work.Run("delete", token => client.DeleteAsync(glam.Id, token));
     }
 
@@ -829,6 +866,7 @@ internal sealed class GlamStore : IDisposable
 
     public void Dispose()
     {
+        signals.ContentRemoved -= OnContentRemoved;
         work.Dispose();
     }
 
@@ -885,9 +923,16 @@ internal sealed class GlamStore : IDisposable
         }
     }
 
-    private void Remove(string glamId)
+    public void Purge(string glamId)
     {
         removedIds[glamId] = true;
+        if (bannerFor == glamId)
+        {
+            banner = null;
+            bannerMissing = true;
+            bannerFailed = false;
+        }
+
         for (var index = 0; index < discover.Length; index++)
         {
             discover[index].Items = CopyOnWrite.RemoveById(discover[index].Items, glamId);

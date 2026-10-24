@@ -417,6 +417,36 @@ internal sealed class PrismStore : IDisposable
         ballot = null;
     }
 
+    public void PurgeLook(string lookId, string? weekId)
+    {
+        if (rawWeek is not { } raw || (!EnteredWith(raw, lookId) && weekId != raw.Id && weekId != raw.PreviousWeekId))
+        {
+            return;
+        }
+
+        lastWeekResults.Clear();
+        Refresh();
+    }
+
+    private static bool EnteredWith(PrismWeekDto raw, string lookId)
+    {
+        if (raw.MyEntry?.Id == lookId)
+        {
+            return true;
+        }
+
+        var tracks = raw.Tracks ?? Array.Empty<PrismTrackDto>();
+        for (var index = 0; index < tracks.Length; index++)
+        {
+            if (tracks[index].MyEntry?.Id == lookId)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void Report(string lookId, ReportReason reason, Action<bool> done)
     {
         work.Run("report", token => safety.ReportAsync(PrismClient.ReportTarget, lookId, reason, token), done);

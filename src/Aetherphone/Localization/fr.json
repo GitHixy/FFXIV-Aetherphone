@@ -7555,6 +7555,8 @@
   "moderation.notice.nameResetHandle": "Vous êtes maintenant {0}",
   "moderation.notice.nameResetWhere": "Réinitialisé sur : {0}",
   "moderation.notice.nameResetLabel": "Nouvel identifiant",
+  "moderation.notice.removedGlam": "Votre mirage a été supprimé",
+  "moderation.notice.removedLook": "Votre participation au concours a été supprimée",
   "safety.title": "Modération et sécurité",
   "safety.unreadSummary": "{0} non lu(s)",
   "safety.empty": "Rien ici. Aucun modérateur n'est intervenu sur votre compte.",

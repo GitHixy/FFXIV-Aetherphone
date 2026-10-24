@@ -7555,6 +7555,8 @@
   "moderation.notice.nameResetHandle": "你现在是 {0}",
   "moderation.notice.nameResetWhere": "已重置的位置：{0}",
   "moderation.notice.nameResetLabel": "新用户名",
+  "moderation.notice.removedGlam": "你的幻化已被移除",
+  "moderation.notice.removedLook": "你的参赛作品已被移除",
   "safety.title": "管理与安全",
   "safety.unreadSummary": "{0} 条未读",
   "safety.empty": "这里没有内容。没有管理员对你的账户采取过操作。",

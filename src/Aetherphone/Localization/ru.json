@@ -7555,6 +7555,8 @@
   "moderation.notice.nameResetHandle": "Теперь вы {0}",
   "moderation.notice.nameResetWhere": "Сброшено здесь: {0}",
   "moderation.notice.nameResetLabel": "Новый логин",
+  "moderation.notice.removedGlam": "Ваш гламур удалён",
+  "moderation.notice.removedLook": "Ваша конкурсная работа удалена",
   "safety.title": "Модерация и безопасность",
   "safety.unreadSummary": "{0} непрочитанных",
   "safety.empty": "Здесь пусто. Модераторы не предпринимали действий по вашему аккаунту.",

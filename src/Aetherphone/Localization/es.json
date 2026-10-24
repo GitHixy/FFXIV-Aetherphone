@@ -7555,6 +7555,8 @@
   "moderation.notice.nameResetHandle": "Ahora eres {0}",
   "moderation.notice.nameResetWhere": "Restablecido en: {0}",
   "moderation.notice.nameResetLabel": "Nuevo identificador",
+  "moderation.notice.removedGlam": "Se eliminó tu glamour",
+  "moderation.notice.removedLook": "Se eliminó tu participación en el concurso",
   "safety.title": "Moderación y seguridad",
   "safety.unreadSummary": "{0} sin leer",
   "safety.empty": "Aquí no hay nada. Ningún moderador ha actuado sobre tu cuenta.",

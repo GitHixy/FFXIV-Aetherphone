@@ -335,6 +335,8 @@ internal static class L
         public static readonly LocString NoticeNameResetHandle = new("moderation.notice.nameResetHandle", "You are now {0}");
         public static readonly LocString NoticeNameResetWhere = new("moderation.notice.nameResetWhere", "Reset on: {0}");
         public static readonly LocString NoticeNameResetLabel = new("moderation.notice.nameResetLabel", "New handle");
+        public static readonly LocString NoticeRemovedGlam = new("moderation.notice.removedGlam", "Your glam was removed");
+        public static readonly LocString NoticeRemovedLook = new("moderation.notice.removedLook", "Your contest look was removed");
     }
 
     internal static class Apps
