@@ -117,7 +117,7 @@ internal static class HomeTileView
         }
 
         FinishPointer(dl, firstVertex, center, drawMin, drawMax, radius, drawHalf, pointer, scale);
-        DrawLabel(center, size, app.DisplayName, theme, scale, labelAlpha, showLabels, labelWidth, zoom);
+        DrawLabel(center, size, app.HomeLabel, theme, scale, labelAlpha, showLabels, labelWidth, zoom);
         if (app.BadgeCount > 0 && IsBadgeVisible(app, configuration))
         {
             DrawBadge(center, size, app.BadgeCount, app.BadgeAsDot, theme, scale);

@@ -358,6 +358,7 @@ internal static class L
         public static readonly LocString Dailies = new("app.dailies", "Dailies");
         public static readonly LocString Games = new("app.games", "Games");
         public static readonly LocString Notifications = new("app.notifications", "Notifications");
+        public static readonly LocString NotificationsHome = new("app.notificationsHome", "Alerts");
         public static readonly LocString News = new("app.news", "News");
         public static readonly LocString Fishing = new("app.fishing", "Fishing");
         public static readonly LocString Maps = new("app.maps", "Maps");
@@ -369,6 +370,7 @@ internal static class L
         public static readonly LocString Polls = new("app.polls", "Polls");
         public static readonly LocString Prism = new("app.prism", "Prism");
         public static readonly LocString Announcements = new("app.announcements", "Announcements");
+        public static readonly LocString AnnouncementsHome = new("app.announcementsHome", "Updates");
         public static readonly LocString Muster = new("app.muster", "Muster");
         public static readonly LocString YellowPages = new("app.yellowpages", "Yellow Pages");
         public static readonly LocString Calendar = new("app.calendar", "Calendar");

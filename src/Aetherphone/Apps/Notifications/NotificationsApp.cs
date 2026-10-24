@@ -20,6 +20,7 @@ internal sealed partial class NotificationsApp : IResumableApp
 
     public string Id => NotificationChannels.NotificationsAppId;
     public string DisplayName => Loc.T(L.Apps.Notifications);
+    public string HomeLabel => Loc.T(L.Apps.NotificationsHome);
     public string Glyph => "N";
     public int BadgeCount => notifications.UnreadCount;
     public bool HasBadge => true;
