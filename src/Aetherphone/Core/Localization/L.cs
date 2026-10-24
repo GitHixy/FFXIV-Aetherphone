@@ -9874,6 +9874,14 @@ internal static class L
         public static readonly LocString StagePaperclip = new("coil.stagePaperclip", "Paperclip");
         public static readonly LocString StageFigureEight = new("coil.stageFigureEight", "Figure Eight");
         public static readonly LocString StageRipple = new("coil.stageRipple", "Ripple");
+        public static readonly LocString Guide1Title = new("coil.guide1Title", "Aim and fire");
+        public static readonly LocString Guide1Body = new("coil.guide1Body", "Click where you want to shoot. The marble joins the chain right where it hits.");
+        public static readonly LocString Guide2Title = new("coil.guide2Title", "Match three");
+        public static readonly LocString Guide2Body = new("coil.guide2Body", "Pop three or more of one color. Matching colors across a gap roll back together and can pop again for a chain bonus.");
+        public static readonly LocString Guide3Title = new("coil.guide3Title", "Swap and power up");
+        public static readonly LocString Guide3Body = new("coil.guide3Body", "Press Space or right-click to swap in your next marble. Pop glowing marbles for power-ups like Freeze.");
+        public static readonly LocString Guide4Title = new("coil.guide4Title", "Mind the vortex");
+        public static readonly LocString Guide4Body = new("coil.guide4Body", "If the chain reaches the vortex, you lose a life. Pop every marble to clear the stage.");
     }
 
     internal static class Updraft
