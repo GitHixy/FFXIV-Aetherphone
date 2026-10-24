@@ -207,6 +207,7 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
     public long PrismShowcaseEndsAtUnix { get; set; }
     public bool PrismShowcaseOpened { get; set; }
     public HashSet<byte> PrismDyeFavourites { get; set; } = new();
+    public int PrismWardrobeColumns { get; set; }
     public float ScreenBrightness { get; set; } = 1f;
     public float PhoneScale { get; set; } = PhoneSizeCatalog.DefaultWidth / PhoneSizeCatalog.DesignWidth;
     public float PhoneWidth { get; set; }
