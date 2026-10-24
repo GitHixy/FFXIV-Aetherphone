@@ -213,6 +213,7 @@ internal sealed partial class PrismApp : IResumableApp
     public void OnClosed()
     {
         pickIntake.Discard();
+        composeIntake.Discard();
         photoViewer.Close();
     }
 

@@ -4,6 +4,7 @@ using Aetherphone.Core.Game;
 using Aetherphone.Core.Glamour;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Notifications;
+using Aetherphone.Core.Platform;
 using Aetherphone.Windows.Components;
 using Aetherphone.Windows.Widgets;
 using Dalamud.Bindings.ImGui;
@@ -29,6 +30,7 @@ internal sealed partial class PrismApp
     private const string ComposeGenderId = "prism.composeGender";
 
     private readonly PhotoComposeSession composeSession;
+    private readonly ImageIntake composeIntake = new();
     private readonly HashSet<string> droppedMods = new(StringComparer.Ordinal);
     private readonly ModDraft composeMods = new();
     private readonly ChipRail modTypeRail = new();
@@ -56,6 +58,7 @@ internal sealed partial class PrismApp
     private void StartCompose()
     {
         composeDraft++;
+        composeIntake.Discard();
         composeSession.Open(false);
         composeSession.MaxPhotos = GlamStore.MaxPhotos;
         composeDetails = false;
@@ -81,6 +84,7 @@ internal sealed partial class PrismApp
             return;
         }
 
+        TakeComposeIntake(content);
         var top = DrawActionHeader(drawList, content, PhoneIcons.X, Loc.T(L.Common.Cancel), Loc.T(L.Prism.PostGlam),
             PhoneIcons.ChevronRight, Loc.T(L.Common.Next), composeSession.HasSelection, string.Empty, UiSound.Tap,
             scale, out var advance) + Metrics.Space.Sm * scale;
@@ -100,14 +104,35 @@ internal sealed partial class PrismApp
             new Vector2(content.Max.X, content.Max.Y - PrismArt.BottomMargin(scale)));
         using (AppSurface.BeginEdgeToEdge(gridRect, smoothWheel: true))
         {
-            composeSession.DrawPickGrid(gridRect, scale, PickStyle, true, Loc.T(L.Common.ImportFromPc),
-                Loc.T(L.Prism.PostGlam));
+            if (composeSession.DrawPickGrid(gridRect, scale, PickStyle, true, Loc.T(L.Common.ImportFromPc),
+                    Loc.T(L.Prism.PostGlam), ComposePasteLabel()))
+            {
+                composeIntake.Paste(library);
+            }
         }
     }
+
+    private void TakeComposeIntake(Rect content)
+    {
+        while (composeIntake.TryTake(out var taken))
+        {
+            composeSession.TakeImported(taken);
+        }
+
+        if (UiInteract.Hover(content.Min, content.Max) && GameFocus.Active && ImageIntake.PasteRequested())
+        {
+            composeIntake.Paste(library);
+        }
+
+        composeIntake.AcceptDrop(content, library, PrismArt.Fore);
+    }
+
+    private string? ComposePasteLabel() => composeIntake.ClipboardHasImage() ? Loc.T(L.Common.PasteImage) : null;
 
     private bool DrawPhotoPick(ImDrawListPtr drawList, Rect content, string title, float aspect, float scale)
     {
         composeSession.ConsumePendingImport();
+        TakeComposeIntake(content);
         var top = DrawActionHeader(drawList, content, PhoneIcons.X, Loc.T(L.Common.Cancel), title, PhoneIcons.Check,
             Loc.T(L.Prism.UsePhoto), composeSession.HasSelection, string.Empty, UiSound.Tap, scale, out var chosen) +
                   Metrics.Space.Sm * scale;
@@ -123,7 +148,11 @@ internal sealed partial class PrismApp
             new Vector2(content.Max.X, content.Max.Y - PrismArt.BottomMargin(scale)));
         using (AppSurface.BeginEdgeToEdge(gridRect, smoothWheel: true))
         {
-            composeSession.DrawPickGrid(gridRect, scale, PickStyle, false, Loc.T(L.Common.ImportFromPc), title);
+            if (composeSession.DrawPickGrid(gridRect, scale, PickStyle, false, Loc.T(L.Common.ImportFromPc), title,
+                    ComposePasteLabel()))
+            {
+                composeIntake.Paste(library);
+            }
         }
 
         return false;
