@@ -111,6 +111,7 @@ internal static class AppAccents
         ["minigolf"] = AccentRing.Emerald,
         ["herd"] = AccentRing.Rose,
         ["tempo"] = AccentRing.Violet,
+        ["cluster"] = AccentRing.Indigo,
         ["rolladeck"] = AccentRing.Violet,
         ["hunts"] = AccentRing.Indigo,
         ["loveisland"] = AccentRing.Rose

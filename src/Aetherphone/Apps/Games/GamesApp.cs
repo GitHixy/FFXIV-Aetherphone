@@ -6,6 +6,7 @@ using Aetherphone.Apps.Games.BubbleShooter;
 using Aetherphone.Apps.Games.CapMan;
 using Aetherphone.Apps.Games.Chess;
 using Aetherphone.Apps.Games.Claim;
+using Aetherphone.Apps.Games.Cluster;
 using Aetherphone.Apps.Games.Coil;
 using Aetherphone.Apps.Games.Crates;
 using Aetherphone.Apps.Games.Crawler;
@@ -252,6 +253,7 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
             new MiniGolfApp(),
             new HerdApp(textures),
             new TempoApp(),
+            new ClusterApp(),
         };
         library = new GamesLibrary(games, stats, leaderboard);
         countLabels = new string[library.Entries.Length + 1];
