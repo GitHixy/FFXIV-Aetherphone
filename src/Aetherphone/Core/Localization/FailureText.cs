@@ -85,6 +85,9 @@ internal static class FailureCodes
     public const string ContactOwnNumber = "contact_own_number";
     public const string CasinoLimitOutOfRange = "casino_limit_out_of_range";
     public const string PollClosed = "poll_closed";
+    public const string PollAlreadyVoted = "poll_already_voted";
+    public const string PostPollInvalid = "post_poll_invalid";
+    public const string PostPollWithMedia = "post_poll_with_media";
     public const string PhotoTagRejected = "photo_tag_rejected";
     public const string VelvetRequestsClosed = "velvet_requests_closed";
     public const string VelvetRequestsMutualsOnly = "velvet_requests_mutuals_only";
@@ -322,6 +325,12 @@ internal static class FailureText
                 return Valued(L.Failure.CasinoLimitOutOfRange, failure);
             case FailureCodes.PollClosed:
                 return Loc.T(L.Failure.PollClosed);
+            case FailureCodes.PollAlreadyVoted:
+                return Loc.T(L.Failure.PollAlreadyVoted);
+            case FailureCodes.PostPollInvalid:
+                return Loc.T(L.Failure.PostPollInvalid);
+            case FailureCodes.PostPollWithMedia:
+                return Loc.T(L.Failure.PostPollWithMedia);
             case FailureCodes.PhotoTagRejected:
                 return Loc.T(L.Failure.PhotoTagRejected);
             case FailureCodes.VelvetRequestsClosed:
