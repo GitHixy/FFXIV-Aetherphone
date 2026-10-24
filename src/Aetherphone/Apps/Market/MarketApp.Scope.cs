@@ -229,19 +229,12 @@ internal sealed partial class MarketApp
             TextStyles.Subheadline);
     }
 
-    private string ScopeTitle(in MarketScope scope) =>
-        scope.Kind == MarketScopeKind.Region ? RegionTitle(scope.ApiName) : scope.ApiName;
+    private string ScopeTitle(in MarketScope scope) => watchlist.Title(in scope);
 
     private string ScopeParent(in MarketScope scope)
     {
         var parent = watchlist.Geography.ParentOf(scope.Kind, scope.ApiName);
-        return scope.Kind == MarketScopeKind.DataCenter && parent.Length > 0 ? RegionTitle(parent) : parent;
-    }
-
-    private string RegionTitle(string apiName)
-    {
-        var region = watchlist.Geography.Region(apiName);
-        return region is null ? apiName : Loc.T(region.Label);
+        return scope.Kind == MarketScopeKind.DataCenter && parent.Length > 0 ? watchlist.RegionTitle(parent) : parent;
     }
 
     private string BackLabel(string localName)
@@ -358,7 +351,7 @@ internal sealed partial class MarketApp
         for (var scopeIndex = 0; scopeIndex < local.Count; scopeIndex++)
         {
             var scope = local[scopeIndex];
-            var title = scope.Kind == MarketScopeKind.Region ? RegionTitle(scope.ApiName) : scope.ApiName;
+            var title = ScopeTitle(in scope);
             var subtitle = Loc.T(scope.Kind switch
             {
                 MarketScopeKind.World => L.Venues.YourWorld,
