@@ -25,6 +25,7 @@ internal static class ChangelogData
             new(L.Apps.Collections, L.Changelog.Release1400Collections),
             new(L.Changelog.SectionSounds, L.Changelog.Release1400Sounds),
             new(L.Apps.LoveIsland, L.Changelog.Release1400LoveIsland),
+            new(L.Apps.AetherStream, L.Changelog.Release1400MogCast),
         }),
         new ChangelogEntry("1.3.3.0", "2026-10-19", new ChangelogSection[]
         {

@@ -2357,9 +2357,9 @@ internal static class L
             new("changelog.r1400.30",
                 "Added trying on any vanilla Prism glam in one tap through Glamourer, or through the game's Try On window without it"),
             new("changelog.r1400.31",
-                "Added posting your own Prism glam with up to four photos: choose Modded or Vanilla and the race and gender in the photo, then add the pieces with their dyes and any mods, or fill them in from your character, and edit it later from its page"),
+                "Added posting your own Prism glam with up to four photos: choose Modded or Vanilla and the race and gender in the photo, then add the pieces with their dyes and any mods, or fill them in from your character or a wardrobe outfit, and edit it later from its page"),
             new("changelog.r1400.32",
-                "Added a Prism wardrobe: build outfits piece by piece with their dyes and mods or fill them from what you're wearing, keep your Glamourer designs and any glam you add, and put an outfit back on in one tap"),
+                "Added a Prism wardrobe: build outfits piece by piece with their dyes and mods or fill them from what you're wearing, keep your Glamourer designs and any glam you add, put an outfit back on in one tap, and post one as a glam"),
             new("changelog.r1400.33",
                 "Added Modded and Vanilla contests to Prism side by side, with a Vanilla entry listing its gear and dyes by hand"),
             new("changelog.r1400.34",
@@ -2374,8 +2374,12 @@ internal static class L
                 "Added hiding messages from people you blocked in ChocoChat group chats: each shows as a short row you can tap to read, and they no longer notify you"),
             new("changelog.r1400.58",
                 "Added GIFs from KLIPY to ChocoChat chats, group chats included, and to Aethergram messages"),
+            new("changelog.r1400.59",
+                "Changed ChocoChat chats with one person to need you both in each other's contacts before a message goes through, as starting one already did"),
             new("changelog.r1400.6",
                 "Fixed voice messages recorded with Automatic gain distorting when you raise your voice and staying quiet afterwards"),
+            new("changelog.r1400.60",
+                "Fixed unblocking someone leaving you both out of each other's ChocoChat contacts: the contacts a block removed now come back"),
         };
 
         public static readonly LocString[] Release1400Calls =
@@ -2442,6 +2446,8 @@ internal static class L
                 "Changed tab bar and header icons to one optical size, so solid and outline icons look even side by side, contributed by t3sco"),
             new("changelog.r1400.48",
                 "Changed screens that fail to load because of a brief connection hiccup to try once more by themselves before showing an error"),
+            new("changelog.r1400.61",
+                "Changed the names of the Announcements and Notifications apps to Updates and Alerts"),
             new("changelog.r1400.41",
                 "Fixed icons sitting slightly off center on their buttons and wiggling on hover, contributed by t3sco"),
         };
@@ -2524,6 +2530,12 @@ internal static class L
                 "Added Keep it night to Love Island Eclipse, which holds Eorzea at night while the app is open during the event"),
             new("changelog.r1400.42",
                 "Added a DJs tab to Love Island Eclipse that lists every set with who plays when and which ones stream, and the Live DJ card on Tonight now follows that list"),
+        };
+
+        public static readonly LocString[] Release1400MogCast =
+        {
+            new("changelog.r1400.62",
+                "Fixed MogCast hiding the nameplates of people near you while a video plays with the screen in the world switched off"),
         };
 
         public static readonly LocString[] Release1330Chirper =
