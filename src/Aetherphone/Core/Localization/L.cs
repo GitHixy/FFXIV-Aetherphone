@@ -10517,6 +10517,14 @@ internal static class L
         public static readonly LocString Paused = new("games.herd.paused", "Paused: tap moogles to give skills");
         public static readonly LocString NukeArmed = new("games.herd.nukeArmed", "Tap again to pop them all");
         public static readonly LocString GoalReached = new("games.herd.goalReached", "Goal reached!");
+        public static readonly LocString Guide1Title = new("games.herd.guide1Title", "Lead them home");
+        public static readonly LocString Guide1Body = new("games.herd.guide1Body", "Moogles drop from the door and walk on, turning back at walls. Get enough of them into the hut before time runs out.");
+        public static readonly LocString Guide2Title = new("games.herd.guide2Title", "Hand out skills");
+        public static readonly LocString Guide2Body = new("games.herd.guide2Body", "Pick a skill below or press 1 to 6, then tap a moogle to give it. Each level has only a few of each.");
+        public static readonly LocString Guide3Title = new("games.herd.guide3Title", "Mind the drop");
+        public static readonly LocString Guide3Body = new("games.herd.guide3Body", "A fall from too high splats a moogle, and water sinks it. Give it Float first for a soft landing.");
+        public static readonly LocString Guide4Title = new("games.herd.guide4Title", "Pause and plan");
+        public static readonly LocString Guide4Body = new("games.herd.guide4Body", "Space or the pause button freezes time, and skills still work while paused. F speeds the herd up.");
     }
 
     internal static class Tempo
