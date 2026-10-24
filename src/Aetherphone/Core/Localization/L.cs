@@ -10445,6 +10445,14 @@ internal static class L
         public static readonly LocString Knockouts = new("games.fuse.knockouts", "Knockouts");
         public static readonly LocString Crates = new("games.fuse.crates", "Crates broken");
         public static readonly LocString PowerUps = new("games.fuse.powerUps", "Power-ups");
+        public static readonly LocString Guide1Title = new("games.fuse.guide1Title", "Drop and run");
+        public static readonly LocString Guide1Body = new("games.fuse.guide1Body", "Move with the pad or WASD and drop a bomb with the button or Space. Then get clear, because its fire knocks out anyone, you included.");
+        public static readonly LocString Guide2Title = new("games.fuse.guide2Title", "Blasts and chains");
+        public static readonly LocString Guide2Body = new("games.fuse.guide2Body", "Blasts shoot out in four straight lines and break the first crate they hit. A blast that reaches another bomb sets it off too.");
+        public static readonly LocString Guide3Title = new("games.fuse.guide3Title", "Grab power-ups");
+        public static readonly LocString Guide3Body = new("games.fuse.guide3Body", "Broken crates can drop an extra bomb, a bigger blast, more speed, or a kick that sends bombs sliding. Walk over one to take it.");
+        public static readonly LocString Guide4Title = new("games.fuse.guide4Title", "Last one standing");
+        public static readonly LocString Guide4Body = new("games.fuse.guide4Body", "Outlast the other moogles to win a round; two rounds win the match. Late in a round, blocks fall from the edges and crush anyone below.");
     }
 
     internal static class Snip
