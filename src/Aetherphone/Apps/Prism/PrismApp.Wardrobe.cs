@@ -486,7 +486,7 @@ internal sealed partial class PrismApp
         coverForEditor = false;
         Push(PrismScreen.WardrobeCover);
         coverFor = outfit.Id;
-        composeSession.Open(true);
+        OpenPhotoPick();
     }
 
     private void AddSheetAction(bool shown, WardrobeAction action)

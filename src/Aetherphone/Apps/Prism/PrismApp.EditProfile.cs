@@ -37,7 +37,7 @@ internal sealed partial class PrismApp
 
     private void OpenProfilePhoto()
     {
-        composeSession.Open(true);
+        OpenPhotoPick();
         Push(PrismScreen.ProfilePhoto);
     }
 

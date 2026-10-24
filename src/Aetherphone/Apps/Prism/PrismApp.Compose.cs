@@ -157,6 +157,12 @@ internal sealed partial class PrismApp
 
     private string? ComposePasteLabel() => composeIntake.ClipboardHasImage() ? Loc.T(L.Common.PasteImage) : null;
 
+    private void OpenPhotoPick()
+    {
+        composeIntake.Discard();
+        composeSession.Open(true);
+    }
+
     private bool DrawPhotoPick(ImDrawListPtr drawList, Rect content, string title, float aspect, float scale)
     {
         composeSession.ConsumePendingImport();

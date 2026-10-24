@@ -297,7 +297,7 @@ internal sealed partial class PrismApp
     {
         coverForEditor = true;
         Push(PrismScreen.WardrobeCover);
-        composeSession.Open(true);
+        OpenPhotoPick();
     }
 
     private void OpenWornMods(ModDraft target)
