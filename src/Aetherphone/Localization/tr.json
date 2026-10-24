@@ -5340,7 +5340,7 @@
   "games.fuse.crates": "Kırılan sandık",
   "games.fuse.powerUps": "Güçlendirmeler",
   "games.fuse.guide1Title": "Bırak ve kaç",
-  "games.fuse.guide1Body": "Ped ya da WASD ile hareket et, düğme ya da Boşluk ile bomba bırak. Sonra hemen uzaklaş, çünkü ateşi seni de dahil herkesi nakavt eder.",
+  "games.fuse.guide1Body": "Ped ya da ok tuşlarıyla hareket et, düğme ya da Boşluk ile bomba bırak. Sonra hemen uzaklaş, çünkü ateşi seni de dahil herkesi nakavt eder.",
   "games.fuse.guide2Title": "Patlamalar ve zincirler",
   "games.fuse.guide2Body": "Patlamalar dört düz çizgide yayılır ve çarptıkları ilk sandığı kırar. Başka bir bombaya ulaşan patlama onu da patlatır.",
   "games.fuse.guide3Title": "Güçlendirmeleri kap",

@@ -1000,7 +1000,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 TranslateLink.Activate(translation, confirm, key, post.Text, translation.Peek(key));
                 break;
             case PostSheetAction.Report:
-                profile.OpenReport("post", post.Id, Loc.T(L.Report.PostTitle));
+                profile.OpenReport("post", post.Id, Loc.T(L.Report.PostTitle), GifReportForwarder(post));
                 break;
             case PostSheetAction.Block:
                 profile.AskBlock(post.AuthorDisplayName, post.AuthorHandle, post.AuthorId);

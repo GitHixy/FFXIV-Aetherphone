@@ -18,8 +18,8 @@ internal abstract partial class SocialFeedStore
         var trimmed = text.Trim();
         work.Run("compose gif", async token =>
         {
-            var created = await client.CreateGifPostAsync(trimmed, quotedPostId, gif.Url, gif.Width, gif.Height,
-                sensitive, token, onFailure).ConfigureAwait(false);
+            var created = await client.CreateGifPostAsync(trimmed, quotedPostId, gif.Url, gif.Slug, gif.Width,
+                gif.Height, sensitive, token, onFailure).ConfigureAwait(false);
             if (created is null)
             {
                 return false;

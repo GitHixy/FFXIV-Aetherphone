@@ -5340,7 +5340,7 @@
   "games.fuse.crates": "Caisses détruites",
   "games.fuse.powerUps": "Bonus",
   "games.fuse.guide1Title": "Posez et fuyez",
-  "games.fuse.guide1Body": "Déplacez-vous avec la croix ou WASD et posez une bombe avec le bouton ou Espace. Puis éloignez-vous : son feu met K.-O. tout le monde, vous compris.",
+  "games.fuse.guide1Body": "Déplacez-vous avec la croix ou les flèches et posez une bombe avec le bouton ou Espace. Puis éloignez-vous : son feu met K.-O. tout le monde, vous compris.",
   "games.fuse.guide2Title": "Explosions et chaînes",
   "games.fuse.guide2Body": "Les explosions partent en quatre lignes droites et brisent la première caisse touchée. Une explosion qui atteint une autre bombe la fait sauter aussi.",
   "games.fuse.guide3Title": "Ramassez les bonus",

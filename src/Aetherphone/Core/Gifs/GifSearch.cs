@@ -212,6 +212,32 @@ internal sealed class GifSearch : IDisposable
         });
     }
 
+    public void ForwardReport(string slug, string reason)
+    {
+        var cached = Available ? settings : null;
+        var cancel = lifetime.Token;
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var current = cached ?? GifSettings.From(await gifs.ConfigAsync(cancel).ConfigureAwait(false));
+                if (current is null)
+                {
+                    return;
+                }
+
+                await klipy.ReportAsync(current, slug, reason, cancel).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                AepLog.Debug(exception, "[Gifs] could not forward a GIF report to KLIPY");
+            }
+        });
+    }
+
     private void Begin(string query, bool force)
     {
         var effective = GifQuery.IsSearch(query) ? query : string.Empty;

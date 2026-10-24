@@ -46,7 +46,7 @@ internal sealed class LivePreview
     private static readonly string[] Allowlist =
     [
         "tetris", "breakout", "invaders", "capman", "beat", "stack", "bubbles", "swoop", "trailblaze", "pinball",
-        "pegfall", "minigolf",
+        "pegfall", "minigolf", "cluster", "harvest",
     ];
 
     private static readonly Vector4 RimInk = new(1f, 1f, 1f, 0.08f);

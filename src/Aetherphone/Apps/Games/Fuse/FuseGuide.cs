@@ -495,10 +495,14 @@ internal static class FuseGuide
     {
         var step = KeyStep * scale;
         var center = new Vector2(controls.Inner.Min.X + ClusterHalf * scale, controls.Inner.Center.Y);
-        GuideKit.Key(drawList, center - new Vector2(0f, step * 0.5f), "W", held == FuseDirection.Up, accent, scale);
-        GuideKit.Key(drawList, center + new Vector2(-step, step * 0.5f), "A", held == FuseDirection.Left, accent, scale);
-        GuideKit.Key(drawList, center + new Vector2(0f, step * 0.5f), "S", held == FuseDirection.Down, accent, scale);
-        GuideKit.Key(drawList, center + new Vector2(step, step * 0.5f), "D", held == FuseDirection.Right, accent, scale);
+        GuideKit.ArrowKey(drawList, center - new Vector2(0f, step * 0.5f), new Vector2(0f, -1f),
+            held == FuseDirection.Up, accent, scale);
+        GuideKit.ArrowKey(drawList, center + new Vector2(-step, step * 0.5f), new Vector2(-1f, 0f),
+            held == FuseDirection.Left, accent, scale);
+        GuideKit.ArrowKey(drawList, center + new Vector2(0f, step * 0.5f), new Vector2(0f, 1f),
+            held == FuseDirection.Down, accent, scale);
+        GuideKit.ArrowKey(drawList, center + new Vector2(step, step * 0.5f), new Vector2(1f, 0f),
+            held == FuseDirection.Right, accent, scale);
         GuideKit.SpaceKey(drawList, new Vector2(controls.Inner.Max.X - SpaceHalf * scale, controls.Inner.Center.Y), bomb,
             accent, scale);
     }

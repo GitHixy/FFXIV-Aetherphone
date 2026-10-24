@@ -5340,7 +5340,7 @@
   "games.fuse.crates": "Kisten zerstört",
   "games.fuse.powerUps": "Power-ups",
   "games.fuse.guide1Title": "Legen und weglaufen",
-  "games.fuse.guide1Body": "Lauf mit dem Steuerkreuz oder WASD und leg mit dem Bombenknopf oder der Leertaste eine Bombe. Dann schnell weg: Ihr Feuer schaltet jeden aus, auch dich.",
+  "games.fuse.guide1Body": "Lauf mit dem Steuerkreuz oder den Pfeiltasten und leg mit dem Bombenknopf oder der Leertaste eine Bombe. Dann schnell weg: Ihr Feuer schaltet jeden aus, auch dich.",
   "games.fuse.guide2Title": "Explosionen und Ketten",
   "games.fuse.guide2Body": "Explosionen schießen in vier geraden Linien los und zerstören die erste Kiste, die sie treffen. Erreicht eine Explosion eine andere Bombe, geht auch diese hoch.",
   "games.fuse.guide3Title": "Power-ups schnappen",

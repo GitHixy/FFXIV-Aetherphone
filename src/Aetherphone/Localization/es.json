@@ -5340,7 +5340,7 @@
   "games.fuse.crates": "Cajas rotas",
   "games.fuse.powerUps": "Potenciadores",
   "games.fuse.guide1Title": "Suelta y corre",
-  "games.fuse.guide1Body": "Muévete con la cruceta o WASD y suelta una bomba con el botón o Espacio. Luego aléjate, porque su fuego deja fuera de combate a cualquiera, incluido tú.",
+  "games.fuse.guide1Body": "Muévete con la cruceta o las flechas y suelta una bomba con el botón o Espacio. Luego aléjate, porque su fuego deja fuera de combate a cualquiera, incluido tú.",
   "games.fuse.guide2Title": "Explosiones y cadenas",
   "games.fuse.guide2Body": "Las explosiones salen en cuatro líneas rectas y rompen la primera caja que tocan. Si una explosión alcanza otra bomba, también la hace estallar.",
   "games.fuse.guide3Title": "Consigue potenciadores",

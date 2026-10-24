@@ -5340,7 +5340,7 @@
   "games.fuse.crates": "Caixas quebradas",
   "games.fuse.powerUps": "Power-ups",
   "games.fuse.guide1Title": "Solte e corra",
-  "games.fuse.guide1Body": "Mova-se com o direcional ou WASD e solte uma bomba com o botão ou Espaço. Depois se afaste, porque o fogo dela nocauteia qualquer um, inclusive você.",
+  "games.fuse.guide1Body": "Mova-se com o direcional ou as setas e solte uma bomba com o botão ou Espaço. Depois se afaste, porque o fogo dela nocauteia qualquer um, inclusive você.",
   "games.fuse.guide2Title": "Explosões em cadeia",
   "games.fuse.guide2Body": "As explosões saem em quatro linhas retas e quebram a primeira caixa que atingem. Uma explosão que alcança outra bomba também a detona.",
   "games.fuse.guide3Title": "Pegue power-ups",

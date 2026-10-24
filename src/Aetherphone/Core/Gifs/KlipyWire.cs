@@ -58,9 +58,14 @@ internal sealed record KlipyShareRequest(
     [property: JsonPropertyName("customer_id")] string CustomerId,
     [property: JsonPropertyName("q")] string Query);
 
+internal sealed record KlipyReportRequest(
+    [property: JsonPropertyName("customer_id")] string CustomerId,
+    [property: JsonPropertyName("reason")] string Reason);
+
 [JsonSourceGenerationOptions(NumberHandling = JsonNumberHandling.AllowReadingFromString)]
 [JsonSerializable(typeof(KlipyResponse))]
 [JsonSerializable(typeof(KlipyShareRequest))]
+[JsonSerializable(typeof(KlipyReportRequest))]
 internal sealed partial class KlipyJsonContext : JsonSerializerContext
 {
 }

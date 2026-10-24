@@ -188,7 +188,8 @@ internal sealed record CreatePostRequest(
     int MediaHeight = 0,
     bool Sensitive = false,
     PostPollInput? Poll = null,
-    string? GifUrl = null);
+    string? GifUrl = null,
+    string? GifSlug = null);
 
 internal sealed record SetSensitiveRequest(bool Sensitive);
 
@@ -257,7 +258,8 @@ internal sealed record PostDto(
     long? PinnedAtUnix = null,
     long? ArchivedAtUnix = null,
     PostPollDto? Poll = null,
-    string? GifUrl = null) : IIdentified
+    string? GifUrl = null,
+    string? GifSlug = null) : IIdentified
 {
     [JsonIgnore] public string[]? GifMedia { get; } = GifUrl is null ? null : new[] { GifUrl };
 }
