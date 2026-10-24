@@ -38,8 +38,11 @@ Some apps call public services directly. None of them receive the Aethernet toke
 | YouTube, through YoutubeExplode | Songs in Music |
 | GitHub | Media tool downloads (see [Media and video](media-and-video.md)), Dalamud's plugin list for Shortcuts |
 | GitHub and Debian's package archive | Doom game data |
+| KLIPY | GIF search in Chirper, after the player turns it on |
 
 Most ride `HttpService`; services that ask for polite pacing also go through `RequestThrottle` (src/Aetherphone/Core/Net/RequestThrottle.cs).
+
+KLIPY's integration rules say searches and GIF images must load straight from the player's PC, never through a partner server or cache, so Aethernet does not proxy it. `GET /gifs/config` hands a signed-in client the KLIPY app key, the content filter and an anonymous per-account customer id; `GifSearch` (src/Aetherphone/Core/Gifs/) calls KLIPY with them, debounced and one request at a time. The whole feature stays off until the player accepts the consent card or turns on GIFs from KLIPY in Settings > Privacy; until then a KLIPY GIF in a chirp or reply shows a "GIF, tap to show" tile and loads nothing.
 
 ## The request path
 

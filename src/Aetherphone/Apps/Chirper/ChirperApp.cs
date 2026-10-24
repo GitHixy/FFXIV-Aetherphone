@@ -7,6 +7,7 @@ using Aetherphone.Core.Conduct;
 using Aetherphone.Core.Confirm;
 using Aetherphone.Core.Emoji;
 using Aetherphone.Core.Game;
+using Aetherphone.Core.Gifs;
 using Aetherphone.Core.Honorific;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Lodestone;
@@ -303,11 +304,12 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         RemoteImageCache images, PhotoLibrary library, SocialLauncher launcher, GameData gameData,
         Configuration configuration, SocialNotificationService social, WallpaperImageCache wallpaperImages,
         ConfirmService confirm, TranslationService translation, ReportService report, ConductGateService conduct,
-        RealtimeSignalBus realtimeSignals)
+        RealtimeSignalBus realtimeSignals, HttpService http)
     {
         this.translation = translation;
         this.confirm = confirm;
         store = new ChirperStore(session, net.Account, net.Social, net.Safety, net.Media, realtimeSignals);
+        gifSearch = new GifSearch(session, net.Gifs, new KlipyClient(http));
         store.SetFeedRegions(SocialRegion.FilterCsv(configuration.ChirperFeedRegionMask));
         composeMentions = new MentionAutocomplete(store.NewMentionSuggestions());
         commentMentions = new MentionAutocomplete(store.NewMentionSuggestions());
@@ -361,6 +363,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         ResetReactionsExpansion();
         sheet.Close();
         filterSheet.Close();
+        CloseGifSheets();
         homeTab = HomeTab.Feed;
         sheetKind = SheetKind.None;
         sheetPost = null;
@@ -448,7 +451,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         DrawNight(screen, context.Content.Min.Y);
         var appArea = new Rect(new Vector2(screen.Min.X, context.Content.Min.Y),
             new Vector2(screen.Max.X, context.Content.Max.Y));
-        using (InputShield.Engage(avatarLightbox.Expanded))
+        using (InputShield.Engage(avatarLightbox.Expanded || GifSheetsCapture))
         using (intro.FadeContent())
         {
             router.Draw(appArea, AppSkin.Transparent, ImGui.GetIO().DeltaTime, drawView);
@@ -461,6 +464,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         }
 
         DrawSheet(screen);
+        DrawGifSheets(screen);
         DrawFilterSheet(screen);
         DrawFeedExplainer(screen);
         DrawClaw(screen);
@@ -2493,6 +2497,11 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     private void DrawMediaTile(ImDrawListPtr drawList, string url, Rect rect, float rounding, ImDrawFlags corners,
         string? scanStatus)
     {
+        if (DrawHeldGifTile(drawList, url, rect, rounding, corners))
+        {
+            return;
+        }
+
         var texture = MediaTexture(url);
         if (texture is null)
         {
@@ -2518,7 +2527,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         }
     }
 
-    private IDalamudTextureWrap? MediaTexture(string? url) => GifMedia.Texture(images, url, ImGui.GetTime());
+    private IDalamudTextureWrap? MediaTexture(string? url) =>
+        HeldGif(url) ? null : GifMedia.Texture(images, url, ImGui.GetTime());
 
     private void BeginQuote(PostDto post)
     {
@@ -2634,5 +2644,6 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     public void Dispose()
     {
         store.Dispose();
+        gifSearch.Dispose();
     }
 }

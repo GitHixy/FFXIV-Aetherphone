@@ -55,7 +55,7 @@ internal static class CommentComposerBar
             {
                 overlayTop = bar.Min.Y - stripHeight;
                 attachment.DrawStrip(new Rect(new Vector2(bar.Min.X, overlayTop), new Vector2(bar.Max.X, bar.Min.Y)),
-                    theme, wallpaperImages!);
+                    theme, wallpaperImages!, images);
             }
         }
 
@@ -116,7 +116,7 @@ internal static class CommentComposerBar
 
         mentionPopup.Gate(mentions);
 
-        var canSend = (draft.Trim().Length > 0 || (attachmentActive && attachment!.Path is not null)) && !busy;
+        var canSend = (draft.Trim().Length > 0 || (attachmentActive && attachment!.HasAttachment)) && !busy;
         if (style.CircleSend && sendReveal > 0.01f)
         {
             var reveal = Math.Clamp(sendReveal, 0f, 1f);

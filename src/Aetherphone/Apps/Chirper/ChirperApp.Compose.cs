@@ -286,7 +286,7 @@ internal sealed partial class ChirperApp
         {
             if (gifEnabled)
             {
-                OpenComposePicker(true);
+                OpenComposeGifSource();
             }
             else
             {
@@ -336,6 +336,12 @@ internal sealed partial class ChirperApp
 
     private void Submit()
     {
+        if (AttachedComposeGif() is { } gif)
+        {
+            SubmitComposeGif(gif);
+            return;
+        }
+
         if ((string.IsNullOrWhiteSpace(draft) && composeAttachments.Count == 0) || store.Posting)
         {
             return;
@@ -379,7 +385,7 @@ internal sealed partial class ChirperApp
     private bool DrawComposeAttachmentThumb(ImDrawListPtr drawList, string path, Vector2 min, Vector2 max,
         float rounding, float scale)
     {
-        var texture = wallpaperImages.Get(path);
+        var texture = ComposeThumbTexture(path, max.X - min.X);
         if (texture is null)
         {
             Squircle.Fill(drawList, min, max, rounding, ImGui.GetColorU32(ChirperInk.ChipFill));

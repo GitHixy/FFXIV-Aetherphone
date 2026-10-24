@@ -572,11 +572,12 @@ internal sealed partial class ChirperApp
         if (comment.MediaUrl is { } commentMediaUrl && !CommentMediaHidden(commentMediaUrl))
         {
             var mediaTop = cursorY + (commentText.Length > 0 ? 6f * scale : 0f);
+            var held = HeldGif(commentMediaUrl);
             var mediaRect = CommentMedia.Draw(drawList, images, comment, new Vector2(textLeft, mediaTop), bodyWidth, scale,
-                ChirperInk.ChipFill, ChirperInk.MutedInk);
+                ChirperInk.ChipFill, ChirperInk.MutedInk, held);
             if (UiInteract.HoverClick(mediaRect.Min, mediaRect.Max))
             {
-                photoViewer.Open(this, () => MediaTexture(commentMediaUrl));
+                OpenCommentMedia(commentMediaUrl, held);
             }
         }
 
@@ -713,6 +714,8 @@ internal sealed partial class ChirperApp
             commentAttachment.Restore(returnedAttachment);
         }
 
+        PrepareCommentGifs();
+
         var scale = UiScale.Current;
         if (commentFailure.Failed)
         {
@@ -737,7 +740,7 @@ internal sealed partial class ChirperApp
             ChirperInk.Accent, AppSkin.Transparent, ChirperInk.White, true, 11f, 56f, 1f, 19f);
         var focusPending = replyFocusPending;
         replyFocusPending = false;
-        var canSend = !string.IsNullOrWhiteSpace(commentDraft) || commentAttachment.Path is not null;
+        var canSend = !string.IsNullOrWhiteSpace(commentDraft) || commentAttachment.HasAttachment;
         var delta = MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
         replySendReveal.Step(canSend ? 1f : 0f, Motion.Appear, delta);
         var fieldBar = new Rect(new Vector2(fieldLeft, bar.Min.Y), bar.Max);
@@ -747,9 +750,16 @@ internal sealed partial class ChirperApp
         {
             var text = commentDraft;
             var attachmentPath = commentAttachment.Path;
+            var attachedGif = commentAttachment.Gif;
             commentDraft = string.Empty;
             commentAttachment.Clear();
             commentFailure.Clear();
+            if (attachedGif is not null)
+            {
+                SubmitCommentGif(postId, text, attachedGif);
+                return;
+            }
+
             store.AddComment(postId, text, attachmentPath, accepted =>
             {
                 if (accepted)

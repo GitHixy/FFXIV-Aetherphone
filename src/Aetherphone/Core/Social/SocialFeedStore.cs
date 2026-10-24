@@ -23,7 +23,7 @@ internal enum FollowState
     Following,
 }
 
-internal abstract class SocialFeedStore : IDisposable
+internal abstract partial class SocialFeedStore : IDisposable
 {
     private const int CommentImageDimension = 1280;
     private const string CommentUploadScope = "comment";

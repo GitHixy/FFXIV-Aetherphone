@@ -22,11 +22,17 @@ internal static class CommentMedia
     }
 
     public static Rect Draw(ImDrawListPtr drawList, RemoteImageCache images, CommentDto comment, Vector2 origin,
-        float availableWidth, float scale, Vector4 placeholderFill, Vector4 mutedInk)
+        float availableWidth, float scale, Vector4 placeholderFill, Vector4 mutedInk, bool held = false)
     {
         var (width, height) = Fit(comment, availableWidth, scale);
         var rect = new Rect(origin, origin + new Vector2(width, height));
         var rounding = 10f * scale;
+        if (held)
+        {
+            GifHold.Draw(drawList, rect, rounding, ImDrawFlags.RoundCornersAll, placeholderFill);
+            return rect;
+        }
+
         var texture = GifMedia.Texture(images, comment.MediaUrl, ImGui.GetTime());
         if (texture is null)
         {
