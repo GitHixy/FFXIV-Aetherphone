@@ -19,7 +19,7 @@ internal sealed class ScreenController : IDisposable
 
     private void OnNamePlateUpdate(INamePlateUpdateContext context, IReadOnlyList<INamePlateUpdateHandler> handlers)
     {
-        if (!hideNameplates() || !Engine.IsActive)
+        if (!hideNameplates() || !Engine.IsActive || !Engine.ScreenVisible)
         {
             return;
         }
