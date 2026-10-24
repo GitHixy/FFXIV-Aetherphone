@@ -16,6 +16,7 @@ internal static class ChangelogData
             new(L.Apps.Camera, L.Changelog.Release1400Camera),
             new(L.Changelog.SectionAethergramVelvet, L.Changelog.Release1400AethergramVelvet),
             new(L.Apps.Chirper, L.Changelog.Release1400Chirper),
+            new(L.Apps.Market, L.Changelog.Release1400Market),
             new(L.Changelog.SectionPhone, L.Changelog.Release1400Phone),
             new(L.Apps.Casino, L.Changelog.Release1400Gamba),
             new(L.Apps.Games, L.Changelog.Release1400Games),

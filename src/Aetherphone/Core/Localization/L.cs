@@ -2419,6 +2419,12 @@ internal static class L
                 "Fixed icons sitting slightly off center on their buttons and wiggling on hover, contributed by t3sco"),
         };
 
+        public static readonly LocString[] Release1400Market =
+        {
+            new("changelog.r1400.49",
+                "Added a copy button to an item's page, so you can paste its name into the market board search"),
+        };
+
         public static readonly LocString[] Release1400Gamba =
         {
             new("changelog.r1400.17",
@@ -9137,6 +9143,7 @@ internal static class L
         public static readonly LocString VendorNpc = new("market.vendorNpc", "Vendor (NPC)");
         public static readonly LocString CheaperOn = new("market.cheaperOn", "Cheaper on {0}");
         public static readonly LocString PriceAlert = new("market.priceAlert", "Price alert");
+        public static readonly LocString CopyName = new("market.copyName", "Copy name");
         public static readonly LocString CreateAlert = new("market.createAlert", "Create alert");
         public static readonly LocString AtOrBelow = new("market.atOrBelow", "At or below");
         public static readonly LocString AtOrAbove = new("market.atOrAbove", "At or above");
