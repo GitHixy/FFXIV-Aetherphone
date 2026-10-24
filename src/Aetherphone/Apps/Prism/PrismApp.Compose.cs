@@ -12,7 +12,7 @@ using Dalamud.Game.ClientState.Objects.Enums;
 
 namespace Aetherphone.Apps.Prism;
 
-internal readonly record struct CapturedMod(string Key, string Label);
+internal readonly record struct CapturedMod(string Key, string Name, string Caption);
 
 internal sealed partial class PrismApp
 {
@@ -31,7 +31,7 @@ internal sealed partial class PrismApp
 
     private readonly PhotoComposeSession composeSession;
     private readonly ImageIntake composeIntake = new();
-    private readonly HashSet<string> droppedMods = new(StringComparer.Ordinal);
+    private readonly HashSet<string> pickedMods = new(StringComparer.Ordinal);
     private readonly ModDraft composeMods = new();
     private readonly ChipRail modTypeRail = new();
     private readonly string[] modTypeLabels = new string[GearSlots.All.Length + 1];
@@ -498,33 +498,24 @@ internal sealed partial class PrismApp
 
     private float DrawModRows(ImDrawListPtr drawList, float left, float top, float width, float scale)
     {
-        var leaveOut = Loc.T(L.Prism.LeaveOutMod);
-        var addBack = Loc.T(L.Prism.AddBackMod);
-        var actionWidth = ButtonWidth([leaveOut, addBack], width * 0.5f, scale);
-        var rowHeight = Metrics.Size.TapTarget * scale;
-        var nameHeight = Typography.LineHeight(PrismType.Headline);
-        var room = MathF.Max(1f, width - actionWidth - Metrics.Space.Md * scale);
         for (var index = 0; index < capturedMods.Length; index++)
         {
             var mod = capturedMods[index];
-            var dropped = droppedMods.Contains(mod.Key);
-            Typography.Draw(drawList, new Vector2(left, top + (rowHeight - nameHeight) * 0.5f),
-                Typography.FitText(mod.Label, room, PrismType.Headline), dropped ? PrismArt.Muted : PrismArt.Fore,
-                PrismType.Headline);
-            var action = new Rect(new Vector2(left + width - actionWidth, top), new Vector2(left + width, top + rowHeight));
-            if (DrawButton(drawList, action, dropped ? addBack : leaveOut, ButtonStyle.Plain, scale, id: mod.Key))
+            var picked = pickedMods.Contains(mod.Key);
+            top = DrawModTick(drawList, left, top, width, mod.Name, mod.Caption, picked, scale, out var toggled);
+            if (!toggled)
             {
-                if (dropped)
-                {
-                    droppedMods.Remove(mod.Key);
-                }
-                else
-                {
-                    droppedMods.Add(mod.Key);
-                }
+                continue;
             }
 
-            top += rowHeight;
+            if (picked)
+            {
+                pickedMods.Remove(mod.Key);
+            }
+            else
+            {
+                pickedMods.Add(mod.Key);
+            }
         }
 
         if (capturedMods.Length > 0)
@@ -533,6 +524,40 @@ internal sealed partial class PrismApp
         }
 
         return top;
+    }
+
+    private float DrawModTick(ImDrawListPtr drawList, float left, float top, float width, string name, string caption,
+        bool picked, float scale, out bool toggled)
+    {
+        toggled = false;
+        var nameHeight = Typography.LineHeight(PrismType.Headline);
+        var captionHeight = Typography.LineHeight(PrismType.Caption);
+        var height = MathF.Max(Metrics.Size.TapTarget * scale, nameHeight + captionHeight) + Metrics.Space.Sm * scale;
+        var row = new Rect(new Vector2(left, top), new Vector2(left + width, top + height));
+        if (!ImGui.IsRectVisible(row.Min, row.Max))
+        {
+            return row.Max.Y;
+        }
+
+        var check = WornCheckUnits * scale;
+        var hovered = HoverWash(drawList, row);
+        PhoneIcon.Draw(drawList, new Vector2(left + check * 0.5f, row.Center.Y),
+            picked ? PhoneIcons.CircleCheck : PhoneIcons.Circle, picked ? PrismArt.Fore : PrismArt.Muted, check);
+        var textLeft = left + check + Metrics.Space.Md * scale;
+        var room = MathF.Max(1f, row.Max.X - textLeft);
+        var textTop = row.Center.Y - (nameHeight + captionHeight) * 0.5f;
+        Typography.Draw(drawList, new Vector2(textLeft, textTop), Typography.FitText(name, room, PrismType.Headline),
+            PrismArt.Fore, PrismType.Headline);
+        Typography.Draw(drawList, new Vector2(textLeft, textTop + nameHeight),
+            Typography.FitText(caption, room, PrismType.Caption), PrismArt.Muted, PrismType.Caption);
+        toggled = UiInteract.Click(row.Min, row.Max, hovered);
+        return row.Max.Y;
+    }
+
+    private string ModCaption(int slot, string author)
+    {
+        var place = ModTypeName(slot);
+        return author.Length > 0 ? string.Concat(place, GlamMetaSeparator, author) : place;
     }
 
     private void SyncCapturedMods()
@@ -544,24 +569,15 @@ internal sealed partial class PrismApp
 
         capturedModsFor = captured;
         capturedModsLanguage = Loc.Current.Code;
-        var mods = new List<CapturedMod>();
-        var seen = new HashSet<string>(StringComparer.Ordinal);
-        for (var index = 0; index < captured.Length; index++)
+        var worn = PostedMods.GearMods(captured);
+        var mods = new CapturedMod[worn.Length];
+        for (var index = 0; index < worn.Length; index++)
         {
-            var pieceMods = captured[index].Mods ?? Array.Empty<GlamModDto>();
-            for (var modIndex = 0; modIndex < pieceMods.Length; modIndex++)
-            {
-                var mod = pieceMods[modIndex];
-                var key = PostedMods.Key(mod);
-                if (seen.Add(key))
-                {
-                    mods.Add(new CapturedMod(key,
-                        mod.Author.Length > 0 ? Loc.T(L.Prism.ModBy, mod.Name, mod.Author) : mod.Name));
-                }
-            }
+            var mod = worn[index].Mod;
+            mods[index] = new CapturedMod(PostedMods.Key(mod), mod.Name, ModCaption(worn[index].Slot, mod.Author));
         }
 
-        capturedMods = mods.ToArray();
+        capturedMods = mods;
     }
 
     private void PostGlam()

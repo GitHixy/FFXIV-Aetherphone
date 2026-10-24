@@ -69,7 +69,7 @@ internal sealed partial class PrismApp
         {
             var corner = Metrics.Size.TapTarget * scale * 0.5f;
             enterShardOrigin = new Vector2(content.Max.X - corner, content.Min.Y + corner);
-            RememberEntryDrops();
+            RememberEntryPicks();
             store.Enter(pickSession.FirstSelected, pickSession.CropsArray()[0], EntryOutfit(), entryRace, entryGender,
                 entrySettled);
         }
@@ -146,7 +146,7 @@ internal sealed partial class PrismApp
 
     private string OutfitLink()
     {
-        var count = VanillaEntry ? DraftPieces() : KeptModCount();
+        var count = VanillaEntry ? DraftPieces() : PickedModCount();
         var listed = VanillaEntry || capturedMods.Length > 0;
         var key = HashCode.Combine(VanillaEntry, count, listed, Loc.Current.Code);
         if (outfitLinkText.IsCurrent(key))
@@ -154,19 +154,20 @@ internal sealed partial class PrismApp
             return outfitLinkText.Value;
         }
 
-        var text = VanillaEntry
-            ? count == 0 ? Loc.T(L.Prism.AddYourGear) : Loc.Plural(L.Prism.GearSummary, count)
-            : listed ? Loc.Plural(L.Prism.ModsSummary, count) : string.Empty;
+        var text = !listed ? string.Empty
+            : count == 0 ? Loc.T(VanillaEntry ? L.Prism.AddYourGear : L.Prism.AddYourMods)
+            : VanillaEntry ? Loc.Plural(L.Prism.GearSummary, count)
+            : Loc.Plural(L.Prism.ModsSummary, count);
         return outfitLinkText.Store(key, text);
     }
 
-    private int KeptModCount()
+    private int PickedModCount()
     {
         SyncCapturedMods();
         var count = 0;
         for (var index = 0; index < capturedMods.Length; index++)
         {
-            if (!droppedMods.Contains(capturedMods[index].Key))
+            if (pickedMods.Contains(capturedMods[index].Key))
             {
                 count++;
             }

@@ -11001,9 +11001,6 @@ internal static class L
         public static readonly LocString GearHeading = new("prism.gearHeading", "Gear");
         public static readonly LocString CharacterHeading = new("prism.characterHeading", "Character");
         public static readonly LocString GetMod = new("prism.getMod", "Get it");
-        public static readonly LocString ModBy = new("prism.modBy", "{0} by {1}");
-        public static readonly LocString LeaveOutMod = new("prism.leaveOutMod", "Leave out");
-        public static readonly LocString AddBackMod = new("prism.addBackMod", "Add back");
         public static readonly LocString PhotosHint = new("prism.photosHint", "Pick up to 4 photos. The first one is the cover.");
         public static readonly LocString TitleLabel = new("prism.titleLabel", "Title");
         public static readonly LocString TitleHint = new("prism.titleHint", "Name your glam");
@@ -11069,7 +11066,7 @@ internal static class L
             "Add each piece in your photo and pick its dyes. Everyone who sees your entry sees this list.");
         public static readonly LocString YourMods = new("prism.yourMods", "Your mods");
         public static readonly LocString ModsNote = new("prism.modsNote",
-            "Read from Penumbra. Leave out any you'd rather not credit.");
+            "Read from Penumbra. Tick the mods you want to credit.");
         public static readonly LocString NoModsFound = new("prism.noModsFound", "No mods found on your character.");
         public static readonly LocString AddPiece = new("prism.addPiece", "Add a piece");
         public static readonly LocString RemovePiece = new("prism.removePiece", "Remove");
@@ -11177,6 +11174,7 @@ internal static class L
             "Every glam from this week shows up here in placing order once the results are in.");
         public static readonly LocString GalleryEmptyHint = new("prism.galleryEmptyHint",
             "Nobody entered this contest that week.");
+        public static readonly LocString AddYourMods = new("prism.addYourMods", "Add your mods");
     }
 
     internal static class Announcements

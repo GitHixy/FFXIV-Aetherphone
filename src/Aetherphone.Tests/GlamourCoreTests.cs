@@ -109,8 +109,58 @@ public sealed class GlamourCoreTests
     public void MatchingFindsAnInstalledModByName()
     {
         var installed = new Dictionary<string, string> { ["coat-v2"] = "Cute Coat", ["boots"] = "Boots" };
-        Assert.Equal("coat-v2", ModAttribution.MatchFolder(installed, new GlamModDto("cute coat")));
-        Assert.Equal(string.Empty, ModAttribution.MatchFolder(installed, new GlamModDto("Hat")));
+        Assert.Equal("coat-v2", ModAttribution.MatchFolder(installed, null, new GlamModDto(" cute coat ")));
+        Assert.Equal(string.Empty, ModAttribution.MatchFolder(installed, null, new GlamModDto("Hat")));
+        Assert.Equal(string.Empty, ModAttribution.MatchFolder(installed, null, new GlamModDto("  ")));
+    }
+
+    [Fact]
+    public void MatchingFallsBackToTheFolderName()
+    {
+        var installed = new Dictionary<string, string> { ["Good Girl's Collar"] = "My Collar Edit" };
+        Assert.Equal("Good Girl's Collar",
+            ModAttribution.MatchFolder(installed, null, new GlamModDto("good girl's collar")));
+    }
+
+    [Fact]
+    public void ARenamedCopyMatchesByItsWebsiteAndNamePrefix()
+    {
+        var installed = new Dictionary<string, string> { ["collar"] = "Good Girl's Collar", ["boots"] = "Boots" };
+        var links = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["collar"] = "https://www.xivmodarchive.com/modid/1234/",
+            ["boots"] = "https://www.xivmodarchive.com/modid/99",
+        };
+        var posted = new GlamModDto("Good Girl's Collar - Edited", "Helper Kato", Link: " HTTPS://www.xivmodarchive.com/modid/1234");
+
+        Assert.Equal(string.Empty, ModAttribution.MatchByName(installed, posted));
+        Assert.True(ModAttribution.HasLink(posted));
+        Assert.Equal("collar", ModAttribution.MatchFolder(installed, links, posted));
+    }
+
+    [Fact]
+    public void ASharedWebsiteAloneIsNotAMatch()
+    {
+        var installed = new Dictionary<string, string> { ["dress"] = "Sleepy Bunny Dress" };
+        var links = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["dress"] = "https://www.patreon.com/lacey",
+        };
+        var posted = new GlamModDto("Girl Next Door Cardigan", "Lacey", Link: "https://www.patreon.com/lacey");
+
+        Assert.Equal(string.Empty, ModAttribution.MatchFolder(installed, links, posted));
+    }
+
+    [Fact]
+    public void AModWithoutALinkNeverUsesTheWebsiteFallback()
+    {
+        var installed = new Dictionary<string, string> { ["coat"] = "Cute Coat" };
+        var links = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { ["coat"] = "https://example.com" };
+        var posted = new GlamModDto("Cute Coat Plus");
+
+        Assert.False(ModAttribution.HasLink(posted));
+        Assert.Equal(string.Empty, ModAttribution.MatchFolder(installed, links, posted));
+        Assert.Equal(string.Empty, ModAttribution.MatchFolder(installed, null, posted));
     }
 
     [Theory]
