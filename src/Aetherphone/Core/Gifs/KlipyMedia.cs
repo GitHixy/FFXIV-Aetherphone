@@ -14,7 +14,11 @@ internal static class KlipyMedia
 
         var rest = url.AsSpan(Scheme.Length);
         var end = rest.IndexOfAny('/', ':', '?');
-        var host = end < 0 ? rest : rest[..end];
+        return IsKlipyHost(end < 0 ? rest : rest[..end]);
+    }
+
+    public static bool IsKlipyHost(ReadOnlySpan<char> host)
+    {
         if (host.Equals(RootDomain, StringComparison.OrdinalIgnoreCase))
         {
             return true;
