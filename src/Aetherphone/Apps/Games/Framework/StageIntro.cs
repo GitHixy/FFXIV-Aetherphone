@@ -21,7 +21,7 @@ internal enum IntroAction : byte
 
 internal sealed class StageIntro
 {
-    private const float IdleDim = 0.8f;
+    public const float IdleDim = 0.8f;
     private const float EntranceSpeed = 1.6f;
     private const float PlayHeight = 52f;
     private const float PillGap = 8f;
