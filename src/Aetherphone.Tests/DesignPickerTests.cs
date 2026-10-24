@@ -83,6 +83,45 @@ public sealed class DesignPickerTests
         Assert.Equal(0, picker.PickedCount);
     }
 
+    [Fact]
+    public void SelectAllTicksOnlyWhatTheSearchShowsAndSkipsOwnedDesigns()
+    {
+        var picker = Loaded();
+        picker.Filter(Compare, "raid");
+        picker.PickVisible(true);
+        picker.Filter(Compare, string.Empty);
+
+        Assert.Equal(2, picker.PickedCount);
+        Assert.False(picker.AllVisiblePicked());
+        picker.PickVisible(true);
+
+        Assert.Equal(3, picker.PickedCount);
+        Assert.True(picker.AllVisiblePicked());
+    }
+
+    [Fact]
+    public void DeselectAllClearsOnlyWhatTheSearchShows()
+    {
+        var picker = Loaded();
+        picker.Filter(Compare, string.Empty);
+        picker.PickVisible(true);
+        picker.Filter(Compare, "winter");
+        picker.PickVisible(false);
+
+        Assert.Equal(2, picker.PickedCount);
+        Assert.False(picker.AllVisiblePicked());
+    }
+
+    [Fact]
+    public void NothingToSelectWhenOnlyOwnedDesignsShow()
+    {
+        var picker = Loaded();
+        picker.Filter(Compare, "owned");
+
+        Assert.False(picker.AnyVisiblePickable());
+        Assert.False(picker.AllVisiblePicked());
+    }
+
     [Theory]
     [InlineData("Raids/Savage/Winter coat", "Winter coat", "Raids/Savage")]
     [InlineData("Winter coat", "Winter coat", "")]
