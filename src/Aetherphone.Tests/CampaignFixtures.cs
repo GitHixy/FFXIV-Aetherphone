@@ -13,14 +13,18 @@ internal static class CampaignFixtures
         new(id, "Set " + id, "Main island", startsAt, endsAt, "Sephirot", "Mist", 24, 32, "Main hall", string.Empty,
             Array.Empty<string>(), null, twitch);
 
+    public static CampaignExperienceDto Elsewhere(string id, string district = "", int ward = 0, string spot = "") =>
+        new(id, "Set " + id, "Beach", Start, Start + Hour, "Sephirot", district, ward, 0, spot, "Amethyst Shallows",
+            Array.Empty<string>(), null, null);
+
     public static CampaignDjSetDto DjSet(string id, long startsAt, long endsAt, string? twitch = null) =>
         new(id, "DJ " + id, "Set " + id, "Main island", startsAt, endsAt, null, twitch);
 
     public static CampaignDto Campaign(CampaignExperienceDto[]? experiences = null, long updatedAt = Start - 10L * Hour,
-        CampaignTextDto[]? texts = null, CampaignDjSetDto[]? djSets = null) =>
+        CampaignTextDto[]? texts = null, CampaignDjSetDto[]? djSets = null, bool liveOnAir = false) =>
         new("love-island-eclipse", "loveisland", "Love Island Eclipse", "A Halloween festival", "About text",
             "#cf255b", null, null, null, null, null, null, Array.Empty<CampaignLinkDto>(), "LoveIslandEclipse", Start,
-            End, Retire, "Materia (OCE)", null, null, false, false, 30, false,
+            End, Retire, "Materia (OCE)", null, null, liveOnAir, false, 30, false,
             new CampaignRewardDto("badge", "Eclipse badge", "frame", "Eclipse frame", 500),
             texts ?? Array.Empty<CampaignTextDto>(),
             experiences ?? new[]

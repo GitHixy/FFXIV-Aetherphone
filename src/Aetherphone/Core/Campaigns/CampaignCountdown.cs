@@ -19,7 +19,7 @@ internal enum ExperienceState : byte
 }
 
 internal readonly record struct CampaignMoment(CampaignPhase Phase, int CurrentIndex, int NextIndex,
-    int CurrentDjIndex, int NextDjIndex, long SecondsToStart)
+    int CurrentDjIndex, int NextDjIndex, long SecondsToStart, bool OnAir)
 {
     public bool WindowOpen => Phase is CampaignPhase.Live or CampaignPhase.Between;
 }
@@ -70,19 +70,20 @@ internal static class CampaignCountdown
             }
         }
 
+        var onAir = campaign.LiveOnAir || currentDj >= 0;
         if (nowUnix >= campaign.EndsAtUnix)
         {
-            return new CampaignMoment(CampaignPhase.Ended, current, next, currentDj, nextDj, 0L);
+            return new CampaignMoment(CampaignPhase.Ended, current, next, currentDj, nextDj, 0L, onAir);
         }
 
         if (nowUnix < campaign.StartsAtUnix)
         {
             return new CampaignMoment(CampaignPhase.Before, current, next, currentDj, nextDj,
-                campaign.StartsAtUnix - nowUnix);
+                campaign.StartsAtUnix - nowUnix, onAir);
         }
 
         return new CampaignMoment(current >= 0 ? CampaignPhase.Live : CampaignPhase.Between, current, next,
-            currentDj, nextDj, 0L);
+            currentDj, nextDj, 0L, onAir);
     }
 
     public static ExperienceState StateOf(CampaignExperienceDto experience, long nowUnix) =>

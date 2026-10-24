@@ -191,12 +191,12 @@ internal sealed partial class LoveIslandApp
         in CampaignMoment moment)
     {
         var texts = Texts;
-        var onAir = campaign.LiveOnAir;
+        var onAir = moment.OnAir;
         var channel = campaign.LiveChannel ?? string.Empty;
         var watchUrl = string.Empty;
         string title;
         string body;
-        if (onAir && moment.CurrentDjIndex >= 0)
+        if (moment.CurrentDjIndex >= 0)
         {
             var current = labels.DjSets[moment.CurrentDjIndex];
             title = campaign.DjSets[moment.CurrentDjIndex].Name;
@@ -398,8 +398,7 @@ internal sealed partial class LoveIslandApp
     private void Teleport(CampaignExperienceDto experience, ExperienceLabels experienceLabels)
     {
         UiFeedback.Play(UiSound.Tap);
-        TeleportActions.AskThenTravel(confirm, experience.Title,
-            string.Concat(experienceLabels.Address, LoveIslandKit.Separator, experienceLabels.WardPlot),
+        TeleportActions.AskThenTravel(confirm, experience.Title, experienceLabels.TravelLine,
             experienceLabels.Destination);
     }
 }

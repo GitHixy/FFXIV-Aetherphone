@@ -53,6 +53,24 @@ public sealed class CampaignCountdownTests
     }
 
     [Fact]
+    public void AScheduledDjSetPutsTheLiveCardOnAirWithoutTheSwitch()
+    {
+        var campaign = Campaign(djSets: new[] { DjSet("opening", Start + Hour, Start + 2L * Hour) });
+
+        Assert.True(CampaignCountdown.Evaluate(campaign, Start + Hour + 60L).OnAir);
+        Assert.False(CampaignCountdown.Evaluate(campaign, Start + 2L * Hour + 60L).OnAir);
+    }
+
+    [Fact]
+    public void TheOnAirSwitchStillCoversAStreamWithNoSet()
+    {
+        var campaign = Campaign(liveOnAir: true);
+
+        Assert.True(CampaignCountdown.Evaluate(campaign, Start + Hour).OnAir);
+        Assert.False(CampaignCountdown.Evaluate(Campaign(), Start + Hour).OnAir);
+    }
+
+    [Fact]
     public void ACampaignWithoutDjSetsHasNoDjIndices()
     {
         var moment = CampaignCountdown.Evaluate(Campaign(), Start + Hour);
