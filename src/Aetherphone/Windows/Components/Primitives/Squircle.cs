@@ -156,26 +156,6 @@ internal static class Squircle
         drawList.PopTextureID();
     }
 
-    public static void FillEdge(ImDrawListPtr drawList, Vector2 min, Vector2 max, float radius, float band, uint color)
-    {
-        var box = CornerBox(min, max, radius);
-        var innerMin = new Vector2(min.X + band, min.Y + band);
-        var innerMax = new Vector2(max.X - band, max.Y - band);
-        if (box <= DegenerateBox || band <= 0f || innerMax.X - innerMin.X <= 1f || innerMax.Y - innerMin.Y <= 1f)
-        {
-            return;
-        }
-
-        var corner = CornerFor(box);
-        var count = TraceRing(OuterRing, min, max, box, corner);
-        TraceRing(InnerRing, innerMin, innerMax, CornerBox(innerMin, innerMax, MathF.Max(box - band, 0f)), corner);
-        for (var index = 0; index < count; index++)
-        {
-            var next = index + 1 == count ? 0 : index + 1;
-            drawList.AddQuadFilled(OuterRing[index], OuterRing[next], InnerRing[next], InnerRing[index], color);
-        }
-    }
-
     private static Vector2 MapUv(Vector2 point, Vector2 min, Vector2 size, Vector2 uv0, Vector2 span) =>
         new(uv0.X + (point.X - min.X) / size.X * span.X, uv0.Y + (point.Y - min.Y) / size.Y * span.Y);
 

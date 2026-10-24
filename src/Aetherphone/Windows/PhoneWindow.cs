@@ -176,7 +176,6 @@ internal sealed class PhoneWindow : Window
     public override void OnClose()
     {
         PersistPositions();
-        Plugin.LiveBackdrop.Release();
         shell.OnClosed();
     }
 
@@ -184,7 +183,6 @@ internal sealed class PhoneWindow : Window
     {
         FrameClock.Advance(ImGui.GetFrameCount(), ImGui.GetIO().DeltaTime);
         shell.PrepareFrame(FrameClock.Delta);
-        Plugin.LiveBackdrop.Prepare();
         var portraitWidth = Components.PhoneBounds.ClampWidth(configuration.PhoneWidth);
         var landscapeWidth = Components.PhoneBounds.LandscapeWidth(configuration);
         var turn = shell.Turn;
@@ -462,6 +460,7 @@ internal sealed class PhoneWindow : Window
 
     public override void Draw()
     {
+        using var glassGroup = RealGlass.Group();
         var device = DeviceRect();
         LastPosition = device.Min;
         LastSize = device.Size;
@@ -476,6 +475,8 @@ internal sealed class PhoneWindow : Window
             ImGui.Dummy(ImGui.GetContentRegionAvail());
             using (InputShield.Engage(turning || PhoneAside.Requested))
             {
+                using var glassSuspension =
+                    RealGlass.Suspend(turning || PhoneAside.Requested || aside.Value >= AsideShown);
                 if (configuration.ShowPerfHud)
                 {
                     Components.PerfHud.BeginShell();

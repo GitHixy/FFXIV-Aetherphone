@@ -185,7 +185,7 @@ Aethernet opened on 2 July 2026. By the end of the season, players on 113 worlds
 
 **Spotlight and Control Center.** Pull down on the Home Screen to search apps, contacts, settings, notes and market items, or tap the top of the screen for music, volume, brightness and Do Not Disturb.
 
-**Make it yours.** Wallpapers, accent colors, icon looks, phone cases and your home layout, saved as a Look that follows each character.
+**Make it yours.** Wallpapers, accent colors, icon looks, phone cases and your home layout, saved as a Look that follows each character. Settings → Display → Liquid Glass slides the glass from Clear to Tinted and can turn on real glass that bends and blurs what is behind it.
 
 **Speaks your language.** Nine interface languages and one-tap translation on posts, profiles and messages.
 

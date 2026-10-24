@@ -413,11 +413,6 @@ internal sealed class PhoneShell : IDisposable
         }
 
         overlays.DrawOverlays(chassis, theme, delta, state, !turn.Turning, homeEditing);
-        if (!turn.Turning)
-        {
-            DeviceChrome.DrawLiveBand(ImGui.GetForegroundDrawList(), chassis, UiScale.Current);
-        }
-
         HoverTooltip.Flush();
     }
 

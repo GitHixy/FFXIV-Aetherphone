@@ -224,7 +224,7 @@ internal sealed class TabBar
         highlightSlot.Step(targetSlot, Motion.TabBar, delta);
     }
 
-    private static void DrawHighlight(ImDrawListPtr drawList, Rect highlight, Vector4 accent, float pressAmount,
+    public static void DrawHighlight(ImDrawListPtr drawList, Rect highlight, Vector4 accent, float pressAmount,
         float scale)
     {
         var half = highlight.Size * 0.5f * (1f - PressDepth * pressAmount);
