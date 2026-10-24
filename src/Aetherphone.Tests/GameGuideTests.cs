@@ -1,5 +1,11 @@
 using System.Numerics;
+using Aetherphone.Apps.Games.Claim;
+using Aetherphone.Apps.Games.Coil;
+using Aetherphone.Apps.Games.Delve;
 using Aetherphone.Apps.Games.Framework;
+using Aetherphone.Apps.Games.Fuse;
+using Aetherphone.Apps.Games.Herd;
+using Aetherphone.Apps.Games.Pinball;
 using Aetherphone.Core;
 using Aetherphone.Core.Games;
 using Aetherphone.Core.Localization;
@@ -10,6 +16,36 @@ namespace Aetherphone.Tests;
 public sealed class GameGuideTests
 {
     private static readonly LocString Text = new("test.guide", "Guide");
+
+    public static TheoryData<string> ShippedGuides => new()
+    {
+        "pinball",
+        "herd",
+        "fuse",
+        "claim",
+        "delve",
+        "coil",
+    };
+
+    [Theory]
+    [MemberData(nameof(ShippedGuides))]
+    public void ShippedGuidesHaveThreeOrFourNumberedPages(string gameId)
+    {
+        var guide = GuideFor(gameId);
+        Assert.InRange(guide.Count, 3, 4);
+        Assert.InRange(guide.Count, GameGuide.MinPages, GameGuide.MaxPages);
+        for (var index = 0; index < guide.Count; index++)
+        {
+            ref readonly var page = ref guide.Page(index);
+            var number = index + 1;
+            Assert.EndsWith($".guide{number}Title", page.Title.Key, StringComparison.Ordinal);
+            Assert.EndsWith($".guide{number}Body", page.Body.Key, StringComparison.Ordinal);
+            Assert.Contains(gameId, page.Title.Key, StringComparison.Ordinal);
+            Assert.False(string.IsNullOrWhiteSpace(page.Title.Source));
+            Assert.False(string.IsNullOrWhiteSpace(page.Body.Source));
+            Assert.NotNull(page.Art);
+        }
+    }
 
     [Fact]
     public void AGameWithoutAGuideDeclaresNone()
@@ -76,4 +112,15 @@ public sealed class GameGuideTests
         Assert.Equal(art.Center.X, fitted.Center.X, 3);
         Assert.Equal(art.Center.Y, fitted.Center.Y, 3);
     }
+
+    private static GameGuide GuideFor(string gameId) => gameId switch
+    {
+        "pinball" => PinballGuide.Guide,
+        "herd" => HerdGuide.Guide,
+        "fuse" => FuseGuide.Guide,
+        "claim" => ClaimGuide.Guide,
+        "delve" => DelveGuide.Guide,
+        "coil" => CoilGuide.Guide,
+        _ => throw new ArgumentOutOfRangeException(nameof(gameId), gameId, null),
+    };
 }
