@@ -1154,6 +1154,7 @@
   "changelog.r1400.38": "Fixed followers and following lists that did not load leaving no way to try again: they now offer Retry, as does a search through one that stops partway, contributed by hellovvn",
   "changelog.r1400.39": "Added a Reply button under comments that starts your comment with their @handle, contributed by hellovvn",
   "changelog.r1400.40": "Changed tab bar and header icons to one optical size, so solid and outline icons look even side by side, contributed by t3sco",
+  "changelog.r1400.48": "Changed screens that fail to load because of a brief connection hiccup to try once more by themselves before showing an error",
   "changelog.r1400.41": "Fixed icons sitting slightly off center on their buttons and wiggling on hover, contributed by t3sco",
   "changelog.r1400.43": "Added Lock position and Always on top to Settings > Minimized phone, to keep the mini phone where you put it or let other windows sit over it, contributed by hellovvn",
   "changelog.r1400.44": "Fixed the Game order sort in Collections listing items newest first: in Facewear it now follows the in-game list, and the other categories start on Newest first, contributed by jambalong",

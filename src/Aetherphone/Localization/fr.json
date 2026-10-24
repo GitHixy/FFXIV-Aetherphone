@@ -1154,6 +1154,7 @@
   "changelog.r1400.38": "Correction des listes d'abonnés et d'abonnements qui ne se chargeaient pas sans permettre de réessayer : elles proposent maintenant Réessayer, tout comme une recherche dans l'une d'elles qui s'arrête en cours de route, contribution de hellovvn",
   "changelog.r1400.39": "Ajout d'un bouton Répondre sous les commentaires, qui commence votre commentaire par son @nom d'utilisateur, contribution de hellovvn",
   "changelog.r1400.40": "Modification des icônes des barres d'onglets et des en-têtes vers une même taille optique, pour que les icônes pleines et en contour paraissent égales côte à côte, contribution de t3sco",
+  "changelog.r1400.48": "Modification : les écrans qui ne se chargent pas à cause d'une brève coupure de connexion réessaient une fois d'eux-mêmes avant d'afficher une erreur",
   "changelog.r1400.41": "Correction des icônes légèrement décentrées sur leurs boutons et qui tremblaient au survol, contribution de t3sco",
   "changelog.r1400.43": "Ajout de Verrouiller la position et Toujours au premier plan dans Réglages > Téléphone réduit, pour garder le mini téléphone à sa place ou laisser d'autres fenêtres passer par-dessus, contribution de hellovvn",
   "changelog.r1400.44": "Correction du tri Ordre du jeu de Collections qui affichait les plus récents d'abord : dans Accessoires faciaux, il suit maintenant la liste du jeu, et les autres catégories s'ouvrent sur Plus récents d'abord, contribution de jambalong",

@@ -2409,6 +2409,8 @@ internal static class L
                 "Changed new apps to arrive on your home screen by themselves, in the first free spot starting from the first page; an app you remove stays removed"),
             new("changelog.r1400.40",
                 "Changed tab bar and header icons to one optical size, so solid and outline icons look even side by side, contributed by t3sco"),
+            new("changelog.r1400.48",
+                "Changed screens that fail to load because of a brief connection hiccup to try once more by themselves before showing an error"),
             new("changelog.r1400.41",
                 "Fixed icons sitting slightly off center on their buttons and wiggling on hover, contributed by t3sco"),
         };
