@@ -1,6 +1,7 @@
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Confirm;
+using Aetherphone.Core.Glamour;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Notifications;
 using Aetherphone.Windows.Components;
@@ -310,6 +311,11 @@ internal sealed partial class PrismApp
         var seen = new HashSet<string>(StringComparer.Ordinal);
         for (var index = 0; index < gear.Length; index++)
         {
+            if (gear[index].Slot == GearSlots.None)
+            {
+                continue;
+            }
+
             var mods = gear[index].Mods ?? Array.Empty<GlamModDto>();
             for (var modIndex = 0; modIndex < mods.Length; modIndex++)
             {
