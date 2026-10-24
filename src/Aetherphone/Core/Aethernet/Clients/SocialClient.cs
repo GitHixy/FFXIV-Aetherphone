@@ -3,7 +3,7 @@ using Aetherphone.Core.Net;
 
 namespace Aetherphone.Core.Aethernet.Clients;
 
-internal sealed class SocialClient
+internal sealed partial class SocialClient
 {
     private readonly AethernetTransport net;
 

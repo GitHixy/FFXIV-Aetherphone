@@ -216,6 +216,7 @@ internal sealed partial class ChirperApp
             cursorY += quoteHeight;
         }
 
+        cursorY = DrawThreadPoll(drawList, post, left, cursorY, contentWidth);
         if (post.CreatedAtUnix > 0)
         {
             cursorY += 12f * scale;
