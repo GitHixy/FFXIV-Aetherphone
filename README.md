@@ -62,6 +62,7 @@ Aethernet opened on 2 July 2026. By the end of the season, players on 113 worlds
         <li>Rechirps, quotes, replies and hashtags</li>
         <li>Save chirps to find them again on your profile</li>
         <li>Photos, GIFs and thirteen reactions</li>
+        <li>Polls, and GIF search from KLIPY once you turn it on</li>
         <li>Paste an image with Ctrl+V or drag one in from File Explorer</li>
         <li>Chirps in other languages translated with one tap</li>
       </ul>
@@ -158,7 +159,7 @@ Aethernet opened on 2 July 2026. By the end of the season, players on 113 worlds
 
 **Plays the game with you**<br>
 <img src="docs/media/readme/icons/messages.png" width="36" alt="Linkpearl" title="Linkpearl" /> <img src="docs/media/readme/icons/strats.png" width="36" alt="Strats" title="Strats" /> <img src="docs/media/readme/icons/hunts.png" width="36" alt="Hunts" title="Hunts" /> <img src="docs/media/readme/icons/market.png" width="36" alt="Market" title="Market" /> <img src="docs/media/readme/icons/housing.png" width="36" alt="Housing" title="Housing" /> <img src="docs/media/readme/icons/fishing.png" width="36" alt="Fishing" title="Fishing" /> <img src="docs/media/readme/icons/jobs.png" width="36" alt="Jobs" title="Jobs" /> <img src="docs/media/readme/icons/inventory.png" width="36" alt="Inventory" title="Inventory" /> <img src="docs/media/readme/icons/dailies.png" width="36" alt="Dailies" title="Dailies" /> <img src="docs/media/readme/icons/timers.png" width="36" alt="Timers" title="Timers" /><br>
-<sub>Linkpearl chat tabs · raid Strats · live Hunts · Market prices and alerts · Housing lottery · Fishing windows · Jobs and gearsets · Inventory search · Dailies · retainer Timers · Maps · mount and minion Collections</sub>
+<sub>Linkpearl chat tabs · raid Strats · live Hunts · Market prices for any world, data center or region, with alerts · Housing lottery · Fishing windows · Jobs and gearsets · Inventory search · Dailies · retainer Timers · Maps · mount and minion Collections</sub>
 
 **Brings people together**<br>
 <img src="docs/media/readme/icons/muster.png" width="36" alt="Muster" title="Muster" /> <img src="docs/media/readme/icons/yellowpages.png" width="36" alt="Yellow Pages" title="Yellow Pages" /> <img src="docs/media/readme/icons/announcements.png" width="36" alt="Announcements" title="Announcements" /> <img src="docs/media/readme/icons/polls.png" width="36" alt="Polls" title="Polls" /> <img src="docs/media/readme/icons/coin.png" width="36" alt="Aether Coin" title="Aether Coin" /> <img src="docs/media/readme/icons/loveisland.png" width="36" alt="Love Island Eclipse" title="Love Island Eclipse" /><br>
@@ -170,7 +171,7 @@ Aethernet opened on 2 July 2026. By the end of the season, players on 113 worlds
 
 **Downtime**<br>
 <img src="docs/media/readme/icons/games.png" width="36" alt="Games" title="Games" /> <img src="docs/media/readme/icons/doom.png" width="36" alt="Doom" title="Doom" /> <img src="docs/media/readme/icons/chess.png" width="36" alt="Chess" title="Chess" /> <img src="docs/media/readme/icons/tetris.png" width="36" alt="Tetris" title="Tetris" /> <img src="docs/media/readme/icons/wordrun.png" width="36" alt="Word Run" title="Word Run" /> <img src="docs/media/readme/icons/solitaire.png" width="36" alt="Solitaire" title="Solitaire" /> <img src="docs/media/readme/icons/2048.png" width="36" alt="2048" title="2048" /><br>
-<sub>An arcade of fifty-nine games, Doom among them, each full screen with an intro, a pause menu and a result card · Doom, Moogle War and Slice play sideways · a daily board that is the same for everyone, with a streak calendar · global and friends leaderboards you join only if you choose to · Uno, Chess, 8-Ball Pool, Connect Four, Broadside, Lucky Draw, Moogle War and Mini Golf online with friends</sub>
+<sub>An arcade of sixty-one games, Doom among them, each full screen with an intro, a pause menu and a result card, plus animated How to play pages where the rules need them · Doom, Moogle War and Slice play sideways · a daily board that is the same for everyone, with a streak calendar · global and friends leaderboards you join only if you choose to · Uno, Chess, 8-Ball Pool, Connect Four, Broadside, Lucky Draw, Moogle War and Mini Golf online with friends</sub>
 
 ## Built like the phone in your pocket
 

@@ -2445,6 +2445,8 @@ internal static class L
 
         public static readonly LocString[] Release1400Market =
         {
+            new("changelog.r1400.55",
+                "Added pricing anywhere: tap the globe beside the scope strip to price any world, data center or region, kept until you go back to your own"),
             new("changelog.r1400.49",
                 "Added a copy button to an item's page, so you can paste its name into the market board search"),
         };
@@ -2463,6 +2465,12 @@ internal static class L
 
         public static readonly LocString[] Release1400Games =
         {
+            new("changelog.r1400.52",
+                "Added Cluster: tap groups of three or more touching pieces before the bar runs dry, and save big clears for a Shuffle"),
+            new("changelog.r1400.53",
+                "Added Harvest: steer a chocobo's basket under falling ore, logs and crystals, jump boulders and duck birds across six lands"),
+            new("changelog.r1400.54",
+                "Added How to play: animated pages show a game's rules the first time you play it, and again from the intro or the pause menu, in Cluster, Harvest, Pinball, Herd, Fuse, Claim, Delve and Coil"),
             new("changelog.r1400.18",
                 "Fixed the Played too short to pay note never showing when you leave a game before it pays"),
         };
@@ -2479,6 +2487,10 @@ internal static class L
                 "Added saving chirps: pick Save chirp in a chirp's menu and find it again in the new Saved tab on your profile"),
             new("changelog.r1400.46",
                 "Added a Replies tab to Activity, and grouped your notifications under Today, This week, This month and Earlier"),
+            new("changelog.r1400.56",
+                "Added polls: ask a question with two to four answers that stay open from an hour to a week, and see the results once you vote"),
+            new("changelog.r1400.57",
+                "Added GIF search from KLIPY for chirps and replies. It stays off until you turn it on, and until then GIFs from KLIPY wait for a tap before they load"),
             new("changelog.r1400.47",
                 "Fixed the Mentions tab in Activity staying empty when your latest notifications had no mentions: it now looks further back"),
         };
@@ -9602,11 +9614,9 @@ internal static class L
         public static readonly LocString HoursMinutes = new("gamesHub.hoursMinutes", "{0}h {1}m");
         public static readonly LocString MinutesShort = new("gamesHub.minutesShort", "{0}m");
         public static readonly LocString WhatsNewTitle = new("gamesHub.whatsNewTitle", "What's new in Games");
-        public static readonly LocString WhatsNewGames = new("gamesHub.whatsNewGames", "26 new games, from Mahjong Solitaire to Mini Golf");
-        public static readonly LocString WhatsNewLeaderboards = new("gamesHub.whatsNewLeaderboards", "Leaderboards you can choose to join, worldwide or among friends");
-        public static readonly LocString WhatsNewRooms = new("gamesHub.whatsNewRooms", "Play Moogle War, Broadside, Lucky Draw and Mini Golf online with friends");
-        public static readonly LocString WhatsNewRedesign = new("gamesHub.whatsNewRedesign", "A new look with Home, Together, Library and Profile tabs");
         public static readonly LocString WhatsNewSeeAll = new("gamesHub.whatsNewSeeAll", "See what's new");
+        public static readonly LocString WhatsNewClusterHarvest = new("gamesHub.whatsNewClusterHarvest", "Two new games: Cluster, a race to clear color groups, and Harvest, a catch-and-dodge run");
+        public static readonly LocString WhatsNewHowToPlay = new("gamesHub.whatsNewHowToPlay", "How to play pages that walk you through a game's rules before your first run");
     }
 
     internal static class Stage
