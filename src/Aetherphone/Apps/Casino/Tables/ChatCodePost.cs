@@ -53,7 +53,7 @@ internal sealed class ChatCodePost
         }
 
         var count = channels;
-        if (invite.Length > 0)
+        if (code.Length > 0 || invite.Length > 0)
         {
             items[count++] = new ActionSheet.Item(Loc.T(L.Casino.DoorCopyInvite));
         }
@@ -71,9 +71,11 @@ internal sealed class ChatCodePost
             return;
         }
 
-        ImGui.SetClipboardText(invite);
+        ImGui.SetClipboardText(code.Length > 0 ? Invitation() : invite);
         ShellToast.Show(Loc.T(L.Common.Copied));
     }
+
+    private string Invitation() => Loc.T(L.Tables.ChatInvite, CasinoChatCodes.Tag(code), Loc.T(L.Apps.Casino));
 
     private void Post(string channelKey)
     {
@@ -82,8 +84,7 @@ internal sealed class ChatCodePost
             return;
         }
 
-        var invitation = Loc.T(L.Tables.ChatInvite, CasinoChatCodes.Tag(code), Loc.T(L.Apps.Casino));
-        var posted = ChatSender.TrySend(string.Concat(channel.Command, " ", invitation));
+        var posted = ChatSender.TrySend(string.Concat(channel.Command, " ", Invitation()));
         UiFeedback.Play(posted ? UiSound.MessageSent : UiSound.Caution);
         ShellToast.Show(Loc.T(posted ? L.Tables.CodePosted : L.Tables.CodePostFailed));
     }
