@@ -160,6 +160,7 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
     public int ChirperFeedScope { get; set; }
     public int AethergramFeedScope { get; set; }
     public bool ShowSensitiveContent { get; set; }
+    public bool KlipyGifsAllowed { get; set; }
     public bool ArrowKeysStepPosts { get; set; } = true;
     public bool FeedAutoAdvance { get; set; }
     public int FeedAutoAdvanceSeconds { get; set; } = 8;

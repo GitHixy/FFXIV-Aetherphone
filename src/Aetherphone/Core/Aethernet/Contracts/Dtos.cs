@@ -187,7 +187,8 @@ internal sealed record CreatePostRequest(
     int MediaWidth = 0,
     int MediaHeight = 0,
     bool Sensitive = false,
-    PostPollInput? Poll = null);
+    PostPollInput? Poll = null,
+    string? GifUrl = null);
 
 internal sealed record SetSensitiveRequest(bool Sensitive);
 
@@ -371,7 +372,8 @@ internal sealed record CreateCommentRequest(
     string Text,
     string? MediaKey = null,
     int MediaWidth = 0,
-    int MediaHeight = 0);
+    int MediaHeight = 0,
+    string? GifUrl = null);
 
 internal sealed record CommentPage(CommentDto[] Items, string? NextCursor);
 

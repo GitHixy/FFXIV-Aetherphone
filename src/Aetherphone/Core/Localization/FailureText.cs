@@ -16,6 +16,9 @@ internal static class FailureCodes
     public const string PostQuoteMissing = "post_quote_missing";
     public const string PostQuoteNotChirp = "post_quote_not_chirp";
     public const string PostQuoteBlocked = "post_quote_blocked";
+    public const string GifInvalid = "gif_invalid";
+    public const string GifWithMedia = "gif_with_media";
+    public const string GifsDisabled = "gifs_disabled";
     public const string PostCooldown = "post_cooldown";
     public const string MediaInvalidReference = "media_invalid_reference";
     public const string MediaInvalidImage = "media_invalid_image";
@@ -179,6 +182,12 @@ internal static class FailureText
                 return Loc.T(L.Failure.PostQuoteNotChirp);
             case FailureCodes.PostQuoteBlocked:
                 return Loc.T(L.Failure.PostQuoteBlocked);
+            case FailureCodes.GifInvalid:
+                return Loc.T(L.Failure.GifInvalid);
+            case FailureCodes.GifWithMedia:
+                return Loc.T(L.Common.GifRidesAlone);
+            case FailureCodes.GifsDisabled:
+                return Loc.T(L.Failure.GifsDisabled);
             case FailureCodes.PostCooldown:
                 return Valued(L.Failure.PostCooldown, failure);
             case FailureCodes.MediaInvalidImage:

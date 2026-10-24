@@ -486,7 +486,7 @@ internal sealed partial class ChirperApp
 
         if (composeAttachments.Count > 0)
         {
-            toast.Show(Loc.T(L.Chirper.PollRidesAlone));
+            toast.Show(Loc.T(ComposeHasGif() ? L.Gifs.PollBlockedByGif : L.Chirper.PollRidesAlone));
             return;
         }
 

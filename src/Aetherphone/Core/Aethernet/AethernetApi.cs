@@ -25,6 +25,7 @@ internal sealed class AethernetApi
         Prism = new PrismClient(net);
         Glams = new GlamClient(net);
         Translation = new TranslationClient(net);
+        Gifs = new GifsClient(net);
         Announcements = new AnnouncementsClient(net);
         Musters = new MusterClient(net);
         Ads = new YellowPagesClient(net);
@@ -53,6 +54,7 @@ internal sealed class AethernetApi
     public PrismClient Prism { get; }
     public GlamClient Glams { get; }
     public TranslationClient Translation { get; }
+    public GifsClient Gifs { get; }
     public AnnouncementsClient Announcements { get; }
     public MusterClient Musters { get; }
     public YellowPagesClient Ads { get; }

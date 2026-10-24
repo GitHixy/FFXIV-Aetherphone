@@ -2302,6 +2302,30 @@ internal static class L
         public static readonly LocString DisclosureContinue = new("translate.disclosureContinue", "Continue");
     }
 
+    internal static class Gifs
+    {
+        public static readonly LocString Title = new("gifs.title", "GIFs");
+        public static readonly LocString Search = new("gifs.search", "Search GIFs");
+        public static readonly LocString FromPc = new("gifs.fromPc", "From your PC");
+        public static readonly LocString SearchHint = new("gifs.searchHint", "Search KLIPY");
+        public static readonly LocString PoweredBy = new("gifs.poweredBy", "Powered by KLIPY");
+        public static readonly LocString Trending = new("gifs.trending", "Trending");
+        public static readonly LocString NoResults = new("gifs.noResults", "No GIFs found. Try other words.");
+        public static readonly LocString LoadFailed = new("gifs.loadFailed", "Couldn't load GIFs");
+        public static readonly LocString Unavailable = new("gifs.unavailable", "GIF search isn't available right now.");
+        public static readonly LocString TapToShow = new("gifs.tapToShow", "GIF, tap to show");
+        public static readonly LocString PollBlockedByGif = new("gifs.pollBlockedByGif", "Remove the GIF to add a poll.");
+        public static readonly LocString ConsentTitle = new("gifs.consentTitle", "Search GIFs with KLIPY?");
+        public static readonly LocString ConsentBody = new("gifs.consentBody", "GIF search comes from KLIPY, an outside GIF library. It stays off until you turn it on.");
+        public static readonly LocString ConsentSearches = new("gifs.consentSearches", "What you type in GIF search goes from this PC straight to KLIPY, with an anonymous id from Aethernet. Never your name or character.");
+        public static readonly LocString ConsentImages = new("gifs.consentImages", "GIF images load from KLIPY's servers, which see your IP address. Until you turn this on, KLIPY GIFs in chirps wait for a tap.");
+        public static readonly LocString ConsentSettings = new("gifs.consentSettings", "Change this any time in Settings > Privacy.");
+        public static readonly LocString ConsentAccept = new("gifs.consentAccept", "Turn on GIF search");
+        public static readonly LocString ConsentDecline = new("gifs.consentDecline", "Not now");
+        public static readonly LocString Setting = new("gifs.setting", "GIFs from KLIPY");
+        public static readonly LocString SettingHint = new("gifs.settingHint", "Search GIFs in Chirper and show KLIPY GIFs in chirps and replies. Searches and images load straight from KLIPY, which sees your IP address.");
+    }
+
     internal static class Changelog
     {
         public static readonly LocString SectionMessaging = new("changelog.sectionMessaging", "Messaging");
@@ -14837,6 +14861,8 @@ internal static class L
         public static readonly LocString PostQuoteMissing = new("failure.postQuoteMissing", "The chirp you quoted is no longer available.");
         public static readonly LocString PostQuoteNotChirp = new("failure.postQuoteNotChirp", "Only chirps can be quoted.");
         public static readonly LocString PostQuoteBlocked = new("failure.postQuoteBlocked", "You can't quote that chirp.");
+        public static readonly LocString GifInvalid = new("failure.gifInvalid", "That GIF can't be posted. Pick another one.");
+        public static readonly LocString GifsDisabled = new("failure.gifsDisabled", "GIF search is turned off right now.");
         public static readonly LocString PostCooldown = new("failure.postCooldown", "You're posting quickly. Try again in {0} seconds.");
         public static readonly LocString MediaInvalidImage = new("failure.mediaInvalidImage", "One of your images didn't upload. Remove it and attach it again.");
         public static readonly LocString MediaInvalidAudio = new("failure.mediaInvalidAudio", "That voice clip didn't upload. Record it again.");

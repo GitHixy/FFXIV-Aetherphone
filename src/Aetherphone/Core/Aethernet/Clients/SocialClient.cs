@@ -261,6 +261,23 @@ internal sealed partial class SocialClient
         return net.PostAsync("/posts", new CreatePostRequest(text, quotedPostId, mediaKeys, mediaWidth, mediaHeight), AethernetJsonContext.Default.CreatePostRequest, AethernetJsonContext.Default.PostDto, token, null, onFailure);
     }
 
+    public Task<PostDto?> CreateGifPostAsync(string text, string? quotedPostId, string gifUrl, int width, int height,
+        bool sensitive, CancellationToken token, Action<AepFailure>? onFailure = null)
+    {
+        return net.PostAsync("/posts",
+            new CreatePostRequest(text, quotedPostId, MediaWidth: width, MediaHeight: height, Sensitive: sensitive,
+                GifUrl: gifUrl),
+            AethernetJsonContext.Default.CreatePostRequest, AethernetJsonContext.Default.PostDto, token, null, onFailure);
+    }
+
+    public Task<CommentDto?> AddGifCommentAsync(string postId, string text, string gifUrl, int width, int height,
+        CancellationToken token, Action<AepFailure>? onFailure = null)
+    {
+        return net.PostAsync($"/posts/{postId}/comments", new CreateCommentRequest(text, MediaWidth: width, MediaHeight: height, GifUrl: gifUrl),
+            AethernetJsonContext.Default.CreateCommentRequest, AethernetJsonContext.Default.CommentDto, token, null,
+            onFailure);
+    }
+
     public Task<CommentPage?> CommentsAsync(string postId, string? cursor, CancellationToken token,
         Action<AepFailure>? onFailure = null)
     {
