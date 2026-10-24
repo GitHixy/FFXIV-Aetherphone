@@ -11087,6 +11087,7 @@ internal static class L
         public static readonly LocString FinalTitle = new("prism.finalTitle", "The final");
         public static readonly LocString Back = new("prism.back", "Back");
         public static readonly LocString YourLook = new("prism.yourLook", "Your glam");
+        public static readonly LocString YourGlams = new("prism.yourGlams", "Your glams");
         public static readonly LocString ReplayReveal = new("prism.replayReveal", "Replay the reveal");
         public static readonly LocString Submitting = new("prism.submitting", "Sending your scores…");
         public static readonly LocString HeatName = new("prism.heatName", "Heat {0}");
@@ -11279,6 +11280,8 @@ internal static class L
         public static readonly LocString AddDye = new("prism.addDye", "Add dye");
         public static readonly LocString NoDye = new("prism.noDye", "No dye");
         public static readonly LocString DyeChannel = new("prism.dyeChannel", "Dye {0}");
+        public static readonly LocString DyeSearchHint = new("prism.dyeSearchHint", "Search dyes");
+        public static readonly LocString AllDyes = new("prism.allDyes", "All dyes");
         public static readonly LocString SlotRing = new("prism.slotRing", "Ring");
         public static readonly LocString AddYourGear = new("prism.addYourGear", "Add your gear");
         public static readonly LocPlural GearSummary = new("prism.gearSummary", "Your gear, {0} piece",
@@ -11297,6 +11300,7 @@ internal static class L
             "Mods welcome, as long as it's your character.");
         public static readonly LocString WithTrack = new("prism.withTrack", "{0} · {1}");
         public static readonly LocString StatusMoved = new("prism.statusMoved", "Moved");
+        public static readonly LocString ResultsAreOut = new("prism.resultsAreOut", "Results are out");
         public static readonly LocString StatusMovedTitle = new("prism.statusMovedTitle",
             "Your glam moved to the other contest");
         public static readonly LocString ActivityLiked = new("prism.activityLiked", "liked your glam");

@@ -1,5 +1,6 @@
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Core.Animation;
 using Aetherphone.Core.Glamour;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Theme;
@@ -43,6 +44,7 @@ internal sealed partial class PrismApp
     private const int DyeSegments = 16;
     private const int DyeChannels = 2;
     private const int GearGridColumns = 6;
+    private const string DyeSearchId = "##dyeSearch";
 
     private static readonly LocString[] SlotNames =
     {
@@ -68,6 +70,16 @@ internal sealed partial class PrismApp
     private float outfitScroll;
     private bool focusGearSearch;
     private CachedText dyeChannelText;
+    private int[] shownDyes = Array.Empty<int>();
+    private DyePick[]? shownDyesFor;
+    private string shownDyesQuery = string.Empty;
+    private string dyeQuery = string.Empty;
+    private int shownDyeCount;
+    private int shownFavouriteDyes;
+    private bool dyeSearchFocus;
+    private bool searchingDyes;
+    private bool shownDyesStale = true;
+    private Spring dyeSearchEdge;
 
     private static bool HasOutfit(GlamGearDto[]? outfit) => outfit is { Length: > 0 };
 
@@ -272,7 +284,7 @@ internal sealed partial class PrismApp
                 Loc.T(vanilla ? L.Prism.GearNote : L.Prism.ModsNote), PrismArt.Muted, PrismType.Body, width) +
                       Metrics.Space.Lg * scale;
             cursor = vanilla
-                ? DrawGearSlots(list, left, cursor, width, scale)
+                ? DrawEntryGear(list, left, cursor, width, scale)
                 : DrawEntryMods(list, left, cursor, width, scale);
             ImGui.Dummy(new Vector2(width, cursor - origin.Y + PrismArt.BottomMargin(scale)));
         }
@@ -290,6 +302,18 @@ internal sealed partial class PrismApp
 
             Go(outfitReturn, -1);
         }
+    }
+
+    private float DrawEntryGear(ImDrawListPtr drawList, float left, float top, float width, float scale)
+    {
+        var fill = new Rect(new Vector2(left, top), new Vector2(left + width, top + Button.RegularHeight * scale));
+        if (DrawButton(drawList, fill, Loc.T(L.Prism.FillFromWearing), ButtonStyle.Tinted, scale,
+                id: "prism.entry.fill"))
+        {
+            FillFromWearing(Draft);
+        }
+
+        return DrawGearSlots(drawList, left, fill.Max.Y + Metrics.Space.Lg * scale, width, scale);
     }
 
     private float DrawEntryMods(ImDrawListPtr drawList, float left, float top, float width, float scale)
@@ -501,6 +525,8 @@ internal sealed partial class PrismApp
         editingSlot = slot;
         editingDye = channel;
         outfitScroll = bodyScroll;
+        dyeQuery = string.Empty;
+        shownDyesStale = true;
         gearCatalog.EnsureBuilt();
         Go(PrismScreen.DyePick);
     }
@@ -603,6 +629,9 @@ internal sealed partial class PrismApp
             ? dyeChannelText.Value
             : dyeChannelText.Store(key, Loc.T(L.Prism.DyeChannel, editingDye + 1));
         var top = DrawBackHeader(drawList, content, title, scale) + Metrics.Space.Sm * scale;
+        top = DrawSearchField(drawList, content, top, DyeSearchId, Loc.T(L.Prism.DyeSearchHint), ref dyeQuery,
+            GearSearchLength, ref dyeSearchFocus, ref dyeSearchEdge, scale);
+        SyncShownDyes();
         var body = new Rect(new Vector2(content.Min.X, top), content.Max);
         using var surface = BeginBody(body);
         var list = ImGui.GetWindowDrawList();
@@ -610,27 +639,104 @@ internal sealed partial class PrismApp
         var width = ScrollLayout.StableContentWidth();
         var left = origin.X;
         var current = editingDye == 0 ? Draft.Stain0[editingSlot] : Draft.Stain1[editingSlot];
-        var cursor = DrawDyeRow(list, left, origin.Y, width, 0, Loc.T(L.Prism.NoDye), current == 0, scale);
-        var dyes = gearCatalog.Dyes;
-        for (var index = 0; index < dyes.Length; index++)
+        var cursor = origin.Y;
+        if (!searchingDyes)
         {
-            cursor = DrawDyeRow(list, left, cursor, width, dyes[index].StainId, dyes[index].Name,
-                dyes[index].StainId == current, scale);
+            cursor = DrawDyeRow(list, left, cursor, width, 0, Loc.T(L.Prism.NoDye), current == 0, false, scale);
         }
 
-        if (!gearCatalog.Ready)
+        var dyes = gearCatalog.Dyes;
+        for (var index = 0; index < shownDyeCount; index++)
         {
-            cursor += Typography.DrawWrappedLeft(new Vector2(left, cursor), Loc.T(L.Common.Loading), PrismArt.Muted,
-                PrismType.Body, width);
+            if (index == 0 && shownFavouriteDyes > 0)
+            {
+                cursor = DrawDyeSection(list, left, cursor, Loc.T(L.Prism.Favourites), scale);
+            }
+            else if (index == shownFavouriteDyes && shownFavouriteDyes > 0)
+            {
+                cursor = DrawDyeSection(list, left, cursor, Loc.T(L.Prism.AllDyes), scale);
+            }
+
+            var dye = dyes[shownDyes[index]];
+            cursor = DrawDyeRow(list, left, cursor, width, dye.StainId, dye.Name, dye.StainId == current,
+                index < shownFavouriteDyes, scale);
+        }
+
+        if (!gearCatalog.Ready || (searchingDyes && shownDyeCount == 0))
+        {
+            cursor += Typography.DrawWrappedLeft(new Vector2(left, cursor),
+                Loc.T(gearCatalog.Ready ? L.Prism.NoMatches : L.Common.Loading), PrismArt.Muted, PrismType.Body,
+                width);
         }
 
         ImGui.Dummy(new Vector2(width, cursor - origin.Y + PrismArt.BottomMargin(scale)));
     }
 
-    private float DrawDyeRow(ImDrawListPtr drawList, float left, float top, float width, byte stainId, string name,
-        bool chosen, float scale)
+    private static float DrawDyeSection(ImDrawListPtr drawList, float left, float top, string title, float scale) =>
+        DrawSearchCaption(drawList, left, top + Metrics.Space.Md * scale, title) + Metrics.Space.Xs * scale;
+
+    private void SyncShownDyes()
     {
-        var row = new Rect(new Vector2(left, top), new Vector2(left + width, top + Metrics.Size.TapTarget * scale));
+        var dyes = gearCatalog.Dyes;
+        if (!shownDyesStale && ReferenceEquals(dyes, shownDyesFor) &&
+            string.Equals(dyeQuery, shownDyesQuery, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        shownDyesStale = false;
+        shownDyesFor = dyes;
+        shownDyesQuery = dyeQuery;
+        if (shownDyes.Length < dyes.Length)
+        {
+            shownDyes = new int[dyes.Length];
+        }
+
+        var query = dyeQuery.Trim();
+        searchingDyes = query.Length > 0;
+        shownFavouriteDyes = CollectDyes(dyes, query, true, 0);
+        shownDyeCount = CollectDyes(dyes, query, false, shownFavouriteDyes);
+    }
+
+    private int CollectDyes(DyePick[] dyes, string query, bool favourites, int count)
+    {
+        var liked = configuration.PrismDyeFavourites;
+        var compare = Loc.Culture.CompareInfo;
+        for (var index = 0; index < dyes.Length; index++)
+        {
+            if (liked.Contains(dyes[index].StainId) != favourites)
+            {
+                continue;
+            }
+
+            if (query.Length > 0 && compare.IndexOf(dyes[index].Name, query, DesignPicker.MatchOptions) < 0)
+            {
+                continue;
+            }
+
+            shownDyes[count++] = index;
+        }
+
+        return count;
+    }
+
+    private void ToggleDyeFavourite(byte stainId)
+    {
+        var liked = configuration.PrismDyeFavourites;
+        if (!liked.Remove(stainId))
+        {
+            liked.Add(stainId);
+        }
+
+        configuration.Save();
+        shownDyesStale = true;
+    }
+
+    private float DrawDyeRow(ImDrawListPtr drawList, float left, float top, float width, byte stainId, string name,
+        bool chosen, bool favourite, float scale)
+    {
+        var tap = Metrics.Size.TapTarget * scale;
+        var row = new Rect(new Vector2(left, top), new Vector2(left + width, top + tap));
         if (!ImGui.IsRectVisible(row.Min, row.Max))
         {
             return row.Max.Y;
@@ -638,17 +744,33 @@ internal sealed partial class PrismApp
 
         var radius = DyeSwatchUnits * 2f * scale;
         DrawDyeSwatch(drawList, new Vector2(left + radius, row.Center.Y), radius, stainId, scale);
-        var hovered = UiInteract.Hover(row.Min, row.Max);
-        var markRoom = chosen ? Metrics.Size.TapTarget * scale : 0f;
+        var starRoom = stainId != 0 ? tap : 0f;
+        var pickRight = row.Max.X - starRoom;
+        var hovered = UiInteract.Hover(row.Min, new Vector2(pickRight, row.Max.Y));
+        var markRoom = chosen ? tap : 0f;
         var textLeft = left + radius * 2f + Metrics.Space.Md * scale;
         var nameTop = row.Center.Y - Typography.LineHeight(PrismType.Headline) * 0.5f;
         Typography.Draw(drawList, new Vector2(textLeft, nameTop),
-            Typography.FitText(name, MathF.Max(1f, row.Max.X - markRoom - textLeft), PrismType.Headline),
+            Typography.FitText(name, MathF.Max(1f, pickRight - markRoom - textLeft), PrismType.Headline),
             PrismArt.Fore, PrismType.Headline);
         if (chosen)
         {
-            PhoneIcon.Draw(drawList, new Vector2(row.Max.X - markRoom * 0.5f, row.Center.Y), PhoneIcons.Check,
+            PhoneIcon.Draw(drawList, new Vector2(pickRight - markRoom * 0.5f, row.Center.Y), PhoneIcons.Check,
                 PrismArt.Fore, Typography.LineHeight(PrismType.Headline));
+        }
+
+        if (stainId != 0)
+        {
+            ImGui.PushID(stainId);
+            var starred = RoundButton.Icon(drawList, new Vector2(row.Max.X - tap * 0.5f, row.Center.Y), tap * 0.5f,
+                favourite ? PhoneIcons.StarFilled : PhoneIcons.Star, controls, ButtonStyle.Bare,
+                Loc.T(favourite ? L.Prism.Unfavourite : L.Prism.Favourite),
+                glyphInk: favourite ? PrismArt.Fore : PrismArt.Muted);
+            ImGui.PopID();
+            if (starred)
+            {
+                ToggleDyeFavourite(stainId);
+            }
         }
 
         if (hovered)
@@ -656,7 +778,7 @@ internal sealed partial class PrismApp
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
         }
 
-        if (UiInteract.Click(row.Min, row.Max, hovered))
+        if (UiInteract.Click(row.Min, new Vector2(pickRight, row.Max.Y), hovered))
         {
             if (editingDye == 0)
             {

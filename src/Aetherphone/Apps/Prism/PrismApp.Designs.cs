@@ -95,10 +95,22 @@ internal sealed partial class PrismApp
         var text = designCountText.IsCurrent(key)
             ? designCountText.Value
             : designCountText.Store(key, Loc.Plural(L.Photos.Selected, count));
-        Typography.Draw(drawList, new Vector2(content.Min.X, top),
-            Typography.FitText(text, content.Width, PrismType.Caption), count > 0 ? PrismArt.Fore : PrismArt.Muted,
-            PrismType.Caption);
-        return top + Typography.LineHeight(PrismType.Caption) + Metrics.Space.Sm * scale;
+        var middle = top + Button.LargeHeight * scale * 0.5f;
+        var all = designPicker.AllVisiblePicked();
+        var toggle = Loc.T(all ? L.Prism.DeselectAll : L.Prism.SelectAll);
+        var toggleRect = PlainRect(new Vector2(content.Max.X, middle), toggle, content.Width * SelectActionShare, 1f,
+            scale);
+        if (DrawButton(drawList, toggleRect, toggle, ButtonStyle.Plain, scale,
+                enabled: all || designPicker.AnyVisiblePickable(), id: "prism.designs.selectAll"))
+        {
+            designPicker.PickVisible(!all);
+        }
+
+        var captionHeight = Typography.LineHeight(PrismType.Caption);
+        Typography.Draw(drawList, new Vector2(content.Min.X, middle - captionHeight * 0.5f),
+            Typography.FitText(text, MathF.Max(1f, toggleRect.Min.X - content.Min.X), PrismType.Caption),
+            count > 0 ? PrismArt.Fore : PrismArt.Muted, PrismType.Caption);
+        return top + Button.LargeHeight * scale + Metrics.Space.Xs * scale;
     }
 
     private void DrawDesignRows(Rect area, float scale)

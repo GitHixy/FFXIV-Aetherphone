@@ -265,7 +265,7 @@ internal sealed partial class PrismApp
         var hintHeight = Typography.MeasureWrappedBlock(hint, PrismType.Body, hintWrap).Y;
         var area = new Rect(new Vector2(full.Min.X, top),
             new Vector2(full.Max.X, content.Max.Y - hintHeight - pad * 2f));
-        var frameHeight = full.Width * CoverShare - PhotoInset(full, content);
+        var frameHeight = full.Width * CoverShare;
         var frameTop = MathF.Max(area.Min.Y, area.Center.Y - frameHeight * 0.5f);
         var frame = new Rect(new Vector2(full.Min.X, frameTop), new Vector2(full.Max.X, frameTop + frameHeight));
         DrawCropPhoto(drawList, area, frame, Cover(glam), scale);

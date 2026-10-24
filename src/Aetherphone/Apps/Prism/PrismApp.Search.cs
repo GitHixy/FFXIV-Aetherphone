@@ -332,8 +332,14 @@ internal sealed partial class PrismApp
             return top;
         }
 
-        top = DrawSearchCaption(drawList, left + Metrics.Space.Lg * scale, top + Metrics.Space.Md * scale,
-            searchTagTitle) + Metrics.Space.Xs * scale;
+        var linkTop = top + Metrics.Space.Md * scale;
+        if (PrismArt.Link(drawList, new Vector2(left + Metrics.Space.Lg * scale, linkTop), searchTagTitle,
+                PrismArt.Fore, scale))
+        {
+            OpenTagGlams(searchTag);
+        }
+
+        top = linkTop + PrismType.LineHeight(PrismFace.Label, PrismArt.LabelPixels()) + Metrics.Space.Xs * scale;
         var gap = Metrics.Space.Xxs * scale;
         var tile = (width - gap * (TagTiles + 1)) / TagTiles;
         var height = tile / GlamStore.PhotoRatio;

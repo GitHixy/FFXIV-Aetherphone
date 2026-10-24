@@ -17,6 +17,8 @@ internal enum WardrobeAction : byte
     Import,
     Surprise,
     Select,
+    ZoomIn,
+    ZoomOut,
 }
 
 internal sealed partial class PrismApp
@@ -26,7 +28,9 @@ internal sealed partial class PrismApp
     private const float FitLogoAlpha = 0.9f;
     private const float GridLogoShare = 0.42f;
     private const float GridLogoHeightShare = 0.42f;
-    private const int SheetCapacity = 3;
+    private const int SheetCapacity = 5;
+    private const int WardrobeColumnsMin = 2;
+    private const int WardrobeColumnsMax = 4;
     private const float NewOutfitGlyphUnits = 14f;
 
     private readonly WardrobeStore wardrobe;
@@ -116,10 +120,13 @@ internal sealed partial class PrismApp
         {
             if (IconButton(drawList, new Vector2(right - height * 0.5f, middle), PhoneIcons.Dots, Loc.T(L.Prism.More), scale))
             {
+                var columns = WardrobeColumns;
                 sheetCount = 0;
                 AddSheetAction(canSelect, WardrobeAction.Select);
                 AddSheetAction(canImport, WardrobeAction.Import);
                 AddSheetAction(canShuffle, WardrobeAction.Surprise);
+                AddSheetAction(canSelect && columns > WardrobeColumnsMin, WardrobeAction.ZoomIn);
+                AddSheetAction(canSelect && columns < WardrobeColumnsMax, WardrobeAction.ZoomOut);
                 OpenWardrobeSheet();
             }
 
@@ -228,16 +235,17 @@ internal sealed partial class PrismApp
         SyncShownOutfits();
         var outfits = shownOutfitsFor ?? Array.Empty<WardrobeOutfit>();
         var busy = wardrobe.Loading || wardrobe.Importing;
-        var count = busy ? PlaceholderRows * GridColumns : shownOutfitCount;
-        var pitch = MathF.Max(1f, GridPitch(gridWidth, scale, GridColumns));
+        var columns = WardrobeColumns;
+        var count = busy ? PlaceholderRows * columns : shownOutfitCount;
+        var pitch = MathF.Max(1f, GridPitch(gridWidth, scale, columns));
         var windowTop = ImGui.GetWindowPos().Y;
-        var first = Math.Clamp((int)MathF.Floor((windowTop - origin.Y) / pitch) * GridColumns, 0, count);
+        var first = Math.Clamp((int)MathF.Floor((windowTop - origin.Y) / pitch) * columns, 0, count);
         var last = Math.Clamp(
-            ((int)MathF.Ceiling((windowTop + ImGui.GetWindowHeight() - origin.Y) / pitch) + 1) * GridColumns, first,
+            ((int)MathF.Ceiling((windowTop + ImGui.GetWindowHeight() - origin.Y) / pitch) + 1) * columns, first,
             count);
         for (var index = first; index < last; index++)
         {
-            var photo = GridCell(origin.X + gap, origin.Y, gridWidth, index, scale);
+            var photo = GridCell(origin.X + gap, origin.Y, gridWidth, index, scale, columns);
             if (busy)
             {
                 PrismArt.Placeholder(list, photo, false, scale);
@@ -273,7 +281,17 @@ internal sealed partial class PrismApp
             }
         }
 
-        ImGui.Dummy(new Vector2(width, GridHeight(gridWidth, count, scale) + PrismArt.BottomMargin(scale)));
+        ImGui.Dummy(new Vector2(width, GridHeight(gridWidth, count, scale, columns) + PrismArt.BottomMargin(scale)));
+    }
+
+    private int WardrobeColumns => configuration.PrismWardrobeColumns == 0
+        ? GridColumns
+        : Math.Clamp(configuration.PrismWardrobeColumns, WardrobeColumnsMin, WardrobeColumnsMax);
+
+    private void SetWardrobeColumns(int columns)
+    {
+        configuration.PrismWardrobeColumns = Math.Clamp(columns, WardrobeColumnsMin, WardrobeColumnsMax);
+        configuration.Save();
     }
 
     private void OpenOutfit(string id)
@@ -302,13 +320,12 @@ internal sealed partial class PrismApp
         GateWardrobeSheet();
         SyncFit(outfit);
         var covered = outfit.Cover is { } cover && !wallpaperImages.Failed(cover.Path);
-        var top = covered ? PhotoTop(full, content) : content.Min.Y;
-        DrawFit(new Rect(new Vector2(full.Min.X, top), new Vector2(full.Max.X, content.Max.Y)), content.Min.Y, outfit,
-            covered, covered ? PhotoInset(full, content) : 0f, scale);
+        DrawFit(new Rect(new Vector2(full.Min.X, content.Min.Y), new Vector2(full.Max.X, content.Max.Y)), content.Min.Y,
+            outfit, covered, scale);
         DrawWardrobeSheet(full);
     }
 
-    private void DrawFit(Rect body, float pinTop, WardrobeOutfit outfit, bool covered, float topInset, float scale)
+    private void DrawFit(Rect body, float pinTop, WardrobeOutfit outfit, bool covered, float scale)
     {
         using var surface = BeginBody(body);
         var list = ImGui.GetWindowDrawList();
@@ -324,17 +341,12 @@ internal sealed partial class PrismApp
                 PrismArt.Placeholder(list, hero, false, scale);
             }
 
-            if (!PrismArt.Light)
-            {
-                PrismArt.TopFog(list, hero, scale);
-            }
-
             if (UiInteract.Click(hero.Min, hero.Max, piecesOpen && UiInteract.Hover(hero.Min, hero.Max)))
             {
                 piecesOpen = false;
             }
 
-            DrawPiecesLayer(list, hero, topInset, outfit.Gear, scale);
+            DrawPiecesLayer(list, hero, outfit.Gear, scale);
             DrawPiecesChip(list, hero, scale);
         }
         else
@@ -350,7 +362,7 @@ internal sealed partial class PrismApp
             }
         }
 
-        DrawPhotoBack(list, hero, topInset, scale);
+        DrawPhotoBack(list, hero, scale);
 
         var left = origin.X + inset;
         var right = origin.X + width - inset;
@@ -547,21 +559,27 @@ internal sealed partial class PrismApp
     {
         WardrobeAction.Import => L.Prism.ImportDesigns,
         WardrobeAction.Select => L.Photos.Select,
+        WardrobeAction.ZoomIn => L.Photos.ZoomIn,
+        WardrobeAction.ZoomOut => L.Photos.ZoomOut,
         _ => L.Prism.SurpriseMe,
     };
 
     private void RunSheetAction(WardrobeAction action)
     {
-        if (action == WardrobeAction.Import)
+        switch (action)
         {
-            OpenDesignPicker();
-            return;
-        }
-
-        if (action == WardrobeAction.Select)
-        {
-            StartOutfitSelect();
-            return;
+            case WardrobeAction.Import:
+                OpenDesignPicker();
+                return;
+            case WardrobeAction.Select:
+                StartOutfitSelect();
+                return;
+            case WardrobeAction.ZoomIn:
+                SetWardrobeColumns(WardrobeColumns - 1);
+                return;
+            case WardrobeAction.ZoomOut:
+                SetWardrobeColumns(WardrobeColumns + 1);
+                return;
         }
 
         var outfits = wardrobe.Outfits;

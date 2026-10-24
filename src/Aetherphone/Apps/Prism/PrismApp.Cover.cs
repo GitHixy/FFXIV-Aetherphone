@@ -43,17 +43,6 @@ internal sealed partial class PrismApp
         DrawContest(drawList, full, content, week, scale);
     }
 
-    private static float DrawGlyphCaption(ImDrawListPtr drawList, Vector2 topLeft, float right, string glyph,
-        string text, Vector4 ink, float scale)
-    {
-        var line = Typography.LineHeight(PrismType.Caption);
-        PhoneIcon.Draw(drawList, topLeft + new Vector2(line * 0.5f, line * 0.5f), glyph, ink, line * CreditGlyphShare);
-        var left = topLeft.X + line + Metrics.Space.Xs * scale;
-        var fitted = Typography.FitText(text, MathF.Max(1f, right - left), PrismType.Caption);
-        Typography.Draw(drawList, new Vector2(left, topLeft.Y), fitted, ink, PrismType.Caption);
-        return left + Typography.Measure(fitted, PrismType.Caption).X;
-    }
-
     private static int DrawSegments(string id, Rect row, IReadOnlyList<string> labels, int selected)
     {
         var track = Surfaces.Fill(PrismArt.Fore, FillLevel.Tertiary);

@@ -342,15 +342,6 @@ internal static class PrismArt
     public static void PhotoPanel(ImDrawListPtr drawList, Rect panel, float radius) =>
         Squircle.Fill(drawList, panel.Min, panel.Max, radius, ImGui.GetColorU32(ScrimDeep));
 
-    public static void TopFog(ImDrawListPtr drawList, Rect photo, float scale)
-    {
-        var fog = ImGui.GetColorU32(PhotoInks.Fog);
-        var clear = ImGui.GetColorU32(ShadeClear);
-        drawList.AddRectFilledMultiColor(photo.Min,
-            new Vector2(photo.Max.X, MathF.Min(photo.Max.Y, photo.Min.Y + TopShadeUnits * scale)), fog, fog, clear,
-            clear);
-    }
-
     public static bool PhotoChip(ImDrawListPtr drawList, Vector2 bottomLeft, float maxWidth, string glyph,
         string label, bool selected, float scale)
     {

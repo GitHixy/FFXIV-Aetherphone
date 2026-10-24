@@ -192,7 +192,7 @@ internal sealed partial class PrismApp
         }
     }
 
-    private void DrawPiecesLayer(ImDrawListPtr drawList, Rect photo, float topInset, GlamGearDto[] gear, float scale)
+    private void DrawPiecesLayer(ImDrawListPtr drawList, Rect photo, GlamGearDto[] gear, float scale)
     {
         var delta = MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
         var reveal = Math.Clamp(piecesReveal.Step(piecesOpen ? 1f : 0f, Motion.Appear, delta), 0f, 1f);
@@ -206,8 +206,8 @@ internal sealed partial class PrismApp
         var ready = piecesOpen && piecesReveal.Arrive(1f) && !UiInteract.InputBlocked;
         var tile = PieceTileUnits * scale;
         var reach = (Metrics.Size.TapTarget - PieceTileUnits) * 0.5f * scale;
-        var top = photo.Min.Y + topInset + (Metrics.Space.Xs + Metrics.Size.GlassButton * 0.5f +
-                                            Metrics.Size.TapTarget * 0.5f + Metrics.Space.Xs) * scale + reach;
+        var top = photo.Min.Y + (Metrics.Space.Xs + Metrics.Size.GlassButton * 0.5f + Metrics.Size.TapTarget * 0.5f +
+                                 Metrics.Space.Xs) * scale + reach;
         var bottom = photo.Max.Y - Metrics.Space.Md * scale;
         var pitch = pieceTileCount < 2
             ? 0f
@@ -250,8 +250,7 @@ internal sealed partial class PrismApp
 
         if (cardTile >= 0 && cardTile < pieceTileCount)
         {
-            DrawCardLayer(drawList, photo, topInset, column.Min.X, top + pitch * cardTile, gear, ready, delta, reveal,
-                scale);
+            DrawCardLayer(drawList, photo, column.Min.X, top + pitch * cardTile, gear, ready, delta, reveal, scale);
         }
 
         if (named >= 0 && cardTile < 0)
@@ -261,13 +260,13 @@ internal sealed partial class PrismApp
         }
     }
 
-    private void DrawCardLayer(ImDrawListPtr drawList, Rect photo, float topInset, float columnLeft, float anchor,
-        GlamGearDto[] gear, bool ready, float delta, float reveal, float scale)
+    private void DrawCardLayer(ImDrawListPtr drawList, Rect photo, float columnLeft, float anchor, GlamGearDto[] gear,
+        bool ready, float delta, float reveal, float scale)
     {
         var cardShow = Math.Clamp(cardReveal.Step(1f, Motion.Appear, delta), 0f, 1f);
         var cardReady = ready && cardReveal.Arrive(1f);
         var cardMark = PrismMotion.Mark(drawList);
-        var limits = new Rect(new Vector2(photo.Min.X + Metrics.Space.Md * scale, photo.Min.Y + topInset),
+        var limits = new Rect(new Vector2(photo.Min.X + Metrics.Space.Md * scale, photo.Min.Y),
             new Vector2(columnLeft - Metrics.Space.Xs * scale,
                 photo.Max.Y - (Metrics.Space.Md + PrismArt.ChipUnits + Metrics.Space.Sm) * scale));
         DrawPieceCard(drawList, limits, anchor, pieceTiles[cardTile], gear, cardReady, scale);

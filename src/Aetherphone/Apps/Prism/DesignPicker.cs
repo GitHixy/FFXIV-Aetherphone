@@ -48,6 +48,56 @@ internal sealed class DesignPicker
         PickedCount += picked[index] ? 1 : -1;
     }
 
+    public bool AnyVisiblePickable()
+    {
+        for (var row = 0; row < VisibleCount; row++)
+        {
+            if (!choices[visible[row]].Owned)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool AllVisiblePicked()
+    {
+        var pickable = false;
+        for (var row = 0; row < VisibleCount; row++)
+        {
+            var index = visible[row];
+            if (choices[index].Owned)
+            {
+                continue;
+            }
+
+            if (!picked[index])
+            {
+                return false;
+            }
+
+            pickable = true;
+        }
+
+        return pickable;
+    }
+
+    public void PickVisible(bool pick)
+    {
+        for (var row = 0; row < VisibleCount; row++)
+        {
+            var index = visible[row];
+            if (choices[index].Owned || picked[index] == pick)
+            {
+                continue;
+            }
+
+            picked[index] = pick;
+            PickedCount += pick ? 1 : -1;
+        }
+    }
+
     public void Filter(CompareInfo compare, string query)
     {
         if (!stale && string.Equals(query, filteredFor, StringComparison.Ordinal))

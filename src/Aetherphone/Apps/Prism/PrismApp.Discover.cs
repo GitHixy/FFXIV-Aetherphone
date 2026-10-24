@@ -3,6 +3,7 @@ using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Animation;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Social;
+using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
 using Aetherphone.Windows.Widgets;
 using Dalamud.Bindings.ImGui;
@@ -36,6 +37,14 @@ internal sealed partial class PrismApp
     private const float ContestMarkShare = 0.45f;
     private const float ContestTileUnits = 32f;
     private const int CountdownUnitsShown = 3;
+    private const int ScopeShrinkSteps = 8;
+    private const float ContestThumbStep = 0.62f;
+    private const float ContestThumbEdgeUnits = 2f;
+    private const float ContestBadgeUnits = 18f;
+    private const float ContestBadgeShade = 0.55f;
+    private const float ContestBadgeGlyphShare = 0.62f;
+    private const float FabRadiusUnits = 27f;
+    private const float FabDeepShare = 0.18f;
     private const int RaceCount = 8;
     private const int MaleGender = 0;
     private const int FemaleGender = 1;
@@ -58,7 +67,11 @@ internal sealed partial class PrismApp
     private GlamScope discoverScope = GlamScope.New;
     private bool fitsMe;
     private bool scopeLineShown;
+    private int scopeStyleKey;
+    private float scopeStyleScale;
     private readonly PrismCountdown rowCountdown = new();
+    private readonly PrismEntryDto?[] contestEntries = new PrismEntryDto?[MaxTracks];
+    private readonly string[] contestEntryTracks = new string[MaxTracks];
     private Spring scopeLineLeft;
     private Spring scopeLineRight;
     private Action? refreshDiscoverNow;
@@ -83,7 +96,19 @@ internal sealed partial class PrismApp
         var top = DrawDiscoverHeader(drawList, content, scale);
         top = DrawFilterRow(drawList, content, top, scale) + Metrics.Space.Xs * scale;
         DrawDiscoverFeed(new Rect(new Vector2(content.Min.X, top), content.Max), scale);
+        DrawComposeFab(content);
         DrawRaceMenu(full);
+    }
+
+    private void DrawComposeFab(Rect content)
+    {
+        var area = new Rect(content.Min, new Vector2(content.Max.X, content.Max.Y - bottomChrome));
+        if (ComposeFab.Draw(area, "##prismComposeFab", PrismArt.Fore, PhoneIcons.Plus, Loc.T(L.Prism.PostGlam),
+                "prism.compose", Palette.Mix(PrismArt.Fore, PrismArt.Back, FabDeepShare), FabRadiusUnits, true,
+                PrismArt.OnFore))
+        {
+            StartCompose();
+        }
     }
 
     private void DrawDiscoverFeed(Rect body, float scale)
@@ -104,7 +129,7 @@ internal sealed partial class PrismApp
             filtered ? L.Prism.FiltersEmptyHint : following ? L.Prism.FollowingEmptyHint : L.Prism.EmptyFeedHint,
             scale,
             Loc.T(filtered ? L.Prism.NoMatches : following ? L.Prism.FollowingEmptyTitle : L.Prism.EmptyFeedTitle));
-        ImGui.Dummy(new Vector2(width, cursor - origin.Y));
+        ImGui.Dummy(new Vector2(width, cursor - origin.Y + (FabRadiusUnits * 2f + Metrics.Space.Lg) * scale));
         if (showcasePager.Owning)
         {
             surface.CancelDrag();
@@ -306,17 +331,16 @@ internal sealed partial class PrismApp
 
     private void DrawScopeTabs(ImDrawListPtr drawList, Rect row, float scale)
     {
-        var gap = Metrics.Space.Lg * scale;
-        var total = -gap;
+        var gap = Metrics.Space.Md * scale;
         for (var index = 0; index < ScopeNames.Length; index++)
         {
             scopeLabels[index] = Loc.T(ScopeNames[index]);
             scopeActive[index] = discoverScope == ShownScopes[index];
-            total += Typography.Measure(scopeLabels[index], PrismType.Title).X + gap;
         }
 
         var picked = -1;
-        if (total > row.Width)
+        var style = ScopeStyle(row.Width, gap);
+        if (style is not { } fitted)
         {
             var half = ChipRail.RowHeight * scale * 0.5f;
             picked = scopeRail.Draw(new Rect(new Vector2(row.Min.X, row.Center.Y - half),
@@ -330,7 +354,7 @@ internal sealed partial class PrismApp
             var lineTop = row.Center.Y;
             for (var index = 0; index < ScopeNames.Length; index++)
             {
-                var size = Typography.Measure(scopeLabels[index], PrismType.Title);
+                var size = Typography.Measure(scopeLabels[index], fitted);
                 if (scopeActive[index])
                 {
                     lineLeft = x;
@@ -347,7 +371,7 @@ internal sealed partial class PrismApp
                 }
 
                 Typography.Draw(drawList, new Vector2(x, row.Center.Y - size.Y * 0.5f), scopeLabels[index],
-                    scopeActive[index] || hovered ? PrismArt.Fore : PrismArt.Muted, PrismType.Title);
+                    scopeActive[index] || hovered ? PrismArt.Fore : PrismArt.Muted, fitted);
                 if (UiInteract.Click(hit.Min, hit.Max, hovered))
                 {
                     picked = index;
@@ -367,6 +391,41 @@ internal sealed partial class PrismApp
         discoverScope = ShownScopes[picked];
         pendingScroll = 0f;
         RefreshDiscover(false);
+    }
+
+    private TextStyle? ScopeStyle(float room, float gap)
+    {
+        var key = HashCode.Combine(Loc.Current.Code, (int)room, (int)gap, Plugin.Fonts.Generation,
+            ImGui.GetFontSize());
+        if (key != scopeStyleKey)
+        {
+            scopeStyleKey = key;
+            scopeStyleScale = FitScopeScale(room, gap);
+        }
+
+        return scopeStyleScale > 0f ? new TextStyle(scopeStyleScale, PrismType.Title.Weight) : null;
+    }
+
+    private float FitScopeScale(float room, float gap)
+    {
+        var largest = PrismType.Title.Scale;
+        var smallest = PrismType.Headline.Scale;
+        for (var step = 0; step <= ScopeShrinkSteps; step++)
+        {
+            var size = largest - (largest - smallest) * step / ScopeShrinkSteps;
+            var total = -gap;
+            for (var index = 0; index < scopeLabels.Length; index++)
+            {
+                total += Typography.Measure(scopeLabels[index], size, PrismType.Title.Weight).X + gap;
+            }
+
+            if (total <= room)
+            {
+                return size;
+            }
+        }
+
+        return 0f;
     }
 
     private void DrawScopeLine(ImDrawListPtr drawList, float left, float right, float top, float scale)
@@ -440,6 +499,10 @@ internal sealed partial class PrismApp
         {
             StartJudging();
         }
+        else if (CollectContestEntries(week) > 1)
+        {
+            OpenTab(PrismTab.Week);
+        }
         else if (week.MyEntry is not null)
         {
             Go(PrismScreen.Entry);
@@ -466,8 +529,13 @@ internal sealed partial class PrismApp
         var thumbHeight = ContestThumbUnits * scale;
         var thumb = new Rect(new Vector2(row.Min.X + inset, row.Center.Y - thumbHeight * 0.5f),
             new Vector2(row.Min.X + inset + thumbHeight * GlamStore.PhotoRatio, row.Center.Y + thumbHeight * 0.5f));
-        var cover = ContestCover(week);
-        if (cover.Length > 0)
+        var entries = CollectContestEntries(week);
+        var thumbsRight = thumb.Max.X;
+        if (entries > 1)
+        {
+            thumbsRight = DrawContestEntryThumbs(drawList, thumb, entries, scale);
+        }
+        else if (ContestCover(week) is { Length: > 0 } cover)
         {
             DrawLook(drawList, thumb, cover, false);
         }
@@ -479,11 +547,12 @@ internal sealed partial class PrismApp
 
         var deadline = PrismCountdown.Deadline(week);
         var remaining = PrismCountdown.Remaining(deadline);
-        var entered = week.Phase == PrismPhases.Entering && week.MyEntry is not null;
+        var entered = week.Phase == PrismPhases.Entering && entries > 0;
         var label = Loc.T(week.Phase == PrismPhases.Final ? L.Prism.JudgeFinal
             : week.Phase != PrismPhases.Entering ? L.Prism.JudgeHeat
+            : entries > 1 ? L.Prism.YourGlams
             : entered ? L.Prism.YourLook : L.Prism.Enter);
-        var textLeft = thumb.Max.X + Metrics.Space.Md * scale;
+        var textLeft = thumbsRight + Metrics.Space.Md * scale;
         var room = MathF.Max(1f, row.Max.X - inset - textLeft);
         var captionHeight = Typography.LineHeight(PrismType.Caption);
         var themeLine = Typography.LineHeight(PrismType.Title);
@@ -513,6 +582,55 @@ internal sealed partial class PrismApp
                 new Rect(new Vector2(pill.Max.X + Metrics.Space.Sm * scale, pill.Min.Y),
                     new Vector2(row.Max.X - inset, pill.Max.Y)), deadline, scale);
         }
+    }
+
+    private int CollectContestEntries(PrismWeekDto week)
+    {
+        var tracks = store.Tracks;
+        if (tracks.Length < 2)
+        {
+            return week.MyEntry is null ? 0 : 1;
+        }
+
+        var count = 0;
+        for (var index = 0; index < tracks.Length && count < MaxTracks; index++)
+        {
+            if (tracks[index].MyEntry is { } entry)
+            {
+                contestEntries[count] = entry;
+                contestEntryTracks[count] = tracks[index].Id;
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private float DrawContestEntryThumbs(ImDrawListPtr drawList, Rect first, int count, float scale)
+    {
+        var step = first.Width * ContestThumbStep;
+        var badge = ContestBadgeUnits * scale;
+        var pad = Metrics.Space.Xs * scale;
+        var stroke = MathF.Max(1f, ContestThumbEdgeUnits * scale);
+        var edge = new Vector2(stroke, stroke);
+        for (var index = 0; index < count; index++)
+        {
+            var offset = new Vector2(step * index, 0f);
+            var thumb = new Rect(first.Min + offset, first.Max + offset);
+            if (index > 0)
+            {
+                drawList.AddRectFilled(thumb.Min - edge, thumb.Max + edge, ImGui.GetColorU32(PrismArt.Back));
+            }
+
+            DrawLook(drawList, thumb, contestEntries[index]?.ImageUrl ?? string.Empty, false);
+            var center = new Vector2(thumb.Min.X + pad + badge * 0.5f, thumb.Max.Y - pad - badge * 0.5f);
+            drawList.AddCircleFilled(center, badge * 0.5f, ImGui.GetColorU32(PrismArt.Ink with { W = ContestBadgeShade }));
+            PrismArt.FactIcon(drawList, center, badge * ContestBadgeGlyphShare,
+                contestEntryTracks[index] == PrismTracks.Vanilla ? PrismFact.Vanilla : PrismFact.Modded,
+                PrismArt.PhotoFore);
+        }
+
+        return first.Max.X + step * (count - 1);
     }
 
     private string ContestCover(PrismWeekDto week) =>
