@@ -320,6 +320,13 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
             return;
         }
 
+        if (launch.Kind == Core.Casino.CasinoLaunchKind.Code && launch.Code.Length > 0)
+        {
+            SelectTab(CasinoTab.Live);
+            casinoTables.JoinByCode(launch.Code);
+            return;
+        }
+
         if (launch.Kind == Core.Casino.CasinoLaunchKind.Game && launch.GameId.Length > 0)
         {
             OpenGame(launch.GameId);
