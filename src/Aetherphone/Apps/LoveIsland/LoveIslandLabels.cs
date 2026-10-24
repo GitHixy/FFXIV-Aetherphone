@@ -23,6 +23,7 @@ internal sealed class ExperienceLabels
     public string WardPlot = string.Empty;
     public string Command = string.Empty;
     public string Destination = string.Empty;
+    public string TravelLine = string.Empty;
     public bool CanTeleport;
     public DateTime LocalDay;
     public readonly ClampedLines RowTitle = new();
@@ -46,6 +47,7 @@ internal sealed class DjLabels
 internal sealed class LoveIslandLabels
 {
     private const string CommandPrefix = "/li ";
+    private const int WardEntrancePlot = 0;
     private const string DjRowPrefix = "loveisland.dj.";
     private const string CopyIdPrefix = "loveisland.syncshell.copyId.";
     private const string CopyPasswordPrefix = "loveisland.syncshell.copyPassword.";
@@ -197,19 +199,32 @@ internal sealed class LoveIslandLabels
         labels.StreamLine = string.Concat(TimeText.FutureMoment(experience.StartsAtUnix), LoveIslandKit.Separator,
             labels.Lineup.Length > 0 ? labels.Lineup : experience.Stage);
         labels.Address = Join(experience.World, where);
-        labels.CanTeleport = housing;
-        if (!housing)
+        var nearWard = !housing && experience.District.Length > 0 && experience.Ward > 0;
+        labels.CanTeleport = housing || nearWard;
+        if (housing)
+        {
+            labels.WardPlot = Join(Loc.T(L.LoveIsland.WardPlot, experience.Ward, experience.Plot), experience.Spot);
+        }
+        else if (nearWard)
+        {
+            labels.WardPlot = Join(Join(experience.District, Loc.T(L.Housing.WardNumber, experience.Ward)),
+                experience.Spot);
+        }
+        else
         {
             labels.WardPlot = experience.Spot;
+        }
+
+        labels.TravelLine = Join(labels.Address, labels.WardPlot);
+        if (!labels.CanTeleport)
+        {
             labels.Command = string.Empty;
             labels.Destination = string.Empty;
             return;
         }
 
-        var wardPlot = Loc.T(L.LoveIsland.WardPlot, experience.Ward, experience.Plot);
-        labels.WardPlot = Join(wardPlot, experience.Spot);
         labels.Command = LifestreamBridge.HousingCommand(experience.World, LoveIslandKit.StripThe(experience.District),
-            experience.Ward, experience.Plot);
+            experience.Ward, housing ? experience.Plot : WardEntrancePlot);
         labels.Destination = labels.Command.StartsWith(CommandPrefix, StringComparison.Ordinal)
             ? labels.Command.Substring(CommandPrefix.Length)
             : labels.Command;

@@ -13,6 +13,10 @@ internal static class CampaignFixtures
         new(id, "Set " + id, "Main island", startsAt, endsAt, "Sephirot", "Mist", 24, 32, "Main hall", string.Empty,
             Array.Empty<string>(), null, twitch);
 
+    public static CampaignExperienceDto Elsewhere(string id, string district = "", int ward = 0, string spot = "") =>
+        new(id, "Set " + id, "Beach", Start, Start + Hour, "Sephirot", district, ward, 0, spot, "Amethyst Shallows",
+            Array.Empty<string>(), null, null);
+
     public static CampaignDjSetDto DjSet(string id, long startsAt, long endsAt, string? twitch = null) =>
         new(id, "DJ " + id, "Set " + id, "Main island", startsAt, endsAt, null, twitch);
 

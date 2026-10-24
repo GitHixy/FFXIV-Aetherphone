@@ -398,8 +398,7 @@ internal sealed partial class LoveIslandApp
     private void Teleport(CampaignExperienceDto experience, ExperienceLabels experienceLabels)
     {
         UiFeedback.Play(UiSound.Tap);
-        TeleportActions.AskThenTravel(confirm, experience.Title,
-            string.Concat(experienceLabels.Address, LoveIslandKit.Separator, experienceLabels.WardPlot),
+        TeleportActions.AskThenTravel(confirm, experience.Title, experienceLabels.TravelLine,
             experienceLabels.Destination);
     }
 }
