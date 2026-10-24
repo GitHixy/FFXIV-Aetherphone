@@ -10530,6 +10530,33 @@ internal static class L
         public static readonly LocString PracticeHint = new("games.tempo.practiceHint", "Tap the flag to drop a checkpoint, the cross to lift the last one");
     }
 
+    internal static class Cluster
+    {
+        public static readonly LocString Title = new("games.cluster.title", "Cluster");
+        public static readonly LocString Hook = new("games.cluster.hook", "Tap groups of three or more touching pieces before the bar runs dry. Bigger groups score far more.");
+        public static readonly LocString Shuffle = new("games.cluster.shuffle", "Shuffle");
+        public static readonly LocString ShuffleReady = new("games.cluster.shuffleReady", "Shuffle ready!");
+        public static readonly LocString BoardClear = new("games.cluster.boardClear", "Board clear!");
+        public static readonly LocString PerfectClear = new("games.cluster.perfectClear", "Perfect clear!");
+        public static readonly LocString NewColor = new("games.cluster.newColor", "New color!");
+        public static readonly LocString BiggerBoard = new("games.cluster.biggerBoard", "Bigger board!");
+        public static readonly LocString NoGroups = new("games.cluster.noGroups", "No groups, shuffling");
+        public static readonly LocString Great = new("games.cluster.great", "Great!");
+        public static readonly LocString Huge = new("games.cluster.huge", "Huge!");
+        public static readonly LocString Massive = new("games.cluster.massive", "Massive!");
+        public static readonly LocString OutOfTime = new("games.cluster.outOfTime", "Out of time!");
+        public static readonly LocString BestGroup = new("games.cluster.bestGroup", "Best group");
+        public static readonly LocString Boards = new("games.cluster.boards", "Boards");
+        public static readonly LocString Guide1Title = new("games.cluster.guide1Title", "Tap a group");
+        public static readonly LocString Guide1Body = new("games.cluster.guide1Body", "Tap three or more touching pieces of one color to clear them. Points grow with the square of the group, so build big ones.");
+        public static readonly LocString Guide2Title = new("games.cluster.guide2Title", "Fall and close in");
+        public static readonly LocString Guide2Body = new("games.cluster.guide2Body", "Pieces above drop into the gaps, and empty columns slide in from the sides.");
+        public static readonly LocString Guide3Title = new("games.cluster.guide3Title", "Beat the bar");
+        public static readonly LocString Guide3Body = new("games.cluster.guide3Body", "The bar drains faster on every board. Each clear refills it, more for bigger groups.");
+        public static readonly LocString Guide4Title = new("games.cluster.guide4Title", "Shuffle");
+        public static readonly LocString Guide4Body = new("games.cluster.guide4Body", "Big clears charge Shuffle. Tap it or press E to regroup the board into larger clusters.");
+    }
+
     internal static class Nameplate
     {
         public static readonly LocString Title = new("nameplate.title", "Nameplate Title");
