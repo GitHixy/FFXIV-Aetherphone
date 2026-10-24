@@ -131,7 +131,7 @@ Follow requests and accepts (types 14 and 15) belong to Aethergram, which owns t
 
 ### Rules the server enforces
 
-- Up to 5 new glams per account per day, 4 photos each, 3:4.
+- A daily limit on new glams per account that staff set in the Prism console (0 turns it off, which is the current setting); a post over the limit answers `prism_glam_daily_limit` with the limit, and the phone names it and the daily reset. Each glam takes up to 4 photos, 3:4.
 - Mod links outside the allowlist are dropped.
 - Glam of the day (`scope=today`) changes at the daily reset, 15:00 UTC. The client does not show it; Discover's carousel reads `scope=popular` without filters.
 - Popular (`scope=popular`) ranks the last seven days by likes and try ons.

@@ -11095,6 +11095,7 @@
   "failure.patreonAlreadyLinked": "このPatreonアカウントはすでに連携されています。",
   "failure.feedbackLength": "フィードバックは{0}文字以内にしてください。",
   "failure.feedbackTooManyImages": "添付できる画像は最大{0}枚です。",
+  "failure.prismGlamDailyLimit": "今日のミラプリ投稿の上限（{0}件）に達しました。デイリーリセット後にまた投稿できます。",
   "failure.tokenExpired": "セッションの有効期限が切れました。もう一度サインインしてください。",
   "failure.sessionRevoked": "サインアウトされました。続けるにはもう一度サインインしてください。",
   "failure.socialDisabled": "ソーシャルアプリは一時的に停止しています。しばらくしてからお試しください。",

@@ -11095,6 +11095,7 @@
   "failure.patreonAlreadyLinked": "Essa conta do Patreon já está vinculada.",
   "failure.feedbackLength": "Use no máximo {0} caracteres nos comentários.",
   "failure.feedbackTooManyImages": "Você pode anexar no máximo {0} imagens.",
+  "failure.prismGlamDailyLimit": "Você atingiu o limite diário de glamours ({0}). Você poderá publicar de novo após o reset diário.",
   "failure.tokenExpired": "Sua sessão expirou. Entre novamente e tente de novo.",
   "failure.sessionRevoked": "Você foi desconectado. Entre novamente para continuar.",
   "failure.socialDisabled": "Os apps sociais estão desativados temporariamente. Tente mais tarde.",

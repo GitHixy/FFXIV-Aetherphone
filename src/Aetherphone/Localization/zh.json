@@ -11095,6 +11095,7 @@
   "failure.patreonAlreadyLinked": "该 Patreon 账号已被关联。",
   "failure.feedbackLength": "反馈请控制在 {0} 个字符以内。",
   "failure.feedbackTooManyImages": "最多只能添加 {0} 张图片。",
+  "failure.prismGlamDailyLimit": "你已达到今日幻化发布上限（{0}）。每日重置后即可再次发布。",
   "failure.tokenExpired": "登录状态已过期。请重新登录后重试。",
   "failure.sessionRevoked": "你已退出登录。请重新登录以继续。",
   "failure.socialDisabled": "社交应用已临时关闭。请稍后再试。",

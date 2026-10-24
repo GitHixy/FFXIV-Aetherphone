@@ -11095,6 +11095,7 @@
   "failure.patreonAlreadyLinked": "That Patreon account is already linked.",
   "failure.feedbackLength": "Keep your feedback to {0} characters.",
   "failure.feedbackTooManyImages": "You can attach at most {0} images.",
+  "failure.prismGlamDailyLimit": "You've reached today's glam limit ({0}). You can post again after the daily reset.",
   "failure.tokenExpired": "Your session expired. Sign in again, then try again.",
   "failure.sessionRevoked": "You were signed out. Sign in again to continue.",
   "failure.socialDisabled": "The social apps are temporarily switched off. Try again later.",

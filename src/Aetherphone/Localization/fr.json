@@ -11095,6 +11095,7 @@
   "failure.patreonAlreadyLinked": "Ce compte Patreon est déjà lié.",
   "failure.feedbackLength": "Limite ton avis à {0} caractères.",
   "failure.feedbackTooManyImages": "Tu peux joindre au maximum {0} images.",
+  "failure.prismGlamDailyLimit": "Vous avez atteint la limite quotidienne de mirages ({0}). Vous pourrez publier de nouveau après la réinitialisation quotidienne.",
   "failure.tokenExpired": "Ta session a expiré. Reconnecte-toi, puis réessaie.",
   "failure.sessionRevoked": "Tu as été déconnecté. Reconnecte-toi pour continuer.",
   "failure.socialDisabled": "Les applis sociales sont désactivées temporairement. Réessaie plus tard.",

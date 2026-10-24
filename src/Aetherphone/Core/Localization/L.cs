@@ -14957,6 +14957,7 @@ internal static class L
         public static readonly LocString PatreonAlreadyLinked = new("failure.patreonAlreadyLinked", "That Patreon account is already linked.");
         public static readonly LocString FeedbackLength = new("failure.feedbackLength", "Keep your feedback to {0} characters.");
         public static readonly LocString FeedbackTooManyImages = new("failure.feedbackTooManyImages", "You can attach at most {0} images.");
+        public static readonly LocString PrismGlamDailyLimit = new("failure.prismGlamDailyLimit", "You've reached today's glam limit ({0}). You can post again after the daily reset.");
     }
 
     internal static class Rolladeck
