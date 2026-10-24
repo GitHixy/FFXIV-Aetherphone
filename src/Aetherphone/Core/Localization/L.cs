@@ -2437,6 +2437,12 @@ internal static class L
                 "Fixed followers and following lists that did not load leaving no way to try again: they now offer Retry, as does a search through one that stops partway, contributed by hellovvn"),
         };
 
+        public static readonly LocString[] Release1400Collections =
+        {
+            new("changelog.r1400.44",
+                "Fixed the Game order sort in Collections listing items newest first: in Facewear it now follows the in-game list, and the other categories start on Newest first, contributed by jambalong"),
+        };
+
         public static readonly LocString[] Release1400Sounds =
         {
             new("changelog.r1400.19",
