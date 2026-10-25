@@ -20,6 +20,7 @@ internal static class SettingsRow
     private const float HighlightScrollRatio = 0.5f;
     private const float MinimumWashAlpha = 0.002f;
     private const float ValueShareCap = 0.4f;
+    private const int MaxWrappedLabelLines = 2;
 
     public static float ChevronReserve(float scale) =>
         (NavBarMetrics.ChevronSize * ChevronWidthFactor + ChevronGap) * scale;
@@ -50,16 +51,47 @@ internal static class SettingsRow
 
         var labelSize = Typography.Measure(label, TextStyles.BodyEmphasized);
         var rowId = id ?? label;
-        var labelWidth = Marquee.DrawLeftAuto(rowId, label, row.Min.X, row.Center.Y - labelSize.Y * 0.5f, labelMaxWidth,
-            TextStyles.BodyEmphasized, dimmed ? theme.TextMuted : theme.TextStrong);
+        var labelColor = dimmed ? theme.TextMuted : theme.TextStrong;
+        if (labelSize.X <= labelMaxWidth ||
+            !DrawWrappedLabel(row, label, labelMaxWidth, labelColor, out var labelWidth, out var hintCenterY))
+        {
+            labelWidth = Marquee.DrawLeftAuto(rowId, label, row.Min.X, row.Center.Y - labelSize.Y * 0.5f,
+                labelMaxWidth, TextStyles.BodyEmphasized, labelColor);
+            hintCenterY = row.Center.Y;
+        }
 
         if (hint != null)
         {
-            var hintIconCenter = new Vector2(row.Min.X + labelWidth + iconGap, row.Center.Y);
+            var hintIconCenter = new Vector2(row.Min.X + labelWidth + iconGap, hintCenterY);
             HintIcon.Draw(hintIconCenter, hint, theme, scale);
         }
 
         return Toggle.Draw(rowId, new Rect(toggleMin, toggleMin + new Vector2(width, height)), value, theme);
+    }
+
+    private static bool DrawWrappedLabel(Rect row, string label, float maxWidth, Vector4 color,
+        out float lastLineWidth, out float lastLineCenterY)
+    {
+        var style = TextStyles.BodyEmphasized;
+        var lines = Typography.WrapText(label, style, maxWidth);
+        var lineHeight = Typography.LineHeight(style);
+        lastLineWidth = 0f;
+        lastLineCenterY = row.Center.Y;
+        if (lines.Length <= 1 || lines.Length > MaxWrappedLabelLines || lineHeight * lines.Length > row.Height)
+        {
+            return false;
+        }
+
+        var drawList = ImGui.GetWindowDrawList();
+        var top = row.Center.Y - lineHeight * lines.Length * 0.5f;
+        for (var index = 0; index < lines.Length; index++)
+        {
+            Typography.Draw(drawList, new Vector2(row.Min.X, top + index * lineHeight), lines[index], color, style);
+        }
+
+        lastLineWidth = Typography.Measure(lines[^1], style).X;
+        lastLineCenterY = top + (lines.Length - 0.5f) * lineHeight;
+        return true;
     }
 
     public static void Info(Rect row, string label, string value, PhoneTheme theme, string? id = null)
