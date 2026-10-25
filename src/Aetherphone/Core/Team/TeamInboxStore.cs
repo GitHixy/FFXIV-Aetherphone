@@ -18,6 +18,8 @@ internal sealed class TeamInboxStore : IDisposable
     private const int ForbiddenStatus = 403;
     private static readonly TimeSpan ForegroundPollInterval = TimeSpan.FromSeconds(120);
     private static readonly TimeSpan BackgroundPollInterval = TimeSpan.FromSeconds(300);
+    private static readonly TimeSpan ReadRetryFirst = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan ReadRetryLongest = TimeSpan.FromMinutes(5);
 
     private readonly AethernetSession session;
     private readonly ITeamInboxApi api;
@@ -34,11 +36,14 @@ internal sealed class TeamInboxStore : IDisposable
     private volatile bool loadingOlder;
     private volatile bool sending;
     private volatile bool markingRead;
+    private volatile bool readOwed;
+    private volatile bool readAgain;
     private volatile bool primed;
     private volatile AepFailureBox? sendFailure;
     private volatile string? returnedDraft;
     private long notifiedThroughId;
-    private int accountGeneration;
+    private long readRetryAtTicks;
+    private long readRetryDelayTicks = ReadRetryFirst.Ticks;
     private string? lastAccountId;
 
     public TeamInboxStore(AethernetSession session, ITeamInboxApi api, IFramework framework,
@@ -81,15 +86,36 @@ internal sealed class TeamInboxStore : IDisposable
 
     public int Version => state.Version;
 
+    public int AccountGeneration => state.Generation;
+
     public AepFailureBox? SendFailure => sendFailure;
 
     public static bool IsThreadClosed(in AepFailure failure) =>
         string.Equals(failure.Code, ThreadClosedCode, StringComparison.Ordinal)
-        || string.Equals(failure.ServerMessage, ThreadClosedCode, StringComparison.Ordinal)
         || failure.StatusCode == ForbiddenStatus;
 
     public static bool ShouldReset(string? previousAccountId, string? currentAccountId) =>
         !string.Equals(previousAccountId, currentAccountId, StringComparison.Ordinal);
+
+    public static bool ShouldPoll(bool refreshing, PollCadence cadence, DateTime nowUtc) =>
+        !refreshing && cadence.Due(nowUtc);
+
+    public static bool RaiseTo(ref long location, long candidate)
+    {
+        var current = Interlocked.Read(ref location);
+        while (candidate > current)
+        {
+            var observed = Interlocked.CompareExchange(ref location, candidate, current);
+            if (observed == current)
+            {
+                return true;
+            }
+
+            current = observed;
+        }
+
+        return false;
+    }
 
     public void Refresh()
     {
@@ -143,16 +169,16 @@ internal sealed class TeamInboxStore : IDisposable
         }
 
         loadingOlder = true;
-        var generation = Volatile.Read(ref accountGeneration);
+        var generation = state.Generation;
         var token = cancellation.Token;
         _ = Task.Run(async () =>
         {
             try
             {
                 var page = await api.ListAsync(before, PageSize, token).ConfigureAwait(false);
-                if (page is not null && generation == Volatile.Read(ref accountGeneration))
+                if (page is not null)
                 {
-                    state.ApplyOlder(page, PageSize);
+                    state.ApplyOlder(page, PageSize, generation);
                 }
             }
             catch (OperationCanceledException)
@@ -179,7 +205,7 @@ internal sealed class TeamInboxStore : IDisposable
 
         sending = true;
         sendFailure = null;
-        var generation = Volatile.Read(ref accountGeneration);
+        var generation = state.Generation;
         var token = cancellation.Token;
         _ = Task.Run(async () =>
         {
@@ -187,14 +213,14 @@ internal sealed class TeamInboxStore : IDisposable
             try
             {
                 var sent = await api.SendAsync(body, token, value => failure = value).ConfigureAwait(false);
-                if (generation != Volatile.Read(ref accountGeneration))
+                if (generation != state.Generation)
                 {
                     return;
                 }
 
                 if (sent is not null)
                 {
-                    state.ApplyIncoming(sent);
+                    state.ApplyIncoming(sent, generation);
                     return;
                 }
 
@@ -227,19 +253,33 @@ internal sealed class TeamInboxStore : IDisposable
 
     private void MarkRead()
     {
-        if (markingRead || !session.IsSignedIn || !state.MarkAllRead())
+        if (!session.IsSignedIn || !state.MarkAllRead())
         {
             return;
         }
 
         notifications.RemoveGroup(notificationAppId, ThreadKey);
+        readOwed = true;
+        SendRead();
+    }
+
+    private void SendRead()
+    {
+        if (markingRead)
+        {
+            readAgain = true;
+            return;
+        }
+
         markingRead = true;
+        var generation = state.Generation;
         var token = cancellation.Token;
         _ = Task.Run(async () =>
         {
+            var acknowledged = false;
             try
             {
-                await api.MarkReadAsync(token).ConfigureAwait(false);
+                acknowledged = await api.MarkReadAsync(token).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -250,9 +290,35 @@ internal sealed class TeamInboxStore : IDisposable
             }
             finally
             {
+                if (generation == state.Generation)
+                {
+                    SettleRead(acknowledged);
+                }
+
                 markingRead = false;
             }
         });
+    }
+
+    private void SettleRead(bool acknowledged)
+    {
+        if (acknowledged)
+        {
+            Interlocked.Exchange(ref readRetryDelayTicks, ReadRetryFirst.Ticks);
+            if (readAgain)
+            {
+                readAgain = false;
+                Interlocked.Exchange(ref readRetryAtTicks, 0);
+                return;
+            }
+
+            readOwed = false;
+            return;
+        }
+
+        var delay = Interlocked.Read(ref readRetryDelayTicks);
+        Interlocked.Exchange(ref readRetryAtTicks, DateTime.UtcNow.Ticks + delay);
+        Interlocked.Exchange(ref readRetryDelayTicks, Math.Min(delay * 2, ReadRetryLongest.Ticks));
     }
 
     private void OnTeamMessage(TeamMessageDto? message)
@@ -271,7 +337,7 @@ internal sealed class TeamInboxStore : IDisposable
             }
         }
 
-        if (!state.ApplyIncoming(message) || !message.FromTeam)
+        if (!state.ApplyIncoming(message, state.Generation) || !message.FromTeam)
         {
             return;
         }
@@ -281,12 +347,11 @@ internal sealed class TeamInboxStore : IDisposable
 
     private void Announce(TeamMessageDto message)
     {
-        if (message.Id <= Interlocked.Read(ref notifiedThroughId))
+        if (!RaiseTo(ref notifiedThroughId, message.Id))
         {
             return;
         }
 
-        Interlocked.Exchange(ref notifiedThroughId, message.Id);
         if (viewing.Covers(ThreadKey))
         {
             MarkRead();
@@ -325,12 +390,14 @@ internal sealed class TeamInboxStore : IDisposable
 
     private void ResetForAccount()
     {
-        Interlocked.Increment(ref accountGeneration);
         state.Clear();
         primed = false;
+        readOwed = false;
+        readAgain = false;
         sendFailure = null;
         returnedDraft = null;
         Interlocked.Exchange(ref notifiedThroughId, 0);
+        Interlocked.Exchange(ref readRetryDelayTicks, ReadRetryFirst.Ticks);
         viewing.Clear();
     }
 
@@ -347,7 +414,13 @@ internal sealed class TeamInboxStore : IDisposable
             return;
         }
 
-        if (!cadence.Due(DateTime.UtcNow))
+        var now = DateTime.UtcNow;
+        if (readOwed && !markingRead && now.Ticks >= Interlocked.Read(ref readRetryAtTicks))
+        {
+            SendRead();
+        }
+
+        if (!ShouldPoll(refreshing, cadence, now))
         {
             return;
         }
@@ -357,29 +430,29 @@ internal sealed class TeamInboxStore : IDisposable
 
     private void Poll()
     {
-        if (refreshing)
-        {
-            return;
-        }
-
         refreshing = true;
-        var generation = Volatile.Read(ref accountGeneration);
+        var generation = state.Generation;
+        var knownNewestId = state.NewestId;
         var token = cancellation.Token;
         _ = Task.Run(async () =>
         {
             try
             {
                 var page = await api.ListAsync(0, PageSize, token).ConfigureAwait(false);
-                if (page is null || generation != Volatile.Read(ref accountGeneration))
+                if (page is null || !state.ApplyLatest(page, PageSize, generation, knownNewestId))
                 {
                     return;
                 }
 
-                state.ApplyLatest(page, PageSize);
+                if (readOwed)
+                {
+                    state.MarkAllRead();
+                }
+
                 if (!primed)
                 {
                     primed = true;
-                    Interlocked.Exchange(ref notifiedThroughId, state.NewestId);
+                    RaiseTo(ref notifiedThroughId, state.NewestId);
                     return;
                 }
 

@@ -11,6 +11,7 @@ internal sealed class TeamThreadState
     private bool hasMoreOlder;
     private bool loaded;
     private int version;
+    private int generation;
 
     public TeamMessageDto[] Messages => Volatile.Read(ref messages);
 
@@ -23,6 +24,8 @@ internal sealed class TeamThreadState
     public bool Loaded => Volatile.Read(ref loaded);
 
     public int Version => Volatile.Read(ref version);
+
+    public int Generation => Volatile.Read(ref generation);
 
     public bool HasThread => Messages.Length > 0;
 
@@ -53,45 +56,71 @@ internal sealed class TeamThreadState
         }
     }
 
-    public void ApplyLatest(TeamMessagePage page, int pageSize)
+    public bool ApplyLatest(TeamMessagePage page, int pageSize, int expectedGeneration, long knownNewestId)
     {
         var incoming = Ascending(page.Messages);
         lock (gate)
         {
+            if (expectedGeneration != generation)
+            {
+                return false;
+            }
+
             var current = messages;
-            var detached = current.Length > 0 && incoming.Length >= pageSize && incoming[0].Id > NewestOf(current);
+            var pageNewest = NewestOf(incoming);
+            var settledThrough = Math.Max(pageNewest, knownNewestId);
+            var arrived = NewerThan(current, settledThrough, out var arrivedUnread);
+            var fullPage = incoming.Length >= pageSize;
+            var detached = current.Length > 0 && fullPage && incoming[0].Id > NewestOf(current);
             if (!loaded || detached)
             {
-                hasMoreOlder = incoming.Length >= pageSize;
-                messages = incoming;
+                hasMoreOlder = fullPage;
+                messages = Merge(arrived, incoming);
             }
             else
             {
-                messages = Merge(current, incoming);
+                var coveredFrom = fullPage ? incoming[0].Id : long.MinValue;
+                messages = Merge(Prune(current, coveredFrom, settledThrough, incoming), incoming);
+                if (!fullPage)
+                {
+                    hasMoreOlder = false;
+                }
             }
 
-            unread = Math.Max(0, page.Unread);
-            canReply = page.CanReply;
+            unread = Math.Max(0, page.Unread) + arrivedUnread;
+            canReply = page.CanReply || HasTeamMessage(arrived);
             loaded = true;
             version++;
+            return true;
         }
     }
 
-    public void ApplyOlder(TeamMessagePage page, int pageSize)
+    public bool ApplyOlder(TeamMessagePage page, int pageSize, int expectedGeneration)
     {
         var incoming = Ascending(page.Messages);
         lock (gate)
         {
+            if (expectedGeneration != generation)
+            {
+                return false;
+            }
+
             messages = Merge(messages, incoming);
             hasMoreOlder = incoming.Length >= pageSize;
             version++;
+            return true;
         }
     }
 
-    public bool ApplyIncoming(TeamMessageDto message)
+    public bool ApplyIncoming(TeamMessageDto message, int expectedGeneration)
     {
         lock (gate)
         {
+            if (expectedGeneration != generation)
+            {
+                return false;
+            }
+
             var current = messages;
             var position = IndexOf(current, message.Id);
             if (position >= 0)
@@ -184,7 +213,87 @@ internal sealed class TeamThreadState
             hasMoreOlder = false;
             loaded = false;
             version++;
+            generation++;
         }
+    }
+
+    private static TeamMessageDto[] NewerThan(TeamMessageDto[] items, long settledThrough, out int unreadCount)
+    {
+        unreadCount = 0;
+        var first = items.Length;
+        while (first > 0 && items[first - 1].Id > settledThrough)
+        {
+            first--;
+        }
+
+        if (first == items.Length)
+        {
+            return Array.Empty<TeamMessageDto>();
+        }
+
+        var newer = new TeamMessageDto[items.Length - first];
+        Array.Copy(items, first, newer, 0, newer.Length);
+        for (var index = 0; index < newer.Length; index++)
+        {
+            if (newer[index].FromTeam && !newer[index].Read)
+            {
+                unreadCount++;
+            }
+        }
+
+        return newer;
+    }
+
+    private static TeamMessageDto[] Prune(TeamMessageDto[] items, long coveredFrom, long coveredThrough,
+        TeamMessageDto[] page)
+    {
+        TeamMessageDto[]? kept = null;
+        var count = 0;
+        for (var index = 0; index < items.Length; index++)
+        {
+            var item = items[index];
+            var covered = item.Id >= coveredFrom && item.Id <= coveredThrough;
+            if (covered && IndexOf(page, item.Id) < 0)
+            {
+                if (kept is null)
+                {
+                    kept = new TeamMessageDto[items.Length];
+                    Array.Copy(items, kept, index);
+                    count = index;
+                }
+
+                continue;
+            }
+
+            if (kept is not null)
+            {
+                kept[count] = item;
+            }
+
+            count++;
+        }
+
+        if (kept is null)
+        {
+            return items;
+        }
+
+        var trimmed = new TeamMessageDto[count];
+        Array.Copy(kept, trimmed, count);
+        return trimmed;
+    }
+
+    private static bool HasTeamMessage(TeamMessageDto[] items)
+    {
+        for (var index = 0; index < items.Length; index++)
+        {
+            if (items[index].FromTeam)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static long NewestOf(TeamMessageDto[] items) => items.Length == 0 ? 0 : items[items.Length - 1].Id;
