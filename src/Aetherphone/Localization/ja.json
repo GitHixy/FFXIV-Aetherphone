@@ -10215,7 +10215,7 @@
   "casino.tables.postParty": "パーティチャットにコードを投稿",
   "casino.tables.postSay": "Sayでコードを投稿",
   "casino.tables.postYell": "Yellでコードを投稿",
-  "casino.tables.chatInvite": "テーブルに参加してください：{0}。Aetherphoneの {1} > ライブ でコードを入力できます。",
+  "casino.tables.chatInvite": "テーブルに参加してください：{0}。",
   "casino.tables.codePosted": "チャットにコードを投稿しました",
   "casino.tables.codePostFailed": "チャットに投稿できませんでした",
   "casino.tables.postCodeTitle": "チャットにコードを投稿",

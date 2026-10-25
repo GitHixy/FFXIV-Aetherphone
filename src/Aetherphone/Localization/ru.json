@@ -10215,7 +10215,7 @@
   "casino.tables.postParty": "Отправить код в чат группы",
   "casino.tables.postSay": "Отправить код в канал «Сказать»",
   "casino.tables.postYell": "Отправить код в канал «Возглас»",
-  "casino.tables.chatInvite": "Присоединяйтесь к моему столу: {0}. Введите код в Aetherphone: {1} > Живое.",
+  "casino.tables.chatInvite": "Присоединяйтесь к моему столу: {0}.",
   "casino.tables.codePosted": "Код отправлен в чат",
   "casino.tables.codePostFailed": "Не удалось отправить в чат",
   "casino.tables.postCodeTitle": "Отправить код в чат",

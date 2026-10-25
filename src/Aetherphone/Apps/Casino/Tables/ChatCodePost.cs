@@ -75,7 +75,7 @@ internal sealed class ChatCodePost
         ShellToast.Show(Loc.T(L.Common.Copied));
     }
 
-    private string Invitation() => Loc.T(L.Tables.ChatInvite, CasinoChatCodes.Tag(code), Loc.T(L.Apps.Casino));
+    private string Invitation() => Loc.T(L.Tables.ChatInvite, CasinoChatCodes.Tag(code));
 
     private void Post(string channelKey)
     {

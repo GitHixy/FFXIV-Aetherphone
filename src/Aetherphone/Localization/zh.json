@@ -10215,7 +10215,7 @@
   "casino.tables.postParty": "在小队聊天中发布代码",
   "casino.tables.postSay": "通过说话频道发布代码",
   "casino.tables.postYell": "通过喊话频道发布代码",
-  "casino.tables.chatInvite": "来我的牌桌吧：{0}。在 Aetherphone 的 {1} > 进行中 页面输入代码。",
+  "casino.tables.chatInvite": "来我的牌桌吧：{0}。",
   "casino.tables.codePosted": "已在聊天中发布代码",
   "casino.tables.codePostFailed": "无法在聊天中发布",
   "casino.tables.postCodeTitle": "在聊天中发布代码",
