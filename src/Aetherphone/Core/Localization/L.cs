@@ -11136,6 +11136,36 @@ internal static class L
         public static readonly LocString Back = new("prism.back", "Back");
         public static readonly LocString YourLook = new("prism.yourLook", "Your glam");
         public static readonly LocString YourGlams = new("prism.yourGlams", "Your glams");
+        public static readonly LocString AllRankings =
+            new("prism.allRankings", "See all rankings");
+
+        public static readonly LocString SearchRankings =
+            new("prism.searchRankings", "Search by name or username");
+
+        public static readonly LocString RankingVotes =
+            new("prism.rankingVotes", "{0:N0} total votes");
+
+        public static readonly LocString RankingYou =
+            new("prism.rankingYou", "You");
+
+        public static readonly LocString RankingsEmpty =
+            new("prism.rankingsEmpty", "No entrants match your search.");
+
+        public static readonly LocString RankingsUnavailable =
+            new("prism.rankingsUnavailable", "Rankings will appear when results are published.");
+
+        public static readonly LocString RankingsOrder =
+            new("prism.rankingsOrder", "Finalists first, then heat standings. Votes include heats and the final.");
+
+        public static readonly LocString RevealThanks =
+            new("prism.revealThanks", "Thanks for joining!");
+
+        public static readonly LocString RevealNext =
+            new("prism.revealNext", "You made this runway shine. The next glamour competition starts soon. Time to dream up your next look!");
+
+        public static readonly LocString RevealOwnRank =
+            new("prism.revealOwnRank", "Your rank: #{0} · {1:N0} total votes");
+
         public static readonly LocString ReplayReveal = new("prism.replayReveal", "Replay the reveal");
         public static readonly LocString Submitting = new("prism.submitting", "Sending your scores…");
         public static readonly LocString HeatName = new("prism.heatName", "Heat {0}");

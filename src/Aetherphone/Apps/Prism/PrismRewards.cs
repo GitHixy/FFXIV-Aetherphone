@@ -59,8 +59,8 @@ internal static class PrismRewards
         for (var index = 0; index < placings.Length; index++)
         {
             var placing = placings[index];
-            if (placing.Badge is not null || placing.Frame is not null || placing.Coins > 0 || placing.Gil > 0 ||
-                placing.ChineseCoins > 0)
+            if (placing.Coins > 0 || placing.Stage == PrismPhases.StageFinal &&
+                (placing.Badge is not null || placing.Frame is not null || placing.Gil > 0 || placing.ChineseCoins > 0))
             {
                 return true;
             }
@@ -175,10 +175,20 @@ internal static class PrismRewards
                 continue;
             }
 
-            into.Add(new PrismPrizeRow(placing.Rank, Math.Max(0, placing.Coins), Math.Max(0, placing.Gil),
-                placing.Badge is null ? null : BadgeStyle.From(placing.Badge),
-                placing.Frame is null ? null : FrameStyle.From(placing.Frame), Math.Max(0, placing.FrameDays),
-                Math.Max(0, placing.ChineseCoins)));
+            var final = stage == PrismPhases.StageFinal;
+            var gil = final ? Math.Max(0, placing.Gil) : 0;
+            var chineseCoins = final ? Math.Max(0, placing.ChineseCoins) : 0;
+            var badge = final ? placing.Badge : null;
+            var frame = final ? placing.Frame : null;
+            if (placing.Coins <= 0 && gil == 0 && chineseCoins == 0 && badge is null && frame is null)
+            {
+                continue;
+            }
+
+            into.Add(new PrismPrizeRow(placing.Rank, Math.Max(0, placing.Coins), gil,
+                badge is null ? null : BadgeStyle.From(badge),
+                frame is null ? null : FrameStyle.From(frame), frame is null ? 0 : Math.Max(0, placing.FrameDays),
+                chineseCoins));
         }
 
         if (into.Count > 0)

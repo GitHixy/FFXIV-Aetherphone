@@ -13,6 +13,48 @@ namespace Aetherphone.Tests;
 public sealed class PrismWireContractTests
 {
     [Fact]
+    public void FullRankingsKeepLargeRanksVoteTotalsAndTheViewersIdentity()
+    {
+        const string Payload = """
+            {"weekId":"w_1","rankings":[
+              {"rank":1,"displayName":"Winner","handle":"winner","totalVotes":42,"isMe":false},
+              {"rank":1042,"displayName":"My look","handle":"mine","totalVotes":12,"isMe":true}
+            ]}
+            """;
+        var results = JsonSerializer.Deserialize(Payload, AethernetJsonContext.Default.PrismResultsDto);
+        Assert.NotNull(results?.Rankings);
+        Assert.Equal(2, results.Rankings.Length);
+        Assert.Equal(1042, results.Rankings[1].Rank);
+        Assert.Equal(12, results.Rankings[1].TotalVotes);
+        Assert.True(results.Rankings[1].IsMe);
+        Assert.False(results.Rankings[0].IsMe);
+    }
+
+    [Fact]
+    public void HeatPrizesIgnoreEveryLegacyNonCoinReward()
+    {
+        var prizes = new PrismPrizesDto(Placings:
+        [
+            new PrismPrizeDto(Stage: PrismPhases.StageHeat, Rank: 1, Coins: 75, Gil: 100000, ChineseCoins: 500,
+                Badge: new BadgeDescriptorDto("heat", "Old badge", "f005"),
+                Frame: new FrameDescriptorDto("heat", "Old frame"), FrameDays: 7),
+        ]);
+        var rows = new List<PrismPrizeRow>();
+        PrismRewards.Fill(rows, prizes, PrismPhases.StageHeat);
+        Assert.Equal(75, Assert.Single(rows).CoinsFor(false));
+        Assert.Equal(75, rows[0].CoinsFor(true));
+        Assert.Equal(0, rows[0].GilFor(false));
+        Assert.Null(rows[0].Badge);
+        Assert.Null(rows[0].Frame);
+        Assert.Equal(0, rows[0].FrameDays);
+        var gilOnly = new PrismPrizesDto(Placings:
+            [prizes.Placings![0] with { Coins = 0 }]);
+        Assert.False(PrismRewards.Any(gilOnly, null));
+        PrismRewards.Fill(rows, gilOnly, PrismPhases.StageHeat);
+        Assert.Empty(rows);
+    }
+
+    [Fact]
     public void RoutesMatchTheProposedEndpoints()
     {
         Assert.Equal("/prism/week?lang=en", PrismClient.WeekPath("en"));

@@ -112,6 +112,8 @@ Aethernet opened on 2 July 2026. By the end of the season, players on 113 worlds
   </tr>
 </table>
 
+Prism brings glamour contests to the phone, with an animated podium reveal featuring sharp, oversized rank labels, searchable rankings and your own rank and vote total highlighted. Moderators set gil, frames, badges and Aethercoins for the final top three together; heat winners receive only Aethercoins.
+
 ## Watch, listen and play together
 
 <table>

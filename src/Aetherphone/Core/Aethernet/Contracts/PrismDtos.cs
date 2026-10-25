@@ -93,7 +93,9 @@ internal sealed record PrismPlacingDto(
     string World = "",
     string Handle = "",
     GlamGearDto[]? Outfit = null,
-    string GlamId = "");
+    string GlamId = "",
+    int TotalVotes = 0,
+    bool IsMe = false);
 
 internal sealed record PrismResultsDto(
     string WeekId = "",
@@ -112,4 +114,5 @@ internal sealed record PrismResultsDto(
     long Revision = 0,
     int FinalistCount = 0,
     PrismPrizesDto? Prizes = null,
-    string Track = "");
+    string Track = "",
+    PrismPlacingDto[]? Rankings = null);

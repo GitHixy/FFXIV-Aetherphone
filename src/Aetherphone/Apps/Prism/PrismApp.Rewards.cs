@@ -147,6 +147,7 @@ internal sealed partial class PrismApp
 
             cursor = DrawJudgePrize(list, left, cursor, width, scale);
             cursor = DrawGilNote(list, left, cursor, width, scale);
+            cursor = DrawRankingsButton(list, left, cursor + Metrics.Space.Lg * scale, width, scale);
             ImGui.SetCursorScreenPos(origin);
             ImGui.Dummy(new Vector2(width, cursor - origin.Y + PrismArt.BottomMargin(scale)));
         }
@@ -158,6 +159,7 @@ internal sealed partial class PrismApp
         var area = new Rect(new Vector2(content.Min.X, top), new Vector2(content.Max.X, content.Max.Y - bottomChrome));
         DrawEmpty(drawList, area, RewardsGlyph, string.Empty, Loc.T(L.Prism.NoRewardsHint), string.Empty,
             ButtonStyle.Solid, scale, out _);
+        DrawRankingsButton(drawList, content.Min.X, area.Max.Y - Button.LargeHeight * scale, content.Width, scale);
     }
 
     private float DrawRewardTracks(float left, float top, float width, float scale)

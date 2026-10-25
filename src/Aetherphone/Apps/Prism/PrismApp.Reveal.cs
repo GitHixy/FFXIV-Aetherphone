@@ -13,20 +13,14 @@ namespace Aetherphone.Apps.Prism;
 
 internal sealed partial class PrismApp
 {
-    private const float RevealNumeralUnits = 200f;
+    private const float RevealNumeralUnits = 128f;
     private const float PodiumNumeralUnits = 48f;
     private const float PodiumShadeShare = 0.45f;
     private const float RowThumbUnits = 36f;
     private const float CardThumbUnits = 48f;
     private const float RankColumnUnits = 32f;
     private const int PodiumSize = 3;
-    private const float PrintNumeralUnits = 64f;
-    private const float PrintWidthShare = 0.78f;
-    private const float PrintPadUnits = 12f;
-    private const float PrintRiseUnits = 40f;
     private const float RevealZoom = 0.12f;
-    private const float RevealDim = 0.6f;
-    private const float FlashAlpha = 0.25f;
     private const float PodiumLightDelay = 0.26f;
     private const float PodiumLightStagger = 0.18f;
     private const float PodiumDimFloor = 0.26f;
@@ -40,15 +34,16 @@ internal sealed partial class PrismApp
     private const float StoryBarGapUnits = 8f;
     private const float StoryRowGapUnits = 12f;
     private const float CreditDelay = 0.3f;
-    private const float CreditWorldShare = 0.4f;
-    private const float RefractionDelay = 0.05f;
-    private const float PrintDelay = 0.05f;
     private const float HintDelay = 0.5f;
     private const float RevealPitchTop = 1.3f;
     private const float RevealPitchStep = 0.12f;
 
     private readonly List<PrismPlacingDto> finalOrder = new();
     private readonly List<PrismPlacingDto> heatOrder = new();
+    private readonly List<PrismPlacingDto> summaryPhotos = new();
+    private static readonly string[] RevealRanks = { "", "#1", "#2", "#3" };
+    private CachedText revealHandle;
+    private CachedText revealOwnRank;
 
     private static readonly string PodiumGlyph = IconGlyph.Of(FontAwesomeIcon.Trophy);
     private static readonly Vector4 PodiumShade = new(0f, 0f, 0f, 0.6f);
@@ -73,6 +68,7 @@ internal sealed partial class PrismApp
         revealIndex = 0;
         revealPageSeconds = 0f;
         soundedPage = -1;
+        revealHoldSeconds = 0f;
         Go(PrismScreen.Reveal, 0);
     }
 
@@ -103,7 +99,14 @@ internal sealed partial class PrismApp
 
         var delta = MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
         var held = !summary && ImGui.IsMouseDown(ImGuiMouseButton.Left) && UiInteract.Hover(content.Min, content.Max);
-        revealHoldSeconds = held ? revealHoldSeconds + delta : 0f;
+        if (held)
+        {
+            revealHoldSeconds += delta;
+        }
+        else if (!ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+        {
+            revealHoldSeconds = 0f;
+        }
         if (!summary && revealHoldSeconds < RevealHoldSeconds)
         {
             revealPageSeconds += delta;
@@ -117,7 +120,7 @@ internal sealed partial class PrismApp
 
         if (summary)
         {
-            DrawRevealSummary(drawList, content, results, scale);
+            DrawRevealSummary(drawList, full, content, results, scale);
         }
         else
         {
@@ -125,10 +128,11 @@ internal sealed partial class PrismApp
             DrawRevealTaps(drawList, content, pages, scale);
         }
 
-        PrismArt.OverPhoto(false);
+        PrismArt.OverPhoto(true);
         PrismArt.StoryBars(drawList, content.Min.X, content.Max.X, content.Min.Y + StoryBarGapUnits * scale, pages,
             revealIndex, summary ? 1f : revealPageSeconds / RevealPageSeconds, scale);
         DrawRevealTop(drawList, content, results, summary, scale);
+        PrismArt.OverPhoto(false);
     }
 
     private void DrawRevealTaps(ImDrawListPtr drawList, Rect content, int pages, float scale)
@@ -165,33 +169,50 @@ internal sealed partial class PrismApp
             PrismMotion.RiseUnits * scale);
     }
 
-    private void DrawRevealSummary(ImDrawListPtr drawList, Rect content, PrismResultsDto results, float scale)
+    private void DrawRevealSummary(ImDrawListPtr drawList, Rect full, Rect content, PrismResultsDto results, float scale)
     {
-        var top = content.Min.Y + RevealTapTopUnits * scale;
+        PrismArt.OverPhoto(true);
+        onPhoto = true;
+        PrismLight.Week(drawList, full, results.WeekId, new Vector4(0.035f, 0.025f, 0.075f, 1f),
+            PrismArt.PhotoFore, 0f, 0f);
         var final = ActionRect(content, scale, 1);
-        var card = PrismMotion.Mark(drawList);
-        if (results.MyHeatRank > 0)
+        var thanks = Loc.T(L.Prism.RevealThanks);
+        var message = Loc.T(L.Prism.RevealNext);
+        var titleHeight = PrismType.HeroHeight(thanks, content.Width);
+        var bodyHeight = Typography.MeasureWrappedBlock(message, PrismType.Body, content.Width).Y;
+        var captionLine = Typography.LineHeight(PrismType.Caption);
+        var own = RevealOwnRanking(results);
+        var textHeight = titleHeight + bodyHeight + captionLine + Metrics.Space.Lg * scale * 2f;
+        if (own.Length > 0)
         {
-            var stripsTop = final.Min.Y - Metrics.Space.Lg * scale;
-            var width = content.Width * PrintWidthShare;
-            var frame = PrintFrame(Vector2.Zero, width, scale);
-            var fit = MathF.Min(1f, (stripsTop - top) / frame.Height);
-            var printWidth = width * fit;
-            var origin = new Vector2(content.Center.X - printWidth * 0.5f,
-                top + (stripsTop - top - frame.Height * fit) * 0.5f);
-            DrawPrint(drawList, PrintFrame(origin, printWidth, scale), results, scale);
-        }
-        else
-        {
-            PrismType.DrawHero(drawList, new Vector2(content.Min.X, top + Metrics.Space.Xl * scale), results.Title,
-                content.Width, PrismArt.Fore);
+            textHeight += Typography.MeasureWrappedBlock(own, PrismType.Caption, content.Width).Y + Metrics.Space.Md * scale;
         }
 
-        PrismMotion.Rise(drawList, card, PrismMotion.At(screenAge, PrintDelay, Motion.Sheet), PrintRiseUnits * scale);
-        var actions = PrismMotion.Mark(drawList);
-        if (DrawButton(drawList, final, Loc.T(L.Prism.FinalTitle), ButtonStyle.Solid, scale))
+        var textTop = final.Min.Y - Metrics.Space.Xl * scale - textHeight;
+        var photoTop = content.Min.Y + RevealTapTopUnits * scale;
+        var photoBottom = textTop - Metrics.Space.Lg * scale;
+        DrawRevealCollage(drawList, new Rect(new Vector2(content.Min.X, photoTop),
+            new Vector2(content.Max.X, MathF.Max(photoTop, photoBottom))), scale);
+        PrismCelebrationRenderer.Draw(drawList, full, screenAge, 0, scale);
+        var mark = PrismMotion.Mark(drawList);
+        Typography.Draw(drawList, new Vector2(content.Min.X, textTop),
+            Typography.FitText(results.Title, content.Width, PrismType.Caption), PrismArt.PhotoMuted, PrismType.Caption);
+        textTop += captionLine + Metrics.Space.Md * scale;
+        textTop += PrismType.DrawHero(drawList, new Vector2(content.Min.X, textTop), thanks, content.Width,
+            PrismArt.PhotoFore) + Metrics.Space.Md * scale;
+        textTop += Typography.DrawWrappedLeft(new Vector2(content.Min.X, textTop), message, PrismArt.PhotoMuted,
+            PrismType.Body, content.Width) + Metrics.Space.Md * scale;
+        if (own.Length > 0)
+        {
+            Typography.DrawWrappedLeft(new Vector2(content.Min.X, textTop), own, PrismArt.PhotoFore,
+                PrismType.Caption, content.Width);
+        }
+
+        PrismMotion.Rise(drawList, mark, PrismMotion.At(screenAge, 0.1f, Motion.Sheet), PrismMotion.RiseUnits * scale);
+        if (DrawButton(drawList, final, Loc.T(L.Prism.AllRankings), ButtonStyle.Solid, scale))
         {
             FinishReveal(results);
+            OpenRankings();
         }
 
         var replay = Loc.T(L.Prism.ReplayReveal);
@@ -200,9 +221,49 @@ internal sealed partial class PrismApp
         {
             StartReveal();
         }
+    }
 
-        PrismMotion.Rise(drawList, actions, PrismMotion.At(screenAge, HintDelay, Motion.PageSettle),
-            PrismMotion.RiseUnits * scale);
+    private string RevealOwnRanking(PrismResultsDto results)
+    {
+        var rankings = results.Rankings ?? Array.Empty<PrismPlacingDto>();
+        for (var index = 0; index < rankings.Length; index++)
+        {
+            if (!rankings[index].IsMe)
+            {
+                continue;
+            }
+
+            var own = rankings[index];
+            var key = HashCode.Combine(own.Rank, own.TotalVotes, Loc.Current.Code);
+            return revealOwnRank.IsCurrent(key) ? revealOwnRank.Value
+                : revealOwnRank.Store(key, Loc.T(L.Prism.RevealOwnRank, own.Rank, own.TotalVotes));
+        }
+
+        return string.Empty;
+    }
+
+    private void DrawRevealCollage(ImDrawListPtr drawList, Rect area, float scale)
+    {
+        if (summaryPhotos.Count == 0 || area.Height < Metrics.Size.TapTarget * scale)
+        {
+            return;
+        }
+
+        var columns = Math.Min(3, summaryPhotos.Count);
+        var rows = area.Height > 190f * scale && summaryPhotos.Count > columns ? 2 : 1;
+        var gap = Metrics.Space.Sm * scale;
+        var width = (area.Width - gap * (columns - 1)) / columns;
+        var height = (area.Height - gap * (rows - 1)) / rows;
+        for (var index = 0; index < Math.Min(summaryPhotos.Count, columns * rows); index++)
+        {
+            var min = area.Min + new Vector2(index % columns * (width + gap), index / columns * (height + gap));
+            var photo = new Rect(min, min + new Vector2(width, height));
+            var mark = PrismMotion.Mark(drawList);
+            DrawLook(drawList, photo, summaryPhotos[index].ImageUrl, false, focusY: CoverFocus);
+            PrismLight.Edge(drawList, photo, 0f, PrismGlow.Spectrum, 0.5f, scale);
+            PrismMotion.Rise(drawList, mark, PrismMotion.At(screenAge, index * PrismMotion.Stagger, Motion.Sheet),
+                PrismMotion.RiseUnits * scale);
+        }
     }
 
     private void DrawRevealTop(ImDrawListPtr drawList, Rect content, PrismResultsDto results, bool summary,
@@ -225,6 +286,12 @@ internal sealed partial class PrismApp
             Loc.T(L.Common.Close));
         if (PrismArt.Icon(drawList, close, PhoneIcons.X, scale))
         {
+            if (summary)
+            {
+                FinishReveal(results);
+                return;
+            }
+
             Go(PrismScreen.Cover, -1);
         }
     }
@@ -232,40 +299,41 @@ internal sealed partial class PrismApp
     private void DrawRevealPlacing(ImDrawListPtr drawList, Rect full, Rect content, PrismResultsDto results,
         PrismPlacingDto placing, float scale)
     {
-        var settle = PrismMotion.At(screenAge, 0f, Motion.Sheet);
-        DrawLook(drawList, full, placing.ImageUrl, false, 1f, 1f + RevealZoom * (1f - settle));
-        PrismArt.Shade(drawList, full, scale);
         PrismArt.OverPhoto(true);
         onPhoto = true;
-        drawList.AddRectFilled(full.Min, full.Max,
-            ImGui.GetColorU32(Palette.WithAlpha(PrismArt.Back, RevealDim * (1f - settle))));
-        if (placing.Rank == 1)
-        {
-            drawList.AddRectFilled(full.Min, full.Max, ImGui.GetColorU32(Palette.WithAlpha(PrismArt.Fore,
-                FlashAlpha * (1f - PrismMotion.At(screenAge, 0f, Motion.Release)))));
-            PrismArt.Refraction(drawList, full, PrismMotion.At(screenAge, RefractionDelay, Motion.Sheet));
-        }
-
+        var settle = PrismMotion.At(screenAge, 0f, Motion.Sheet);
+        var zoom = Plugin.PluginInterface.UiBuilder.ShouldUseReducedMotion ? 1f : 1f + RevealZoom * (1f - settle);
+        DrawLook(drawList, full, placing.ImageUrl, false, 1f, zoom, focusY: CoverFocus);
+        var clear = ImGui.GetColorU32(new Vector4(0f, 0f, 0f, 0f));
+        var shade = ImGui.GetColorU32(new Vector4(0.015f, 0.01f, 0.035f, 0.96f));
+        var topShade = ImGui.GetColorU32(new Vector4(0f, 0f, 0f, 0.55f));
+        drawList.AddRectFilledMultiColor(full.Min, new Vector2(full.Max.X, content.Min.Y + 100f * scale),
+            topShade, topShade, clear, clear);
+        drawList.AddRectFilledMultiColor(new Vector2(full.Min.X, full.Min.Y + full.Height * 0.48f), full.Max,
+            clear, clear, shade, shade);
+        PrismCelebrationRenderer.Draw(drawList, full, screenAge, placing.Rank, scale);
+        var color = PrismCelebrationRenderer.Color(placing.Rank);
         var left = content.Min.X;
-        var span = content.Width;
-        var labelPixels = PrismArt.LabelPixels();
-        var labelLine = PrismType.LineHeight(PrismFace.Label, labelPixels);
-        var creditTop = content.Max.Y - PrismArt.BottomMargin(scale) - labelPixels - Metrics.Space.Lg * scale - labelLine;
-        var credit = PrismMotion.At(screenAge, CreditDelay, Motion.PageSettle);
-        var world = PrismType.FitLabel(PlacingDetail(placing), labelPixels, span * CreditWorldShare);
-        var worldWidth = PrismType.Measure(world, PrismFace.Label, labelPixels).X;
-        DrawWipe(drawList, new Vector2(left, creditTop),
-            PrismType.FitLabel(placing.DisplayName, labelPixels, span - worldWidth - Metrics.Space.Lg * scale),
-            PrismFace.Label, labelPixels, credit, PrismArt.Fore);
-        DrawWipe(drawList, new Vector2(left + span - worldWidth, creditTop), world, PrismFace.Label, labelPixels,
-            credit, PrismArt.Fore);
-        var pixels = RevealNumeralUnits * scale;
-        var numeral = Plain[Math.Clamp(placing.Rank, 0, Plain.Length - 1)];
-        var numeralTop = creditTop - Metrics.Space.Lg * scale - PrismType.Snap(PrismFace.Numerals, pixels);
-        DrawWipe(drawList, new Vector2(left, numeralTop), numeral, PrismFace.Numerals, pixels,
-            PrismMotion.At(screenAge, NumeralDelay, Motion.PageSettle), PrismArt.Fore);
-        DrawWipe(drawList, new Vector2(left, numeralTop - labelLine), Loc.T(L.Prism.PlaceLabel),
-            PrismFace.Label, labelPixels, credit, PrismArt.Muted);
+        var nameHeight = PrismType.HeroHeight(placing.DisplayName, content.Width);
+        var labelLine = Typography.LineHeight(PrismType.Body);
+        var creditTop = content.Max.Y - PrismArt.BottomMargin(scale) - nameHeight - labelLine - Metrics.Space.Xl * scale;
+        var numeralPixels = MathF.Min(RevealNumeralUnits * scale, content.Height * 0.22f);
+        var numeralTop = creditTop - PrismType.LineHeight(PrismFace.Numerals, numeralPixels) - Metrics.Space.Lg * scale;
+        var mark = PrismMotion.Mark(drawList);
+        var numeral = RevealRanks[Math.Clamp(placing.Rank, 1, PodiumSize)];
+        PrismType.Draw(drawList, new Vector2(left + 2f * scale, numeralTop + 2f * scale), numeral,
+            new Vector4(0f, 0f, 0f, 0.45f), PrismFace.Numerals, numeralPixels);
+        PrismType.Draw(drawList, new Vector2(left, numeralTop), numeral, color, PrismFace.Numerals, numeralPixels);
+        PrismMotion.Rise(drawList, mark, PrismMotion.At(screenAge, NumeralDelay, Motion.Sheet), 28f * scale);
+        var credit = PrismMotion.Mark(drawList);
+        PrismArt.Hairline(drawList, left, left + 48f * scale, creditTop - Metrics.Space.Md * scale, color, scale);
+        PrismType.DrawHero(drawList, new Vector2(left, creditTop), placing.DisplayName, content.Width, PrismArt.PhotoFore);
+        var handleKey = HashCode.Combine(placing.Handle, placing.World);
+        var handle = revealHandle.IsCurrent(handleKey) ? revealHandle.Value : revealHandle.Store(handleKey,
+            placing.Handle.Length > 0 ? "@" + placing.Handle.TrimStart('@') : placing.World);
+        Typography.Draw(drawList, new Vector2(left, creditTop + nameHeight + Metrics.Space.Sm * scale),
+            Typography.FitText(handle, content.Width, PrismType.Body), PrismArt.PhotoMuted, PrismType.Body);
+        PrismMotion.Rise(drawList, credit, PrismMotion.At(screenAge, CreditDelay, Motion.Sheet), PrismMotion.RiseUnits * scale);
     }
 
     private static void PlayRevealSound(int rank)
@@ -337,11 +405,6 @@ internal sealed partial class PrismApp
                 cursor = button.Max.Y + Metrics.Space.Lg * scale;
             }
 
-            for (var index = PodiumSize; index < finalOrder.Count; index++)
-            {
-                cursor = DrawRankRow(list, left, cursor, width, finalOrder[index], scale);
-            }
-
             cursor += Metrics.Space.Xl * scale;
         }
 
@@ -382,7 +445,8 @@ internal sealed partial class PrismApp
             OpenRewards();
         }
 
-        cursor += tap + PrismArt.BottomMargin(scale);
+        cursor += tap + Metrics.Space.Lg * scale;
+        cursor = DrawRankingsButton(list, left, cursor, width, scale) + PrismArt.BottomMargin(scale);
         ImGui.Dummy(new Vector2(width, cursor - origin.Y));
     }
 
@@ -602,38 +666,6 @@ internal sealed partial class PrismApp
         }
     }
 
-    private static Rect PrintFrame(Vector2 origin, float width, float scale)
-    {
-        var pad = PrintPadUnits * scale;
-        var photo = (width - pad * 2f) / PrismStore.EntryRatio;
-        var height = pad * 3f + photo + PrismType.LineHeight(PrismFace.Label, PrismArt.LabelPixels()) +
-                     Typography.LineHeight(PrismType.Caption) * 2f + PrintNumeralUnits * scale;
-        return new Rect(origin, new Vector2(origin.X + width, origin.Y + height));
-    }
-
-    private void DrawPrint(ImDrawListPtr drawList, Rect card, PrismResultsDto results, float scale)
-    {
-        drawList.AddRectFilled(card.Min, card.Max, ImGui.GetColorU32(PrismArt.Bone));
-        var pad = PrintPadUnits * scale;
-        var inner = card.Width - pad * 2f;
-        var photo = new Rect(new Vector2(card.Min.X + pad, card.Min.Y + pad),
-            new Vector2(card.Max.X - pad, card.Min.Y + pad + inner / PrismStore.EntryRatio));
-        drawList.AddRectFilled(photo.Min, photo.Max, ImGui.GetColorU32(PrismArt.Ink));
-        DrawLook(drawList, photo, results.MyImageUrl, false);
-        var labelPixels = PrismArt.LabelPixels();
-        var top = photo.Max.Y + pad;
-        var coinsWidth = PrismType.DrawRight(drawList, new Vector2(photo.Max.X, top), CoinFact(results), PrismArt.Ink,
-            PrismFace.Label, labelPixels);
-        PrismType.Draw(drawList, new Vector2(photo.Min.X, top),
-            PrismType.FitLabel(results.Title, labelPixels, inner - coinsWidth - Metrics.Space.Sm * scale),
-            PrismArt.InkMuted, PrismFace.Label, labelPixels);
-        top += PrismType.LineHeight(PrismFace.Label, labelPixels);
-        var pixels = PrintNumeralUnits * scale;
-        PrismType.Draw(drawList, new Vector2(photo.Min.X, top), PlacingLine(results), PrismArt.Ink,
-            PrismFace.Numerals, pixels);
-        DrawFacts(drawList, new Vector2(photo.Min.X, top + pixels), inner, results, PrismArt.InkMuted, scale);
-    }
-
     private void SyncOrder(PrismResultsDto results)
     {
         if (ReferenceEquals(orderedFor, results))
@@ -644,6 +676,28 @@ internal sealed partial class PrismApp
         orderedFor = results;
         Fill(finalOrder, results.FinalPodium);
         Fill(heatOrder, results.HeatPodium);
+        summaryPhotos.Clear();
+        var photos = results.Rankings ?? results.FinalPodium ?? results.HeatPodium ?? Array.Empty<PrismPlacingDto>();
+        for (var index = 0; index < photos.Length; index++)
+        {
+            if (photos[index].ImageUrl.Length == 0)
+            {
+                continue;
+            }
+
+            if (summaryPhotos.Count < 6)
+            {
+                summaryPhotos.Add(photos[index]);
+            }
+            else
+            {
+                var slot = Random.Shared.Next(index + 1);
+                if (slot < summaryPhotos.Count)
+                {
+                    summaryPhotos[slot] = photos[index];
+                }
+            }
+        }
     }
 
     private static void Fill(List<PrismPlacingDto> into, PrismPlacingDto[]? podium)
@@ -667,12 +721,7 @@ internal sealed partial class PrismApp
 
     private string RevealTitle(PrismResultsDto results, bool summary)
     {
-        if (summary && results.MyHeatRank <= 0)
-        {
-            return string.Empty;
-        }
-
-        var label = Loc.T(summary ? L.Prism.YourPlacing : L.Prism.FinalTitle);
+        var label = Loc.T(summary ? L.Apps.Prism : L.Prism.FinalTitle);
         return results.Title.Length == 0 ? label : FactLine(ref revealTitle, label, results.Title);
     }
 

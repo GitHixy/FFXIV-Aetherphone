@@ -31,6 +31,7 @@ internal enum PrismScreen : byte
     Runway,
     Reveal,
     Final,
+    Rankings,
     Guide,
     Rewards,
     Outfit,
@@ -316,6 +317,9 @@ internal sealed partial class PrismApp : IResumableApp
                 break;
             case PrismScreen.Final:
                 DrawFinal(drawList, full, content, scale);
+                break;
+            case PrismScreen.Rankings:
+                DrawRankings(drawList, full, content, scale);
                 break;
             case PrismScreen.Guide:
                 DrawGuide(drawList, full, content, scale);

@@ -69,13 +69,14 @@ internal sealed partial class PrismApp
         value is PrismScreen.GlamDetail or PrismScreen.Compose or PrismScreen.Profile or PrismScreen.GlamList
             or PrismScreen.WardrobeOutfit or PrismScreen.WardrobeCover or PrismScreen.WardrobeEdit
             or PrismScreen.WardrobeMods or PrismScreen.WardrobeDesigns or PrismScreen.WardrobePick
-            or PrismScreen.Rewards or PrismScreen.Activity
+            or PrismScreen.Rewards or PrismScreen.Rankings or PrismScreen.Activity
             or PrismScreen.Gallery or PrismScreen.EditProfile or PrismScreen.ProfilePhoto or PrismScreen.BannerPick
             or PrismScreen.BannerCrop;
 
     private static bool ShowsTabBar(PrismScreen value) =>
         IsTabRoot(value) || value is PrismScreen.GlamDetail or PrismScreen.Profile or PrismScreen.GlamList
-            or PrismScreen.WardrobeOutfit or PrismScreen.Rewards or PrismScreen.Activity or PrismScreen.Gallery;
+            or PrismScreen.WardrobeOutfit or PrismScreen.Rewards or PrismScreen.Rankings or PrismScreen.Activity
+            or PrismScreen.Gallery;
 
     private bool Wearing(string key) => glamour.TryingOn && key.Length > 0 && wearingKey == key;
 

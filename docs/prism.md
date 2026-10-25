@@ -113,9 +113,17 @@ A contest entry keeps today's routes (`PUT /prism/weeks/{id}/entry`, tracks, bal
 
 ### Prizes
 
-Each podium place pays coins through its coin rule, plus whatever the moderator console adds: gil, a badge, and a frame for good or for a number of days. Badges, frames and coins go out when the final is counted. Gil is traded by hand from the console's payout list, so the rewards page says it can take a few days. The team cannot trade on the Chinese servers, so a Chinese account (a Rising Stones id) that wins a gil place is paid that place's `chineseCoins` instead under the `prism.gil.cn` coin rule, and no gil is owed; each prize's `chineseCoins` carries the amount, and the rewards page tells Chinese players about the swap.
+The moderator console's Prism prize section configures Aethercoins for 1st, 2nd and 3rd in each stage, plus gil for the final's top three only. Heat winners receive only Aethercoins. Gil, badges and frames are exclusive to the final's top three; legacy heat gil, badge and frame settings are ignored and cannot create new awards. Saving coin amounts updates the existing payout rules and refreshes their cache, so no visit to the admin Economy page is needed. Zero disables that place's coin reward. Badges, frames and coins go out when the final is counted. Gil is traded by hand from the console's payout list, so the rewards page says it can take a few days. The team cannot trade on the Chinese servers, so a Chinese account (a Rising Stones id) that wins a gil place is paid that place's `chineseCoins` instead under the `prism.gil.cn` coin rule, and no gil is owed; each prize's `chineseCoins` carries the amount, and the rewards page tells Chinese players about the swap.
 
 A moderator can end a week early with the console's step buttons and, once its results are out, start the next week's round at once (`POST /mod/api/prism/rounds/start-next`). That round uses the next week's id and scheduled theme, runs its usual lengths from the moment it starts, and is the current round until the calendar reaches its week.
+
+### Rankings and the reveal
+
+Published results include `rankings`, an ordered array of every live, eligible entrant in the selected track. Finalists come first in final rank order; remaining entrants follow their overall heat standing. Rows have a continuous `rank`, `displayName`, `handle`, `imageUrl`, optional live `glamId`, `totalVotes` (counted heat votes plus final votes) and `isMe`. Rankings omit outfits, removed entries and banned accounts. They are available only through the existing published-results route, and the podium remains the top three.
+
+See all rankings is available below the rewards and results screens and on the reveal's closing screen. The leaderboard searches names and handles, retains the original ranks while filtering, and pins the viewer's rank and total votes above the list. The viewer's row also has a spectrum highlight. Only visible rows load photos.
+
+The reveal counts down #3, #2, #1 over brighter portraits with gold, silver and bronze accents, drifting confetti and sparkles. Names and @handles are stacked together. Hold pauses the story; releasing a hold does not skip a winner. The closing screen shows a random selection of contest photos, a thank-you message, the viewer's rank and votes when available, and rankings and replay actions. Confetti is disabled with Dalamud's Reduce Motion setting.
 
 ### Activity
 
