@@ -2356,6 +2356,10 @@ internal static class L
         {
             new("changelog.r1400.0",
                 "Added Prism, a weekly glamour contest with a new theme every Monday at the daily reset, and a wardrobe that keeps all your glams to put on in one tap or share, contributed by t3sco"),
+            new("changelog.r1400.75",
+                "Added exploring other players' glams in Prism, Modded or Vanilla: try on any vanilla glam in one tap, and like or save the ones you love"),
+            new("changelog.r1400.76",
+                "Added entering the weekly Prism contest for a chance to win gil, Aether Coin, a frame and a badge"),
         };
 
         public static readonly LocString[] Release1400LiquidGlass =
@@ -2543,11 +2547,7 @@ internal static class L
         public static readonly LocString[] Release1400LoveIsland =
         {
             new("changelog.r1400.24",
-                "Added Love Island Eclipse, the companion app for PNX's Halloween festival on Materia: a countdown to the doors and the experience on now, every experience with Teleport and a reminder, the #LoveIslandEclipse gallery, the syncshells to join with their ID and password, and the frame, badge and Aether Coin you earn by posting during the night"),
-            new("changelog.r1400.25",
-                "Added Keep it night to Love Island Eclipse, which holds Eorzea at night while the app is open during the event"),
-            new("changelog.r1400.42",
-                "Added a DJs tab to Love Island Eclipse that lists every set with who plays when and which ones stream, and the Live DJ card on Tonight now follows that list"),
+                "Added Love Island Eclipse, the companion app for Phoenix Nights' big Halloween festival on Materia: share your best event pictures with #LoveIslandEclipse to win exclusive frames, a badge and Aether Coin"),
         };
 
         public static readonly LocString[] Release1400MogCast =
