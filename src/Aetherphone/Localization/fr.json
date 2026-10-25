@@ -11883,5 +11883,20 @@
   "nameplate.template.games": "Joue à [game]",
   "nameplate.template.gamba": "Parie à [game]",
   "nameplate.template.slotsWin": "[chips] jetons gagnés !",
-  "nameplate.template.slotsLoss": "[chips] jetons perdus :("
+  "nameplate.template.slotsLoss": "[chips] jetons perdus :(",
+  "prism.gilChocoChat": "L'équipe écrit aux gagnants dans ChocoChat pour organiser l'échange.",
+  "teamInbox.name": "Aetherphone Team",
+  "teamInbox.official": "Compte officiel",
+  "teamInbox.disclosure": "Les messages avec l'Aetherphone Team ne sont pas chiffrés de bout en bout. L'équipe peut les lire.",
+  "teamInbox.composerHint": "Écrire à l'Aetherphone Team",
+  "teamInbox.repliesClosed": "Vous pourrez répondre dès que l'équipe vous écrira.",
+  "teamInbox.empty": "Aucun message de l'équipe pour l'instant",
+  "teamInbox.placeFirst": "1re",
+  "teamInbox.placeSecond": "2e",
+  "teamInbox.placeThird": "3e",
+  "teamInbox.placeOther": "{0}e",
+  "teamInbox.gilWonFinal": "Vous avez terminé {0} de la finale Prism ({1}) de la semaine {2} et gagné {3} gils. Répondez ici avec votre monde d'origine et quelques créneaux où vous pouvez nous retrouver en jeu, et un membre de l'équipe vous les remettra par un échange.",
+  "teamInbox.gilWonHeat": "Vous avez terminé {0} de votre manche Prism ({1}) de la semaine {2} et gagné {3} gils. Répondez ici avec votre monde d'origine et quelques créneaux où vous pouvez nous retrouver en jeu, et un membre de l'équipe vous les remettra par un échange.",
+  "teamInbox.gilPaid": "Votre prix de {0} gils de la semaine {1} a été marqué comme remis. Profitez-en !",
+  "teamInbox.automatedFallback": "L'Aetherphone Team vous a envoyé une nouvelle."
 }

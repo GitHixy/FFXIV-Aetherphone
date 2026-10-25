@@ -11883,5 +11883,20 @@
   "nameplate.template.games": "Spielt [game]",
   "nameplate.template.gamba": "Zockt bei [game]",
   "nameplate.template.slotsWin": "[chips] Chips gewonnen!",
-  "nameplate.template.slotsLoss": "[chips] Chips verloren :("
+  "nameplate.template.slotsLoss": "[chips] Chips verloren :(",
+  "prism.gilChocoChat": "Das Team schreibt den Gewinnern in ChocoChat, um die Übergabe abzusprechen.",
+  "teamInbox.name": "Aetherphone Team",
+  "teamInbox.official": "Offizielles Konto",
+  "teamInbox.disclosure": "Nachrichten mit dem Aetherphone Team sind nicht Ende-zu-Ende verschlüsselt. Das Team kann sie lesen.",
+  "teamInbox.composerHint": "Nachricht an das Aetherphone Team",
+  "teamInbox.repliesClosed": "Du kannst antworten, sobald dir das Team schreibt.",
+  "teamInbox.empty": "Noch keine Nachrichten vom Team",
+  "teamInbox.placeFirst": "1.",
+  "teamInbox.placeSecond": "2.",
+  "teamInbox.placeThird": "3.",
+  "teamInbox.placeOther": "{0}.",
+  "teamInbox.gilWonFinal": "Du hast im Prism-Finale ({1}) für Woche {2} den {0} Platz belegt und {3} Gil gewonnen. Antworte hier mit deiner Heimatwelt und ein paar Zeiten, zu denen du dich im Spiel treffen kannst, dann übergibt sie dir ein Teammitglied per Handel.",
+  "teamInbox.gilWonHeat": "Du hast in deinem Prism-Vorlauf ({1}) für Woche {2} den {0} Platz belegt und {3} Gil gewonnen. Antworte hier mit deiner Heimatwelt und ein paar Zeiten, zu denen du dich im Spiel treffen kannst, dann übergibt sie dir ein Teammitglied per Handel.",
+  "teamInbox.gilPaid": "Dein Preis von {0} Gil für Woche {1} wurde als übergeben markiert. Viel Spaß damit!",
+  "teamInbox.automatedFallback": "Das Aetherphone Team hat dir eine Nachricht geschickt."
 }

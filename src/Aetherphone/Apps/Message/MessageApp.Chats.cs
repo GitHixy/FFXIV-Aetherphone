@@ -85,7 +85,8 @@ internal sealed partial class MessageApp
         DrawRecoveryNudge(ref listRect);
         CollectChats(pinnedChats, regularChats, archived: false);
         var query = chatQuery.Trim();
-        if (pinnedChats.Count == 0 && regularChats.Count == 0)
+        var showTeam = TeamRowVisible(query);
+        if (pinnedChats.Count == 0 && regularChats.Count == 0 && !showTeam)
         {
             if (query.Length > 0 || chatFilter != ChatFilterAll)
             {
@@ -112,6 +113,11 @@ internal sealed partial class MessageApp
         using (AppSurface.BeginEdgeToEdge(listRect))
         {
             var drawList = ImGui.GetWindowDrawList();
+            if (showTeam)
+            {
+                DrawTeamRow(drawList);
+            }
+
             if (query.Length == 0 && chatFilter == ChatFilterAll && configuration.MessageArchivedChats.Count > 0)
             {
                 DrawArchivedRow(drawList);
@@ -352,17 +358,7 @@ internal sealed partial class MessageApp
         var right = row.TextRight;
         if (unread)
         {
-            var badgeRadius = UnreadBadgeRadius * scale;
-            var label = item.UnreadCount > 99 ? "99+" : item.UnreadCount.ToString(Loc.Culture);
-            var labelWidth = Typography.Measure(label, UnreadCountStyle).X;
-            var badgeWidth = MathF.Max(badgeRadius * 2f, labelWidth + 10f * scale);
-            var badgeMin = new Vector2(right - badgeWidth, subCenterY - badgeRadius);
-            var badgeMax = new Vector2(right, subCenterY + badgeRadius);
-            Squircle.Fill(drawList, badgeMin, badgeMax, badgeRadius,
-                ImGui.GetColorU32(item.Muted ? ink.MutedInk : activeTheme.Badge));
-            Typography.DrawCentered(drawList, (badgeMin + badgeMax) * 0.5f, label,
-                item.Muted ? ChatThemes.Body : White, UnreadCountStyle);
-            right = badgeMin.X - RowTrailingGap * scale;
+            right = DrawUnreadBadge(drawList, right, subCenterY, item.UnreadCount, item.Muted);
         }
 
         if (item.Muted)
@@ -463,6 +459,22 @@ internal sealed partial class MessageApp
         }
 
         EndPersonRow(drawList, row);
+    }
+
+    private float DrawUnreadBadge(ImDrawListPtr drawList, float right, float centerY, int count, bool muted)
+    {
+        var scale = UiScale.Current;
+        var badgeRadius = UnreadBadgeRadius * scale;
+        var label = count > 99 ? "99+" : NumberText.Group(count);
+        var labelWidth = Typography.Measure(label, UnreadCountStyle).X;
+        var badgeWidth = MathF.Max(badgeRadius * 2f, labelWidth + 10f * scale);
+        var badgeMin = new Vector2(right - badgeWidth, centerY - badgeRadius);
+        var badgeMax = new Vector2(right, centerY + badgeRadius);
+        Squircle.Fill(drawList, badgeMin, badgeMax, badgeRadius,
+            ImGui.GetColorU32(muted ? ink.MutedInk : activeTheme.Badge));
+        Typography.DrawCentered(drawList, (badgeMin + badgeMax) * 0.5f, label, muted ? ChatThemes.Body : White,
+            UnreadCountStyle);
+        return badgeMin.X - RowTrailingGap * scale;
     }
 
     private void OpenChatSheet(ConversationDto conversation)

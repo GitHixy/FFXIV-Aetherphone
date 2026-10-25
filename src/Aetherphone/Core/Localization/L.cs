@@ -11287,6 +11287,8 @@ internal static class L
             "Gil prizes are traded to you in game by the Aetherphone team. This can take a few days, since we meet each winner in game.");
         public static readonly LocString GilChinese = new("prism.gilChinese",
             "We can't trade on the Chinese servers, so winners there get extra Aether Coin instead of gil.");
+        public static readonly LocString GilChocoChat = new("prism.gilChocoChat",
+            "The team messages winners in ChocoChat to set up the trade.");
         public static readonly LocString WhatWinnersGet = new("prism.whatWinnersGet", "What winners get");
         public static readonly LocString NoPodium = new("prism.noPodium", "Too few glams were entered this week for a podium.");
         public static readonly LocString NoPodiumTitle = new("prism.noPodiumTitle", "No podium this time");
@@ -15392,5 +15394,29 @@ internal static class L
         public static readonly LocString SampleMessageThanks = new("widgetsPeople.sampleMessageThanks", "Thanks for the help earlier!");
         public static readonly LocString SampleNotificationLike = new("widgetsPeople.sampleNotificationLike", "Liked your photo.");
         public static readonly LocString SampleNotificationMuster = new("widgetsPeople.sampleNotificationMuster", "Your meetup starts in 15 minutes.");
+    }
+
+    internal static class TeamInbox
+    {
+        public static readonly LocString Name = new("teamInbox.name", "Aetherphone Team");
+        public static readonly LocString Official = new("teamInbox.official", "Official account");
+        public static readonly LocString Disclosure = new("teamInbox.disclosure",
+            "Messages with the Aetherphone Team are not end-to-end encrypted. Staff can read them.");
+        public static readonly LocString ComposerHint = new("teamInbox.composerHint", "Message the Aetherphone Team");
+        public static readonly LocString RepliesClosed = new("teamInbox.repliesClosed",
+            "You can reply once the team messages you.");
+        public static readonly LocString Empty = new("teamInbox.empty", "No messages from the team yet");
+        public static readonly LocString PlaceFirst = new("teamInbox.placeFirst", "1st");
+        public static readonly LocString PlaceSecond = new("teamInbox.placeSecond", "2nd");
+        public static readonly LocString PlaceThird = new("teamInbox.placeThird", "3rd");
+        public static readonly LocString PlaceOther = new("teamInbox.placeOther", "#{0}");
+        public static readonly LocString GilWonFinal = new("teamInbox.gilWonFinal",
+            "You placed {0} in the Prism final ({1}) for week {2} and won {3} gil. Reply here with your home world and a few times you can meet in game, and a staff member will trade it to you.");
+        public static readonly LocString GilWonHeat = new("teamInbox.gilWonHeat",
+            "You placed {0} in your Prism heat ({1}) for week {2} and won {3} gil. Reply here with your home world and a few times you can meet in game, and a staff member will trade it to you.");
+        public static readonly LocString GilPaid = new("teamInbox.gilPaid",
+            "Your {0} gil prize for week {1} was marked as traded. Enjoy it!");
+        public static readonly LocString AutomatedFallback = new("teamInbox.automatedFallback",
+            "The Aetherphone Team sent you an update.");
     }
 }

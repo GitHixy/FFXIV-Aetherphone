@@ -11883,5 +11883,20 @@
   "nameplate.template.games": "Играет в [game]",
   "nameplate.template.gamba": "Азартит: [game]",
   "nameplate.template.slotsWin": "Выиграл [chips] фишек!",
-  "nameplate.template.slotsLoss": "Проиграл [chips] фишек :("
+  "nameplate.template.slotsLoss": "Проиграл [chips] фишек :(",
+  "prism.gilChocoChat": "Команда пишет победителям в ChocoChat, чтобы договориться об обмене.",
+  "teamInbox.name": "Aetherphone Team",
+  "teamInbox.official": "Официальный аккаунт",
+  "teamInbox.disclosure": "Сообщения с Aetherphone Team не защищены сквозным шифрованием. Команда может их читать.",
+  "teamInbox.composerHint": "Написать Aetherphone Team",
+  "teamInbox.repliesClosed": "Ответить можно, когда команда напишет вам.",
+  "teamInbox.empty": "Сообщений от команды пока нет",
+  "teamInbox.placeFirst": "1-е",
+  "teamInbox.placeSecond": "2-е",
+  "teamInbox.placeThird": "3-е",
+  "teamInbox.placeOther": "{0}-е",
+  "teamInbox.gilWonFinal": "Вы заняли {0} место в финале Prism ({1}) за неделю {2} и выиграли {3} гил. Ответьте здесь, указав свой родной мир и несколько вариантов времени для встречи в игре, и участник команды передаст приз через обмен.",
+  "teamInbox.gilWonHeat": "Вы заняли {0} место в своём заезде Prism ({1}) за неделю {2} и выиграли {3} гил. Ответьте здесь, указав свой родной мир и несколько вариантов времени для встречи в игре, и участник команды передаст приз через обмен.",
+  "teamInbox.gilPaid": "Ваш приз в {0} гил за неделю {1} отмечен как переданный. Приятной игры!",
+  "teamInbox.automatedFallback": "Aetherphone Team прислала вам новость."
 }

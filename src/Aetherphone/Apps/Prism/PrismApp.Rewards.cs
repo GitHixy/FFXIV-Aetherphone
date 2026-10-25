@@ -529,6 +529,12 @@ internal sealed partial class PrismApp
 
         top += Typography.DrawWrappedLeft(new Vector2(left, top),
             Loc.T(chinese ? L.Prism.GilChinese : L.Prism.GilSent), PrismArt.Muted, PrismType.Caption, width);
+        if (!chinese)
+        {
+            top += Typography.DrawWrappedLeft(new Vector2(left, top), Loc.T(L.Prism.GilChocoChat), PrismArt.Muted,
+                PrismType.Caption, width);
+        }
+
         if (chinese || rewardsFor is not { GilNote.Length: > 0 } prizes)
         {
             return top;

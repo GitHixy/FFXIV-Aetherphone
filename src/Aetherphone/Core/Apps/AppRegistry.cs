@@ -47,6 +47,7 @@ using Aetherphone.Core.Home;
 using Aetherphone.Core.Inventory;
 using Aetherphone.Core.Photos;
 using Aetherphone.Core.Shell.Home;
+using Aetherphone.Core.Team;
 using Aetherphone.Core.Telephony;
 using Aetherphone.Core.Video;
 using Aetherphone.Windows;
@@ -96,7 +97,8 @@ internal static class AppRegistry
             Themes = services.Themes,
             Gifs = services.Gifs,
         }, messageStore);
-        var messageApp = new MessageApp(messageStore, contactBook, services.Calls, services.AethernetSession, services.RemoteImages, services.Lodestone, services.DmLauncher, photoLibrary, services.Http, services.Configuration, services.Confirm, services.Translation, services.Report, services.WallpaperImages, services.Musters, services.MusterLauncher, services.SocialNotifications, services.EncryptionSetup, services.EncryptionHelp, services.SettingsLauncher, messagePopouts, services.Gifs);
+        var teamInbox = new TeamInboxStore(services.AethernetSession, dmNet.Team, Plugin.Framework, services.Notifications, services.Visibility, services.RealtimeSignals, "message", Windows.Components.AppPalettes.Message.Accent);
+        var messageApp = new MessageApp(messageStore, contactBook, services.Calls, services.AethernetSession, services.RemoteImages, services.Lodestone, services.DmLauncher, photoLibrary, services.Http, services.Configuration, services.Confirm, services.Translation, services.Report, services.WallpaperImages, services.Musters, services.MusterLauncher, services.SocialNotifications, services.EncryptionSetup, services.EncryptionHelp, services.SettingsLauncher, messagePopouts, services.Gifs, teamInbox);
         messagePopouts.Owner = messageApp;
         apps.Insert(0, messageApp);
         apps.Add(new ChirperApp(services.AethernetSession, new AethernetApi(services.Http, services.AethernetSession, "chirper"), services.Lodestone, services.RemoteImages, photoLibrary, services.SocialLauncher, services.GameData, services.Configuration, services.SocialNotifications, services.WallpaperImages, services.Confirm, services.Translation, services.Report, services.Conduct, services.RealtimeSignals, services.Gifs));

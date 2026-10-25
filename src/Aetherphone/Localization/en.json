@@ -11883,5 +11883,20 @@
   "nameplate.template.games": "Playing [game]",
   "nameplate.template.gamba": "Gambling at [game]",
   "nameplate.template.slotsWin": "Won [chips] chips!",
-  "nameplate.template.slotsLoss": "Lost [chips] chips :("
+  "nameplate.template.slotsLoss": "Lost [chips] chips :(",
+  "prism.gilChocoChat": "The team messages winners in ChocoChat to set up the trade.",
+  "teamInbox.name": "Aetherphone Team",
+  "teamInbox.official": "Official account",
+  "teamInbox.disclosure": "Messages with the Aetherphone Team are not end-to-end encrypted. Staff can read them.",
+  "teamInbox.composerHint": "Message the Aetherphone Team",
+  "teamInbox.repliesClosed": "You can reply once the team messages you.",
+  "teamInbox.empty": "No messages from the team yet",
+  "teamInbox.placeFirst": "1st",
+  "teamInbox.placeSecond": "2nd",
+  "teamInbox.placeThird": "3rd",
+  "teamInbox.placeOther": "#{0}",
+  "teamInbox.gilWonFinal": "You placed {0} in the Prism final ({1}) for week {2} and won {3} gil. Reply here with your home world and a few times you can meet in game, and a staff member will trade it to you.",
+  "teamInbox.gilWonHeat": "You placed {0} in your Prism heat ({1}) for week {2} and won {3} gil. Reply here with your home world and a few times you can meet in game, and a staff member will trade it to you.",
+  "teamInbox.gilPaid": "Your {0} gil prize for week {1} was marked as traded. Enjoy it!",
+  "teamInbox.automatedFallback": "The Aetherphone Team sent you an update."
 }

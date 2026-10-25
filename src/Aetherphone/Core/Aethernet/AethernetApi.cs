@@ -36,6 +36,7 @@ internal sealed class AethernetApi
         Games = new GamesClient(net);
         Scores = new ScoresClient(net);
         Campaigns = new CampaignClient(net);
+        Team = new TeamClient(net);
     }
 
     public AuthClient Auth { get; }
@@ -65,4 +66,5 @@ internal sealed class AethernetApi
     public GamesClient Games { get; }
     public ScoresClient Scores { get; }
     public CampaignClient Campaigns { get; }
+    public TeamClient Team { get; }
 }
