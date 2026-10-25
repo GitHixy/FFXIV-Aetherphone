@@ -1201,6 +1201,7 @@
   "changelog.r1400.41": "Se corrigió que los iconos quedaran ligeramente descentrados en sus botones y temblaran al pasar el cursor, contribuido por t3sco",
   "changelog.r1400.68": "Se corrigió que tocar la parte de arriba del botón Buscar en la pantalla de inicio abriera la app que está justo encima",
   "changelog.r1400.69": "Se corrigió que los selectores de fotos no mostraran una foto que hiciste o importaste mientras estaban abiertos hasta que salías y volvías",
+  "changelog.r1400.72": "Se corrigió que mensajes, publicaciones y comentarios partieran un número como 100.000 en dos líneas",
   "changelog.r1400.70": "Se añadió el ajuste Tamaño de la lista a ChocoChat y Linkpearl: Cómodo, Estándar o Compacto, para que quepan más chats y contactos en pantalla, contribuido por hellovvn",
   "changelog.r1400.71": "Corregido que Linkpearl aplastara el retrato de cuerpo entero dentro de la imagen redonda en el perfil de alguien que no es tu amigo: ahora muestra su cara, contribuido por hellovvn",
   "changelog.r1400.43": "Se añadieron Bloquear posición y Siempre visible en Ajustes > Teléfono minimizado, para dejar el miniteléfono donde lo pusiste o permitir que otras ventanas queden encima, contribuido por hellovvn",

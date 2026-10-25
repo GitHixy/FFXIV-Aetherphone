@@ -11,6 +11,7 @@ internal enum HoverLabelSide : byte
     Above,
     Left,
     Right,
+    BelowEnd,
 }
 
 internal static class HoverButton
