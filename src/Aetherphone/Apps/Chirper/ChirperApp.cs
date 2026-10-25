@@ -284,6 +284,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     private readonly List<string> composeAttachments = new();
     private bool composePicking;
     private string[] composePickerPaths = Array.Empty<string>();
+    private PhotoLibraryWatch composePickerLibraryWatch;
+    private bool composePickerGifsOnly;
     private string? pendingComposePickedPath;
     private readonly ImageIntake composeIntake = new();
     private bool composeFieldActive;

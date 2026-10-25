@@ -102,6 +102,7 @@ internal abstract class ChatThreadView<TMessage, TThread> : IDisposable, IChatTr
     private volatile int imageSaveOutcome;
     private volatile bool imageSaveBusy;
     private string[] pickerPaths = Array.Empty<string>();
+    private PhotoLibraryWatch pickerLibraryWatch;
     private string? pickerThreadId;
     private string? pendingPickedPath;
     private string pickerNotice = string.Empty;
@@ -1279,9 +1280,14 @@ internal abstract class ChatThreadView<TMessage, TThread> : IDisposable, IChatTr
         if (pickerThreadId != threadId)
         {
             pickerThreadId = threadId;
+            pickerLibraryWatch.Mark(library);
             pickerPaths = library.List();
             pendingPickedPath = null;
             pickerNotice = string.Empty;
+        }
+        else if (pickerLibraryWatch.Changed(library))
+        {
+            pickerPaths = library.List();
         }
 
         var picked = Interlocked.Exchange(ref pendingPickedPath, null);

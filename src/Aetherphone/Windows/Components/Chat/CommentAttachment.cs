@@ -23,6 +23,7 @@ internal sealed class CommentAttachment
     private GifPick? gif;
     private bool panelOpen;
     private string[] pickerPaths = Array.Empty<string>();
+    private PhotoLibraryWatch libraryWatch;
     private string notice = string.Empty;
     private string? pendingImport;
 
@@ -125,6 +126,7 @@ internal sealed class CommentAttachment
         panelOpen = !panelOpen;
         if (panelOpen)
         {
+            libraryWatch.Mark(library);
             pickerPaths = library.List();
             notice = string.Empty;
             emoji.Close();
@@ -205,6 +207,11 @@ internal sealed class CommentAttachment
         if (!panelOpen)
         {
             return;
+        }
+
+        if (libraryWatch.Changed(library))
+        {
+            pickerPaths = library.List();
         }
 
         UiInteract.HoverOverlay(panel);

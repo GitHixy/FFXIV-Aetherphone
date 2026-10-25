@@ -623,6 +623,7 @@ internal sealed partial class FeedbackApp
 
     private void OpenPicker()
     {
+        pickerLibraryWatch.Mark(library);
         pickerPaths = library.List();
         router.Push(FeedbackRoute.Photos);
     }

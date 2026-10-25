@@ -433,6 +433,11 @@ internal sealed partial class ChirperApp
 
     private void DrawComposePicker(Rect area)
     {
+        if (composePickerLibraryWatch.Changed(library))
+        {
+            ListComposePicker();
+        }
+
         SocialChrome.DrawScreenHeader(area, Loc.T(L.Chirper.AddPhotos), ChirperInk.Shared, closeComposePicker,
             ScreenTitleStyle);
         var scale = UiScale.Current;
@@ -526,36 +531,41 @@ internal sealed partial class ChirperApp
 
     private void OpenComposePicker(bool gifsOnly)
     {
+        composePickerGifsOnly = gifsOnly;
+        composePickerLibraryWatch.Mark(library);
+        ListComposePicker();
+        composePicking = true;
+    }
+
+    private void ListComposePicker()
+    {
         var all = library.List();
-        if (!gifsOnly)
+        if (!composePickerGifsOnly)
         {
             composePickerPaths = all;
+            return;
         }
-        else
+
+        var gifCount = 0;
+        for (var index = 0; index < all.Length; index++)
         {
-            var gifCount = 0;
-            for (var index = 0; index < all.Length; index++)
+            if (GifMedia.IsGif(all[index]))
             {
-                if (GifMedia.IsGif(all[index]))
-                {
-                    gifCount++;
-                }
+                gifCount++;
             }
-
-            var gifs = new string[gifCount];
-            var cursor = 0;
-            for (var index = 0; index < all.Length; index++)
-            {
-                if (GifMedia.IsGif(all[index]))
-                {
-                    gifs[cursor++] = all[index];
-                }
-            }
-
-            composePickerPaths = gifs;
         }
 
-        composePicking = true;
+        var gifs = new string[gifCount];
+        var cursor = 0;
+        for (var index = 0; index < all.Length; index++)
+        {
+            if (GifMedia.IsGif(all[index]))
+            {
+                gifs[cursor++] = all[index];
+            }
+        }
+
+        composePickerPaths = gifs;
     }
 
     private bool ComposeHasGif()
