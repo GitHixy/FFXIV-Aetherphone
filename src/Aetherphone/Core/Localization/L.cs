@@ -2480,6 +2480,8 @@ internal static class L
                 "Fixed messages, posts and comments splitting a number like 100,000 across two lines"),
             new("changelog.r1400.73",
                 "Fixed long setting names next to a switch being cut off with an ellipsis: they now wrap onto a second line"),
+            new("changelog.r1400.74",
+                "Fixed long button labels in Settings running past the edges of the button: they now wrap onto a second line"),
         };
 
         public static readonly LocString[] Release1400Market =
