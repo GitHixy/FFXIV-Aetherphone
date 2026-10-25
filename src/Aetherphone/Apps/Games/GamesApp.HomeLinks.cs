@@ -56,7 +56,7 @@ internal sealed partial class GamesApp : IHomeLinkTarget
 
         var hit = new Vector2(MathF.Max(radius, Metrics.Size.TapTarget * 0.5f * scale));
         HoverTooltip.Show(HomeChipTooltipId, new Rect(center - hit, center + hit),
-            Loc.T(onHome ? L.HomeLinks.OnHome : L.HomeLinks.AddToHome), HoverLabelSide.Left);
+            Loc.T(onHome ? L.HomeLinks.OnHome : L.HomeLinks.AddToHome), HoverLabelSide.BelowEnd);
         return center.X - radius - StageLayout.CoinChipGap * scale;
     }
 

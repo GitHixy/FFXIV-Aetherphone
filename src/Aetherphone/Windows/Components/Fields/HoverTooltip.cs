@@ -155,8 +155,9 @@ internal static class HoverTooltip
         var centerY = side == HoverLabelSide.Above
             ? target.Min.Y - gap - height * 0.5f + rise
             : target.Max.Y + gap + height * 0.5f - rise;
+        var anchorX = side == HoverLabelSide.BelowEnd ? target.Max.X - width * 0.5f : target.Center.X;
         var centerX = right - left > width
-            ? Math.Clamp(target.Center.X, left + width * 0.5f, right - width * 0.5f)
+            ? Math.Clamp(anchorX, left + width * 0.5f, right - width * 0.5f)
             : (left + right) * 0.5f;
         return new Vector2(centerX, centerY);
     }
