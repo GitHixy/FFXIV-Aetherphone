@@ -75,7 +75,7 @@ internal sealed class GlamStore : IDisposable
     private readonly HashSet<string> triedOn = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, bool> follows = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, bool> followLookups = new(StringComparer.Ordinal);
-    private readonly ConcurrentDictionary<string, bool> removedIds = new(StringComparer.Ordinal);
+    private readonly RemovalMarks removedIds = new();
 
     private Func<string?, CancellationToken, Action<AepFailure>?, Task<GlamPage?>>? listFetch;
     private volatile string listKey = string.Empty;
@@ -135,7 +135,7 @@ internal sealed class GlamStore : IDisposable
 
         if (string.Equals(removal.Kind, ContentRemovalKinds.Glam, StringComparison.Ordinal))
         {
-            removedIds[contentId] = true;
+            removedIds.Mark(contentId);
         }
         else if (!string.Equals(removal.Kind, ContentRemovalKinds.Look, StringComparison.Ordinal))
         {
@@ -253,40 +253,34 @@ internal sealed class GlamStore : IDisposable
 
     public FeedLane<GlamDto> Lane(GlamScope scope) => discover[(int)scope];
 
-    public bool IsRemoved(string glamId) => removedIds.ContainsKey(glamId);
+    public bool IsRemoved(string glamId) => removedIds.Contains(glamId);
 
-    private GlamDto[] Visible(GlamDto[]? items)
+    private GlamDto[] Visible(GlamDto[]? items, long requestedAfter)
     {
         if (items is null || items.Length == 0)
         {
             return Array.Empty<GlamDto>();
         }
 
-        var kept = 0;
+        List<GlamDto>? kept = null;
         for (var index = 0; index < items.Length; index++)
         {
-            if (!removedIds.ContainsKey(items[index].Id))
+            var hidden = removedIds.Hidden(items[index].Id, requestedAfter);
+            if (hidden && kept is null)
             {
-                kept++;
+                kept = new List<GlamDto>(items.Length);
+                for (var earlier = 0; earlier < index; earlier++)
+                {
+                    kept.Add(items[earlier]);
+                }
+            }
+            else if (!hidden)
+            {
+                kept?.Add(items[index]);
             }
         }
 
-        if (kept == items.Length)
-        {
-            return items;
-        }
-
-        var visible = new GlamDto[kept];
-        var next = 0;
-        for (var index = 0; index < items.Length; index++)
-        {
-            if (!removedIds.ContainsKey(items[index].Id))
-            {
-                visible[next++] = items[index];
-            }
-        }
-
-        return visible;
+        return kept is null ? items : kept.ToArray();
     }
 
     public FeedLane<GlamDto> List => list;
@@ -341,6 +335,7 @@ internal sealed class GlamStore : IDisposable
         var fits = unfiltered ? default : body;
         var started = unfiltered ? -1 : epoch;
         lane.Loading = true;
+        var requestedAfter = removedIds.Current;
         work.Run("discover", async token =>
         {
             var reported = AepFailure.None;
@@ -357,7 +352,7 @@ internal sealed class GlamStore : IDisposable
                 return;
             }
 
-            lane.ApplyRefresh(Visible(page.Items), page.NextCursor);
+            lane.ApplyRefresh(Visible(page.Items, requestedAfter), page.NextCursor);
         }, () =>
         {
             if (started < 0 || started == epoch)
@@ -386,12 +381,13 @@ internal sealed class GlamStore : IDisposable
         var fits = unfiltered ? default : body;
         var started = unfiltered ? -1 : epoch;
         lane.LoadingMore = true;
+        var requestedAfter = removedIds.Current;
         work.Run("discover more", async token =>
         {
             var page = await client.FeedAsync(key, only, fits, cursor, token).ConfigureAwait(false);
             if (page is not null && (started < 0 || started == epoch))
             {
-                lane.ApplyMore(Visible(page.Items), page.NextCursor);
+                lane.ApplyMore(Visible(page.Items, requestedAfter), page.NextCursor);
             }
         }, () =>
         {
@@ -469,6 +465,7 @@ internal sealed class GlamStore : IDisposable
         var glamId = glam.Id;
         var authorId = author.Id;
         moreFor = glamId;
+        var requestedAfter = removedIds.Current;
         work.Run("more from", async token =>
         {
             var page = await client.UserGlamsAsync(authorId, null, token).ConfigureAwait(false);
@@ -480,7 +477,7 @@ internal sealed class GlamStore : IDisposable
             var kept = new List<GlamDto>(MoreLimit);
             for (var index = 0; index < items.Length && kept.Count < MoreLimit; index++)
             {
-                if (items[index].Id != glamId && !removedIds.ContainsKey(items[index].Id))
+                if (items[index].Id != glamId && !removedIds.Hidden(items[index].Id, requestedAfter))
                 {
                     kept.Add(items[index]);
                 }
@@ -509,12 +506,13 @@ internal sealed class GlamStore : IDisposable
     {
         var key = listKey;
         list.LoadingMore = true;
+        var requestedAfter = removedIds.Current;
         work.Run("list more", async token =>
         {
             var page = await fetch(cursor, token, null).ConfigureAwait(false);
             if (page is not null && key == listKey)
             {
-                list.ApplyMore(Visible(page.Items), page.NextCursor);
+                list.ApplyMore(Visible(page.Items, requestedAfter), page.NextCursor);
             }
         }, () =>
         {
@@ -537,6 +535,7 @@ internal sealed class GlamStore : IDisposable
             return;
         }
 
+        var requestedAfter = removedIds.Current;
         work.Run("glam", async token =>
         {
             var failure = AepFailure.None;
@@ -548,7 +547,10 @@ internal sealed class GlamStore : IDisposable
 
             if (fetched is not null)
             {
-                Replace(fetched);
+                if (!removedIds.Hidden(glamId, requestedAfter))
+                {
+                    Replace(fetched);
+                }
             }
             else if (failure.StatusCode == NotFoundStatus)
             {
@@ -566,7 +568,7 @@ internal sealed class GlamStore : IDisposable
 
     private void Gone(string glamId)
     {
-        removedIds[glamId] = true;
+        removedIds.Mark(glamId);
         QueueRemoval(new ContentRemovalSignal(SocialActivity.PrismApp, ContentRemovalKinds.Glam, glamId, null));
     }
 
@@ -829,6 +831,7 @@ internal sealed class GlamStore : IDisposable
     private void FetchShowcase(int slot, bool vanilla)
     {
         Volatile.Write(ref showcaseLoading[slot], true);
+        var requestedAfter = removedIds.Current;
         work.Run("showcase", async token =>
         {
             var page = await client.FeedAsync(GlamClient.ScopePopular, vanilla, default, null, token)
@@ -837,7 +840,7 @@ internal sealed class GlamStore : IDisposable
             for (var index = 0; index < items.Length; index++)
             {
                 if (items[index].Vanilla == vanilla && items[index].Photos is { Length: > 0 } &&
-                    !removedIds.ContainsKey(items[index].Id))
+                    !removedIds.Hidden(items[index].Id, requestedAfter))
                 {
                     Volatile.Write(ref showcase[slot], items[index]);
                     return;
@@ -959,6 +962,7 @@ internal sealed class GlamStore : IDisposable
         list.Clear();
         list.Loading = true;
         var opened = ++listOpened;
+        var requestedAfter = removedIds.Current;
         work.Run("list", async token =>
         {
             var reported = AepFailure.None;
@@ -974,7 +978,7 @@ internal sealed class GlamStore : IDisposable
                 return;
             }
 
-            list.ApplyRefresh(Visible(page.Items), page.NextCursor);
+            list.ApplyRefresh(Visible(page.Items, requestedAfter), page.NextCursor);
         }, () =>
         {
             if (opened == listOpened)
@@ -1018,7 +1022,7 @@ internal sealed class GlamStore : IDisposable
 
     public void Purge(string glamId)
     {
-        removedIds[glamId] = true;
+        removedIds.Mark(glamId);
         if (bannerFor == glamId)
         {
             banner = null;
