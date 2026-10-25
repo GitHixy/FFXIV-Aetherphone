@@ -1,5 +1,6 @@
 using Aetherphone.Core.Apps;
 using Aetherphone.Core.Home;
+using Aetherphone.Core.Localization;
 using Aetherphone.Core.Shortcuts;
 using Aetherphone.Core.Theme;
 using Dalamud.Bindings.ImGui;
@@ -310,6 +311,22 @@ internal static class HomeTileView
         DrawLabel(center, size, shortcut.Name, theme, scale, labelAlpha, showLabels, labelWidth, zoom);
     }
 
+    public static void DrawLink(Vector2 center, float size, HomeLink link, PhoneTheme theme, float drawScale,
+        float labelAlpha, bool showLabels, float labelWidth, float zoom = 1f, PointerState pointer = default)
+    {
+        var scale = UiScale.Current * zoom;
+        var dl = ImGui.GetWindowDrawList();
+        var drawHalf = size * 0.5f * drawScale;
+        var min = new Vector2(center.X - drawHalf, center.Y - drawHalf);
+        var max = new Vector2(center.X + drawHalf, center.Y + drawHalf);
+        var radius = size * Metrics.Radius.HomeTileFactor * drawScale;
+        var firstVertex = dl.VtxBuffer.Size;
+        Material.PointerHalo(dl, min, max, radius, pointer.Lift, scale);
+        link.Target.DrawLinkIcon(link.Argument, min, max, true);
+        FinishPointer(dl, firstVertex, center, min, max, radius, drawHalf, pointer, scale);
+        DrawLabel(center, size, Loc.T(link.Title), theme, scale, labelAlpha, showLabels, labelWidth, zoom);
+    }
+
     public static void DrawFolder(Vector2 center, float size, HomeTile folder, PhoneTheme theme, float drawScale,
         float labelAlpha, bool showLabels, string fallbackName, float labelWidth,
         Func<ShortcutEntry, IDalamudTextureWrap?> shortcutIcon, Configuration configuration, float zoom = 1f,
@@ -384,6 +401,13 @@ internal static class HomeTileView
             if (member.IsShortcut)
             {
                 ShortcutArt.DrawSurface(dl, cellCenter, mini, member.Shortcut!, shortcutIcon(member.Shortcut!), scale);
+                continue;
+            }
+
+            if (member.Link is { } link)
+            {
+                var half = new Vector2(mini * 0.5f);
+                link.Target.DrawLinkIcon(link.Argument, cellCenter - half, cellCenter + half, false);
                 continue;
             }
 

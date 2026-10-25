@@ -89,9 +89,9 @@ internal sealed class CasinoLauncher
         }
     }
 
-    public bool TryConsume(out CasinoLaunch launch)
+    public bool TryConsume(bool stateLoaded, out CasinoLaunch launch)
     {
-        if (pending is not { } held)
+        if (pending is not { } held || (held.Kind == CasinoLaunchKind.Game && !stateLoaded))
         {
             launch = default;
             return false;

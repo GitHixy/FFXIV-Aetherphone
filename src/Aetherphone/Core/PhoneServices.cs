@@ -59,6 +59,7 @@ namespace Aetherphone.Core;
 internal sealed class PhoneServices : IDisposable
 {
     public required Home.AppInstaller Installer { get; init; }
+    public required Home.HomeLinks HomeLinks { get; init; }
     public required Configuration Configuration { get; init; }
     public required ThemeProvider Themes { get; init; }
     public required Home.HomeLookService Looks { get; init; }
@@ -496,6 +497,7 @@ internal sealed class PhoneServices : IDisposable
         return new PhoneServices
         {
             Installer = installer,
+            HomeLinks = new Home.HomeLinks(),
             Configuration = configuration,
             MinimizedLayout = new Shell.MinimizedLayoutService(configuration),
             MinimizedPreview = new Shell.MinimizedPreview(),

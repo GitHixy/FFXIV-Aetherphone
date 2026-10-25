@@ -65,6 +65,27 @@ internal static class CasinoArt
             ImGui.GetColorU32(White with { W = alpha }), ImGui.GetColorU32(surface with { W = alpha }));
     }
 
+    public static void HomeTile(ImDrawListPtr drawList, string gameId, Vector2 min, Vector2 max, bool elevated)
+    {
+        var scale = UiScale.Current;
+        var side = MathF.Min(max.X - min.X, max.Y - min.Y);
+        var radius = side * Metrics.Radius.HomeTileFactor;
+        var surface = IconTile.Surface(TintOf(gameId));
+        if (elevated)
+        {
+            Elevation.IconRest(drawList, min, max, radius, scale);
+        }
+
+        IconTile.FillShaded(drawList, min, max, radius, surface);
+        if (elevated)
+        {
+            Material.EdgeSquircle(drawList, min, max, radius, scale);
+        }
+
+        CasinoGlyphs.Draw(drawList, gameId, (min + max) * 0.5f, side * GlyphExtentFactor, ImGui.GetColorU32(White),
+            ImGui.GetColorU32(surface));
+    }
+
     public static void IconTileAt(ImDrawListPtr drawList, Vector2 center, float size, Vector4 tint,
         FontAwesomeIcon icon)
     {

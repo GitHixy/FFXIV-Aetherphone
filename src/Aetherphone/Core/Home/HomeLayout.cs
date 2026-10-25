@@ -34,4 +34,6 @@ internal sealed class HomeItem
     public int StackIndex { get; set; }
     public bool SmartRotate { get; set; } = true;
     public string ShortcutId { get; set; } = string.Empty;
+    public string LinkAppId { get; set; } = string.Empty;
+    public string LinkArgument { get; set; } = string.Empty;
 }

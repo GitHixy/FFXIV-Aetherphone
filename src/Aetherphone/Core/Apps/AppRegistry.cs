@@ -137,7 +137,7 @@ internal static class AppRegistry
         apps.Add(new GamesApp(services.GameStats, services.GameData, services.Textures, services.Coins,
             services.CoinSessions, services.GameRooms, services.Configuration, services.Leaderboard,
             services.RemoteImages, services.Lodestone, services.MoogleClicker, services.SettingsLauncher,
-            services.Confirm));
+            services.Confirm, services.HomeLinks));
         apps.Add(new NotificationsApp(services, apps));
         var calendarEvents = new CalendarEvents(services.Http, services.AethernetSession);
         apps.Add(new CalendarApp(services.Configuration, calendarEvents, services.Confirm));
@@ -149,7 +149,7 @@ internal static class AppRegistry
             services.CasinoTurns, services.CasinoLauncher, services.GameStats, services.Confirm,
             services.Conduct, services.RemoteImages, services.Lodestone, services.Holdem, services.CasinoVenue,
             services.CasinoTrade, services.Report, services.CasinoFloor, services.Configuration,
-            services.CasinoFameChoice, services.ChatRolls));
+            services.CasinoFameChoice, services.ChatRolls, services.HomeLinks));
         var appStore = new AppStoreApp(services.Installer, services.Confirm, apps);
         apps.Add(appStore);
         apps.Add(new HousingApp(services.Housing, services.Configuration, services.Confirm));

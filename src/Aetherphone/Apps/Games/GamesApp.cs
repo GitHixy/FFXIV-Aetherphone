@@ -69,6 +69,7 @@ using Aetherphone.Core.Changelog;
 using Aetherphone.Core.Confirm;
 using Aetherphone.Core.Game;
 using Aetherphone.Core.Games;
+using Aetherphone.Core.Home;
 using Aetherphone.Core.Honorific;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Lodestone;
@@ -131,6 +132,7 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
     private readonly RemoteImageCache images;
     private readonly LodestoneService lodestone;
     private readonly SettingsLauncher settingsLauncher;
+    private readonly HomeLinks homeLinks;
     private readonly OnlineHub onlineHub;
     private readonly OnlineRoomView onlineRoom;
     private readonly IMiniGame[] games;
@@ -177,7 +179,7 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
         Core.Coins.CoinStore coins, Core.Coins.CoinGameSessionTracker coinSessions,
         GameRoomsStore gameRooms, Configuration configuration, LeaderboardStore leaderboard, RemoteImageCache images,
         LodestoneService lodestone, MoogleClickerService moogleClicker, SettingsLauncher settingsLauncher,
-        ConfirmService confirm)
+        ConfirmService confirm, HomeLinks homeLinks)
     {
         this.stats = stats;
         this.configuration = configuration;
@@ -188,6 +190,7 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
         this.images = images;
         this.lodestone = lodestone;
         this.settingsLauncher = settingsLauncher;
+        this.homeLinks = homeLinks;
         refreshLeaderboard = RefreshLeaderboardNow;
         session = new GameSession(stats, leaderboard, leaderboard);
         fx = new ScreenFx(backdrop);
@@ -982,7 +985,9 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
             }
         }
 
-        var rightEdge = landscape ? 0f : DrawPauseChip(drawList, full, theme, radius, scale);
+        var rightEdge = session.State == StageFlow.Intro
+            ? DrawHomeChip(drawList, full, theme, radius, scale, landscape ? 0f : full.Max.X - Metrics.Space.Md * scale)
+            : landscape ? 0f : DrawPauseChip(drawList, full, theme, radius, scale);
         var chip = BuildCoinSessionChip();
         if (!chip.Visible)
         {

@@ -55,6 +55,15 @@ internal sealed class StageChrome
         return Chip(drawList, center, chipRadius, paused ? FontAwesomeIcon.Play : FontAwesomeIcon.Pause, theme, scale);
     }
 
+    public bool HomeChip(ImDrawListPtr drawList, Vector2 center, float chipRadius, PhoneTheme theme, float scale,
+        bool onHome)
+    {
+        pauseCenter = center;
+        radius = HitRadius(chipRadius, scale);
+        pauseShown = true;
+        return Chip(drawList, center, chipRadius, onHome ? FontAwesomeIcon.Check : FontAwesomeIcon.Plus, theme, scale);
+    }
+
     public void RecordCoinChip(Rect rect)
     {
         coinRect = rect;

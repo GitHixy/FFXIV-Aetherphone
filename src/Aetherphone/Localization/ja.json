@@ -11883,5 +11883,9 @@
   "nameplate.template.games": "[game] をプレイ中",
   "nameplate.template.gamba": "[game] で勝負中",
   "nameplate.template.slotsWin": "[chips] チップ獲得！",
-  "nameplate.template.slotsLoss": "[chips] チップ負け :("
+  "nameplate.template.slotsLoss": "[chips] チップ負け :(",
+  "homeLinks.addToHome": "ホーム画面に追加",
+  "homeLinks.onHome": "ホーム画面にあります",
+  "homeLinks.added": "{0}をホーム画面に追加しました",
+  "homeLinks.alreadyThere": "{0}はすでにホーム画面にあります"
 }
