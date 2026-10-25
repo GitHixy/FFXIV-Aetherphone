@@ -1203,6 +1203,7 @@
   "changelog.r1400.69": "Se corrigió que los selectores de fotos no mostraran una foto que hiciste o importaste mientras estaban abiertos hasta que salías y volvías",
   "changelog.r1400.72": "Se corrigió que mensajes, publicaciones y comentarios partieran un número como 100.000 en dos líneas",
   "changelog.r1400.73": "Se corrigió que los nombres largos de ajustes junto a un interruptor se cortaran con puntos suspensivos: ahora pasan a una segunda línea",
+  "changelog.r1400.74": "Se corrigió que los textos largos de los botones de Ajustes se salieran del botón: ahora pasan a una segunda línea",
   "changelog.r1400.70": "Se añadió el ajuste Tamaño de la lista a ChocoChat y Linkpearl: Cómodo, Estándar o Compacto, para que quepan más chats y contactos en pantalla, contribuido por hellovvn",
   "changelog.r1400.71": "Corregido que Linkpearl aplastara el retrato de cuerpo entero dentro de la imagen redonda en el perfil de alguien que no es tu amigo: ahora muestra su cara, contribuido por hellovvn",
   "changelog.r1400.43": "Se añadieron Bloquear posición y Siempre visible en Ajustes > Teléfono minimizado, para dejar el miniteléfono donde lo pusiste o permitir que otras ventanas queden encima, contribuido por hellovvn",
