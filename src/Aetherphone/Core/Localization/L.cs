@@ -2476,6 +2476,8 @@ internal static class L
                 "Fixed tapping the top of the Search button on the home screen opening the app just above it"),
             new("changelog.r1400.69",
                 "Fixed photo pickers leaving out a photo you took or imported while they were open until you left and came back"),
+            new("changelog.r1400.72",
+                "Fixed messages, posts and comments splitting a number like 100,000 across two lines"),
         };
 
         public static readonly LocString[] Release1400Market =
