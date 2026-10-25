@@ -44,6 +44,33 @@ public sealed class PhotoLibraryWatchTests : IDisposable
     }
 
     [Fact]
+    public void DeletingAPhotoIsReported()
+    {
+        var photo = CreatePhoto("AEP_20261025_101500_000.png");
+        var watch = new PhotoLibraryWatch();
+        watch.Mark(library);
+
+        library.Delete(photo);
+
+        Assert.True(watch.Changed(library));
+        Assert.Empty(library.List());
+    }
+
+    [Fact]
+    public void RecoveringAPhotoIsReported()
+    {
+        library.Delete(CreatePhoto("AEP_20261025_101500_000.png"));
+        var trashed = Assert.Single(library.ListTrash());
+        var watch = new PhotoLibraryWatch();
+        watch.Mark(library);
+
+        var recovered = library.Restore(trashed);
+
+        Assert.True(watch.Changed(library));
+        Assert.Equal(recovered, Assert.Single(library.List()));
+    }
+
+    [Fact]
     public void AChangeBeforeMarkingIsNotReported()
     {
         var watch = new PhotoLibraryWatch();
@@ -51,5 +78,12 @@ public sealed class PhotoLibraryWatchTests : IDisposable
         watch.Mark(library);
 
         Assert.False(watch.Changed(library));
+    }
+
+    private string CreatePhoto(string name)
+    {
+        var path = Path.Combine(library.DirectoryPath, name);
+        File.WriteAllBytes(path, new byte[] { 1, 2, 3 });
+        return path;
     }
 }
