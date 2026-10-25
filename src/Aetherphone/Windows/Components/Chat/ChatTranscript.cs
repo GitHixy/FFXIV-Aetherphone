@@ -293,9 +293,11 @@ internal sealed class ChatTranscript
     private const float OlderRestoreTimeout = 20f;
 
     private const int RowSweepThreshold = 256;
+    private const string SenderKeyPrefix = "chattranscript.sender.";
 
     private readonly ChatEntranceTracker entrances = new();
     private readonly Dictionary<string, RowLayout> rowLayouts = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> senderKeys = new(StringComparer.Ordinal);
     private int lastRowSweepFrame = -1;
     private string? followThreadId;
     private bool followBottom;
@@ -686,7 +688,7 @@ internal sealed class ChatTranscript
         var textLeft = mine ? origin.X + available - blockWidth : origin.X + 4f * scale;
         var rect = new Vector2(textLeft, origin.Y);
         var hovering = UiInteract.Hover(rect, new Vector2(rect.X + blockWidth, rect.Y + 16f * scale));
-        UserName.Draw("chattranscript.sender." + message.Id, name, message.SenderBadges, message.SenderBadgeIds,
+        UserName.Draw(SenderKey(message.Id), name, message.SenderBadges, message.SenderBadgeIds,
             textLeft, origin.Y, mine ? nameWidth : maxWidth, nameStyle, message.SenderTint, hovering, theme);
         if (message.ChannelTag.Length > 0)
         {
@@ -740,6 +742,23 @@ internal sealed class ChatTranscript
 
     private string DisplayName(string senderName) => fullSenderNames ? senderName : FirstName(senderName);
 
+    private string SenderKey(string messageId)
+    {
+        if (senderKeys.TryGetValue(messageId, out var key))
+        {
+            return key;
+        }
+
+        if (senderKeys.Count > RowSweepThreshold)
+        {
+            senderKeys.Clear();
+        }
+
+        key = string.Concat(SenderKeyPrefix, messageId);
+        senderKeys[messageId] = key;
+        return key;
+    }
+
     private SenderHeader TakeSenderHeader(TranscriptMessage message, float maxWidth, float scale)
     {
         if (!senderHeaderPending)
@@ -771,7 +790,7 @@ internal sealed class ChatTranscript
         var origin = fx.Apply(topLeft);
         var bounds = new Rect(origin, new Vector2(origin.X + header.Width, origin.Y + header.Height));
         var hovering = UiInteract.Hover(bounds.Min, bounds.Max);
-        UserName.Draw("chattranscript.sender." + message.Id, name, message.SenderBadges, message.SenderBadgeIds,
+        UserName.Draw(SenderKey(message.Id), name, message.SenderBadges, message.SenderBadgeIds,
             origin.X, origin.Y, header.NameWidth, SenderNameStyle,
             Palette.WithAlpha(message.SenderTint, message.SenderTint.W * fx.Alpha), hovering, theme);
         if (message.ChannelTag.Length > 0 && header.Width > header.NameWidth)

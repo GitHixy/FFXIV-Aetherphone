@@ -11887,5 +11887,20 @@
   "homeLinks.addToHome": "Ana Ekrana Ekle",
   "homeLinks.onHome": "Ana Ekranında",
   "homeLinks.added": "{0} Ana Ekrana eklendi",
-  "homeLinks.alreadyThere": "{0} zaten Ana Ekranında"
+  "homeLinks.alreadyThere": "{0} zaten Ana Ekranında",
+  "prism.gilChocoChat": "Ekip, takası ayarlamak için kazananlara ChocoChat'ten yazar.",
+  "teamInbox.name": "Aetherphone Team",
+  "teamInbox.official": "Resmi hesap",
+  "teamInbox.disclosure": "Aetherphone Team ile mesajlar uçtan uca şifreli değildir. Ekip bunları okuyabilir.",
+  "teamInbox.composerHint": "Aetherphone Team'e mesaj yaz",
+  "teamInbox.repliesClosed": "Ekip sana yazdığında yanıt verebilirsin.",
+  "teamInbox.empty": "Henüz ekipten mesaj yok",
+  "teamInbox.placeFirst": "1.",
+  "teamInbox.placeSecond": "2.",
+  "teamInbox.placeThird": "3.",
+  "teamInbox.placeOther": "{0}.",
+  "teamInbox.gilWonFinal": "{2}. haftanın Prism finalinde ({1}) {0} oldun ve {3} gil kazandın. Ana dünyanı ve oyunda buluşabileceğin birkaç saati buraya yaz, bir ekip üyesi ödülünü takasla versin.",
+  "teamInbox.gilWonHeat": "{2}. haftanın Prism elemesinde ({1}) {0} oldun ve {3} gil kazandın. Ana dünyanı ve oyunda buluşabileceğin birkaç saati buraya yaz, bir ekip üyesi ödülünü takasla versin.",
+  "teamInbox.gilPaid": "{1}. haftanın {0} gil ödülü teslim edildi olarak işaretlendi. İyi eğlenceler!",
+  "teamInbox.automatedFallback": "Aetherphone Team sana bir güncelleme gönderdi."
 }

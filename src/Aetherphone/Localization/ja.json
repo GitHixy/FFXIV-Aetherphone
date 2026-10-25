@@ -11887,5 +11887,20 @@
   "homeLinks.addToHome": "ホーム画面に追加",
   "homeLinks.onHome": "ホーム画面にあります",
   "homeLinks.added": "{0}をホーム画面に追加しました",
-  "homeLinks.alreadyThere": "{0}はすでにホーム画面にあります"
+  "homeLinks.alreadyThere": "{0}はすでにホーム画面にあります",
+  "prism.gilChocoChat": "受け渡しの日程は、チームがChocoChatで受賞者に連絡して決めます。",
+  "teamInbox.name": "Aetherphone Team",
+  "teamInbox.official": "公式アカウント",
+  "teamInbox.disclosure": "Aetherphone Teamとのメッセージはエンドツーエンド暗号化されていません。スタッフが読むことができます。",
+  "teamInbox.composerHint": "Aetherphone Teamにメッセージ",
+  "teamInbox.repliesClosed": "チームからメッセージが届くと返信できます。",
+  "teamInbox.empty": "チームからのメッセージはまだありません",
+  "teamInbox.placeFirst": "1位",
+  "teamInbox.placeSecond": "2位",
+  "teamInbox.placeThird": "3位",
+  "teamInbox.placeOther": "{0}位",
+  "teamInbox.gilWonFinal": "第{2}週のPrism決勝（{1}）で{0}になり、{3}ギルを獲得しました。ここにホームワールドとゲーム内でお会いできる日時をいくつか返信してください。スタッフがトレードでお渡しします。",
+  "teamInbox.gilWonHeat": "第{2}週のPrism予選（{1}）で{0}になり、{3}ギルを獲得しました。ここにホームワールドとゲーム内でお会いできる日時をいくつか返信してください。スタッフがトレードでお渡しします。",
+  "teamInbox.gilPaid": "第{1}週の賞品{0}ギルは受け渡し済みになりました。お楽しみください！",
+  "teamInbox.automatedFallback": "Aetherphone Teamからお知らせが届きました。"
 }

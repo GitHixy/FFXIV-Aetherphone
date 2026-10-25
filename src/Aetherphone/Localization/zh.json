@@ -11887,5 +11887,20 @@
   "homeLinks.addToHome": "添加到主屏幕",
   "homeLinks.onHome": "已在主屏幕上",
   "homeLinks.added": "已将{0}添加到主屏幕",
-  "homeLinks.alreadyThere": "{0}已在主屏幕上"
+  "homeLinks.alreadyThere": "{0}已在主屏幕上",
+  "prism.gilChocoChat": "团队会通过 ChocoChat 联系获奖者，约好交易时间。",
+  "teamInbox.name": "Aetherphone Team",
+  "teamInbox.official": "官方账号",
+  "teamInbox.disclosure": "与 Aetherphone Team 的消息没有端到端加密，工作人员可以阅读。",
+  "teamInbox.composerHint": "给 Aetherphone Team 发消息",
+  "teamInbox.repliesClosed": "团队给你发消息后，你就可以回复了。",
+  "teamInbox.empty": "团队还没有给你发消息",
+  "teamInbox.placeFirst": "第1名",
+  "teamInbox.placeSecond": "第2名",
+  "teamInbox.placeThird": "第3名",
+  "teamInbox.placeOther": "第{0}名",
+  "teamInbox.gilWonFinal": "你在第{2}周的 Prism 决赛（{1}）中获得{0}，赢得了 {3} 金币。请在这里回复你的原始服务器和几个可以在游戏中见面的时间，工作人员会通过交易发放奖励。",
+  "teamInbox.gilWonHeat": "你在第{2}周的 Prism 小组赛（{1}）中获得{0}，赢得了 {3} 金币。请在这里回复你的原始服务器和几个可以在游戏中见面的时间，工作人员会通过交易发放奖励。",
+  "teamInbox.gilPaid": "你第{1}周的 {0} 金币奖励已标记为已发放，祝你玩得开心！",
+  "teamInbox.automatedFallback": "Aetherphone Team 给你发来了一条消息。"
 }

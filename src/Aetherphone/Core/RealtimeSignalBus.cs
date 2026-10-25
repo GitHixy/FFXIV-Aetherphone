@@ -62,6 +62,7 @@ internal sealed class RealtimeSignalBus
     public event Action<CallControl>? RadioReceived;
     public event Action? ServerRestarting;
     public event Action? FlagsChanged;
+    public event Action<TeamMessageDto?>? TeamMessaged;
     public event Action<bool>? ConnectedChanged;
 
     public bool RealtimeActive => realtimeActive;
@@ -170,6 +171,11 @@ internal sealed class RealtimeSignalBus
     public void PublishFlagsChanged()
     {
         FlagsChanged?.Invoke();
+    }
+
+    public void PublishTeamMessage(TeamMessageDto? message)
+    {
+        TeamMessaged?.Invoke(message);
     }
 
     public void BindSender(Action<CallControl>? sender)
