@@ -2432,6 +2432,8 @@ internal static class L
 
         public static readonly LocString[] Release1400Phone =
         {
+            new("changelog.r1400.75",
+                "Added two new phone cases: Love Island and Love Island Eclipse, contributed by Haru"),
             new("changelog.r1400.15",
                 "Added a line in game chat when Aethernet restarts for an update or loses its connection, and another when it is back, which you can turn off with Network status in chat in Settings"),
             new("changelog.r1400.43",
@@ -13679,6 +13681,8 @@ internal static class L
         public static readonly LocString CaseDrippy = new("catalog.case.drippy", "Drippy");
         public static readonly LocString CasePod = new("catalog.case.pod", "Pod");
         public static readonly LocString CaseScathatch = new("catalog.case.scathatch", "Scathatch");
+        public static readonly LocString CaseLoveIsland = new("catalog.case.loveisland", "Love Island");
+        public static readonly LocString CaseLoveIslandEclipse = new("catalog.case.loveislandeclipse", "Love Island Eclipse");
         public static readonly LocString RingtoneSilent = new("catalog.ringtone.silent", "Silent");
         public static readonly LocString RadioLofi = new("catalog.radio.lofi", "Lofi");
         public static readonly LocString RadioChillout = new("catalog.radio.chillout", "Chillout");
