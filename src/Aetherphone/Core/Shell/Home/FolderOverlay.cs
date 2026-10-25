@@ -39,6 +39,7 @@ internal sealed class FolderOverlay
     private readonly ShortcutStore shortcuts;
     private readonly ShortcutRunner runner;
     private readonly Configuration configuration;
+    private readonly HomeLaunchTrace launches;
     private HomeTile? folder;
     private bool closing;
     private Spring anim;
@@ -64,12 +65,13 @@ internal sealed class FolderOverlay
     private Spring[] slideY = Array.Empty<Spring>();
 
     public FolderOverlay(HomeLayoutService layout, ShortcutStore shortcuts, ShortcutRunner runner,
-        Configuration configuration)
+        Configuration configuration, HomeLaunchTrace launches)
     {
         this.layout = layout;
         this.shortcuts = shortcuts;
         this.runner = runner;
         this.configuration = configuration;
+        this.launches = launches;
     }
 
     public bool Active => folder is not null;
@@ -400,7 +402,7 @@ internal sealed class FolderOverlay
         }
         else if (member.Link is { } link)
         {
-            link.Open(navigation, pressRect);
+            launches.Open(link, navigation, pressRect);
         }
         else
         {

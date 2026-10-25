@@ -101,6 +101,85 @@ public sealed class HomeLinkTests
     }
 
     [Fact]
+    public void ALinkWhoseAppIsSwitchedOff_SurvivesASaveAndComesBack()
+    {
+        var app = new FakeLinkApp(GamesId, HarvestRoute);
+        var apps = new List<IPhoneApp> { app };
+        var configuration = EmptyConfiguration();
+        BuildLayout(apps, configuration).AddLink(GamesId, HarvestRoute);
+
+        app.IsAvailable = false;
+        var switchedOff = BuildLayout(apps, configuration);
+        Assert.Equal(0, CountLinks(switchedOff));
+        switchedOff.Persist();
+
+        app.IsAvailable = true;
+        var restored = BuildLayout(apps, configuration);
+        Assert.True(restored.HasLink(GamesId, HarvestRoute), "A switched off app's link must come back with the app");
+    }
+
+    [Fact]
+    public void ALinkInAFolderWhoseAppIsSwitchedOff_ComesBackOnTheHomeScreen()
+    {
+        var app = new FakeLinkApp(GamesId, HarvestRoute);
+        var apps = new List<IPhoneApp> { new FakeApp("notes"), app };
+        var configuration = EmptyConfiguration();
+        var layout = BuildLayout(apps, configuration);
+        layout.Install("notes");
+        layout.AddLink(GamesId, HarvestRoute);
+        layout.MakeFolder(AppTile(layout, "notes"), LinkTile(layout, HarvestRoute));
+
+        app.IsAvailable = false;
+        BuildLayout(apps, configuration).Persist();
+
+        app.IsAvailable = true;
+        Assert.True(BuildLayout(apps, configuration).HasLink(GamesId, HarvestRoute));
+    }
+
+    [Fact]
+    public void ALinkToAnUninstalledApp_IsDroppedWhenAnotherLookLoadsIt()
+    {
+        var apps = new List<IPhoneApp> { new FakeApp("notes"), new FakeLinkApp(GamesId, HarvestRoute) };
+        var configuration = new FakeHomeConfiguration
+        {
+            Home = new HomeLayout
+            {
+                Dock = new List<string>(),
+                Installed = new List<string> { "notes" },
+                Pages = new List<HomePage>
+                {
+                    new()
+                    {
+                        Items = new List<HomeItem>
+                        {
+                            new() { Kind = "app", AppId = "notes" },
+                            new() { Kind = "link", LinkAppId = GamesId, LinkArgument = HarvestRoute },
+                        },
+                    },
+                },
+            },
+        };
+
+        var layout = BuildLayout(apps, configuration);
+
+        Assert.False(layout.HasLink(GamesId, HarvestRoute));
+        Assert.Equal(0, CountLinks(layout));
+    }
+
+    [Fact]
+    public void AddingALinkForAnAppThatIsNotInstalled_InstallsItSoTheLinkSticks()
+    {
+        var apps = new List<IPhoneApp> { new FakeLinkApp(GamesId, HarvestRoute) };
+        var configuration = EmptyConfiguration();
+        var layout = BuildLayout(apps, configuration);
+
+        Assert.Equal(HomeLinkAdd.Added, layout.AddLink(GamesId, HarvestRoute));
+
+        Assert.True(layout.IsInstalled(GamesId));
+        Assert.True(BuildLayout(apps, configuration).HasLink(GamesId, HarvestRoute));
+    }
+
+    [Fact]
     public void AHomeLookKeepsItsLinks()
     {
         var look = new FakeLookConfiguration
@@ -213,6 +292,7 @@ public sealed class HomeLinkTests
         }
 
         public List<string> Known { get; }
+        public bool IsAvailable { get; set; } = true;
         public string Id { get; }
         public string DisplayName => Id;
         public string Glyph => string.Empty;

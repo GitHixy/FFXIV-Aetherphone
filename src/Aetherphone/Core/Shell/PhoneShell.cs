@@ -123,6 +123,7 @@ internal sealed class PhoneShell : IDisposable
         services.Looks.Bind(home.Layout);
         services.Shortcuts.Bind(home.Layout);
         navigation.ReturningHome += home.PrepareReveal;
+        navigation.AppOpened += home.ForgetLaunch;
         var incomingOverlay = new IncomingCallOverlay(calls);
         var alarmOverlay = new AlarmOverlay(services.AlarmRinger);
         var banOverlay = new BanOverlay(services.AethernetSession);

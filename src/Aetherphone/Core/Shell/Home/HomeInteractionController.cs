@@ -42,6 +42,7 @@ internal sealed class HomeInteractionController
     private readonly Spotlight.SpotlightOverlay spotlight;
     private readonly TilePoseCache poses;
     private readonly ShortcutRunner runner;
+    private readonly HomeLaunchTrace launches;
 
     private bool pressActive;
     private Vector2 pressPos;
@@ -90,9 +91,10 @@ internal sealed class HomeInteractionController
 
     public HomeInteractionController(HomeLayoutService layout, Pager pager, FolderOverlay folder,
         WidgetContextMenu widgetMenu, WidgetGallery gallery, Spotlight.SpotlightOverlay spotlight, TilePoseCache poses,
-        ShortcutRunner runner, WidgetHost widgetHost)
+        ShortcutRunner runner, WidgetHost widgetHost, HomeLaunchTrace launches)
     {
         this.layout = layout;
+        this.launches = launches;
         this.widgetHost = widgetHost;
         this.pager = pager;
         this.folder = folder;
@@ -430,7 +432,7 @@ internal sealed class HomeInteractionController
         {
             if (!editing)
             {
-                link.Open(navigation, DrawnRect(rect, pressTile, metrics));
+                launches.Open(link, navigation, DrawnRect(rect, pressTile, metrics));
             }
 
             return;

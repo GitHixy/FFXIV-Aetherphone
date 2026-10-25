@@ -43,6 +43,7 @@ internal sealed class HomeLayoutService
     private readonly IHomeConfiguration configuration;
     private readonly Dictionary<string, IPhoneApp> byId = new();
     private readonly Dictionary<string, IHomeLinkTarget> linkTargets = new(StringComparer.Ordinal);
+    private readonly List<DormantLink> dormantLinks = new();
     private readonly List<List<HomeTile>> pages = new();
     private readonly List<HomeTile> dock = new();
     private readonly List<List<GridCell>> placements = new();
@@ -396,7 +397,7 @@ internal sealed class HomeLayoutService
         }
 
         DetachApp(appId);
-        DetachLinksOf(appId);
+        DropLinksOfUninstalledApps();
         DropWidgetsOfUninstalledApps();
         Commit();
         InstalledChanged?.Invoke(appId);
@@ -601,6 +602,11 @@ internal sealed class HomeLayoutService
             return HomeLinkAdd.AlreadyThere;
         }
 
+        if (!installed.Contains(appId))
+        {
+            Install(appId);
+        }
+
         Append(HomeTile.ForLink(link));
         Commit();
         return HomeLinkAdd.Added;
@@ -617,10 +623,22 @@ internal sealed class HomeLayoutService
         return new HomeLink(app, target, argument);
     }
 
-    private HomeTile? BuildLink(HomeItem item) =>
-        ResolveLink(item.LinkAppId, item.LinkArgument) is { } link ? HomeTile.ForLink(link) : null;
+    private HomeTile? BuildLink(HomeItem item, int page)
+    {
+        if (ResolveLink(item.LinkAppId, item.LinkArgument) is { } link)
+        {
+            return HomeTile.ForLink(link);
+        }
 
-    private void DetachLinksOf(string appId)
+        if (byId.TryGetValue(item.LinkAppId, out var app) && !app.IsAvailable && linkTargets.ContainsKey(app.Id))
+        {
+            dormantLinks.Add(new DormantLink(page, item));
+        }
+
+        return null;
+    }
+
+    private void DropLinksOfUninstalledApps()
     {
         for (var page = 0; page < pages.Count; page++)
         {
@@ -628,7 +646,7 @@ internal sealed class HomeLayoutService
             for (var index = tiles.Count - 1; index >= 0; index--)
             {
                 var tile = tiles[index];
-                if (tile.Link is { } link && string.Equals(link.AppId, appId, StringComparison.Ordinal))
+                if (tile.Link is { } link && !installed.Contains(link.AppId))
                 {
                     tiles.RemoveAt(index);
                     continue;
@@ -641,12 +659,19 @@ internal sealed class HomeLayoutService
 
                 for (var memberIndex = tile.Members.Count - 1; memberIndex >= 0; memberIndex--)
                 {
-                    if (tile.Members[memberIndex].Link is { } member
-                        && string.Equals(member.AppId, appId, StringComparison.Ordinal))
+                    if (tile.Members[memberIndex].Link is { } member && !installed.Contains(member.AppId))
                     {
                         tile.Members.RemoveAt(memberIndex);
                     }
                 }
+            }
+        }
+
+        for (var index = dormantLinks.Count - 1; index >= 0; index--)
+        {
+            if (!installed.Contains(dormantLinks[index].Item.LinkAppId))
+            {
+                dormantLinks.RemoveAt(index);
             }
         }
     }
@@ -971,6 +996,7 @@ internal sealed class HomeLayoutService
     private void Load()
     {
         pages.Clear();
+        dormantLinks.Clear();
         dock.Clear();
         widgetKeys.Clear();
         var placed = new HashSet<string>();
@@ -1104,6 +1130,7 @@ internal sealed class HomeLayoutService
             Append(HomeTile.ForApp(queue[index]));
         }
 
+        DropLinksOfUninstalledApps();
         DropWidgetsOfUninstalledApps();
     }
 
@@ -1154,7 +1181,7 @@ internal sealed class HomeLayoutService
             var items = source[pageIndex].Items;
             for (var itemIndex = 0; itemIndex < items.Count; itemIndex++)
             {
-                if (LoadItem(items[itemIndex], placed) is { } tile)
+                if (LoadItem(items[itemIndex], placed, pages.Count) is { } tile)
                 {
                     page.Add(tile);
                 }
@@ -1167,9 +1194,9 @@ internal sealed class HomeLayoutService
         }
     }
 
-    private HomeTile? LoadItem(HomeItem item, HashSet<string> placed)
+    private HomeTile? LoadItem(HomeItem item, HashSet<string> placed, int page)
     {
-        var tile = BuildItem(item, placed);
+        var tile = BuildItem(item, placed, page);
         if (tile is not null)
         {
             tile.Cell = new GridCell(item.Column, item.Row);
@@ -1178,11 +1205,11 @@ internal sealed class HomeLayoutService
         return tile;
     }
 
-    private HomeTile? BuildItem(HomeItem item, HashSet<string> placed)
+    private HomeTile? BuildItem(HomeItem item, HashSet<string> placed, int page)
     {
         if (string.Equals(item.Kind, "folder", StringComparison.Ordinal))
         {
-            var contents = ResolveFolderMembers(item, placed);
+            var contents = ResolveFolderMembers(item, placed, page);
             if (contents.Count == 0)
             {
                 return null;
@@ -1205,7 +1232,7 @@ internal sealed class HomeLayoutService
 
         if (string.Equals(item.Kind, "link", StringComparison.Ordinal))
         {
-            return BuildLink(item);
+            return BuildLink(item, page);
         }
 
         if (string.Equals(item.Kind, "widget", StringComparison.Ordinal))
@@ -1323,14 +1350,14 @@ internal sealed class HomeLayoutService
         }
     }
 
-    private List<HomeTile> ResolveFolderMembers(HomeItem item, HashSet<string> placed)
+    private List<HomeTile> ResolveFolderMembers(HomeItem item, HashSet<string> placed, int page)
     {
         if (item.Members.Count > 0)
         {
             var contents = new List<HomeTile>(item.Members.Count);
             for (var index = 0; index < item.Members.Count; index++)
             {
-                if (ResolveFolderMember(item.Members[index], placed) is { } member)
+                if (ResolveFolderMember(item.Members[index], placed, page) is { } member)
                 {
                     contents.Add(member);
                 }
@@ -1349,7 +1376,7 @@ internal sealed class HomeLayoutService
         return legacy;
     }
 
-    private HomeTile? ResolveFolderMember(HomeItem item, HashSet<string> placed)
+    private HomeTile? ResolveFolderMember(HomeItem item, HashSet<string> placed, int page)
     {
         if (string.Equals(item.Kind, "shortcut", StringComparison.Ordinal))
         {
@@ -1363,7 +1390,7 @@ internal sealed class HomeLayoutService
 
         if (string.Equals(item.Kind, "link", StringComparison.Ordinal))
         {
-            return BuildLink(item);
+            return BuildLink(item, page);
         }
 
         if (byId.TryGetValue(item.AppId, out var app) && app.IsAvailable && placed.Add(app.Id))
@@ -1616,6 +1643,17 @@ internal sealed class HomeLayoutService
 
             target.Add(stored);
         }
+
+        for (var index = 0; index < dormantLinks.Count; index++)
+        {
+            if (target.Count == 0)
+            {
+                target.Add(new HomePage());
+            }
+
+            var dormant = dormantLinks[index];
+            target[Math.Min(dormant.Page, target.Count - 1)].Items.Add(dormant.Item);
+        }
     }
 
     private static HomeItem SerializeTile(HomeTile tile)
@@ -1701,6 +1739,8 @@ internal sealed class HomeLayoutService
 
         return new HomeItem { Kind = "app", AppId = tile.App!.Id };
     }
+
+    private readonly record struct DormantLink(int Page, HomeItem Item);
 
     private static HomeItem LinkItem(HomeLink link) =>
         new() { Kind = "link", LinkAppId = link.AppId, LinkArgument = link.Argument };
