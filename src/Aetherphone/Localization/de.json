@@ -11883,5 +11883,9 @@
   "nameplate.template.games": "Spielt [game]",
   "nameplate.template.gamba": "Zockt bei [game]",
   "nameplate.template.slotsWin": "[chips] Chips gewonnen!",
-  "nameplate.template.slotsLoss": "[chips] Chips verloren :("
+  "nameplate.template.slotsLoss": "[chips] Chips verloren :(",
+  "homeLinks.addToHome": "Zum Home-Bildschirm hinzufügen",
+  "homeLinks.onHome": "Auf deinem Home-Bildschirm",
+  "homeLinks.added": "{0} liegt jetzt auf deinem Home-Bildschirm",
+  "homeLinks.alreadyThere": "{0} liegt schon auf deinem Home-Bildschirm"
 }

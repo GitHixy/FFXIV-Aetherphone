@@ -398,6 +398,10 @@ internal sealed class FolderOverlay
         {
             runner.Run(member.Shortcut!);
         }
+        else if (member.Link is { } link)
+        {
+            link.Open(navigation, pressRect);
+        }
         else
         {
             navigation.OpenAppFrom(member.App!, pressRect, LaunchOrigin.Icon);
@@ -542,6 +546,10 @@ internal sealed class FolderOverlay
         {
             HomeTileView.DrawShortcut(center, iconSize, member.Shortcut!, shortcuts.Icon(member.Shortcut!), theme,
                 1f, labelAlpha, true, cell);
+        }
+        else if (member.Link is { } link)
+        {
+            HomeTileView.DrawLink(center, iconSize, link, theme, 1f, labelAlpha, true, cell);
         }
         else
         {

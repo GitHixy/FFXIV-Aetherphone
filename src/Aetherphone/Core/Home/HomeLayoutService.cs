@@ -42,6 +42,7 @@ internal sealed class HomeLayoutService
     private readonly IShortcutSource shortcuts;
     private readonly IHomeConfiguration configuration;
     private readonly Dictionary<string, IPhoneApp> byId = new();
+    private readonly Dictionary<string, IHomeLinkTarget> linkTargets = new(StringComparer.Ordinal);
     private readonly List<List<HomeTile>> pages = new();
     private readonly List<HomeTile> dock = new();
     private readonly List<List<GridCell>> placements = new();
@@ -70,6 +71,10 @@ internal sealed class HomeLayoutService
         {
             byId[apps[index].Id] = apps[index];
             availability[index] = apps[index].IsAvailable;
+            if (apps[index] is IHomeLinkTarget linkTarget)
+            {
+                linkTargets[apps[index].Id] = linkTarget;
+            }
         }
 
         Load();
@@ -391,6 +396,7 @@ internal sealed class HomeLayoutService
         }
 
         DetachApp(appId);
+        DetachLinksOf(appId);
         DropWidgetsOfUninstalledApps();
         Commit();
         InstalledChanged?.Invoke(appId);
@@ -550,6 +556,99 @@ internal sealed class HomeLayoutService
         }
 
         return removed;
+    }
+
+    public bool HasLink(string appId, string argument)
+    {
+        for (var page = 0; page < pages.Count; page++)
+        {
+            var tiles = pages[page];
+            for (var index = 0; index < tiles.Count; index++)
+            {
+                var tile = tiles[index];
+                if (tile.Link is { } link && link.Matches(appId, argument))
+                {
+                    return true;
+                }
+
+                if (!tile.IsFolder)
+                {
+                    continue;
+                }
+
+                for (var memberIndex = 0; memberIndex < tile.Members.Count; memberIndex++)
+                {
+                    if (tile.Members[memberIndex].Link is { } member && member.Matches(appId, argument))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public HomeLinkAdd AddLink(string appId, string argument)
+    {
+        if (ResolveLink(appId, argument) is not { } link)
+        {
+            return HomeLinkAdd.Unavailable;
+        }
+
+        if (HasLink(appId, argument))
+        {
+            return HomeLinkAdd.AlreadyThere;
+        }
+
+        Append(HomeTile.ForLink(link));
+        Commit();
+        return HomeLinkAdd.Added;
+    }
+
+    private HomeLink? ResolveLink(string appId, string argument)
+    {
+        if (argument.Length == 0 || !byId.TryGetValue(appId, out var app) || !app.IsAvailable
+            || !linkTargets.TryGetValue(appId, out var target) || !target.HasLink(argument))
+        {
+            return null;
+        }
+
+        return new HomeLink(app, target, argument);
+    }
+
+    private HomeTile? BuildLink(HomeItem item) =>
+        ResolveLink(item.LinkAppId, item.LinkArgument) is { } link ? HomeTile.ForLink(link) : null;
+
+    private void DetachLinksOf(string appId)
+    {
+        for (var page = 0; page < pages.Count; page++)
+        {
+            var tiles = pages[page];
+            for (var index = tiles.Count - 1; index >= 0; index--)
+            {
+                var tile = tiles[index];
+                if (tile.Link is { } link && string.Equals(link.AppId, appId, StringComparison.Ordinal))
+                {
+                    tiles.RemoveAt(index);
+                    continue;
+                }
+
+                if (!tile.IsFolder)
+                {
+                    continue;
+                }
+
+                for (var memberIndex = tile.Members.Count - 1; memberIndex >= 0; memberIndex--)
+                {
+                    if (tile.Members[memberIndex].Link is { } member
+                        && string.Equals(member.AppId, appId, StringComparison.Ordinal))
+                    {
+                        tile.Members.RemoveAt(memberIndex);
+                    }
+                }
+            }
+        }
     }
 
     public void SetFolderTint(HomeTile folder, string tint)
@@ -1104,6 +1203,11 @@ internal sealed class HomeLayoutService
             return HomeTile.ForShortcut(shortcut);
         }
 
+        if (string.Equals(item.Kind, "link", StringComparison.Ordinal))
+        {
+            return BuildLink(item);
+        }
+
         if (string.Equals(item.Kind, "widget", StringComparison.Ordinal))
         {
             return BuildWidget(item, null);
@@ -1255,6 +1359,11 @@ internal sealed class HomeLayoutService
             }
 
             return HomeTile.ForShortcut(shortcut);
+        }
+
+        if (string.Equals(item.Kind, "link", StringComparison.Ordinal))
+        {
+            return BuildLink(item);
         }
 
         if (byId.TryGetValue(item.AppId, out var app) && app.IsAvailable && placed.Add(app.Id))
@@ -1554,6 +1663,11 @@ internal sealed class HomeLayoutService
             return new HomeItem { Kind = "shortcut", ShortcutId = tile.Shortcut!.Id.ToString("N") };
         }
 
+        if (tile.IsLink)
+        {
+            return LinkItem(tile.Link!);
+        }
+
         if (tile.IsFolder)
         {
             var item = new HomeItem { Kind = "folder", FolderName = tile.FolderName, FolderTint = tile.FolderTint };
@@ -1569,6 +1683,12 @@ internal sealed class HomeLayoutService
                     continue;
                 }
 
+                if (member.IsLink)
+                {
+                    item.Members.Add(LinkItem(member.Link!));
+                    continue;
+                }
+
                 var appId = member.App!.Id;
                 item.Members.Add(new HomeItem { Kind = "app", AppId = appId });
 
@@ -1581,6 +1701,9 @@ internal sealed class HomeLayoutService
 
         return new HomeItem { Kind = "app", AppId = tile.App!.Id };
     }
+
+    private static HomeItem LinkItem(HomeLink link) =>
+        new() { Kind = "link", LinkAppId = link.AppId, LinkArgument = link.Argument };
 
     private string NextFolderKey() => string.Concat("folder#", (++folderCounter).ToString());
 

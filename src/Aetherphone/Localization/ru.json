@@ -11883,5 +11883,9 @@
   "nameplate.template.games": "Играет в [game]",
   "nameplate.template.gamba": "Азартит: [game]",
   "nameplate.template.slotsWin": "Выиграл [chips] фишек!",
-  "nameplate.template.slotsLoss": "Проиграл [chips] фишек :("
+  "nameplate.template.slotsLoss": "Проиграл [chips] фишек :(",
+  "homeLinks.addToHome": "Добавить на домашний экран",
+  "homeLinks.onHome": "На домашнем экране",
+  "homeLinks.added": "Добавлено на домашний экран: {0}",
+  "homeLinks.alreadyThere": "Уже на домашнем экране: {0}"
 }

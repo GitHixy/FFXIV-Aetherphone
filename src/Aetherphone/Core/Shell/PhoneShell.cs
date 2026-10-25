@@ -119,6 +119,7 @@ internal sealed class PhoneShell : IDisposable
         home = new HomeScreen(apps, bundle.Widgets, bundle.WidgetActions, services.Shortcuts, services.ShortcutRunner,
             configuration, services.Confirm, spotlightIndex);
         services.Installer.Bind(home.Layout);
+        services.HomeLinks.Bind(home.Layout);
         services.Looks.Bind(home.Layout);
         services.Shortcuts.Bind(home.Layout);
         navigation.ReturningHome += home.PrepareReveal;

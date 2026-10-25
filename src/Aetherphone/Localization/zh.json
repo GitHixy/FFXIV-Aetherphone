@@ -11883,5 +11883,9 @@
   "nameplate.template.games": "正在玩 [game]",
   "nameplate.template.gamba": "在[game]试手气",
   "nameplate.template.slotsWin": "赢了 [chips] 筹码！",
-  "nameplate.template.slotsLoss": "输了 [chips] 筹码 :("
+  "nameplate.template.slotsLoss": "输了 [chips] 筹码 :(",
+  "homeLinks.addToHome": "添加到主屏幕",
+  "homeLinks.onHome": "已在主屏幕上",
+  "homeLinks.added": "已将{0}添加到主屏幕",
+  "homeLinks.alreadyThere": "{0}已在主屏幕上"
 }

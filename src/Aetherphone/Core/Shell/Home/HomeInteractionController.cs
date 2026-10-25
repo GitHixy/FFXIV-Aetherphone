@@ -426,6 +426,16 @@ internal sealed class HomeInteractionController
             return;
         }
 
+        if (pressTile.Link is { } link)
+        {
+            if (!editing)
+            {
+                link.Open(navigation, DrawnRect(rect, pressTile, metrics));
+            }
+
+            return;
+        }
+
         if (pressTile.IsFolder)
         {
             folder.Open(pressTile, rect);

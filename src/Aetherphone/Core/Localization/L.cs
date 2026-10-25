@@ -15393,4 +15393,12 @@ internal static class L
         public static readonly LocString SampleNotificationLike = new("widgetsPeople.sampleNotificationLike", "Liked your photo.");
         public static readonly LocString SampleNotificationMuster = new("widgetsPeople.sampleNotificationMuster", "Your meetup starts in 15 minutes.");
     }
+
+    internal static class HomeLinks
+    {
+        public static readonly LocString AddToHome = new("homeLinks.addToHome", "Add to Home Screen");
+        public static readonly LocString OnHome = new("homeLinks.onHome", "On your Home Screen");
+        public static readonly LocString Added = new("homeLinks.added", "Added {0} to your Home Screen");
+        public static readonly LocString AlreadyThere = new("homeLinks.alreadyThere", "{0} is already on your Home Screen");
+    }
 }

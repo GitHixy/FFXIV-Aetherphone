@@ -31,6 +31,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
     private readonly AethernetSession session;
     private readonly Core.Casino.CasinoFloorStore floor;
     private readonly Configuration configuration;
+    private readonly Core.Home.HomeLinks homeLinks;
     private readonly Core.Casino.CasinoPreferences preferences;
     private readonly Strip.StripHero stripHero = new();
     private readonly Strip.StripLightClock floorLights = new();
@@ -116,10 +117,12 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
         Core.Lodestone.LodestoneService lodestone, Core.Casino.HoldemStore holdemStore,
         Core.Casino.CasinoVenueStore casinoVenue, Core.Casino.CasinoTradeSync tradeSync,
         Core.Report.ReportService report, Core.Casino.CasinoFloorStore floor, Configuration configuration,
-        Core.Casino.CasinoFameChoiceStore fameChoice, Core.Casino.Rolls.ChatRolls chatRolls)
+        Core.Casino.CasinoFameChoiceStore fameChoice, Core.Casino.Rolls.ChatRolls chatRolls,
+        Core.Home.HomeLinks homeLinks)
     {
         this.floor = floor;
         this.configuration = configuration;
+        this.homeLinks = homeLinks;
         this.fameChoice = fameChoice;
         this.chatRolls = chatRolls;
         rollSetup = new Rolls.RollSetupPage(chatRolls);
@@ -875,6 +878,9 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
                 break;
             case CasinoInfoRequest.Fairness:
                 OpenFairness();
+                break;
+            case CasinoInfoRequest.AddToHome:
+                AddToHome(StageSpecFor(current).GameId);
                 break;
         }
     }

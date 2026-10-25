@@ -11883,5 +11883,9 @@
   "nameplate.template.games": "[game] oynuyor",
   "nameplate.template.gamba": "[game] oynuyor",
   "nameplate.template.slotsWin": "[chips] çip kazandım!",
-  "nameplate.template.slotsLoss": "[chips] çip kaybettim :("
+  "nameplate.template.slotsLoss": "[chips] çip kaybettim :(",
+  "homeLinks.addToHome": "Ana Ekrana Ekle",
+  "homeLinks.onHome": "Ana Ekranında",
+  "homeLinks.added": "{0} Ana Ekrana eklendi",
+  "homeLinks.alreadyThere": "{0} zaten Ana Ekranında"
 }

@@ -236,6 +236,20 @@ internal sealed class HomeGridRenderer
             return;
         }
 
+        if (tile.Link is { } link)
+        {
+            HomeTileView.DrawLink(center, rect.Width, link, theme, pointer.Scale, labelAlpha, showLabels,
+                metrics.CellWidth, zoom, pointer);
+            if (interaction.RemoveBadgesLive(motion) &&
+                HomeTileView.RemoveBadge(new Vector2(rect.Min.X + 2f * scale, rect.Min.Y + 2f * scale), scale, theme))
+            {
+                layout.RemoveTile(tile);
+                interaction.ConsumeEditGesture();
+            }
+
+            return;
+        }
+
         if (tile.IsFolder && ReferenceEquals(tile, interaction.OpenFolder))
         {
             HomeTileView.DrawFolderLabel(center, rect.Width, tile, theme, labelAlpha, showLabels,
@@ -408,6 +422,12 @@ internal sealed class HomeGridRenderer
         {
             HomeTileView.DrawShortcut(position, metrics.IconSize, tile.Shortcut!, shortcuts.Icon(tile.Shortcut!), theme,
                 scale, 0f, true, metrics.CellWidth);
+            return;
+        }
+
+        if (tile.Link is { } link)
+        {
+            HomeTileView.DrawLink(position, metrics.IconSize, link, theme, scale, 0f, true, metrics.CellWidth);
             return;
         }
 
