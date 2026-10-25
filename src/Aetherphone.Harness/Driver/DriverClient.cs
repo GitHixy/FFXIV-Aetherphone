@@ -152,6 +152,30 @@ internal static class DriverClient
             case "command":
                 query.Add(new("text", string.Join(' ', rest)));
                 break;
+            case "chat":
+                if (rest.Count < 3)
+                {
+                    return Usage("chat CHANNEL SENDER TEXT (channels: say, yell, shout, party, crossparty, tell, echo, system)");
+                }
+
+                query.Add(new("channel", rest[0]));
+                query.Add(new("sender", rest[1]));
+                query.Add(new("text", string.Join(' ', rest.GetRange(2, rest.Count - 2))));
+                break;
+            case "roll":
+                if (rest.Count < 2)
+                {
+                    return Usage("roll NAME|me VALUE [MAX]");
+                }
+
+                query.Add(new("name", rest[0]));
+                query.Add(new("value", rest[1]));
+                if (rest.Count > 2)
+                {
+                    query.Add(new("max", rest[2]));
+                }
+
+                break;
             case "scenario":
                 if (rest.Count > 0)
                 {
@@ -177,7 +201,7 @@ internal static class DriverClient
             case "quit":
                 break;
             default:
-                return Usage("url | state | step [N] | shot [PATH] [--full] | tree [--all] [--full] [--json] | perf [--frames N] [--warmup N] [--json] | tap X Y | tap ANCHOR | tap --text TEXT | drag X1 Y1 X2 Y2 | scroll X Y DY | type TEXT | key NAME | open [APP] | home | settings | anchors | log [--since N] | command TEXT | scenario [NAME|none] | install [APP|all] | login | logout | quit");
+                return Usage("url | state | step [N] | shot [PATH] [--full] | tree [--all] [--full] [--json] | perf [--frames N] [--warmup N] [--json] | tap X Y | tap ANCHOR | tap --text TEXT | drag X1 Y1 X2 Y2 | scroll X Y DY | type TEXT | key NAME | open [APP] | home | settings | anchors | log [--since N] | command TEXT | chat CHANNEL SENDER TEXT | roll NAME|me VALUE [MAX] | scenario [NAME|none] | install [APP|all] | login | logout | quit");
         }
 
         var url = BuildUrl(port, command, query);

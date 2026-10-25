@@ -244,6 +244,17 @@ internal sealed class DriverServer
                 var handled = host.RunCommand(query["text"] ?? string.Empty);
                 host.Step(Int(query, "settle", DefaultSettleFrames));
                 return Json(handled ? 200 : 404, new { ok = handled, state = State() });
+            case "/chat":
+                var delivered = host.DeliverChat(query["channel"] ?? string.Empty, query["sender"] ?? string.Empty,
+                    query["text"] ?? string.Empty);
+                host.Step(Int(query, "settle", DefaultSettleFrames));
+                return delivered
+                    ? Json(200, State())
+                    : Json(400, new { ok = false, error = $"unknown channel '{query["channel"]}'" });
+            case "/roll":
+                host.DeliverRoll(query["name"] ?? IncomingChat.OwnRoll, Int(query, "value", 1), Int(query, "max", 0));
+                host.Step(Int(query, "settle", DefaultSettleFrames));
+                return Json(200, State());
             case "/scenario":
                 return Scenario(query);
             case "/install":

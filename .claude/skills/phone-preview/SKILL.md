@@ -58,6 +58,8 @@ Every command is `tools/harness/aep <command>` (`tools\harness\aep.cmd` on Windo
 | `scenario [NAME]` | List scenarios, or switch to another character (logs out, then in) |
 | `install [APPID]` | Put an app, or every available app, on the home screen |
 | `command "/aep ..."` | Run a chat command through the plugin's handler |
+| `chat CHANNEL SENDER TEXT` | Deliver an incoming game chat line (say, yell, shout, party, crossparty, tell, echo, system) |
+| `roll NAME\|me VALUE [MAX]` | Deliver a `/random` result line, yours (`me`) or another player's, for the Gamba roll games |
 | `quit` | Stop the server |
 
 ## Typical review loop
@@ -74,5 +76,5 @@ After changing draw code, open the screen and run `perf`: the draw path should a
 - Real game memory: every game value comes from the scenario file, so a reader bug (a moved offset, a missed container) never shows here. Reader changes still need an in-game check.
 - Without game data the sheet-bound apps (Skywatcher, Dailies, Wallet, Jobs, Inventory, Market, Hunts, Maps, Housing, Collections) are hidden, world or item names are blank, and no scenario loads.
 - A config created before game data was available has no sheet-bound apps on the home screen; run `install` once.
-- No audio, no video screen, no camera capture, no hooks, and no incoming game chat.
+- No audio, no video screen, no camera capture and no hooks. Incoming game chat comes only from `chat` and `roll`, and a `chat` sender is plain text, because reading a `PlayerPayload`'s world blocks forever in the harness (Dalamud's data service behind it is never provided). Anything that needs the sender's player link, such as the Gamba table invite notice, does not fire.
 - A fresh config runs the first-run boot and onboarding tour. `step 1000` gets past the boot; the tour has buttons to tap. Config persists in `~/.aetherphone-harness/config` (one folder per backend), so this happens once per backend.

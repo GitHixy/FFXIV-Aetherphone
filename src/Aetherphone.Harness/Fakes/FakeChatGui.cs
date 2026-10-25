@@ -9,7 +9,7 @@ internal sealed class FakeChatGui : IChatGui
 {
     private readonly Dictionary<(string PluginName, uint CommandId), Action<uint, SeString>> linkHandlers = new();
 
-    public event IChatGui.OnHandleableChatMessageDelegate? ChatMessage { add { } remove { } }
+    public event IChatGui.OnHandleableChatMessageDelegate? ChatMessage;
 
     public event IChatGui.OnHandleableChatMessageDelegate? CheckMessageHandled { add { } remove { } }
 
@@ -34,6 +34,13 @@ internal sealed class FakeChatGui : IChatGui
     public void RemoveChatLinkHandler(uint commandId) => linkHandlers.Remove(("Aetherphone", commandId));
 
     public void RemoveChatLinkHandler() => linkHandlers.Clear();
+
+    public void Deliver(XivChatType logKind, SeString sender, SeString message)
+    {
+        var entry = new FakeChatMessage(logKind, sender, message, (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        HarnessLog.Note($"incoming {logKind}: {sender.TextValue}: {message.TextValue}");
+        ChatMessage?.Invoke(entry);
+    }
 
     public void Print(XivChatEntry chat) => HarnessLog.Plugin("chat", chat.Message?.TextValue ?? string.Empty);
 

@@ -10,6 +10,8 @@ using Aetherphone.Harness.Profiling;
 using Aetherphone.Harness.Rendering;
 using Aetherphone.Harness.Scenarios;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Game.Text;
+using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Interface.DragDrop;
 using Dalamud.Interface.ManagedFontAtlas;
 using Dalamud.Interface.Utility;
@@ -34,6 +36,7 @@ internal sealed unsafe class PhoneHost : IDisposable
     private readonly FakeCommandManager commands;
     private readonly FakeDataManager data;
     private readonly FakeObjectTable objectTable = new();
+    private readonly FakeChatGui chatGui = new();
     private readonly IUnlockState unlockState = UnlockStateProxy.Create();
     private readonly string cacheDirectory;
     private readonly Plugin plugin;
@@ -81,7 +84,7 @@ internal sealed unsafe class PhoneHost : IDisposable
         Plugin.PluginInterface = pluginInterface;
         Plugin.CommandManager = commands;
         Plugin.DtrBar = new FakeDtrBar();
-        Plugin.ChatGui = new FakeChatGui();
+        Plugin.ChatGui = chatGui;
         Plugin.DataManager = data;
         Plugin.ObjectTable = objectTable;
         Plugin.ClientState = clientState;
@@ -342,6 +345,20 @@ internal sealed unsafe class PhoneHost : IDisposable
     }
 
     public bool RunCommand(string text) => commands.ProcessCommand(text);
+
+    public bool DeliverChat(string channelName, string sender, string text)
+    {
+        if (!IncomingChat.TryChannel(channelName, out var channel))
+        {
+            return false;
+        }
+
+        chatGui.Deliver(channel, IncomingChat.Sender(sender), IncomingChat.Text(text));
+        return true;
+    }
+
+    public void DeliverRoll(string name, int value, int max) =>
+        chatGui.Deliver(XivChatType.RandomNumber, new SeString(), IncomingChat.Roll(name, value, max));
 
     public void MouseMove(Vector2 screen) => ImGui.GetIO().AddMousePosEvent(screen.X, screen.Y);
 
