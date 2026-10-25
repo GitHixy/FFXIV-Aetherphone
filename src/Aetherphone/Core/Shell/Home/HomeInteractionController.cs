@@ -495,6 +495,11 @@ internal sealed class HomeInteractionController
             return null;
         }
 
+        if (!editing && dragTile is null && HomeChrome.SearchRect(metrics).Contains(mouse))
+        {
+            return null;
+        }
+
         var page = Math.Clamp((int)MathF.Round(pager.Value), 0, layout.PageCount - 1);
         var cell = metrics.CellFromPoint(page, pager.Value, mouse);
         var tiles = layout.Page(page);

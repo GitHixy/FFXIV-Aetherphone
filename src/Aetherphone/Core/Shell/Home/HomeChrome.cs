@@ -54,7 +54,7 @@ internal sealed class HomeChrome
         }
 
         var spacing = DotSpacingUnits * scale;
-        var searchHalf = new Vector2(PillWidthUnits * 0.5f * scale, PillHeightUnits * 0.5f * scale);
+        var searchHalf = SearchHalf(scale);
         var dotsHalf = new Vector2(((Math.Max(pageCount, 1) - 1) * spacing) * 0.5f + DotsPillPadUnits * scale,
             DotsPillHeightUnits * 0.5f * scale);
         var half = Vector2.Lerp(searchHalf, dotsHalf, dots);
@@ -111,7 +111,7 @@ internal sealed class HomeChrome
             if (hovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             {
                 pager.AnimateTo(index, pageCount);
-                interaction.CancelPress();
+                interaction.ConsumeEditGesture();
             }
         }
     }
@@ -232,6 +232,16 @@ internal sealed class HomeChrome
         ProgressRing.CenterIcon(drawList, rect.Center, icon, Palette.WithAlpha(theme.TextStrong, 0.95f * presence),
             EditIconUnits * scale);
     }
+
+    public static Rect SearchRect(in HomeMetrics metrics)
+    {
+        var half = SearchHalf(metrics.Scale);
+        var center = new Vector2(metrics.Content.Center.X, metrics.DotsCenterY);
+        return new Rect(center - half, center + half);
+    }
+
+    private static Vector2 SearchHalf(float scale) =>
+        new(PillWidthUnits * 0.5f * scale, PillHeightUnits * 0.5f * scale);
 
     public static Rect DoneRect(Rect screen) => EditPillRect(screen, 1);
 
