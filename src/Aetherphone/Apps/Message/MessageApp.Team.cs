@@ -39,6 +39,7 @@ internal sealed partial class MessageApp
     private LanguageInfo? teamPreviewLanguage;
     private string? teamRestoreDraft;
     private int lastTeamDrawFrame = -1;
+    private int teamComposerGeneration = -1;
 
     private sealed class TeamPaging : IChatTranscriptPaging
     {
@@ -181,6 +182,7 @@ internal sealed partial class MessageApp
             team.NoteViewed();
         }
 
+        ForgetTeamDraftOnAccountChange();
         RestoreTeamDraft();
         DrawTeamHeader(area);
         var scale = UiScale.Current;
@@ -239,6 +241,19 @@ internal sealed partial class MessageApp
             OnSendText = sendTeamText,
             OnEditText = ignoreTeamEdit,
         });
+    }
+
+    private void ForgetTeamDraftOnAccountChange()
+    {
+        var generation = team.AccountGeneration;
+        if (generation == teamComposerGeneration)
+        {
+            return;
+        }
+
+        teamComposerGeneration = generation;
+        teamRestoreDraft = null;
+        teamComposer.Clear();
     }
 
     private void RestoreTeamDraft()

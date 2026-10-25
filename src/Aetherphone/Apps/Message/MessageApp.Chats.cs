@@ -25,6 +25,8 @@ internal sealed partial class MessageApp
     private const float ChatSearchRevealSeconds = 0.12f;
     private const float ChatChipsHeight = 44f;
     private const float ArchivedRowHeight = 52f;
+    private const float NoChatsBelowTeamHeight = 320f;
+    private const float ChatListTrailingPad = 24f;
     private const float UnreadBadgeRadius = 10f;
     private const float RowStatusGlyph = 16f;
     private const float RowStatusPitch = 20f;
@@ -86,25 +88,16 @@ internal sealed partial class MessageApp
         CollectChats(pinnedChats, regularChats, archived: false);
         var query = chatQuery.Trim();
         var showTeam = TeamRowVisible(query);
-        if (pinnedChats.Count == 0 && regularChats.Count == 0 && !showTeam)
+        var noChats = pinnedChats.Count == 0 && regularChats.Count == 0;
+        if (noChats && !showTeam)
         {
             if (query.Length > 0 || chatFilter != ChatFilterAll)
             {
                 EmptyState.Draw(listRect, ui, PhoneIcons.Search, Loc.T(L.Phone.NoOneFound), string.Empty);
             }
-            else if (store.ThreadListFailed)
+            else
             {
-                threadListFailure.Set(store.ThreadListFailure);
-                if (EmptyState.Draw(listRect, ui, PhoneIcons.HelpCircle, Loc.T(L.Failure.CouldNotLoad),
-                        threadListFailure.Text(), Loc.T(L.Common.Retry)))
-                {
-                    store.RefreshConversations();
-                }
-            }
-            else if (EmptyState.Draw(listRect, ui, PhoneIcons.MessageCircle, Loc.T(L.DirectMessages.Empty),
-                         Loc.T(L.DirectMessages.EmptyHint), Loc.T(L.Message.NewChat)))
-            {
-                OpenNewChat();
+                DrawNoChats(listRect);
             }
 
             return;
@@ -116,6 +109,10 @@ internal sealed partial class MessageApp
             if (showTeam)
             {
                 DrawTeamRow(drawList);
+                if (noChats && query.Length == 0 && chatFilter == ChatFilterAll)
+                {
+                    DrawNoChatsBelowTeam(listRect, scale);
+                }
             }
 
             if (query.Length == 0 && chatFilter == ChatFilterAll && configuration.MessageArchivedChats.Count > 0)
@@ -142,8 +139,38 @@ internal sealed partial class MessageApp
                 store.LoadMoreThreads();
             }
 
-            ImGui.Dummy(new Vector2(0f, 24f * scale));
+            ImGui.Dummy(new Vector2(0f, ChatListTrailingPad * scale));
         }
+    }
+
+    private void DrawNoChats(Rect area)
+    {
+        if (store.ThreadListFailed)
+        {
+            threadListFailure.Set(store.ThreadListFailure);
+            if (EmptyState.Draw(area, ui, PhoneIcons.HelpCircle, Loc.T(L.Failure.CouldNotLoad),
+                    threadListFailure.Text(), Loc.T(L.Common.Retry)))
+            {
+                store.RefreshConversations();
+            }
+
+            return;
+        }
+
+        if (EmptyState.Draw(area, ui, PhoneIcons.MessageCircle, Loc.T(L.DirectMessages.Empty),
+                Loc.T(L.DirectMessages.EmptyHint), Loc.T(L.Message.NewChat)))
+        {
+            OpenNewChat();
+        }
+    }
+
+    private void DrawNoChatsBelowTeam(Rect listRect, float scale)
+    {
+        var top = ImGui.GetCursorScreenPos().Y;
+        var bottom = MathF.Max(listRect.Max.Y - ChatListTrailingPad * scale,
+            top + NoChatsBelowTeamHeight * scale);
+        DrawNoChats(new Rect(new Vector2(listRect.Min.X, top), new Vector2(listRect.Max.X, bottom)));
+        ImGui.Dummy(new Vector2(0f, bottom - top));
     }
 
     private float DrawChatSearchRow(Rect area, float scale)
@@ -282,7 +309,7 @@ internal sealed partial class MessageApp
                 DrawConversationRow(drawList, regularChats[index], pinned: false);
             }
 
-            ImGui.Dummy(new Vector2(0f, 24f * scale));
+            ImGui.Dummy(new Vector2(0f, ChatListTrailingPad * scale));
         }
     }
 
