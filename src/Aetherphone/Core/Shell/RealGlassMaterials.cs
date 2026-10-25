@@ -16,7 +16,13 @@ internal static class RealGlassMaterials
     public static GlassMaterial Build(RealGlassKind kind, GlassTone tone, bool onWallpaper, Vector4 accent,
         float opacity, float amount, GlassTuning tuning, float radius, Vector2 size)
     {
-        var material = Base(kind, tone, onWallpaper, accent).WithAmount(amount);
+        var preset = Base(kind, tone, onWallpaper, accent);
+        var material = preset.WithAmount(amount);
+        if (onWallpaper)
+        {
+            KeepPresetRim(ref material, in preset);
+        }
+
         Tune(ref material, tuning);
         material.Opacity = Math.Clamp(opacity, 0f, 1f);
         material.CornerExponent = CornerExponent(radius, size);
@@ -57,6 +63,12 @@ internal static class RealGlassMaterials
     }
 
     private static bool InkIsDark(GlassTone tone, bool onWallpaper) => tone == GlassTone.Light && !onWallpaper;
+
+    private static void KeepPresetRim(ref GlassMaterial material, in GlassMaterial preset)
+    {
+        material.EdgeLineStrength = MathF.Min(material.EdgeLineStrength, preset.EdgeLineStrength);
+        material.RimFrostRelief = MathF.Min(material.RimFrostRelief, preset.RimFrostRelief);
+    }
 
     private static void Tune(ref GlassMaterial material, GlassTuning tuning)
     {
