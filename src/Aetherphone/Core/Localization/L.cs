@@ -2355,29 +2355,13 @@ internal static class L
         public static readonly LocString[] Release1400Prism =
         {
             new("changelog.r1400.0",
-                "Added Prism, a weekly glamour contest with a new theme every Monday at the daily reset, contributed by t3sco"),
-            new("changelog.r1400.1",
-                "Added entering Prism with one photo of your glam for the week's theme, picked from Photos or imported from your PC, and withdrawing it while entries are open"),
-            new("changelog.r1400.2",
-                "Added judging in Prism: rate anonymous glams in heats from Off theme to Nails it, with Aether Coin for every heat you judge"),
-            new("changelog.r1400.3",
-                "Added the Prism reveal: heat winners go through to a final, and results arrive as a podium with your placing, the Aether Coin you won, a reveal you can replay and a gallery of the week's glams in placing order"),
-            new("changelog.r1400.4",
-                "Added reporting a Prism glam, so moderators can take it out of the contest"),
-            new("changelog.r1400.29",
-                "Added the Prism glam library: browse new, popular and followed glams, filter to Modded, Vanilla or ones that fit your character, and search by item or #tag, contributed by t3sco"),
-            new("changelog.r1400.30",
-                "Added trying on any vanilla Prism glam in one tap through Glamourer, or through the game's Try On window without it"),
-            new("changelog.r1400.31",
-                "Added posting your own Prism glam with up to four photos: choose Modded or Vanilla and the race and gender in the photo, then add the pieces with their dyes and any mods, or fill them in from your character or a wardrobe outfit, and edit it later from its page"),
-            new("changelog.r1400.32",
-                "Added a Prism wardrobe: build outfits piece by piece with their dyes and mods or fill them from what you're wearing, keep your Glamourer designs and any glam you add, put an outfit back on in one tap, and post one as a glam"),
-            new("changelog.r1400.33",
-                "Added Modded and Vanilla contests to Prism side by side, with a Vanilla entry listing its gear and dyes by hand"),
-            new("changelog.r1400.34",
-                "Added the Prism rewards page, showing the badges, frames, Aether Coin and gil each week's winners take home"),
-            new("changelog.r1400.35",
-                "Added Prism profiles with their own name, handle, bio and picture, a banner from one of your glams, follows and placings, and an activity inbox with a home screen badge for new likes, follows and contest results"),
+                "Added Prism, a weekly glamour contest with a new theme every Monday at the daily reset, and a wardrobe that keeps all your glams to put on in one tap or share, contributed by t3sco"),
+        };
+
+        public static readonly LocString[] Release1400LiquidGlass =
+        {
+            new("changelog.r1400.66",
+                "Added Liquid Glass to Settings > Display: slide the phone's glass from Clear to Tinted, or turn on Real Glass, which bends and frosts what is behind it, with Fine Tuning sliders and a preview of your home screen"),
         };
 
         public static readonly LocString[] Release1400Messaging =
@@ -2385,7 +2369,7 @@ internal static class L
             new("changelog.r1400.5",
                 "Added hiding messages from people you blocked in ChocoChat group chats: each shows as a short row you can tap to read, and they no longer notify you"),
             new("changelog.r1400.58",
-                "Added GIFs from KLIPY to ChocoChat chats, group chats included, and to Aethergram messages"),
+                "Added GIFs to ChocoChat chats, group chats included, and to Aethergram messages. They switch on in a couple of days"),
             new("changelog.r1400.67",
                 "Added the Aetherphone Team to ChocoChat: the team can message you there, for example to set up the trade for a Prism gil prize, and you can write back"),
             new("changelog.r1400.70",
@@ -2454,12 +2438,8 @@ internal static class L
                 "Added Lock position and Always on top to Settings > Minimized phone, to keep the mini phone where you put it or let other windows sit over it, contributed by hellovvn"),
             new("changelog.r1400.65",
                 "Added putting a single game from Games or Gamba on your home screen: tap Add to Home Screen on the game, and its icon opens straight into it"),
-            new("changelog.r1400.66",
-                "Added Liquid Glass to Settings > Display: slide the phone's glass from Clear to Tinted, or turn on Real Glass, which bends and frosts what is behind it, with Fine Tuning sliders and a preview of your home screen"),
             new("changelog.r1400.20",
                 "Changed apps that are switched on or off for everyone to appear or disappear within seconds instead of a few minutes"),
-            new("changelog.r1400.16",
-                "Fixed the status bar clock not lining up with screen titles"),
             new("changelog.r1400.26",
                 "Changed app names on the home screen to always show in full: a long name shrinks a little or wraps onto a second line instead of ending in an ellipsis"),
             new("changelog.r1400.28",
@@ -2470,6 +2450,8 @@ internal static class L
                 "Changed screens that fail to load because of a brief connection hiccup to try once more by themselves before showing an error"),
             new("changelog.r1400.61",
                 "Changed the names of the Announcements and Notifications apps to Updates and Alerts"),
+            new("changelog.r1400.16",
+                "Fixed the status bar clock not lining up with screen titles"),
             new("changelog.r1400.41",
                 "Fixed icons sitting slightly off center on their buttons and wiggling on hover, contributed by t3sco"),
             new("changelog.r1400.68",
@@ -2541,7 +2523,7 @@ internal static class L
         public static readonly LocString[] Release1400Social =
         {
             new("changelog.r1400.57",
-                "Added GIF search from KLIPY for chirps, replies and Aethergram comments. It stays off until you turn it on, and until then GIFs from KLIPY wait for a tap before they load"),
+                "Added GIF search for chirps, replies and Aethergram comments. It switches on in a couple of days"),
             new("changelog.r1400.38",
                 "Fixed followers and following lists that did not load leaving no way to try again: they now offer Retry, as does a search through one that stops partway, contributed by hellovvn"),
         };
