@@ -68,6 +68,8 @@ Every driver command is available as a CLI verb and as an HTTP route with the sa
 | `scenario [NAME]` | `/scenario?name=` | Lists scenarios, or switches character; `none` clears it |
 | `install [APPID]` | `/install?app=` | Places an app on the home screen; with no id, every available app |
 | `command TEXT` | `/command?text=` | Runs a registered chat command |
+| `chat CHANNEL SENDER TEXT` | `/chat?channel=&sender=&text=` | Delivers an incoming game chat line (say, yell, shout, party, crossparty, tell, echo, system) to every `IChatGui.ChatMessage` subscriber; the sender is plain text |
+| `roll NAME\|me VALUE [MAX]` | `/roll?name=&value=&max=` | Delivers a `/random` result line as the game prints it (`me` is your own roll, MAX defaults to 999) |
 | `quit` | `/quit` | Stops the server |
 | `home` | `/home` | Back to the home screen |
 | `url` | | Prints the viewer address |
@@ -131,6 +133,8 @@ Switched off through the plugin's own gates: `GameMemory.Detach()` stops every F
 The fake sits at the raw-read layer on purpose. A scenario supplies levels, item stacks, and currency counts, and the plugin's own code still turns them into the jobs roster, the inventory sections, and the wallet. That keeps the harness honest about the UI and about the logic above the readers, but it says nothing about the readers themselves: an offset that moved in a game patch, a RowId used as an array index, or a container a reader forgot to visit only shows up in game.
 
 Game actions behind the gate (party invites, chat sends, gearset swaps, item links, friend actions, targeting) report success and land in the log as `game action: ...` lines, so a walk can check that a button asked the game for the right thing. Equipping a gearset also changes the simulated job, so the UI follows the switch.
+
+Incoming game chat only arrives when a walk sends it: `chat` delivers a line on a channel and `roll` delivers a `/random` result in the game's own shape (the value after icon 73, an optional "(out of N)"), so the Gamba roll games can be played end to end on one phone by rolling for every player. A `chat` sender is plain text with no `PlayerPayload`, because reading a player link's world asks Dalamud's data service, which the harness never provides, and would block the frame forever; code that needs the sender's player link, such as the Gamba table invite notice, does not fire here.
 
 ## Scenarios
 
