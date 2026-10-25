@@ -10215,7 +10215,7 @@
   "casino.tables.postParty": "Post code in party chat",
   "casino.tables.postSay": "Post code in say",
   "casino.tables.postYell": "Post code in yell",
-  "casino.tables.chatInvite": "Join my table: {0}. Enter the code in Aetherphone under {1} > Live.",
+  "casino.tables.chatInvite": "Join my table: {0}.",
   "casino.tables.codePosted": "Code posted in chat",
   "casino.tables.codePostFailed": "Couldn't post in chat",
   "casino.tables.postCodeTitle": "Post the code in chat",

@@ -10215,7 +10215,7 @@
   "casino.tables.postParty": "Kodu takım sohbetine gönder",
   "casino.tables.postSay": "Kodu Söyle kanalına gönder",
   "casino.tables.postYell": "Kodu Haykır kanalına gönder",
-  "casino.tables.chatInvite": "Masama katıl: {0}. Kodu Aetherphone'da {1} > Canlı bölümüne gir.",
+  "casino.tables.chatInvite": "Masama katıl: {0}.",
   "casino.tables.codePosted": "Kod sohbete gönderildi",
   "casino.tables.codePostFailed": "Sohbete gönderilemedi",
   "casino.tables.postCodeTitle": "Kodu sohbete gönder",

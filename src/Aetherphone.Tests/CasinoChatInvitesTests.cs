@@ -9,7 +9,7 @@ public sealed class CasinoChatInvitesTests
     [Fact]
     public void APostedTagReadsBackItsCode()
     {
-        var line = string.Concat("Join my table: ", CasinoChatCodes.Tag("K7PQ2M"), ". Enter the code in Aetherphone.");
+        var line = string.Concat("Join my table: ", CasinoChatCodes.Tag("K7PQ2M"), ".");
         Assert.True(CasinoChatCodes.TryFind(line, out var code));
         Assert.Equal("K7PQ2M", code);
     }

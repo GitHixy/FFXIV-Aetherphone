@@ -13045,7 +13045,7 @@ internal static class L
         public static readonly LocString PostParty = new("casino.tables.postParty", "Post code in party chat");
         public static readonly LocString PostSay = new("casino.tables.postSay", "Post code in say");
         public static readonly LocString PostYell = new("casino.tables.postYell", "Post code in yell");
-        public static readonly LocString ChatInvite = new("casino.tables.chatInvite", "Join my table: {0}. Enter the code in Aetherphone under {1} > Live.");
+        public static readonly LocString ChatInvite = new("casino.tables.chatInvite", "Join my table: {0}.");
         public static readonly LocString CodePosted = new("casino.tables.codePosted", "Code posted in chat");
         public static readonly LocString CodePostFailed = new("casino.tables.codePostFailed", "Couldn't post in chat");
         public static readonly LocString PostCodeTitle = new("casino.tables.postCodeTitle", "Post the code in chat");

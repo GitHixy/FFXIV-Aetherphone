@@ -10215,7 +10215,7 @@
   "casino.tables.postParty": "Publicar el código en el chat de grupo",
   "casino.tables.postSay": "Publicar el código en el canal Decir",
   "casino.tables.postYell": "Publicar el código en el canal Vocear",
-  "casino.tables.chatInvite": "Únete a mi mesa: {0}. Introduce el código en Aetherphone, en {1} > En vivo.",
+  "casino.tables.chatInvite": "Únete a mi mesa: {0}.",
   "casino.tables.codePosted": "Código publicado en el chat",
   "casino.tables.codePostFailed": "No se pudo publicar en el chat",
   "casino.tables.postCodeTitle": "Publicar el código en el chat",
