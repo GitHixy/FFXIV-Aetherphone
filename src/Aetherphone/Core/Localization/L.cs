@@ -2385,6 +2385,8 @@ internal static class L
                 "Added hiding messages from people you blocked in ChocoChat group chats: each shows as a short row you can tap to read, and they no longer notify you"),
             new("changelog.r1400.58",
                 "Added GIFs from KLIPY to ChocoChat chats, group chats included, and to Aethergram messages"),
+            new("changelog.r1400.67",
+                "Added the Aetherphone Team to ChocoChat: the team can message you there, for example to set up the trade for a Prism gil prize, and you can write back"),
             new("changelog.r1400.59",
                 "Changed ChocoChat chats with one person to need you both in each other's contacts before a message goes through, as starting one already did"),
             new("changelog.r1400.6",
@@ -2445,6 +2447,10 @@ internal static class L
                 "Added a line in game chat when Aethernet restarts for an update or loses its connection, and another when it is back, which you can turn off with Network status in chat in Settings"),
             new("changelog.r1400.43",
                 "Added Lock position and Always on top to Settings > Minimized phone, to keep the mini phone where you put it or let other windows sit over it, contributed by hellovvn"),
+            new("changelog.r1400.65",
+                "Added putting a single game from Games or Gamba on your home screen: tap Add to Home Screen on the game, and its icon opens straight into it"),
+            new("changelog.r1400.66",
+                "Added Liquid Glass to Settings > Display: slide the phone's glass from Clear to Tinted, or turn on Real Glass, which bends and frosts what is behind it, with Fine Tuning sliders and a preview of your home screen"),
             new("changelog.r1400.20",
                 "Changed apps that are switched on or off for everyone to appear or disappear within seconds instead of a few minutes"),
             new("changelog.r1400.16",
@@ -2461,6 +2467,10 @@ internal static class L
                 "Changed the names of the Announcements and Notifications apps to Updates and Alerts"),
             new("changelog.r1400.41",
                 "Fixed icons sitting slightly off center on their buttons and wiggling on hover, contributed by t3sco"),
+            new("changelog.r1400.68",
+                "Fixed tapping the top of the Search button on the home screen opening the app just above it"),
+            new("changelog.r1400.69",
+                "Fixed photo pickers leaving out a photo you took or imported while they were open until you left and came back"),
         };
 
         public static readonly LocString[] Release1400Market =
@@ -2550,7 +2560,7 @@ internal static class L
         public static readonly LocString[] Release1400MogCast =
         {
             new("changelog.r1400.62",
-                "Fixed MogCast hiding the nameplates of people near you while a video plays with the screen in the world switched off"),
+                "Fixed MogCast's Hide nameplates taking effect only after a zone change, and hiding the nameplates of people near you while the screen in the world was switched off"),
         };
 
         public static readonly LocString[] Release1330Chirper =
