@@ -200,6 +200,10 @@ A local-only surface skips both bases and composes `ChatTranscript`, `ChatEntran
 - **Token shares need three changes.** Wire a new token type into the bubble, `ChatText.EffectiveKind` and the previews (`QuotePreview`, `ListPreview`), or it shows as raw text somewhere.
 - **The entrance animation keys on the last message id.** `ChatEntranceTracker` animates only when the count grows and the last id changes, so prepended history stays still. An unstable last id makes older pages pop in like new ones.
 
+## Official team conversation
+
+The Aetherphone Team conversation uses its own `/team/messages` inbox. The server allows deletion once the player has a paid gil prize and no outstanding gil prizes. ChocoChat then offers Delete conversation on right-click. Deleting clears the player's history through the newest message when the confirmation opens, removes its unread count and closes replies until the team writes again. The console retains its history. `canDelete` and `clearedThroughId` on the inbox page keep the permission and cleared history synchronized across sessions; older servers default to keeping the conversation protected.
+
 ## Related docs
 
 - [Linkpearl](linkpearl.md): the in-game chat app and its pop-out windows.

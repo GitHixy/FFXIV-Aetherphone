@@ -102,6 +102,7 @@ namespace Aetherphone.Core.Aethernet;
 [JsonSerializable(typeof(MyFeedbackPage))]
 [JsonSerializable(typeof(TeamMessageDto))]
 [JsonSerializable(typeof(TeamMessagePage))]
+[JsonSerializable(typeof(TeamConversationClearedDto))]
 [JsonSerializable(typeof(SendTeamMessageRequest))]
 [JsonSerializable(typeof(NotificationDto))]
 [JsonSerializable(typeof(NotificationPage))]

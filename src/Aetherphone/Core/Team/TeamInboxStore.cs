@@ -35,6 +35,7 @@ internal sealed class TeamInboxStore : IDisposable
     private volatile bool refreshing;
     private volatile bool loadingOlder;
     private volatile bool sending;
+    private volatile bool deleting;
     private volatile bool markingRead;
     private volatile bool readOwed;
     private volatile bool readAgain;
@@ -71,6 +72,8 @@ internal sealed class TeamInboxStore : IDisposable
     public int Unread => session.IsSignedIn ? state.Unread : 0;
 
     public bool CanReply => state.CanReply;
+
+    public bool CanDelete => session.IsSignedIn && state.CanDelete && !deleting;
 
     public bool HasThread => session.IsSignedIn && state.HasThread;
 
@@ -153,6 +156,61 @@ internal sealed class TeamInboxStore : IDisposable
     public void ClearSendFailure()
     {
         sendFailure = null;
+    }
+
+    public void DeleteThread(long through, Action<bool, AepFailure> onDone)
+    {
+        if (!CanDelete || through <= 0)
+        {
+            return;
+        }
+
+        deleting = true;
+        var generation = state.Generation;
+        var token = cancellation.Token;
+        _ = Task.Run(async () =>
+        {
+            TeamConversationClearedDto? deleted = null;
+            var failure = AepFailure.None;
+            try
+            {
+                deleted = await api.DeleteAsync(through, token, value => failure = value).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                AepLog.Warning(exception, "[Team] delete failed");
+            }
+            finally
+            {
+                await framework.RunOnFrameworkThread(() =>
+                {
+                    deleting = false;
+                    if (generation != state.Generation)
+                    {
+                        return;
+                    }
+
+                    if (deleted is not null)
+                    {
+                        state.ApplyCleared(deleted.ClearedThroughId, generation);
+                        returnedDraft = null;
+                        sendFailure = null;
+                        notifications.RemoveGroup(notificationAppId, ThreadKey);
+                    }
+
+                    cadence.RequestImmediate();
+                    if (deleted is null && !failure.Failed)
+                    {
+                        failure = AepFailure.Transport(AepFailureKind.BadResponse);
+                    }
+
+                    onDone(deleted is not null, failure);
+                }).ConfigureAwait(false);
+            }
+        });
     }
 
     public void LoadOlder()
@@ -328,13 +386,11 @@ internal sealed class TeamInboxStore : IDisposable
             return;
         }
 
-        if (message is null || !state.Loaded)
+        cadence.RequestImmediate();
+
+        if (message is null)
         {
-            cadence.RequestImmediate();
-            if (message is null)
-            {
-                return;
-            }
+            return;
         }
 
         if (!state.ApplyIncoming(message, state.Generation) || !message.FromTeam)

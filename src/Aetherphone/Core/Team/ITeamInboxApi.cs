@@ -11,4 +11,7 @@ internal interface ITeamInboxApi
     Task<TeamMessageDto?> SendAsync(string body, CancellationToken token, Action<AepFailure>? onFailure = null);
 
     Task<bool> MarkReadAsync(CancellationToken token);
+
+    Task<TeamConversationClearedDto?> DeleteAsync(long through, CancellationToken token,
+        Action<AepFailure>? onFailure = null);
 }

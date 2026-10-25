@@ -8,6 +8,8 @@ internal sealed class TeamThreadState
     private TeamMessageDto[] messages = Array.Empty<TeamMessageDto>();
     private int unread;
     private bool canReply;
+    private bool canDelete;
+    private long clearedThroughId;
     private bool hasMoreOlder;
     private bool loaded;
     private int version;
@@ -18,6 +20,8 @@ internal sealed class TeamThreadState
     public int Unread => Volatile.Read(ref unread);
 
     public bool CanReply => Volatile.Read(ref canReply);
+
+    public bool CanDelete => Volatile.Read(ref canDelete);
 
     public bool HasMoreOlder => Volatile.Read(ref hasMoreOlder);
 
@@ -61,12 +65,14 @@ internal sealed class TeamThreadState
         var incoming = Ascending(page.Messages);
         lock (gate)
         {
-            if (expectedGeneration != generation)
+            if (expectedGeneration != generation || page.ClearedThroughId < clearedThroughId)
             {
                 return false;
             }
 
-            var current = messages;
+            clearedThroughId = page.ClearedThroughId;
+            var current = NewerThan(messages, clearedThroughId, out _);
+            incoming = NewerThan(incoming, clearedThroughId, out _);
             var pageNewest = NewestOf(incoming);
             var settledThrough = Math.Max(pageNewest, knownNewestId);
             var arrived = NewerThan(current, settledThrough, out var arrivedUnread);
@@ -89,6 +95,7 @@ internal sealed class TeamThreadState
 
             unread = Math.Max(0, page.Unread) + arrivedUnread;
             canReply = page.CanReply || HasTeamMessage(arrived);
+            canDelete = page.CanDelete && !HasTeamMessage(arrived);
             loaded = true;
             version++;
             return true;
@@ -100,12 +107,12 @@ internal sealed class TeamThreadState
         var incoming = Ascending(page.Messages);
         lock (gate)
         {
-            if (expectedGeneration != generation)
+            if (expectedGeneration != generation || page.ClearedThroughId != clearedThroughId)
             {
                 return false;
             }
 
-            messages = Merge(messages, incoming);
+            messages = Merge(messages, NewerThan(incoming, clearedThroughId, out _));
             hasMoreOlder = incoming.Length >= pageSize;
             version++;
             return true;
@@ -116,7 +123,7 @@ internal sealed class TeamThreadState
     {
         lock (gate)
         {
-            if (expectedGeneration != generation)
+            if (expectedGeneration != generation || message.Id <= clearedThroughId)
             {
                 return false;
             }
@@ -137,6 +144,7 @@ internal sealed class TeamThreadState
             if (message.FromTeam)
             {
                 canReply = true;
+                canDelete = false;
                 if (!message.Read)
                 {
                     unread++;
@@ -203,6 +211,26 @@ internal sealed class TeamThreadState
         }
     }
 
+    public bool ApplyCleared(long through, int expectedGeneration)
+    {
+        lock (gate)
+        {
+            if (expectedGeneration != generation)
+            {
+                return false;
+            }
+
+            clearedThroughId = Math.Max(clearedThroughId, through);
+            messages = NewerThan(messages, clearedThroughId, out unread);
+            canReply = HasTeamMessage(messages);
+            canDelete = false;
+            hasMoreOlder = false;
+            version++;
+            generation++;
+            return true;
+        }
+    }
+
     public void Clear()
     {
         lock (gate)
@@ -210,6 +238,8 @@ internal sealed class TeamThreadState
             messages = Array.Empty<TeamMessageDto>();
             unread = 0;
             canReply = false;
+            canDelete = false;
+            clearedThroughId = 0;
             hasMoreOlder = false;
             loaded = false;
             version++;

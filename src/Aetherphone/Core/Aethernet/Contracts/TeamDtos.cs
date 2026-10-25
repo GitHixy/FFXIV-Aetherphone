@@ -30,9 +30,12 @@ internal sealed record TeamMessageDto(
     }
 }
 
-internal sealed record TeamMessagePage(TeamMessageDto[]? Messages = null, int Unread = 0, bool CanReply = false);
+internal sealed record TeamMessagePage(TeamMessageDto[]? Messages = null, int Unread = 0, bool CanReply = false,
+    bool CanDelete = false, long ClearedThroughId = 0);
 
 internal sealed record SendTeamMessageRequest(string Body);
+
+internal sealed record TeamConversationClearedDto(long ClearedThroughId = 0);
 
 internal static class TeamMessageKinds
 {

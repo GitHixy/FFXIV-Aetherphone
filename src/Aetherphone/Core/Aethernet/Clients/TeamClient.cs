@@ -36,4 +36,11 @@ internal sealed class TeamClient : ITeamInboxApi
     {
         return net.SendAsync(HttpMethod.Post, ReadPath, token);
     }
+
+    public Task<TeamConversationClearedDto?> DeleteAsync(long through, CancellationToken token,
+        Action<AepFailure>? onFailure = null)
+    {
+        return net.RequestAsync(HttpMethod.Delete, $"{MessagesPath}?through={through}",
+            AethernetJsonContext.Default.TeamConversationClearedDto, token, null, onFailure);
+    }
 }

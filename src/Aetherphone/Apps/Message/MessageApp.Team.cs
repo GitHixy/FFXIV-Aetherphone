@@ -1,6 +1,7 @@
 using System.Globalization;
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Core.Confirm;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Social;
 using Aetherphone.Core.Team;
@@ -29,6 +30,9 @@ internal sealed partial class MessageApp
     private readonly ChatComposer teamComposer = new();
     private readonly TeamPaging teamPaging;
     private readonly FailureSlot teamSendFailure = new();
+    private readonly ActionSheet teamSheet = new();
+    private readonly ActionSheet.Item[] teamSheetItems = new ActionSheet.Item[1];
+    private int teamSheetGeneration;
     private readonly Action<string, string, string?> sendTeamText;
     private readonly Action<string, string, string> ignoreTeamEdit = static (_, _, _) => { };
     private TranscriptMessage[] teamTranscriptCache = Array.Empty<TranscriptMessage>();
@@ -112,9 +116,13 @@ internal sealed partial class MessageApp
             right = DrawUnreadBadge(drawList, right, subCenterY, unreadCount, false, iconScale);
         }
 
-        PhoneIcon.Draw(drawList, new Vector2(right - RowStatusGlyph * 0.5f * iconScale, subCenterY), PhoneIcons.PinFilled,
-            ink.MutedInk, RowStatusGlyph * iconScale);
-        right -= RowStatusPitch * iconScale;
+        if (!team.CanDelete)
+        {
+            PhoneIcon.Draw(drawList, new Vector2(right - RowStatusGlyph * 0.5f * iconScale, subCenterY), PhoneIcons.PinFilled,
+                ink.MutedInk, RowStatusGlyph * iconScale);
+            right -= RowStatusPitch * iconScale;
+        }
+
         var previewLeft = row.TextLeft;
         if (newest is { FromTeam: false })
         {
@@ -128,12 +136,75 @@ internal sealed partial class MessageApp
         Typography.Draw(drawList, new Vector2(previewLeft, subTop),
             Typography.FitText(TeamPreview(), MathF.Max(1f, previewRight - previewLeft), size.SubStyle),
             unreadCount > 0 ? ink.BodyInk : ink.MutedInk, size.SubStyle);
-        if (row.Tapped)
+        if (team.CanDelete && UiInteract.Hover(row.Bounds.Min, row.Bounds.Max)
+            && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+        {
+            teamSheetItems[0] = new ActionSheet.Item(Loc.T(L.Message.DeleteConversation), PhoneIcons.Trash, true);
+            teamSheetGeneration = team.AccountGeneration;
+            teamSheet.Open();
+        }
+        else if (row.Tapped)
         {
             OpenTeamThread();
         }
 
         EndPersonRow(drawList, row);
+    }
+
+    private void DrawTeamSheet(Rect screen)
+    {
+        if (!teamSheet.CapturesPointer)
+        {
+            return;
+        }
+
+        if (!team.CanDelete || !team.HasThread || teamSheetGeneration != team.AccountGeneration)
+        {
+            teamSheet.CloseImmediately();
+            return;
+        }
+
+        if (teamSheet.Draw(screen, ActionSheetStyle.From(ui), teamSheetItems, Loc.T(L.Common.Cancel), false,
+                Loc.T(L.TeamInbox.Name)) != 0)
+        {
+            return;
+        }
+
+        var generation = team.AccountGeneration;
+        var through = team.Newest?.Id ?? 0;
+        confirm.Ask(new ConfirmRequest
+        {
+            Title = Loc.T(L.Message.DeleteConversation),
+            Message = Loc.T(L.Message.DeleteConversationMessage),
+            ConfirmLabel = Loc.T(L.Common.Delete),
+            CancelLabel = Loc.T(L.Common.Cancel),
+            Sheet = true,
+            Danger = true,
+            Confirm = () =>
+            {
+                if (generation != team.AccountGeneration)
+                {
+                    return;
+                }
+
+                team.DeleteThread(through, (succeeded, failure) =>
+                {
+                    if (!succeeded)
+                    {
+                        teamSendFailure.Set(failure);
+                        ShellToast.Show(teamSendFailure.Text());
+                        return;
+                    }
+
+                    teamRestoreDraft = null;
+                    teamComposer.Clear();
+                    if (router.Current.Screen == MessageScreen.Team)
+                    {
+                        router.Pop();
+                    }
+                });
+            },
+        });
     }
 
     private string TeamPreview()

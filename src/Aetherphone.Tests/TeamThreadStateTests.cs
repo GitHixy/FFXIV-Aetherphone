@@ -35,6 +35,98 @@ public sealed class TeamThreadStateTests
     }
 
     [Fact]
+    public void DeletionIsOfferedOnlyWhenTheServerAllowsIt()
+    {
+        var state = new TeamThreadState();
+        Latest(state, Page(0, true, Team(10)));
+        Assert.False(state.CanDelete);
+        Latest(state, Page(0, true, Team(10)) with { CanDelete = true });
+        Assert.True(state.CanDelete);
+        Latest(state, Page(0, true, Team(10)));
+        Assert.False(state.CanDelete);
+    }
+
+    [Fact]
+    public void ClearingDropsOldPagesAndLatePushesButKeepsNewMessages()
+    {
+        var state = new TeamThreadState();
+        Latest(state, Page(1, true, Team(10)) with { CanDelete = true });
+        var beforeClear = state.Generation;
+        state.ApplyIncoming(Team(11), beforeClear);
+
+        Assert.True(state.ApplyCleared(10, beforeClear));
+        Assert.Equal(new long[] { 11 }, Ids(state));
+        Assert.Equal(1, state.Unread);
+        Assert.True(state.CanReply);
+        Assert.False(state.CanDelete);
+        Assert.False(state.ApplyLatest(Page(1, true, Team(10)), PageSize, beforeClear, 10));
+        Assert.False(state.ApplyOlder(Page(0, true, Team(9)), PageSize, beforeClear));
+        Assert.False(state.ApplyIncoming(Team(10), state.Generation));
+        Assert.False(state.ApplyLatest(Page(1, true, Team(10)), PageSize, state.Generation, 11));
+        Assert.Equal(new long[] { 11 }, Ids(state));
+    }
+
+    [Fact]
+    public void AClearOnAnotherDeviceRemovesOlderCachedHistoryEvenWithAFullPage()
+    {
+        var state = new TeamThreadState();
+        Latest(state, Page(0, true, Team(30), Team(20), Team(10)));
+        state.ApplyOlder(Page(0, true, Team(5)), PageSize, state.Generation);
+
+        Latest(state, Page(3, true, Team(40), Team(30), Team(20)) with { ClearedThroughId = 10 });
+
+        Assert.Equal(new long[] { 20, 30, 40 }, Ids(state));
+        Assert.False(state.ApplyOlder(Page(0, true, Team(5)), PageSize, state.Generation));
+    }
+
+    [Fact]
+    public void AClearedConversationStaysGoneUntilANewTeamMessageArrives()
+    {
+        var state = new TeamThreadState();
+        Latest(state, Page(1, true, Team(10)) with { CanDelete = true });
+        Assert.True(state.ApplyCleared(10, state.Generation));
+
+        Assert.False(state.HasThread);
+        Assert.False(state.CanReply);
+        Assert.False(state.CanDelete);
+        Assert.False(state.HasMoreOlder);
+        Assert.Equal(0, state.Unread);
+        Latest(state, Page(0, false) with { ClearedThroughId = 10 });
+        Assert.False(state.HasThread);
+        Assert.True(state.ApplyIncoming(Team(11), state.Generation));
+        Assert.True(state.HasThread);
+        Assert.True(state.CanReply);
+        Assert.Equal(1, state.Unread);
+    }
+
+    [Fact]
+    public void APushAfterAPaidPageRequiresFreshPermissionBeforeDeleting()
+    {
+        var state = new TeamThreadState();
+        Latest(state, Page(0, true, Team(10)) with { CanDelete = true });
+        var knownNewest = state.NewestId;
+        state.ApplyIncoming(Team(11), state.Generation);
+        Assert.False(state.CanDelete);
+        state.ApplyLatest(Page(0, true, Team(10)) with { CanDelete = true }, PageSize,
+            state.Generation, knownNewest);
+        Assert.False(state.CanDelete);
+    }
+
+    [Fact]
+    public void AnAccountSwitchResetsDeletionPermissionAndTheClearedBoundary()
+    {
+        var state = new TeamThreadState();
+        Latest(state, Page(0, true, Team(10)) with { CanDelete = true });
+        var previousAccount = state.Generation;
+        state.Clear();
+
+        Assert.False(state.CanDelete);
+        Assert.False(state.ApplyCleared(10, previousAccount));
+        Latest(state, Page(1, true, Team(1)));
+        Assert.Equal(new long[] { 1 }, Ids(state));
+    }
+
+    [Fact]
     public void TheFirstPageLandsOldestFirstWithTheServerCounts()
     {
         var state = new TeamThreadState();

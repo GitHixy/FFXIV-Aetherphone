@@ -251,6 +251,7 @@ internal sealed partial class MessageApp : IResumableApp, ISpotlightConversation
         ProcessPending();
         threadView.GateMenus();
         chatSheet.Gate();
+        teamSheet.Gate();
         threadSheet.Gate();
         memberSheet.Gate();
         groupPhotoSheet.Gate();
@@ -271,6 +272,7 @@ internal sealed partial class MessageApp : IResumableApp, ISpotlightConversation
         }
 
         DrawChatSheet(screen);
+        DrawTeamSheet(screen);
         DrawThreadSheet(screen);
         DrawMemberSheet(screen);
         DrawGroupPhotoSheet(screen);
@@ -571,6 +573,7 @@ internal sealed partial class MessageApp : IResumableApp, ISpotlightConversation
     {
         activeTab = tab;
         chatSheet.Close();
+        teamSheet.Close();
         filter = string.Empty;
         CloseChatSearch();
     }
