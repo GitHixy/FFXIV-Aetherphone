@@ -193,6 +193,37 @@ public sealed class RealGlassMaterialsTests
         Assert.True(tinted.TintAmount > neutral.TintAmount);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void TintedGlassOnTheWallpaperKeepsThePresetRim(bool light)
+    {
+        var tone = light ? GlassTone.Light : GlassTone.Dark;
+        var neutral = Build(RealGlassKind.Liquid, tone, NeutralAmount, true);
+        var tinted = Build(RealGlassKind.Liquid, tone, 1f, true);
+
+        Assert.Equal(neutral.EdgeLineStrength, tinted.EdgeLineStrength);
+        Assert.Equal(neutral.RimFrostRelief, tinted.RimFrostRelief);
+    }
+
+    [Fact]
+    public void ClearGlassOnTheWallpaperStillThinsTheRimFrost()
+    {
+        var neutral = Build(RealGlassKind.Frosted, GlassTone.Dark, NeutralAmount, true);
+        var clear = Build(RealGlassKind.Frosted, GlassTone.Dark, 0f, true);
+
+        Assert.True(clear.RimFrostRelief < neutral.RimFrostRelief);
+    }
+
+    [Fact]
+    public void TintedGlassInAnAppKeepsTheBrighterRim()
+    {
+        var neutral = Build(RealGlassKind.Liquid, GlassTone.Dark, NeutralAmount, false);
+        var tinted = Build(RealGlassKind.Liquid, GlassTone.Dark, 1f, false);
+
+        Assert.True(tinted.EdgeLineStrength > neutral.EdgeLineStrength);
+    }
+
     [Fact]
     public void LightGlassInAnAppKeepsTheDarkInkPreset()
     {

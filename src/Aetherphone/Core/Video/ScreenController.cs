@@ -1,5 +1,6 @@
 using Aetherphone.Core.Game;
 using Dalamud.Game.Gui.NamePlate;
+using Dalamud.Plugin.Services;
 
 namespace Aetherphone.Core.Video;
 
@@ -15,28 +16,32 @@ internal sealed class ScreenController : IDisposable
     {
         this.hideNameplates = hideNameplates;
         Engine = new VideoEngine();
+        Plugin.Framework.Update += OnFrameworkUpdate;
         Plugin.NamePlateGui.OnNamePlateUpdate += OnNamePlateUpdate;
     }
 
-    private void OnNamePlateUpdate(INamePlateUpdateContext context, IReadOnlyList<INamePlateUpdateHandler> handlers)
+    private void OnFrameworkUpdate(IFramework framework)
     {
         var hide = hideNameplates() && Engine.IsActive && Engine.ScreenVisible;
-        if (hide != hiding)
-        {
-            hiding = hide;
-            if (!hide)
-            {
-                Plugin.NamePlateGui.RequestRedraw();
-            }
-        }
-
-        if (!hide)
+        if (hide == hiding)
         {
             return;
         }
 
-        foreach (var handler in handlers)
+        hiding = hide;
+        Plugin.NamePlateGui.RequestRedraw();
+    }
+
+    private void OnNamePlateUpdate(INamePlateUpdateContext context, IReadOnlyList<INamePlateUpdateHandler> handlers)
+    {
+        if (!hiding)
         {
+            return;
+        }
+
+        for (var index = 0; index < handlers.Count; index++)
+        {
+            var handler = handlers[index];
             var gameObject = handler.GameObject;
             if (gameObject is null)
             {
@@ -53,6 +58,7 @@ internal sealed class ScreenController : IDisposable
 
     public void Dispose()
     {
+        Plugin.Framework.Update -= OnFrameworkUpdate;
         Plugin.NamePlateGui.OnNamePlateUpdate -= OnNamePlateUpdate;
         if (hiding)
         {

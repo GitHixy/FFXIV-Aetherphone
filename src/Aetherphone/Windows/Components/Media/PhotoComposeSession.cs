@@ -77,7 +77,9 @@ internal sealed class PhotoComposeSession : IDisposable
     // The ratio each photo was last framed at, so a change of aspect re-frames it exactly once
     // instead of fighting the user's own zoom and pan every frame.
     private readonly List<float?> framedForRatio = new();
+    private readonly List<string> importedPaths = new();
     private string[] pickerPaths = Array.Empty<string>();
+    private PhotoLibraryWatch libraryWatch;
     private PendingImport? pendingImport;
     private int openings;
     private Spring zoomSpring = new(1f);
@@ -167,6 +169,8 @@ internal sealed class PhotoComposeSession : IDisposable
         Notice = string.Empty;
         Interlocked.Increment(ref openings);
         Volatile.Write(ref pendingImport, null);
+        importedPaths.Clear();
+        libraryWatch.Mark(library);
         pickerPaths = library.List();
         LoadCrop(DefaultCrop);
     }
@@ -189,6 +193,11 @@ internal sealed class PhotoComposeSession : IDisposable
     public void TakeImported(string picked)
     {
         pickerPaths = PickerPaths.WithImported(pickerPaths, picked);
+        if (!importedPaths.Contains(picked))
+        {
+            importedPaths.Add(picked);
+        }
+
         if (!SingleSelect && selected.Contains(picked))
         {
             SelectCurrent(selected.IndexOf(picked));
@@ -519,9 +528,26 @@ internal sealed class PhotoComposeSession : IDisposable
         }
     }
 
+    private void RefreshPickerPaths()
+    {
+        if (!libraryWatch.Changed(library))
+        {
+            return;
+        }
+
+        var paths = library.List();
+        for (var index = 0; index < importedPaths.Count; index++)
+        {
+            paths = PickerPaths.WithImported(paths, importedPaths[index]);
+        }
+
+        pickerPaths = paths;
+    }
+
     public bool DrawPickGrid(Rect gridRect, float scale, in PhotoComposeStyle style, bool showBadges,
         string importLabel, string importTitle, string? pasteLabel = null)
     {
+        RefreshPickerPaths();
         var gap = GridGap * scale;
         var avail = ScrollLayout.StableContentWidth();
         var cell = (avail - gap * (GridColumns - 1)) / GridColumns;

@@ -30,11 +30,7 @@ internal static class LiquidGlassPreview
         }
 
         var backdrop = WallpaperBackdrop.Snapshot();
-        if (!RealGlass.Ready)
-        {
-            WallpaperRenderer.RecordBackdrop(picture, light, dark, aspect, darkness);
-        }
-
+        WallpaperRenderer.RecordBackdrop(picture, light, dark, aspect, darkness);
         DrawTabBar(drawList, picture, theme, scale);
         WallpaperBackdrop.Restore(backdrop);
         Squircle.Stroke(drawList, picture.Min, picture.Max, radius, ImGui.GetColorU32(theme.Separator),
@@ -45,10 +41,11 @@ internal static class LiquidGlassPreview
     {
         var capsule = TabBarLayout.FullCapsule(picture, scale, true);
         var action = TabBarLayout.ActionCircle(picture, scale);
-        Material.ThemedGlass(drawList, capsule.Min, capsule.Max, capsule.Height * 0.5f, scale, theme,
-            TabBar.GlassOpacity);
-        Material.ThemedGlass(drawList, action.Min, action.Max, action.Height * 0.5f, scale, theme,
-            TabBar.GlassOpacity);
+        var legibility = WallpaperLegibility.Strength(theme);
+        Material.LiquidGlass(drawList, capsule.Min, capsule.Max, capsule.Height * 0.5f, scale, GlassTone.Light,
+            legibility, TabBar.GlassOpacity);
+        Material.LiquidGlass(drawList, action.Min, action.Max, action.Height * 0.5f, scale, GlassTone.Light,
+            legibility, TabBar.GlassOpacity);
         TabBar.DrawHighlight(drawList, TabBarLayout.Highlight(capsule, TabGlyphs.Length, ActiveTab, scale),
             theme.Accent, 0f, scale);
         var iconSize = TabBarLayout.IconSize * scale;
