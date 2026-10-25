@@ -93,6 +93,7 @@ Aethernet opened on 2 July 2026. By the end of the season, players on 113 worlds
         <li>People you block stay hidden in group chats, behind a row you can tap to show</li>
         <li>Pick, paste or drag in a photo and add a caption before it sends</li>
         <li>Voice calls, one-on-one or in groups, with a mic test and a threshold you set</li>
+        <li>The Aetherphone Team writes to you here, for example to set up the trade for a Prism gil prize, and you can reply</li>
         <li>End-to-end encrypted</li>
       </ul>
     </td>
@@ -185,11 +186,11 @@ Aethernet opened on 2 July 2026. By the end of the season, players on 113 worlds
 
 **Spotlight and Control Center.** Pull down on the Home Screen to search apps, contacts, settings, notes and market items, or tap the top of the screen for music, volume, brightness and Do Not Disturb.
 
-**Make it yours.** Wallpapers, accent colors, icon looks, phone cases and your home layout, saved as a Look that follows each character. Settings → Display → Liquid Glass slides the glass from Clear to Tinted and can turn on real glass that bends and blurs what is behind it.
+**Make it yours.** Wallpapers, accent colors, icon looks, phone cases and your home layout, saved as a Look that follows each character. Any game in Games or Gamba can sit on the Home Screen as its own icon with Add to Home Screen. Settings → Display → Liquid Glass slides the glass from Clear to Tinted and can turn on real glass that bends and blurs what is behind it.
 
 **Speaks your language.** Nine interface languages and one-tap translation on posts, profiles and messages.
 
-**Private by design.** Messages, photos and voice notes are end-to-end encrypted. A Velvet intro is sent as plain text, and translating a message sends its text to Aethernet to be translated. A human moderation team reviews reported content.
+**Private by design.** Messages, photos and voice notes are end-to-end encrypted. A Velvet intro and messages with the Aetherphone Team (which staff read) are sent as plain text, and translating a message sends its text to Aethernet to be translated. A human moderation team reviews reported content.
 
 ## Install
 
