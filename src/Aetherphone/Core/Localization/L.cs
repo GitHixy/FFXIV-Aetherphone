@@ -2355,11 +2355,7 @@ internal static class L
         public static readonly LocString[] Release1400Prism =
         {
             new("changelog.r1400.0",
-                "Added Prism, a weekly glamour contest with a new theme every Monday at the daily reset, and a wardrobe that keeps all your glams to put on in one tap or share, contributed by t3sco"),
-            new("changelog.r1400.75",
-                "Added exploring other players' glams in Prism, Modded or Vanilla: try on any vanilla glam in one tap, and like or save the ones you love"),
-            new("changelog.r1400.76",
-                "Added entering the weekly Prism contest for a chance to win gil, Aether Coin, a frame and a badge"),
+                "Added Prism, a weekly glamour contest with a new theme every Monday at the daily reset, contributed by t3sco. Explore other players' Modded or Vanilla glams, try on any vanilla glam in one tap, like or save the ones you love, keep all your glams in a wardrobe, and enter the weekly contest to win gil, Aether Coin, a frame and a badge"),
         };
 
         public static readonly LocString[] Release1400LiquidGlass =
