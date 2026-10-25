@@ -1201,6 +1201,8 @@
   "changelog.r1400.41": "Behoben, dass Symbole leicht neben der Mitte ihrer Schaltflächen saßen und beim Darüberfahren wackelten, beigetragen von t3sco",
   "changelog.r1400.68": "Behoben, dass ein Tippen auf den oberen Rand der Taste Suchen auf dem Home-Bildschirm die App direkt darüber öffnete",
   "changelog.r1400.69": "Behoben, dass Fotoauswahlen ein Foto, das du aufgenommen oder importiert hast, während sie offen waren, erst zeigten, nachdem du sie verlassen hattest und zurückgekehrt warst",
+  "changelog.r1400.70": "Die Einstellung Listengröße in ChocoChat und Linkpearl hinzugefügt: Komfortabel, Standard oder Kompakt, damit mehr Chats und Kontakte auf den Bildschirm passen, beigetragen von hellovvn",
+  "changelog.r1400.71": "Behoben, dass Linkpearl auf dem Profil von jemandem, der nicht in deiner Freundesliste ist, das ganze Ganzkörperporträt in das runde Bild quetschte: Es zeigt jetzt das Gesicht, beigetragen von hellovvn",
   "changelog.r1400.43": "Position sperren und Immer im Vordergrund unter Einstellungen > Minimiertes Telefon hinzugefügt, damit das Mini-Telefon an seinem Platz bleibt oder andere Fenster darüber liegen können, beigetragen von hellovvn",
   "changelog.r1400.65": "Einzelne Spiele aus Spiele oder Gamba auf dem Home-Bildschirm hinzugefügt: Tippe beim Spiel auf Zum Home-Bildschirm hinzufügen, und sein Symbol öffnet es direkt",
   "changelog.r1400.66": "Liquid Glass unter Einstellungen > Anzeige hinzugefügt: Schiebe das Glas des Telefons von Klar bis Getönt oder schalte Echtes Glas ein, das bricht und mattiert, was dahinter liegt, mit Reglern zur Feinabstimmung und einer Vorschau deines Home-Bildschirms",

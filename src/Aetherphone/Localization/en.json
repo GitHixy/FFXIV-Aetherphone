@@ -1201,6 +1201,8 @@
   "changelog.r1400.41": "Fixed icons sitting slightly off center on their buttons and wiggling on hover, contributed by t3sco",
   "changelog.r1400.68": "Fixed tapping the top of the Search button on the home screen opening the app just above it",
   "changelog.r1400.69": "Fixed photo pickers leaving out a photo you took or imported while they were open until you left and came back",
+  "changelog.r1400.70": "Added a List size setting to ChocoChat and Linkpearl: Comfortable, Standard or Compact, so more chats and contacts fit on screen, contributed by hellovvn",
+  "changelog.r1400.71": "Fixed Linkpearl squeezing the whole full-body portrait into the round picture on the profile of someone who is not your friend: it now shows their face, contributed by hellovvn",
   "changelog.r1400.43": "Added Lock position and Always on top to Settings > Minimized phone, to keep the mini phone where you put it or let other windows sit over it, contributed by hellovvn",
   "changelog.r1400.65": "Added putting a single game from Games or Gamba on your home screen: tap Add to Home Screen on the game, and its icon opens straight into it",
   "changelog.r1400.66": "Added Liquid Glass to Settings > Display: slide the phone's glass from Clear to Tinted, or turn on Real Glass, which bends and frosts what is behind it, with Fine Tuning sliders and a preview of your home screen",

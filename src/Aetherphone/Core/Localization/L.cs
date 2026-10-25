@@ -2388,12 +2388,16 @@ internal static class L
                 "Added GIFs from KLIPY to ChocoChat chats, group chats included, and to Aethergram messages"),
             new("changelog.r1400.67",
                 "Added the Aetherphone Team to ChocoChat: the team can message you there, for example to set up the trade for a Prism gil prize, and you can write back"),
+            new("changelog.r1400.70",
+                "Added a List size setting to ChocoChat and Linkpearl: Comfortable, Standard or Compact, so more chats and contacts fit on screen, contributed by hellovvn"),
             new("changelog.r1400.59",
                 "Changed ChocoChat chats with one person to need you both in each other's contacts before a message goes through, as starting one already did"),
             new("changelog.r1400.6",
                 "Fixed voice messages recorded with Automatic gain distorting when you raise your voice and staying quiet afterwards"),
             new("changelog.r1400.60",
                 "Fixed unblocking someone leaving you both out of each other's ChocoChat contacts: the contacts a block removed now come back"),
+            new("changelog.r1400.71",
+                "Fixed Linkpearl squeezing the whole full-body portrait into the round picture on the profile of someone who is not your friend: it now shows their face, contributed by hellovvn"),
         };
 
         public static readonly LocString[] Release1400Calls =

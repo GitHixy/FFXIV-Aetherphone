@@ -1201,6 +1201,8 @@
   "changelog.r1400.41": "Simgelerin düğmelerinde hafifçe ortadan kayık durması ve üzerine gelince titremesi düzeltildi, katkı: t3sco",
   "changelog.r1400.68": "Ana ekrandaki Ara düğmesinin üst kısmına dokununca hemen üstündeki uygulamanın açılması düzeltildi",
   "changelog.r1400.69": "Fotoğraf seçicilerin, açıkken çektiğin ya da içe aktardığın bir fotoğrafı çıkıp geri dönene kadar göstermemesi düzeltildi",
+  "changelog.r1400.70": "ChocoChat ve Linkpearl'e Liste boyutu ayarı eklendi: Ferah, Standart veya Sıkışık, böylece ekrana daha fazla sohbet ve kişi sığar, katkı: hellovvn",
+  "changelog.r1400.71": "Linkpearl'de arkadaşın olmayan birinin profilinde tam boy portrenin yuvarlak resme sıkıştırılması düzeltildi: artık yüzü gösteriyor, katkı: hellovvn",
   "changelog.r1400.43": "Ayarlar > Küçültülmüş telefon altına Konumu kilitle ve Her zaman üstte eklendi; mini telefon bıraktığınız yerde kalabilir ya da diğer pencereler üstüne gelebilir, katkı: hellovvn",
   "changelog.r1400.65": "Oyunlar veya Gamba'dan tek bir oyunu ana ekrana koyma eklendi: oyunda Ana Ekrana Ekle'ye dokun, simgesi oyunu doğrudan açsın",
   "changelog.r1400.66": "Ayarlar > Ekran altına Liquid Glass eklendi: telefonun camını Şeffaf'tan Renkli'ye kaydır ya da arkasındakini büken ve buzlandıran Gerçek cam'ı aç; İnce Ayar kaydırıcıları ve ana ekran önizlemesiyle",
