@@ -84,7 +84,7 @@ public sealed class CasinoChatInvitesTests
     {
         var launcher = new CasinoLauncher();
         launcher.RequestNotification(CasinoLauncher.CodeGroupKey("K7PQ2M"));
-        Assert.True(launcher.TryConsume(out var launch));
+        Assert.True(launcher.TryConsume(true, out var launch));
         Assert.Equal(CasinoLaunchKind.Code, launch.Kind);
         Assert.Equal("K7PQ2M", launch.Code);
         Assert.Equal(string.Empty, launch.TableId);

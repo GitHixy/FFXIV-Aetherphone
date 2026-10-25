@@ -306,7 +306,7 @@ internal sealed partial class CasinoApp : IPhoneApp, ITabRouteTarget, INameplate
 
     private void ConsumeLaunch()
     {
-        if (!launcher.TryConsume(out var launch))
+        if (!launcher.TryConsume(casino.State is not null, out var launch))
         {
             return;
         }
