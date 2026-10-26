@@ -12097,7 +12097,7 @@ internal static class L
         public static readonly LocString VerdictMismatchHint = new("casino.verdict.mismatchHint", "The revealed seed does not reproduce this round. Copy the details and send them to us through Feedback.");
         public static readonly LocString VerdictUnrevealedTitle = new("casino.verdict.unrevealedTitle", "Still sealed");
         public static readonly LocString VerdictUnrevealedHint = new("casino.verdict.unrevealedHint", "This round has not settled yet, so its seed stays sealed. Check back once it wraps.");
-        public static readonly LocString FairnessIntro = new("casino.fairness.intro", "Every game here is dealt from a sealed seed, and for 7 days you can check settled rounds yourself, right on this phone. Here is how it works.");
+        public static readonly LocString FairnessIntro = new("casino.fairness.intro", "Every game here is dealt from a sealed seed, and for 3 days you can check settled rounds yourself, right on this phone. Here is how it works.");
         public static readonly LocString FairnessLockTitle = new("casino.fairness.lockTitle", "Locked before you play");
         public static readonly LocString FairnessLockBody = new("casino.fairness.lockBody", "Before a stake is accepted, Gamba publishes a fingerprint of the round's secret seed. The outcome is fixed in that seed; nothing after your tap can bend it.");
         public static readonly LocString FairnessRevealTitle = new("casino.fairness.revealTitle", "Revealed when it settles");
@@ -12261,7 +12261,7 @@ internal static class L
         public static readonly LocString RulesHowToPlay = new("casino.rules.howToPlay", "HOW IT PLAYS");
         public static readonly LocString RulesNumbers = new("casino.rules.numbers", "THE NUMBERS");
         public static readonly LocString RulesPlay = new("casino.rules.play", "Play");
-        public static readonly LocString RulesFairness = new("casino.rules.fairness", "Every round is sealed before it is drawn, and you can check settled rounds for 7 days under Fair play.");
+        public static readonly LocString RulesFairness = new("casino.rules.fairness", "Every round is sealed before it is drawn, and you can check settled rounds for 3 days under Fair play.");
         public static readonly LocString PitchGeneric = new("casino.pitch.generic", "A game on the floor");
         public static readonly LocString PitchScratch = new("casino.pitch.scratch", "Buy a card, rub the foil, match three symbols");
         public static readonly LocString PitchWheel = new("casino.pitch.wheel", "One wheel, five spots, everybody on the same spin");
