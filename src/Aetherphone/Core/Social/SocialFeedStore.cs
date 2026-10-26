@@ -195,6 +195,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         feedSignals.Reset();
         ClearTagged();
         ClearHashtag();
+        ResetSuggestedPeople();
         OnAccountReset();
     }
 
@@ -1990,6 +1991,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         discoverResults = MapFollow(discoverResults, userId, following, requested);
         userListResults = MapFollow(userListResults, userId, following, requested);
         followRequests = MapFollow(followRequests, userId, following, requested);
+        MapSuggestedFollow(userId, following, requested);
         forYouLane.Items = MapFollowByAuthor(forYouLane.Items, userId, following);
         latestLane.Items = MapFollowByAuthor(latestLane.Items, userId, following);
         followingLane.Items = MapFollowByAuthor(followingLane.Items, userId, following);

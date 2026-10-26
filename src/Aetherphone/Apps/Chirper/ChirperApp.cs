@@ -1221,6 +1221,10 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                         new Vector2(listRect.Center.X, listRect.Min.Y + 118f * UiScale.Current),
                         Loc.T(L.Failure.PullToRetry), ChirperInk.MutedInk, TextStyles.Footnote);
                 }
+                else if (scope == SocialFeedScope.Following)
+                {
+                    DrawSuggestedPeopleList(listRect.Min.Y + EmptyFollowingListTop * UiScale.Current);
+                }
             }
             else
             {
@@ -1236,9 +1240,15 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 }
 
                 var caughtUpAfterId = ranked ? store.CaughtUpAfterId : null;
+                var peopleSlot = PeopleRailSlot(scope, snapshot.Length);
                 feedActionsAnchorPending = UiAnchors.Recording;
                 for (var index = 0; index < snapshot.Length; index++)
                 {
+                    if (index == peopleSlot)
+                    {
+                        DrawPeopleRailRow();
+                    }
+
                     var post = snapshot[index];
                     if (HiddenByMediaPreference(post))
                     {
@@ -1262,7 +1272,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                         continue;
                     }
 
-                    var suggestion = ranked && !post.IsFollowing && store.TryGetFeedNote(post.Id, out var note)
+                    var suggestion = ranked && (!post.IsFollowing || followedFromFeed.Contains(post.AuthorId))
+                        && store.TryGetFeedNote(post.Id, out var note)
                         ? FeedNotes.SuggestionLabel(note)
                         : null;
                     var rowTop = ImGui.GetCursorScreenPos().Y;
@@ -1273,6 +1284,11 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                     {
                         DrawCaughtUpLine();
                     }
+                }
+
+                if (peopleSlot == snapshot.Length)
+                {
+                    DrawPeopleRailRow();
                 }
 
                 feedActionsAnchorPending = false;
@@ -1375,7 +1391,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         }
         else if (suggestion is not null)
         {
-            DrawBanner(origin, cellRight, PhoneIcons.Sparkles, suggestion);
+            DrawSuggestionBanner(origin, cellRight, suggestion, post);
         }
         else if (pinned)
         {
@@ -1557,6 +1573,31 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             ? Loc.T(L.Chirper.YouReposted)
             : Loc.T(L.Chirper.Reposted, SocialIdentity.Name(repostBy.AuthorDisplayName, repostBy.AuthorHandle));
         DrawBanner(origin, cellRight, PhoneIcons.Repeat, label);
+    }
+
+    private void DrawSuggestionBanner(Vector2 origin, float cellRight, string label, PostDto post)
+    {
+        var scale = UiScale.Current;
+        var top = origin.Y + CellPadTop * scale;
+        var right = cellRight - CellPadX * scale;
+        var followLabel = post.IsFollowing ? Loc.T(L.Chirper.Following) : Loc.T(L.Chirper.Follow);
+        var followSize = Typography.Measure(followLabel, BannerStyle);
+        var followMin = new Vector2(right - followSize.X, top);
+        var followMax = new Vector2(right, top + Typography.LineHeight(BannerStyle));
+        DrawBanner(origin, followMin.X + (CellPadX - BannerFollowGap) * scale, PhoneIcons.Sparkles, label);
+        var hovered = !post.IsFollowing && UiInteract.Hover(followMin, followMax);
+        if (hovered)
+        {
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+        }
+
+        var ink = post.IsFollowing ? ChirperInk.MutedInk : hovered ? ChirperInk.TitleInk : ChirperInk.AccentLink;
+        Typography.Draw(ImGui.GetWindowDrawList(), followMin, followLabel, ink, BannerStyle);
+        if (!post.IsFollowing && UiInteract.Click(followMin, followMax, hovered))
+        {
+            followedFromFeed.Add(post.AuthorId);
+            store.SetFollow(post.AuthorId, true);
+        }
     }
 
     private static void DrawBanner(Vector2 origin, float cellRight, string icon, string label)

@@ -49,6 +49,7 @@ namespace Aetherphone.Core.Aethernet;
 [JsonSerializable(typeof(UserSearchResult))]
 [JsonSerializable(typeof(TagSearchResult))]
 [JsonSerializable(typeof(UserListPage))]
+[JsonSerializable(typeof(SuggestedUsersPage))]
 [JsonSerializable(typeof(UploadUrlRequest))]
 [JsonSerializable(typeof(UploadUrlResponse))]
 [JsonSerializable(typeof(CreateGramRequest))]

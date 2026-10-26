@@ -293,6 +293,10 @@ internal sealed record UserListPage(
     Dictionary<string, int>? ReactionKinds = null,
     int[]? ReactionCounts = null);
 
+internal sealed record SuggestedUserDto(UserDto User, int Reason);
+
+internal sealed record SuggestedUsersPage(SuggestedUserDto[] Items);
+
 internal sealed record UploadUrlRequest(string ContentType, string Scope);
 
 internal sealed record UploadUrlResponse(string Key, string UploadUrl, string PublicUrl);
