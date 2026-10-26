@@ -1,3 +1,5 @@
+using Aetherphone.Core.Game;
+
 namespace Aetherphone.Core.Collections;
 
 internal static class CollectionCategories
@@ -31,7 +33,9 @@ internal static class CollectionCategories
 
     public static CollectionSort[] SortOptions(CollectionCategory category) => category switch
     {
-        CollectionCategory.Facewear => GameOrderSorts,
+        CollectionCategory.Facewear or CollectionCategory.Mounts or CollectionCategory.Emotes
+            or CollectionCategory.TriadCards => GameOrderSorts,
+        CollectionCategory.Minions or CollectionCategory.Orchestrions when GameSheets.Available => GameOrderSorts,
         _ => SharedSorts,
     };
 
