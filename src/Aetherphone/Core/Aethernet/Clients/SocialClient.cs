@@ -116,6 +116,13 @@ internal sealed partial class SocialClient
         return UserListAsync($"/users/{Uri.EscapeDataString(userId)}/mutual-followers", cursor, token, onFailure);
     }
 
+    public Task<SuggestedUsersPage?> SuggestedUsersAsync(int limit, CancellationToken token,
+        Action<AepFailure>? onFailure = null)
+    {
+        return net.GetAsync($"/users/suggested?limit={limit}", AethernetJsonContext.Default.SuggestedUsersPage, token,
+            null, onFailure);
+    }
+
     private Task<UserListPage?> UserListAsync(string path, string? cursor, CancellationToken token,
         Action<AepFailure>? onFailure = null)
     {

@@ -218,17 +218,17 @@ internal sealed partial class AethergramApp
             Ink.White, GridOverlayStyle);
     }
 
-    private SocialUserRowResult DrawUserRow(UserDto user, float trailingWidth)
+    private SocialUserRowResult DrawUserRow(UserDto user, float trailingWidth, string? subtitle = null)
     {
         var regionCode = SocialRegion.Resolve(user.Region, user.World, gameData);
-        return SocialUserRow.Draw("aethergram.row.", user, SocialIdentity.ProfileMeta(user.Handle, regionCode),
+        return SocialUserRow.Draw("aethergram.row.", user, subtitle ?? SocialIdentity.ProfileMeta(user.Handle, regionCode),
             trailingWidth, UserRowStyle, Ink, theme, images, lodestone);
     }
 
-    private void DrawUserRowWithFollow(UserDto user)
+    private void DrawUserRowWithFollow(UserDto user, string? subtitle = null)
     {
         var isMe = store.Me is { } me && me.Id == user.Id;
-        var row = DrawUserRow(user, isMe ? 0f : FollowPillWidth);
+        var row = DrawUserRow(user, isMe ? 0f : FollowPillWidth, subtitle);
         if (!isMe)
         {
             DrawFollowPill(row.Trailing, user);

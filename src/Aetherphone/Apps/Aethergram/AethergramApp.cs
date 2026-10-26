@@ -1029,6 +1029,10 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                     Typography.DrawCentered(new Vector2(listRect.Center.X, messageY + 28f * UiScale.Current),
                         Loc.T(L.Failure.PullToRetry), Ink.MutedInk, TextStyles.Footnote);
                 }
+                else if (scope == SocialFeedScope.Following)
+                {
+                    DrawSuggestedPeopleList(messageY + EmptyFollowingListGap * UiScale.Current);
+                }
             }
             else
             {
@@ -1043,9 +1047,15 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                 }
 
                 var caughtUpAfterId = ranked ? store.CaughtUpAfterId : null;
+                var peopleSlot = PeopleRailSlot(scope, snapshot.Length);
                 feedActionsAnchorPending = UiAnchors.Recording;
                 for (var index = 0; index < snapshot.Length; index++)
                 {
+                    if (index == peopleSlot)
+                    {
+                        DrawPeopleRailRow();
+                    }
+
                     var post = snapshot[index];
                     if (HiddenByMediaPreference(post))
                     {
@@ -1065,7 +1075,8 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                         continue;
                     }
 
-                    var suggestion = ranked && !post.IsFollowing && store.TryGetFeedNote(post.Id, out var note)
+                    var suggestion = ranked && (!post.IsFollowing || followedFromFeed.Contains(post.AuthorId))
+                        && store.TryGetFeedNote(post.Id, out var note)
                         ? FeedNotes.SuggestionLabel(note)
                         : null;
                     var rowTop = ImGui.GetCursorScreenPos().Y;
@@ -1076,6 +1087,11 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                     {
                         DrawCaughtUpLine();
                     }
+                }
+
+                if (peopleSlot == snapshot.Length)
+                {
+                    DrawPeopleRailRow();
                 }
 
                 feedActionsAnchorPending = false;
@@ -1117,16 +1133,35 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         UiAnchors.Report("aethergram.card.actions", new Rect(new Vector2(left, top), new Vector2(right, bottom)));
     }
 
-    private static void DrawSuggestionBanner(ImDrawListPtr drawList, float left, float top, float width, string label)
+    private void DrawSuggestionBanner(ImDrawListPtr drawList, float left, float top, float width, string label,
+        PostDto post)
     {
         var scale = UiScale.Current;
         var lineHeight = Typography.LineHeight(CardMetaStyle);
         var iconSize = 13f * scale;
         PhoneIcon.Draw(drawList, new Vector2(left + iconSize * 0.5f, top + lineHeight * 0.5f), PhoneIcons.Sparkles,
             Ink.MutedInk, iconSize);
+        var followLabel = post.IsFollowing ? Loc.T(L.Aethergram.Following) : Loc.T(L.Aethergram.Follow);
+        var followWidth = Typography.Measure(followLabel, BannerFollowStyle).X;
+        var followMin = new Vector2(left + width - followWidth, top);
+        var followMax = new Vector2(left + width, top + lineHeight);
         var textLeft = left + iconSize + 6f * scale;
-        Typography.Draw(drawList, new Vector2(textLeft, top),
-            Typography.FitText(label, MathF.Max(1f, width - iconSize - 6f * scale), CardMetaStyle), Ink.MutedInk, CardMetaStyle);
+        var textWidth = MathF.Max(1f, followMin.X - BannerFollowGap * scale - textLeft);
+        Typography.Draw(drawList, new Vector2(textLeft, top), Typography.FitText(label, textWidth, CardMetaStyle),
+            Ink.MutedInk, CardMetaStyle);
+        var hovered = !post.IsFollowing && UiInteract.Hover(followMin, followMax);
+        if (hovered)
+        {
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+        }
+
+        var ink = post.IsFollowing ? Ink.MutedInk : hovered ? Ink.TitleInk : Ink.AccentLink;
+        Typography.Draw(drawList, followMin, followLabel, ink, BannerFollowStyle);
+        if (!post.IsFollowing && UiInteract.Click(followMin, followMax, hovered))
+        {
+            followedFromFeed.Add(post.AuthorId);
+            store.SetFollow(post.AuthorId, true);
+        }
     }
 
     private static float TagPromptTextWidth(float innerWidth, float scale) =>
@@ -1233,7 +1268,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         var innerX = origin.X + inset;
         if (suggestion is not null)
         {
-            DrawSuggestionBanner(drawList, innerX, origin.Y + CardPadTop * scale, innerWidth, suggestion);
+            DrawSuggestionBanner(drawList, innerX, origin.Y + CardPadTop * scale, innerWidth, suggestion, post);
         }
 
         if (pendingTag is not null)

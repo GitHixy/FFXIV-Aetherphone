@@ -80,11 +80,15 @@ internal static class L
         public static readonly LocString FeedSuggested = new("social.feedSuggested", "Suggested for you");
         public static readonly LocString FeedSuggestedTaste = new("social.feedSuggestedTaste", "Liked by people with your taste");
         public static readonly LocString FeedSuggestedFresh = new("social.feedSuggestedFresh", "New post, you are among the first to see it");
+        public static readonly LocString FeedSuggestedNewcomer = new("social.feedSuggestedNewcomer", "One of their first posts");
+        public static readonly LocString PeopleToFollow = new("social.peopleToFollow", "People to follow");
+        public static readonly LocString SuggestedInteracts = new("social.suggestedInteracts", "You interact often");
+        public static readonly LocString SuggestedPopular = new("social.suggestedPopular", "Popular right now");
         public static readonly LocString FeedHowItWorks = new("social.feedHowItWorks", "How your feed works");
         public static readonly LocString FeedHowItWorksIntro = new("social.feedHowItWorksIntro", "For You shows the posts you have not seen yet, in the order we think you will enjoy them. Latest is every post, newest first, and it is always one tap away.");
         public static readonly LocString FeedHowItWorksQuality = new("social.feedHowItWorksQuality", "A post rises on how the people who saw it responded, never on how many followers its author has. Comments and replies count far more than a heart.");
         public static readonly LocString FeedHowItWorksPeople = new("social.feedHowItWorksPeople", "People you interact with, and players who like the same posts you do, lift what appears for you.");
-        public static readonly LocString FeedHowItWorksFair = new("social.feedHowItWorksFair", "Posting hour does not decide reach. A post made while most players are asleep waits for them instead of expiring, and every new post is shown to a few people before it competes on numbers.");
+        public static readonly LocString FeedHowItWorksFair = new("social.feedHowItWorksFair", "Posting hour does not decide reach. A post made while most players are asleep waits for them instead of expiring, and every new post is shown to a few people before it competes on numbers. A new player's first few posts are shown near the top until someone responds to them.");
         public static readonly LocString RoleManagement = new("social.roleManagement", "Management");
         public static readonly LocString RoleDeveloper = new("social.roleDeveloper", "Developer");
         public static readonly LocString RoleModerator = new("social.roleModerator", "Moderator");
@@ -14029,6 +14033,8 @@ internal static class L
         public static readonly LocString WalletActivityBody = new("onboarding.walletActivityBody", "Gains and spends land here with the place they happened, so you can see where your currency went.");
         public static readonly LocString ChirperFeedsTitle = new("onboarding.chirperFeedsTitle", "Pick your feed");
         public static readonly LocString ChirperFeedsBody = new("onboarding.chirperFeedsBody", "For You shows chirps you have not seen yet, ranked for you. Latest puts the newest first. Tap one to switch.");
+        public static readonly LocString ChirperPeopleTitle = new("onboarding.chirperPeopleTitle", "Find your people");
+        public static readonly LocString ChirperPeopleBody = new("onboarding.chirperPeopleBody", "Follow a few players to fill your Following feed. For You also learns from who you follow.");
         public static readonly LocString ChirperJoinTitle = new("onboarding.chirperJoinTitle", "Join the conversation");
         public static readonly LocString ChirperJoinBody = new("onboarding.chirperJoinBody", "Under every chirp: reply, rechirp or quote it, react with an emoji, or copy its text.");
         public static readonly LocString ChirperNavTitle = new("onboarding.chirperNavTitle", "Find your way");
@@ -14041,6 +14047,8 @@ internal static class L
         public static readonly LocString ChirperSendBody = new("onboarding.chirperSendBody", "Tap Chirp to share it with everyone. It lights up once there is something to post.");
         public static readonly LocString AethergramFeedsTitle = new("onboarding.aethergramFeedsTitle", "Pick your feed");
         public static readonly LocString AethergramFeedsBody = new("onboarding.aethergramFeedsBody", "For You shows posts you have not seen yet, ranked for you. Latest puts the newest first. Tap one to switch.");
+        public static readonly LocString AethergramPeopleTitle = new("onboarding.aethergramPeopleTitle", "Find your people");
+        public static readonly LocString AethergramPeopleBody = new("onboarding.aethergramPeopleBody", "Follow a few players whose photos you like to fill your Following feed. For You also learns from who you follow.");
         public static readonly LocString AethergramStoriesTitle = new("onboarding.aethergramStoriesTitle", "Watch and share stories");
         public static readonly LocString AethergramStoriesBody = new("onboarding.aethergramStoriesBody", "Tap a ringed picture to watch someone's story, or the plus on your own picture to share one.");
         public static readonly LocString AethergramReactTitle = new("onboarding.aethergramReactTitle", "Like, comment, send");

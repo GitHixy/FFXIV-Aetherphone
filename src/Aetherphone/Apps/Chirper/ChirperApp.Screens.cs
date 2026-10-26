@@ -225,7 +225,7 @@ internal sealed partial class ChirperApp
     private static void DrawSectionLabel(string label) =>
         SocialChrome.DrawSectionLabel(label, ChirperInk.Shared, SectionLabelStyle);
 
-    private void DrawUserRow(UserDto user)
+    private void DrawUserRow(UserDto user, string? subtitle = null)
     {
         var scale = UiScale.Current;
         var drawList = ImGui.GetWindowDrawList();
@@ -238,9 +238,9 @@ internal sealed partial class ChirperApp
         };
         var pillWidth = pillLabel.Length > 0 ? Button.WidthFor(pillLabel, ButtonSize.Small) / scale : 0f;
         var regionCode = SocialRegion.Resolve(user.Region, user.World, gameData);
-        var sub = user.Bio.Length > 0 && user.Handle.Length > 0
+        var sub = subtitle ?? (user.Bio.Length > 0 && user.Handle.Length > 0
             ? $"@{user.Handle} · {user.Bio}"
-            : SocialIdentity.ProfileMeta(user.Handle, regionCode);
+            : SocialIdentity.ProfileMeta(user.Handle, regionCode));
         var row = SocialUserRow.Draw("chirper.row.name.", user, sub, pillWidth, UserRowStyle, ChirperInk.Shared, theme,
             images, lodestone);
         DrawReactionBadge(drawList, row.AvatarCenter, row.AvatarRadius, store.ReactionKindOf(user.Id));

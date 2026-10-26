@@ -11,6 +11,8 @@ internal static class FeedNotes
 
     public const string Fresh = "fresh";
 
+    public const string Newcomer = "newcomer";
+
     public const string Quality = "quality";
 
     public static string? SuggestionLabel(in FeedItemNote note)
@@ -19,6 +21,7 @@ internal static class FeedNotes
         {
             Neighbour => Loc.T(L.Social.FeedSuggestedTaste),
             Fresh => Loc.T(L.Social.FeedSuggestedFresh),
+            Newcomer => Loc.T(L.Social.FeedSuggestedNewcomer),
             Quality => Loc.T(L.Social.FeedSuggested),
             _ => null,
         };

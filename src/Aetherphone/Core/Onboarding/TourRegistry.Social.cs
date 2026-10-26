@@ -10,6 +10,8 @@ internal static partial class TourRegistry
             new[]
             {
                 GuideStep.TryTap(L.Onboarding.ChirperFeedsTitle, L.Onboarding.ChirperFeedsBody, "chirper.tabs"),
+                GuideStep.Point(L.Onboarding.ChirperPeopleTitle, L.Onboarding.ChirperPeopleBody, "chirper.people",
+                    GuideGesture.None),
                 GuideStep.Point(L.Onboarding.ChirperJoinTitle, L.Onboarding.ChirperJoinBody, "chirper.post.actions",
                     GuideGesture.None),
                 GuideStep.Point(L.Onboarding.ChirperNavTitle, L.Onboarding.ChirperNavBody, "chirper.tabbar",
@@ -26,6 +28,8 @@ internal static partial class TourRegistry
             {
                 GuideStep.TryTap(L.Onboarding.AethergramFeedsTitle, L.Onboarding.AethergramFeedsBody,
                     "aethergram.feeds"),
+                GuideStep.Point(L.Onboarding.AethergramPeopleTitle, L.Onboarding.AethergramPeopleBody,
+                    "aethergram.people", GuideGesture.None),
                 GuideStep.Point(L.Onboarding.AethergramStoriesTitle, L.Onboarding.AethergramStoriesBody,
                     "aethergram.stories", GuideGesture.None),
                 GuideStep.Point(L.Onboarding.AethergramReactTitle, L.Onboarding.AethergramReactBody,

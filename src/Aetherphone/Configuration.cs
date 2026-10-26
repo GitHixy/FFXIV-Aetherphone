@@ -159,6 +159,7 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
     public int AethergramFeedRegionMask { get; set; }
     public int ChirperFeedScope { get; set; }
     public int AethergramFeedScope { get; set; }
+    public HashSet<string> DismissedFollowSuggestions { get; set; } = new();
     public bool ShowSensitiveContent { get; set; }
     public bool KlipyGifsAllowed { get; set; }
     public bool ArrowKeysStepPosts { get; set; } = true;
