@@ -29,6 +29,7 @@ internal sealed partial class ChirperApp
 
     private void DrawCompose(Rect area)
     {
+        PostAltTexts.Prune(composeAltTexts, composeAttachments);
         if (composeOutcome == 1)
         {
             composeOutcome = 0;
@@ -367,12 +368,13 @@ internal sealed partial class ChirperApp
         var attachments = composeAttachments.ToArray();
         if (quoteTargetId is not null)
         {
-            store.Quote(draft, quoteTargetId, attachments, ok => composeOutcome = ok ? 1 : 2, composeReplyPolicy);
+            store.Quote(draft, quoteTargetId, attachments, ComposeAltTextInputs(attachments),
+                ok => composeOutcome = ok ? 1 : 2, composeReplyPolicy);
         }
         else
         {
             store.Compose(draft, attachments, composeSensitive && attachments.Length > 0,
-                ok => composeOutcome = ok ? 1 : 2, composeFailure.Set, composeReplyPolicy);
+                ComposeAltTextInputs(attachments), ok => composeOutcome = ok ? 1 : 2, composeFailure.Set, composeReplyPolicy);
         }
     }
 
@@ -418,6 +420,7 @@ internal sealed partial class ChirperApp
             GifBadge.Draw(drawList, new Rect(min, max));
         }
 
+        DrawComposeAltChip(drawList, path, min, max);
         var badgeRadius = 11f * scale;
         var badgeCenter = new Vector2(max.X - badgeRadius - 6f * scale, min.Y + badgeRadius + 6f * scale);
         var badgeMin = badgeCenter - new Vector2(badgeRadius, badgeRadius);

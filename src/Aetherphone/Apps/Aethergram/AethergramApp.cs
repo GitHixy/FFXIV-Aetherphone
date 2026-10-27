@@ -326,6 +326,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         router.Reset();
         activeTab = AethergramTab.Home;
         avatarLightbox.Reset();
+        CloseAltText();
         caption = string.Empty;
         composeSensitive = false;
         commentDraft = string.Empty;
@@ -421,6 +422,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         postSheet.Gate();
         filterSheet.Gate();
         feedExplainer.Gate();
+        GateAltText();
         commentSheet.Gate();
         profileMenu.Gate();
         profileActionSheet.Gate();
@@ -449,6 +451,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
 
         DrawNight(screen, context.Content.Min.Y);
         using (InputShield.Engage(avatarLightbox.Expanded || GifSheetCaptures || StoryShareCaptures))
+        using (InputShield.Engage(AltTextCapturesPointer))
         using (intro.FadeContent())
         {
             router.Draw(SceneChrome.AppAreaFrom(context.Content, theme, UiScale.Current), AppSkin.Transparent,
@@ -465,6 +468,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         DrainPostNotices();
         DrawPostSheet(screen);
         DrawFeedExplainer(screen);
+        DrawAltText(screen);
         DrawCommentSheet(screen);
         DrawGifSheet(screen);
         DrawProfileMenu(screen);
@@ -1684,6 +1688,11 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         if (tags.OpenUserId is { } taggedUserId)
         {
             OpenProfile(taggedUserId);
+        }
+
+        if (DrawGramAltBadge(imageRect, post, result.Index))
+        {
+            pendingPhotoTap.Cancel();
         }
 
         doubleTapLike.DrawBurst(ImGui.GetWindowDrawList(), imageRect, post.Id);

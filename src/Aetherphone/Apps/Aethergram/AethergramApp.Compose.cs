@@ -116,6 +116,7 @@ internal sealed partial class AethergramApp
         composeStatus = string.Empty;
         composeSensitive = false;
         composeTags.Clear();
+        composeAltTexts.Clear();
         composeTagMode = false;
         captionEmoji.Close();
         personPicker.Close();
@@ -343,6 +344,8 @@ internal sealed partial class AethergramApp
             composeSession.OpenEdit(composeSession.ClampedPreviewIndex);
             return;
         }
+
+        DrawComposeAltChip(preview);
 
         if (stripHeight > 0f)
         {
@@ -766,9 +769,11 @@ internal sealed partial class AethergramApp
         }
 
         composeStatus = string.Empty;
-        store.CreateGram(composeSession.SelectedArray(), composeSession.CropsArray(), composeSession.AspectsArray(),
+        var paths = composeSession.SelectedArray();
+        store.CreateGram(paths, composeSession.CropsArray(), composeSession.AspectsArray(),
             composeSession.EditsArray(),
-            caption, ComposeTagInputs(), composeSensitive, ComposeCollaboratorId, ok => composeOutcome = ok ? 1 : 2);
+            caption, ComposeTagInputs(), composeSensitive, ComposeCollaboratorId, PostAltTexts.Aligned(paths, composeAltTexts),
+            ok => composeOutcome = ok ? 1 : 2);
     }
 
     private void CommitStory(int audience)

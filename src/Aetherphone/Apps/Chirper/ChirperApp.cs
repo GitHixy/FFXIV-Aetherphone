@@ -365,6 +365,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     {
         router.Reset();
         avatarLightbox.Reset();
+        CloseAltText();
         draft = string.Empty;
         actions.Reset();
         ResetReactionsExpansion();
@@ -446,6 +447,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         filterSheet.Gate();
         replyPolicySheet.Gate();
         feedExplainer.Gate();
+        GateAltText();
         actions.Tick(MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds));
         TickReactionsExpansion();
         if (actions.IsOpen)
@@ -467,6 +469,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         var appArea = new Rect(new Vector2(screen.Min.X, context.Content.Min.Y),
             new Vector2(screen.Max.X, context.Content.Max.Y));
         using (InputShield.Engage(avatarLightbox.Expanded || GifSheetsCapture))
+        using (InputShield.Engage(AltTextCapturesPointer))
         using (intro.FadeContent())
         {
             router.Draw(appArea, AppSkin.Transparent, ImGui.GetIO().DeltaTime, drawView);
@@ -483,6 +486,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         DrawGifSheets(screen);
         DrawFilterSheet(screen);
         DrawFeedExplainer(screen);
+        DrawAltText(screen);
         DrawClaw(screen);
         toast.Draw(screen, ToastStyle);
     }
@@ -2602,6 +2606,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         if (photos.Length == 1)
         {
             DrawMediaTile(drawList, photos[0], rect, rounding, ImDrawFlags.RoundCornersAll, post.ScanStatus);
+            DrawPostAltBadge(drawList, post, 0, rect);
         }
         else
         {
@@ -2623,6 +2628,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                     lastRow && rightEdge);
                 DrawMediaTile(drawList, photos[index], new Rect(tileMin, tileMax), rounding, corners,
                     post.ScanStatus);
+                DrawPostAltBadge(drawList, post, index, new Rect(tileMin, tileMax));
             }
         }
 

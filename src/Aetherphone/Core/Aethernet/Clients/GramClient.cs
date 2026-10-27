@@ -13,16 +13,16 @@ internal sealed partial class GramClient
     }
 
     public Task<PostDto?> CreateAsync(string caption, string[] mediaKeys, int width, int height, PhotoTagInput[]? photoTags, bool sensitive,
-        string? collaboratorId, CancellationToken token, Action<AepFailure>? onFailure = null)
+        string? collaboratorId, string[]? altTexts, CancellationToken token, Action<AepFailure>? onFailure = null)
     {
-        return net.PostAsync("/grams", new CreateGramRequest(caption, mediaKeys[0], width, height, mediaKeys, photoTags, sensitive, collaboratorId), AethernetJsonContext.Default.CreateGramRequest, AethernetJsonContext.Default.PostDto, token, null, onFailure);
+        return net.PostAsync("/grams", new CreateGramRequest(caption, mediaKeys[0], width, height, mediaKeys, photoTags, sensitive, CollaboratorId: collaboratorId, AltTexts: altTexts), AethernetJsonContext.Default.CreateGramRequest, AethernetJsonContext.Default.PostDto, token, null, onFailure);
     }
 
     public Task<PostDto?> EditAsync(string postId, string caption, PhotoTagInput[] photoTags, bool sensitive,
-        CancellationToken token, Action<AepFailure>? onFailure = null)
+        string[]? altTexts, CancellationToken token, Action<AepFailure>? onFailure = null)
     {
         return net.SendJsonAsync(HttpMethod.Put, $"/posts/{Uri.EscapeDataString(postId)}",
-            new EditGramRequest(caption, photoTags, sensitive), AethernetJsonContext.Default.EditGramRequest,
+            new EditGramRequest(caption, photoTags, sensitive, altTexts), AethernetJsonContext.Default.EditGramRequest,
             AethernetJsonContext.Default.PostDto, token, null, onFailure);
     }
 

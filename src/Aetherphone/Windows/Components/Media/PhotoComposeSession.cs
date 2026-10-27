@@ -128,6 +128,8 @@ internal sealed class PhotoComposeSession : IDisposable
 
     public string[] SelectedArray() => selected.ToArray();
 
+    public string PathAt(int index) => index >= 0 && index < selected.Count ? selected[index] : string.Empty;
+
     public WallpaperCrop[] CropsArray()
     {
         SaveCurrentCrop();
