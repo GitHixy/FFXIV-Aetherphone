@@ -291,7 +291,7 @@ internal sealed class VideoEngine : IDisposable
             return null;
         }
 
-        var created = new MpvRenderer();
+        var created = new MpvRenderer(MpvRenderer.RenderKey);
         try
         {
             created.Initialize(ScreenWidth, ScreenHeight, screenTexture, Dependencies.LinkResolverPath,

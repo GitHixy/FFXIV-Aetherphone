@@ -76,6 +76,9 @@ public sealed class Plugin : IDalamudPlugin
     private readonly VideoSuite videoSuite;
     private readonly VideoWorldOverlay videoWorldOverlay;
     private readonly VideoDebugWindow videoDebugWindow;
+#if DEBUG
+    private readonly ReelSpikeWindow reelSpikeWindow;
+#endif
     private readonly AetherStreamScreenWindow screenWindow;
     private readonly UpdateChipWindow updateChipWindow;
     private readonly HuntsMapMarkersIndicatorWindow huntsMapMarkersIndicatorWindow;
@@ -168,6 +171,11 @@ public sealed class Plugin : IDalamudPlugin
             windowSystem.AddWindow(huntsMapMarkersIndicatorWindow);
             windowSystem.AddWindow(PhotoWindow);
             windowSystem.AddWindow(videoDebugWindow);
+#if DEBUG
+            reelSpikeWindow = new ReelSpikeWindow(videoSuite.Screen.Engine);
+            commands.ReelSpike = reelSpikeWindow;
+            windowSystem.AddWindow(reelSpikeWindow);
+#endif
             windowSystem.AddWindow(screenWindow);
             for (var index = 0; index < linkpearlPopouts.Windows.Count; index++)
             {
@@ -288,6 +296,9 @@ public sealed class Plugin : IDalamudPlugin
         windowSystem.RemoveAllWindows();
         RealGlass.Dispose();
         videoDebugWindow?.Dispose();
+#if DEBUG
+        reelSpikeWindow?.Dispose();
+#endif
         videoSuite?.Dispose();
         DxHandler.Dispose();
         phoneEmote?.Dispose();
@@ -439,6 +450,9 @@ public sealed class Plugin : IDalamudPlugin
         windowSystem.RemoveAllWindows();
         RealGlass.Dispose();
         videoDebugWindow.Dispose();
+#if DEBUG
+        reelSpikeWindow.Dispose();
+#endif
         videoSuite.Dispose();
         DxHandler.Dispose();
         phoneEmote.Dispose();
