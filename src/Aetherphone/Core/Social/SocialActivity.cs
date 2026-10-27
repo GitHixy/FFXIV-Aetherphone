@@ -29,6 +29,8 @@ internal static class SocialActivity
     public const int TypeRadioLive = 21;
     public const int TypePlacing = 23;
     public const int TypeStoryLike = 24;
+    public const int TypeCollabInvite = 25;
+    public const int TypeCollabAccepted = 26;
     public const string ChirperApp = "chirper";
     public const string AethergramApp = "aethergram";
     public const string VelvetApp = "velvet";
@@ -42,7 +44,7 @@ internal static class SocialActivity
 
     public static bool OpensPost(NotificationDto item) =>
         item.Type is TypeLike or TypeComment or TypeCommentLike or TypeMention or TypeCommentMention or TypePhotoTag
-            or TypeRepost or TypeQuote or TypePlacing
+            or TypeRepost or TypeQuote or TypePlacing or TypeCollabInvite or TypeCollabAccepted
         && !string.IsNullOrEmpty(item.PostId);
 
     public static string ActorLabel(NotificationDto item)
@@ -147,6 +149,10 @@ internal static class SocialActivity
                 return string.IsNullOrEmpty(item.Preview)
                     ? Loc.T(L.Music.NotifLiveGeneric)
                     : Loc.T(L.Music.NotifLiveBody, item.Preview);
+            case TypeCollabInvite:
+                return Loc.T(L.Aethergram.CollabInvited);
+            case TypeCollabAccepted:
+                return Loc.T(L.Aethergram.CollabAcceptedActivity);
             default:
                 return string.Empty;
         }

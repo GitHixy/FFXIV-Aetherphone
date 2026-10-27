@@ -155,7 +155,8 @@ internal sealed partial class AethergramApp
         var body = SocialActivity.Body(item);
         var actorHeight = Typography.LineHeight(ActivityActorStyle);
         var bodyHeight = body.Length > 0 ? EmojiText.BlockHeight(body, ActivityBodyStyle, textWidth) : 0f;
-        var contentHeight = actorHeight + (bodyHeight > 0f ? 2f * scale + bodyHeight : 0f);
+        var contentHeight = actorHeight + (bodyHeight > 0f ? 2f * scale + bodyHeight : 0f)
+            + CollabInvitePillsHeight(item);
         var rowHeight = MathF.Max(radius * 2f, contentHeight) + padY * 2f;
         var cell = FeedCell.Begin(drawList, rowHeight, Ink.HoverTint);
         var rowMax = cell.Bounds.Max;
@@ -185,6 +186,8 @@ internal sealed partial class AethergramApp
             EmojiText.DrawBlock(new Vector2(textLeft, textTop + actorHeight + 2f * scale), body, Ink.BodyInk,
                 ActivityBodyStyle, textWidth);
         }
+
+        DrawCollabInvitePills(item, textLeft, textTop + contentHeight);
 
         Typography.Draw(drawList, new Vector2(origin.X + width - padX - timeSize.X, textTop + 1f * scale), timeText,
             Ink.FaintInk, ActivityTimeStyle);
@@ -241,6 +244,11 @@ internal sealed partial class AethergramApp
             case SocialActivity.TypePhotoTag:
                 drawList.AddCircleFilled(center, radius, ImGui.GetColorU32(Ink.AccentLink), 20);
                 PhoneIcon.Draw(drawList, center, PhoneIcons.UserSquareRounded, Ink.White, iconSize);
+                break;
+            case SocialActivity.TypeCollabInvite:
+            case SocialActivity.TypeCollabAccepted:
+                drawList.AddCircleFilled(center, radius, ImGui.GetColorU32(Ink.AccentLink), 20);
+                PhoneIcon.Draw(drawList, center, PhoneIcons.Users, Ink.White, iconSize);
                 break;
             case SocialActivity.TypeFollow:
             case SocialActivity.TypeFollowRequest:

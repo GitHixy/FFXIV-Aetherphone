@@ -10,7 +10,7 @@ using Aetherphone.Core.Wallpapers;
 
 namespace Aetherphone.Apps.Aethergram;
 
-internal sealed class AethergramStore : SocialFeedStore
+internal sealed partial class AethergramStore : SocialFeedStore
 {
     private const int LoveKind = 1;
     private const int GramSize = 1080;
@@ -70,7 +70,7 @@ internal sealed class AethergramStore : SocialFeedStore
     // the other carousel photos are baked to their own boxes and cover-fit into the frame at
     // draw time.
     public void CreateGram(string[] sourcePaths, WallpaperCrop[] crops, PostAspect[] aspects, PhotoEdit[] edits,
-        string caption, PhotoTagInput[]? photoTags, bool sensitive, Action<bool> onComplete)
+        string caption, PhotoTagInput[]? photoTags, bool sensitive, string? collaboratorId, Action<bool> onComplete)
     {
         if (posting || sourcePaths.Length == 0)
         {
@@ -134,7 +134,7 @@ internal sealed class AethergramStore : SocialFeedStore
             }
 
             var created = await grams.CreateAsync(caption.Trim(), keys, containerWidth, containerHeight, photoTags,
-                sensitive, token).ConfigureAwait(false);
+                sensitive, collaboratorId, token).ConfigureAwait(false);
             if (created is null)
             {
                 return false;
