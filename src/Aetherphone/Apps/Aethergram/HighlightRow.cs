@@ -28,6 +28,10 @@ internal sealed class HighlightRow
     private const float EdgeInset = 6f;
     private const float DragSlop = 5f;
     private const float PlusSize = 22f;
+    private const float MarkRadius = 10f;
+    private const float MarkGlyph = 12f;
+    private const float MarkStroke = 1.5f;
+    private const float DiagonalOffset = 0.70710677f;
     private const double LongPressSeconds = 0.5d;
     private const int NoTile = -2;
     private const int NewTile = -1;
@@ -43,7 +47,7 @@ internal sealed class HighlightRow
 
     public HighlightRowResult Draw(ImDrawListPtr drawList, Rect row, StoryHighlightDto[] items, bool showNew,
         string newLabel, bool interactive, bool overlay, PhoneTheme theme, SocialInk ink, RemoteImageCache images,
-        LodestoneService lodestone)
+        LodestoneService lodestone, string[]? markedIds = null)
     {
         var art = new TileArt(theme, ink, images, lodestone);
         var scale = UiScale.Current;
@@ -57,8 +61,8 @@ internal sealed class HighlightRow
         var result = HighlightRowResult.None;
         if (showNew)
         {
-            if (DrawTile(drawList, new Vector2(x + tile * 0.5f, row.Center.Y), null, newLabel, NewTile, interactive,
-                    overlay, in art, scale, ref result))
+            if (DrawTile(drawList, new Vector2(x + tile * 0.5f, row.Center.Y), null, newLabel, NewTile, false,
+                    interactive, overlay, in art, scale, ref result))
             {
                 result = result with { NewTapped = true };
             }
@@ -69,8 +73,9 @@ internal sealed class HighlightRow
         for (var index = 0; index < items.Length; index++)
         {
             var item = items[index];
+            var marked = markedIds is not null && Array.IndexOf(markedIds, item.Id) >= 0;
             if (DrawTile(drawList, new Vector2(x + tile * 0.5f, row.Center.Y), item.CoverUrl, item.Title, index,
-                    interactive, overlay, in art, scale, ref result))
+                    marked, interactive, overlay, in art, scale, ref result))
             {
                 result = result with { Opened = index };
             }
@@ -86,6 +91,16 @@ internal sealed class HighlightRow
         }
 
         return result;
+    }
+
+    private static void DrawMark(ImDrawListPtr drawList, Vector2 center, float ringRadius, SocialInk ink, float scale)
+    {
+        var markRadius = MarkRadius * scale;
+        var offset = ringRadius * DiagonalOffset;
+        var markCenter = new Vector2(center.X + offset, center.Y + offset);
+        drawList.AddCircleFilled(markCenter, markRadius, ImGui.GetColorU32(ink.Accent), 24);
+        drawList.AddCircle(markCenter, markRadius, ImGui.GetColorU32(ink.White), 24, MarkStroke * scale);
+        PhoneIcon.Draw(drawList, markCenter, PhoneIcons.Check, ink.White, MarkGlyph * scale);
     }
 
     private static bool Hover(Vector2 min, Vector2 max, bool overlay) =>
@@ -118,7 +133,7 @@ internal sealed class HighlightRow
     }
 
     private bool DrawTile(ImDrawListPtr drawList, Vector2 slotCenter, string? coverUrl, string label, int tileIndex,
-        bool interactive, bool overlay, in TileArt art, float scale, ref HighlightRowResult result)
+        bool marked, bool interactive, bool overlay, in TileArt art, float scale, ref HighlightRowResult result)
     {
         var ink = art.Ink;
         var radius = Radius * scale;
@@ -138,6 +153,11 @@ internal sealed class HighlightRow
         {
             AvatarView.DrawRemote(drawList, center, radius, art.Theme, label, string.Empty, coverUrl, art.Images,
                 art.Lodestone, 0.8f, 48);
+        }
+
+        if (marked)
+        {
+            DrawMark(drawList, center, ringRadius, ink, scale);
         }
 
         var fitted = Typography.FitText(label, TileWidth * scale - 8f * scale, TextStyles.Footnote);

@@ -50,6 +50,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         NotInterested,
         Mute,
         RemoveCollab,
+        AddToStory,
     }
 
     private enum PostNotice
@@ -102,7 +103,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
     private const float CardLineGap = 4f;
     private const float CardCaptionScale = 0.95f;
     private const int GridColumns = 3;
-    private const int PostSheetMaxItems = 8;
+    private const int PostSheetMaxItems = 9;
     private const int MaxPinnedPosts = 3;
     private const float CardPinGlyphSize = 12f;
     private const float CardPinGlyphGap = 3f;
@@ -742,6 +743,11 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             AddPostSheetItem(PostSheetAction.View, Loc.T(L.Aethergram.ViewPost), false);
         }
 
+        if (StorySharePhoto(post) is not null)
+        {
+            AddPostSheetItem(PostSheetAction.AddToStory, Loc.T(L.Story.AddPostToStory), false);
+        }
+
         if (IsOwnPost(post))
         {
             AddPostSheetItem(PostSheetAction.Edit, Loc.T(L.Aethergram.EditPost), false);
@@ -858,6 +864,13 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                 break;
             case PostSheetAction.RemoveCollab:
                 AskRemoveCollab(post);
+                break;
+            case PostSheetAction.AddToStory:
+                if (StorySharePhoto(post) is { } photoUrl)
+                {
+                    OpenStoryShareSheet(post, photoUrl);
+                }
+
                 break;
         }
     }

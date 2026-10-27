@@ -2,6 +2,7 @@ using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Media;
+using Aetherphone.Core.Net;
 using Aetherphone.Core.Social;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
@@ -15,13 +16,15 @@ internal sealed partial class AethergramApp
     private const float AddToStoryIconRadius = 21f;
     private const float AddToStoryIconSize = 18f;
     private const float AddToStoryLabelGap = 12f;
-    private const float StoryShareSheetHeight = 456f;
+    private const float StoryShareSheetHeight = 512f;
     private const float StoryShareTitleTop = 16f;
     private const float StorySharePreviewTop = 40f;
     private const float StorySharePreviewHeight = 240f;
     private const float StoryShareButtonGap = 16f;
     private const float StoryShareButtonHeight = 40f;
     private const float StoryShareButtonSpacing = 8f;
+    private const float StoryShareCaptionInset = 16f;
+    private const int StoryShareCaptionMaxLength = 200;
     private const int OutcomeNone = 0;
     private const int OutcomeShared = 1;
     private const int OutcomeFailed = 2;
@@ -32,18 +35,39 @@ internal sealed partial class AethergramApp
     private readonly Sheet storyShareSheet = new();
     private PostDto? storyShareCandidate;
     private string? storySharePhotoUrl;
+    private string storyShareCaption = string.Empty;
+    private AethergramRoute storyShareRoute;
     private volatile int storyShareOutcome;
+    private volatile AepFailureBox? storyShareFailure;
 
     private bool StoryShareCaptures => storyShareSheet.CapturesPointer;
 
     private void OpenShare(PostDto post)
     {
-        var photos = PostMedia.Photos(post.MediaUrls, post.MediaUrl);
-        var shareable = !post.Sensitive && post.ArchivedAtUnix is null && !ContentModeration.IsInReview(post.ScanStatus)
-            && photos.Length > 0;
-        storyShareCandidate = shareable ? post : null;
-        storySharePhotoUrl = shareable ? photos[0] : null;
+        storySharePhotoUrl = StorySharePhoto(post);
+        storyShareCandidate = storySharePhotoUrl is null ? null : post;
         OpenShare(post.Id);
+    }
+
+    private static string? StorySharePhoto(PostDto post)
+    {
+        if (post.Sensitive || post.ArchivedAtUnix is not null || ContentModeration.IsInReview(post.ScanStatus))
+        {
+            return null;
+        }
+
+        var photos = PostMedia.Photos(post.MediaUrls, post.MediaUrl);
+        return photos.Length > 0 ? photos[0] : null;
+    }
+
+    private void OpenStoryShareSheet(PostDto post, string photoUrl)
+    {
+        storyShareCandidate = post;
+        storySharePhotoUrl = photoUrl;
+        storyShareCaption = string.Empty;
+        storyShareOutcome = OutcomeNone;
+        storyShareRoute = router.Current;
+        storyShareSheet.Open();
     }
 
     private void DrawAddToStoryRow(string postId)
@@ -68,10 +92,9 @@ internal sealed partial class AethergramApp
         Typography.Draw(drawList, new Vector2(labelLeft, cell.Bounds.Center.Y - labelSize.Y * 0.5f), label,
             Ink.TitleInk, TextStyles.SubheadlineEmphasized);
         FeedCell.End(drawList, cell, Ink.Hairline);
-        if (cell.Tapped)
+        if (cell.Tapped && storySharePhotoUrl is { } photoUrl)
         {
-            storyShareOutcome = OutcomeNone;
-            storyShareSheet.Open();
+            OpenStoryShareSheet(post, photoUrl);
         }
     }
 
@@ -83,7 +106,7 @@ internal sealed partial class AethergramApp
             return;
         }
 
-        if (storyShareSheet.IsOpen && router.Current.Screen != AethergramScreen.Share)
+        if (storyShareSheet.IsOpen && router.Current != storyShareRoute)
         {
             storyShareSheet.Close();
         }
@@ -126,8 +149,16 @@ internal sealed partial class AethergramApp
         SharedPostCard.Draw(frame.DrawList, preview, theme, card, images, lodestone, scale, false);
 
         var inset = CellPadX * scale;
+        var captionTop = preview.Max.Y + StoryShareButtonGap * scale;
+        var captionRect = new Rect(new Vector2(content.Min.X + inset, captionTop),
+            new Vector2(content.Max.X - inset, captionTop + GlassField.HeightUnits * scale));
+        Squircle.Fill(frame.DrawList, captionRect.Min, captionRect.Max, GlassField.Radius(captionRect),
+            ImGui.GetColorU32(Ink.FieldFill));
+        GlassField.Text(captionRect, "##aethergramStoryShareCaption", Loc.T(L.Aethergram.CaptionHint),
+            ref storyShareCaption, Ink.TitleInk, Ink.MutedInk, StoryShareCaptionInset * scale,
+            StoryShareCaptionMaxLength);
         var buttonHeight = StoryShareButtonHeight * scale;
-        var shareTop = preview.Max.Y + StoryShareButtonGap * scale;
+        var shareTop = captionRect.Max.Y + StoryShareButtonGap * scale;
         var shareRect = new Rect(new Vector2(content.Min.X + inset, shareTop),
             new Vector2(content.Max.X - inset, shareTop + buttonHeight));
         var cancelTop = shareRect.Max.Y + StoryShareButtonSpacing * scale;
@@ -137,7 +168,11 @@ internal sealed partial class AethergramApp
         if (DrawAccentPill(shareRect, Loc.T(posting ? L.Aethergram.Saving : L.Share.Action),
                 frame.Interactive && !posting))
         {
-            stories.ShareGram(post.Id, shared => storyShareOutcome = shared ? OutcomeShared : OutcomeFailed);
+            stories.ShareGram(post.Id, storyShareCaption, (shared, failure) =>
+            {
+                storyShareFailure = shared ? null : new AepFailureBox(failure);
+                storyShareOutcome = shared ? OutcomeShared : OutcomeFailed;
+            });
         }
 
         if (DrawGrayPill(cancelRect, Loc.T(L.Common.Cancel)) && frame.Interactive)
@@ -162,6 +197,6 @@ internal sealed partial class AethergramApp
             return;
         }
 
-        toast.Show(Loc.T(L.Story.AddToStoryFailed));
+        toast.Show(StoryFailureText(storyShareFailure?.Failure ?? AepFailure.None, L.Story.AddToStoryFailed));
     }
 }

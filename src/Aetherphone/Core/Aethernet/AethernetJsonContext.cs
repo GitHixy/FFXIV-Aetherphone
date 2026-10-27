@@ -65,6 +65,7 @@ namespace Aetherphone.Core.Aethernet;
 [JsonSerializable(typeof(StoryViewersPage))]
 [JsonSerializable(typeof(StoryHighlightDto))]
 [JsonSerializable(typeof(StoryHighlightList))]
+[JsonSerializable(typeof(StoryHighlightMembership))]
 [JsonSerializable(typeof(CreateHighlightRequest))]
 [JsonSerializable(typeof(UpdateHighlightRequest))]
 [JsonSerializable(typeof(CommentDto))]

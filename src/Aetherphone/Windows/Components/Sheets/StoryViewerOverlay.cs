@@ -58,6 +58,7 @@ internal sealed partial class StoryViewerOverlay
     private Spring reveal;
     private StoryDto[] stories = Array.Empty<StoryDto>();
     private string authorLabel = string.Empty;
+    private string? replyName;
     private string? authorAvatarUrl;
     private string authorFrameId = string.Empty;
     private bool canDelete;
@@ -105,9 +106,10 @@ internal sealed partial class StoryViewerOverlay
         Action<StoryDto>? delete = null, Func<StoryDto, StoryViewers>? viewers = null, Action? exhausted = null,
         Func<bool>? nextGroup = null, Func<bool>? previousGroup = null, bool startAtEnd = false,
         StoryReplyPrompt? reply = null, Action? loadMoreViewers = null, Action<StoryDto>? highlight = null,
-        Action<StoryDto>? toggleLike = null)
+        Action<StoryDto>? toggleLike = null, string? replyTo = null)
     {
         onToggleLike = toggleLike;
+        replyName = replyTo;
         stories = items;
         onHighlight = highlight;
         authorLabel = label;
@@ -343,7 +345,7 @@ internal sealed partial class StoryViewerOverlay
         Squircle.Stroke(drawList, barMin, barMax, radius, ImGui.GetColorU32(new Vector4(1f, 1f, 1f, 0.35f)),
             1.2f * scale);
         var centerY = (barMin.Y + barMax.Y) * 0.5f;
-        var hint = Loc.T(prompt.Hint, authorLabel);
+        var hint = Loc.T(prompt.Hint, replyName ?? authorLabel);
         var hasDraft = replyDraft.Length > 0;
         var sendCenter = new Vector2(barMax.X - 20f * scale, centerY);
         var inputLeft = barMin.X + 16f * scale;
