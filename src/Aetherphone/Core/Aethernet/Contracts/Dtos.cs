@@ -270,7 +270,8 @@ internal sealed record PostDto(
     CollaboratorDto? Collaborator = null,
     int ReplyPolicy = 0,
     bool CanReply = true,
-    string[]? AltTexts = null) : IIdentified
+    string[]? AltTexts = null,
+    int EditCount = 0) : IIdentified
 {
     [JsonIgnore] public string[]? GifMedia { get; } = GifUrl is null ? null : new[] { GifUrl };
 }
