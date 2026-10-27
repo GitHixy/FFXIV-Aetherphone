@@ -199,6 +199,7 @@ internal sealed class PhoneServices : IDisposable
     public required StratsGuideStore StratsGuides { get; init; }
     public required MusterStore Musters { get; init; }
     public required MusterLauncher MusterLauncher { get; init; }
+    public required Social.ChirpCardStore ChirpCards { get; init; }
 
     public required RadioLauncher RadioLauncher { get; init; }
     public required JamSession Jam { get; init; }
@@ -454,6 +455,8 @@ internal sealed class PhoneServices : IDisposable
             realtimeSignals);
         var musters = new MusterStore(aethernetSession, aethernet.Musters, notifications, configuration,
             visibility, realtimeSignals, installer.Gate(MusterStore.AppId));
+        var chirpCards = new Social.ChirpCardStore(aethernetSession,
+            new AethernetApi(http, aethernetSession, Social.ChirpChatBridge.ChirperAppId).Social, remoteImages);
         var yellowPages = new YellowPagesStore(aethernetSession, aethernet.Ads, aethernet.Media, configuration,
             visibility, realtimeSignals, installer.Gate(YellowPagesStore.AppId));
         var adInquiries = new AdInquiryStore(aethernetSession, aethernet.Ads, aethernet.Safety, aethernet.Media,
@@ -626,6 +629,7 @@ internal sealed class PhoneServices : IDisposable
             StratsGuides = stratsGuides,
             Musters = musters,
             MusterLauncher = new MusterLauncher(),
+            ChirpCards = chirpCards,
             RadioLauncher = new RadioLauncher(),
             Jam = jam,
             MusicUninstallStop = musicUninstall,
@@ -713,6 +717,7 @@ internal sealed class PhoneServices : IDisposable
         StratsManifest.Dispose();
         StratsGuides.Dispose();
         Musters.Dispose();
+        ChirpCards.Dispose();
         YellowPages.Dispose();
         AdInquiries.Dispose();
         Lyrics.Dispose();

@@ -62,6 +62,7 @@ Aethernet opened on 2 July 2026. By the end of the season, players on 113 worlds
         <li>Suggestions of people to follow</li>
         <li>View counts on every chirp, where your own views came from, and Not interested for what you'd rather skip</li>
         <li>Rechirps, quotes, replies and hashtags</li>
+        <li>Share a chirp in a ChocoChat message or to your Aethergram story, where it shows as a card you can tap</li>
         <li>Edit a chirp in its first hour, with its edit history a tap away</li>
         <li>Save chirps to find them again on your profile</li>
         <li>Photos, GIFs and thirteen reactions</li>

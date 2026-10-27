@@ -42,7 +42,7 @@ internal sealed class StoryPresenter : IDisposable
     private readonly Action<string>? openProfile;
     private readonly Action<StoryDto>? highlightStory;
     private bool detached;
-    private readonly Action<string>? openPost;
+    private readonly Action<StorySharedPostDto>? openPost;
     private readonly Action<StoryDto> toggleLike;
     private StoryRingDto? pendingRing;
     private bool pendingOpenAtEnd;
@@ -53,7 +53,7 @@ internal sealed class StoryPresenter : IDisposable
         LodestoneService lodestone, StoryRingPainter painter, AppPalette palette, StoryConfirmLabels labels,
         ConfirmService confirm, TranslationService translation, RealtimeSignalBus signals, string logTag, Action onCompose,
         StoryReplyHooks? reply = null, Action<string>? openProfile = null, Action<StoryDto>? highlight = null,
-        Action<string>? openPost = null)
+        Action<StorySharedPostDto>? openPost = null)
     {
         highlightStory = highlight;
         stories = new StoryStore(session, client, media, signals, logTag);
@@ -251,10 +251,10 @@ internal sealed class StoryPresenter : IDisposable
         openProfile?.Invoke(authorId);
     }
 
-    private void OpenSharedPost(string postId)
+    private void OpenSharedPost(StorySharedPostDto shared)
     {
         Close();
-        openPost?.Invoke(postId);
+        openPost?.Invoke(shared);
     }
 
     private void SendReply(StoryDto story, string text)

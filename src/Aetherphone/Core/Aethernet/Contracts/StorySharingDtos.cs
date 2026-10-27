@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Aetherphone.Core.Aethernet.Contracts;
 
 internal sealed record StorySharedPostDto(
@@ -9,4 +11,11 @@ internal sealed record StorySharedPostDto(
     string? AuthorAvatarUrl = null,
     string? MediaUrl = null,
     int MediaWidth = 0,
-    int MediaHeight = 0);
+    int MediaHeight = 0,
+    int? Kind = null,
+    string? Text = null)
+{
+    public const int ChirpKind = 0;
+
+    [JsonIgnore] public bool IsChirp => Available && Kind == ChirpKind;
+}

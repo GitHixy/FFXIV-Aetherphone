@@ -32,10 +32,16 @@ internal sealed partial class AethergramApp
         store.BeginImpressions(viewportTop, viewportTop + ImGui.GetWindowSize().Y, ImGui.GetIO().DeltaTime, source);
     }
 
-    private void OpenDetailFromStory(string postId)
+    private void OpenDetailFromStory(StorySharedPostDto shared)
     {
-        storyOpenedPostId = postId;
-        OpenDetailFromLink(postId);
+        if (shared.IsChirp)
+        {
+            ChirpChatBridge.Open(shared.PostId);
+            return;
+        }
+
+        storyOpenedPostId = shared.PostId;
+        OpenDetailFromLink(shared.PostId);
     }
 
     private void OpenPostViews(PostDto post)

@@ -92,6 +92,7 @@ internal sealed partial class MessageApp
             ChatText.LocationKind => PhoneIcons.MapPin,
             ChatText.MusterKind => PhoneIcons.Compass,
             ChatText.GifKind => PhoneIcons.Photo,
+            ChatText.ChirpKind => PhoneIcons.Feather,
             _ => string.Empty,
         };
         if (kindGlyph.Length > 0)

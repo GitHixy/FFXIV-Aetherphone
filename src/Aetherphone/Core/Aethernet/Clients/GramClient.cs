@@ -172,7 +172,7 @@ internal sealed partial class GramClient
         return net.SendAsync(HttpMethod.Delete, $"/stories/{Uri.EscapeDataString(storyId)}", token, null, onFailure);
     }
 
-    public Task<StoryDto?> ShareGramToStoryAsync(string postId, string caption, CancellationToken token,
+    public Task<StoryDto?> SharePostToStoryAsync(string postId, string caption, CancellationToken token,
         Action<AepFailure>? onFailure = null)
     {
         return net.PostAsync("/stories", new CreateStoryRequest(caption, string.Empty, 0, 0, SharedPostId: postId),

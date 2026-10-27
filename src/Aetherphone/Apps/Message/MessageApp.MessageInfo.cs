@@ -4,6 +4,7 @@ using Aetherphone.Core.Gifs;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Maps;
 using Aetherphone.Core.Muster;
+using Aetherphone.Core.Social;
 using Aetherphone.Core.YellowPages;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
@@ -94,6 +95,10 @@ internal sealed partial class MessageApp
         else if (GifShare.IsToken(message.Body))
         {
             text = Loc.T(L.DirectMessages.GifPreview);
+        }
+        else if (ChirpShare.IsToken(message.Body))
+        {
+            text = Loc.T(L.Chirper.ChirpPreview);
         }
         else
         {

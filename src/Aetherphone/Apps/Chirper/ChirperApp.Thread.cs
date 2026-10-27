@@ -371,9 +371,9 @@ internal sealed partial class ChirperApp
         }
 
         if (DrawSpreadTarget(drawList, rowLeft + slot * 3f, slot, centerY, height, ActionGlyph.Share, string.Empty,
-                ChirperInk.MutedInk, ChirperInk.AccentLink, Loc.T(L.Chirper.CopyChirp)))
+                ChirperInk.MutedInk, ChirperInk.AccentLink, Loc.T(L.Chirper.ShareChirp)))
         {
-            CopyChirp(post);
+            OpenShareSheet(post);
         }
 
         DrawHairline(drawList, rowLeft, rowLeft + rowWidth, top + height);

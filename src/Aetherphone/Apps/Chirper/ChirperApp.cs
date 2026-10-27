@@ -1,5 +1,6 @@
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet;
+using Aetherphone.Core.Aethernet.Clients;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Animation;
 using Aetherphone.Core.Apps;
@@ -11,6 +12,7 @@ using Aetherphone.Core.Gifs;
 using Aetherphone.Core.Honorific;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Lodestone;
+using Aetherphone.Core.Message;
 using Aetherphone.Core.Media;
 using Aetherphone.Core.Net;
 using Aetherphone.Core.Notifications;
@@ -40,6 +42,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         Post,
         Profile,
         Reply,
+        Share,
     }
 
     private enum PostSheetAction
@@ -64,6 +67,10 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         MutedAccounts,
         ReplyPolicy,
         Edit,
+        SendInMessage,
+        AddToStory,
+        CopyLink,
+        CopyText,
     }
 
     private enum ActionGlyph
@@ -312,11 +319,14 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         RemoteImageCache images, PhotoLibrary library, SocialLauncher launcher, GameData gameData,
         Configuration configuration, SocialNotificationService social, WallpaperImageCache wallpaperImages,
         ConfirmService confirm, TranslationService translation, ReportService report, ConductGateService conduct,
-        RealtimeSignalBus realtimeSignals, GifSearch gifs, SocialMuteLedger mutes)
+        RealtimeSignalBus realtimeSignals, GifSearch gifs, SocialMuteLedger mutes, IChatShareTarget chats,
+        GramClient storyClient)
     {
         this.translation = translation;
         this.confirm = confirm;
-        store = new ChirperStore(session, net.Account, net.Social, net.Safety, net.Media, realtimeSignals, mutes);
+        this.chats = chats;
+        store = new ChirperStore(session, net.Account, net.Social, net.Safety, net.Media, realtimeSignals, mutes,
+            storyClient);
         gifSearch = gifs;
         store.SetFeedRegions(SocialRegion.FilterCsv(configuration.ChirperFeedRegionMask));
         composeMentions = new MentionAutocomplete(store.NewMentionSuggestions());
@@ -380,6 +390,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         sheetKind = SheetKind.None;
         sheetPost = null;
         sheetUser = null;
+        shareStates.Clear();
         commentDraft = string.Empty;
         composeAttachments.Clear();
         composePicking = false;
@@ -465,6 +476,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         screenRect = screen;
         ui.Backdrop(screen);
         ConsumeSharedPhoto();
+        ConsumeShareOutcomes();
         if (photoViewer.Active)
         {
             photoViewer.Draw(screen, theme);
@@ -548,6 +560,9 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 break;
             case ChirperScreen.EditChirp:
                 DrawChirpEdit(area, route.PostId!);
+                break;
+            case ChirperScreen.ShareToChat:
+                DrawShareToChat(area, route.PostId!);
                 break;
             default:
                 DrawHome(area);
@@ -893,6 +908,9 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             case SheetKind.Reply:
                 DrawReplySheet(screen);
                 break;
+            case SheetKind.Share:
+                DrawShareSheet(screen);
+                break;
         }
     }
 
@@ -1018,10 +1036,10 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         return Loc.T(following ? L.Chirper.UnfollowHandle : L.Chirper.FollowHandle, handle);
     }
 
-    private void AddSheetItem(PostSheetAction action, string label, bool danger)
+    private void AddSheetItem(PostSheetAction action, string label, bool danger, string glyph = "")
     {
         sheetActions[sheetCount] = action;
-        sheetItems[sheetCount] = new ActionSheet.Item(label, string.Empty, danger);
+        sheetItems[sheetCount] = new ActionSheet.Item(label, glyph, danger);
         sheetCount++;
     }
 
@@ -1765,10 +1783,10 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
 
         var shareKey = TapGlow.Key(post.Id, TapGlow.Share);
         if (DrawActionTarget(cursorX, centerY, plainWidth, ActionGlyph.Share, string.Empty,
-                ChirperInk.MutedInk, ChirperInk.Accent, Loc.T(L.Chirper.CopyChirp), shareKey))
+                ChirperInk.MutedInk, ChirperInk.Accent, Loc.T(L.Chirper.ShareChirp), shareKey))
         {
             TapGlow.Bloom(shareKey);
-            CopyChirp(post);
+            OpenShareSheet(post);
         }
 
         var popoverBottom = centerY - ActionRowHeight * scale * 0.5f - 4f * scale;

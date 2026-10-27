@@ -16,7 +16,7 @@ internal sealed partial class StoryStore
         var failure = AepFailure.None;
         work.Run("share gram to story", async token =>
         {
-            var created = await client.ShareGramToStoryAsync(postId, caption.Trim(), token,
+            var created = await client.SharePostToStoryAsync(postId, caption.Trim(), token,
                 reported => failure = reported).ConfigureAwait(false);
             if (created is null)
             {
