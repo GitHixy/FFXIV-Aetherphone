@@ -427,6 +427,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         profileMenu.Gate();
         profileActionSheet.Gate();
         inboxRowSheet.Gate();
+        draftExitSheet.Gate();
         threadView.GateMenus();
         GateHighlightSheets();
         var screen = SceneChrome.ScreenFrom(context.Content, theme, UiScale.Current);
@@ -476,6 +477,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         DrawHighlightMenu(screen);
         DrawInboxRowSheet(screen);
         DrawStoryShareSheet(screen);
+        DrawDraftExitSheet(screen);
         DrawFlights(screen);
         toast.Draw(screen, ScreenToastStyle.From(ui));
     }

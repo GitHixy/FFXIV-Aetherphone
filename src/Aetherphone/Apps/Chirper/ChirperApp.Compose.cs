@@ -46,6 +46,7 @@ internal sealed partial class ChirperApp
             store.RefreshFeed(SocialFeedScope.Latest);
             store.RefreshFeed(SocialFeedScope.Following);
             feedScrollTopPending = true;
+            FinishComposeExtras();
             router.Pop();
             return;
         }
@@ -77,6 +78,11 @@ internal sealed partial class ChirperApp
         if (composePicking)
         {
             DrawComposePicker(area);
+            return;
+        }
+
+        if (DrawComposeExtras(area))
+        {
             return;
         }
 
@@ -222,13 +228,15 @@ internal sealed partial class ChirperApp
 
     private void DrawComposeHeader(Rect area)
     {
-        var actionLabel = store.Posting ? Loc.T(L.Chirper.Saving) : Loc.T(L.Chirper.ChirpAction);
+        var actionLabel = store.Posting ? Loc.T(L.Chirper.Saving) : Loc.T(ComposeActionLabel);
         var canPost = (!string.IsNullOrWhiteSpace(draft) || composeAttachments.Count > 0)
-            && draft.Length <= MaxPostLength && !store.Posting;
+            && draft.Length <= MaxPostLength && !store.Posting && !ComposeScheduleBlocked;
         var action = HeaderActionRect(area, actionLabel);
         UiAnchors.Report("chirper.compose.post", action);
         var title = Loc.T(quoteTarget is not null ? L.Chirper.QuoteTitle : L.Chirper.NewChirp);
-        DrawScreenHeader(area, title, action.Width + HeaderActionGap * UiScale.Current);
+        var draftsWidth = DrawComposeDraftsEntry(action);
+        SocialChrome.DrawScreenHeader(area, title, ChirperInk.Shared, CloseCompose, ScreenTitleStyle,
+            (action.Width + draftsWidth) / UiScale.Current + HeaderActionGap, ComposeScheduleSubtitle());
         if (Button.Draw(action, actionLabel, ui.Ink, ButtonStyle.Prominent, enabled: canPost,
                 id: "chirper.compose.post"))
         {
@@ -305,7 +313,8 @@ internal sealed partial class ChirperApp
         }
 
         var pollRight = DrawComposePollButton(drawList, gifMax.X, centerY, iconRadius);
-        var emojiCenter = new Vector2(pollRight + 8f * scale + iconRadius, centerY);
+        var scheduleRight = DrawComposeScheduleButton(drawList, pollRight, centerY, iconRadius);
+        var emojiCenter = new Vector2(scheduleRight + 8f * scale + iconRadius, centerY);
         var emojiExtent = new Vector2(iconRadius, iconRadius);
         if (UiInteract.Hover(emojiCenter - emojiExtent, emojiCenter + emojiExtent))
         {
@@ -331,6 +340,11 @@ internal sealed partial class ChirperApp
 
     private void Submit()
     {
+        if (TrySubmitScheduled())
+        {
+            return;
+        }
+
         if (AttachedComposeGif() is { } gif)
         {
             SubmitComposeGif(gif);

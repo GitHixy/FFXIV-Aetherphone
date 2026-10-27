@@ -495,6 +495,8 @@ internal sealed class Configuration : IPluginConfiguration, IHomeConfiguration, 
     public List<string> MessageFavoriteContacts { get; set; } = new();
     public Dictionary<string, string> MessageContactNotes { get; set; } = new();
     public Dictionary<string, string> MessageDrafts { get; set; } = new();
+    public Dictionary<string, List<ComposerDraft>> ChirperDrafts { get; set; } = new();
+    public Dictionary<string, List<ComposerDraft>> AethergramDrafts { get; set; } = new();
     public List<StarredMessage> MessageStarredMessages { get; set; } = new();
     public string MessageChatTheme { get; set; } = string.Empty;
     public List<MessagePopoutState> MessagePopouts { get; set; } = new();

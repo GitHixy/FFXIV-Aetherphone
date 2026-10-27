@@ -385,6 +385,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         composeSensitive = false;
         composePoll.Reset();
         composeReplyPolicy = ChirperReplyPolicy.Everyone;
+        ResetComposeExtras();
         store.ClearDiscover();
         trendingRequested = false;
         feedScrollY = 0f;
@@ -450,6 +451,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         replyPolicySheet.Gate();
         feedExplainer.Gate();
         GateAltText();
+        draftExitSheet.Gate();
         actions.Tick(MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds));
         TickReactionsExpansion();
         if (actions.IsOpen)
@@ -490,6 +492,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         DrawFilterSheet(screen);
         DrawFeedExplainer(screen);
         DrawAltText(screen);
+        DrawDraftExitSheet(screen);
         DrawClaw(screen);
         toast.Draw(screen, ToastStyle);
     }
