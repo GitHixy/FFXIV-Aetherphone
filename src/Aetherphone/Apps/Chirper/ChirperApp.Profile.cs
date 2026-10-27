@@ -523,6 +523,7 @@ internal sealed partial class ChirperApp
         }
 
         profileVirtualizer.BeginFrame(stepping: configuration);
+        BeginImpressionPass(PostViewSource.Profile);
         renderedUnderlyingIds.Clear();
         for (var index = 0; index < posts.Length; index++)
         {
@@ -542,7 +543,7 @@ internal sealed partial class ChirperApp
                 continue;
             }
 
-            DrawPost(post, showPinned: true);
+            DrawObservedPost(post, showPinned: true);
             profileVirtualizer.Record(post.Id);
         }
     }
@@ -598,6 +599,7 @@ internal sealed partial class ChirperApp
         var viewHeight = ImGui.GetWindowSize().Y;
         var cullMargin = cell + 60f * scale;
         var cellIndex = 0;
+        BeginImpressionPass(PostViewSource.Profile);
         for (var postIndex = 0; postIndex < posts.Length; postIndex++)
         {
             var post = posts[postIndex];
@@ -628,6 +630,10 @@ internal sealed partial class ChirperApp
                 var min = new Vector2(origin.X + column * (cell + gap), origin.Y + rowTop);
                 var max = new Vector2(min.X + cell, min.Y + cell);
                 DrawProfileMediaCell(drawList, post, photos[photoIndex], min, max, veiled, scale);
+                if (photoIndex == 0)
+                {
+                    store.ObserveImpression(post.Id, min.Y, max.Y);
+                }
             }
         }
 
@@ -840,6 +846,7 @@ internal sealed partial class ChirperApp
 
             ImGui.Dummy(new Vector2(0f, FeedTopPadding * scale));
             hashtagVirtualizer.BeginFrame(stepping: configuration);
+            BeginImpressionPass(PostViewSource.Hashtag);
             renderedUnderlyingIds.Clear();
             for (var index = 0; index < posts.Length; index++)
             {
@@ -859,7 +866,7 @@ internal sealed partial class ChirperApp
                     continue;
                 }
 
-                DrawPost(post);
+                DrawObservedPost(post);
                 hashtagVirtualizer.Record(post.Id);
             }
 

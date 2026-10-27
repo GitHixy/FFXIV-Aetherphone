@@ -12,18 +12,18 @@ internal sealed class FeedSignalQueue
 
     private const double FlushSeconds = 4d;
 
-    private readonly Func<string[], CancellationToken, Task<bool>> sendSeen;
-    private readonly Func<string, int, CancellationToken, Task<bool>> sendSignal;
+    private readonly Func<string[], int[], CancellationToken, Task<bool>> sendSeen;
+    private readonly Func<string, int, int, CancellationToken, Task<bool>> sendSignal;
     private readonly StoreWork work;
-    private readonly HashSet<string> pending = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, PostViewSource> pending = new(StringComparer.Ordinal);
     private readonly HashSet<(string PostId, int Kind)> signalled = new();
     private readonly object gate = new();
     private DateTime lastFlush = DateTime.UtcNow;
     private bool flushing;
 
     public FeedSignalQueue(
-        Func<string[], CancellationToken, Task<bool>> sendSeen,
-        Func<string, int, CancellationToken, Task<bool>> sendSignal,
+        Func<string[], int[], CancellationToken, Task<bool>> sendSeen,
+        Func<string, int, int, CancellationToken, Task<bool>> sendSignal,
         StoreWork work)
     {
         this.sendSeen = sendSeen;
@@ -42,7 +42,9 @@ internal sealed class FeedSignalQueue
         }
     }
 
-    public void MarkSeen(string postId)
+    // The first surface to report a post keeps it: the server attributes a view to where it was
+    // first seen, so a later surface must not overwrite the source of one still waiting to go out.
+    public void MarkSeen(string postId, PostViewSource source)
     {
         if (postId.Length == 0)
         {
@@ -51,16 +53,16 @@ internal sealed class FeedSignalQueue
 
         lock (gate)
         {
-            if (pending.Count >= PendingCap && !pending.Contains(postId))
+            if (pending.Count >= PendingCap && !pending.ContainsKey(postId))
             {
                 return;
             }
 
-            pending.Add(postId);
+            pending.TryAdd(postId, source);
         }
     }
 
-    public void Signal(string postId, int kind)
+    public void Signal(string postId, int kind, PostViewSource source)
     {
         if (postId.Length == 0)
         {
@@ -75,7 +77,7 @@ internal sealed class FeedSignalQueue
             }
         }
 
-        work.Run("feed signal", token => sendSignal(postId, kind, token));
+        work.Run("feed signal", token => sendSignal(postId, kind, (int)source, token));
     }
 
     public void Tick(DateTime now)
@@ -92,7 +94,7 @@ internal sealed class FeedSignalQueue
     {
         while (true)
         {
-            string[] batch;
+            SeenBatch batch;
             lock (gate)
             {
                 if (pending.Count == 0)
@@ -104,7 +106,7 @@ internal sealed class FeedSignalQueue
                 lastFlush = DateTime.UtcNow;
             }
 
-            if (await sendSeen(batch, token).ConfigureAwait(false))
+            if (await sendSeen(batch.PostIds, batch.Sources, token).ConfigureAwait(false))
             {
                 continue;
             }
@@ -129,7 +131,7 @@ internal sealed class FeedSignalQueue
 
     private void Dispatch(DateTime now, bool force)
     {
-        string[] batch;
+        SeenBatch batch;
         lock (gate)
         {
             if (flushing || pending.Count == 0)
@@ -147,7 +149,7 @@ internal sealed class FeedSignalQueue
             lastFlush = now;
         }
 
-        work.Run("feed seen", token => sendSeen(batch, token), sent =>
+        work.Run("feed seen", token => sendSeen(batch.PostIds, batch.Sources, token), sent =>
         {
             lock (gate)
             {
@@ -160,25 +162,27 @@ internal sealed class FeedSignalQueue
         });
     }
 
-    private void Requeue(string[] batch)
+    private void Requeue(SeenBatch batch)
     {
-        for (var index = 0; index < batch.Length; index++)
+        for (var index = 0; index < batch.PostIds.Length; index++)
         {
             if (pending.Count < PendingCap)
             {
-                pending.Add(batch[index]);
+                pending.TryAdd(batch.PostIds[index], (PostViewSource)batch.Sources[index]);
             }
         }
     }
 
-    private string[] Take()
+    private SeenBatch Take()
     {
         var count = pending.Count < BatchMax ? pending.Count : BatchMax;
-        var batch = new string[count];
+        var postIds = new string[count];
+        var sources = new int[count];
         var index = 0;
-        foreach (var postId in pending)
+        foreach (var entry in pending)
         {
-            batch[index] = postId;
+            postIds[index] = entry.Key;
+            sources[index] = (int)entry.Value;
             index++;
             if (index == count)
             {
@@ -188,9 +192,11 @@ internal sealed class FeedSignalQueue
 
         for (var removed = 0; removed < count; removed++)
         {
-            pending.Remove(batch[removed]);
+            pending.Remove(postIds[removed]);
         }
 
-        return batch;
+        return new SeenBatch(postIds, sources);
     }
+
+    private readonly record struct SeenBatch(string[] PostIds, int[] Sources);
 }

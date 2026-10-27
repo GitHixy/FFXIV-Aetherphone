@@ -75,6 +75,7 @@ internal sealed partial class ChirperApp
             var rowTop = ImGui.GetCursorScreenPos().Y;
             DrawPost(item);
             var rowBottom = ImGui.GetCursorScreenPos().Y;
+            store.ObserveImpression(item.Id, rowTop, rowBottom);
             var avatarCenterY = rowTop + CellPadTop * scale + radius;
             drawList.AddLine(new Vector2(lineX, rowTop), new Vector2(lineX, avatarCenterY - radius - lineInset),
                 lineColor, lineWidth);

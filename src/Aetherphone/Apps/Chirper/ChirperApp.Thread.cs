@@ -54,7 +54,10 @@ internal sealed partial class ChirperApp
         using (AppSurface.BeginEdgeToEdge(body))
         {
             ImGui.Dummy(new Vector2(0f, 6f * scale));
+            BeginImpressionPass(PostViewSource.Detail);
+            var headTop = ImGui.GetCursorScreenPos().Y;
             DrawThreadHead(post);
+            store.ObserveImpression(post.Id, headTop, ImGui.GetCursorScreenPos().Y);
             DrawThreadChain(post);
             var comments = store.DetailComments;
             if (comments.Length == 0)
@@ -280,7 +283,12 @@ internal sealed partial class ChirperApp
 
         if (views > 0)
         {
-            DrawThreadStat(drawList, cursorX, centerY, right, views, L.Social.ViewsCount, false, out _);
+            DrawThreadStat(drawList, cursorX, centerY, right, views, L.Social.ViewsCount, IsOwnPost(post),
+                out var viewsClicked);
+            if (viewsClicked)
+            {
+                OpenPostViews(post);
+            }
         }
 
         DrawHairline(drawList, left, right, top + height);

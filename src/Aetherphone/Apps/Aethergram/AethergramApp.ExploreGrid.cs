@@ -1,6 +1,7 @@
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Localization;
+using Aetherphone.Core.Social;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
 
@@ -102,8 +103,7 @@ internal sealed partial class AethergramApp
         var gap = GridGap * scale;
         var cellWidth = ExploreCellWidth(width, gap);
         var cellHeight = cellWidth * ExploreGrid.Aspect;
-        var viewportTop = ImGui.GetWindowPos().Y;
-        store.BeginImpressions(viewportTop, viewportTop + ImGui.GetWindowSize().Y, ImGui.GetIO().DeltaTime);
+        BeginImpressionPass(PostViewSource.Explore);
         for (var index = 0; index < posts.Length; index++)
         {
             var tile = ExploreTileRect(origin, ExploreMosaic.Cell(index), cellWidth, cellHeight, gap);

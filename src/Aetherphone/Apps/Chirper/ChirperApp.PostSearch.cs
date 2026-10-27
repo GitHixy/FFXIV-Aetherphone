@@ -77,6 +77,7 @@ internal sealed partial class ChirperApp
 
             ImGui.Dummy(new Vector2(0f, FeedTopPadding * scale));
             postSearchVirtualizer.BeginFrame(stepping: configuration);
+            BeginImpressionPass(PostViewSource.Search);
             for (var index = 0; index < posts.Length; index++)
             {
                 var post = posts[index];
@@ -90,7 +91,7 @@ internal sealed partial class ChirperApp
                     continue;
                 }
 
-                DrawPost(post);
+                DrawObservedPost(post);
                 postSearchVirtualizer.Record(post.Id);
             }
 

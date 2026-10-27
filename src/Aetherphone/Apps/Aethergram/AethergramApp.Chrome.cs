@@ -121,6 +121,12 @@ internal sealed partial class AethergramApp
         var gap = GridGap * scale;
         var cellWidth = (width - gap * (GridColumns - 1)) / GridColumns;
         var cellHeight = cellWidth * style.Aspect;
+        var observesImpressions = ViewSourceFor(source, out var viewSource);
+        if (observesImpressions)
+        {
+            BeginImpressionPass(viewSource);
+        }
+
         using (UiScope.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(gap, gap)))
         {
             for (var index = 0; index < posts.Length; index++)
@@ -131,6 +137,11 @@ internal sealed partial class AethergramApp
                 if (ImGui.IsRectVisible(min, max))
                 {
                     DrawGridTile(posts[index], min, max, style, source == PostSource.Profile);
+                    if (observesImpressions)
+                    {
+                        store.ObserveImpression(posts[index].Id, min.Y, max.Y);
+                    }
+
                     if (UiInteract.Click(min, max, UiInteract.Hover(min, max)))
                     {
                         OpenPosts(posts[index].Id, source);

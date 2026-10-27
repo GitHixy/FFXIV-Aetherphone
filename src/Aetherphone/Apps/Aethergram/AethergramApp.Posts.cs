@@ -37,11 +37,10 @@ internal sealed partial class AethergramApp
 
             var contentTop = ImGui.GetCursorPosY();
             var jumpY = -1f;
-            var observesImpressions = source == PostSource.Explore;
+            var observesImpressions = ViewSourceFor(source, out var viewSource);
             if (observesImpressions)
             {
-                var viewportTop = ImGui.GetWindowPos().Y;
-                store.BeginImpressions(viewportTop, viewportTop + ImGui.GetWindowSize().Y, ImGui.GetIO().DeltaTime);
+                BeginImpressionPass(viewSource);
             }
 
             postsVirtualizer.BeginFrame(stepping: configuration);

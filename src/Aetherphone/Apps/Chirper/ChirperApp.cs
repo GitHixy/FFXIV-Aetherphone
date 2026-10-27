@@ -372,6 +372,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         ResetReactionsExpansion();
         sheet.Close();
         filterSheet.Close();
+        postViewsSheet.Close();
         replyPolicySheet.Close();
         CloseGifSheets();
         chirpEditHistorySheet.CloseImmediately();
@@ -450,6 +451,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         filterSheet.Gate();
         replyPolicySheet.Gate();
         feedExplainer.Gate();
+        postViewsSheet.Gate();
         GateAltText();
         draftExitSheet.Gate();
         actions.Tick(MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds));
@@ -491,6 +493,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         DrawGifSheets(screen);
         DrawFilterSheet(screen);
         DrawFeedExplainer(screen);
+        DrawPostViewsSheet(screen);
         DrawAltText(screen);
         DrawDraftExitSheet(screen);
         DrawClaw(screen);
@@ -1284,8 +1287,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             {
                 ImGui.Dummy(new Vector2(0f, FeedTopPadding * UiScale.Current));
                 feedVirtualizer.BeginFrame(store.FeedSource(scope), configuration);
-                var viewportTop = ImGui.GetWindowPos().Y;
-                store.BeginImpressions(viewportTop, viewportTop + ImGui.GetWindowSize().Y, ImGui.GetIO().DeltaTime);
+                BeginImpressionPass(PostViewSources.For(scope));
                 renderedUnderlyingIds.Clear();
                 var ranked = scope == SocialFeedScope.ForYou && store.ForYouRanked;
                 if (ranked && store.CaughtUpAtTop)
@@ -1751,8 +1753,13 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         cursorX += plainWidth + gap;
         if (showsViews)
         {
-            DrawActionTarget(cursorX, centerY, viewsWidth, ActionGlyph.Views, viewsCount, ChirperInk.MutedInk,
-                ChirperInk.MutedInk, Loc.T(L.Social.Views), TapGlow.Key(post.Id, TapGlow.Views));
+            if (DrawActionTarget(cursorX, centerY, viewsWidth, ActionGlyph.Views, viewsCount, ChirperInk.MutedInk,
+                    ChirperInk.MutedInk, Loc.T(L.Social.Views), TapGlow.Key(post.Id, TapGlow.Views))
+                && IsOwnPost(post))
+            {
+                OpenPostViews(post);
+            }
+
             cursorX += viewsWidth + gap;
         }
 
