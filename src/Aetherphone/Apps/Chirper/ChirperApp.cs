@@ -62,6 +62,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         NotInterested,
         Mute,
         MutedAccounts,
+        ReplyPolicy,
     }
 
     private enum ActionGlyph
@@ -369,6 +370,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         ResetReactionsExpansion();
         sheet.Close();
         filterSheet.Close();
+        replyPolicySheet.Close();
         CloseGifSheets();
         homeTab = HomeTab.Feed;
         sheetKind = SheetKind.None;
@@ -379,6 +381,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         composePicking = false;
         composeSensitive = false;
         composePoll.Reset();
+        composeReplyPolicy = ChirperReplyPolicy.Everyone;
         store.ClearDiscover();
         trendingRequested = false;
         feedScrollY = 0f;
@@ -441,6 +444,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         SyncSeason();
         sheet.Gate();
         filterSheet.Gate();
+        replyPolicySheet.Gate();
         feedExplainer.Gate();
         actions.Tick(MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds));
         TickReactionsExpansion();
@@ -475,6 +479,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         }
 
         DrawSheet(screen);
+        DrawReplyPolicySheet(screen);
         DrawGifSheets(screen);
         DrawFilterSheet(screen);
         DrawFeedExplainer(screen);
@@ -953,6 +958,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 AddSheetItem(PostSheetAction.Unpin, Loc.T(L.Social.UnpinFromProfile), false);
             }
 
+            AddSheetItem(PostSheetAction.ReplyPolicy, Loc.T(L.Chirper.ChangeWhoCanReply), false);
             AddSheetItem(PostSheetAction.Delete, Loc.T(L.Chirper.DeleteChirp), true);
         }
         else
@@ -1045,6 +1051,9 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 break;
             case PostSheetAction.Unsave:
                 store.SetSaved(post.Id, false);
+                break;
+            case PostSheetAction.ReplyPolicy:
+                OpenReplyPolicyPicker(post.Id, post.ReplyPolicy);
                 break;
             case PostSheetAction.NotInterested:
                 store.MarkNotInterested(post.Id);
@@ -1679,7 +1688,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             }
             else
             {
-                OpenThread(post);
+                OpenThreadForReply(post);
             }
         }
 
@@ -2670,6 +2679,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         composePicking = false;
         composeSensitive = false;
         composePoll.Reset();
+        composeReplyPolicy = ChirperReplyPolicy.Everyone;
         composeFocus = true;
         router.Push(ChirperRoute.Compose);
     }
@@ -2719,6 +2729,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     {
         actions.Reset();
         commentDraft = string.Empty;
+        replyFocusPending = false;
         store.ReportFeedSignal(post.Id, FeedSignalKinds.DetailOpen);
         store.OpenDetail(post);
         router.Push(ChirperRoute.Thread(post.Id));
@@ -2728,6 +2739,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     {
         actions.Reset();
         commentDraft = string.Empty;
+        replyFocusPending = false;
         store.OpenDetailById(postId);
         router.Push(ChirperRoute.Thread(postId));
     }
@@ -2765,6 +2777,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         composePicking = false;
         composeSensitive = false;
         composePoll.Reset();
+        composeReplyPolicy = ChirperReplyPolicy.Everyone;
         AddComposeAttachment(path);
         composeFocus = true;
         router.Push(ChirperRoute.Compose);

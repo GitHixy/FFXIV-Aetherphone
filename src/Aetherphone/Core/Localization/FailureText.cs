@@ -50,6 +50,7 @@ internal static class FailureCodes
     public const string ChatRecipientUnavailable = "chat_recipient_unavailable";
     public const string ChatMessageExpired = "chat_message_expired";
     public const string CommentLength = "comment_length";
+    public const string ReplyRestricted = "reply_restricted";
     public const string AdLimitReached = "ad_limit_reached";
     public const string AdCooldown = "ad_cooldown";
     public const string AdNotLive = "ad_not_live";
@@ -261,6 +262,8 @@ internal static class FailureText
                 return Loc.T(L.Failure.ChatMessageExpired);
             case FailureCodes.CommentLength:
                 return Valued(L.Failure.CommentLength, failure);
+            case FailureCodes.ReplyRestricted:
+                return Loc.T(L.Chirper.ReplyRestricted);
             case FailureCodes.AdLimitReached:
                 return Loc.T(L.Failure.AdLimitReached);
             case FailureCodes.AdCooldown:

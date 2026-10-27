@@ -165,7 +165,7 @@ internal sealed partial class ChirperApp
             }
 
             composeOutcome = ok ? 1 : 2;
-        }, composeFailure.Set);
+        }, composeFailure.Set, composeReplyPolicy);
     }
 
     private void PrepareCommentGifs()

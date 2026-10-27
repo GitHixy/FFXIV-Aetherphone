@@ -7504,6 +7504,17 @@ internal static class L
         public static readonly LocString RepliesTitle = new("chirper.repliesTitle", "Replies");
         public static readonly LocString ChirpsTitle = new("chirper.chirpsTitle", "Chirps");
         public static readonly LocString Reply = new("chirper.reply", "Reply");
+        public static readonly LocString ReplyEveryoneCan = new("chirper.replyEveryoneCan", "Everyone can reply");
+        public static readonly LocString ReplyFollowingCan = new("chirper.replyFollowingCan", "People you follow can reply");
+        public static readonly LocString ReplyMentionedCan = new("chirper.replyMentionedCan", "Only people you mention can reply");
+        public static readonly LocString WhoCanReply = new("chirper.whoCanReply", "Choose who can reply to this chirp. Anyone you mention can always reply.");
+        public static readonly LocString ReplyOptionMentioned = new("chirper.replyOptionMentioned", "Only people you mention");
+        public static readonly LocString ChangeWhoCanReply = new("chirper.changeWhoCanReply", "Change who can reply");
+        public static readonly LocString ReplyLimitedFollowing = new("chirper.replyLimitedFollowing", "Only people {0} follows can reply");
+        public static readonly LocString ReplyLimitedMentioned = new("chirper.replyLimitedMentioned", "Only people {0} mentioned can reply");
+        public static readonly LocString ReplyPolicyUpdated = new("chirper.replyPolicyUpdated", "Updated who can reply");
+        public static readonly LocString ReplyPolicyFailed = new("chirper.replyPolicyFailed", "Couldn't change who can reply");
+        public static readonly LocString ReplyRestricted = new("chirper.replyRestricted", "The author limited who can reply to this chirp");
         public static readonly LocString More = new("chirper.more", "More");
         public static readonly LocString ThreadTitle = new("chirper.threadTitle", "Chirp");
         public static readonly LocString YouReposted = new("chirper.youReposted", "You rechirped");

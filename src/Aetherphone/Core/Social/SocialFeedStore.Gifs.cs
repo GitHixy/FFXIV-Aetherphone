@@ -7,7 +7,7 @@ namespace Aetherphone.Core.Social;
 internal abstract partial class SocialFeedStore
 {
     public void ComposeGif(string text, string? quotedPostId, GifItem gif, bool sensitive, Action<bool> onComplete,
-        Action<AepFailure>? onFailure = null)
+        Action<AepFailure>? onFailure = null, int replyPolicy = 0)
     {
         if (posting)
         {
@@ -19,7 +19,7 @@ internal abstract partial class SocialFeedStore
         work.Run("compose gif", async token =>
         {
             var created = await client.CreateGifPostAsync(trimmed, quotedPostId, gif.Url, gif.Slug, gif.Width,
-                gif.Height, sensitive, token, onFailure).ConfigureAwait(false);
+                gif.Height, sensitive, token, onFailure, replyPolicy).ConfigureAwait(false);
             if (created is null)
             {
                 return false;

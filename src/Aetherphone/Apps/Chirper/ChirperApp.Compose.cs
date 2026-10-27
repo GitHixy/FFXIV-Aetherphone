@@ -41,6 +41,7 @@ internal sealed partial class ChirperApp
             composePicking = false;
             composeSensitive = false;
             composePoll.Reset();
+            composeReplyPolicy = ChirperReplyPolicy.Everyone;
             store.RefreshFeed(SocialFeedScope.Latest);
             store.RefreshFeed(SocialFeedScope.Following);
             feedScrollTopPending = true;
@@ -90,7 +91,8 @@ internal sealed partial class ChirperApp
             var toolbarHeight = ComposeToolbarHeight * scale;
             var emojiHeight = composeEmoji.PanelHeight(scale);
             var panelTop = area.Max.Y - toolbarHeight - emojiHeight;
-            var contentLimit = panelTop - 8f * scale;
+            var replyRowTop = panelTop - ComposeReplyRowHeight * scale;
+            var contentLimit = replyRowTop - 8f * scale;
             var padX = CellPadX * scale;
             var avatarRadius = FeedAvatarRadius * scale;
             var me = store.Me;
@@ -212,6 +214,7 @@ internal sealed partial class ChirperApp
                 composeFocus = true;
             }
 
+            DrawComposeReplyControl(drawList, inputX, inputX + inputWidth, replyRowTop);
             DrawComposeToolbar(area, toolbarHeight);
         }
     }
@@ -364,12 +367,12 @@ internal sealed partial class ChirperApp
         var attachments = composeAttachments.ToArray();
         if (quoteTargetId is not null)
         {
-            store.Quote(draft, quoteTargetId, attachments, ok => composeOutcome = ok ? 1 : 2);
+            store.Quote(draft, quoteTargetId, attachments, ok => composeOutcome = ok ? 1 : 2, composeReplyPolicy);
         }
         else
         {
             store.Compose(draft, attachments, composeSensitive && attachments.Length > 0,
-                ok => composeOutcome = ok ? 1 : 2, composeFailure.Set);
+                ok => composeOutcome = ok ? 1 : 2, composeFailure.Set, composeReplyPolicy);
         }
     }
 

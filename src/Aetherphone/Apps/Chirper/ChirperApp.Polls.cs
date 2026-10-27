@@ -529,7 +529,8 @@ internal sealed partial class ChirperApp
             return true;
         }
 
-        store.ComposePoll(draft, composePoll.ToInput(), ok => composeOutcome = ok ? 1 : 2, composeFailure.Set);
+        store.ComposePoll(draft, composePoll.ToInput(), ok => composeOutcome = ok ? 1 : 2, composeFailure.Set,
+            composeReplyPolicy);
         return true;
     }
 }

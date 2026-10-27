@@ -190,7 +190,8 @@ internal sealed record CreatePostRequest(
     bool Sensitive = false,
     PostPollInput? Poll = null,
     string? GifUrl = null,
-    string? GifSlug = null);
+    string? GifSlug = null,
+    int ReplyPolicy = 0);
 
 internal sealed record SetSensitiveRequest(bool Sensitive);
 
@@ -264,7 +265,9 @@ internal sealed record PostDto(
     string? GifUrl = null,
     string? GifSlug = null,
     int? Views = null,
-    CollaboratorDto? Collaborator = null) : IIdentified
+    CollaboratorDto? Collaborator = null,
+    int ReplyPolicy = 0,
+    bool CanReply = true) : IIdentified
 {
     [JsonIgnore] public string[]? GifMedia { get; } = GifUrl is null ? null : new[] { GifUrl };
 }
