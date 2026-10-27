@@ -79,6 +79,7 @@ internal sealed partial class AethergramStore : SocialFeedStore
         }
 
         posting = true;
+        createFailure = null;
         work.Run("create gram", async token =>
         {
             var keys = new string[sourcePaths.Length];
@@ -135,7 +136,7 @@ internal sealed partial class AethergramStore : SocialFeedStore
             }
 
             var created = await grams.CreateAsync(caption.Trim(), keys, containerWidth, containerHeight, photoTags,
-                sensitive, collaboratorId, altTexts, token).ConfigureAwait(false);
+                sensitive, collaboratorId, altTexts, token, RecordCreateFailure).ConfigureAwait(false);
             if (created is null)
             {
                 return false;

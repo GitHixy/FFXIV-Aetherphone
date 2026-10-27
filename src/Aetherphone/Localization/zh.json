@@ -3317,6 +3317,7 @@
   "aethergram.collabRemovedToast": "已移除合作者",
   "aethergram.collabLeftToast": "你已退出这篇帖子",
   "aethergram.collabFailed": "无法更新合作，请重试。",
+  "aethergram.collabUnavailable": "无法邀请此人合作。请选择其他人或清除选择。",
   "aethergram.editPostFailed": "无法保存更改",
   "aethergram.editedStamp": "{0} · 已编辑",
   "aethergram.deleteCommentFailed": "无法删除评论",

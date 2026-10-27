@@ -36,6 +36,7 @@ internal static class FailureCodes
     public const string GramImageCount = "gram_image_count";
     public const string GramTooManyTags = "gram_too_many_tags";
     public const string GramInvalidTag = "gram_invalid_tag";
+    public const string GramInvalidCollaborator = "gram_invalid_collaborator";
     public const string MediaUnsupportedType = "media_unsupported_type";
     public const string MediaTooLarge = "media_too_large";
     public const string ChatNotMember = "chat_not_member";
@@ -236,6 +237,8 @@ internal static class FailureText
                 return Valued(L.Failure.GramTooManyTags, failure);
             case FailureCodes.GramInvalidTag:
                 return Loc.T(L.Failure.GramInvalidTag);
+            case FailureCodes.GramInvalidCollaborator:
+                return Loc.T(L.Aethergram.CollabUnavailable);
             case FailureCodes.MediaUnsupportedType:
                 return Loc.T(L.Failure.MediaUnsupportedType);
             case FailureCodes.MediaTooLarge:

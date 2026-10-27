@@ -211,7 +211,7 @@ internal sealed partial class AethergramApp
             Sheet = true,
             BusyLabel = Loc.T(L.Aethergram.Saving),
             FailedMessage = Loc.T(L.Aethergram.CollabFailed),
-            ConfirmAsync = done => store.RemoveCollab(post.Id, removed =>
+            ConfirmAsync = done => store.RemoveCollab(post.Id, post.Collaborator!.UserId, removed =>
             {
                 if (removed)
                 {
@@ -222,6 +222,17 @@ internal sealed partial class AethergramApp
                 done(removed);
             }),
         });
+    }
+
+    private string? CollabRefusalText()
+    {
+        var failure = store.CreateFailure;
+        if (composeStoryMode || failure.Code != FailureCodes.GramInvalidCollaborator)
+        {
+            return null;
+        }
+
+        return FailureText.Resolve(failure);
     }
 
     private bool ShowsCollabInvitePills(NotificationDto item) =>
