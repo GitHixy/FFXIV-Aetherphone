@@ -221,6 +221,8 @@
   "social.mutedAccounts": "Contas silenciadas",
   "social.mutedEmpty": "Nenhuma conta silenciada",
   "social.mutedHint": "As contas silenciadas não são avisadas. As publicações e os stories delas ficam fora dos seus feeds no Chirper e no Aethergram, e você ainda pode visitar o perfil.",
+  "social.mutedQuote": "Este chirp é de uma conta que você silenciou.",
+  "social.mutedQuoteView": "Ver",
   "social.blockConfirmTitle": "Bloquear {0}?",
   "social.blockConfirm": "Vocês não verão mais as publicações, os comentários nem os perfis um do outro. Qualquer vínculo de seguidor entre vocês será removido.",
   "social.blockedUsers": "Pessoas bloqueadas",

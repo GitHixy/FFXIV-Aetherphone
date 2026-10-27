@@ -221,6 +221,8 @@
   "social.mutedAccounts": "已隐藏的账号",
   "social.mutedEmpty": "没有已隐藏的账号",
   "social.mutedHint": "对方不会收到通知。TA 的帖子和快拍不会出现在你的 Chirper 和 Aethergram 信息流中，你仍然可以访问 TA 的主页。",
+  "social.mutedQuote": "这条啾文来自你已隐藏的账号。",
+  "social.mutedQuoteView": "查看",
   "social.blockConfirmTitle": "要屏蔽 {0} 吗？",
   "social.blockConfirm": "你们将无法再看到彼此的帖子、评论和主页，你们双方的关注也会被移除。",
   "social.blockedUsers": "已屏蔽的人",

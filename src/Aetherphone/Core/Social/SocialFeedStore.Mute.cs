@@ -5,9 +5,7 @@ namespace Aetherphone.Core.Social;
 
 internal abstract partial class SocialFeedStore
 {
-    private static readonly Dictionary<string, bool> NoMuteChanges = new(StringComparer.Ordinal);
-
-    private volatile Dictionary<string, bool> muteChanges = NoMuteChanges;
+    private readonly SocialMuteLedger mutes;
     private volatile UserDto[] mutedAccounts = Array.Empty<UserDto>();
     private volatile string? mutedAccountsCursor;
     private volatile bool mutedAccountsLoading;
@@ -23,11 +21,14 @@ internal abstract partial class SocialFeedStore
     public bool HasMoreMutedAccounts => mutedAccountsCursor is not null;
 
     public bool IsMuted(UserDto user) =>
-        muteChanges.TryGetValue(user.Id, out var muted) ? muted : user.IsMuted;
+        mutes.TryGet(user.Id, out var muted) ? muted : user.IsMuted;
+
+    public bool IsAuthorMuted(PostDto post) =>
+        mutes.TryGet(post.AuthorId, out var muted) ? muted : post.AuthorMuted;
 
     public bool IsMuted(string userId)
     {
-        if (muteChanges.TryGetValue(userId, out var muted))
+        if (mutes.TryGet(userId, out var muted))
         {
             return muted;
         }
@@ -37,12 +38,7 @@ internal abstract partial class SocialFeedStore
 
     public void SetMuted(string userId, bool muted, Action<bool> onComplete)
     {
-        RecordMuteChange(userId, muted);
-        if (muted)
-        {
-            HideMutedAuthor(userId);
-        }
-
+        mutes.Record(userId, muted);
         work.Run(muted ? "mute" : "unmute", async token => muted
             ? await client.MuteAsync(userId, token).ConfigureAwait(false)
             : await client.UnmuteAsync(userId, token).ConfigureAwait(false), saved =>
@@ -50,11 +46,7 @@ internal abstract partial class SocialFeedStore
             if (!saved)
             {
                 AepLog.Warning($"{(muted ? "Mute" : "Unmute")} of {userId} failed; restoring the previous state");
-                RecordMuteChange(userId, !muted);
-                if (muted)
-                {
-                    RefreshLoadedFeeds();
-                }
+                mutes.Restore(userId, !muted);
             }
 
             onComplete(saved);
@@ -107,21 +99,43 @@ internal abstract partial class SocialFeedStore
         }, () => mutedAccountsLoadingMore = false);
     }
 
-    private void RecordMuteChange(string userId, bool muted)
+    private void OnMuteChanged(MuteChange change)
     {
-        muteChanges = new Dictionary<string, bool>(muteChanges, StringComparer.Ordinal) { [userId] = muted };
+        if (change.Muted)
+        {
+            HideMutedAuthor(change.UserId);
+            return;
+        }
+
+        if (change.Restored)
+        {
+            RefreshLoadedFeeds();
+        }
     }
 
-    // Only the feeds lose the author: their profile, the post being read, saved and liked posts stay,
-    // because a mute narrows what is pushed at the viewer and nothing the viewer opens on purpose.
+    // The feeds and the replies under someone else's post lose the author, as the server filters them;
+    // their profile, the post being read, saved and liked posts stay, because a mute narrows what is
+    // pushed at the viewer and nothing the viewer opens on purpose.
     private void HideMutedAuthor(string userId)
     {
         HideMutedAuthor(forYouLane, userId);
         HideMutedAuthor(latestLane, userId);
         HideMutedAuthor(followingLane, userId);
         HideMutedAuthor(hashtagLane, userId);
+        HideMutedAuthor(exploreLane, userId);
         pendingForYouPage = null;
         DismissSuggestion(userId);
+        HideMutedReplies(userId);
+    }
+
+    private void HideMutedReplies(string userId)
+    {
+        if (detailPost is { } post && post.AuthorId == userId)
+        {
+            return;
+        }
+
+        detailComments = CopyOnWrite.RemoveWhere(detailComments, comment => comment.AuthorId == userId);
     }
 
     private static void HideMutedAuthor(FeedLane<PostDto> lane, string userId)
@@ -147,7 +161,7 @@ internal abstract partial class SocialFeedStore
 
     private void ResetMutes()
     {
-        muteChanges = NoMuteChanges;
+        mutes.Reset();
         mutedAccounts = Array.Empty<UserDto>();
         mutedAccountsCursor = null;
         mutedAccountsLoaded = false;

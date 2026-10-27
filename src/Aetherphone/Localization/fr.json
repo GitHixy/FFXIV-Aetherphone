@@ -221,6 +221,8 @@
   "social.mutedAccounts": "Comptes masqués",
   "social.mutedEmpty": "Aucun compte masqué",
   "social.mutedHint": "Les comptes masqués n'en sont pas informés. Leurs publications et stories restent hors de vos fils Chirper et Aethergram, et vous pouvez toujours consulter leur profil.",
+  "social.mutedQuote": "Ce chirp provient d'un compte que vous avez masqué.",
+  "social.mutedQuoteView": "Afficher",
   "social.blockConfirmTitle": "Bloquer {0} ?",
   "social.blockConfirm": "Vous ne verrez plus vos publications, commentaires ni profils respectifs. Tout abonnement entre vous sera supprimé.",
   "social.blockedUsers": "Personnes bloquées",

@@ -35,8 +35,8 @@ internal sealed partial class AethergramStore : SocialFeedStore
             : Math.Max(pendingTagsLane.Items.Length, Me?.PendingPhotoTags ?? 0);
 
     public AethergramStore(AethernetSession session, AccountClient account, SocialClient client, GramClient grams,
-        SafetyClient safety, MediaClient media, RealtimeSignalBus signals)
-        : base(session, account, client, safety, media, signals, "Aethergram")
+        SafetyClient safety, MediaClient media, RealtimeSignalBus signals, SocialMuteLedger mutes)
+        : base(session, account, client, safety, media, signals, mutes, "Aethergram")
     {
         this.grams = grams;
     }

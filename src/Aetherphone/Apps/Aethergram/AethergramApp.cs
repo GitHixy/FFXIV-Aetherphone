@@ -260,11 +260,12 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         PhoneVisibility visibility, RealtimeSignalBus realtimeSignals,
         WallpaperImageCache wallpaperImages, ConfirmService confirm, TranslationService translation,
         ReportService report, ConductGateService conduct,
-        AppInstaller installer, EncryptionHelpService encryptionHelp, GifSearch gifs)
+        AppInstaller installer, EncryptionHelpService encryptionHelp, GifSearch gifs, SocialMuteLedger mutes)
     {
         this.translation = translation;
         this.gifs = gifs;
-        store = new AethergramStore(session, net.Account, net.Social, net.Grams, net.Safety, net.Media, realtimeSignals);
+        store = new AethergramStore(session, net.Account, net.Social, net.Grams, net.Safety, net.Media, realtimeSignals,
+            mutes);
         store.SetFeedRegions(SocialRegion.FilterCsv(configuration.AethergramFeedRegionMask));
         store.SetFeedSensitive(configuration.AethergramShowSensitivePosts, activeScope);
         account = net.Account;

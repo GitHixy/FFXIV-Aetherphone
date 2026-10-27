@@ -218,7 +218,7 @@ internal sealed partial class ChirperApp
         if (post.QuotedPostId is not null)
         {
             cursorY += 12f * scale;
-            var quoteHeight = QuotedCardHeight(post.ReferencedPost, contentWidth);
+            var quoteHeight = QuotedCardHeight(post.ReferencedPost, contentWidth, post.Id);
             DrawQuotedCard(drawList, new Vector2(left, cursorY), contentWidth, quoteHeight, post.ReferencedPost, true,
                 post.Id);
             cursorY += quoteHeight;
