@@ -263,6 +263,7 @@ internal static class ReelTranscoder
         private readonly ReelTranscodeReport report;
         private readonly IProgress<float>? progress;
         private readonly CancellationToken token;
+        private readonly Nv12BandWorkers bands = new(Nv12BandWorkers.DefaultWorkerCount);
 
         private IMFSourceReader reader = null!;
         private IMFSinkWriter writer = null!;
@@ -292,6 +293,7 @@ internal static class ReelTranscoder
             this.report = report;
             this.progress = progress;
             this.token = token;
+            report.ScaleWorkers = bands.WorkerCount;
         }
 
         internal void Run()
@@ -802,7 +804,7 @@ internal static class ReelTranscoder
             }
         }
 
-        private unsafe void WriteVideoFrame(IMFSample source, long slot)
+        private void WriteVideoFrame(IMFSample source, long slot)
         {
             var frameBytes = layout.Width * layout.Height * 3 / 2;
             var lumaBytes = layout.Width * layout.Height;
@@ -833,15 +835,22 @@ internal static class ReelTranscoder
                             $"A decoded frame holds {locked.Length} bytes at pitch {locked.Pitch}, less than {geometry.CodedWidth}x{geometry.CodedHeight} NV12 needs.");
                     }
 
-                    var decoded = new Nv12Source(new ReadOnlySpan<byte>((void*)locked.Scan0, sourceLumaBytes),
-                        new ReadOnlySpan<byte>((void*)(locked.Scan0 + sourceLumaBytes), sourceLumaBytes / 2),
-                        locked.Pitch, geometry.Visible);
-                    var target = new Nv12Target(new Span<byte>((void*)outputPointer, lumaBytes),
-                        new Span<byte>((void*)(outputPointer + lumaBytes), lumaBytes / 2), layout.Width,
-                        layout.Height);
+                    var decoded = new Nv12Planes(locked.Scan0, sourceLumaBytes, locked.Scan0 + sourceLumaBytes,
+                        sourceLumaBytes / 2, locked.Pitch);
+                    var target = new Nv12Planes(outputPointer, lumaBytes, outputPointer + lumaBytes, lumaBytes / 2,
+                        layout.Width);
                     var scaling = Stopwatch.GetTimestamp();
-                    Nv12Scaler.Render(decoded, target, layout, geometry.ClockwiseRotation);
+                    var path = bands.Render(decoded, geometry.Visible, target, layout.Width, layout.Height, layout,
+                        geometry.ClockwiseRotation);
                     report.ScaleSeconds += Stopwatch.GetElapsedTime(scaling).TotalSeconds;
+                    if (path == Nv12RenderPath.Copy)
+                    {
+                        report.CopiedFrames++;
+                    }
+                    else
+                    {
+                        report.SampledFrames++;
+                    }
                 }
                 finally
                 {
@@ -977,6 +986,7 @@ internal static class ReelTranscoder
         {
             MediaFoundationVideo.Release(writer);
             MediaFoundationVideo.Release(reader);
+            bands.Dispose();
         }
     }
 }

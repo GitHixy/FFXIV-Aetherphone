@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Aetherphone.Core.Reels;
 using Xunit;
 
@@ -139,6 +140,122 @@ public sealed class Nv12ScalerTests
         var (outputLuma, _) = Render(luma, chroma, pitch, new PixelRect(0, 0, 8, 4), layout, 0);
 
         Assert.All(outputLuma, value => Assert.Equal(60, value));
+    }
+
+    [Theory]
+    [InlineData("letterbox", 2)]
+    [InlineData("letterbox", 16)]
+    [InlineData("fill", 3)]
+    [InlineData("downscale", 6)]
+    [InlineData("rotate90", 4)]
+    [InlineData("rotate180", 5)]
+    [InlineData("rotate270", 6)]
+    [InlineData("aperture", 3)]
+    public void BandsMatchTheSingleThreadedPathByteForByte(string scenario, int workers)
+    {
+        var (frame, layout, rotation) = Scenario(scenario);
+        var expectedLuma = new byte[layout.Width * layout.Height];
+        var expectedChroma = new byte[layout.Width * layout.Height / 2];
+        var expectedPath = Nv12Scaler.Render(frame.Source(), new Nv12Target(expectedLuma, expectedChroma,
+            layout.Width, layout.Height), layout, rotation);
+
+        var actualLuma = new byte[expectedLuma.Length];
+        var actualChroma = new byte[expectedChroma.Length];
+        Nv12RenderPath actualPath;
+        using (var bands = new Nv12BandWorkers(workers))
+        using (var source = new PinnedPlanes(frame.Luma, frame.Chroma, frame.Pitch))
+        using (var target = new PinnedPlanes(actualLuma, actualChroma, layout.Width))
+        {
+            actualPath = bands.Render(source.Planes, frame.Visible, target.Planes, layout.Width, layout.Height, layout,
+                rotation);
+        }
+
+        Assert.Equal(Nv12RenderPath.Sampled, expectedPath);
+        Assert.Equal(Nv12RenderPath.Sampled, actualPath);
+        Assert.Equal(expectedLuma, actualLuma);
+        Assert.Equal(expectedChroma, actualChroma);
+    }
+
+    [Fact]
+    public void CopyPathMatchesTheSampledPath()
+    {
+        var frame = Frame(80, 36, 80, new PixelRect(2, 2, 60, 32), seed: 7);
+        var layout = ReelLayout.Plan(60, 32, null);
+        var copiedLuma = new byte[layout.Width * layout.Height];
+        var copiedChroma = new byte[copiedLuma.Length / 2];
+        var sampledLuma = new byte[copiedLuma.Length];
+        var sampledChroma = new byte[copiedChroma.Length];
+
+        var path = Nv12Scaler.Render(frame.Source(), new Nv12Target(copiedLuma, copiedChroma, layout.Width,
+            layout.Height), layout, 0);
+        Nv12Scaler.RenderBand(frame.Source(), new Nv12Target(sampledLuma, sampledChroma, layout.Width, layout.Height),
+            layout, 0, 0, layout.Height);
+
+        Assert.Equal(Nv12RenderPath.Copy, path);
+        Assert.Equal(sampledLuma, copiedLuma);
+        Assert.Equal(sampledChroma, copiedChroma);
+    }
+
+    [Fact]
+    public void KeepsTheSampledPathForAnOddAperture()
+    {
+        var layout = ReelLayout.Plan(60, 32, null);
+
+        Assert.False(Nv12Scaler.IsPassThrough(layout, new PixelRect(1, 0, 60, 32), 0));
+        Assert.False(Nv12Scaler.IsPassThrough(layout, new PixelRect(0, 0, 60, 32), 90));
+        Assert.True(Nv12Scaler.IsPassThrough(layout, new PixelRect(0, 0, 60, 32), 0));
+    }
+
+    private static (TestFrame Frame, ReelLayout Layout, int Rotation) Scenario(string name) => name switch
+    {
+        "letterbox" => (Frame(96, 24, 96, new PixelRect(0, 0, 96, 24), 1), ReelLayout.Plan(96, 24, null), 0),
+        "fill" => (Frame(192, 108, 192, new PixelRect(0, 0, 192, 108), 2),
+            ReelLayout.Plan(192, 108, ReelCrop.FillPortrait(192, 108, 0.3f)), 0),
+        "downscale" => (Frame(200, 120, 208, new PixelRect(0, 0, 200, 120), 3),
+            new ReelLayout(130, 78, new PixelRect(0, 0, 130, 78), 0f, 0f, 200f, 120f), 0),
+        "rotate90" => (Frame(120, 64, 128, new PixelRect(0, 0, 120, 64), 4), ReelLayout.Plan(64, 120, null), 90),
+        "rotate180" => (Frame(120, 64, 120, new PixelRect(0, 0, 120, 64), 5), ReelLayout.Plan(120, 64, null), 180),
+        "rotate270" => (Frame(120, 64, 128, new PixelRect(0, 0, 120, 64), 6), ReelLayout.Plan(64, 120, null), 270),
+        "aperture" => (Frame(144, 72, 144, new PixelRect(0, 0, 128, 68), 8),
+            new ReelLayout(96, 52, new PixelRect(0, 0, 96, 52), 0f, 0f, 128f, 68f), 0),
+        _ => throw new ArgumentOutOfRangeException(nameof(name)),
+    };
+
+    private static TestFrame Frame(int codedWidth, int codedHeight, int pitch, PixelRect visible, int seed)
+    {
+        var random = new Random(seed);
+        var luma = new byte[pitch * codedHeight];
+        var chroma = new byte[pitch * codedHeight / 2];
+        random.NextBytes(luma);
+        random.NextBytes(chroma);
+        return new TestFrame(luma, chroma, pitch, visible);
+    }
+
+    private sealed record TestFrame(byte[] Luma, byte[] Chroma, int Pitch, PixelRect Visible)
+    {
+        internal Nv12Source Source() => new(Luma, Chroma, Pitch, Visible);
+    }
+
+    private sealed class PinnedPlanes : IDisposable
+    {
+        private GCHandle luma;
+        private GCHandle chroma;
+
+        internal PinnedPlanes(byte[] lumaBytes, byte[] chromaBytes, int pitch)
+        {
+            luma = GCHandle.Alloc(lumaBytes, GCHandleType.Pinned);
+            chroma = GCHandle.Alloc(chromaBytes, GCHandleType.Pinned);
+            Planes = new Nv12Planes(luma.AddrOfPinnedObject(), lumaBytes.Length, chroma.AddrOfPinnedObject(),
+                chromaBytes.Length, pitch);
+        }
+
+        internal Nv12Planes Planes { get; }
+
+        public void Dispose()
+        {
+            luma.Free();
+            chroma.Free();
+        }
     }
 
     private static (byte[] Luma, byte[] Chroma) Render(byte[] luma, byte[] chroma, int pitch, PixelRect visible,

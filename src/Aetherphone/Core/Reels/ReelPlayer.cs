@@ -46,6 +46,7 @@ internal sealed class ReelPlayer : IDisposable
     private readonly int volume;
     private readonly bool hardwareDecoding;
     private int currentSlot = -1;
+    private Task closing = Task.CompletedTask;
     private bool paused;
     private bool muted;
     private volatile bool disposed;
@@ -477,29 +478,35 @@ internal sealed class ReelPlayer : IDisposable
             ending.Detail ?? "mpv could not play the reel."));
     }
 
+    internal Task CloseAsync()
+    {
+        if (disposed)
+        {
+            return closing;
+        }
+
+        disposed = true;
+        var surfaces = TakeSurfaces();
+        var retires = retiring.ToArray();
+        retiring.Clear();
+        currentSlot = -1;
+        closing = Task.Run(() => TearDownAsync(surfaces, retires));
+        return closing;
+    }
+
     public void Dispose()
     {
         if (disposed)
         {
+            _ = closing.Wait(RetireWaitMilliseconds);
             return;
         }
 
         disposed = true;
-        for (var index = 0; index < Depth; index++)
+        var surfaces = TakeSurfaces();
+        for (var index = 0; index < surfaces.Count; index++)
         {
-            var slot = slots[index];
-            ReelSurface? surface;
-            ReelSurface? pending;
-            lock (slot)
-            {
-                surface = slot.Surface;
-                pending = slot.Pending;
-                slot.Surface = null;
-                slot.Pending = null;
-            }
-
-            surface?.DisposeNow();
-            pending?.DisposeNow();
+            surfaces[index].DisposeNow();
         }
 
         if (retiring.Count > 0)
@@ -509,6 +516,44 @@ internal sealed class ReelPlayer : IDisposable
 
         retiring.Clear();
         currentSlot = -1;
+    }
+
+    private List<ReelSurface> TakeSurfaces()
+    {
+        var surfaces = new List<ReelSurface>(Depth * 2);
+        for (var index = 0; index < Depth; index++)
+        {
+            var slot = slots[index];
+            lock (slot)
+            {
+                if (slot.Surface is { } surface)
+                {
+                    surfaces.Add(surface);
+                }
+
+                if (slot.Pending is { } pending)
+                {
+                    surfaces.Add(pending);
+                }
+
+                slot.Surface = null;
+                slot.Pending = null;
+            }
+        }
+
+        return surfaces;
+    }
+
+    private static async Task TearDownAsync(List<ReelSurface> surfaces, Task[] retires)
+    {
+        var teardowns = new Task[surfaces.Count + retires.Length];
+        for (var index = 0; index < surfaces.Count; index++)
+        {
+            teardowns[index] = Task.Run(surfaces[index].Retire);
+        }
+
+        retires.CopyTo(teardowns, surfaces.Count);
+        await Task.WhenAll(teardowns).ConfigureAwait(false);
     }
 
     private readonly record struct ReelSlotEvent(int SlotIndex, int Generation, string Detail);
@@ -572,11 +617,13 @@ internal sealed class ReelPlayer : IDisposable
             texture.Dispose();
         }
 
+        // The first hop can land in the present that still draws the frame which showed this view; the second hop
+        // runs a present later, after ImGui has finished with it.
         internal static void ReleaseOnRenderThread(string key, Texture2D texture, ShaderResourceView view) =>
-            DxHandler.RunOnRenderThread(key + "-release", () =>
+            DxHandler.RunOnRenderThread(key + "-release", () => DxHandler.RunOnRenderThread(key + "-release-late", () =>
             {
                 view.Dispose();
                 texture.Dispose();
-            });
+            }));
     }
 }

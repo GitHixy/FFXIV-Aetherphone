@@ -32,6 +32,22 @@ internal readonly ref struct Nv12Target
     }
 }
 
+internal readonly record struct Nv12Planes(nint Luma, int LumaLength, nint Chroma, int ChromaLength, int Pitch)
+{
+    internal unsafe Nv12Source AsSource(PixelRect visible) =>
+        new(new ReadOnlySpan<byte>((void*)Luma, LumaLength), new ReadOnlySpan<byte>((void*)Chroma, ChromaLength),
+            Pitch, visible);
+
+    internal unsafe Nv12Target AsTarget(int width, int height) =>
+        new(new Span<byte>((void*)Luma, LumaLength), new Span<byte>((void*)Chroma, ChromaLength), width, height);
+}
+
+internal enum Nv12RenderPath : byte
+{
+    Copy,
+    Sampled,
+}
+
 internal static class Nv12Scaler
 {
     internal const byte BlackLuma = 16;
@@ -41,14 +57,58 @@ internal static class Nv12Scaler
     private const int WeightShift = 16;
     private const int WeightRounding = 1 << (WeightShift - 1);
 
-    internal static void Render(in Nv12Source source, in Nv12Target target, in ReelLayout layout,
+    internal static Nv12RenderPath Render(in Nv12Source source, in Nv12Target target, in ReelLayout layout,
         int clockwiseRotation)
+    {
+        if (IsPassThrough(layout, source.Visible, clockwiseRotation))
+        {
+            Copy(source, target);
+            return Nv12RenderPath.Copy;
+        }
+
+        RenderBand(source, target, layout, clockwiseRotation, 0, target.Height);
+        return Nv12RenderPath.Sampled;
+    }
+
+    // Sampling lands exactly on source pixels when nothing is cropped, scaled, rotated or letterboxed, so a plane
+    // copy gives the same bytes. Odd aperture offsets would split a chroma pair, so they keep the sampled path.
+    internal static bool IsPassThrough(in ReelLayout layout, PixelRect visible, int clockwiseRotation) =>
+        clockwiseRotation == 0
+        && (visible.X & 1) == 0
+        && (visible.Y & 1) == 0
+        && layout.Width == visible.Width
+        && layout.Height == visible.Height
+        && layout.Content == new PixelRect(0, 0, layout.Width, layout.Height)
+        && layout.SourceX == 0f
+        && layout.SourceY == 0f
+        && layout.SourceWidth == visible.Width
+        && layout.SourceHeight == visible.Height;
+
+    internal static void Copy(in Nv12Source source, in Nv12Target target)
+    {
+        var visible = source.Visible;
+        for (var row = 0; row < target.Height; row++)
+        {
+            source.Luma.Slice((visible.Y + row) * source.Pitch + visible.X, target.Width)
+                .CopyTo(target.Luma.Slice(row * target.Width, target.Width));
+        }
+
+        for (var row = 0; row < target.Height / 2; row++)
+        {
+            source.Chroma.Slice((visible.Y / 2 + row) * source.Pitch + visible.X, target.Width)
+                .CopyTo(target.Chroma.Slice(row * target.Width, target.Width));
+        }
+    }
+
+    internal static void RenderBand(in Nv12Source source, in Nv12Target target, in ReelLayout layout,
+        int clockwiseRotation, int firstRow, int endRow)
     {
         var content = layout.Content;
         if (content.Width != target.Width || content.Height != target.Height)
         {
-            target.Luma[..(target.Width * target.Height)].Fill(BlackLuma);
-            target.Chroma[..(target.Width * target.Height / 2)].Fill(NeutralChroma);
+            target.Luma.Slice(firstRow * target.Width, (endRow - firstRow) * target.Width).Fill(BlackLuma);
+            target.Chroma.Slice(firstRow / 2 * target.Width, (endRow - firstRow) / 2 * target.Width)
+                .Fill(NeutralChroma);
         }
 
         var displayToStored = DisplayToStored(clockwiseRotation, source.Visible.Width, source.Visible.Height);
@@ -60,7 +120,8 @@ internal static class Nv12Scaler
             * contentToDisplay
             * displayToStored
             * Matrix3x2.CreateTranslation(source.Visible.X - 0.5f, source.Visible.Y - 0.5f);
-        SampleLuma(source, target, content, lumaMap);
+        SampleLuma(source, target, content, lumaMap, Math.Max(firstRow, content.Y),
+            Math.Min(endRow, content.Y + content.Height));
 
         var chromaMap = Matrix3x2.CreateScale(2f)
             * Matrix3x2.CreateTranslation(1f - content.X, 1f - content.Y)
@@ -68,7 +129,8 @@ internal static class Nv12Scaler
             * displayToStored
             * Matrix3x2.CreateScale(0.5f)
             * Matrix3x2.CreateTranslation(source.Visible.X * 0.5f - 0.5f, source.Visible.Y * 0.5f - 0.5f);
-        SampleChroma(source, target, content, chromaMap);
+        SampleChroma(source, target, content, chromaMap, Math.Max(firstRow, content.Y) / 2,
+            Math.Min(endRow, content.Y + content.Height) / 2);
     }
 
     internal static Matrix3x2 DisplayToStored(int clockwiseRotation, int storedWidth, int storedHeight) =>
@@ -80,15 +142,15 @@ internal static class Nv12Scaler
             _ => Matrix3x2.Identity,
         };
 
-    private static void SampleLuma(in Nv12Source source, in Nv12Target target, PixelRect content, in Matrix3x2 map)
+    private static void SampleLuma(in Nv12Source source, in Nv12Target target, PixelRect content, in Matrix3x2 map,
+        int firstRow, int endRow)
     {
         var minimumX = source.Visible.X;
         var maximumX = source.Visible.X + source.Visible.Width - 1;
         var minimumY = source.Visible.Y;
         var maximumY = source.Visible.Y + source.Visible.Height - 1;
-        for (var row = 0; row < content.Height; row++)
+        for (var targetY = firstRow; targetY < endRow; targetY++)
         {
-            var targetY = content.Y + row;
             var start = Vector2.Transform(new Vector2(content.X, targetY), map);
             var targetRow = target.Luma.Slice(targetY * target.Width + content.X, content.Width);
             for (var column = 0; column < targetRow.Length; column++)
@@ -101,7 +163,7 @@ internal static class Nv12Scaler
     }
 
     private static void SampleChroma(in Nv12Source source, in Nv12Target target, PixelRect content,
-        in Matrix3x2 map)
+        in Matrix3x2 map, int firstRow, int endRow)
     {
         var minimumX = source.Visible.X / 2;
         var maximumX = (source.Visible.X + source.Visible.Width) / 2 - 1;
@@ -109,9 +171,8 @@ internal static class Nv12Scaler
         var maximumY = (source.Visible.Y + source.Visible.Height) / 2 - 1;
         var firstColumn = content.X / 2;
         var columns = content.Width / 2;
-        for (var row = 0; row < content.Height / 2; row++)
+        for (var targetY = firstRow; targetY < endRow; targetY++)
         {
-            var targetY = content.Y / 2 + row;
             var start = Vector2.Transform(new Vector2(firstColumn, targetY), map);
             var targetRow = target.Chroma.Slice(targetY * target.Width + firstColumn * 2, columns * 2);
             for (var column = 0; column < columns; column++)

@@ -56,6 +56,9 @@ internal sealed class ReelTranscodeReport
     internal long OutputBytes { get; set; }
     internal double ReadSeconds { get; set; }
     internal double ScaleSeconds { get; set; }
+    internal int ScaleWorkers { get; set; }
+    internal int CopiedFrames { get; set; }
+    internal int SampledFrames { get; set; }
     internal double WriteSeconds { get; set; }
     internal double FinalizeSeconds { get; set; }
     internal double ElapsedSeconds { get; set; }

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 using System.Text;
 using Aetherphone.Core;
 using Aetherphone.Core.Reels;
@@ -18,9 +19,13 @@ internal sealed class ReelSpikeWindow : Window, IDisposable
     private const float PortraitAspect = 9f / 16f;
     private const float Megabyte = 1024f * 1024f;
     private const int TranscodeWaitMilliseconds = 3000;
+    private const int TeardownWaitMilliseconds = 3000;
     private const uint PanelColor = 0xFF000000;
     private const uint RailColor = 0x55FFFFFF;
     private const uint ProgressColor = 0xFFFFFFFF;
+
+    private static readonly bool JitOptimized =
+        typeof(ReelSpikeWindow).Assembly.GetCustomAttribute<DebuggableAttribute>() is not { IsJITOptimizerDisabled: true };
 
     private readonly VideoEngine mogCast;
     private readonly float[] drawMilliseconds = new float[DrawSampleCapacity];
@@ -47,6 +52,7 @@ internal sealed class ReelSpikeWindow : Window, IDisposable
     private string status = "Idle. Use reelspike play or transcode.";
     private int transcoding;
     private Task transcodeTask = Task.CompletedTask;
+    private Task teardownTask = Task.CompletedTask;
     private CancellationTokenSource transcodeCancel = new();
 
     public ReelSpikeWindow(VideoEngine mogCast)
@@ -118,7 +124,12 @@ internal sealed class ReelSpikeWindow : Window, IDisposable
         transcodeCancel.Cancel();
         _ = transcodeTask.Wait(TranscodeWaitMilliseconds);
         transcodeCancel.Dispose();
-        ClosePlayer("plugin unloading");
+        _ = teardownTask.Wait(TeardownWaitMilliseconds);
+        if (player is { } open)
+        {
+            player = null;
+            open.Dispose();
+        }
     }
 
     private void ApplyRequests()
@@ -168,7 +179,7 @@ internal sealed class ReelSpikeWindow : Window, IDisposable
         Array.Clear(loggedFailures);
         ResetReport();
         AepLog.Info(LogPrefix
-            + $"play: {sources.Length} file(s), volume {volume}, hardware decoding {Plugin.Cfg.VideoHardwareDecoding}, MogCast active {mogCast.IsActive}");
+            + $"play: {sources.Length} file(s), volume {volume}, hardware decoding {Plugin.Cfg.VideoHardwareDecoding}, MogCast active {mogCast.IsActive}, jit optimized {JitOptimized}");
         ShowWindow(player);
     }
 
@@ -206,10 +217,25 @@ internal sealed class ReelSpikeWindow : Window, IDisposable
 
         player = null;
         var started = Stopwatch.GetTimestamp();
-        closing.Dispose();
+        var teardown = closing.CloseAsync();
         AepLog.Info(LogPrefix
-            + $"player disposed ({reason}) in {Stopwatch.GetElapsedTime(started).TotalMilliseconds:F1} ms on the calling thread");
+            + $"player close ({reason}) returned in {Stopwatch.GetElapsedTime(started).TotalMilliseconds:F2} ms on the calling thread; mpv teardown continues on workers");
+        teardownTask = LogTeardownAsync(teardown, started);
         status = "Idle.";
+    }
+
+    private static async Task LogTeardownAsync(Task teardown, long started)
+    {
+        try
+        {
+            await teardown.ConfigureAwait(false);
+            AepLog.Info(LogPrefix
+                + $"background teardown finished {Stopwatch.GetElapsedTime(started).TotalMilliseconds:F1} ms after close (textures released on the render thread)");
+        }
+        catch (Exception exception)
+        {
+            AepLog.Error(exception, LogPrefix + "background teardown failed");
+        }
     }
 
     private void DrawReel(ReelPlayer reels)
@@ -448,7 +474,7 @@ internal sealed class ReelSpikeWindow : Window, IDisposable
         try
         {
             AepLog.Info(LogPrefix
-                + $"transcode start: {path} mode={(fill ? $"fill 9:16 at {fillPosition:F2}" : "original")} encoder={(allowHardware ? "hardware allowed" : "software only")} wine={WineEnvironment.IsWine} os={Environment.OSVersion.VersionString} cores={Environment.ProcessorCount}");
+                + $"transcode start: {path} mode={(fill ? $"fill 9:16 at {fillPosition:F2}" : "original")} encoder={(allowHardware ? "hardware allowed" : "software only")} jit optimized={JitOptimized} wine={WineEnvironment.IsWine} os={Environment.OSVersion.VersionString} cores={Environment.ProcessorCount}");
             ReelMediaInfo input;
             try
             {
@@ -525,7 +551,7 @@ internal sealed class ReelSpikeWindow : Window, IDisposable
         AepLog.Info(LogPrefix
             + $"transcode ok: {report.TrimSeconds:F2} s of video in {report.ElapsedSeconds:F2} s wall, real-time factor {factor:F2}x (video seconds per wall second)");
         AepLog.Info(LogPrefix
-            + $"time split: read+decode {report.ReadSeconds:F2} s, crop+scale {report.ScaleSeconds:F2} s ({(report.FramesWritten > 0 ? report.ScaleSeconds * 1000d / report.FramesWritten : 0d):F2} ms/frame), write+encode {report.WriteSeconds:F2} s, finalize {report.FinalizeSeconds:F2} s");
+            + $"time split: read+decode {report.ReadSeconds:F2} s, crop+scale {report.ScaleSeconds:F2} s ({(report.FramesWritten > 0 ? report.ScaleSeconds * 1000d / report.FramesWritten : 0d):F2} ms/frame; copy path {report.CopiedFrames} frames, sampled path {report.SampledFrames} frames, {report.ScaleWorkers} workers), write+encode {report.WriteSeconds:F2} s, finalize {report.FinalizeSeconds:F2} s");
         AepLog.Info(LogPrefix
             + $"frames: decoded {report.FramesDecoded}, written {report.FramesWritten} at {report.Cadence.Numerator}/{report.Cadence.Denominator} | output {layout.Width}x{layout.Height}, content {layout.Content.X},{layout.Content.Y} {layout.Content.Width}x{layout.Content.Height}, source rect {layout.SourceX:F1},{layout.SourceY:F1} {layout.SourceWidth:F1}x{layout.SourceHeight:F1} | audio {(report.HasAudio ? $"AAC, {report.AudioBytesWritten / Megabyte:F2} MB PCM in" : "none")}{(report.AudioNote is { } note ? $" ({note})" : string.Empty)}");
         var megabits = report.TrimSeconds > 0d ? report.OutputBytes * 8d / report.TrimSeconds / 1_000_000d : 0d;
