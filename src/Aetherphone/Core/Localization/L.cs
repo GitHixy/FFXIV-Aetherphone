@@ -2356,6 +2356,36 @@ internal static class L
         public static readonly LocString SectionSounds = new("changelog.sectionSounds", "Sounds");
         public static readonly LocString SectionHalloween = new("changelog.sectionHalloween", "Halloween");
 
+        public static readonly LocString[] Release1410Collections =
+        {
+            new("changelog.r1410.0",
+                "Added the Game order sort to Mounts, Minions, Emotes, Orchestrions and Triple Triad in Collections: each list follows the in-game order, contributed by jambalong"),
+        };
+
+        public static readonly LocString[] Release1410Velvet =
+        {
+            new("changelog.r1410.1",
+                "Added a list of your connections: tap Connections on your profile to see and search everyone you are connected to, contributed by hellovvn"),
+        };
+
+        public static readonly LocString[] Release1410Feedback =
+        {
+            new("changelog.r1410.4",
+                "Added pasting and dragging screenshots into a report: press Ctrl+V, tap Paste image in Add photos, or drag a file in from File Explorer, contributed by hellovvn"),
+        };
+
+        public static readonly LocString[] Release1410Messaging =
+        {
+            new("changelog.r1410.2",
+                "Fixed a new tell popping up while you typed in a Linkpearl pop-out sending your next keys to the game: it now opens without taking focus and you keep typing where you were, contributed by hellovvn"),
+        };
+
+        public static readonly LocString[] Release1410Music =
+        {
+            new("changelog.r1410.3",
+                "Fixed accented letters in playlist, song and channel names turning into garbled characters: re-import a playlist to fix names it already saved, contributed by GitHixy"),
+        };
+
         public static readonly LocString[] Release1400Prism =
         {
             new("changelog.r1400.0",
@@ -7688,6 +7718,10 @@ internal static class L
         public static readonly LocPlural ConnectToUnlockPosts =
             new("velvet.connectToUnlockPosts", "Connect to unlock {0} post", "Connect to unlock {0} posts");
         public static readonly LocString ProfileConnections = new("velvet.profileConnections", "Connections");
+        public static readonly LocString ConnectionsSearchHint = new("velvet.connectionsSearchHint", "Search by name or handle");
+        public static readonly LocString ConnectionsNone = new("velvet.connectionsNone", "No connections yet.");
+        public static readonly LocString ConnectionsNoneHint = new("velvet.connectionsNoneHint", "People you connect with show up here.");
+        public static readonly LocString ConnectionsNoMatches = new("velvet.connectionsNoMatches", "No one matches that name.");
         public static readonly LocString IntroTitle = new("velvet.introTitle", "Connect with");
         public static readonly LocString IntroduceYourselfTo = new("velvet.introduceYourselfTo", "Introduce yourself to {0}");
         public static readonly LocString YourIntro = new("velvet.yourIntro", "Your intro");
