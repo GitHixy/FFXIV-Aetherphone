@@ -31,6 +31,7 @@ internal sealed class HighlightStore : IDisposable
     private volatile StoryHighlightDto[] mine = Array.Empty<StoryHighlightDto>();
     private volatile bool mineLoaded;
     private volatile bool mineLoading;
+    private string? mineOwnerId;
     private volatile string? openingId;
     private volatile StoryHighlightDto? openedHighlight;
     private volatile StoryDto[]? openedStories;
@@ -78,6 +79,7 @@ internal sealed class HighlightStore : IDisposable
         profileHighlights = Array.Empty<StoryHighlightDto>();
         mine = Array.Empty<StoryHighlightDto>();
         mineLoaded = false;
+        mineOwnerId = null;
         openingId = null;
         openedHighlight = null;
         openedStories = null;
@@ -102,9 +104,10 @@ internal sealed class HighlightStore : IDisposable
         return profileHighlights;
     }
 
-    public void EnsureMine()
+    public void EnsureMine(string ownerId)
     {
-        if (mineLoaded || mineLoading || session.CurrentUser is null)
+        mineOwnerId = session.CurrentUser?.Id ?? ownerId;
+        if (mineLoaded || mineLoading)
         {
             return;
         }
@@ -288,7 +291,7 @@ internal sealed class HighlightStore : IDisposable
 
     private void RefreshMine()
     {
-        var me = session.CurrentUser?.Id;
+        var me = session.CurrentUser?.Id ?? mineOwnerId;
         if (me is null)
         {
             return;

@@ -113,7 +113,7 @@ internal sealed partial class AethergramApp
     private void OnHighlightStory(StoryDto story)
     {
         highlightPickerStory = story;
-        highlights.EnsureMine();
+        highlights.EnsureMine(story.AuthorId);
         highlights.LoadHolding(story.Id);
         highlightPicker.Open();
     }

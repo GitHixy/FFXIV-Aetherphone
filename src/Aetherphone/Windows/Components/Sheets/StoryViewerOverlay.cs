@@ -812,7 +812,7 @@ internal sealed partial class StoryViewerOverlay
         }
 
         var highlightCenter = new Vector2(deleteCenter.X - ActionSpacing * scale, row.Center.Y);
-        AppSkin.Icon(highlightCenter, IconGlyph.Of(FontAwesomeIcon.HeartCirclePlus), new Vector4(1f, 1f, 1f, 0.9f),
+        AppSkin.Icon(highlightCenter, IconGlyph.Of(FontAwesomeIcon.Heart), new Vector4(1f, 1f, 1f, 0.9f),
             1f);
         HoverTooltip.Show(new Rect(highlightCenter - hit, highlightCenter + hit), Loc.T(L.Story.Highlight));
         if (UiInteract.HoverClick(highlightCenter - hit, highlightCenter + hit))

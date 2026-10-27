@@ -238,7 +238,7 @@ internal sealed partial class ChirperApp
         var action = HeaderActionRect(area, actionLabel);
         UiAnchors.Report("chirper.compose.post", action);
         var title = Loc.T(ScheduledComposeTitle(quoteTarget is not null ? L.Chirper.QuoteTitle : L.Chirper.NewChirp));
-        var draftsWidth = DrawComposeDraftsEntry(action);
+        var draftsWidth = EditingScheduled ? 0f : DrawComposeDraftsEntry(action);
         SocialChrome.DrawScreenHeader(area, title, ChirperInk.Shared, CloseCompose, ScreenTitleStyle,
             (action.Width + draftsWidth) / UiScale.Current + HeaderActionGap, ComposeScheduleSubtitle());
         if (Button.Draw(action, actionLabel, ui.Ink, ButtonStyle.Prominent, enabled: canPost,
