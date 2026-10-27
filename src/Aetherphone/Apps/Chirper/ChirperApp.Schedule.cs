@@ -226,7 +226,8 @@ internal sealed partial class ChirperApp
             Sensitive: composeSensitive && gif is not null,
             Poll: composePoll.Active ? composePoll.ToInput() : null,
             GifUrl: gif?.Item.Url,
-            GifSlug: gif?.Item.Slug);
+            GifSlug: gif?.Item.Slug,
+            ReplyPolicy: composeReplyPolicy);
         store.SchedulePost(request, composeScheduleAtUnix, ok =>
         {
             if (ok && gif is not null)
