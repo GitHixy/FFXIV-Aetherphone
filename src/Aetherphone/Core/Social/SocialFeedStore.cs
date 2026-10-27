@@ -196,6 +196,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         ClearTagged();
         ClearHashtag();
         ResetSuggestedPeople();
+        ResetNotInterested();
         OnAccountReset();
     }
 

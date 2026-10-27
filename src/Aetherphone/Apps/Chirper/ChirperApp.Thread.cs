@@ -236,7 +236,8 @@ internal sealed partial class ChirperApp
 
     private float DrawThreadStats(ImDrawListPtr drawList, PostDto post, float left, float right, float top)
     {
-        if (post.TotalReactions <= 0 && post.RepostCount <= 0 && post.CommentCount <= 0)
+        var views = post.Views ?? 0;
+        if (post.TotalReactions <= 0 && post.RepostCount <= 0 && post.CommentCount <= 0 && views <= 0)
         {
             return top;
         }
@@ -263,7 +264,13 @@ internal sealed partial class ChirperApp
 
         if (post.CommentCount > 0)
         {
-            DrawThreadStat(drawList, cursorX, centerY, right, post.CommentCount, L.Chirper.RepliesCount, false, out _);
+            cursorX = DrawThreadStat(drawList, cursorX, centerY, right, post.CommentCount, L.Chirper.RepliesCount, false,
+                out _);
+        }
+
+        if (views > 0)
+        {
+            DrawThreadStat(drawList, cursorX, centerY, right, views, L.Social.ViewsCount, false, out _);
         }
 
         DrawHairline(drawList, left, right, top + height);

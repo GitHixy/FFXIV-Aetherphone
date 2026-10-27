@@ -259,7 +259,8 @@ internal sealed record PostDto(
     long? ArchivedAtUnix = null,
     PostPollDto? Poll = null,
     string? GifUrl = null,
-    string? GifSlug = null) : IIdentified
+    string? GifSlug = null,
+    int? Views = null) : IIdentified
 {
     [JsonIgnore] public string[]? GifMedia { get; } = GifUrl is null ? null : new[] { GifUrl };
 }
@@ -625,7 +626,9 @@ internal sealed record NotificationDto(
     string[]? ActorBadgeIds = null,
     string ActorFrameId = "",
     int Rank = 0,
-    string? ImageUrl = null) : IIdentified;
+    string? ImageUrl = null,
+    int ActorCount = 1,
+    string? OtherActorDisplayName = null) : IIdentified;
 
 internal sealed record NotificationPage(
     NotificationDto[] Items,

@@ -60,6 +60,7 @@ Aethernet opened on 2 July 2026. By the end of the season, players on 113 worlds
       <ul>
         <li>For You and Latest timelines, with a Following filter</li>
         <li>Suggestions of people to follow</li>
+        <li>View counts on every chirp, and Not interested for what you'd rather skip</li>
         <li>Rechirps, quotes, replies and hashtags</li>
         <li>Save chirps to find them again on your profile</li>
         <li>Photos, GIFs and thirteen reactions</li>
@@ -76,6 +77,7 @@ Aethernet opened on 2 July 2026. By the end of the season, players on 113 worlds
         <li>Up to eight photos straight from your gallery, or pasted and dragged in</li>
         <li>Stories that last a day</li>
         <li>Suggestions of people to follow</li>
+        <li>See how many people saw your posts</li>
         <li>Tag the people in frame</li>
         <li>A built-in photo editor before you share</li>
       </ul>

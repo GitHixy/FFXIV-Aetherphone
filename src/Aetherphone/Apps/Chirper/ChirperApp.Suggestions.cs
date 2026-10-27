@@ -1,3 +1,4 @@
+using System.Globalization;
 using Aetherphone.Core;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Social;
@@ -12,11 +13,34 @@ internal sealed partial class ChirperApp
     private const int PeopleRailAfterPosts = 5;
     private const float EmptyFollowingListTop = 130f;
     private const float BannerFollowGap = 10f;
+    private const float CollapsedCellHeight = 48f;
+    private const int ViewsLabelCap = 512;
     private const string PeopleRailRowId = "chirper.people";
     private const string PeopleAnchor = "chirper.people";
 
     private readonly SuggestedPeopleRail peopleRail = new();
     private readonly HashSet<string> followedFromFeed = new(StringComparer.Ordinal);
+    private bool drawingForYou;
+    private readonly Dictionary<string, ViewsLabel> viewsLabels = new(StringComparer.Ordinal);
+
+    private readonly record struct ViewsLabel(int Views, CultureInfo Culture, string Text);
+
+    private string ViewsText(string postId, int views)
+    {
+        if (viewsLabels.TryGetValue(postId, out var label) && label.Views == views && ReferenceEquals(label.Culture, Loc.Culture))
+        {
+            return label.Text;
+        }
+
+        if (viewsLabels.Count >= ViewsLabelCap)
+        {
+            viewsLabels.Clear();
+        }
+
+        var text = views > 0 ? CountText.Compact(views) : string.Empty;
+        viewsLabels[postId] = new ViewsLabel(views, Loc.Culture, text);
+        return text;
+    }
 
     private int PeopleRailSlot(SocialFeedScope scope, int postCount)
     {

@@ -47,6 +47,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         RemoveTag,
         Report,
         Block,
+        NotInterested,
     }
 
     private enum PostNotice
@@ -99,7 +100,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
     private const float CardLineGap = 4f;
     private const float CardCaptionScale = 0.95f;
     private const int GridColumns = 3;
-    private const int PostSheetMaxItems = 5;
+    private const int PostSheetMaxItems = 6;
     private const int MaxPinnedPosts = 3;
     private const float CardPinGlyphSize = 12f;
     private const float CardPinGlyphGap = 3f;
@@ -698,7 +699,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         return mediaUrl is not null && !configuration.AethergramShowCommentMedia;
     }
 
-    private void OpenPostSheet(PostDto post, bool includeView)
+    private void OpenPostSheet(PostDto post, bool includeView, bool offerNotInterested)
     {
         sheetPost = post;
         postSheetTitle = SocialIdentity.Name(post.AuthorDisplayName, post.AuthorHandle);
@@ -738,6 +739,11 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             if (PhotoTagStates.MineFor(post.PhotoTags, store.Me?.Id) is not null)
             {
                 AddPostSheetItem(PostSheetAction.RemoveTag, Loc.T(L.PhotoTag.RemoveMe), true);
+            }
+
+            if (offerNotInterested)
+            {
+                AddPostSheetItem(PostSheetAction.NotInterested, Loc.T(L.Social.NotInterested), false);
             }
 
             AddPostSheetItem(PostSheetAction.Report, Loc.T(L.Report.Action), true);
@@ -806,6 +812,9 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                 break;
             case PostSheetAction.Block:
                 profile.AskBlock(post.AuthorDisplayName, post.AuthorHandle, post.AuthorId);
+                break;
+            case PostSheetAction.NotInterested:
+                store.MarkNotInterested(post.Id);
                 break;
         }
     }
@@ -1048,6 +1057,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
 
                 var caughtUpAfterId = ranked ? store.CaughtUpAfterId : null;
                 var peopleSlot = PeopleRailSlot(scope, snapshot.Length);
+                drawingForYou = scope == SocialFeedScope.ForYou;
                 feedActionsAnchorPending = UiAnchors.Recording;
                 for (var index = 0; index < snapshot.Length; index++)
                 {
@@ -1062,7 +1072,8 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                         continue;
                     }
 
-                    var revision = post.CommentCount > 0 ? 1 : 0;
+                    var collapsed = drawingForYou && store.IsNotInterested(post.Id);
+                    var revision = collapsed ? CollapsedRevision : post.CommentCount > 0 ? 1 : 0;
                     var closesRankedBlock = caughtUpAfterId is not null
                         && string.Equals(post.Id, caughtUpAfterId, StringComparison.Ordinal);
                     if (feedVirtualizer.Skip(post.Id, revision))
@@ -1075,13 +1086,21 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                         continue;
                     }
 
-                    var suggestion = ranked && (!post.IsFollowing || followedFromFeed.Contains(post.AuthorId))
-                        && store.TryGetFeedNote(post.Id, out var note)
-                        ? FeedNotes.SuggestionLabel(note)
-                        : null;
-                    var rowTop = ImGui.GetCursorScreenPos().Y;
-                    DrawGramCard(post, suggestion: suggestion);
-                    store.ObserveImpression(post.Id, rowTop, ImGui.GetCursorScreenPos().Y);
+                    if (collapsed)
+                    {
+                        DrawNotInterestedCell(post.Id);
+                    }
+                    else
+                    {
+                        var suggestion = ranked && (!post.IsFollowing || followedFromFeed.Contains(post.AuthorId))
+                            && store.TryGetFeedNote(post.Id, out var note)
+                            ? FeedNotes.SuggestionLabel(note)
+                            : null;
+                        var rowTop = ImGui.GetCursorScreenPos().Y;
+                        DrawGramCard(post, suggestion: suggestion);
+                        store.ObserveImpression(post.Id, rowTop, ImGui.GetCursorScreenPos().Y);
+                    }
+
                     feedVirtualizer.Record(post.Id, revision);
                     if (closesRankedBlock)
                     {
@@ -1094,6 +1113,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                     DrawPeopleRailRow();
                 }
 
+                drawingForYou = false;
                 feedActionsAnchorPending = false;
                 if (store.LoadingMore(scope))
                 {
@@ -1355,7 +1375,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             HoverLabelSide.Above);
         if (UiInteract.Click(moreCenter - moreExtent, moreCenter + moreExtent, moreHovered))
         {
-            OpenPostSheet(post, !detail);
+            OpenPostSheet(post, !detail, drawingForYou);
         }
 
         var imageRect = new Rect(new Vector2(origin.X, imageTop), new Vector2(origin.X + width, imageBottom));
@@ -1496,6 +1516,10 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         }
 
         var time = detail ? CardTimestamp(post) : FeedTimestamp(post);
+        if (post.Views is { } views)
+        {
+            time = $"{time} · {Loc.Plural(L.Social.ViewsCount, views)}";
+        }
         Typography.Draw(drawList, new Vector2(innerX, y), Typography.FitText(time, innerWidth, CardTimeStyle),
             Ink.MutedInk, CardTimeStyle);
         FeedCell.End(drawList, cell, Ink.Hairline);

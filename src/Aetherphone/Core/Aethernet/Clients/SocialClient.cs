@@ -116,6 +116,16 @@ internal sealed partial class SocialClient
         return UserListAsync($"/users/{Uri.EscapeDataString(userId)}/mutual-followers", cursor, token, onFailure);
     }
 
+    public Task<bool> NotInterestedAsync(string postId, CancellationToken token)
+    {
+        return net.SendAsync(HttpMethod.Post, $"/posts/{Uri.EscapeDataString(postId)}/not-interested", token);
+    }
+
+    public Task<bool> UndoNotInterestedAsync(string postId, CancellationToken token)
+    {
+        return net.SendAsync(HttpMethod.Delete, $"/posts/{Uri.EscapeDataString(postId)}/not-interested", token);
+    }
+
     public Task<SuggestedUsersPage?> SuggestedUsersAsync(int limit, CancellationToken token,
         Action<AepFailure>? onFailure = null)
     {
