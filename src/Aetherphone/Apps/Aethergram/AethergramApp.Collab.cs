@@ -21,175 +21,207 @@ internal sealed partial class AethergramApp
     }
 
     private const float CollabAvatarFraction = 0.72f;
+    private const float CollabTrioFraction = 0.6f;
+    private const float CollabTrioRise = 0.6f;
+    private const float CollabTrioDrop = 0.9f;
+    private const int CollabAvatarsShown = 3;
     private const float CollabAvatarCutout = 1.5f;
     private const int CollabAvatarSegments = 28;
     private const float CollabAuthorShare = 0.5f;
     private const float CollabNameGap = 4f;
     private const float CollabPillGap = 8f;
-    private const float CollabClearSize = 16f;
-    private const float CollabClearHit = 14f;
-    private const float CollabTrailingShare = 0.45f;
 
-    private MentionSuggestDto? composeCollaborator;
-    private PersonPicker? collabPicker;
+    private readonly ActionSheet collabAuthorsSheet = new();
+    private readonly string[] collabOthersText = new string[CollabStates.MaxCollaborators + 1];
+    private LanguageInfo? collabOthersLanguage;
+    private ActionSheet.Item[] collabAuthorItems = Array.Empty<ActionSheet.Item>();
+    private string[] collabAuthorIds = Array.Empty<string>();
+    private string collabAuthorsPostId = string.Empty;
     private volatile string? collabBusyPostId;
     private volatile HashSet<string> settledCollabInvites = new(StringComparer.Ordinal);
     private volatile CollabNotice pendingCollabNotice;
 
-    private PersonPicker CollabPicker =>
-        collabPicker ??= new PersonPicker(store.NewMentionSuggestions(), L.Aethergram.CollabInvite);
+    private static float CollabAvatarRadius(float radius, int accepted) =>
+        radius * (accepted == 1 ? CollabAvatarFraction : CollabTrioFraction);
 
-    private string? ComposeCollaboratorId => composeCollaborator?.UserId;
-
-    private void ResetComposeCollab()
+    // Slot 0 is the author, then the first collaborators in invite order. One collaborator sits on a
+    // diagonal; more make a triangle inside the same circle, so the header keeps its width.
+    private static Vector2 CollabAvatarCenter(Vector2 center, float radius, int accepted, int slot)
     {
-        composeCollaborator = null;
-        collabPicker?.Close();
+        var reach = radius - CollabAvatarRadius(radius, accepted);
+        if (accepted == 1)
+        {
+            return slot == 0 ? center - new Vector2(reach, reach) : center + new Vector2(reach, reach);
+        }
+
+        return slot switch
+        {
+            0 => center + new Vector2(-reach, -reach * CollabTrioRise),
+            1 => center + new Vector2(reach, -reach * CollabTrioRise),
+            _ => center + new Vector2(0f, reach * CollabTrioDrop),
+        };
     }
 
-    private void GateComposeCollabPicker()
-    {
-        collabPicker?.Gate();
-    }
-
-    private void DrawComposeCollabPicker(Rect area)
-    {
-        if (collabPicker is null)
-        {
-            return;
-        }
-
-        var picked = collabPicker.Draw(area, theme, images, lodestone);
-        if (picked is null || string.Equals(picked.UserId, store.Me?.Id, StringComparison.Ordinal))
-        {
-            return;
-        }
-
-        composeCollaborator = picked;
-    }
-
-    private float DrawComposeCollabRow(ImDrawListPtr drawList, Rect card, float top, float scale)
-    {
-        var row = new Rect(new Vector2(card.Min.X, top), new Vector2(card.Max.X, top + ComposeRowHeight * scale));
-        var hovered = UiInteract.Hover(row.Min, row.Max);
-        if (hovered)
-        {
-            drawList.AddRectFilled(row.Min, row.Max, ImGui.GetColorU32(Ink.HoverTint));
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-        }
-
-        var rowTapped = UiInteract.Click(row.Min, row.Max, hovered);
-        var trailingRight = row.Max.X - CellPadX * scale;
-        var picked = composeCollaborator;
-        var clearTapped = false;
-        if (picked is null)
-        {
-            var chevronCenter = new Vector2(trailingRight - 8f * scale, row.Center.Y);
-            PhoneIcon.Draw(drawList, chevronCenter, PhoneIcons.ChevronRight, Ink.MutedInk, 18f * scale);
-            trailingRight = chevronCenter.X - 14f * scale;
-        }
-        else
-        {
-            var hit = CollabClearHit * scale;
-            var clearCenter = new Vector2(trailingRight - hit * 0.5f, row.Center.Y);
-            var clearRect = new Rect(clearCenter - new Vector2(hit, hit), clearCenter + new Vector2(hit, hit));
-            PhoneIcon.Draw(drawList, clearCenter, PhoneIcons.X, Ink.MutedInk, CollabClearSize * scale);
-            HoverTooltip.Show(clearRect, Loc.T(L.Aethergram.CollabClear), HoverLabelSide.Above);
-            clearTapped = UiInteract.HoverClick(clearRect.Min, clearRect.Max);
-            var nameRight = clearRect.Min.X - 4f * scale;
-            var name = Typography.FitText(SocialIdentity.Name(picked.DisplayName, picked.Handle),
-                MathF.Max(1f, row.Width * CollabTrailingShare), TextStyles.Subheadline);
-            var nameSize = Typography.Measure(name, TextStyles.Subheadline);
-            Typography.Draw(drawList, new Vector2(nameRight - nameSize.X, row.Center.Y - nameSize.Y * 0.5f), name,
-                Ink.MutedInk, TextStyles.Subheadline);
-            trailingRight = nameRight - nameSize.X - 10f * scale;
-        }
-
-        DrawComposeRowLabel(drawList, row, PhoneIcons.Users, Loc.T(L.Aethergram.CollabInvite), trailingRight);
-        DrawHairline(drawList, ComposeRowLabelLeft(row, scale), card.Max.X - ComposeCardPad * scale, row.Max.Y);
-        if (clearTapped)
-        {
-            composeCollaborator = null;
-        }
-        else if (rowTapped)
-        {
-            CollabPicker.Open();
-        }
-
-        return row.Max.Y;
-    }
+    private static int CollabAvatarSlots(int accepted) => Math.Min(accepted + 1, CollabAvatarsShown);
 
     private void DrawCardAvatar(PostDto post, Vector2 center, float radius, string displayName)
     {
-        if (CollabStates.AcceptedFor(post) is not { } collaborator)
+        var accepted = CollabStates.AcceptedCount(post);
+        if (accepted == 0)
         {
             DrawAvatar(center, radius, displayName, string.Empty, post.AuthorAvatarUrl, 0.85f, 32,
                 Frames.Of(post.AuthorFrameId));
             return;
         }
 
-        var small = radius * CollabAvatarFraction;
-        var offset = new Vector2(radius - small, radius - small);
-        var collaboratorCenter = center + offset;
-        DrawAvatar(center - offset, small, displayName, string.Empty, post.AuthorAvatarUrl, 0.85f,
-            CollabAvatarSegments);
-        ImGui.GetWindowDrawList().AddCircleFilled(collaboratorCenter, small + CollabAvatarCutout * UiScale.Current,
-            ImGui.GetColorU32(ActivityBadgeRing), CollabAvatarSegments);
-        DrawAvatar(collaboratorCenter, small, SocialIdentity.Name(collaborator.DisplayName, collaborator.Handle),
-            string.Empty, collaborator.AvatarUrl, 0.85f, CollabAvatarSegments);
+        var small = CollabAvatarRadius(radius, accepted);
+        DrawAvatar(CollabAvatarCenter(center, radius, accepted, 0), small, displayName, string.Empty,
+            post.AuthorAvatarUrl, 0.85f, CollabAvatarSegments);
+        var slots = CollabAvatarSlots(accepted);
+        for (var slot = 1; slot < slots; slot++)
+        {
+            var collaborator = CollabStates.AcceptedAt(post, slot - 1)!;
+            var collaboratorCenter = CollabAvatarCenter(center, radius, accepted, slot);
+            ImGui.GetWindowDrawList().AddCircleFilled(collaboratorCenter,
+                small + CollabAvatarCutout * UiScale.Current, ImGui.GetColorU32(ActivityBadgeRing),
+                CollabAvatarSegments);
+            DrawAvatar(collaboratorCenter, small, SocialIdentity.Name(collaborator.DisplayName, collaborator.Handle),
+                string.Empty, collaborator.AvatarUrl, 0.85f, CollabAvatarSegments);
+        }
     }
 
     private static float CardAuthorNameWidth(PostDto post, float headerTextMaxWidth) =>
-        CollabStates.AcceptedFor(post) is null ? headerTextMaxWidth : headerTextMaxWidth * CollabAuthorShare;
+        CollabStates.AcceptedCount(post) == 0 ? headerTextMaxWidth : headerTextMaxWidth * CollabAuthorShare;
 
-    // Drawn after the header's own tap target so a tap on the collaborator's name or face claims the
-    // press, and the rest of the header still opens the author.
+    // Drawn after the header's own tap target so a tap on a collaborator's name or face claims the
+    // press, and the rest of the header still opens the author. One collaborator reads "A and B" and
+    // opens B; more read "A and N others" and open the list of everyone on the post.
     private void DrawCollabByline(ImDrawListPtr drawList, PostDto post, float left, float top, float right,
         Vector2 avatarCenter, float avatarRadius)
     {
-        if (CollabStates.AcceptedFor(post) is not { } collaborator)
+        var accepted = CollabStates.AcceptedCount(post);
+        if (accepted == 0)
         {
             return;
         }
 
         var scale = UiScale.Current;
         var gap = CollabNameGap * scale;
-        var joiner = Loc.T(L.Aethergram.CollabAnd);
-        var joinerLeft = left + gap;
-        Typography.Draw(drawList, new Vector2(joinerLeft, top), joiner, Ink.BodyInk, CardNameStyle);
-        var nameLeft = joinerLeft + Typography.Measure(joiner, CardNameStyle).X + gap;
-        var name = Typography.FitText(SocialIdentity.Name(collaborator.DisplayName, collaborator.Handle),
-            MathF.Max(1f, right - nameLeft), CardNameStyle);
-        var nameSize = Typography.Measure(name, CardNameStyle);
-        Typography.Draw(drawList, new Vector2(nameLeft, top), name, Ink.TitleInk, CardNameStyle);
-        var nameMin = new Vector2(nameLeft, top);
-        var nameMax = new Vector2(nameLeft + nameSize.X, top + nameSize.Y);
+        Vector2 nameMin;
+        Vector2 nameMax;
+        if (accepted == 1)
+        {
+            var joiner = Loc.T(L.Aethergram.CollabAnd);
+            var joinerLeft = left + gap;
+            Typography.Draw(drawList, new Vector2(joinerLeft, top), joiner, Ink.BodyInk, CardNameStyle);
+            var collaborator = CollabStates.AcceptedAt(post, 0)!;
+            var nameLeft = joinerLeft + Typography.Measure(joiner, CardNameStyle).X + gap;
+            var name = Typography.FitText(SocialIdentity.Name(collaborator.DisplayName, collaborator.Handle),
+                MathF.Max(1f, right - nameLeft), CardNameStyle);
+            nameMin = new Vector2(nameLeft, top);
+            nameMax = nameMin + Typography.Measure(name, CardNameStyle);
+            Typography.Draw(drawList, nameMin, name, Ink.TitleInk, CardNameStyle);
+        }
+        else
+        {
+            var others = Typography.FitText(CollabOthersText(accepted), MathF.Max(1f, right - left - gap),
+                CardNameStyle);
+            nameMin = new Vector2(left + gap, top);
+            nameMax = nameMin + Typography.Measure(others, CardNameStyle);
+            Typography.Draw(drawList, nameMin, others, Ink.TitleInk, CardNameStyle);
+        }
+
         if (UiInteract.Hover(nameMin, nameMax))
         {
             drawList.AddLine(new Vector2(nameMin.X, nameMax.Y - 1f * scale),
                 new Vector2(nameMax.X, nameMax.Y - 1f * scale), ImGui.GetColorU32(Ink.TitleInk), 1f);
         }
 
-        var small = avatarRadius * CollabAvatarFraction;
-        var collaboratorCenter = avatarCenter + new Vector2(avatarRadius - small, avatarRadius - small);
-        var nameTapped = UiInteract.HoverClick(nameMin, nameMax);
-        var avatarTapped = UiInteract.HoverClickCircle(collaboratorCenter, small);
-        if (nameTapped || avatarTapped)
+        var tapped = UiInteract.HoverClick(nameMin, nameMax);
+        var small = CollabAvatarRadius(avatarRadius, accepted);
+        var slots = CollabAvatarSlots(accepted);
+        for (var slot = 1; slot < slots && !tapped; slot++)
         {
-            OpenProfileFromPost(collaborator.UserId, post.Id);
+            tapped = UiInteract.HoverClickCircle(CollabAvatarCenter(avatarCenter, avatarRadius, accepted, slot), small);
         }
-    }
 
-    private void AddCollabSheetItem(PostDto post)
-    {
-        if (post.Collaborator is null)
+        if (!tapped)
         {
             return;
         }
 
+        if (accepted == 1)
+        {
+            OpenProfileFromPost(CollabStates.AcceptedAt(post, 0)!.UserId, post.Id);
+            return;
+        }
+
+        OpenCollabAuthors(post);
+    }
+
+    private string CollabOthersText(int count)
+    {
+        if (!ReferenceEquals(collabOthersLanguage, Loc.Current))
+        {
+            Array.Clear(collabOthersText);
+            collabOthersLanguage = Loc.Current;
+        }
+
+        if (count >= collabOthersText.Length)
+        {
+            return Loc.Plural(L.Aethergram.CollabOthers, count);
+        }
+
+        return collabOthersText[count] ??= Loc.Plural(L.Aethergram.CollabOthers, count);
+    }
+
+    private void OpenCollabAuthors(PostDto post)
+    {
+        var accepted = CollabStates.AcceptedCount(post);
+        collabAuthorItems = new ActionSheet.Item[accepted + 1];
+        collabAuthorIds = new string[accepted + 1];
+        collabAuthorsPostId = post.Id;
+        collabAuthorIds[0] = post.AuthorId;
+        collabAuthorItems[0] = new ActionSheet.Item(SocialIdentity.Name(post.AuthorDisplayName, post.AuthorHandle));
+        for (var index = 0; index < accepted; index++)
+        {
+            var collaborator = CollabStates.AcceptedAt(post, index)!;
+            collabAuthorIds[index + 1] = collaborator.UserId;
+            collabAuthorItems[index + 1] =
+                new ActionSheet.Item(SocialIdentity.Name(collaborator.DisplayName, collaborator.Handle));
+        }
+
+        collabAuthorsSheet.Open();
+    }
+
+    private void DrawCollabAuthorsSheet(Rect screen)
+    {
+        if (!collabAuthorsSheet.CapturesPointer)
+        {
+            return;
+        }
+
+        var picked = collabAuthorsSheet.Draw(screen, ActionSheetStyle.From(ui), collabAuthorItems,
+            Loc.T(L.Common.Cancel), false, Loc.T(L.Aethergram.CollabAuthors));
+        if (picked < 0)
+        {
+            return;
+        }
+
+        OpenProfileFromPost(collabAuthorIds[picked], collabAuthorsPostId);
+    }
+
+    // With several collaborators the author manages them from Edit post; the menu keeps the one-tap
+    // removal only for the single-collaborator case it always had.
+    private void AddCollabSheetItem(PostDto post)
+    {
         if (IsOwnPost(post))
         {
-            AddPostSheetItem(PostSheetAction.RemoveCollab, Loc.T(L.Aethergram.CollabRemove), true);
+            if (CollabStates.Count(post) == 1)
+            {
+                AddPostSheetItem(PostSheetAction.RemoveCollab, Loc.T(L.Aethergram.CollabRemove), true);
+            }
+
             return;
         }
 
@@ -202,16 +234,17 @@ internal sealed partial class AethergramApp
     private void AskRemoveCollab(PostDto post)
     {
         var own = IsOwnPost(post);
+        var targetId = own ? post.Collaborators![0].UserId : store.Me!.Id;
         confirm.Ask(new ConfirmRequest
         {
             Title = Loc.T(own ? L.Aethergram.CollabRemove : L.Aethergram.CollabLeave),
-            Message = Loc.T(own ? L.Aethergram.CollabRemoveMessage : L.Aethergram.CollabLeaveMessage),
+            Message = Loc.T(own ? L.Aethergram.CollabRemoveOneMessage : L.Aethergram.CollabLeaveMessage),
             ConfirmLabel = Loc.T(L.Aethergram.CollabRemoveConfirm),
             CancelLabel = Loc.T(L.Common.Cancel),
             Sheet = true,
             BusyLabel = Loc.T(L.Aethergram.Saving),
             FailedMessage = Loc.T(L.Aethergram.CollabFailed),
-            ConfirmAsync = done => store.RemoveCollab(post.Id, post.Collaborator!.UserId, removed =>
+            ConfirmAsync = done => store.RemoveCollab(post.Id, targetId, removed =>
             {
                 if (removed)
                 {
@@ -227,7 +260,8 @@ internal sealed partial class AethergramApp
     private string? CollabRefusalText()
     {
         var failure = store.CreateFailure;
-        if (composeStoryMode || failure.Code != FailureCodes.GramInvalidCollaborator)
+        if (composeStoryMode || failure.Code is not (FailureCodes.GramInvalidCollaborator
+                or FailureCodes.GramTooManyCollaborators))
         {
             return null;
         }

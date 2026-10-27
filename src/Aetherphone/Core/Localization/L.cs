@@ -7703,7 +7703,6 @@ internal static class L
         public static readonly LocString DeleteFailed = new("aethergram.deleteFailed", "Couldn't delete the post");
         public static readonly LocString EditPost = new("aethergram.editPost", "Edit post");
         public static readonly LocString CollabInvite = new("aethergram.collabInvite", "Invite collaborator");
-        public static readonly LocString CollabClear = new("aethergram.collabClear", "Clear collaborator");
         public static readonly LocString CollabAnd = new("aethergram.collabAnd", "and");
         public static readonly LocString CollabInvited = new("aethergram.collabInvited", "invited you to collaborate on a post");
         public static readonly LocString CollabAcceptedActivity = new("aethergram.collabAcceptedActivity", "accepted your collab invite");
@@ -7712,7 +7711,6 @@ internal static class L
         public static readonly LocString CollabPromptTitle = new("aethergram.collabPromptTitle", "Invite to collaborate");
         public static readonly LocString CollabPromptHint = new("aethergram.collabPromptHint", "Accept to show this post on your profile and to your followers.");
         public static readonly LocString CollabRemove = new("aethergram.collabRemove", "Remove collaborator");
-        public static readonly LocString CollabRemoveMessage = new("aethergram.collabRemoveMessage", "The post leaves their profile and shows only you as the author.");
         public static readonly LocString CollabLeave = new("aethergram.collabLeave", "Remove me from post");
         public static readonly LocString CollabLeaveMessage = new("aethergram.collabLeaveMessage", "The post leaves your profile and no longer shows you as a collaborator.");
         public static readonly LocString CollabRemoveConfirm = new("aethergram.collabRemoveConfirm", "Remove");
@@ -7722,6 +7720,15 @@ internal static class L
         public static readonly LocString CollabLeftToast = new("aethergram.collabLeftToast", "You left this post");
         public static readonly LocString CollabFailed = new("aethergram.collabFailed", "Couldn't update the collab. Try again.");
         public static readonly LocString CollabUnavailable = new("aethergram.collabUnavailable", "That person can't be invited to collaborate. Choose someone else or clear the collaborator.");
+        public static readonly LocString CollabInviteMany = new("aethergram.collabInviteMany", "Invite collaborators");
+        public static readonly LocPlural CollabRemaining = new("aethergram.collabRemaining", "{0} left", "{0} left");
+        public static readonly LocPlural CollabOthers = new("aethergram.collabOthers", "and {0} other", "and {0} others");
+        public static readonly LocString CollabAuthors = new("aethergram.collabAuthors", "Authors");
+        public static readonly LocString CollabSection = new("aethergram.collabSection", "Collaborators");
+        public static readonly LocString CollabPendingChip = new("aethergram.collabPendingChip", "{0} (invited)");
+        public static readonly LocString CollabRemoveOneMessage = new("aethergram.collabRemoveOneMessage", "They will be taken off this post.");
+        public static readonly LocString CollabInviteSent = new("aethergram.collabInviteSent", "Invite sent");
+        public static readonly LocString CollabTooMany = new("aethergram.collabTooMany", "A post can have up to {0} collaborators.");
         public static readonly LocString EditPostFailed = new("aethergram.editPostFailed", "Couldn't save the changes");
         public static readonly LocString EditedStamp = new("aethergram.editedStamp", "{0} · Edited");
         public static readonly LocString DeleteCommentFailed = new("aethergram.deleteCommentFailed", "Couldn't delete the comment");

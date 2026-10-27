@@ -423,6 +423,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         ui.Theme = theme;
         SyncSeason();
         postSheet.Gate();
+        collabAuthorsSheet.Gate();
         filterSheet.Gate();
         feedExplainer.Gate();
         GateAltText();
@@ -471,6 +472,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         DrawFilterSheet(screen);
         DrainPostNotices();
         DrawPostSheet(screen);
+        DrawCollabAuthorsSheet(screen);
         DrawFeedExplainer(screen);
         DrawAltText(screen);
         DrawCommentSheet(screen);
