@@ -50,6 +50,8 @@ namespace Aetherphone.Core.Aethernet;
 [JsonSerializable(typeof(FeedSeenRequest))]
 [JsonSerializable(typeof(FeedSignalRequest))]
 [JsonSerializable(typeof(PostViewsDto))]
+[JsonSerializable(typeof(ReelFeedPage))]
+[JsonSerializable(typeof(ReelWatchRequest))]
 [JsonSerializable(typeof(UserSearchResult))]
 [JsonSerializable(typeof(TagSearchResult))]
 [JsonSerializable(typeof(UserListPage))]

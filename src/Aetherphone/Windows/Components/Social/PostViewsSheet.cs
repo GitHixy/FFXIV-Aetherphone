@@ -12,7 +12,8 @@ namespace Aetherphone.Windows.Components;
 
 internal sealed class PostViewsSheet
 {
-    private const int GroupCount = 7;
+    private const int GroupCount = 8;
+    private const int ReelsRow = 1;
     private const int EarlierRow = GroupCount - 1;
     private const float MaxDim = 0.45f;
     private const float Rounding = 24f;
@@ -40,6 +41,7 @@ internal sealed class PostViewsSheet
     private static readonly LocString[] GroupLabels =
     {
         L.Social.ViewsSourceHome,
+        L.Aethergram.Reels,
         L.Social.ViewsSourceExplore,
         L.Social.ViewsSourceProfile,
         L.Social.ViewsSourceHashtags,
@@ -61,6 +63,7 @@ internal sealed class PostViewsSheet
     private int attributed;
     private Spring reveal;
     private bool open;
+    private bool includeReels;
     private int openedFrame;
 
     public bool IsOpen => open;
@@ -97,8 +100,9 @@ internal sealed class PostViewsSheet
         }
     }
 
-    public void Draw(Rect screen, SocialInk ink, PostViewsDto? views, bool loading)
+    public void Draw(Rect screen, SocialInk ink, PostViewsDto? views, bool loading, bool reel = false)
     {
+        includeReels = reel;
         var delta = MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
         reveal.Step(open ? 1f : 0f, Motion.Sheet, delta);
         if (!open && reveal.IsResting(0f, 0.001f, 0.005f))
@@ -236,7 +240,7 @@ internal sealed class PostViewsSheet
         var track = Palette.WithAlpha(ink.TitleInk, TrackAlpha * opacity);
         for (var groupIndex = 0; groupIndex < GroupCount; groupIndex++)
         {
-            if (groupIndex == EarlierRow && groupCounts[groupIndex] == 0)
+            if (!RowVisible(groupIndex))
             {
                 continue;
             }
@@ -325,9 +329,26 @@ internal sealed class PostViewsSheet
             ImGui.GetColorU32(accent), barHeight * 0.5f);
     }
 
+    // Earlier shows only when old viewers exist, and Reels on a reel or once the Reels feed has shown the post.
+    private bool RowVisible(int groupIndex) => groupIndex switch
+    {
+        EarlierRow => groupCounts[EarlierRow] > 0,
+        ReelsRow => includeReels || groupCounts[ReelsRow] > 0,
+        _ => true,
+    };
+
     private int VisibleRows()
     {
-        return groupCounts[EarlierRow] > 0 ? GroupCount : GroupCount - 1;
+        var rows = 0;
+        for (var groupIndex = 0; groupIndex < GroupCount; groupIndex++)
+        {
+            if (RowVisible(groupIndex))
+            {
+                rows++;
+            }
+        }
+
+        return rows;
     }
 
     private void Format(PostViewsDto views)
@@ -340,11 +361,12 @@ internal sealed class PostViewsSheet
         formattedViews = views;
         formattedCulture = Loc.Culture;
         groupCounts[0] = views.Home;
-        groupCounts[1] = views.Explore;
-        groupCounts[2] = views.Profile;
-        groupCounts[3] = views.HashtagsAndSearch;
-        groupCounts[4] = views.Stories;
-        groupCounts[5] = views.Other;
+        groupCounts[ReelsRow] = views.Reels;
+        groupCounts[2] = views.Explore;
+        groupCounts[3] = views.Profile;
+        groupCounts[4] = views.HashtagsAndSearch;
+        groupCounts[5] = views.Stories;
+        groupCounts[6] = views.Other;
         groupCounts[EarlierRow] = views.Earlier;
         VoteShares.Percentages(groupCounts, groupPercents);
         for (var groupIndex = 0; groupIndex < GroupCount; groupIndex++)

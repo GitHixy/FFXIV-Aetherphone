@@ -7707,6 +7707,25 @@ internal static class L
         public static readonly LocString TagsSection = new("aethergram.tagsSection", "Tags");
         public static readonly LocString ExploreNothingNew = new("aethergram.exploreNothingNew", "Nothing new to explore right now");
         public static readonly LocString ExploreNothingNewHint = new("aethergram.exploreNothingNewHint", "Photos from people you don't follow yet show up here");
+        public static readonly LocString Reels = new("aethergram.reels", "Reels");
+        public static readonly LocString ReelsEmpty = new("aethergram.reelsEmpty", "No reels yet");
+        public static readonly LocString ReelsEmptyHint = new("aethergram.reelsEmptyHint",
+            "Short videos people share show up here");
+        public static readonly LocString ReelsLoadFailed = new("aethergram.reelsLoadFailed", "Couldn't load reels");
+        public static readonly LocString ReelsCaughtUp = new("aethergram.reelsCaughtUp", "You're all caught up");
+        public static readonly LocString ReelPlayFailed = new("aethergram.reelPlayFailed", "This reel couldn't play");
+        public static readonly LocString ReelComments = new("aethergram.reelComments", "Comments");
+        public static readonly LocString ReelSetupTitle = new("aethergram.reelSetupTitle", "Watch Reels in game");
+        public static readonly LocString ReelSetupBody = new("aethergram.reelSetupBody",
+            "Reels play with MogCast's video engine. It downloads once and stays on your machine.");
+        public static readonly LocString ReelInstallPlayer = new("aethergram.reelInstallPlayer",
+            "Install the video engine to play reels");
+        public static readonly LocString ReelInstallingPlayer = new("aethergram.reelInstallingPlayer",
+            "Installing the video engine…");
+        public static readonly LocString ReelVideoUnavailable = new("aethergram.reelVideoUnavailable",
+            "Video can't play on this device");
+        public static readonly LocString ReelPausedForMogCast = new("aethergram.reelPausedForMogCast",
+            "Paused while MogCast plays");
         public static readonly LocString NoResults = new("aethergram.noResults", "No results found");
         public static readonly LocString SavedEmptyHint = new("aethergram.savedEmptyHint", "Save posts you want to see again");
         public static readonly LocString Use = new("aethergram.use", "Use");

@@ -235,6 +235,9 @@ internal sealed partial class AethergramApp
             case PostSource.Explore:
                 store.LoadMoreExplore();
                 break;
+            case PostSource.Reels:
+                store.LoadMoreUserReels();
+                break;
             default:
                 store.LoadMoreProfilePosts();
                 break;

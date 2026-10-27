@@ -1384,6 +1384,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         hashtagLane.Items = MapSaved(hashtagLane.Items, postId, saved);
         postSearchLane.Items = MapSaved(postSearchLane.Items, postId, saved);
         likedLane.Items = MapSaved(likedLane.Items, postId, saved);
+        MapAttachedLanes(items => MapSaved(items, postId, saved));
         savedLane.Items = saved
             ? MapSaved(savedLane.Items, postId, true)
             : CopyOnWrite.RemoveById(savedLane.Items, postId);
@@ -1445,6 +1446,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         taggedLane.Items = BlockedContent.Purge(taggedLane.Items, userId);
         likedLane.Items = BlockedContent.Purge(likedLane.Items, userId);
         postSearchLane.Items = BlockedContent.Purge(postSearchLane.Items, userId);
+        MapAttachedLanes(items => BlockedContent.Purge(items, userId));
         detailComments = CopyOnWrite.RemoveWhere(detailComments, comment => comment.AuthorId == userId);
         discoverResults = CopyOnWrite.RemoveWhere(discoverResults, user => user.Id == userId);
         if (detailPost is not { } current)
@@ -1929,6 +1931,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         hashtagLane.Items = CopyOnWrite.MapById(hashtagLane.Items, postId, transform);
         postSearchLane.Items = CopyOnWrite.MapById(postSearchLane.Items, postId, transform);
         likedLane.Items = CopyOnWrite.MapById(likedLane.Items, postId, transform);
+        MapAttachedLanes(items => CopyOnWrite.MapById(items, postId, transform));
         if (detailPost is { } current && current.Id == postId)
         {
             detailPost = transform(current);
@@ -1966,6 +1969,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         hashtagLane.Items = CopyOnWrite.Replace(hashtagLane.Items, updated);
         postSearchLane.Items = CopyOnWrite.Replace(postSearchLane.Items, updated);
         likedLane.Items = CopyOnWrite.Replace(likedLane.Items, updated);
+        MapAttachedLanes(items => CopyOnWrite.Replace(items, updated));
         if (detailPost is { } current && current.Id == updated.Id)
         {
             detailPost = updated;
@@ -1984,6 +1988,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         hashtagLane.Items = CopyOnWrite.RemoveById(hashtagLane.Items, postId);
         postSearchLane.Items = CopyOnWrite.RemoveById(postSearchLane.Items, postId);
         likedLane.Items = CopyOnWrite.RemoveById(likedLane.Items, postId);
+        MapAttachedLanes(items => CopyOnWrite.RemoveById(items, postId));
         if (detailPost is { } current && current.Id == postId)
         {
             detailPost = null;
@@ -2005,6 +2010,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         hashtagLane.Items = MapCommentCount(hashtagLane.Items, postId, delta);
         postSearchLane.Items = MapCommentCount(postSearchLane.Items, postId, delta);
         likedLane.Items = MapCommentCount(likedLane.Items, postId, delta);
+        MapAttachedLanes(items => MapCommentCount(items, postId, delta));
         if (detailPost is { } current && current.Id == postId)
         {
             detailPost = current with { CommentCount = Math.Max(0, current.CommentCount + delta) };
@@ -2025,6 +2031,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         taggedLane.Items = MapFollowByAuthor(taggedLane.Items, userId, following);
         savedLane.Items = MapFollowByAuthor(savedLane.Items, userId, following);
         likedLane.Items = MapFollowByAuthor(likedLane.Items, userId, following);
+        MapAttachedLanes(items => MapFollowByAuthor(items, userId, following));
         if (detailPost is { } post && post.AuthorId == userId && post.IsFollowing != following)
         {
             detailPost = post with { IsFollowing = following };

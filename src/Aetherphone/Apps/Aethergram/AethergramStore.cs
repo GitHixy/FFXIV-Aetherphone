@@ -39,6 +39,7 @@ internal sealed partial class AethergramStore : SocialFeedStore
         : base(session, account, client, safety, media, signals, mutes, "Aethergram")
     {
         this.grams = grams;
+        AttachReelLanes();
     }
 
     protected override void OnAccountReset()
@@ -46,6 +47,7 @@ internal sealed partial class AethergramStore : SocialFeedStore
         archivedLane.Clear();
         pendingTagsLane.Clear();
         pendingTagsLoaded = false;
+        ResetReels();
     }
 
     protected override Task<FeedPage?> FetchFeedAsync(string feedKey, string? cursor, string? regions, bool includeSensitive,

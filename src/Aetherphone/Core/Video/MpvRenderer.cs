@@ -245,7 +245,8 @@ internal sealed class MpvRenderer : IDisposable
     internal string? LinkResolverPath { get; private set; }
 
     internal void Initialize(int frameWidth, int frameHeight, Texture2D? texture, string? linkResolverPath,
-        bool hardwareDecoding, int maxQualityHeight, bool allowInsecureDirectUrls, int initialVolume)
+        bool hardwareDecoding, int maxQualityHeight, bool allowInsecureDirectUrls, int initialVolume,
+        bool resolveLinks = true)
     {
         width = frameWidth;
         height = frameHeight;
@@ -265,7 +266,7 @@ internal sealed class MpvRenderer : IDisposable
         SetOption("vo", "libmpv");
         SetOption("hwdec", hardwareDecoding ? "auto-safe" : "no");
         SetOption("profile", "sw-fast");
-        SetOption("ytdl", "yes");
+        SetOption("ytdl", resolveLinks ? "yes" : "no");
         LinkResolverPath = linkResolverPath;
         if (linkResolverPath is { Length: > 0 })
         {
