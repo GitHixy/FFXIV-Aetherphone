@@ -36,6 +36,14 @@ internal static class ReelTranscoder
         }
     }
 
+    internal static void EnsureReadable(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+        {
+            throw new ReelTranscodeException(ReelTranscodeFailure.UnreadableInput, "The file does not exist.");
+        }
+    }
+
     internal static IMFSourceReader OpenReader(string path, bool advancedVideoProcessing)
     {
         var attributes = MediaFoundationApi.CreateAttributes(1);
@@ -53,6 +61,14 @@ internal static class ReelTranscoder
         {
             throw new ReelTranscodeException(ReelTranscodeFailure.UnreadableInput,
                 $"Media Foundation cannot open the file ({MediaFoundationVideo.Hex(exception.HResult)}).");
+        }
+        catch (IOException exception)
+        {
+            throw new ReelTranscodeException(ReelTranscodeFailure.UnreadableInput, exception.Message);
+        }
+        catch (UnauthorizedAccessException exception)
+        {
+            throw new ReelTranscodeException(ReelTranscodeFailure.UnreadableInput, exception.Message);
         }
         catch (DllNotFoundException exception)
         {
@@ -74,6 +90,7 @@ internal static class ReelTranscoder
         try
         {
             CheckRange(request);
+            EnsureReadable(request.InputPath);
             if (!OperatingSystem.IsWindows())
             {
                 throw new ReelTranscodeException(ReelTranscodeFailure.MediaFoundationMissing,
@@ -121,6 +138,12 @@ internal static class ReelTranscoder
         }
         catch (InvalidDataException exception)
         {
+            return Fail(ReelTranscodeFailure.EncodeFailed, exception.Message, request.OutputPath, partialPath,
+                report);
+        }
+        catch (Exception exception)
+        {
+            AepLog.Warning(exception, "[Reels] transcode hit an unexpected error");
             return Fail(ReelTranscodeFailure.EncodeFailed, exception.Message, request.OutputPath, partialPath,
                 report);
         }
@@ -204,53 +227,6 @@ internal static class ReelTranscoder
         }
     }
 
-    private readonly record struct VideoGeometry(
-        int CodedWidth,
-        int CodedHeight,
-        int Stride,
-        PixelRect Visible,
-        int ClockwiseRotation)
-    {
-        internal int DisplayWidth => ClockwiseRotation is 90 or 270 ? Visible.Height : Visible.Width;
-        internal int DisplayHeight => ClockwiseRotation is 90 or 270 ? Visible.Width : Visible.Height;
-    }
-
-    private readonly ref struct LockedFrame
-    {
-        internal readonly IntPtr Scan0;
-        internal readonly int Pitch;
-        internal readonly long Length;
-        private readonly IMFMediaBuffer buffer;
-        private readonly IMF2DBuffer? surface;
-
-        internal LockedFrame(IMFMediaBuffer buffer, in VideoGeometry geometry)
-        {
-            this.buffer = buffer;
-            surface = buffer as IMF2DBuffer;
-            if (surface is not null)
-            {
-                surface.Lock2D(out Scan0, out Pitch);
-                Length = (long)Pitch * geometry.CodedHeight * 3 / 2;
-                return;
-            }
-
-            buffer.Lock(out Scan0, out _, out var current);
-            Pitch = geometry.Stride;
-            Length = current;
-        }
-
-        public void Dispose()
-        {
-            if (surface is not null)
-            {
-                surface.Unlock2D();
-                return;
-            }
-
-            buffer.Unlock();
-        }
-    }
-
     private sealed class Session : IDisposable
     {
         private const int ProgressEveryFrames = 15;
@@ -270,10 +246,8 @@ internal static class ReelTranscoder
         private ReelStreams streams;
         private int writerVideo = -1;
         private int writerAudio = -1;
-        private VideoGeometry geometry;
-        private int nativeRotation;
-        private int nativeWidth;
-        private int nativeHeight;
+        private ReelVideoGeometry geometry;
+        private ReelMediaInfo native;
         private ReelLayout layout;
         private ReelCadence cadence;
         private int audioSampleRate;
@@ -313,6 +287,8 @@ internal static class ReelTranscoder
             reader = OpenReader(request.InputPath, advancedVideoProcessing: true);
             var input = ReelMediaProbe.Describe(reader, request.InputPath, out streams);
             report.Input = input;
+            report.SourceVideoBitsPerSecond = ReelBitrate.SourceVideoBitsPerSecond(input);
+            report.VideoBitsPerSecond = ReelBitrate.Cap(report.SourceVideoBitsPerSecond);
             if (streams.Video < 0)
             {
                 throw new ReelTranscodeException(ReelTranscodeFailure.NoVideo, "The file has no video track.");
@@ -368,57 +344,16 @@ internal static class ReelTranscoder
 
         private void ConfigureVideo(in ReelMediaInfo input)
         {
-            nativeRotation = input.RotationAttribute;
-            nativeWidth = input.CodedWidth;
-            nativeHeight = input.CodedHeight;
-            var type = MediaFoundationApi.CreateMediaType();
-            try
-            {
-                type.SetGUID(MediaFoundationAttributes.MF_MT_MAJOR_TYPE, MediaTypes.MFMediaType_Video);
-                type.SetGUID(MediaFoundationAttributes.MF_MT_SUBTYPE, MediaFoundationVideo.VideoFormatNv12);
-                reader.SetCurrentMediaType(streams.Video, IntPtr.Zero, type);
-            }
-            catch (COMException exception)
-            {
-                throw new ReelTranscodeException(ReelTranscodeFailure.DecoderMissing,
-                    $"Windows cannot decode {input.VideoCodec} video to NV12 ({MediaFoundationVideo.Hex(exception.HResult)}).");
-            }
-            finally
-            {
-                MediaFoundationVideo.Release(type);
-            }
-
+            native = input;
+            ReelVideoGeometry.RequestNv12(reader, streams.Video, input.VideoCodec);
             geometry = ReadGeometry();
         }
 
-        private VideoGeometry ReadGeometry()
+        private ReelVideoGeometry ReadGeometry()
         {
-            reader.GetCurrentMediaType(streams.Video, out var type);
-            try
-            {
-                _ = MediaFoundationVideo.TryGetUInt64(type, MediaFoundationVideo.FrameSize, out var packed);
-                var (width, height) = MediaFoundationVideo.Unpack(packed);
-                var visible = MediaFoundationVideo.TryGetAperture(type, out var aperture)
-                    ? aperture
-                    : new PixelRect(0, 0, width, height);
-                var stride = MediaFoundationVideo.TryGetUInt32(type, MediaFoundationVideo.DefaultStride, out var found)
-                    && found > 0
-                        ? found
-                        : width;
-                var hasRotation = MediaFoundationVideo.TryGetUInt32(type, MediaFoundationVideo.VideoRotation,
-                    out var outputRotation);
-                var readerRotated = !hasRotation && (nativeRotation is 90 or 270) && width == nativeHeight
-                    && height == nativeWidth;
-                var attribute = hasRotation ? outputRotation : readerRotated ? 0 : nativeRotation;
-                var clockwise = (360 - attribute) % 360;
-                report.Rotation =
-                    $"native attribute {nativeRotation}, output attribute {(hasRotation ? outputRotation.ToString() : "absent")}, applied {clockwise} clockwise";
-                return new VideoGeometry(width, height, stride, visible, clockwise);
-            }
-            finally
-            {
-                MediaFoundationVideo.Release(type);
-            }
+            var read = ReelVideoGeometry.Read(reader, streams.Video, native, out var rotationNote);
+            report.Rotation = rotationNote;
+            return read;
         }
 
         private void RefreshGeometry()
@@ -581,7 +516,7 @@ internal static class ReelTranscoder
             {
                 output.SetGUID(MediaFoundationAttributes.MF_MT_MAJOR_TYPE, MediaTypes.MFMediaType_Video);
                 output.SetGUID(MediaFoundationAttributes.MF_MT_SUBTYPE, MediaFoundationVideo.VideoFormatH264);
-                output.SetUINT32(MediaFoundationAttributes.MF_MT_AVG_BITRATE, ReelFormat.VideoBitsPerSecond);
+                output.SetUINT32(MediaFoundationAttributes.MF_MT_AVG_BITRATE, report.VideoBitsPerSecond);
                 output.SetUINT32(MediaFoundationVideo.Mpeg2Profile, MediaFoundationVideo.H264HighProfile);
                 SetFrameShape(output);
                 target.AddStream(output, out var stream);
@@ -827,16 +762,8 @@ internal static class ReelTranscoder
                 output.Lock(out var outputPointer, out _, out _);
                 try
                 {
-                    using var locked = new LockedFrame(input, geometry);
-                    var sourceLumaBytes = locked.Pitch * geometry.CodedHeight;
-                    if (locked.Pitch <= 0 || locked.Length < sourceLumaBytes * 3L / 2)
-                    {
-                        throw new ReelTranscodeException(ReelTranscodeFailure.EncodeFailed,
-                            $"A decoded frame holds {locked.Length} bytes at pitch {locked.Pitch}, less than {geometry.CodedWidth}x{geometry.CodedHeight} NV12 needs.");
-                    }
-
-                    var decoded = new Nv12Planes(locked.Scan0, sourceLumaBytes, locked.Scan0 + sourceLumaBytes,
-                        sourceLumaBytes / 2, locked.Pitch);
+                    using var locked = new ReelLockedFrame(input, geometry);
+                    var decoded = locked.Planes(geometry);
                     var target = new Nv12Planes(outputPointer, lumaBytes, outputPointer + lumaBytes, lumaBytes / 2,
                         layout.Width);
                     var scaling = Stopwatch.GetTimestamp();

@@ -44,6 +44,7 @@ internal sealed partial class AethergramStore : SocialFeedStore
 
     protected override void OnAccountReset()
     {
+        ResetReelPosting();
         archivedLane.Clear();
         pendingTagsLane.Clear();
         pendingTagsLoaded = false;

@@ -34,7 +34,7 @@ internal sealed partial class AethergramApp
     private List<ComposerDraft>? ComposeDrafts =>
         ComposerDrafts.For(configuration.AethergramDrafts, store.AccountId);
 
-    private bool ComposeKeepsDrafts => !composeAvatarMode && !composeStoryMode;
+    private bool ComposeKeepsDrafts => !composeAvatarMode && !composeStoryMode && !composeReelMode;
 
     private void ResetComposeDraft()
     {

@@ -71,10 +71,10 @@ internal sealed partial class CoinApp
             return questCardAnchor;
         }
 
-        var items = board.Quests;
-        for (var index = 0; index < items.Length && index < questAnchors.Length; index++)
+        var rows = CoinQuests.RowCount(board);
+        for (var index = 0; index < rows && index < questAnchors.Length; index++)
         {
-            if (string.Equals(items[index].Id, questId, StringComparison.Ordinal))
+            if (string.Equals(CoinQuests.RowAt(board, index).Id, questId, StringComparison.Ordinal))
             {
                 return questAnchors[index];
             }
@@ -87,20 +87,20 @@ internal sealed partial class CoinApp
     {
         quests.EnsureCurrent();
         var board = quests.Board;
-        if (board is null || board.Quests.Length == 0)
+        if (board is null || CoinQuests.RowCount(board) == 0)
         {
             return origin.Y;
         }
 
-        var items = board.Quests;
-        EnsureQuestSlots(items.Length);
+        var rows = CoinQuests.RowCount(board);
+        EnsureQuestSlots(rows);
         var headerTop = origin.Y + CoinArt.SectionGap * scale;
         var cursorY = headerTop + CoinArt.SectionHeader(drawList, new Vector2(origin.X, headerTop), width,
             Loc.T(L.Coin.QuestsTitle), ui.TitleInk, 0f, scale);
         var total = 0f;
-        for (var index = 0; index < items.Length; index++)
+        for (var index = 0; index < rows; index++)
         {
-            total += QuestRowHeight(items[index], index, width, scale);
+            total += QuestRowHeight(CoinQuests.RowAt(board, index), index, width, scale);
         }
 
         var min = new Vector2(origin.X, cursorY);
@@ -115,16 +115,17 @@ internal sealed partial class CoinApp
 
         CoinArt.Card(drawList, ui, min, max, scale);
         var rowTop = min.Y;
-        for (var index = 0; index < items.Length; index++)
+        for (var index = 0; index < rows; index++)
         {
-            var height = QuestRowHeight(items[index], index, width, scale);
+            var quest = CoinQuests.RowAt(board, index);
+            var height = QuestRowHeight(quest, index, width, scale);
             var row = new Rect(new Vector2(min.X, rowTop), new Vector2(max.X, rowTop + height));
             if (index > 0)
             {
                 DrawRowHairline(drawList, row, scale);
             }
 
-            DrawQuestRow(drawList, row, items[index], index, scale);
+            DrawQuestRow(drawList, row, quest, index, scale);
             rowTop += height;
         }
 
@@ -254,10 +255,18 @@ internal sealed partial class CoinApp
 
     private string QuestLineText(CoinQuestDto quest, int index, float textWidth, TextStyle style, out Vector4 ink)
     {
-        if (quest.Claimed)
+        var state = CoinQuests.StateOf(quest);
+        if (state == CoinQuestState.Paid)
         {
             ink = ui.Accent;
             return Loc.T(L.Coin.QuestPaid);
+        }
+
+        if (state == CoinQuestState.AwaitingAutoPay)
+        {
+            ink = ui.Accent;
+            return Typography.FitText(Loc.T(L.Aethergram.ReelQuestPaidAutomatically), textWidth * QuestReasonShare,
+                style);
         }
 
         var reason = quests.ReasonFor(quest.Id);

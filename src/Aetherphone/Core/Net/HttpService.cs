@@ -16,6 +16,7 @@ internal sealed class HttpService : IDisposable
     private const long MaxResponseBytes = 32 * 1024 * 1024;
     private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(20);
     private static readonly TimeSpan UploadTimeout = TimeSpan.FromSeconds(60);
+    private const long MinimumUploadBytesPerSecond = 64 * 1024;
     private static readonly TimeSpan DefaultRateLimitPause = TimeSpan.FromSeconds(10);
     private static readonly TimeSpan MaxRateLimitPause = TimeSpan.FromSeconds(30);
     private const int RetryDelayMinMilliseconds = 750;
@@ -253,6 +254,46 @@ internal sealed class HttpService : IDisposable
             return false;
         }
     }
+
+    public async Task<bool> PutFileAsync(Uri uri, string path, string contentType, IProgress<float> progress,
+        CancellationToken token, string? bearer = null, Action<AepFailure>? onFailure = null)
+    {
+        try
+        {
+            await using var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
+                ProgressFileContent.ChunkBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
+            using var request = new HttpRequestMessage(HttpMethod.Put, uri)
+            {
+                Content = new ProgressFileContent(file, progress),
+            };
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+            ApplyHeaders(request, bearer, null);
+            using var scope = TimeoutScope(token, UploadTimeoutFor(file.Length));
+            using var response = await client.SendAsync(request, scope.Token).ConfigureAwait(false);
+            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                AepLog.Warning($"HTTP PUT {LogUrl.Of(uri)} was rate limited");
+                Report(onFailure, await DescribeAsync(response, scope.Token).ConfigureAwait(false));
+                return false;
+            }
+
+            return await SucceededOrReportedAsync(request, response, onFailure, scope.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            AepLog.Warning(exception, $"HTTP PUT failed for {LogUrl.Of(uri)}");
+            Report(onFailure, ClassifyException(exception, token));
+            return false;
+        }
+    }
+
+    // A large upload on a slow line must not hit the short request timeout, so the allowance grows with the body.
+    private static TimeSpan UploadTimeoutFor(long bytes) =>
+        TimeSpan.FromSeconds(Math.Max(UploadTimeout.TotalSeconds, (double)bytes / MinimumUploadBytesPerSecond));
 
     public async Task<bool> SendJsonForStatusAsync<TRequest>(HttpMethod method, string url, TRequest body,
         JsonTypeInfo<TRequest> requestInfo, string? bearer, CancellationToken token, Action<int>? onStatus = null,

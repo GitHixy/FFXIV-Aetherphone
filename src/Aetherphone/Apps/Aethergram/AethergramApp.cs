@@ -388,6 +388,10 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             {
                 StartStoryCompose();
             }
+            else if (link.Kind == SocialLinkKind.ComposeReel)
+            {
+                StartReelCompose();
+            }
             else if (link.Kind == SocialLinkKind.Compose)
             {
                 StartCompose(false);
@@ -476,6 +480,8 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
 
         PresentFeedReel();
         UpdateTourHold();
+        DrainReelShare();
+        DrawReelSharePill(screen);
         if (avatarLightbox.Active)
         {
             avatarLightbox.Draw(screen, theme);
@@ -1946,6 +1952,8 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         settingsCancellation.Cancel();
         settingsCancellation.Dispose();
         composeSession.Dispose();
+        reelFrames.Dispose();
+        store.DismissReelShare();
         threadView.Dispose();
         dmStore.Dispose();
         store.Dispose();

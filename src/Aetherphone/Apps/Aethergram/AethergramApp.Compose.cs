@@ -65,6 +65,7 @@ internal sealed partial class AethergramApp
 
     private string ComposeTitle => composeAvatarMode ? Loc.T(L.Aethergram.NewAvatar)
         : composeStoryMode ? Loc.T(L.Story.NewStory)
+        : composeReelMode ? Loc.T(L.Aethergram.NewReel)
         : Loc.T(L.Aethergram.NewPost);
 
     private bool ComposePosting => composeStoryMode ? stories.Posting : store.Posting;
@@ -116,6 +117,7 @@ internal sealed partial class AethergramApp
 
     private void PrepareCompose(bool avatarMode, bool storyMode)
     {
+        ResetReelCompose();
         composeAvatarMode = avatarMode;
         composeStoryMode = storyMode;
         caption = string.Empty;
@@ -134,6 +136,12 @@ internal sealed partial class AethergramApp
 
     private void DrawCompose(Rect area)
     {
+        if (composeReelMode)
+        {
+            DrawReelCompose(area);
+            return;
+        }
+
         if (composeOutcome == 1)
         {
             composeOutcome = 0;
@@ -275,7 +283,7 @@ internal sealed partial class AethergramApp
         }
 
         gridTop = DrawComposeDraftsEntry(area, gridTop);
-        var gridRect = new Rect(new Vector2(area.Min.X, gridTop), area.Max);
+        var gridRect = new Rect(new Vector2(area.Min.X, gridTop), new Vector2(area.Max.X, DrawComposeModeStrip(area)));
         UiAnchors.Report("aethergram.compose.grid", gridRect);
         using (AppSurface.BeginEdgeToEdge(gridRect))
         {

@@ -63,6 +63,11 @@ internal sealed partial class AethergramApp
             return images.Sized(altTextEditor.Key, AltTextPreviewPixels * UiScale.Current);
         }
 
+        if (composeReelMode)
+        {
+            return reelFrames.Preview;
+        }
+
         return composeSession.TryGetPreviewUv(altTextPhotoIndex, ComposeAspect, ComposeAllowsReveal, out var texture,
             out _, out _)
             ? texture
