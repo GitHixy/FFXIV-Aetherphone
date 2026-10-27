@@ -43,6 +43,7 @@ internal sealed partial class ChirperApp
             composeSensitive = false;
             composePoll.Reset();
             composeReplyPolicy = ChirperReplyPolicy.Everyone;
+            threadDraft.Clear();
             store.RefreshFeed(SocialFeedScope.Latest);
             store.RefreshFeed(SocialFeedScope.Following);
             feedScrollTopPending = true;
@@ -129,7 +130,7 @@ internal sealed partial class ChirperApp
             var availableInput = contentLimit - inputTop - quotePreviewHeight - stripHeight - pollEditorHeight
                 - statusHeight - 8f * scale;
             var desiredInput = MathF.Max(measuredText + 34f * scale, 96f * scale);
-            var inputHeight = MathF.Max(40f * scale, MathF.Min(desiredInput, availableInput));
+            var inputHeight = OpeningInputHeight(measuredText, desiredInput, availableInput);
             if (me is not null)
             {
                 DrawAvatar(drawList, new Vector2(origin.X + padX + avatarRadius, origin.Y + CellPadTop * scale + avatarRadius),
@@ -206,11 +207,13 @@ internal sealed partial class ChirperApp
                 }
             }
 
+            DrawThreadFollowUps(drawList, new Vector2(origin.X + padX + avatarRadius, origin.Y + CellPadTop * scale + avatarRadius),
+                inputX, inputWidth, inputTop + inputHeight + stripHeight + pollEditorHeight + quotePreviewHeight + statusHeight);
             if (composeEmoji.Open)
             {
                 var panel = new Rect(new Vector2(area.Min.X, panelTop),
                     new Vector2(area.Max.X, area.Max.Y - toolbarHeight));
-                composeEmoji.DrawPanel(panel, ui, ref draft, MaxPostLength);
+                composeEmoji.DrawPanel(panel, ui, ref FocusedComposeText(), MaxPostLength);
             }
 
             var typed = new Rect(new Vector2(inputX, inputTop),
@@ -228,9 +231,10 @@ internal sealed partial class ChirperApp
 
     private void DrawComposeHeader(Rect area)
     {
-        var actionLabel = store.Posting ? Loc.T(L.Chirper.Saving) : Loc.T(ComposeActionLabel);
+        var actionLabel = store.Posting ? Loc.T(L.Chirper.Saving)
+            : Loc.T(ComposingThread ? L.Chirper.ChirpAll : ComposeActionLabel);
         var canPost = (!string.IsNullOrWhiteSpace(draft) || composeAttachments.Count > 0)
-            && draft.Length <= MaxPostLength && !store.Posting && !ComposeScheduleBlocked;
+            && draft.Length <= MaxPostLength && !store.Posting && !ComposeScheduleBlocked && ThreadDraftReady();
         var action = HeaderActionRect(area, actionLabel);
         UiAnchors.Report("chirper.compose.post", action);
         var title = Loc.T(quoteTarget is not null ? L.Chirper.QuoteTitle : L.Chirper.NewChirp);
@@ -313,7 +317,7 @@ internal sealed partial class ChirperApp
         }
 
         var pollRight = DrawComposePollButton(drawList, gifMax.X, centerY, iconRadius);
-        var scheduleRight = DrawComposeScheduleButton(drawList, pollRight, centerY, iconRadius);
+        var scheduleRight = ComposingThread ? pollRight : DrawComposeScheduleButton(drawList, pollRight, centerY, iconRadius);
         var emojiCenter = new Vector2(scheduleRight + 8f * scale + iconRadius, centerY);
         var emojiExtent = new Vector2(iconRadius, iconRadius);
         if (UiInteract.Hover(emojiCenter - emojiExtent, emojiCenter + emojiExtent))
@@ -335,11 +339,17 @@ internal sealed partial class ChirperApp
             }
         }
 
-        DrawComposeLengthRing(drawList, area, centerY, draft.Length);
+        DrawComposeLengthRing(drawList, area, centerY, FocusedComposeText().Length);
     }
 
     private void Submit()
     {
+        if (ComposingThread)
+        {
+            SubmitThread();
+            return;
+        }
+
         if (TrySubmitScheduled())
         {
             return;

@@ -1438,7 +1438,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         var quoteHeight = hasQuote ? QuotedCardHeight(post.ReferencedPost, contentWidth) : 0f;
         var quoteTop = mediaTop + mediaHeight + (hasQuote ? 9f * scale : 0f);
         var pollHeight = PollBlockHeight(post, isThreadHead);
-        var contentBody = quoteTop + quoteHeight + pollHeight;
+        var threadLinkHeight = ThreadLinkHeight(post, isThreadHead);
+        var contentBody = quoteTop + quoteHeight + pollHeight + threadLinkHeight;
         var hasReactions = post.TotalReactions > 0;
         var reactionsTop = contentBody + (hasReactions ? (isThreadHead ? 12f : 9f) * scale : 0f);
         var expandProgress = isThreadHead ? 1f : ReactionsExpandProgress(post);
@@ -1581,6 +1582,11 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         if (pollHeight > 0f)
         {
             DrawPollBlock(drawList, post, contentLeft, quoteTop + quoteHeight, contentWidth, isThreadHead);
+        }
+
+        if (threadLinkHeight > 0f)
+        {
+            DrawThreadLink(drawList, post, contentLeft, quoteTop + quoteHeight + pollHeight, contentWidth);
         }
 
         if (hasReactions)
