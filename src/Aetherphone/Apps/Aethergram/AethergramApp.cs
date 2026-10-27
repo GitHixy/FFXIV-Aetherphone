@@ -1306,7 +1306,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         var mediaHeight = CardMediaHeight(width, post, photos);
         var actionsHeight = CardActionsHeight * scale;
         RichTextLayout? captionLayout = null;
-        var translateKey = new TranslationKey(TranslationSurface.Post, post.Id);
+        var translateKey = new TranslationKey(TranslationSurface.Post, post.Id, post.EditedAtUnix ?? 0);
         var captionView = translation.View(translateKey, post.Text, post.Lang);
         var captionText = captionView.Text;
         var captionLineHeight = 0f;
