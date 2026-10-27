@@ -94,6 +94,7 @@ internal sealed class PhoneShell : IDisposable
             services.CampaignLauncher);
         MusterChatBridge.Bind(services.Musters, services.MusterLauncher, navigation);
         AdChatBridge.Bind(services.YellowPages, services.YellowPagesLauncher, navigation);
+        ChirpChatBridge.Bind(services.ChirpCards, services.SocialLauncher, navigation);
         banner = new NotificationBanner(notifications, VisibleAppId, PhoneVisible, router);
         notifications.Vibration += OnVibration;
         island = new DynamicIsland(services.Playback, calls, configuration, services.Installer, bundle.Video,
@@ -573,6 +574,7 @@ internal sealed class PhoneShell : IDisposable
     {
         MusterChatBridge.Clear();
         AdChatBridge.Clear();
+        ChirpChatBridge.Clear();
         notifications.Vibration -= OnVibration;
         banner.Dispose();
         shortcutPill.Dispose();

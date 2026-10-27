@@ -2,6 +2,7 @@ using Aetherphone.Core.Gifs;
 using Aetherphone.Core.Localization;
 using Aetherphone.Core.Maps;
 using Aetherphone.Core.Muster;
+using Aetherphone.Core.Social;
 using Aetherphone.Core.YellowPages;
 
 namespace Aetherphone.Windows.Components;
@@ -21,6 +22,8 @@ internal static class ChatText
     public const int AdKind = 8;
 
     public const int GifKind = 9;
+
+    public const int ChirpKind = 10;
 
     public static string QuotePreview(string? body, int kind)
     {
@@ -65,6 +68,11 @@ internal static class ChatText
             return Loc.T(L.DirectMessages.GifPreview);
         }
 
+        if (kind == ChirpKind || ChirpShare.IsToken(text))
+        {
+            return Loc.T(L.Chirper.ChirpPreview);
+        }
+
         return UiText.Truncate(Flatten(text), PreviewLength);
     }
 
@@ -90,6 +98,11 @@ internal static class ChatText
             return AdKind;
         }
 
+        if (ChirpShare.IsToken(body))
+        {
+            return ChirpKind;
+        }
+
         return GifShare.IsToken(body) ? GifKind : kind;
     }
 
@@ -113,6 +126,11 @@ internal static class ChatText
         if (GifShare.IsToken(text))
         {
             return Loc.T(L.DirectMessages.GifPreview);
+        }
+
+        if (ChirpShare.IsToken(text))
+        {
+            return Loc.T(L.Chirper.ChirpPreview);
         }
 
         return Flatten(text ?? string.Empty);

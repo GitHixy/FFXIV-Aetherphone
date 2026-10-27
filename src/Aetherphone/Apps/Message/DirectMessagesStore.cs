@@ -17,7 +17,7 @@ using Aetherphone.Windows.Components;
 
 namespace Aetherphone.Apps.Message;
 
-internal sealed class DirectMessagesStore : ChatThreadStoreBase<ChatMessageDto, ConversationDto>
+internal sealed class DirectMessagesStore : ChatThreadStoreBase<ChatMessageDto, ConversationDto>, IChatShareTarget
 {
     private const int SystemMessageKind = 2;
     private static readonly TimeSpan BlockListMaxAge = TimeSpan.FromMinutes(10);
@@ -141,6 +141,7 @@ internal sealed class DirectMessagesStore : ChatThreadStoreBase<ChatMessageDto, 
     public ConversationDto? Conversation => conversation;
     public ConversationMemberDto[] Members => members;
     public ContactBook Contacts => contacts;
+    public ContactDto[] Friends => contacts.Contacts;
     public string? MyPublicKey => vault.PublicKey;
     public int MyKeyVersion => vault.KeyVersion;
     public int UnreadTotal => ComputeUnread();
@@ -159,6 +160,29 @@ internal sealed class DirectMessagesStore : ChatThreadStoreBase<ChatMessageDto, 
     public void NoteConversationViewed(string id) => NoteThreadViewed(id);
 
     public void RefreshConversations() => RefreshThreadListCore();
+
+    public void RefreshShareTargets()
+    {
+        contacts.Refresh();
+        if (!ConversationsLoaded && !LoadingConversations)
+        {
+            RefreshConversations();
+        }
+    }
+
+    public void SendShareToUser(string userId, string body, Action<bool> onComplete)
+    {
+        CreateDirect(userId, conversationId =>
+        {
+            if (conversationId is null)
+            {
+                onComplete(false);
+                return;
+            }
+
+            SendShare(conversationId, body, onComplete);
+        });
+    }
 
     protected override void OnAccountSwitched()
     {

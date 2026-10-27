@@ -5,6 +5,7 @@ using Aetherphone.Core.Localization;
 using Aetherphone.Core.Maps;
 using Aetherphone.Core.Media;
 using Aetherphone.Core.Muster;
+using Aetherphone.Core.Social;
 using Aetherphone.Core.Theme;
 using Aetherphone.Core.Venues;
 using Aetherphone.Core.YellowPages;
@@ -241,7 +242,7 @@ internal readonly ref struct ChatTranscriptModel
     public IChatTranscriptTranslation? Translation { get; init; }
 }
 
-internal sealed class ChatTranscript
+internal sealed partial class ChatTranscript
 {
     private const long GroupWindowSeconds = 240;
     private const int KindText = 0;
@@ -472,6 +473,11 @@ internal sealed class ChatTranscript
                          && AdShare.TryParse(message.Body, out var adId))
                 {
                     DrawAdBubble(message, index, adId, model);
+                }
+                else if ((message.Flags & TranscriptFlags.Deleted) == 0
+                         && ChirpShare.TryParse(message.Body, out var chirpId))
+                {
+                    DrawChirpBubble(message, index, chirpId, model);
                 }
                 else if ((message.Flags & TranscriptFlags.Deleted) == 0 && model.Gifs is not null
                          && GifShare.TryParse(message.Body, out var gif))
@@ -723,7 +729,7 @@ internal sealed class ChatTranscript
         }
 
         return !LocationShare.IsToken(message.Body) && !MusterShare.IsToken(message.Body)
-               && !AdShare.IsToken(message.Body);
+               && !AdShare.IsToken(message.Body) && !ChirpShare.IsToken(message.Body);
     }
 
     private readonly struct SenderHeader

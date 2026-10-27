@@ -18,12 +18,35 @@ internal sealed partial class ChirperStore : SocialFeedStore
 
     private const string UploadScope = "chirp";
 
+    private readonly GramClient stories;
     private volatile bool avatarBusy;
+    private volatile bool sharingToStory;
 
     public ChirperStore(AethernetSession session, AccountClient account, SocialClient client, SafetyClient safety,
-        MediaClient media, RealtimeSignalBus signals, SocialMuteLedger mutes)
+        MediaClient media, RealtimeSignalBus signals, SocialMuteLedger mutes, GramClient stories)
         : base(session, account, client, safety, media, signals, mutes, "Chirper")
     {
+        this.stories = stories;
+    }
+
+    public bool SharingToStory => sharingToStory;
+
+    public void ShareToStory(string postId, Action<bool, AepFailure> onComplete)
+    {
+        if (sharingToStory)
+        {
+            onComplete(false, AepFailure.None);
+            return;
+        }
+
+        sharingToStory = true;
+        var failure = AepFailure.None;
+        work.Run("share chirp to story", async token =>
+        {
+            var created = await stories.SharePostToStoryAsync(postId, string.Empty, token,
+                reported => failure = reported).ConfigureAwait(false);
+            return created is not null;
+        }, shared => onComplete(shared, failure), () => sharingToStory = false);
     }
 
     public bool AvatarBusy => avatarBusy;
