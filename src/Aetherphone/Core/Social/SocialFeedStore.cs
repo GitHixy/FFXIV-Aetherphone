@@ -158,6 +158,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         meGate.Reset();
         forYouLane.Clear();
         latestLane.Clear();
+        ResetExploreState();
         followingLane.Clear();
         forYouNotes = NoNotes;
         caughtUpAfterId = null;
@@ -1366,6 +1367,7 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
         forYouLane.Items = MapSaved(forYouLane.Items, postId, saved);
         latestLane.Items = MapSaved(latestLane.Items, postId, saved);
+        exploreLane.Items = MapSaved(exploreLane.Items, postId, saved);
         followingLane.Items = MapSaved(followingLane.Items, postId, saved);
         profileLane.Items = MapSaved(profileLane.Items, postId, saved);
         taggedLane.Items = MapSaved(taggedLane.Items, postId, saved);
@@ -1426,6 +1428,7 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
         forYouLane.Items = BlockedContent.Purge(forYouLane.Items, userId);
         latestLane.Items = BlockedContent.Purge(latestLane.Items, userId);
+        exploreLane.Items = BlockedContent.Purge(exploreLane.Items, userId);
         followingLane.Items = BlockedContent.Purge(followingLane.Items, userId);
         profileLane.Items = BlockedContent.Purge(profileLane.Items, userId);
         taggedLane.Items = BlockedContent.Purge(taggedLane.Items, userId);
@@ -1906,6 +1909,7 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
         forYouLane.Items = CopyOnWrite.MapById(forYouLane.Items, postId, transform);
         latestLane.Items = CopyOnWrite.MapById(latestLane.Items, postId, transform);
+        exploreLane.Items = CopyOnWrite.MapById(exploreLane.Items, postId, transform);
         followingLane.Items = CopyOnWrite.MapById(followingLane.Items, postId, transform);
         profileLane.Items = CopyOnWrite.MapById(profileLane.Items, postId, transform);
         savedLane.Items = CopyOnWrite.MapById(savedLane.Items, postId, transform);
@@ -1940,6 +1944,7 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
         forYouLane.Items = CopyOnWrite.Replace(forYouLane.Items, updated);
         latestLane.Items = CopyOnWrite.Replace(latestLane.Items, updated);
+        exploreLane.Items = CopyOnWrite.Replace(exploreLane.Items, updated);
         followingLane.Items = CopyOnWrite.Replace(followingLane.Items, updated);
         profileLane.Items = CopyOnWrite.Replace(profileLane.Items, updated);
         savedLane.Items = CopyOnWrite.Replace(savedLane.Items, updated);
@@ -1956,6 +1961,7 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
         forYouLane.Items = CopyOnWrite.RemoveById(forYouLane.Items, postId);
         latestLane.Items = CopyOnWrite.RemoveById(latestLane.Items, postId);
+        exploreLane.Items = CopyOnWrite.RemoveById(exploreLane.Items, postId);
         followingLane.Items = CopyOnWrite.RemoveById(followingLane.Items, postId);
         profileLane.Items = CopyOnWrite.RemoveById(profileLane.Items, postId);
         savedLane.Items = CopyOnWrite.RemoveById(savedLane.Items, postId);
@@ -1975,6 +1981,7 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
         forYouLane.Items = MapCommentCount(forYouLane.Items, postId, delta);
         latestLane.Items = MapCommentCount(latestLane.Items, postId, delta);
+        exploreLane.Items = MapCommentCount(exploreLane.Items, postId, delta);
         followingLane.Items = MapCommentCount(followingLane.Items, postId, delta);
         profileLane.Items = MapCommentCount(profileLane.Items, postId, delta);
         savedLane.Items = MapCommentCount(savedLane.Items, postId, delta);
@@ -1995,6 +2002,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         MapSuggestedFollow(userId, following, requested);
         forYouLane.Items = MapFollowByAuthor(forYouLane.Items, userId, following);
         latestLane.Items = MapFollowByAuthor(latestLane.Items, userId, following);
+        exploreLane.Items = MapFollowByAuthor(exploreLane.Items, userId, following);
         followingLane.Items = MapFollowByAuthor(followingLane.Items, userId, following);
         profileLane.Items = MapFollowByAuthor(profileLane.Items, userId, following);
         taggedLane.Items = MapFollowByAuthor(taggedLane.Items, userId, following);

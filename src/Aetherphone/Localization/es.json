@@ -3178,6 +3178,8 @@
   "aethergram.next": "Siguiente",
   "aethergram.peopleSection": "Personas",
   "aethergram.tagsSection": "Etiquetas",
+  "aethergram.exploreNothingNew": "Ahora mismo no hay nada nuevo que explorar",
+  "aethergram.exploreNothingNewHint": "Aquí aparecen fotos de personas que aún no sigues",
   "aethergram.noResults": "No se encontraron resultados",
   "aethergram.savedEmptyHint": "Guarda las publicaciones que quieras volver a ver",
   "aethergram.use": "Usar",

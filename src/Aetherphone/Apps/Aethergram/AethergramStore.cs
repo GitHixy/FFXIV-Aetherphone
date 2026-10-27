@@ -61,6 +61,10 @@ internal sealed class AethergramStore : SocialFeedStore
     protected override Task<FeedPage?> FetchHashtagPostsAsync(string tag, string? cursor, CancellationToken token) =>
         grams.TagPostsAsync(tag, cursor, token);
 
+    protected override Task<FeedPage?> FetchExploreAsync(string? cursor, string? regions, bool includeSensitive,
+        CancellationToken token, Action<AepFailure>? onFailure) =>
+        client.ExploreGramsAsync(cursor, regions, includeSensitive, token, onFailure);
+
     // aspects holds one choice per photo. The post's MediaWidth/MediaHeight is the first photo's
     // real baked size (GIFs already send theirs), so the feed frame matches that photo's shape;
     // the other carousel photos are baked to their own boxes and cover-fit into the frame at

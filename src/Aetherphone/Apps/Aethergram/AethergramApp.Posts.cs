@@ -1,7 +1,6 @@
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Localization;
-using Aetherphone.Core.Social;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
 
@@ -154,7 +153,7 @@ internal sealed partial class AethergramApp
         PostSource.Archive => store.ArchivedPosts,
         PostSource.PendingTags => store.PendingTagPosts,
         PostSource.Hashtag => store.HashtagPosts,
-        PostSource.Explore => store.Feed(SocialFeedScope.Latest),
+        PostSource.Explore => store.ExplorePosts,
         _ => store.ProfilePosts,
     };
 
@@ -166,7 +165,7 @@ internal sealed partial class AethergramApp
         PostSource.Archive => store.ArchivedLoading,
         PostSource.PendingTags => store.PendingTagsLoading,
         PostSource.Hashtag => store.HashtagLoading,
-        PostSource.Explore => store.IsLoading(SocialFeedScope.Latest),
+        PostSource.Explore => store.ExploreLoading,
         _ => store.ProfileLoading,
     };
 
@@ -178,7 +177,7 @@ internal sealed partial class AethergramApp
         PostSource.Archive => store.ArchivedLoadingMore,
         PostSource.PendingTags => store.PendingTagsLoadingMore,
         PostSource.Hashtag => store.HashtagLoadingMore,
-        PostSource.Explore => store.LoadingMore(SocialFeedScope.Latest),
+        PostSource.Explore => store.ExploreLoadingMore,
         _ => store.ProfileLoadingMore,
     };
 
@@ -190,7 +189,7 @@ internal sealed partial class AethergramApp
         PostSource.Archive => store.HasMoreArchived,
         PostSource.PendingTags => store.HasMorePendingTags,
         PostSource.Hashtag => store.HasMoreHashtagPosts,
-        PostSource.Explore => store.HasMoreFeed(SocialFeedScope.Latest),
+        PostSource.Explore => store.HasMoreExplore,
         _ => store.HasMoreProfilePosts,
     };
 
@@ -217,7 +216,7 @@ internal sealed partial class AethergramApp
                 store.LoadMoreHashtagPosts();
                 break;
             case PostSource.Explore:
-                store.LoadMoreFeed(SocialFeedScope.Latest);
+                store.LoadMoreExplore();
                 break;
             default:
                 store.LoadMoreProfilePosts();
