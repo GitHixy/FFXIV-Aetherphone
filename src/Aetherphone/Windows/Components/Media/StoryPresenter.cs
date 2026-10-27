@@ -41,6 +41,8 @@ internal sealed class StoryPresenter : IDisposable
     private readonly Action<string>? openProfile;
     private readonly Action<StoryDto>? highlightStory;
     private bool detached;
+    private readonly Action<string>? openPost;
+    private readonly Action<StoryDto> toggleLike;
     private StoryRingDto? pendingRing;
     private bool pendingOpenAtEnd;
     private bool pendingFromViewer;
@@ -49,14 +51,17 @@ internal sealed class StoryPresenter : IDisposable
     public StoryPresenter(AethernetSession session, GramClient client, MediaClient media, RemoteImageCache images,
         LodestoneService lodestone, StoryRingPainter painter, AppPalette palette, StoryConfirmLabels labels,
         ConfirmService confirm, TranslationService translation, RealtimeSignalBus signals, string logTag, Action onCompose,
-        StoryReplyHooks? reply = null, Action<string>? openProfile = null, Action<StoryDto>? highlight = null)
+        StoryReplyHooks? reply = null, Action<string>? openProfile = null, Action<StoryDto>? highlight = null,
+        Action<string>? openPost = null)
     {
         highlightStory = highlight;
         stories = new StoryStore(session, client, media, signals, logTag);
         tray = new StoryTrayRow(images, lodestone);
         this.openProfile = openProfile;
+        this.openPost = openPost;
+        toggleLike = stories.ToggleLike;
         viewer = new StoryViewerOverlay(images, lodestone, translation, confirm,
-            openProfile is null ? null : OpenAuthorProfile);
+            openProfile is null ? null : OpenAuthorProfile, openPost is null ? null : OpenSharedPost);
         this.painter = painter;
         this.palette = palette;
         this.labels = labels;
@@ -84,6 +89,8 @@ internal sealed class StoryPresenter : IDisposable
     public void CreateStory(string sourcePath, WallpaperCrop crop, Aetherphone.Core.Media.PhotoEdit edit,
         string caption, Action<bool> onComplete, int audience = StoryAudiences.Everyone) =>
         stories.CreateStory(sourcePath, crop, edit, caption, onComplete, audience);
+
+    public void ShareGram(string postId, Action<bool> onComplete) => stories.ShareGram(postId, onComplete);
 
     public void DrawTray(PhoneTheme theme, string? ownAvatarUrl = null, string ownName = "",
         string? ownFrameId = null) =>
@@ -169,7 +176,7 @@ internal sealed class StoryPresenter : IDisposable
             : SocialIdentity.Name(ring.AuthorDisplayName, ring.AuthorHandle);
         viewer.Open(items, label, ring.AuthorAvatarUrl, stories.MarkSeen, ring.IsMe, AskDelete, viewersSource,
             null, nextGroup, previousGroup, openAtEnd, ring.IsMe ? null : replyPrompt, stories.LoadMoreViewers,
-            ring.IsMe ? highlightStory : null);
+            ring.IsMe ? highlightStory : null, ring.IsMe || replyPrompt is null ? null : toggleLike);
     }
 
     private bool TryAdvanceGroup() => TryOpenAdjacentRing(1);
@@ -212,6 +219,12 @@ internal sealed class StoryPresenter : IDisposable
     {
         Close();
         openProfile?.Invoke(authorId);
+    }
+
+    private void OpenSharedPost(string postId)
+    {
+        Close();
+        openPost?.Invoke(postId);
     }
 
     private void SendReply(StoryDto story, string text)

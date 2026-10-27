@@ -48,6 +48,7 @@ internal sealed partial class AethergramApp
             }
             else
             {
+                DrawAddToStoryRow(postId);
                 DrawShareThreads(listRect, postId, scale);
             }
         }

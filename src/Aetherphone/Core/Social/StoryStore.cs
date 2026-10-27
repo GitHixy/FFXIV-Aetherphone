@@ -6,7 +6,7 @@ using Aetherphone.Core.Wallpapers;
 
 namespace Aetherphone.Core.Social;
 
-internal sealed class StoryStore : IDisposable
+internal sealed partial class StoryStore : IDisposable
 {
     public const int StoryWidth = 1080;
     public const int StoryHeight = 1920;
