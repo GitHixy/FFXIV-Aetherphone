@@ -14,6 +14,8 @@ internal static class ChirperReplyPolicy
 
     public const int Count = 3;
 
+    public static int Clamp(int policy) => policy is >= Everyone and < Count ? policy : Everyone;
+
     public static LocString Option(int policy) => policy switch
     {
         Following => L.Social.AudienceFollowing,

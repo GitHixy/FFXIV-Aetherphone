@@ -1,6 +1,7 @@
 using Aetherphone.Core;
 using Aetherphone.Core.Apps;
 using Aetherphone.Core.Localization;
+using Aetherphone.Core.Media;
 using Aetherphone.Core.Theme;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Textures.TextureWraps;
@@ -14,10 +15,16 @@ internal sealed class PhotoViewerOverlay
     private const float PageButtonInset = 10f;
     private const float PageGlyphSize = 20f;
     private const float PageDotsInset = 14f;
+    private const float AltCardInset = 12f;
+    private const float AltCardPadding = 12f;
+    private const float AltCardGap = 8f;
+    private const float AltCardRounding = 12f;
 
     private static readonly Vector4 PageButtonFill = new(0f, 0f, 0f, 0.55f);
     private static readonly Vector4 PageButtonHover = new(0.12f, 0.12f, 0.12f, 0.85f);
     private static readonly Vector4 PageInk = new(1f, 1f, 1f, 0.95f);
+    private static readonly Vector4 AltCardFill = new(0f, 0f, 0f, 0.78f);
+    private static readonly TextStyle AltCardStyle = TextStyles.Subheadline;
 
     private readonly PhotoZoomView zoomView = new();
     private Aetherphone.Core.Animation.Spring reveal;
@@ -27,16 +34,21 @@ internal sealed class PhotoViewerOverlay
     private int pageCount;
     private int pageIndex;
     private bool open;
+    private string[]? altTexts;
+    private bool altShown;
 
     public bool Active => open || reveal.Value > 0.01f;
 
-    public void Open(IPhoneApp app, Func<IDalamudTextureWrap?> textureSource)
+    public void Open(IPhoneApp app, Func<IDalamudTextureWrap?> textureSource, string? altText = null)
     {
-        Open(app, 1, 0, _ => textureSource());
+        Open(app, 1, 0, _ => textureSource(), altText is { Length: > 0 } ? new[] { altText } : null);
     }
 
-    public void Open(IPhoneApp app, int count, int startIndex, Func<int, IDalamudTextureWrap?> pageSource)
+    public void Open(IPhoneApp app, int count, int startIndex, Func<int, IDalamudTextureWrap?> pageSource,
+        string[]? pageAltTexts = null)
     {
+        altTexts = pageAltTexts;
+        altShown = false;
         pages = pageSource;
         pageCount = Math.Max(1, count);
         pageIndex = Math.Clamp(startIndex, 0, pageCount - 1);
@@ -101,6 +113,11 @@ internal sealed class PhotoViewerOverlay
             DrawPaging(drawList, stage, scale);
         }
 
+        if (open)
+        {
+            DrawAltText(drawList, stage, scale);
+        }
+
         var rowCenterY = contentTop + AppHeader.Height * scale * 0.5f;
         var hitMin = new Vector2(contentLeft, contentTop);
         var hitMax = new Vector2(contentLeft + 44f * scale, headerBottom);
@@ -158,7 +175,39 @@ internal sealed class PhotoViewerOverlay
         }
 
         pageIndex = next;
+        altShown = false;
         zoomView.Reset();
+    }
+
+    private void DrawAltText(ImDrawListPtr drawList, Rect stage, float scale)
+    {
+        var text = PostAltTexts.At(altTexts, pageIndex);
+        if (text.Length == 0)
+        {
+            return;
+        }
+
+        if (AltBadge.Draw(drawList, stage))
+        {
+            altShown = !altShown;
+        }
+
+        if (!altShown)
+        {
+            return;
+        }
+
+        var inset = AltCardInset * scale;
+        var padding = AltCardPadding * scale;
+        var textWidth = MathF.Max(1f, stage.Width - inset * 2f - padding * 2f);
+        var textHeight = Typography.MeasureWrapped(text, textWidth, AltCardStyle.Scale, AltCardStyle.Weight);
+        var bottom = stage.Max.Y - inset - AltBadge.Height * scale - AltCardGap * scale;
+        var top = MathF.Max(stage.Min.Y + inset, bottom - textHeight - padding * 2f);
+        var card = new Rect(new Vector2(stage.Min.X + inset, top), new Vector2(stage.Max.X - inset, bottom));
+        drawList.AddRectFilled(card.Min, card.Max, ImGui.GetColorU32(AltCardFill), AltCardRounding * scale);
+        drawList.PushClipRect(card.Min, card.Max, true);
+        Typography.DrawWrappedLeft(card.Min + new Vector2(padding, padding), text, PageInk, AltCardStyle, textWidth);
+        drawList.PopClipRect();
     }
 
     private static bool DrawPageButton(ImDrawListPtr drawList, Vector2 center, float radius, string glyph, float scale)

@@ -166,7 +166,7 @@ internal sealed partial class ChirperApp
             HeadHandleStyle);
 
         var cursorY = origin.Y + avatarRadius * 2f + 12f * scale;
-        var translateKey = new TranslationKey(TranslationSurface.Post, post.Id);
+        var translateKey = ChirpTranslationKey(post);
         var bodyView = translation.View(translateKey, post.Text, post.Lang);
         var bodyText = bodyView.Text;
         if (bodyText.Length > 0)

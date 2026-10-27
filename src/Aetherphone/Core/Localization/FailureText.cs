@@ -102,6 +102,15 @@ internal static class FailureCodes
     public const string PostScheduleTime = "post_schedule_time";
     public const string PostScheduleMedia = "post_schedule_media";
     public const string PostScheduleLimit = "post_schedule_limit";
+    public const string PostThreadSize = "post_thread_size";
+    public const string PostThreadMissing = "post_thread_missing";
+    public const string PostThreadFull = "post_thread_full";
+    public const string PostEditWindowClosed = "post_edit_window_closed";
+    public const string PostEditLimit = "post_edit_limit";
+    public const string PostEditPoll = "post_edit_poll";
+    public const string PostEditRepost = "post_edit_repost";
+    public const string AltTextTooLong = "alt_text_too_long";
+    public const string AltTextCount = "alt_text_count";
     public const string PhotoTagRejected = "photo_tag_rejected";
     public const string VelvetRequestsClosed = "velvet_requests_closed";
     public const string VelvetRequestsMutualsOnly = "velvet_requests_mutuals_only";
@@ -374,6 +383,24 @@ internal static class FailureText
                 return Loc.T(L.Social.ScheduleNoPhotos);
             case FailureCodes.PostScheduleLimit:
                 return Valued(L.Social.ScheduleLimit, failure);
+            case FailureCodes.PostThreadSize:
+                return Valued(L.Chirper.ThreadSizeFailure, failure);
+            case FailureCodes.PostThreadMissing:
+                return Loc.T(L.Chirper.ThreadMissingFailure);
+            case FailureCodes.PostThreadFull:
+                return Valued(L.Chirper.ThreadFullFailure, failure);
+            case FailureCodes.PostEditWindowClosed:
+                return Loc.T(L.Chirper.EditWindowClosed);
+            case FailureCodes.PostEditLimit:
+                return Loc.T(L.Chirper.EditLimitReached);
+            case FailureCodes.PostEditPoll:
+                return Loc.T(L.Chirper.EditPollFailure);
+            case FailureCodes.PostEditRepost:
+                return Loc.T(L.Chirper.EditRepostFailure);
+            case FailureCodes.AltTextTooLong:
+                return Valued(L.Chirper.AltTextTooLongFailure, failure);
+            case FailureCodes.AltTextCount:
+                return Loc.T(L.Chirper.AltTextCountFailure);
             case FailureCodes.PhotoTagRejected:
                 return Loc.T(L.Failure.PhotoTagRejected);
             case FailureCodes.VelvetRequestsClosed:

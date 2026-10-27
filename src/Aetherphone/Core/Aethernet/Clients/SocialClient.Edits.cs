@@ -5,11 +5,11 @@ namespace Aetherphone.Core.Aethernet.Clients;
 
 internal sealed partial class SocialClient
 {
-    public Task<PostDto?> EditChirpTextAsync(string postId, string text, CancellationToken token,
+    public Task<PostDto?> EditChirpTextAsync(string postId, string text, string[]? altTexts, CancellationToken token,
         Action<AepFailure>? onFailure = null)
     {
         return net.SendJsonAsync(HttpMethod.Put, $"/posts/{Uri.EscapeDataString(postId)}/text",
-            new EditChirpRequest(text), AethernetJsonContext.Default.EditChirpRequest,
+            new EditChirpRequest(text, altTexts), AethernetJsonContext.Default.EditChirpRequest,
             AethernetJsonContext.Default.PostDto, token, null, onFailure);
     }
 

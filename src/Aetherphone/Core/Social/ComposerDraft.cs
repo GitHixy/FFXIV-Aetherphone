@@ -21,6 +21,56 @@ internal sealed class ComposerDraft
     public List<ComposerDraftTag> PhotoTags { get; set; } = new();
 
     public bool Sensitive { get; set; }
+
+    public int ReplyPolicy { get; set; }
+
+    public List<string> AltTexts { get; set; } = new();
+
+    public ComposerDraftPerson? Collaborator { get; set; }
+
+    public List<ComposerDraftFrame> Frames { get; set; } = new();
+
+    public int Aspect { get; set; }
+}
+
+internal sealed class ComposerDraftPerson
+{
+    public string UserId { get; set; } = string.Empty;
+
+    public string Handle { get; set; } = string.Empty;
+
+    public string DisplayName { get; set; } = string.Empty;
+
+    public string AvatarUrl { get; set; } = string.Empty;
+}
+
+internal sealed class ComposerDraftFrame
+{
+    public float Zoom { get; set; } = 1f;
+
+    public float CenterX { get; set; } = 0.5f;
+
+    public float CenterY { get; set; } = 0.5f;
+
+    public int QuarterTurns { get; set; }
+
+    public bool Mirrored { get; set; }
+
+    public float Straighten { get; set; }
+
+    public float Brightness { get; set; }
+
+    public float Contrast { get; set; }
+
+    public float Saturation { get; set; }
+
+    public float Warmth { get; set; }
+
+    public float Vignette { get; set; }
+
+    public int Look { get; set; }
+
+    public float LookStrength { get; set; } = 1f;
 }
 
 internal sealed class ComposerDraftGif

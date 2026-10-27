@@ -77,4 +77,16 @@ public sealed class ChirperEditTests
         Assert.Equal(7, updated.TotalReactions);
         Assert.True(updated.Saved);
     }
+
+    [Fact]
+    public void AnEditCarriesTheNewAltTextsToEveryCopy()
+    {
+        var copy = Chirp() with { AltTexts = new[] { "old words" } };
+        var edited = Chirp() with { AltTexts = new[] { "A moogle by the aetheryte" } };
+
+        var updated = ChirperEdits.WithEdit(copy, edited);
+
+        Assert.Equal(new[] { "A moogle by the aetheryte" }, updated.AltTexts);
+        Assert.Equal(0, updated.EditCount);
+    }
 }

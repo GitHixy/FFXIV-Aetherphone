@@ -23,7 +23,8 @@ internal enum TranslationState : byte
     Quota,
 }
 
-internal readonly record struct TranslationKey(TranslationSurface Surface, string Id);
+// Revision tells two versions of the same text apart (a chirp's edit time), so an edit is translated afresh.
+internal readonly record struct TranslationKey(TranslationSurface Surface, string Id, long Revision = 0);
 
 internal sealed class TranslationEntry
 {

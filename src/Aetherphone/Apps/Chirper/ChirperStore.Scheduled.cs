@@ -70,6 +70,31 @@ internal sealed partial class ChirperStore
         }, onComplete, () => posting = false);
     }
 
+    // The server answers an edit with a new id (it replaces the row), so the old entry is swapped out.
+    public void UpdateScheduled(string scheduledId, CreatePostRequest post, long publishAtUnix, Action<bool> onComplete,
+        Action<AepFailure>? onFailure = null)
+    {
+        if (posting)
+        {
+            return;
+        }
+
+        posting = true;
+        work.Run("edit scheduled chirp", async token =>
+        {
+            var updated = await client.UpdateScheduledPostAsync(scheduledId, post, publishAtUnix, token, onFailure)
+                .ConfigureAwait(false);
+            if (updated is null)
+            {
+                LoadScheduled();
+                return false;
+            }
+
+            PublishScheduled(InsertByTime(CopyOnWrite.RemoveWhere(scheduled, item => item.Id == scheduledId), updated));
+            return true;
+        }, onComplete, () => posting = false);
+    }
+
     public void DeleteScheduled(string scheduledId)
     {
         PublishScheduled(CopyOnWrite.RemoveWhere(scheduled, item => item.Id == scheduledId));

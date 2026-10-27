@@ -7,6 +7,8 @@ namespace Aetherphone.Apps.Chirper;
 internal readonly record struct ThreadOpening(string Text, string? QuotedPostId, GifItem? Gif, PostPollInput? Poll,
     bool Sensitive, int ReplyPolicy, string[]? AltTexts);
 
+internal readonly record struct ThreadFollowUp(string Text, string[] ImagePaths, GifItem? Gif, string[]? AltTexts);
+
 internal sealed partial class ChirperStore
 {
     private volatile PostDto[] threadChain = Array.Empty<PostDto>();
@@ -51,7 +53,7 @@ internal sealed partial class ChirperStore
         });
     }
 
-    public void ComposeThread(ThreadOpening opening, IReadOnlyList<string> imagePaths, string[] followUps,
+    public void ComposeThread(ThreadOpening opening, IReadOnlyList<string> imagePaths, ThreadFollowUp[] followUps,
         Action<bool> onComplete, Action<AepFailure>? onFailure = null)
     {
         if (posting)
@@ -80,7 +82,14 @@ internal sealed partial class ChirperStore
                     AltTexts: keys.Length > 0 ? opening.AltTexts : null);
             for (var index = 0; index < followUps.Length; index++)
             {
-                items[index + 1] = new CreatePostRequest(followUps[index].Trim(), ReplyPolicy: opening.ReplyPolicy);
+                var followUp = await FollowUpRequestAsync(followUps[index], opening, token, onFailure)
+                    .ConfigureAwait(false);
+                if (followUp is null)
+                {
+                    return false;
+                }
+
+                items[index + 1] = followUp;
             }
 
             var created = await client.CreateThreadAsync(items, token, onFailure).ConfigureAwait(false);
@@ -92,5 +101,35 @@ internal sealed partial class ChirperStore
             AcceptCreatedPost(created);
             return true;
         }, onComplete, () => posting = false);
+    }
+
+    // Each chirp of the thread carries its own photos or GIF, uploaded right before the thread is posted
+    // so no upload waits unattached longer than the request takes.
+    private async Task<CreatePostRequest?> FollowUpRequestAsync(ThreadFollowUp followUp, ThreadOpening opening,
+        CancellationToken token, Action<AepFailure>? onFailure)
+    {
+        var text = followUp.Text.Trim();
+        if (followUp.Gif is { } gif)
+        {
+            return new CreatePostRequest(text, MediaWidth: gif.Width, MediaHeight: gif.Height,
+                Sensitive: opening.Sensitive, GifUrl: gif.Url, GifSlug: gif.Slug, ReplyPolicy: opening.ReplyPolicy);
+        }
+
+        if (followUp.ImagePaths.Length == 0)
+        {
+            return new CreatePostRequest(text, ReplyPolicy: opening.ReplyPolicy);
+        }
+
+        var uploaded = await UploadImagesAsync(followUp.ImagePaths, MaxImages, MaxImageDimension, UploadScope, token,
+            onFailure).ConfigureAwait(false);
+        if (uploaded is null)
+        {
+            return null;
+        }
+
+        var (keys, width, height) = uploaded.Value;
+        return new CreatePostRequest(text, null, keys.Length > 0 ? keys : null, width, height,
+            opening.Sensitive && keys.Length > 0, ReplyPolicy: opening.ReplyPolicy,
+            AltTexts: keys.Length > 0 ? followUp.AltTexts : null);
     }
 }

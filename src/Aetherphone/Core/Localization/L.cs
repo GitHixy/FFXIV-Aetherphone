@@ -7586,6 +7586,14 @@ internal static class L
         public static readonly LocString RemoveThreadChirp = new("chirper.removeThreadChirp", "Remove this chirp");
         public static readonly LocString ChirpAll = new("chirper.chirpAll", "Chirp all");
         public static readonly LocString ShowThread = new("chirper.showThread", "Show this thread");
+        public static readonly LocString ThreadSizeFailure = new("chirper.threadSizeFailure", "A thread holds 2 to {0} chirps.");
+        public static readonly LocString ThreadMissingFailure = new("chirper.threadMissingFailure", "That thread is no longer available.");
+        public static readonly LocString ThreadFullFailure = new("chirper.threadFullFailure", "This thread is full: it can hold up to {0} chirps.");
+        public static readonly LocString EditPollFailure = new("chirper.editPollFailure", "A chirp with a poll can't be edited.");
+        public static readonly LocString EditRepostFailure = new("chirper.editRepostFailure", "A rechirp has no words of its own to edit.");
+        public static readonly LocString AltTextTooLongFailure = new("chirper.altTextTooLongFailure", "Alt text can be up to {0} characters per photo.");
+        public static readonly LocString AltTextCountFailure = new("chirper.altTextCountFailure", "There are more descriptions than photos. Each photo takes one.");
+        public static readonly LocString EditScheduledTitle = new("chirper.editScheduledTitle", "Edit scheduled chirp");
         public static readonly LocPlural ReactionsLabel = new("chirper.reactionsLabel", "reaction", "reactions");
         public static readonly LocString OriginalPoster = new("chirper.originalPoster", "OP");
         public static readonly LocString ChirpAction = new("chirper.chirpAction", "Chirp");
@@ -7615,7 +7623,7 @@ internal static class L
         public static readonly LocPlural RepliesCount = new("chirper.repliesCount", "{0} reply", "{0} replies");
         public static readonly LocString Trending = new("chirper.trending", "Trending");
         public static readonly LocPlural ChirpsToday = new("chirper.chirpsToday", "{0} chirp today", "{0} chirps today");
-        public static readonly LocString SearchHint = new("chirper.searchHint", "Search people or #tags");
+        public static readonly LocString SearchHint = new("chirper.searchHint", "Search people, chirps or #tags");
         public static readonly LocString SearchChirpsTab = new("chirper.searchChirpsTab", "Chirps");
         public static readonly LocString SearchChirpsEmpty = new("chirper.searchChirpsEmpty", "No chirps match your search");
         public static readonly LocString SearchChirpsKeepTyping = new("chirper.searchChirpsKeepTyping", "Keep typing to search chirps");

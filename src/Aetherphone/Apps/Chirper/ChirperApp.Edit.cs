@@ -21,11 +21,15 @@ internal sealed partial class ChirperApp
     private MentionAutocomplete? chirpEditMentions;
     private PostDto? chirpEditTarget;
     private string chirpEditDraft = string.Empty;
+    private string[] chirpEditAltTexts = Array.Empty<string>();
     private string chirpEditStatus = string.Empty;
     private CachedText chirpEditsLeftLabel;
     private bool chirpEditFocus;
     private bool chirpEditFieldActive;
     private volatile int chirpEditOutcome;
+
+    private static TranslationKey ChirpTranslationKey(PostDto post) =>
+        new(TranslationSurface.Post, post.Id, post.EditedAtUnix ?? 0);
 
     private bool CanEditChirp(PostDto post) =>
         ChirperEdits.CanEdit(post, store.Me?.Id, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
@@ -35,6 +39,7 @@ internal sealed partial class ChirperApp
         chirpEditMentions ??= new MentionAutocomplete(store.NewMentionSuggestions());
         chirpEditTarget = post;
         chirpEditDraft = post.Text;
+        chirpEditAltTexts = EditableAltTexts(post);
         chirpEditStatus = string.Empty;
         chirpEditFailure.Clear();
         chirpEditEmoji.Close();
@@ -54,7 +59,7 @@ internal sealed partial class ChirperApp
         {
             chirpEditOutcome = 0;
             chirpEditEmoji.Close();
-            translation.Forget(new TranslationKey(TranslationSurface.Post, post.Id));
+            translation.Forget(ChirpTranslationKey(post));
             toast.Show(Loc.T(L.Chirper.EditedToast));
             router.Pop();
             return;
@@ -123,7 +128,7 @@ internal sealed partial class ChirperApp
             var cursorY = inputTop + inputHeight + 10f * scale;
             if (photos.Length > 0)
             {
-                DrawChirpEditPhotos(drawList, photos, inputX, cursorY, tile, gap, scale);
+                DrawChirpEditPhotos(drawList, photos, post.GifMedia is null, inputX, cursorY, tile, gap, scale);
                 cursorY += stripHeight;
             }
 
@@ -170,9 +175,10 @@ internal sealed partial class ChirperApp
         var saving = store.EditingChirp;
         var actionLabel = Loc.T(saving ? L.Chirper.Saving : L.Chirper.Save);
         var hasWords = !chirpEditDraft.AsSpan().Trim().IsEmpty;
+        var altChanged = !PostAltTexts.Same(chirpEditAltTexts, post.AltTexts, chirpEditAltTexts.Length);
         var canSave = !saving && chirpEditDraft.Length <= MaxPostLength
             && (hasWords || PostMedia.Photos(post).Length > 0)
-            && !ChirperEdits.Unchanged(chirpEditDraft, post.Text);
+            && (altChanged || !ChirperEdits.Unchanged(chirpEditDraft, post.Text));
         var action = HeaderActionRect(area, actionLabel);
         DrawScreenHeader(area, Loc.T(L.Chirper.EditChirp), action.Width + HeaderActionGap * UiScale.Current);
         if (!Button.Draw(action, actionLabel, ui.Ink, ButtonStyle.Prominent, enabled: canSave, id: "chirper.edit.save"))
@@ -182,7 +188,8 @@ internal sealed partial class ChirperApp
 
         chirpEditStatus = string.Empty;
         chirpEditFailure.Clear();
-        store.EditChirp(post.Id, chirpEditDraft, ok => chirpEditOutcome = ok ? 1 : 2, chirpEditFailure.Set);
+        store.EditChirp(post.Id, chirpEditDraft, altChanged ? chirpEditAltTexts : null,
+            ok => chirpEditOutcome = ok ? 1 : 2, chirpEditFailure.Set);
     }
 
     private void DrawChirpEditField(Rect area, float inputX, float inputTop, float inputWidth, float inputHeight,
@@ -226,8 +233,8 @@ internal sealed partial class ChirperApp
         }
     }
 
-    private void DrawChirpEditPhotos(ImDrawListPtr drawList, string[] photos, float x, float y, float tile, float gap,
-        float scale)
+    private void DrawChirpEditPhotos(ImDrawListPtr drawList, string[] photos, bool describable, float x, float y,
+        float tile, float gap, float scale)
     {
         var rounding = ComposeTileRounding * scale;
         for (var index = 0; index < photos.Length; index++)
@@ -250,6 +257,11 @@ internal sealed partial class ChirperApp
             if (GifMedia.IsGif(photos[index]))
             {
                 GifBadge.Draw(drawList, new Rect(min, max));
+            }
+
+            if (describable && index < chirpEditAltTexts.Length)
+            {
+                DrawChirpEditAltChip(drawList, photos[index], index, new Rect(min, max));
             }
         }
     }

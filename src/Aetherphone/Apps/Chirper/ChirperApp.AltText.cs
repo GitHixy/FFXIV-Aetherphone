@@ -15,6 +15,7 @@ internal sealed partial class ChirperApp
     private readonly string[] altTextViewerParagraphs = new string[1];
     private readonly AltTextEditor altTextEditor = new();
     private readonly Dictionary<string, string> composeAltTexts = new(StringComparer.Ordinal);
+    private int altTextEditorPhoto = -1;
 
     private bool AltTextCapturesPointer => altTextEditor.CapturesPointer;
 
@@ -31,10 +32,20 @@ internal sealed partial class ChirperApp
         if (altTextEditor.CapturesPointer)
         {
             var path = altTextEditor.Key;
-            var preview = ComposeThumbTexture(path, AltTextPreviewPixels * UiScale.Current);
+            var editingPosted = altTextEditorPhoto >= 0;
+            var preview = editingPosted
+                ? MediaTexture(path)
+                : ComposeThumbTexture(path, AltTextPreviewPixels * UiScale.Current);
             if (altTextEditor.Draw(screen, theme, preview, out var saved))
             {
-                PostAltTexts.Set(composeAltTexts, path, saved);
+                if (!editingPosted)
+                {
+                    PostAltTexts.Set(composeAltTexts, path, saved);
+                }
+                else if (altTextEditorPhoto < chirpEditAltTexts.Length)
+                {
+                    chirpEditAltTexts[altTextEditorPhoto] = saved;
+                }
             }
         }
 
@@ -59,9 +70,21 @@ internal sealed partial class ChirperApp
         altTextViewer.Open();
     }
 
+    private void DrawQuotedAltBadge(ImDrawListPtr drawList, PostDto quoted, Rect thumb)
+    {
+        var text = PostAltTexts.At(quoted, 0);
+        if (text.Length == 0 || !AltBadge.DrawCompact(drawList, thumb))
+        {
+            return;
+        }
+
+        altTextViewerParagraphs[0] = text;
+        altTextViewer.Open();
+    }
+
     private void DrawComposeAltChip(ImDrawListPtr drawList, string path, Vector2 min, Vector2 max)
     {
-        if (AttachedComposeGif() is not null)
+        if (IsComposeGif(path))
         {
             return;
         }
@@ -71,8 +94,38 @@ internal sealed partial class ChirperApp
         if (AltBadge.DrawEditable(drawList, new Rect(min, max), described, ChirperInk.Accent,
                 Loc.T(described ? L.Chirper.AltTextEdit : L.Chirper.AltTextAdd)))
         {
+            altTextEditorPhoto = -1;
             altTextEditor.Open(path, text);
         }
+    }
+
+    private void DrawChirpEditAltChip(ImDrawListPtr drawList, string url, int photoIndex, Rect tile)
+    {
+        var text = chirpEditAltTexts[photoIndex];
+        var described = text.Length > 0;
+        if (AltBadge.DrawEditable(drawList, tile, described, ChirperInk.Accent,
+                Loc.T(described ? L.Chirper.AltTextEdit : L.Chirper.AltTextAdd)))
+        {
+            altTextEditorPhoto = photoIndex;
+            altTextEditor.Open(url, text);
+        }
+    }
+
+    private static string[] EditableAltTexts(PostDto post)
+    {
+        if (post.GifMedia is not null)
+        {
+            return Array.Empty<string>();
+        }
+
+        var count = PostMedia.Photos(post.MediaUrls, post.MediaUrl).Length;
+        var texts = new string[count];
+        for (var index = 0; index < count; index++)
+        {
+            texts[index] = PostAltTexts.At(post, index);
+        }
+
+        return texts;
     }
 
     private string[]? ComposeAltTextInputs(string[] attachments) => PostAltTexts.Aligned(attachments, composeAltTexts);
