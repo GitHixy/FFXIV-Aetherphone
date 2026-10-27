@@ -289,9 +289,9 @@ internal sealed record PinPostResponse(PostDto Post, string? ReplacedPostId);
 
 internal readonly record struct FeedItemNote(string Source, double Score, string? Breakdown);
 
-internal sealed record FeedSeenRequest(string[] PostIds);
+internal sealed record FeedSeenRequest(string[] PostIds, int[] Sources);
 
-internal sealed record FeedSignalRequest(string PostId, int Kind);
+internal sealed record FeedSignalRequest(string PostId, int Kind, int Source);
 
 internal sealed record UserSearchResult(UserDto[] Users);
 

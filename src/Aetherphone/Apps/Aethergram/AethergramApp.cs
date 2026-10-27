@@ -282,7 +282,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             AppPalettes.Aethergram, new StoryConfirmLabels(L.Aethergram.DeleteConfirm, L.Aethergram.DeleteCancel,
                 L.Aethergram.Saving), confirm, translation, realtimeSignals, "Aethergram stories", StartStoryCompose,
             new StoryReplyHooks(L.Aethergram.ReplyToStory, dmStore.SendStoryReply, OpenThread), OpenProfile,
-            OnHighlightStory, OpenDetailFromLink);
+            OnHighlightStory, OpenDetailFromStory);
         highlights = new HighlightStore(session, net.Grams);
         closeFriends = new CloseFriendsStore(net.Grams);
         this.launcher = launcher;
@@ -330,6 +330,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         activeTab = AethergramTab.Home;
         avatarLightbox.Reset();
         CloseAltText();
+        postViewsSheet.Close();
         caption = string.Empty;
         composeSensitive = false;
         commentDraft = string.Empty;
@@ -425,6 +426,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         postSheet.Gate();
         filterSheet.Gate();
         feedExplainer.Gate();
+        postViewsSheet.Gate();
         GateAltText();
         commentSheet.Gate();
         profileMenu.Gate();
@@ -472,6 +474,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         DrainPostNotices();
         DrawPostSheet(screen);
         DrawFeedExplainer(screen);
+        DrawPostViewsSheet(screen);
         DrawAltText(screen);
         DrawCommentSheet(screen);
         DrawGifSheet(screen);
@@ -1106,8 +1109,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             {
                 ImGui.Dummy(new Vector2(0f, 4f * UiScale.Current));
                 feedVirtualizer.BeginFrame(store.FeedSource(scope), configuration);
-                var viewportTop = ImGui.GetWindowPos().Y;
-                store.BeginImpressions(viewportTop, viewportTop + ImGui.GetWindowSize().Y, ImGui.GetIO().DeltaTime);
+                BeginImpressionPass(PostViewSources.For(scope));
                 var ranked = scope == SocialFeedScope.ForYou && store.ForYouRanked;
                 if (ranked && store.CaughtUpAtTop)
                 {
@@ -1576,8 +1578,15 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         {
             time = $"{time} · {Loc.Plural(L.Social.ViewsCount, views)}";
         }
-        Typography.Draw(drawList, new Vector2(innerX, y), Typography.FitText(time, innerWidth, CardTimeStyle),
-            Ink.MutedInk, CardTimeStyle);
+
+        var timeOrigin = new Vector2(innerX, y);
+        var timeText = Typography.FitText(time, innerWidth, CardTimeStyle);
+        Typography.Draw(drawList, timeOrigin, timeText, Ink.MutedInk, CardTimeStyle);
+        if (post.Views is not null && IsOwnPost(post)
+            && UiInteract.HoverClick(timeOrigin, timeOrigin + Typography.Measure(timeText, CardTimeStyle)))
+        {
+            OpenPostViews(post);
+        }
         FeedCell.End(drawList, cell, Ink.Hairline);
     }
 

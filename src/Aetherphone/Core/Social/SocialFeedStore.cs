@@ -39,6 +39,7 @@ internal abstract partial class SocialFeedStore : IDisposable
     protected readonly StoreWork work;
     private readonly FeedImpressions impressions = new();
     private readonly FeedSignalQueue feedSignals;
+    private PostViewSource impressionSource;
     private readonly RetryGate meGate = new(TimeSpan.FromSeconds(30));
     private readonly AccountIdentityTracker accountIdentity = new();
     private volatile UserDto? me;
@@ -197,6 +198,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         followRequestsLoaded = false;
         impressions.Reset();
         feedSignals.Reset();
+        ResetPostViews();
         ClearTagged();
         ClearHashtag();
         ClearPostSearch();
@@ -210,8 +212,9 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
     }
 
-    public void BeginImpressions(float windowTop, float windowBottom, float deltaSeconds)
+    public void BeginImpressions(float windowTop, float windowBottom, float deltaSeconds, PostViewSource source)
     {
+        impressionSource = source;
         impressions.BeginFrame(windowTop, windowBottom, deltaSeconds);
         feedSignals.Tick(DateTime.UtcNow);
     }
@@ -220,13 +223,15 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
         if (impressions.Observe(postId, rowTop, rowBottom))
         {
-            feedSignals.MarkSeen(postId);
+            feedSignals.MarkSeen(postId, impressionSource);
         }
     }
 
+    // A tap that beats the impression flush opens the seen mark itself, so it carries the surface
+    // the post was tapped on: the list that last began an impression pass.
     public void ReportFeedSignal(string postId, int kind)
     {
-        feedSignals.Signal(postId, kind);
+        feedSignals.Signal(postId, kind, impressionSource);
     }
 
     public void FlushFeedSignals()

@@ -172,13 +172,13 @@ internal sealed partial class VelvetStore : ChatThreadStoreBase<VelvetMessageDto
     {
         if (impressions.Observe(postId, rowTop, rowBottom))
         {
-            feedSignals.MarkSeen(postId);
+            feedSignals.MarkSeen(postId, PostViewSource.Other);
         }
     }
 
     public void ReportFeedSignal(string postId, int kind)
     {
-        feedSignals.Signal(postId, kind);
+        feedSignals.Signal(postId, kind, PostViewSource.Other);
     }
 
     public void FlushFeedSignals()

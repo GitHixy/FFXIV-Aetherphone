@@ -63,7 +63,10 @@ internal sealed partial class AethergramApp
         using (AppSurface.BeginEdgeToEdge(body))
         {
             DrawCollabInvitePrompt(post);
+            BeginImpressionPass(DetailViewSource(post));
+            var cardTop = ImGui.GetCursorScreenPos().Y;
             DrawGramCard(post, true);
+            store.ObserveImpression(post.Id, cardTop, ImGui.GetCursorScreenPos().Y);
             DrawComments();
             ImGui.Dummy(new Vector2(0f, 16f * scale));
         }
