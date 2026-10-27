@@ -2,6 +2,7 @@ using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Confirm;
 using Aetherphone.Core.Localization;
+using Aetherphone.Core.Net;
 using Aetherphone.Core.Social;
 using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
@@ -16,6 +17,7 @@ internal sealed partial class AethergramApp
     {
         None,
         Added,
+        Removed,
         Saved,
         Failed,
         Full,
@@ -37,6 +39,7 @@ internal sealed partial class AethergramApp
     private StoryDto? highlightPickerStory;
     private volatile HighlightNotice pendingHighlightNotice;
     private string highlightNoticeTitle = string.Empty;
+    private string highlightOwnerName = string.Empty;
 
     private void GateHighlightSheets()
     {
@@ -54,7 +57,8 @@ internal sealed partial class AethergramApp
     {
         if (highlights.TryTakeOpened(out var highlight, out var items))
         {
-            stories.OpenDetached(items, highlight.Title, highlight.CoverUrl);
+            stories.OpenDetached(items, highlight.Title, highlight.CoverUrl,
+                string.Equals(highlight.OwnerId, store.Me?.Id, StringComparison.Ordinal), highlightOwnerName);
         }
     }
 
@@ -95,6 +99,7 @@ internal sealed partial class AethergramApp
 
         if (result.Opened >= 0)
         {
+            highlightOwnerName = SocialIdentity.Name(user.DisplayName, user.Handle);
             highlights.Open(items[result.Opened]);
             return;
         }
@@ -109,6 +114,7 @@ internal sealed partial class AethergramApp
     {
         highlightPickerStory = story;
         highlights.EnsureMine();
+        highlights.LoadHolding(story.Id);
         highlightPicker.Open();
     }
 
@@ -137,11 +143,13 @@ internal sealed partial class AethergramApp
         var row = new Rect(new Vector2(content.Min.X, rowTop),
             new Vector2(content.Max.X, rowTop + HighlightRow.Height * scale));
         var mine = highlights.Mine;
+        var story = highlightPickerStory;
+        var holding = story is null ? Array.Empty<string>() : highlights.HoldingFor(story.Id);
         var result = HighlightRowResult.None;
         if (highlights.MineLoaded)
         {
             result = pickerHighlightRow.Draw(frame.DrawList, row, mine, true, Loc.T(L.Story.HighlightNew),
-                frame.Interactive && !highlights.Saving, true, theme, Ink, images, lodestone);
+                frame.Interactive && !highlights.Saving, true, theme, Ink, images, lodestone, holding);
         }
         else
         {
@@ -150,7 +158,7 @@ internal sealed partial class AethergramApp
         }
 
         highlightPicker.End(in frame);
-        if (highlightPickerStory is not { } story)
+        if (story is null)
         {
             return;
         }
@@ -169,10 +177,27 @@ internal sealed partial class AethergramApp
             return;
         }
 
-        if (result.Opened >= 0)
+        if (result.Opened < 0)
         {
-            AddToHighlight(mine[result.Opened], story);
+            return;
         }
+
+        var picked = mine[result.Opened];
+        if (Array.IndexOf(holding, picked.Id) >= 0)
+        {
+            RemoveFromHighlight(picked, story);
+            return;
+        }
+
+        AddToHighlight(picked, story);
+    }
+
+    private void RemoveFromHighlight(StoryHighlightDto highlight, StoryDto story)
+    {
+        highlightPicker.Close();
+        highlightNoticeTitle = highlight.Title;
+        highlights.RemoveStory(highlight.Id, story.Id,
+            succeeded => pendingHighlightNotice = succeeded ? HighlightNotice.Removed : HighlightNotice.Failed);
     }
 
     private void AddToHighlight(StoryHighlightDto highlight, StoryDto story)
@@ -245,6 +270,15 @@ internal sealed partial class AethergramApp
         });
     }
 
+    private static string StoryFailureText(AepFailure failure, LocString fallback)
+    {
+        return failure.Code is FailureCodes.StoryPostUnavailable or FailureCodes.StoryLimitReached
+            or FailureCodes.StoryCaptionTooLong or FailureCodes.HighlightTitleLength
+            or FailureCodes.HighlightLimitReached or FailureCodes.HighlightFull
+            ? FailureText.Resolve(failure)
+            : Loc.T(fallback);
+    }
+
     private void DrainHighlightNotice()
     {
         var notice = pendingHighlightNotice;
@@ -257,10 +291,11 @@ internal sealed partial class AethergramApp
         toast.Show(notice switch
         {
             HighlightNotice.Added => Loc.T(L.Story.AddedToHighlight, highlightNoticeTitle),
+            HighlightNotice.Removed => Loc.T(L.Story.RemovedFromHighlight, highlightNoticeTitle),
             HighlightNotice.Saved => Loc.T(L.Story.HighlightSaved),
             HighlightNotice.Full => Loc.T(L.Story.HighlightFull, HighlightStore.MaxItems),
             HighlightNotice.Limit => Loc.T(L.Story.HighlightLimit, HighlightStore.MaxHighlights),
-            _ => Loc.T(L.Story.HighlightFailed),
+            _ => StoryFailureText(highlights.LastFailure, L.Story.HighlightFailed),
         });
     }
 }

@@ -1,6 +1,7 @@
 using Aetherphone.Core.Aethernet;
 using Aetherphone.Core.Aethernet.Clients;
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Core.Net;
 
 namespace Aetherphone.Core.Social;
 
@@ -22,6 +23,7 @@ internal sealed class HighlightStore : IDisposable
     private readonly AethernetSession session;
     private readonly GramClient client;
     private readonly StoreWork work = new("Aethergram highlights");
+    private readonly Action<AepFailure> recordFailure;
     private volatile StoryHighlightDto[] profileHighlights = Array.Empty<StoryHighlightDto>();
     private volatile string? profileOwnerId;
     private volatile bool profileLoading;
@@ -37,12 +39,16 @@ internal sealed class HighlightStore : IDisposable
     private volatile bool editorLoading;
     private volatile int editorVersion;
     private volatile bool saving;
+    private volatile AepFailureBox? lastFailure;
+    private volatile string[] holdingIds = Array.Empty<string>();
+    private volatile string? holdingStoryId;
     private string? lastAccountId;
 
     public HighlightStore(AethernetSession session, GramClient client)
     {
         this.session = session;
         this.client = client;
+        recordFailure = failure => lastFailure = new AepFailureBox(failure);
         session.Changed += OnSessionChanged;
     }
 
@@ -54,6 +60,10 @@ internal sealed class HighlightStore : IDisposable
     public string[] EditorMembers => editorMembers;
     public bool EditorLoading => editorLoading;
     public int EditorVersion => editorVersion;
+    public AepFailure LastFailure => lastFailure?.Failure ?? AepFailure.None;
+
+    public string[] HoldingFor(string storyId) =>
+        string.Equals(holdingStoryId, storyId, StringComparison.Ordinal) ? holdingIds : Array.Empty<string>();
 
     private void OnSessionChanged()
     {
@@ -71,6 +81,8 @@ internal sealed class HighlightStore : IDisposable
         openingId = null;
         openedHighlight = null;
         openedStories = null;
+        holdingStoryId = null;
+        holdingIds = Array.Empty<string>();
     }
 
     public StoryHighlightDto[] For(string ownerId)
@@ -98,6 +110,20 @@ internal sealed class HighlightStore : IDisposable
         }
 
         RefreshMine();
+    }
+
+    public void LoadHolding(string storyId)
+    {
+        holdingStoryId = storyId;
+        holdingIds = Array.Empty<string>();
+        work.Run("highlights holding story", async token =>
+        {
+            var membership = await client.HighlightsHoldingAsync(storyId, token).ConfigureAwait(false);
+            if (membership is not null && string.Equals(holdingStoryId, storyId, StringComparison.Ordinal))
+            {
+                holdingIds = membership.HighlightIds;
+            }
+        });
     }
 
     public void Open(StoryHighlightDto highlight)
@@ -181,26 +207,27 @@ internal sealed class HighlightStore : IDisposable
     public void Create(string title, string[] storyIds, string? coverStoryId, Action<bool> onComplete)
     {
         Write("create highlight", async token =>
-            await client.CreateHighlightAsync(title, storyIds, coverStoryId, token).ConfigureAwait(false) is not null,
+            await client.CreateHighlightAsync(title, storyIds, coverStoryId, token, recordFailure).ConfigureAwait(false)
+                is not null,
             onComplete);
     }
 
     public void AddStory(string highlightId, string storyId, Action<bool> onComplete)
     {
         Write("add to highlight", async token =>
-            await client.AddToHighlightAsync(highlightId, storyId, token).ConfigureAwait(false) is not null,
+            await client.AddToHighlightAsync(highlightId, storyId, token, recordFailure).ConfigureAwait(false) is not null,
             onComplete);
     }
 
     public void RemoveStory(string highlightId, string storyId, Action<bool> onComplete)
     {
         Write("remove from highlight",
-            token => client.RemoveFromHighlightAsync(highlightId, storyId, token), onComplete);
+            token => client.RemoveFromHighlightAsync(highlightId, storyId, token, recordFailure), onComplete);
     }
 
     public void Delete(string highlightId, Action<bool> onComplete)
     {
-        Write("delete highlight", token => client.DeleteHighlightAsync(highlightId, token), onComplete);
+        Write("delete highlight", token => client.DeleteHighlightAsync(highlightId, token, recordFailure), onComplete);
     }
 
     public void Save(HighlightEdit edit, Action<bool> onComplete)
@@ -209,23 +236,24 @@ internal sealed class HighlightStore : IDisposable
         {
             for (var index = 0; index < edit.Added.Length; index++)
             {
-                if (await client.AddToHighlightAsync(edit.HighlightId, edit.Added[index], token).ConfigureAwait(false) is null)
+                if (await client.AddToHighlightAsync(edit.HighlightId, edit.Added[index], token, recordFailure)
+                        .ConfigureAwait(false) is null)
                 {
                     return false;
                 }
             }
 
             if ((edit.Title is not null || edit.CoverStoryId is not null)
-                && await client.UpdateHighlightAsync(edit.HighlightId, edit.Title, edit.CoverStoryId, token)
-                    .ConfigureAwait(false) is null)
+                && await client.UpdateHighlightAsync(edit.HighlightId, edit.Title, edit.CoverStoryId, token,
+                    recordFailure).ConfigureAwait(false) is null)
             {
                 return false;
             }
 
             for (var index = 0; index < edit.Removed.Length; index++)
             {
-                if (!await client.RemoveFromHighlightAsync(edit.HighlightId, edit.Removed[index], token)
-                        .ConfigureAwait(false))
+                if (!await client.RemoveFromHighlightAsync(edit.HighlightId, edit.Removed[index], token,
+                        recordFailure).ConfigureAwait(false))
                 {
                     return false;
                 }
@@ -244,6 +272,7 @@ internal sealed class HighlightStore : IDisposable
         }
 
         saving = true;
+        lastFailure = null;
         work.Run(operation, action, succeeded =>
         {
             RefreshMine();

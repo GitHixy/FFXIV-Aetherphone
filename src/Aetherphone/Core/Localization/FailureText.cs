@@ -77,6 +77,11 @@ internal static class FailureCodes
     public const string StoryUnsupportedApp = "story_unsupported_app";
     public const string StoryCaptionTooLong = "story_caption_too_long";
     public const string StoryLimitReached = "story_limit_reached";
+    public const string StoryPostUnavailable = "story_post_unavailable";
+    public const string StoryLikeUnsupportedApp = "story_like_unsupported_app";
+    public const string HighlightTitleLength = "highlight_title_length";
+    public const string HighlightLimitReached = "highlight_limit_reached";
+    public const string HighlightFull = "highlight_full";
     public const string ProfileNameLength = "profile_name_length";
     public const string ProfileBioTooLong = "profile_bio_too_long";
     public const string ProfileHandleInvalid = "profile_handle_invalid";
@@ -319,6 +324,16 @@ internal static class FailureText
                 return Valued(L.Failure.StoryCaptionTooLong, failure);
             case FailureCodes.StoryLimitReached:
                 return Valued(L.Failure.StoryLimitReached, failure);
+            case FailureCodes.StoryPostUnavailable:
+                return Loc.T(L.Story.PostCannotBeShared);
+            case FailureCodes.StoryLikeUnsupportedApp:
+                return Loc.T(L.Story.LikesUnsupported);
+            case FailureCodes.HighlightTitleLength:
+                return Valued(L.Story.HighlightTitleLength, failure);
+            case FailureCodes.HighlightLimitReached:
+                return Valued(L.Story.HighlightLimit, failure);
+            case FailureCodes.HighlightFull:
+                return Valued(L.Story.HighlightFull, failure);
             case FailureCodes.ProfileNameLength:
                 return Valued(L.Failure.ProfileNameLength, failure);
             case FailureCodes.ProfileBioTooLong:

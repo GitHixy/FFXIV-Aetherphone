@@ -336,6 +336,10 @@ internal static class L
         public static readonly LocString CloseFriendsEmpty = new("story.closeFriendsEmpty", "No followers to add yet");
         public static readonly LocString CloseFriendsFailed = new("story.closeFriendsFailed", "Couldn't load your list");
         public static readonly LocString CloseFriendsRemove = new("story.closeFriendsRemove", "Remove");
+        public static readonly LocString RemovedFromHighlight = new("story.removedFromHighlight", "Removed from {0}");
+        public static readonly LocString PostCannotBeShared = new("story.postCannotBeShared", "This post can't be added to a story.");
+        public static readonly LocString LikesUnsupported = new("story.likesUnsupported", "Story likes are only available in Aethergram.");
+        public static readonly LocString HighlightTitleLength = new("story.highlightTitleLength", "A highlight name needs 1 to {0} characters.");
         public static readonly LocString ViewersTrimmed = new("story.viewersTrimmed", "Showing the latest {0} of {1}");
         public static readonly LocString DeleteFailed = new("story.deleteFailed", "Couldn't delete the story");
     }
