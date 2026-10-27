@@ -2352,6 +2352,12 @@ internal static class L
         public static readonly LocString SectionSounds = new("changelog.sectionSounds", "Sounds");
         public static readonly LocString SectionHalloween = new("changelog.sectionHalloween", "Halloween");
 
+        public static readonly LocString[] Release1410Maintenance =
+        {
+            new("changelog.r1410.maintenance",
+                "Added a maintenance screen: while Aethernet is down for planned maintenance, online apps show a countdown to when it should be back, and apps that don't need Aethernet keep working"),
+        };
+
         public static readonly LocString[] Release1400Prism =
         {
             new("changelog.r1400.0",

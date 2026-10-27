@@ -1168,6 +1168,7 @@
   "gifs.consentDecline": "Ahora no",
   "gifs.setting": "GIF de KLIPY",
   "gifs.settingHint": "Busca GIF en Chirper, Aethergram y ChocoChat, y muestra los GIF de KLIPY en publicaciones, comentarios y mensajes. Las búsquedas y las imágenes se cargan directamente desde KLIPY, que ve tu dirección IP.",
+  "changelog.r1410.maintenance": "Se añadió una pantalla de mantenimiento: mientras Aethernet está caído por un mantenimiento programado, las apps en línea muestran una cuenta atrás hasta que vuelva, y las apps que no necesitan Aethernet siguen funcionando",
   "changelog.r1400.0": "Se añadió Prism, un concurso semanal de glamour con un tema nuevo cada lunes en el reinicio diario, contribuido por t3sco. Explora los glamoures Con mods o Vanilla de otros jugadores, pruébate cualquier glamour Vanilla con un toque, dale me gusta o guarda tus favoritos, conserva todos tus glamoures en un armario y participa en el concurso semanal para ganar guiles, Aether Coin, un marco y una insignia",
   "changelog.r1400.36": "Se añadió el modo Pantalla a Cámara, que captura toda la ventana del juego; el teléfono se aparta y hace una cuenta atrás antes, contribuido por t3sco",
   "changelog.r1400.37": "Se añadió el modo Recorte a Cámara, que captura cualquier parte de la pantalla con un marco que puedes mover y redimensionar, contribuido por t3sco",
