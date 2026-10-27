@@ -10,6 +10,7 @@ internal static class ChangelogData
         {
             new(L.Apps.Collections, L.Changelog.Release1410Collections),
             new(L.Apps.Velvet, L.Changelog.Release1410Velvet),
+            new(L.Apps.Feedback, L.Changelog.Release1410Feedback),
             new(L.Changelog.SectionMessaging, L.Changelog.Release1410Messaging),
             new(L.Apps.Music, L.Changelog.Release1410Music),
         }),

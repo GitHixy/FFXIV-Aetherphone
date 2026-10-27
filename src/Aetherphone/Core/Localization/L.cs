@@ -2364,6 +2364,12 @@ internal static class L
                 "Added a list of your connections: tap Connections on your profile to see and search everyone you are connected to, contributed by hellovvn"),
         };
 
+        public static readonly LocString[] Release1410Feedback =
+        {
+            new("changelog.r1410.4",
+                "Added pasting and dragging screenshots into a report: press Ctrl+V, tap Paste image in Add photos, or drag a file in from File Explorer, contributed by hellovvn"),
+        };
+
         public static readonly LocString[] Release1410Messaging =
         {
             new("changelog.r1410.2",
