@@ -12,6 +12,7 @@ internal enum AepFailureKind : byte
     Server = 5,
     BadResponse = 6,
     Cancelled = 7,
+    Maintenance = 8,
 }
 
 internal readonly record struct AepFailure(

@@ -40,7 +40,7 @@ internal sealed class NetworkStatusNotices : IDisposable
 
     private void OnFrameworkUpdate(IFramework _)
     {
-        if (!session.IsSignedIn)
+        if (!session.IsSignedIn || session.Maintenance.Holds)
         {
             if (tracking)
             {

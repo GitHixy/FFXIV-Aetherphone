@@ -137,7 +137,8 @@ internal sealed class PhoneShell : IDisposable
         setup = new SetupOverlay(services.AethernetSession, services.Aethernet, services.GameData,
             services.RemoteImages, services.Lodestone, bundle.Photos, services.WallpaperImages, navigation,
             configuration, services.Confirm, themes);
-        painter = new ShellScreenPainter(themes, navigation, home);
+        painter = new ShellScreenPainter(themes, navigation, home, session.Maintenance);
+        session.Maintenance.Lifted += OnMaintenanceLifted;
         appSwitcher = new AppSwitcher(navigation, painter);
         transition = new ShellTransitionRenderer(themes, navigation, home, painter);
         morph = new MinimizeMorphView(themes, minimize, minimizedPhone, painter);
@@ -399,7 +400,9 @@ internal sealed class PhoneShell : IDisposable
 
         SyncCallNavigation();
         var state = overlays.Assess(screen);
-        director.Advance(delta, state.Busy, navigation.AtHome, navigation.Current?.Id, minimizedSinceDraw);
+        var maintenanceCovers = navigation.Current is { } shown && painter.CoversWithMaintenance(shown);
+        director.Advance(delta, state.Busy || maintenanceCovers, navigation.AtHome, navigation.Current?.Id,
+            minimizedSinceDraw);
         minimizedSinceDraw = false;
         UiAnchors.BeginFrame(director.WantsAnchors);
         UiAnchors.Report("chrome.action", actionButtonRect);
@@ -569,8 +572,19 @@ internal sealed class PhoneShell : IDisposable
         navigation.GoHome();
     }
 
+    private void OnMaintenanceLifted()
+    {
+        if (navigation.Current is not { } app || !ServerBackedApps.Contains(app.Id))
+        {
+            return;
+        }
+
+        navigation.RefreshCurrent();
+    }
+
     public void Dispose()
     {
+        session.Maintenance.Lifted -= OnMaintenanceLifted;
         MusterChatBridge.Clear();
         AdChatBridge.Clear();
         notifications.Vibration -= OnVibration;

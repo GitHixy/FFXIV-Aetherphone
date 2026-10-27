@@ -64,6 +64,7 @@ internal sealed partial class MessagePopoutWindow : Window
     private readonly ConfirmOverlay confirmOverlay;
     private readonly int confirmHost = ConfirmHosts.Reserve();
     private readonly DropdownMenu switchMenu = new() { Detached = true };
+    private readonly MaintenancePanel maintenancePanel = new();
     private readonly List<DropdownMenu.Item> switchItems = new(SwitchMenuLimit);
     private readonly List<string> switchIds = new(SwitchMenuLimit);
     private readonly List<string> switchTitles = new(SwitchMenuLimit);
@@ -357,6 +358,13 @@ internal sealed partial class MessagePopoutWindow : Window
         {
             Typography.DrawCentered(ImGui.GetWindowDrawList(), body.Center, Loc.T(L.Message.PopoutSignedOut),
                 theme.TextMuted, TextStyles.Callout);
+            return;
+        }
+
+        if (services.Session.Maintenance.Holds)
+        {
+            maintenancePanel.Draw(new Rect(new Vector2(body.Min.X, frame.Min.Y + barHeight), body.Max), theme,
+                services.Session.Maintenance.View);
             return;
         }
 

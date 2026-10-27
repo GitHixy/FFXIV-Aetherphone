@@ -1,3 +1,5 @@
+using Aetherphone.Core.Net;
+
 namespace Aetherphone.Core.Runtime;
 
 internal sealed class PollCadence
@@ -65,6 +67,11 @@ internal sealed class PollCadence
 
     public bool Due(DateTime nowUtc)
     {
+        if (AethernetMaintenance.HoldsTraffic)
+        {
+            return false;
+        }
+
         if (immediate || nowUtc >= scheduledUtc)
         {
             immediate = false;
