@@ -19,14 +19,16 @@ internal sealed partial class StoryViewerOverlay
     private static readonly Vector4 LikeIdleInk = new(1f, 1f, 1f, 0.95f);
 
     private readonly DoubleTapLike likeBurst = new();
-    private readonly Action<string>? openPost;
+    private readonly Action<StorySharedPostDto>? openPost;
     private Action<StoryDto>? onToggleLike;
     private Rect sharedCardBounds;
     private string likePopStoryId = string.Empty;
     private double likePopStartedAt;
 
     private bool StageReady(StoryDto story) =>
-        story.SharedPost is { Available: false } || images.Get(story.MediaUrl) is not null;
+        story.SharedPost is { Available: false }
+        || (story.SharedPost is { IsChirp: true } && story.MediaUrl.Length == 0)
+        || images.Get(story.MediaUrl) is not null;
 
     private bool PressOnSharedCard() => UiInteract.Hover(sharedCardBounds.Min, sharedCardBounds.Max);
 
@@ -50,9 +52,14 @@ internal sealed partial class StoryViewerOverlay
         float scale, bool interactive)
     {
         var hovered = interactive && openPost is not null && PressOnSharedCard();
-        var content = new SharedPostCardContent(SocialIdentity.Name(shared.AuthorDisplayName, shared.AuthorHandle),
-            shared.AuthorAvatarUrl, shared.MediaUrl, shared.MediaWidth, shared.MediaHeight, shared.Available);
-        var bounds = SharedPostCard.Draw(drawList, stage, theme, content, images, lodestone, scale, hovered);
+        var name = SocialIdentity.Name(shared.AuthorDisplayName, shared.AuthorHandle);
+        var bounds = shared.IsChirp
+            ? SharedChirpCard.Draw(drawList, stage, theme,
+                new SharedChirpCardContent(name, shared.AuthorHandle, shared.AuthorAvatarUrl, shared.Text ?? string.Empty,
+                    shared.MediaUrl, shared.MediaWidth, shared.MediaHeight), images, lodestone, scale, hovered)
+            : SharedPostCard.Draw(drawList, stage, theme,
+                new SharedPostCardContent(name, shared.AuthorAvatarUrl, shared.MediaUrl, shared.MediaWidth,
+                    shared.MediaHeight, shared.Available), images, lodestone, scale, hovered);
         sharedCardBounds = openPost is null ? default : bounds;
         if (!interactive || openPost is not { } openSharedPost)
         {
@@ -66,7 +73,7 @@ internal sealed partial class StoryViewerOverlay
 
         if (UiInteract.Click(bounds.Min, bounds.Max, hovered))
         {
-            openSharedPost(shared.PostId);
+            openSharedPost(shared);
         }
     }
 

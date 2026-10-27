@@ -18,6 +18,7 @@ internal enum ChirperScreen
     BadgeProgress,
     MutedAccounts,
     EditChirp,
+    ShareToChat,
 }
 
 internal readonly record struct ChirperRoute(
@@ -40,6 +41,7 @@ internal readonly record struct ChirperRoute(
     public static ChirperRoute Thread(string postId) => new(ChirperScreen.Thread, PostId: postId);
     public static ChirperRoute Hashtag(string tag) => new(ChirperScreen.Hashtag, Tag: tag);
     public static ChirperRoute EditChirp(string postId) => new(ChirperScreen.EditChirp, PostId: postId);
+    public static ChirperRoute ShareToChat(string postId) => new(ChirperScreen.ShareToChat, PostId: postId);
 
     public static ChirperRoute UserList(string sourceId, UserListKind kind) =>
         new(ChirperScreen.UserList, UserId: sourceId, Kind: kind);

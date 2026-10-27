@@ -1303,53 +1303,70 @@ internal abstract class ChatThreadStoreBase<TMessage, TThread> : IDisposable
 
         sending = true;
         lastSendFailure = AepFailure.None;
-        work.Run("send", async token =>
+        work.Run("send", token => SendTextAsync(id, trimmed, replyToId, noteSendFailure, "send", token), onComplete,
+            () => sending = false);
+    }
+
+    // A share arrives from another app while this thread may sit closed, so it skips the composer's
+    // one-send-at-a-time gate but leaves through the same encrypted path, downgrade refusal included.
+    public void SendShare(string id, string body, Action<bool> onComplete)
+    {
+        var trimmed = body.Trim();
+        if (trimmed.Length == 0 || RefuseDowngrade(id, "share"))
         {
-            TMessage? sent;
-            var status = await ResolveSendStatusAsync(id, token).ConfigureAwait(false);
-            var scope = ScopeFor(id);
-            var generation = keys.CurrentGeneration(scope);
-            var encoded = default(EncryptedOutbound);
-            var encrypted = cipher.IsUnlocked && status.CanEncrypt
-                && cipher.TryEncrypt(scope, generation, trimmed, MyUserId, out encoded);
-            if (DowngradeBlocked(id, "send", encrypted, status))
-            {
-                return false;
-            }
+            onComplete(false);
+            return;
+        }
 
-            if (encrypted)
-            {
-                sent = await SendMessageRequestAsync(id, encoded.Envelope, 0, token,
-                    encVersion: EnvelopeCodec.VersionEnvelope, commitmentTag: encoded.CommitmentTag,
-                    replyToId: replyToId, onFailure: noteSendFailure)
-                    .ConfigureAwait(false);
-                if (sent is not null)
-                {
-                    cipher.RecordDecrypted(sent.Id, encoded.Envelope, trimmed, encoded.FrankingKeyBase64);
-                    sent = WithBody(sent, trimmed);
-                }
-            }
-            else
-            {
-                sent = await SendMessageRequestAsync(id, trimmed, 0, token, replyToId: replyToId,
-                        onFailure: noteSendFailure)
-                    .ConfigureAwait(false);
-            }
+        work.Run("share", token => SendTextAsync(id, trimmed, null, null, "share", token), onComplete);
+    }
 
-            if (sent is null)
-            {
-                return false;
-            }
+    private async Task<bool> SendTextAsync(string id, string trimmed, string? replyToId,
+        Action<AepFailure>? onFailure, string what, CancellationToken token)
+    {
+        TMessage? sent;
+        var status = await ResolveSendStatusAsync(id, token).ConfigureAwait(false);
+        var scope = ScopeFor(id);
+        var generation = keys.CurrentGeneration(scope);
+        var encoded = default(EncryptedOutbound);
+        var encrypted = cipher.IsUnlocked && status.CanEncrypt
+            && cipher.TryEncrypt(scope, generation, trimmed, MyUserId, out encoded);
+        if (DowngradeBlocked(id, what, encrypted, status))
+        {
+            return false;
+        }
 
-            sent = ResolveOutgoingReply(scope, sent);
-            if (currentThreadId == id)
+        if (encrypted)
+        {
+            sent = await SendMessageRequestAsync(id, encoded.Envelope, 0, token,
+                encVersion: EnvelopeCodec.VersionEnvelope, commitmentTag: encoded.CommitmentTag,
+                replyToId: replyToId, onFailure: onFailure)
+                .ConfigureAwait(false);
+            if (sent is not null)
             {
-                messages = CopyOnWrite.Append(messages, sent);
+                cipher.RecordDecrypted(sent.Id, encoded.Envelope, trimmed, encoded.FrankingKeyBase64);
+                sent = WithBody(sent, trimmed);
             }
+        }
+        else
+        {
+            sent = await SendMessageRequestAsync(id, trimmed, 0, token, replyToId: replyToId, onFailure: onFailure)
+                .ConfigureAwait(false);
+        }
 
-            threadListLoaded = false;
-            return true;
-        }, onComplete, () => sending = false);
+        if (sent is null)
+        {
+            return false;
+        }
+
+        sent = ResolveOutgoingReply(scope, sent);
+        if (currentThreadId == id)
+        {
+            messages = CopyOnWrite.Append(messages, sent);
+        }
+
+        threadListLoaded = false;
+        return true;
     }
 
     public void SendImageMessage(string id, string sourcePath, string caption, Action<bool> onComplete)

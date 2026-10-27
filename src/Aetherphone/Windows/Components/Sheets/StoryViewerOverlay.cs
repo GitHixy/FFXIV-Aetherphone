@@ -89,7 +89,7 @@ internal sealed partial class StoryViewerOverlay
     private bool sheetOpen;
 
     public StoryViewerOverlay(RemoteImageCache images, LodestoneService lodestone, TranslationService translation,
-        ConfirmService confirm, Action<string>? openProfile = null, Action<string>? openPost = null)
+        ConfirmService confirm, Action<string>? openProfile = null, Action<StorySharedPostDto>? openPost = null)
     {
         this.openPost = openPost;
         this.translation = translation;
