@@ -28,6 +28,7 @@ internal static class SocialActivity
     public const int TypeMissedCall = 20;
     public const int TypeRadioLive = 21;
     public const int TypePlacing = 23;
+    public const int TypeStoryLike = 24;
     public const string ChirperApp = "chirper";
     public const string AethergramApp = "aethergram";
     public const string VelvetApp = "velvet";
@@ -76,6 +77,10 @@ internal static class SocialActivity
                     isPhoto ? L.Social.LikedPhotoOthers : L.Social.LikedChirpOthers);
             case TypeLike:
                 return Loc.T(isPhoto ? L.Social.LikedPhoto : L.Social.LikedChirp);
+            case TypeStoryLike when item.ActorCount > 1:
+                return GroupedLike(item, L.Story.LikedYourStoryWith, L.Story.LikedYourStoryOthers);
+            case TypeStoryLike:
+                return Loc.T(L.Story.LikedYourStory);
             case TypePlacing:
                 return Loc.T(L.Prism.ActivityPlaced, item.Rank, item.Preview ?? string.Empty);
             case TypeComment:

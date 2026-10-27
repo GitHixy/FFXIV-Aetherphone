@@ -19,7 +19,7 @@ internal readonly record struct StoryViewers(StoryViewerDto[] Items, int Total, 
 
 internal readonly record struct StoryReplyPrompt(LocString Hint, Action<StoryDto, string> Send);
 
-internal sealed class StoryViewerOverlay
+internal sealed partial class StoryViewerOverlay
 {
     private const float SecondsPerStory = 5f;
     private const float SheetHeightFraction = 0.58f;
@@ -80,8 +80,9 @@ internal sealed class StoryViewerOverlay
     private bool sheetOpen;
 
     public StoryViewerOverlay(RemoteImageCache images, LodestoneService lodestone, TranslationService translation,
-        ConfirmService confirm, Action<string>? openProfile = null)
+        ConfirmService confirm, Action<string>? openProfile = null, Action<string>? openPost = null)
     {
+        this.openPost = openPost;
         this.translation = translation;
         this.confirm = confirm;
         this.images = images;
@@ -95,8 +96,9 @@ internal sealed class StoryViewerOverlay
     public void Open(StoryDto[] items, string label, string? avatarUrl, Action<StoryDto> seen, bool mine = false,
         Action<StoryDto>? delete = null, Func<StoryDto, StoryViewers>? viewers = null, Action? exhausted = null,
         Func<bool>? nextGroup = null, Func<bool>? previousGroup = null, bool startAtEnd = false,
-        StoryReplyPrompt? reply = null, Action? loadMoreViewers = null)
+        StoryReplyPrompt? reply = null, Action? loadMoreViewers = null, Action<StoryDto>? toggleLike = null)
     {
+        onToggleLike = toggleLike;
         stories = items;
         authorLabel = label;
         authorAvatarUrl = avatarUrl;
@@ -224,12 +226,12 @@ internal sealed class StoryViewerOverlay
             new Vector2(area.Max.X, area.Max.Y - 16f * scale));
         if (open && !suspended && !sheetOpen)
         {
-            HandleInput(baseStage, delta, images.Get(story.MediaUrl) is not null, ReplyZone(baseStage, scale));
+            HandleInput(baseStage, delta, StageReady(story), ReplyZone(baseStage, scale));
         }
 
         var shift = new Vector2(0f, dragOffset * scale);
         var stage = new Rect(baseStage.Min + shift, baseStage.Max + shift);
-        DrawImage(drawList, stage, story, scale);
+        DrawStage(drawList, stage, theme, story, scale, open && !suspended && !sheetOpen);
         var footerInset = replyPrompt is null ? 0f : (ReplyBarHeight + FooterGap) * scale;
         DrawFooter(drawList, stage, story, scale, delta, footerInset);
         if (replyPrompt is not null && !suspended)
@@ -323,7 +325,7 @@ internal sealed class StoryViewerOverlay
         var inset = ReplyBarInset * scale;
         var barHeight = ReplyBarHeight * scale;
         var barMin = new Vector2(stage.Min.X + inset, stage.Max.Y - inset - barHeight);
-        var barMax = new Vector2(stage.Max.X - inset, stage.Max.Y - inset);
+        var barMax = new Vector2(stage.Max.X - inset - LikeReserve(scale), stage.Max.Y - inset);
         var radius = barHeight * 0.5f;
         Squircle.Fill(drawList, barMin, barMax, radius, ImGui.GetColorU32(new Vector4(0f, 0f, 0f, 0.45f)));
         Squircle.Stroke(drawList, barMin, barMax, radius, ImGui.GetColorU32(new Vector4(1f, 1f, 1f, 0.35f)),
@@ -368,6 +370,7 @@ internal sealed class StoryViewerOverlay
         }
 
         DrawQuickEmojiRow(drawList, prompt, story, barMin, barMax, scale);
+        DrawLikeButton(drawList, new Vector2(barMax.X + LikeReserve(scale) * 0.5f, centerY), story, scale);
     }
 
     private void DrawQuickEmojiRow(ImDrawListPtr drawList, in StoryReplyPrompt prompt, StoryDto story,
@@ -546,13 +549,15 @@ internal sealed class StoryViewerOverlay
         var left = center.X + radius + 10f * scale;
         var stamp = TimeText.Short(viewer.ViewedAtUnix);
         var stampSize = Typography.Measure(stamp, TextStyles.Caption1);
-        var nameMaxWidth = MathF.Max(1f, origin.X + width - stampSize.X - 16f * scale - left);
+        var nameMaxWidth = MathF.Max(1f,
+            origin.X + width - stampSize.X - 16f * scale - ViewerHeartReserve(viewer, scale) - left);
         var rowHovering = UiInteract.Hover(origin, new Vector2(origin.X + width, origin.Y + height));
         var nameSize = Typography.Measure(name, TextStyles.Subheadline);
         UserName.Draw("storyviewer.name." + viewer.Handle, name, viewer.Badges, viewer.BadgeIds, left,
             center.Y - nameSize.Y * 0.5f, nameMaxWidth, TextStyles.Subheadline, theme.TextStrong, rowHovering, theme);
         Typography.Draw(new Vector2(origin.X + width - stampSize.X - 6f * scale, center.Y - stampSize.Y * 0.5f), stamp,
             theme.TextMuted, TextStyles.Caption1);
+        DrawViewerHeart(drawList, viewer, origin.X + width - stampSize.X - 6f * scale, center.Y, scale);
         ImGui.SetCursorScreenPos(origin);
         ImGui.Dummy(new Vector2(width, height));
     }
@@ -565,7 +570,8 @@ internal sealed class StoryViewerOverlay
             pressStartedAt = ImGui.GetTime();
             pressOrigin = ImGui.GetIO().MousePos;
             pressInChrome = (replyPrompt is not null && UiInteract.Hover(replyZone.Min, replyZone.Max))
-                || (ShowSeenPill && UiInteract.Hover(seenPillBounds.Min, seenPillBounds.Max));
+                || (ShowSeenPill && UiInteract.Hover(seenPillBounds.Min, seenPillBounds.Max))
+                || PressOnSharedCard();
         }
 
         var down = ImGui.IsMouseDown(ImGuiMouseButton.Left);

@@ -248,6 +248,13 @@ internal static class L
     {
         public static readonly LocString YourStory = new("story.yourStory", "Your story");
         public static readonly LocString NewStory = new("story.newStory", "New Story");
+        public static readonly LocString AddPostToStory = new("story.addPostToStory", "Add post to your story");
+        public static readonly LocString AddedToStory = new("story.addedToStory", "Added to your story");
+        public static readonly LocString AddToStoryFailed = new("story.addToStoryFailed", "Couldn't add this post to your story");
+        public static readonly LocString PostUnavailable = new("story.postUnavailable", "This post is unavailable");
+        public static readonly LocString LikedYourStory = new("story.likedYourStory", "liked your story");
+        public static readonly LocString LikedYourStoryWith = new("story.likedYourStoryWith", "and {0} liked your story");
+        public static readonly LocPlural LikedYourStoryOthers = new("story.likedYourStoryOthers", "and {0} other liked your story", "and {0} others liked your story");
         public static readonly LocString DeleteMessage = new("story.deleteMessage", "Delete this story? It disappears for everyone right away.");
         public static readonly LocPlural SeenBy = new("story.seenBy", "Seen by {0}", "Seen by {0}");
         public static readonly LocString NoViewers = new("story.noViewers", "No one has seen this yet");

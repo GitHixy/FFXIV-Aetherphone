@@ -225,6 +225,7 @@ internal sealed partial class AethergramApp
         {
             case SocialActivity.TypeLike:
             case SocialActivity.TypeCommentLike:
+            case SocialActivity.TypeStoryLike:
                 drawList.AddCircleFilled(center, radius, ImGui.GetColorU32(Ink.LikeRed), 20);
                 PhoneIcon.Draw(drawList, center, PhoneIcons.HeartFilled, Ink.White, iconSize);
                 break;

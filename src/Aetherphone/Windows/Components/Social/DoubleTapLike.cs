@@ -52,6 +52,12 @@ internal sealed class DoubleTapLike
         return false;
     }
 
+    public void Burst(string postId)
+    {
+        burstPostId = postId;
+        burstStart = ImGui.GetTime();
+    }
+
     public bool SwallowedTap(string postId)
     {
         if (swallowPostId != postId)

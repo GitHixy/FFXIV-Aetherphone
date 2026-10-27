@@ -276,7 +276,8 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         stories = new StoryPresenter(session, net.Grams, net.Media, images, lodestone, AethergramArt.StoryRing,
             AppPalettes.Aethergram, new StoryConfirmLabels(L.Aethergram.DeleteConfirm, L.Aethergram.DeleteCancel,
                 L.Aethergram.Saving), confirm, translation, realtimeSignals, "Aethergram stories", StartStoryCompose,
-            new StoryReplyHooks(L.Aethergram.ReplyToStory, dmStore.SendStoryReply, OpenThread), OpenProfile);
+            new StoryReplyHooks(L.Aethergram.ReplyToStory, dmStore.SendStoryReply, OpenThread), OpenProfile,
+            OpenDetailFromLink);
         this.launcher = launcher;
         this.dmLauncher = dmLauncher;
         this.gameData = gameData;
@@ -432,7 +433,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         }
 
         DrawNight(screen, context.Content.Min.Y);
-        using (InputShield.Engage(avatarLightbox.Expanded || GifSheetCaptures))
+        using (InputShield.Engage(avatarLightbox.Expanded || GifSheetCaptures || StoryShareCaptures))
         using (intro.FadeContent())
         {
             router.Draw(SceneChrome.AppAreaFrom(context.Content, theme, UiScale.Current), AppSkin.Transparent,
@@ -454,6 +455,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         DrawProfileMenu(screen);
         DrawProfileActionSheet(screen);
         DrawInboxRowSheet(screen);
+        DrawStoryShareSheet(screen);
         DrawFlights(screen);
         toast.Draw(screen, ScreenToastStyle.From(ui));
     }
@@ -1413,7 +1415,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         {
             TapGlow.Bloom(shareKey);
             SendByBat(sendFrom);
-            OpenShare(post.Id);
+            OpenShare(post);
         }
 
         var iconSize = CardActionIconSize * scale;
