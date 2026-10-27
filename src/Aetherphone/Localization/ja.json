@@ -3319,6 +3319,7 @@
   "aethergram.collabRemovedToast": "コラボ相手を削除しました",
   "aethergram.collabLeftToast": "この投稿から外れました",
   "aethergram.collabFailed": "コラボを更新できませんでした。もう一度お試しください。",
+  "aethergram.collabUnavailable": "この相手はコラボに招待できません。別の相手を選ぶか、選択を解除してください。",
   "aethergram.editPostFailed": "変更を保存できませんでした",
   "aethergram.editedStamp": "{0} · 編集済み",
   "aethergram.deleteCommentFailed": "コメントを削除できませんでした",

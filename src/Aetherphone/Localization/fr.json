@@ -3319,6 +3319,7 @@
   "aethergram.collabRemovedToast": "Collaborateur retiré",
   "aethergram.collabLeftToast": "Vous avez quitté cette publication",
   "aethergram.collabFailed": "Impossible de mettre à jour la collaboration. Réessayez.",
+  "aethergram.collabUnavailable": "Cette personne ne peut pas être invitée à collaborer. Choisissez quelqu'un d'autre ou retirez la sélection.",
   "aethergram.editPostFailed": "Impossible d'enregistrer les modifications",
   "aethergram.editedStamp": "{0} · Modifié",
   "aethergram.deleteCommentFailed": "Impossible de supprimer le commentaire",

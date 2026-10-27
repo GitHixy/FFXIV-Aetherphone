@@ -7709,6 +7709,7 @@ internal static class L
         public static readonly LocString CollabRemovedToast = new("aethergram.collabRemovedToast", "Collaborator removed");
         public static readonly LocString CollabLeftToast = new("aethergram.collabLeftToast", "You left this post");
         public static readonly LocString CollabFailed = new("aethergram.collabFailed", "Couldn't update the collab. Try again.");
+        public static readonly LocString CollabUnavailable = new("aethergram.collabUnavailable", "That person can't be invited to collaborate. Choose someone else or clear the collaborator.");
         public static readonly LocString EditPostFailed = new("aethergram.editPostFailed", "Couldn't save the changes");
         public static readonly LocString EditedStamp = new("aethergram.editedStamp", "{0} · Edited");
         public static readonly LocString DeleteCommentFailed = new("aethergram.deleteCommentFailed", "Couldn't delete the comment");

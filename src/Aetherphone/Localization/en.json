@@ -3319,6 +3319,7 @@
   "aethergram.collabRemovedToast": "Collaborator removed",
   "aethergram.collabLeftToast": "You left this post",
   "aethergram.collabFailed": "Couldn't update the collab. Try again.",
+  "aethergram.collabUnavailable": "That person can't be invited to collaborate. Choose someone else or clear the collaborator.",
   "aethergram.editPostFailed": "Couldn't save the changes",
   "aethergram.editedStamp": "{0} · Edited",
   "aethergram.deleteCommentFailed": "Couldn't delete the comment",

@@ -3319,6 +3319,7 @@
   "aethergram.collabRemovedToast": "Соавтор удалён",
   "aethergram.collabLeftToast": "Вы вышли из этой публикации",
   "aethergram.collabFailed": "Не удалось обновить соавторство. Попробуйте ещё раз.",
+  "aethergram.collabUnavailable": "Этого человека нельзя пригласить в соавторы. Выберите другого или сбросьте выбор.",
   "aethergram.editPostFailed": "Не удалось сохранить изменения",
   "aethergram.editedStamp": "{0} · Изменено",
   "aethergram.deleteCommentFailed": "Не удалось удалить комментарий",

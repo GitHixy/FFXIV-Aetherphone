@@ -3319,6 +3319,7 @@
   "aethergram.collabRemovedToast": "Ortak çalışan kaldırıldı",
   "aethergram.collabLeftToast": "Bu gönderiden ayrıldın",
   "aethergram.collabFailed": "Ortak çalışma güncellenemedi. Tekrar dene.",
+  "aethergram.collabUnavailable": "Bu kişi ortak çalışmaya davet edilemiyor. Başka birini seç ya da seçimi temizle.",
   "aethergram.editPostFailed": "Değişiklikler kaydedilemedi",
   "aethergram.editedStamp": "{0} · Düzenlendi",
   "aethergram.deleteCommentFailed": "Yorum silinemedi",
