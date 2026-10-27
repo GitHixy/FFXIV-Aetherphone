@@ -67,6 +67,7 @@ internal sealed partial class FeedbackApp
 
     private void DrawCompose(Rect area)
     {
+        AcceptImages(area);
         var scale = UiScale.Current;
         var context = new PhoneContext(area, theme, navigation);
         var navBar = AppHeader.BeginLargeTitle(context);
@@ -613,6 +614,7 @@ internal sealed partial class FeedbackApp
     private void DiscardDraft()
     {
         draft.Clear();
+        intake.Discard();
         sendFailure.Clear();
         attachmentCountCache = -1;
         if (router.Current.Screen == FeedbackScreen.Compose)
