@@ -106,7 +106,7 @@ internal sealed partial class StoryViewerOverlay
         Action<StoryDto>? delete = null, Func<StoryDto, StoryViewers>? viewers = null, Action? exhausted = null,
         Func<bool>? nextGroup = null, Func<bool>? previousGroup = null, bool startAtEnd = false,
         StoryReplyPrompt? reply = null, Action? loadMoreViewers = null, Action<StoryDto>? highlight = null,
-        Action<StoryDto>? toggleLike = null, string? replyTo = null)
+        Action<StoryDto>? toggleLike = null, string? replyTo = null, int startIndex = -1)
     {
         onToggleLike = toggleLike;
         replyName = replyTo;
@@ -131,7 +131,9 @@ internal sealed partial class StoryViewerOverlay
         sheetOpen = false;
         sheetReveal = new Spring(0f);
         seenHover = new Spring(0f);
-        index = startAtEnd && items.Length > 0 ? items.Length - 1 : FirstUnseen(items);
+        index = startIndex >= 0 && items.Length > 0 ? Math.Min(startIndex, items.Length - 1)
+            : startAtEnd && items.Length > 0 ? items.Length - 1
+            : FirstUnseen(items);
         elapsed = 0f;
         dragOffset = 0f;
         seenPillBounds = default;

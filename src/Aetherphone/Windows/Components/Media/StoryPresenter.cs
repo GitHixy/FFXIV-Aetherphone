@@ -111,6 +111,33 @@ internal sealed class StoryPresenter : IDisposable
             replyTo: ownerName);
     }
 
+    public void OpenArchived(StoryDto[] items, int startIndex, string label, string? avatarUrl,
+        Action<StoryDto> delete)
+    {
+        Close();
+        detached = true;
+        viewerItems = items;
+        viewer.Open(items, label, avatarUrl, IgnoreSeen, true, delete, highlight: highlightStory,
+            startIndex: startIndex);
+    }
+
+    public void DropDetached(string storyId)
+    {
+        if (!detached || viewerItems is not { } items)
+        {
+            return;
+        }
+
+        var kept = StoryArchiveStore.Without(items, storyId);
+        if (ReferenceEquals(kept, items))
+        {
+            return;
+        }
+
+        viewerItems = kept;
+        viewer.Replace(kept);
+    }
+
     public void OpenRing(StoryRingDto ring)
     {
         pendingRing = ring;

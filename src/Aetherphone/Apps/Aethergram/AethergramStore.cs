@@ -70,7 +70,7 @@ internal sealed partial class AethergramStore : SocialFeedStore
     // the other carousel photos are baked to their own boxes and cover-fit into the frame at
     // draw time.
     public void CreateGram(string[] sourcePaths, WallpaperCrop[] crops, PostAspect[] aspects, PhotoEdit[] edits,
-        string caption, PhotoTagInput[]? photoTags, bool sensitive, string? collaboratorId, string[]? altTexts,
+        string caption, PhotoTagInput[]? photoTags, bool sensitive, string[]? collaboratorIds, string[]? altTexts,
         Action<bool> onComplete)
     {
         if (posting || sourcePaths.Length == 0)
@@ -136,7 +136,7 @@ internal sealed partial class AethergramStore : SocialFeedStore
             }
 
             var created = await grams.CreateAsync(caption.Trim(), keys, containerWidth, containerHeight, photoTags,
-                sensitive, collaboratorId, altTexts, token, RecordCreateFailure).ConfigureAwait(false);
+                sensitive, collaboratorIds, altTexts, token, RecordCreateFailure).ConfigureAwait(false);
             if (created is null)
             {
                 return false;

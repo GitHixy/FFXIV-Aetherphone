@@ -37,11 +37,10 @@ internal sealed partial class AethergramApp
 
             var contentTop = ImGui.GetCursorPosY();
             var jumpY = -1f;
-            var observesImpressions = source == PostSource.Explore;
+            var observesImpressions = ViewSourceFor(source, out var viewSource);
             if (observesImpressions)
             {
-                var viewportTop = ImGui.GetWindowPos().Y;
-                store.BeginImpressions(viewportTop, viewportTop + ImGui.GetWindowSize().Y, ImGui.GetIO().DeltaTime);
+                BeginImpressionPass(viewSource);
             }
 
             postsVirtualizer.BeginFrame(stepping: configuration);
@@ -100,9 +99,14 @@ internal sealed partial class AethergramApp
 
     private void DrawPostGridScreen(Rect area, PostSource source, LocString emptyTitle, LocString emptyHint)
     {
-        var scale = UiScale.Current;
         DrawScreenHeader(area, PostsSubtitle(source));
-        var listRect = new Rect(new Vector2(area.Min.X, area.Min.Y + AppHeader.Height * scale), area.Max);
+        DrawPostGridBody(new Rect(new Vector2(area.Min.X, area.Min.Y + AppHeader.Height * UiScale.Current), area.Max),
+            source, emptyTitle, emptyHint);
+    }
+
+    private void DrawPostGridBody(Rect listRect, PostSource source, LocString emptyTitle, LocString emptyHint)
+    {
+        var scale = UiScale.Current;
         var posts = PostsOf(source);
         using (AppSurface.BeginEdgeToEdge(listRect))
         {

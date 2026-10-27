@@ -16,17 +16,17 @@ public sealed class FeedSignalQueueTests
         var sent = new TaskCompletionSource<string[]>(TaskCreationOptions.RunContinuationsAsynchronously);
         using var work = new StoreWork("FeedSignalQueueTests");
         var queue = new FeedSignalQueue(
-            (postIds, _) =>
+            (postIds, _, _) =>
             {
                 sent.TrySetResult(postIds);
                 return Task.FromResult(true);
             },
-            (_, _, _) => Task.FromResult(true),
+            (_, _, _, _) => Task.FromResult(true),
             work);
 
         for (var index = 0; index < 12; index++)
         {
-            queue.MarkSeen("post-" + index);
+            queue.MarkSeen("post-" + index, PostViewSource.ForYou);
         }
 
         queue.Tick(DateTime.UtcNow);
@@ -42,12 +42,12 @@ public sealed class FeedSignalQueueTests
     {
         using var work = new StoreWork("FeedSignalQueueTests");
         var queue = new FeedSignalQueue(
-            (_, _) => Task.FromResult(true),
             (_, _, _) => Task.FromResult(true),
+            (_, _, _, _) => Task.FromResult(true),
             work);
 
-        queue.MarkSeen("post-one");
-        queue.MarkSeen("post-two");
+        queue.MarkSeen("post-one", PostViewSource.ForYou);
+        queue.MarkSeen("post-two", PostViewSource.ForYou);
         queue.Tick(DateTime.UtcNow);
         Assert.Equal(2, queue.PendingCount);
 
@@ -61,15 +61,15 @@ public sealed class FeedSignalQueueTests
         var sent = new TaskCompletionSource<string[]>(TaskCreationOptions.RunContinuationsAsynchronously);
         using var work = new StoreWork("FeedSignalQueueTests");
         var queue = new FeedSignalQueue(
-            (postIds, _) =>
+            (postIds, _, _) =>
             {
                 sent.TrySetResult(postIds);
                 return Task.FromResult(true);
             },
-            (_, _, _) => Task.FromResult(true),
+            (_, _, _, _) => Task.FromResult(true),
             work);
 
-        queue.MarkSeen("post-one");
+        queue.MarkSeen("post-one", PostViewSource.ForYou);
         queue.Flush(DateTime.UtcNow);
 
         Assert.True(await Waited(sent.Task, Arrives));
@@ -83,21 +83,21 @@ public sealed class FeedSignalQueueTests
         using var gate = new SemaphoreSlim(0);
         using var work = new StoreWork("FeedSignalQueueTests");
         var queue = new FeedSignalQueue(
-            (_, _) => Task.FromResult(true),
-            (_, _, _) =>
+            (_, _, _) => Task.FromResult(true),
+            (_, _, _, _) =>
             {
                 gate.Release();
                 return Task.FromResult(true);
             },
             work);
 
-        queue.Signal("post-one", FeedSignalKinds.ProfileOpen);
-        queue.Signal("post-one", FeedSignalKinds.ProfileOpen);
+        queue.Signal("post-one", FeedSignalKinds.ProfileOpen, PostViewSource.ForYou);
+        queue.Signal("post-one", FeedSignalKinds.ProfileOpen, PostViewSource.ForYou);
 
         Assert.True(await gate.WaitAsync(Arrives));
         Assert.False(await gate.WaitAsync(StaysQuiet));
 
-        queue.Signal("post-one", FeedSignalKinds.Send);
+        queue.Signal("post-one", FeedSignalKinds.Send, PostViewSource.ForYou);
         Assert.True(await gate.WaitAsync(Arrives));
     }
 
@@ -108,16 +108,16 @@ public sealed class FeedSignalQueueTests
         using var gate = new SemaphoreSlim(0);
         using var work = new StoreWork("FeedSignalQueueTests");
         var queue = new FeedSignalQueue(
-            (_, _) =>
+            (_, _, _) =>
             {
                 attempts++;
                 gate.Release();
                 return Task.FromResult(false);
             },
-            (_, _, _) => Task.FromResult(true),
+            (_, _, _, _) => Task.FromResult(true),
             work);
 
-        queue.MarkSeen("post-one");
+        queue.MarkSeen("post-one", PostViewSource.ForYou);
         queue.Flush(DateTime.UtcNow);
         Assert.True(await gate.WaitAsync(Arrives));
 
@@ -143,13 +143,13 @@ public sealed class FeedSignalQueueTests
     {
         using var work = new StoreWork("FeedSignalQueueTests");
         var queue = new FeedSignalQueue(
-            (_, _) => Task.FromResult(true),
             (_, _, _) => Task.FromResult(true),
+            (_, _, _, _) => Task.FromResult(true),
             work);
 
         for (var index = 0; index < FeedSignalQueue.PendingCap + 50; index++)
         {
-            queue.MarkSeen("post-" + index);
+            queue.MarkSeen("post-" + index, PostViewSource.ForYou);
         }
 
         Assert.Equal(FeedSignalQueue.PendingCap, queue.PendingCount);

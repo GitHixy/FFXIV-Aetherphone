@@ -42,6 +42,7 @@ internal sealed partial class AethergramApp
         }
 
         BeginEditPostAltTexts(post, PostMedia.Photos(post.MediaUrls, post.MediaUrl).Length);
+        BeginEditPostCollab();
         editPostMentions.Close();
         captionEmoji.Close();
         personPicker.Close();
@@ -50,6 +51,7 @@ internal sealed partial class AethergramApp
 
     private void DrawEditPost(Rect area)
     {
+        ApplyEditPostCollab();
         if (editPost is not { } post)
         {
             back();
@@ -71,6 +73,7 @@ internal sealed partial class AethergramApp
         }
 
         personPicker.Gate();
+        GateComposeCollabPicker();
         var scale = UiScale.Current;
         var photos = PostMedia.Photos(post.MediaUrls, post.MediaUrl);
         if (composeTagMode)
@@ -93,7 +96,8 @@ internal sealed partial class AethergramApp
               + ComposeStatusGap * scale
             : 0f;
         var cardsBottom = area.Max.Y - margin - statusHeight;
-        var optionsCard = new Rect(new Vector2(left, cardsBottom - ComposeRowHeight * 2f * scale),
+        var optionsRows = 2f + CollabOptionRows(CollabStates.Count(post));
+        var optionsCard = new Rect(new Vector2(left, cardsBottom - ComposeRowHeight * optionsRows * scale),
             new Vector2(right, cardsBottom));
         var captionBottom = optionsCard.Min.Y - ComposeCardGap * scale;
         var captionHeight = (ComposeCardPad * 2f + ComposeCaptionFieldHeight + ComposeMetaGap + ComposeMetaRowHeight)
@@ -114,7 +118,7 @@ internal sealed partial class AethergramApp
         DrawEditPostDots(preview, photos.Length, page, dotsBlock);
         DrawCaptionCard(captionCard, area, scale, "##aethergramEditCaption", true, ref editPostCaption,
             editPostMentions);
-        if (DrawComposeOptionsCard(optionsCard, scale, ref editPostSensitive))
+        if (DrawComposeOptionsCard(optionsCard, scale, ref editPostSensitive, CollabRows.Edit))
         {
             composeTagMode = true;
         }
@@ -132,6 +136,8 @@ internal sealed partial class AethergramApp
             captionEmoji.DrawPanel(new Rect(new Vector2(area.Min.X, panelBottom - panelHeight),
                 new Vector2(area.Max.X, panelBottom)), ui, ref editPostCaption, MaxCaptionLength);
         }
+
+        DrawEditCollabPicker(area, post);
     }
 
     private void DrawEditPostTagging(Rect area, PostDto post, string[] photos, float scale)

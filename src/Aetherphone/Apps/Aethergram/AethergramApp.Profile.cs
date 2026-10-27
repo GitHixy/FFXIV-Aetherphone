@@ -601,15 +601,6 @@ internal sealed partial class AethergramApp
         }
     }
 
-    private void OpenArchive()
-    {
-        store.RefreshArchived();
-        router.Push(AethergramRoute.Archive);
-    }
-
-    private void DrawArchive(Rect area) =>
-        DrawPostGridScreen(area, PostSource.Archive, L.Social.ArchiveEmpty, L.Social.ArchiveEmptyHint);
-
     private void OpenLiked()
     {
         store.RefreshLiked();

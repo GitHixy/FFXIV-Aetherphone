@@ -125,6 +125,20 @@ internal static class L
         public static readonly LocString FeedHowItWorksQuality = new("social.feedHowItWorksQuality", "A post rises on how the people who saw it responded, never on how many followers its author has. Comments and replies count far more than a heart.");
         public static readonly LocString FeedHowItWorksPeople = new("social.feedHowItWorksPeople", "People you interact with, and players who like the same posts you do, lift what appears for you.");
         public static readonly LocString FeedHowItWorksFair = new("social.feedHowItWorksFair", "Posting hour does not decide reach. A post made while most players are asleep waits for them instead of expiring, and every new post is shown to a few people before it competes on numbers. A new player's first few posts are shown near the top until someone responds to them.");
+        public static readonly LocString ViewsSheetCaption = new("social.viewsSheetCaption", "People who saw this post, each counted once");
+        public static readonly LocString ViewsFollowers = new("social.viewsFollowers", "Followers");
+        public static readonly LocString ViewsNonFollowers = new("social.viewsNonFollowers", "Non-followers");
+        public static readonly LocString ViewsSources = new("social.viewsSources", "Where views came from");
+        public static readonly LocString ViewsSourceHome = new("social.viewsSourceHome", "Home");
+        public static readonly LocString ViewsSourceExplore = new("social.viewsSourceExplore", "Explore");
+        public static readonly LocString ViewsSourceProfile = new("social.viewsSourceProfile", "Profile");
+        public static readonly LocString ViewsSourceHashtags = new("social.viewsSourceHashtags", "Hashtags and search");
+        public static readonly LocString ViewsSourceStories = new("social.viewsSourceStories", "Stories");
+        public static readonly LocString ViewsSourceOther = new("social.viewsSourceOther", "Other");
+        public static readonly LocString ViewsSourceEarlier = new("social.viewsSourceEarlier", "Earlier");
+        public static readonly LocString ViewsEarlierHint = new("social.viewsEarlierHint", "Earlier counts views from before sources were recorded, so it has no source or follower split.");
+        public static readonly LocString ViewsPercent = new("social.viewsPercent", "{0}%");
+        public static readonly LocString ViewsLoadFailed = new("social.viewsLoadFailed", "Views could not load. Close this and try again.");
         public static readonly LocString RoleManagement = new("social.roleManagement", "Management");
         public static readonly LocString RoleDeveloper = new("social.roleDeveloper", "Developer");
         public static readonly LocString RoleModerator = new("social.roleModerator", "Moderator");
@@ -313,7 +327,7 @@ internal static class L
         public static readonly LocString NewHighlight = new("story.newHighlight", "New highlight");
         public static readonly LocString EditHighlight = new("story.editHighlight", "Edit highlight");
         public static readonly LocString DeleteHighlight = new("story.deleteHighlight", "Delete highlight");
-        public static readonly LocString DeleteHighlightMessage = new("story.deleteHighlightMessage", "Delete this highlight? Expired stories that are only in this highlight can't be brought back.");
+        public static readonly LocString DeleteHighlightMessage = new("story.deleteHighlightMessage", "Delete this highlight? Its stories stay in your archive. Expired stories that were not saved there can't be brought back.");
         public static readonly LocString DeleteHighlightFailed = new("story.deleteHighlightFailed", "Couldn't delete the highlight");
         public static readonly LocString HighlightTitleHint = new("story.highlightTitleHint", "Highlight name");
         public static readonly LocString HighlightDefaultTitle = new("story.highlightDefaultTitle", "Highlights");
@@ -340,6 +354,12 @@ internal static class L
         public static readonly LocString PostCannotBeShared = new("story.postCannotBeShared", "This post can't be added to a story.");
         public static readonly LocString LikesUnsupported = new("story.likesUnsupported", "Story likes are only available in Aethergram.");
         public static readonly LocString HighlightTitleLength = new("story.highlightTitleLength", "A highlight name needs 1 to {0} characters.");
+        public static readonly LocString ArchiveStoriesTab = new("story.archiveStoriesTab", "Stories");
+        public static readonly LocString ArchiveEmpty = new("story.archiveEmpty", "No archived stories");
+        public static readonly LocString ArchiveEmptyHint = new("story.archiveEmptyHint", "Your stories are kept here after they disappear. Only you can see your archive.");
+        public static readonly LocString DeleteArchivedMessage = new("story.deleteArchivedMessage", "Delete this story from your archive? It also leaves any highlight it is in.");
+        public static readonly LocString SaveToArchive = new("story.saveToArchive", "Save story to archive");
+        public static readonly LocString SaveToArchiveHint = new("story.saveToArchiveHint", "Keep your stories in a private archive after they disappear, so you can add them to highlights later.");
         public static readonly LocString ViewersTrimmed = new("story.viewersTrimmed", "Showing the latest {0} of {1}");
         public static readonly LocString DeleteFailed = new("story.deleteFailed", "Couldn't delete the story");
     }
@@ -7703,7 +7723,6 @@ internal static class L
         public static readonly LocString DeleteFailed = new("aethergram.deleteFailed", "Couldn't delete the post");
         public static readonly LocString EditPost = new("aethergram.editPost", "Edit post");
         public static readonly LocString CollabInvite = new("aethergram.collabInvite", "Invite collaborator");
-        public static readonly LocString CollabClear = new("aethergram.collabClear", "Clear collaborator");
         public static readonly LocString CollabAnd = new("aethergram.collabAnd", "and");
         public static readonly LocString CollabInvited = new("aethergram.collabInvited", "invited you to collaborate on a post");
         public static readonly LocString CollabAcceptedActivity = new("aethergram.collabAcceptedActivity", "accepted your collab invite");
@@ -7712,7 +7731,6 @@ internal static class L
         public static readonly LocString CollabPromptTitle = new("aethergram.collabPromptTitle", "Invite to collaborate");
         public static readonly LocString CollabPromptHint = new("aethergram.collabPromptHint", "Accept to show this post on your profile and to your followers.");
         public static readonly LocString CollabRemove = new("aethergram.collabRemove", "Remove collaborator");
-        public static readonly LocString CollabRemoveMessage = new("aethergram.collabRemoveMessage", "The post leaves their profile and shows only you as the author.");
         public static readonly LocString CollabLeave = new("aethergram.collabLeave", "Remove me from post");
         public static readonly LocString CollabLeaveMessage = new("aethergram.collabLeaveMessage", "The post leaves your profile and no longer shows you as a collaborator.");
         public static readonly LocString CollabRemoveConfirm = new("aethergram.collabRemoveConfirm", "Remove");
@@ -7722,6 +7740,15 @@ internal static class L
         public static readonly LocString CollabLeftToast = new("aethergram.collabLeftToast", "You left this post");
         public static readonly LocString CollabFailed = new("aethergram.collabFailed", "Couldn't update the collab. Try again.");
         public static readonly LocString CollabUnavailable = new("aethergram.collabUnavailable", "That person can't be invited to collaborate. Choose someone else or clear the collaborator.");
+        public static readonly LocString CollabInviteMany = new("aethergram.collabInviteMany", "Invite collaborators");
+        public static readonly LocPlural CollabRemaining = new("aethergram.collabRemaining", "{0} left", "{0} left");
+        public static readonly LocPlural CollabOthers = new("aethergram.collabOthers", "and {0} other", "and {0} others");
+        public static readonly LocString CollabAuthors = new("aethergram.collabAuthors", "Authors");
+        public static readonly LocString CollabSection = new("aethergram.collabSection", "Collaborators");
+        public static readonly LocString CollabPendingChip = new("aethergram.collabPendingChip", "{0} (invited)");
+        public static readonly LocString CollabRemoveOneMessage = new("aethergram.collabRemoveOneMessage", "They will be taken off this post.");
+        public static readonly LocString CollabInviteSent = new("aethergram.collabInviteSent", "Invite sent");
+        public static readonly LocString CollabTooMany = new("aethergram.collabTooMany", "A post can have up to {0} collaborators.");
         public static readonly LocString EditPostFailed = new("aethergram.editPostFailed", "Couldn't save the changes");
         public static readonly LocString EditedStamp = new("aethergram.editedStamp", "{0} · Edited");
         public static readonly LocString DeleteCommentFailed = new("aethergram.deleteCommentFailed", "Couldn't delete the comment");

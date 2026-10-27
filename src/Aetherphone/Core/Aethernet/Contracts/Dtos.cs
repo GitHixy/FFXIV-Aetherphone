@@ -95,7 +95,8 @@ internal sealed record UserDto(
     bool ShowOnLeaderboards = false,
     bool ShowInHallOfFame = false,
     GlamBannerDto? BannerGlam = null,
-    bool IsMuted = false) : IIdentified;
+    bool IsMuted = false,
+    bool SaveStoriesToArchive = false) : IIdentified;
 
 internal sealed record UpdateProfileRequest(string? DisplayName, string? Handle, string? Bio, string? AvatarUrl = null,
     string? BannerUrl = null,
@@ -177,7 +178,7 @@ internal sealed record UpdateRegionRequest(string? Region);
 
 internal sealed record UpdateChatPrivacyRequest(bool? ShareReadReceipts, bool? SharePresence);
 
-internal sealed record UpdateAccountPrivacyRequest(bool? IsPrivate);
+internal sealed record UpdateAccountPrivacyRequest(bool? IsPrivate, bool? SaveStoriesToArchive = null);
 
 internal sealed record FollowResultDto(bool Following, bool Requested);
 
@@ -224,6 +225,8 @@ internal sealed record PhotoTagDto(
     int State);
 
 internal sealed record CollaboratorDto(string UserId, string Handle, string DisplayName, string? AvatarUrl, int State);
+
+internal sealed record InviteCollaboratorRequest(string UserId);
 
 internal sealed record PostDto(
     string Id,
@@ -273,7 +276,8 @@ internal sealed record PostDto(
     string[]? AltTexts = null,
     int EditCount = 0,
     int ThreadCount = 0,
-    bool AuthorMuted = false) : IIdentified
+    bool AuthorMuted = false,
+    CollaboratorDto[]? Collaborators = null) : IIdentified
 {
     [JsonIgnore] public string[]? GifMedia { get; } = GifUrl is null ? null : new[] { GifUrl };
 }
@@ -289,9 +293,9 @@ internal sealed record PinPostResponse(PostDto Post, string? ReplacedPostId);
 
 internal readonly record struct FeedItemNote(string Source, double Score, string? Breakdown);
 
-internal sealed record FeedSeenRequest(string[] PostIds);
+internal sealed record FeedSeenRequest(string[] PostIds, int[] Sources);
 
-internal sealed record FeedSignalRequest(string PostId, int Kind);
+internal sealed record FeedSignalRequest(string PostId, int Kind, int Source);
 
 internal sealed record UserSearchResult(UserDto[] Users);
 
@@ -324,7 +328,8 @@ internal sealed record CreateGramRequest(
     PhotoTagInput[]? PhotoTags = null,
     bool Sensitive = false,
     string? CollaboratorId = null,
-    string[]? AltTexts = null);
+    string[]? AltTexts = null,
+    string[]? CollaboratorIds = null);
 
 internal sealed record CreateStoryRequest(string Caption, string MediaKey, int Width, int Height, int Audience = 0,
     string? SharedPostId = null);

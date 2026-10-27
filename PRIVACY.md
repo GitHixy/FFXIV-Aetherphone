@@ -110,7 +110,7 @@ We keep personal data only as long as we need it for the purposes in this policy
 | Account, profile and settings | Until you delete your account |
 | Posts, comments and other content | Until you delete it or your account, with the exceptions explained below this table |
 | Private messages | Until you delete them or your account, or 7 days after everyone in the conversation has cleared it. Velvet conversations: 7 days after the connection ends. Yellow Pages conversations: together with the listing, not when cleared |
-| Stories, listings, events, notifications and game rooms | Deleted automatically within 60 days after they end |
+| Stories, listings, events, notifications and game rooms | Deleted automatically within 60 days after they end. Aethergram stories are kept in your private archive until you delete them or your account, except a story that ends while **Save story to archive** is turned off in Aethergram's settings. A story in a highlight is kept while it is in the highlight |
 | Which posts your feeds showed you, and whether you opened or shared them | 4 days |
 | Radio listening and mini-game sessions for Aether Coin quests | 7 days |
 | Call records | Until you delete your account |

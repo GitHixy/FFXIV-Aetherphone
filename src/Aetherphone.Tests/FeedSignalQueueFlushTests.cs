@@ -12,18 +12,18 @@ public sealed class FeedSignalQueueFlushTests
         var batches = new List<string[]>();
         using var work = new StoreWork("FeedSignalQueueFlushTests");
         var queue = new FeedSignalQueue(
-            (postIds, _) =>
+            (postIds, _, _) =>
             {
                 batches.Add(postIds);
                 return Task.FromResult(true);
             },
-            (_, _, _) => Task.FromResult(true),
+            (_, _, _, _) => Task.FromResult(true),
             work);
 
         var total = FeedSignalQueue.BatchMax + 10;
         for (var index = 0; index < total; index++)
         {
-            queue.MarkSeen("post-" + index);
+            queue.MarkSeen("post-" + index, PostViewSource.ForYou);
         }
 
         await queue.FlushAsync(CancellationToken.None);
@@ -40,16 +40,16 @@ public sealed class FeedSignalQueueFlushTests
         var attempts = 0;
         using var work = new StoreWork("FeedSignalQueueFlushTests");
         var queue = new FeedSignalQueue(
-            (_, _) =>
+            (_, _, _) =>
             {
                 attempts++;
                 return Task.FromResult(false);
             },
-            (_, _, _) => Task.FromResult(true),
+            (_, _, _, _) => Task.FromResult(true),
             work);
 
-        queue.MarkSeen("post-one");
-        queue.MarkSeen("post-two");
+        queue.MarkSeen("post-one", PostViewSource.ForYou);
+        queue.MarkSeen("post-two", PostViewSource.ForYou);
 
         await queue.FlushAsync(CancellationToken.None);
 
@@ -63,12 +63,12 @@ public sealed class FeedSignalQueueFlushTests
         var attempts = 0;
         using var work = new StoreWork("FeedSignalQueueFlushTests");
         var queue = new FeedSignalQueue(
-            (_, _) =>
+            (_, _, _) =>
             {
                 attempts++;
                 return Task.FromResult(true);
             },
-            (_, _, _) => Task.FromResult(true),
+            (_, _, _, _) => Task.FromResult(true),
             work);
 
         await queue.FlushAsync(CancellationToken.None);

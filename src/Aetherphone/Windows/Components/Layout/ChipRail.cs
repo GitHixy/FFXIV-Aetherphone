@@ -26,6 +26,8 @@ internal sealed class ChipRail
     private const float ArrowGlyphFraction = 0.95f;
     private const float PageFraction = 0.75f;
     private const float OverflowEpsilon = 0.5f;
+    private const float TrailingGlyphRoom = 13f;
+    private const float TrailingGlyphSize = 12f;
 
     private static readonly Vector4 White = new(1f, 1f, 1f, 1f);
     private static readonly Vector4 Black = new(0f, 0f, 0f, 1f);
@@ -48,7 +50,7 @@ internal sealed class ChipRail
 
     public int Draw(Rect row, AppSkin ui, ReadOnlySpan<string> labels, ReadOnlySpan<bool> active, bool overlay = false,
         string? anchorKey = null, float labelPadding = DefaultLabelPadding, bool centered = false,
-        bool interactive = true, float chipHeight = ChipHeight)
+        bool interactive = true, float chipHeight = ChipHeight, string? trailingGlyph = null)
     {
         if (labels.Length == 0)
         {
@@ -65,7 +67,7 @@ internal sealed class ChipRail
         var content = SidePad * 2f * scale;
         for (var index = 0; index < labels.Length; index++)
         {
-            content += ChipWidth(labels[index], scale, labelPadding) + (index > 0 ? gap : 0f);
+            content += ChipWidth(labels[index], scale, labelPadding, trailingGlyph) + (index > 0 ? gap : 0f);
         }
 
         maxOffset = MathF.Max(0f, content - row.Width);
@@ -84,11 +86,11 @@ internal sealed class ChipRail
         var tapped = -1;
         for (var index = 0; index < labels.Length; index++)
         {
-            var width = ChipWidth(labels[index], scale, labelPadding);
+            var width = ChipWidth(labels[index], scale, labelPadding, trailingGlyph);
             if (cursorX + width >= row.Min.X && cursorX <= row.Max.X
                 && DrawChip(drawList, ui, labels[index], active[index],
                     new Vector2(cursorX, row.Center.Y), width, chipHeight * scale, scale, overlay, arrowHovered,
-                    interactive, row))
+                    interactive, row, trailingGlyph))
             {
                 tapped = index;
             }
@@ -156,27 +158,29 @@ internal sealed class ChipRail
         }
     }
 
-    private static float ChipWidth(string label, float scale, float labelPadding) =>
-        WidthFor(Typography.Measure(label, LabelStyle).X, labelPadding, scale);
+    private static float ChipWidth(string label, float scale, float labelPadding, string? trailingGlyph) =>
+        WidthFor(Typography.Measure(label, LabelStyle).X, labelPadding, scale)
+        + (trailingGlyph is null ? 0f : TrailingGlyphRoom * scale);
 
     public static float WidthFor(float labelWidth, float labelPadding, float scale) => labelWidth + labelPadding * scale;
 
     public static float LabelRoom(Rect chip) => chip.Width - chip.Height * 0.5f;
 
     private bool DrawChip(ImDrawListPtr drawList, AppSkin ui, string label, bool active, Vector2 leftCenter,
-        float width, float height, float scale, bool overlay, bool shadowed, bool interactive, Rect row)
+        float width, float height, float scale, bool overlay, bool shadowed, bool interactive, Rect row,
+        string? trailingGlyph)
     {
         var min = new Vector2(leftCenter.X, leftCenter.Y - height * 0.5f);
         var max = new Vector2(leftCenter.X + width, leftCenter.Y + height * 0.5f);
         var hitMin = Vector2.Max(min, row.Min);
         var hitMax = Vector2.Min(max, row.Max);
         var hovered = interactive && !shadowed && Hovered(hitMin, hitMax, overlay);
-        PaintChip(drawList, new Rect(min, max), label, active, hovered && !dragging, ui.Ink);
+        PaintChip(drawList, new Rect(min, max), label, active, hovered && !dragging, ui.Ink, trailingGlyph);
         return interactive && dragTravel <= DragSlop * scale && UiInteract.Click(hitMin, hitMax, hovered);
     }
 
     public static void PaintChip(ImDrawListPtr drawList, Rect rect, string label, bool active, bool highlighted,
-        in ControlInk ink)
+        in ControlInk ink, string? trailingGlyph = null)
     {
         var radius = rect.Height * 0.5f;
         var fill = active
@@ -184,9 +188,18 @@ internal sealed class ChipRail
             : Surfaces.Fill(ink, highlighted ? FillLevel.Secondary : FillLevel.Tertiary);
         Squircle.Fill(drawList, rect.Min, rect.Max, radius, ImGui.GetColorU32(fill));
         var labelInk = !active ? ink.Ink : Palette.RelativeLuminance(ink.Accent) > LightAccentLuminance ? Black : White;
-        var fitted = Typography.FitText(label, MathF.Max(1f, LabelRoom(rect)), LabelStyle);
+        var labelRect = rect;
+        if (trailingGlyph is not null)
+        {
+            var scale = UiScale.Current;
+            labelRect = new Rect(rect.Min, new Vector2(rect.Max.X - TrailingGlyphRoom * scale, rect.Max.Y));
+            PhoneIcon.Draw(drawList, new Vector2(rect.Max.X - radius, rect.Center.Y), trailingGlyph, labelInk,
+                TrailingGlyphSize * scale);
+        }
+
+        var fitted = Typography.FitText(label, MathF.Max(1f, LabelRoom(labelRect)), LabelStyle);
         var fittedSize = Typography.Measure(fitted, LabelStyle);
-        Typography.Draw(drawList, rect.Center - fittedSize * 0.5f, fitted, labelInk, LabelStyle);
+        Typography.Draw(drawList, labelRect.Center - fittedSize * 0.5f, fitted, labelInk, LabelStyle);
         if (highlighted)
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
