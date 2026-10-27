@@ -48,6 +48,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         Report,
         Block,
         NotInterested,
+        RemoveCollab,
     }
 
     private enum PostNotice
@@ -100,7 +101,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
     private const float CardLineGap = 4f;
     private const float CardCaptionScale = 0.95f;
     private const int GridColumns = 3;
-    private const int PostSheetMaxItems = 6;
+    private const int PostSheetMaxItems = 7;
     private const int MaxPinnedPosts = 3;
     private const float CardPinGlyphSize = 12f;
     private const float CardPinGlyphGap = 3f;
@@ -730,6 +731,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                 AddPostSheetItem(PostSheetAction.Archive, Loc.T(L.Social.ArchiveAction), false);
             }
 
+            AddCollabSheetItem(post);
             AddPostSheetItem(PostSheetAction.Delete, Loc.T(L.Aethergram.DeleteConfirm), true);
         }
         else
@@ -741,6 +743,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                 AddPostSheetItem(PostSheetAction.RemoveTag, Loc.T(L.PhotoTag.RemoveMe), true);
             }
 
+            AddCollabSheetItem(post);
             if (offerNotInterested)
             {
                 AddPostSheetItem(PostSheetAction.NotInterested, Loc.T(L.Social.NotInterested), false);
@@ -816,6 +819,9 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             case PostSheetAction.NotInterested:
                 store.MarkNotInterested(post.Id);
                 break;
+            case PostSheetAction.RemoveCollab:
+                AskRemoveCollab(post);
+                break;
         }
     }
 
@@ -880,6 +886,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
 
     private void DrainPostNotices()
     {
+        DrainCollabNotice();
         var notice = pendingPostNotice;
         if (notice == PostNotice.None)
         {
@@ -1312,8 +1319,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             AethergramArt.StoryRing(drawList, avatarCenter, ringRadius, scale, authorRing.HasUnseen);
         }
 
-        DrawAvatar(avatarCenter, avatarRadius - 1f * scale, displayName, string.Empty, post.AuthorAvatarUrl, 0.85f, 32,
-            Frames.Of(post.AuthorFrameId));
+        DrawCardAvatar(post, avatarCenter, avatarRadius - 1f * scale, displayName);
         var moreRadius = CardMoreRadius * scale;
         var moreCenter = new Vector2(origin.X + width - inset - moreRadius + 6f * scale, avatarCenter.Y);
         var nameLeft = avatarCenter.X + avatarRadius + CardNameGap * scale;
@@ -1323,7 +1329,8 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         var metaHeight = Typography.LineHeight(CardMetaStyle);
         var nameTop = avatarCenter.Y - (nameHeight + metaHeight + 1f * scale) * 0.5f;
         var drawnNameWidth = UserName.DrawAuto(drawList, "aethergram.card." + post.Id, displayName, post.AuthorBadges,
-            post.AuthorBadgeIds, nameLeft, nameTop, headerTextMaxWidth, CardNameStyle, Ink.TitleInk, theme);
+            post.AuthorBadgeIds, nameLeft, nameTop, CardAuthorNameWidth(post, headerTextMaxWidth), CardNameStyle,
+            Ink.TitleInk, theme);
         var nameMin = new Vector2(nameLeft, nameTop);
         var nameMax = new Vector2(nameLeft + drawnNameWidth, nameTop + nameHeight);
         if (UiInteract.Hover(nameMin, nameMax))
@@ -1362,6 +1369,8 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             OpenProfileFromPost(post.AuthorId, post.Id);
         }
 
+        DrawCollabByline(drawList, post, nameLeft + drawnNameWidth, nameTop, headerTextRight, avatarCenter,
+            avatarRadius - 1f * scale);
         var moreExtent = new Vector2(MathF.Max(moreRadius, Metrics.Size.TapTarget * 0.5f * scale));
         var moreHovered = UiInteract.Hover(moreCenter - moreExtent, moreCenter + moreExtent);
         if (moreHovered)
