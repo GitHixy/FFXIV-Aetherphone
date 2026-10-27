@@ -55,6 +55,7 @@ internal sealed partial class ChirperApp
         {
             ImGui.Dummy(new Vector2(0f, 6f * scale));
             DrawThreadHead(post);
+            DrawThreadChain(post);
             var comments = store.DetailComments;
             if (comments.Length == 0)
             {

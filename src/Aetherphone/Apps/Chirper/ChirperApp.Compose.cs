@@ -41,6 +41,7 @@ internal sealed partial class ChirperApp
             composePicking = false;
             composeSensitive = false;
             composePoll.Reset();
+            threadDraft.Clear();
             store.RefreshFeed(SocialFeedScope.Latest);
             store.RefreshFeed(SocialFeedScope.Following);
             feedScrollTopPending = true;
@@ -120,7 +121,7 @@ internal sealed partial class ChirperApp
             var availableInput = contentLimit - inputTop - quotePreviewHeight - stripHeight - pollEditorHeight
                 - statusHeight - 8f * scale;
             var desiredInput = MathF.Max(measuredText + 34f * scale, 96f * scale);
-            var inputHeight = MathF.Max(40f * scale, MathF.Min(desiredInput, availableInput));
+            var inputHeight = OpeningInputHeight(measuredText, desiredInput, availableInput);
             if (me is not null)
             {
                 DrawAvatar(drawList, new Vector2(origin.X + padX + avatarRadius, origin.Y + CellPadTop * scale + avatarRadius),
@@ -197,11 +198,13 @@ internal sealed partial class ChirperApp
                 }
             }
 
+            DrawThreadFollowUps(drawList, new Vector2(origin.X + padX + avatarRadius, origin.Y + CellPadTop * scale + avatarRadius),
+                inputX, inputWidth, inputTop + inputHeight + stripHeight + pollEditorHeight + quotePreviewHeight + statusHeight);
             if (composeEmoji.Open)
             {
                 var panel = new Rect(new Vector2(area.Min.X, panelTop),
                     new Vector2(area.Max.X, area.Max.Y - toolbarHeight));
-                composeEmoji.DrawPanel(panel, ui, ref draft, MaxPostLength);
+                composeEmoji.DrawPanel(panel, ui, ref FocusedComposeText(), MaxPostLength);
             }
 
             var typed = new Rect(new Vector2(inputX, inputTop),
@@ -218,9 +221,10 @@ internal sealed partial class ChirperApp
 
     private void DrawComposeHeader(Rect area)
     {
-        var actionLabel = store.Posting ? Loc.T(L.Chirper.Saving) : Loc.T(L.Chirper.ChirpAction);
+        var actionLabel = store.Posting ? Loc.T(L.Chirper.Saving)
+            : Loc.T(ComposingThread ? L.Chirper.ChirpAll : L.Chirper.ChirpAction);
         var canPost = (!string.IsNullOrWhiteSpace(draft) || composeAttachments.Count > 0)
-            && draft.Length <= MaxPostLength && !store.Posting;
+            && draft.Length <= MaxPostLength && !store.Posting && ThreadDraftReady();
         var action = HeaderActionRect(area, actionLabel);
         UiAnchors.Report("chirper.compose.post", action);
         var title = Loc.T(quoteTarget is not null ? L.Chirper.QuoteTitle : L.Chirper.NewChirp);
@@ -322,14 +326,15 @@ internal sealed partial class ChirperApp
             }
         }
 
-        var remaining = MaxPostLength - draft.Length;
+        var focusedLength = FocusedComposeText().Length;
+        var remaining = MaxPostLength - focusedLength;
         var ringRadius = ComposeRingRadius * scale;
         var ringCenter = new Vector2(area.Max.X - CellPadX * scale - 13f * scale, centerY);
         var ringColor = remaining < 0 ? ChirperInk.Danger
             : remaining < ComposeWarnRemaining ? ChirperInk.Warning
             : ChirperInk.Accent;
         ProgressRing.Track(ringCenter, ringRadius, ComposeRingStroke * scale, RingTrack);
-        ProgressRing.Fill(ringCenter, ringRadius, ComposeRingStroke * scale, draft.Length / (float)MaxPostLength,
+        ProgressRing.Fill(ringCenter, ringRadius, ComposeRingStroke * scale, focusedLength / (float)MaxPostLength,
             ringColor);
         if (remaining < ComposeWarnRemaining)
         {
@@ -343,6 +348,12 @@ internal sealed partial class ChirperApp
 
     private void Submit()
     {
+        if (ComposingThread)
+        {
+            SubmitThread();
+            return;
+        }
+
         if (AttachedComposeGif() is { } gif)
         {
             SubmitComposeGif(gif);

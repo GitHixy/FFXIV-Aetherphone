@@ -7473,6 +7473,10 @@ internal static class L
         public static readonly LocString PinMessage = new("chirper.pinMessage", "It will appear at the top of your profile and replace any chirp you pinned before.");
         public static readonly LocString PinConfirm = new("chirper.pinConfirm", "Pin");
         public static readonly LocString CopyChirp = new("chirper.copyChirp", "Copy chirp");
+        public static readonly LocString AddAnotherChirp = new("chirper.addAnotherChirp", "Add another chirp");
+        public static readonly LocString RemoveThreadChirp = new("chirper.removeThreadChirp", "Remove this chirp");
+        public static readonly LocString ChirpAll = new("chirper.chirpAll", "Chirp all");
+        public static readonly LocString ShowThread = new("chirper.showThread", "Show this thread");
         public static readonly LocPlural ReactionsLabel = new("chirper.reactionsLabel", "reaction", "reactions");
         public static readonly LocString OriginalPoster = new("chirper.originalPoster", "OP");
         public static readonly LocString ChirpAction = new("chirper.chirpAction", "Chirp");
