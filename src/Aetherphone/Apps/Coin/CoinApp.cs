@@ -40,6 +40,7 @@ internal sealed partial class CoinApp : IResumableApp, ITabRouteTarget
     private readonly AethernetSession session;
     private readonly CoinStore store;
     private readonly CoinQuestStore quests;
+    private readonly SocialLauncher socialLauncher;
     private readonly CoinCatalogStore catalog;
     private readonly ConfirmService confirm;
     private readonly ConductGateService conduct;
@@ -79,7 +80,7 @@ internal sealed partial class CoinApp : IResumableApp, ITabRouteTarget
         ConductGateService conduct, Core.Social.BadgeCatalogStore badgeCatalog, Core.Media.RemoteImageCache images,
         Core.Casino.CasinoStore casino, Core.Social.FrameCatalogStore frameCatalog,
         Core.Social.LoadoutStore inventory, Core.Lodestone.LodestoneService lodestone, Configuration configuration,
-        CoinQuestStore quests)
+        CoinQuestStore quests, SocialLauncher socialLauncher)
     {
         this.session = session;
         this.store = store;
@@ -94,6 +95,7 @@ internal sealed partial class CoinApp : IResumableApp, ITabRouteTarget
         this.casino = casino;
         this.configuration = configuration;
         this.quests = quests;
+        this.socialLauncher = socialLauncher;
         router = new ViewRouter<CoinRoute>(CoinRoute.Root);
         drawView = DrawView;
         back = () => router.Pop();

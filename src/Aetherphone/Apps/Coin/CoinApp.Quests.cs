@@ -243,6 +243,11 @@ internal sealed partial class CoinApp
         if (UiInteract.Click(row.Min, row.Max, hovered))
         {
             UiFeedback.Play(UiSound.Tap);
+            if (CoinQuests.TryLaunchFor(quest, out var link))
+            {
+                socialLauncher.Request(appId, link);
+            }
+
             navigation.Open(appId);
         }
     }
