@@ -517,19 +517,34 @@ internal sealed partial class ChirperApp
             return false;
         }
 
-        var issue = composePoll.Validate();
-        if (issue != PollDraftIssue.None)
+        if (ReportComposePollIssue())
         {
-            composeStatus = issue switch
-            {
-                PollDraftIssue.OptionTooLong => Loc.T(L.Chirper.PollOptionTooLong, ChirperPolls.MaxOptionLength),
-                PollDraftIssue.DuplicateOption => Loc.T(L.Chirper.PollOptionDuplicate),
-                _ => Loc.T(L.Chirper.PollOptionEmpty),
-            };
             return true;
         }
 
         store.ComposePoll(draft, composePoll.ToInput(), ok => composeOutcome = ok ? 1 : 2, composeFailure.Set);
+        return true;
+    }
+
+    private bool ReportComposePollIssue()
+    {
+        if (!composePoll.Active)
+        {
+            return false;
+        }
+
+        var issue = composePoll.Validate();
+        if (issue == PollDraftIssue.None)
+        {
+            return false;
+        }
+
+        composeStatus = issue switch
+        {
+            PollDraftIssue.OptionTooLong => Loc.T(L.Chirper.PollOptionTooLong, ChirperPolls.MaxOptionLength),
+            PollDraftIssue.DuplicateOption => Loc.T(L.Chirper.PollOptionDuplicate),
+            _ => Loc.T(L.Chirper.PollOptionEmpty),
+        };
         return true;
     }
 }

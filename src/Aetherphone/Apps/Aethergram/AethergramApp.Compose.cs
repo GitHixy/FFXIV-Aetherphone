@@ -110,6 +110,12 @@ internal sealed partial class AethergramApp
 
     private void StartCompose(bool avatarMode, bool storyMode = false)
     {
+        PrepareCompose(avatarMode, storyMode);
+        router.Push(AethergramRoute.Compose);
+    }
+
+    private void PrepareCompose(bool avatarMode, bool storyMode)
+    {
         composeAvatarMode = avatarMode;
         composeStoryMode = storyMode;
         caption = string.Empty;
@@ -121,7 +127,7 @@ internal sealed partial class AethergramApp
         personPicker.Close();
         composeSession.Open(avatarMode || storyMode, !avatarMode && !storyMode);
         composeIntake.Discard();
-        router.Push(AethergramRoute.Compose);
+        ResetComposeDraft();
     }
 
     private void DrawCompose(Rect area)
@@ -139,6 +145,7 @@ internal sealed partial class AethergramApp
                 feedScrollTopPending = true;
             }
 
+            ForgetComposeDraft();
             router.Pop();
             return;
         }
@@ -155,6 +162,12 @@ internal sealed partial class AethergramApp
         while (composeIntake.TryTake(out var taken))
         {
             composeSession.TakeImported(taken);
+        }
+
+        if (composeDraftsOpen)
+        {
+            DrawComposeDraftsPanel(area);
+            return;
         }
 
         switch (composeSession.Stage)
@@ -233,7 +246,7 @@ internal sealed partial class AethergramApp
         var actionLabel = composeAvatarMode
             ? (store.Posting ? Loc.T(L.Aethergram.Saving) : Loc.T(L.Aethergram.Use))
             : Loc.T(L.Aethergram.Next);
-        if (DrawComposeHeader(area, ComposeTitle, true, back, actionLabel,
+        if (DrawComposeHeader(area, ComposeTitle, true, CloseCompose, actionLabel,
                 composeSession.HasSelection && !store.Posting))
         {
             PickAdvance();
@@ -259,6 +272,7 @@ internal sealed partial class AethergramApp
             gridTop += ComposeNoticeHeight * scale;
         }
 
+        gridTop = DrawComposeDraftsEntry(area, gridTop);
         var gridRect = new Rect(new Vector2(area.Min.X, gridTop), area.Max);
         UiAnchors.Report("aethergram.compose.grid", gridRect);
         using (AppSurface.BeginEdgeToEdge(gridRect))
