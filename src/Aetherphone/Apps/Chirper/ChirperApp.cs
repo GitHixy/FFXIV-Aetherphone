@@ -417,6 +417,10 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             {
                 OpenThreadFromLink(link.Id);
             }
+            else if (link.Kind == SocialLinkKind.Compose)
+            {
+                BeginCompose();
+            }
         }
     }
 
@@ -1250,12 +1254,12 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 }
 
                 var caughtUpAfterId = ranked ? store.CaughtUpAfterId : null;
-                var peopleSlot = PeopleRailSlot(scope, snapshot.Length);
+                var showsPeopleRail = ShowsPeopleRail(scope);
                 drawingForYou = scope == SocialFeedScope.ForYou;
                 feedActionsAnchorPending = UiAnchors.Recording;
                 for (var index = 0; index < snapshot.Length; index++)
                 {
-                    if (index == peopleSlot)
+                    if (index == 0 && showsPeopleRail)
                     {
                         DrawPeopleRailRow();
                     }
@@ -1306,11 +1310,6 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                     {
                         DrawCaughtUpLine();
                     }
-                }
-
-                if (peopleSlot == snapshot.Length)
-                {
-                    DrawPeopleRailRow();
                 }
 
                 drawingForYou = false;

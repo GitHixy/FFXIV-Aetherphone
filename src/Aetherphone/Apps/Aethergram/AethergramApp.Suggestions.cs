@@ -9,7 +9,6 @@ namespace Aetherphone.Apps.Aethergram;
 internal sealed partial class AethergramApp
 {
     private const int FewFollows = 5;
-    private const int PeopleRailAfterPosts = 3;
     private const float EmptyFollowingListGap = 44f;
     private const float BannerFollowGap = 10f;
     private const float CollapsedCellHeight = 48f;
@@ -22,21 +21,15 @@ internal sealed partial class AethergramApp
     private readonly HashSet<string> followedFromFeed = new(StringComparer.Ordinal);
     private bool drawingForYou;
 
-    private int PeopleRailSlot(SocialFeedScope scope, int postCount)
+    private bool ShowsPeopleRail(SocialFeedScope scope)
     {
-        if (scope != SocialFeedScope.ForYou)
+        if (scope != SocialFeedScope.ForYou || (store.Me?.Following ?? 0) >= FewFollows)
         {
-            return -1;
+            return false;
         }
 
         store.EnsureSuggestedPeople();
-        if (!SuggestedPeopleRail.HasAny(store.SuggestedPeople, configuration.DismissedFollowSuggestions))
-        {
-            return -1;
-        }
-
-        var follows = store.Me?.Following ?? 0;
-        return Math.Min(postCount, follows < FewFollows ? 0 : PeopleRailAfterPosts);
+        return SuggestedPeopleRail.HasAny(store.SuggestedPeople, configuration.DismissedFollowSuggestions);
     }
 
     private void DrawPeopleRailRow()
@@ -108,5 +101,7 @@ internal sealed partial class AethergramApp
 
             DrawUserRowWithFollow(people[index].User, SuggestedPeopleRail.ReasonLine(people[index]));
         }
+
+        ImGui.Dummy(new Vector2(0f, ComposeFab.Clearance(FabRadius, true)));
     }
 }

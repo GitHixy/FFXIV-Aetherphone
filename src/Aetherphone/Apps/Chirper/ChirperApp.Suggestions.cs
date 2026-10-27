@@ -10,7 +10,6 @@ namespace Aetherphone.Apps.Chirper;
 internal sealed partial class ChirperApp
 {
     private const int FewFollows = 5;
-    private const int PeopleRailAfterPosts = 5;
     private const float EmptyFollowingListTop = 130f;
     private const float BannerFollowGap = 10f;
     private const float CollapsedCellHeight = 48f;
@@ -42,21 +41,15 @@ internal sealed partial class ChirperApp
         return text;
     }
 
-    private int PeopleRailSlot(SocialFeedScope scope, int postCount)
+    private bool ShowsPeopleRail(SocialFeedScope scope)
     {
-        if (scope != SocialFeedScope.ForYou)
+        if (scope != SocialFeedScope.ForYou || (store.Me?.Following ?? 0) >= FewFollows)
         {
-            return -1;
+            return false;
         }
 
         store.EnsureSuggestedPeople();
-        if (!SuggestedPeopleRail.HasAny(store.SuggestedPeople, configuration.DismissedFollowSuggestions))
-        {
-            return -1;
-        }
-
-        var follows = store.Me?.Following ?? 0;
-        return Math.Min(postCount, follows < FewFollows ? 0 : PeopleRailAfterPosts);
+        return SuggestedPeopleRail.HasAny(store.SuggestedPeople, configuration.DismissedFollowSuggestions);
     }
 
     private void DrawPeopleRailRow()
@@ -97,5 +90,7 @@ internal sealed partial class ChirperApp
 
             DrawUserRow(people[index].User, SuggestedPeopleRail.ReasonLine(people[index]));
         }
+
+        ImGui.Dummy(new Vector2(0f, ComposeFab.Clearance(FabRadius, true)));
     }
 }

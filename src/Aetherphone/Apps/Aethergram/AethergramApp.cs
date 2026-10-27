@@ -368,6 +368,14 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                 social.MarkSeen(Id);
                 OpenFollowRequests();
             }
+            else if (link.Kind == SocialLinkKind.ComposeStory)
+            {
+                StartStoryCompose();
+            }
+            else if (link.Kind == SocialLinkKind.Compose)
+            {
+                StartCompose(false);
+            }
             else
             {
                 OpenDetailFromLink(link.Id);
@@ -1056,12 +1064,12 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                 }
 
                 var caughtUpAfterId = ranked ? store.CaughtUpAfterId : null;
-                var peopleSlot = PeopleRailSlot(scope, snapshot.Length);
+                var showsPeopleRail = ShowsPeopleRail(scope);
                 drawingForYou = scope == SocialFeedScope.ForYou;
                 feedActionsAnchorPending = UiAnchors.Recording;
                 for (var index = 0; index < snapshot.Length; index++)
                 {
-                    if (index == peopleSlot)
+                    if (index == 0 && showsPeopleRail)
                     {
                         DrawPeopleRailRow();
                     }
@@ -1106,11 +1114,6 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                     {
                         DrawCaughtUpLine();
                     }
-                }
-
-                if (peopleSlot == snapshot.Length)
-                {
-                    DrawPeopleRailRow();
                 }
 
                 drawingForYou = false;
