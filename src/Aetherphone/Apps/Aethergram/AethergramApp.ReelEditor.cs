@@ -126,7 +126,7 @@ internal sealed partial class AethergramApp
         else
         {
             Squircle.Fill(drawList, preview.Min, preview.Max, rounding, ImGui.GetColorU32(theme.SurfaceMuted));
-            LoadingPulse.Spinner(preview.Center, ReelSpinnerRadius * scale, Accent);
+            LoadingPulse.Spinner(preview.Center, ReelComposeSpinnerRadius * scale, Accent);
         }
 
         if (reelEdit.Crop is not { } crop)

@@ -135,7 +135,7 @@ internal sealed partial class AethergramApp
         if (reelFrames.Preview is not { } texture)
         {
             Squircle.Fill(drawList, preview.Min, preview.Max, rounding, ImGui.GetColorU32(theme.SurfaceMuted));
-            LoadingPulse.Spinner(preview.Center, ReelSpinnerRadius * scale, Accent);
+            LoadingPulse.Spinner(preview.Center, ReelComposeSpinnerRadius * scale, Accent);
             return false;
         }
 

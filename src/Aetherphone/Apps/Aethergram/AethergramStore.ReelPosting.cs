@@ -76,6 +76,7 @@ internal sealed partial class AethergramStore
         }
 
         AcceptCreatedPost(created);
+        PrependOwnReel(created);
     }
 
     private void ResetReelPosting()

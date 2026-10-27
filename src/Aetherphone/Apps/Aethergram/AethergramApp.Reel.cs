@@ -28,7 +28,7 @@ internal sealed partial class AethergramApp
     private const float ComposeModeStripHeight = 52f;
     private const float ComposeModeStripWidth = 280f;
     private const float ComposeModeTrackHeight = 32f;
-    private const float ReelSpinnerRadius = 18f;
+    private const float ReelComposeSpinnerRadius = 18f;
     private const float ReelProblemInset = 28f;
     private const int MaxReelSeconds = (int)ReelFormat.MaxDurationSeconds;
 
@@ -145,7 +145,7 @@ internal sealed partial class AethergramApp
             new Vector2(area.Max.X, stripTop));
         if (reelProbing)
         {
-            LoadingPulse.Draw(body.Center, ReelSpinnerRadius * scale, Accent, Ink.MutedInk,
+            LoadingPulse.Draw(body.Center, ReelComposeSpinnerRadius * scale, Accent, Ink.MutedInk,
                 Loc.T(L.Aethergram.ReelChecking));
             return;
         }

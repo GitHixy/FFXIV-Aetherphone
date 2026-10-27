@@ -1,3 +1,4 @@
+using Aetherphone.Core.Aethernet;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Net;
 using Aetherphone.Core.Social;
@@ -95,6 +96,16 @@ internal sealed partial class AethergramStore
                 userReelsLane.ApplyRefresh(page.Items, page.NextCursor);
             }
         }, () => userReelsLane.Loading = false);
+    }
+
+    private void PrependOwnReel(PostDto created)
+    {
+        if (!string.Equals(userReelsUserId, created.AuthorId, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        userReelsLane.Items = CopyOnWrite.Prepend(userReelsLane.Items, created);
     }
 
     public void ForgetUserReels()
