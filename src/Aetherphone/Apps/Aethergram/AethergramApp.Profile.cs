@@ -179,6 +179,7 @@ internal sealed partial class AethergramApp
                 return;
             }
 
+            DrawProfileHighlights(user);
             DrawProfileTabs();
             if (profileTab == 0)
             {
@@ -289,7 +290,11 @@ internal sealed partial class AethergramApp
     {
         var scale = UiScale.Current;
         var hasRing = stories.TryRing(user.Id, out var ring);
-        if (hasRing)
+        if (hasRing && StoryRingArt.ShowsCloseFriends(ring))
+        {
+            StoryRingArt.CloseFriends(drawList, center, radius + ProfileRingGap * scale, scale);
+        }
+        else if (hasRing)
         {
             AethergramArt.StoryRing(drawList, center, radius + ProfileRingGap * scale, scale, ring.HasUnseen);
         }

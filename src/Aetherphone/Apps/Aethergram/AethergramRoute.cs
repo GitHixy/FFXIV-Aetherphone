@@ -49,6 +49,8 @@ internal enum AethergramScreen
     BadgeProgress,
     Archive,
     InboxArchived,
+    CloseFriends,
+    HighlightEditor,
 }
 
 internal readonly record struct AethergramRoute(
@@ -71,6 +73,8 @@ internal readonly record struct AethergramRoute(
     public static readonly AethergramRoute Activity = new(AethergramScreen.Activity);
     public static readonly AethergramRoute BadgeProgress = new(AethergramScreen.BadgeProgress);
     public static readonly AethergramRoute Archive = new(AethergramScreen.Archive);
+    public static readonly AethergramRoute CloseFriends = new(AethergramScreen.CloseFriends);
+    public static readonly AethergramRoute HighlightEditor = new(AethergramScreen.HighlightEditor);
     public static AethergramRoute Detail(string postId) => new(AethergramScreen.Detail, postId);
     public static AethergramRoute EditPost(string postId) => new(AethergramScreen.EditPost, postId);
 
