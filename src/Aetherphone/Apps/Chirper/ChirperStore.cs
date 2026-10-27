@@ -39,7 +39,7 @@ internal sealed partial class ChirperStore : SocialFeedStore
         client.TagPostsAsync(tag, cursor, token);
 
     public void Compose(string text, IReadOnlyList<string> imagePaths, bool sensitive, Action<bool> onComplete,
-        Action<AepFailure>? onFailure = null)
+        Action<AepFailure>? onFailure = null, int replyPolicy = 0)
     {
         var trimmed = text.Trim();
         if ((trimmed.Length == 0 && imagePaths.Count == 0) || posting)
@@ -59,7 +59,7 @@ internal sealed partial class ChirperStore : SocialFeedStore
 
             var (keys, width, height) = uploaded.Value;
             var created = await client.CreatePostAsync(trimmed, keys.Length > 0 ? keys : null, width, height,
-                    sensitive, token, onFailure)
+                    sensitive, token, onFailure, replyPolicy)
                 .ConfigureAwait(false);
             if (created is null)
             {
@@ -160,7 +160,8 @@ internal sealed partial class ChirperStore : SocialFeedStore
             post => post.RepostOfId == originalId && post.AuthorId == me.Id);
     }
 
-    public void Quote(string text, string quotedPostId, IReadOnlyList<string> imagePaths, Action<bool> onComplete)
+    public void Quote(string text, string quotedPostId, IReadOnlyList<string> imagePaths, Action<bool> onComplete,
+        int replyPolicy = 0)
     {
         var trimmed = text.Trim();
         if ((trimmed.Length == 0 && imagePaths.Count == 0) || posting)
@@ -179,7 +180,8 @@ internal sealed partial class ChirperStore : SocialFeedStore
             }
 
             var (keys, width, height) = uploaded.Value;
-            var created = await client.QuotePostAsync(trimmed, quotedPostId, keys.Length > 0 ? keys : null, width, height, token)
+            var created = await client.QuotePostAsync(trimmed, quotedPostId, keys.Length > 0 ? keys : null, width, height, token,
+                    replyPolicy: replyPolicy)
                 .ConfigureAwait(false);
             if (created is null)
             {

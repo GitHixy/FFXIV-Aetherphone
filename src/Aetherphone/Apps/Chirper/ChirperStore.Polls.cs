@@ -15,7 +15,7 @@ internal sealed partial class ChirperStore
     private AepFailureBox? pollVoteFailure;
 
     public void ComposePoll(string text, PostPollInput poll, Action<bool> onComplete,
-        Action<AepFailure>? onFailure = null)
+        Action<AepFailure>? onFailure = null, int replyPolicy = 0)
     {
         var trimmed = text.Trim();
         if (trimmed.Length == 0 || posting)
@@ -26,7 +26,8 @@ internal sealed partial class ChirperStore
         posting = true;
         work.Run("compose poll", async token =>
         {
-            var created = await client.CreatePollPostAsync(trimmed, poll, token, onFailure).ConfigureAwait(false);
+            var created = await client.CreatePollPostAsync(trimmed, poll, token, onFailure, replyPolicy)
+                .ConfigureAwait(false);
             if (created is null)
             {
                 return false;
