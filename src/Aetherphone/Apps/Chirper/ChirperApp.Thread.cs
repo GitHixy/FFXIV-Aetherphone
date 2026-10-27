@@ -226,6 +226,8 @@ internal sealed partial class ChirperApp
             cursorY += Typography.LineHeight(HeadHandleStyle);
         }
 
+        cursorY = DrawLastEditedLine(drawList, post, left, contentWidth, cursorY);
+
         cursorY += 12f * scale;
         DrawHairline(drawList, left, right, cursorY);
         cursorY = DrawThreadStats(drawList, post, left, right, cursorY);

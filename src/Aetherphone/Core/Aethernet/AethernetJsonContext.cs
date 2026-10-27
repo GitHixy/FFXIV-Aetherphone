@@ -119,6 +119,8 @@ namespace Aetherphone.Core.Aethernet;
 [JsonSerializable(typeof(PollVoteRequest))]
 [JsonSerializable(typeof(PostPollDto))]
 [JsonSerializable(typeof(PostPollInput))]
+[JsonSerializable(typeof(EditChirpRequest))]
+[JsonSerializable(typeof(PostEditDto[]))]
 [JsonSerializable(typeof(PrismWeekDto))]
 [JsonSerializable(typeof(PrismEntryDto))]
 [JsonSerializable(typeof(PrismEntryRequest))]

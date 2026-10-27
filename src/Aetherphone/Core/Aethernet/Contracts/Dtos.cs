@@ -260,7 +260,8 @@ internal sealed record PostDto(
     PostPollDto? Poll = null,
     string? GifUrl = null,
     string? GifSlug = null,
-    int? Views = null) : IIdentified
+    int? Views = null,
+    int EditCount = 0) : IIdentified
 {
     [JsonIgnore] public string[]? GifMedia { get; } = GifUrl is null ? null : new[] { GifUrl };
 }

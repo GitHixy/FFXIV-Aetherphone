@@ -60,6 +60,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         Save,
         Unsave,
         NotInterested,
+        Edit,
     }
 
     private enum ActionGlyph
@@ -368,6 +369,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         sheet.Close();
         filterSheet.Close();
         CloseGifSheets();
+        chirpEditHistorySheet.CloseImmediately();
         homeTab = HomeTab.Feed;
         sheetKind = SheetKind.None;
         sheetPost = null;
@@ -456,7 +458,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         DrawNight(screen, context.Content.Min.Y);
         var appArea = new Rect(new Vector2(screen.Min.X, context.Content.Min.Y),
             new Vector2(screen.Max.X, context.Content.Max.Y));
-        using (InputShield.Engage(avatarLightbox.Expanded || GifSheetsCapture))
+        using (InputShield.Engage(avatarLightbox.Expanded || GifSheetsCapture || ChirpEditHistoryCaptures))
         using (intro.FadeContent())
         {
             router.Draw(appArea, AppSkin.Transparent, ImGui.GetIO().DeltaTime, drawView);
@@ -469,6 +471,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         }
 
         DrawSheet(screen);
+        DrawChirpEditHistory(screen);
         DrawGifSheets(screen);
         DrawFilterSheet(screen);
         DrawFeedExplainer(screen);
@@ -518,6 +521,9 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 break;
             case ChirperScreen.BadgeProgress:
                 DrawBadgeProgress(area);
+                break;
+            case ChirperScreen.EditChirp:
+                DrawChirpEdit(area, route.PostId!);
                 break;
             default:
                 DrawHome(area);
@@ -935,6 +941,11 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                     Loc.T(post.Sensitive ? L.Moderation.SensitiveOn : L.Moderation.MarkSensitive), false);
             }
 
+            if (CanEditChirp(post))
+            {
+                AddSheetItem(PostSheetAction.Edit, Loc.T(L.Chirper.EditChirp), false);
+            }
+
             if (post.PinnedAtUnix is null)
             {
                 AddSheetItem(PostSheetAction.Pin, Loc.T(L.Social.PinToProfile), false);
@@ -1037,6 +1048,9 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 break;
             case PostSheetAction.NotInterested:
                 store.MarkNotInterested(post.Id);
+                break;
+            case PostSheetAction.Edit:
+                BeginChirpEdit(post);
                 break;
         }
     }
@@ -1448,6 +1462,11 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         }
 
         var meta = SocialIdentity.FeedMeta(post.AuthorHandle, TimeText.Short(post.CreatedAtUnix));
+        if (ChirperEdits.IsEdited(post))
+        {
+            meta = Loc.T(L.Chirper.EditedStamp, meta);
+        }
+
         if (ContentModeration.IsInReview(post.ScanStatus))
         {
             meta = $"{meta} · {Loc.T(L.Moderation.InReview)}";

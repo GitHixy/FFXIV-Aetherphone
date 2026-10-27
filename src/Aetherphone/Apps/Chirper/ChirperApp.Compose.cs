@@ -322,23 +322,7 @@ internal sealed partial class ChirperApp
             }
         }
 
-        var remaining = MaxPostLength - draft.Length;
-        var ringRadius = ComposeRingRadius * scale;
-        var ringCenter = new Vector2(area.Max.X - CellPadX * scale - 13f * scale, centerY);
-        var ringColor = remaining < 0 ? ChirperInk.Danger
-            : remaining < ComposeWarnRemaining ? ChirperInk.Warning
-            : ChirperInk.Accent;
-        ProgressRing.Track(ringCenter, ringRadius, ComposeRingStroke * scale, RingTrack);
-        ProgressRing.Fill(ringCenter, ringRadius, ComposeRingStroke * scale, draft.Length / (float)MaxPostLength,
-            ringColor);
-        if (remaining < ComposeWarnRemaining)
-        {
-            var remainingText = remaining.ToString(Loc.Culture);
-            var remainingSize = Typography.Measure(remainingText, RemainingStyle);
-            Typography.Draw(drawList,
-                new Vector2(ringCenter.X - 13f * scale - 8f * scale - remainingSize.X, centerY - remainingSize.Y * 0.5f),
-                remainingText, ringColor, RemainingStyle);
-        }
+        DrawComposeLengthRing(drawList, area, centerY, draft.Length);
     }
 
     private void Submit()

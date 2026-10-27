@@ -7468,6 +7468,15 @@ internal static class L
         public static readonly LocString ReportChirp = new("chirper.reportChirp", "Report chirp");
         public static readonly LocString BlockHandle = new("chirper.blockHandle", "Block @{0}");
         public static readonly LocString DeleteChirp = new("chirper.deleteChirp", "Delete chirp");
+        public static readonly LocString EditChirp = new("chirper.editChirp", "Edit chirp");
+        public static readonly LocString EditedStamp = new("chirper.editedStamp", "{0} · Edited");
+        public static readonly LocString LastEdited = new("chirper.lastEdited", "Last edited {0}");
+        public static readonly LocString EditHistory = new("chirper.editHistory", "Edit history");
+        public static readonly LocPlural EditsLeft = new("chirper.editsLeft", "{0} edit left", "{0} edits left");
+        public static readonly LocString EditKeepsAttachments = new("chirper.editKeepsAttachments", "Photos, GIFs and quotes stay as they are.");
+        public static readonly LocString EditedToast = new("chirper.editedToast", "Chirp updated");
+        public static readonly LocString EditWindowClosed = new("chirper.editWindowClosed", "Chirps can only be edited in the first hour after posting.");
+        public static readonly LocString EditLimitReached = new("chirper.editLimitReached", "This chirp has no edits left.");
         public static readonly LocString DeletedToast = new("chirper.deletedToast", "Chirp deleted");
         public static readonly LocString PinTitle = new("chirper.pinTitle", "Pin chirp to your profile?");
         public static readonly LocString PinMessage = new("chirper.pinMessage", "It will appear at the top of your profile and replace any chirp you pinned before.");

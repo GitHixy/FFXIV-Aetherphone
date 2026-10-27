@@ -16,6 +16,7 @@ internal enum ChirperScreen
     Activity,
     Hashtag,
     BadgeProgress,
+    EditChirp,
 }
 
 internal readonly record struct ChirperRoute(
@@ -36,6 +37,7 @@ internal readonly record struct ChirperRoute(
     public static ChirperRoute Profile(string userId) => new(ChirperScreen.Profile, userId);
     public static ChirperRoute Thread(string postId) => new(ChirperScreen.Thread, PostId: postId);
     public static ChirperRoute Hashtag(string tag) => new(ChirperScreen.Hashtag, Tag: tag);
+    public static ChirperRoute EditChirp(string postId) => new(ChirperScreen.EditChirp, PostId: postId);
 
     public static ChirperRoute UserList(string sourceId, UserListKind kind) =>
         new(ChirperScreen.UserList, UserId: sourceId, Kind: kind);
