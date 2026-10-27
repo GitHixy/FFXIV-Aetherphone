@@ -17,9 +17,18 @@ internal sealed partial class GramClient
             onFailure);
     }
 
-    public Task<bool> RemoveCollabAsync(string postId, CancellationToken token, Action<AepFailure>? onFailure = null)
+    public Task<PostDto?> InviteCollabAsync(string postId, string userId, CancellationToken token,
+        Action<AepFailure>? onFailure = null)
     {
-        return net.SendAsync(HttpMethod.Delete, $"/posts/{Uri.EscapeDataString(postId)}/collab", token, null,
+        return net.PostAsync($"/posts/{Uri.EscapeDataString(postId)}/collab/invite", new InviteCollaboratorRequest(userId),
+            AethernetJsonContext.Default.InviteCollaboratorRequest, AethernetJsonContext.Default.PostDto, token, null,
             onFailure);
+    }
+
+    public Task<bool> RemoveCollabAsync(string postId, string userId, CancellationToken token,
+        Action<AepFailure>? onFailure = null)
+    {
+        return net.SendAsync(HttpMethod.Delete,
+            $"/posts/{Uri.EscapeDataString(postId)}/collab/{Uri.EscapeDataString(userId)}", token, null, onFailure);
     }
 }

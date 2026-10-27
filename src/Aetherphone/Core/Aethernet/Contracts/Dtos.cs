@@ -226,6 +226,8 @@ internal sealed record PhotoTagDto(
 
 internal sealed record CollaboratorDto(string UserId, string Handle, string DisplayName, string? AvatarUrl, int State);
 
+internal sealed record InviteCollaboratorRequest(string UserId);
+
 internal sealed record PostDto(
     string Id,
     string AuthorId,
@@ -274,7 +276,8 @@ internal sealed record PostDto(
     string[]? AltTexts = null,
     int EditCount = 0,
     int ThreadCount = 0,
-    bool AuthorMuted = false) : IIdentified
+    bool AuthorMuted = false,
+    CollaboratorDto[]? Collaborators = null) : IIdentified
 {
     [JsonIgnore] public string[]? GifMedia { get; } = GifUrl is null ? null : new[] { GifUrl };
 }
@@ -325,7 +328,8 @@ internal sealed record CreateGramRequest(
     PhotoTagInput[]? PhotoTags = null,
     bool Sensitive = false,
     string? CollaboratorId = null,
-    string[]? AltTexts = null);
+    string[]? AltTexts = null,
+    string[]? CollaboratorIds = null);
 
 internal sealed record CreateStoryRequest(string Caption, string MediaKey, int Width, int Height, int Audience = 0,
     string? SharedPostId = null);

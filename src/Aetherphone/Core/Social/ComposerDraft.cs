@@ -26,7 +26,7 @@ internal sealed class ComposerDraft
 
     public List<string> AltTexts { get; set; } = new();
 
-    public ComposerDraftPerson? Collaborator { get; set; }
+    public List<ComposerDraftPerson> Collaborators { get; set; } = new();
 
     public List<ComposerDraftFrame> Frames { get; set; } = new();
 

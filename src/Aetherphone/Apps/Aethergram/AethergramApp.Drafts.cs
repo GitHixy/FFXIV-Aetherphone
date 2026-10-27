@@ -105,16 +105,18 @@ internal sealed partial class AethergramApp
         var paths = composeSession.SelectedArray();
         saved.PhotoPaths.AddRange(paths);
         SaveDraftFrames(saved, paths);
-        if (composeCollaborator is { } collaborator)
+        for (var index = 0; index < composeCollaborators.Count; index++)
         {
-            saved.Collaborator = new ComposerDraftPerson
+            var collaborator = composeCollaborators[index];
+            saved.Collaborators.Add(new ComposerDraftPerson
             {
                 UserId = collaborator.UserId,
                 Handle = collaborator.Handle,
                 DisplayName = collaborator.DisplayName,
                 AvatarUrl = collaborator.AvatarUrl ?? string.Empty,
-            };
+            });
         }
+
         for (var index = 0; index < composeTags.Count; index++)
         {
             var tag = composeTags[index];
@@ -171,10 +173,11 @@ internal sealed partial class AethergramApp
         }
 
         composeSensitive = saved.Sensitive;
-        if (saved.Collaborator is { UserId.Length: > 0 } person)
+        for (var index = 0; index < saved.Collaborators.Count; index++)
         {
-            composeCollaborator = new MentionSuggestDto(person.UserId, person.Handle, person.DisplayName,
-                person.AvatarUrl.Length > 0 ? person.AvatarUrl : null);
+            var person = saved.Collaborators[index];
+            AddComposeCollaborator(new MentionSuggestDto(person.UserId, person.Handle, person.DisplayName,
+                person.AvatarUrl.Length > 0 ? person.AvatarUrl : null));
         }
 
         if (missing > 0)

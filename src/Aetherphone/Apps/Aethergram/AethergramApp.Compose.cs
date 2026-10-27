@@ -341,7 +341,9 @@ internal sealed partial class AethergramApp
             : 0f;
         var cardsBottom = shareRect.Min.Y - ComposeCardGap * scale - statusHeight;
         var showOptions = !composeStoryMode;
-        var optionsHeight = showOptions ? ComposeRowHeight * 3f * scale : 0f;
+        var optionsHeight = showOptions
+            ? ComposeRowHeight * (2f + CollabOptionRows(composeCollaborators.Count)) * scale
+            : 0f;
         var optionsCard = new Rect(new Vector2(left, cardsBottom - optionsHeight), new Vector2(right, cardsBottom));
         var captionBottom = showOptions ? optionsCard.Min.Y - ComposeCardGap * scale : cardsBottom;
         var captionHeight = (ComposeCardPad * 2f + ComposeCaptionFieldHeight + ComposeMetaGap + ComposeMetaRowHeight)
@@ -375,7 +377,7 @@ internal sealed partial class AethergramApp
 
         DrawCaptionCard(captionCard, area, scale, composeStoryMode ? "##gramStoryCaption" : "##gramCaption",
             !composeStoryMode, ref caption, composeMentions);
-        if (showOptions && DrawComposeOptionsCard(optionsCard, scale, ref composeSensitive, true))
+        if (showOptions && DrawComposeOptionsCard(optionsCard, scale, ref composeSensitive, CollabRows.Compose))
         {
             composeTagMode = true;
         }
@@ -506,7 +508,7 @@ internal sealed partial class AethergramApp
             MaxCaptionLength.ToString(Loc.Culture));
     }
 
-    private bool DrawComposeOptionsCard(Rect card, float scale, ref bool sensitive, bool offerCollab = false)
+    private bool DrawComposeOptionsCard(Rect card, float scale, ref bool sensitive, CollabRows collabRows)
     {
         var drawList = ImGui.GetWindowDrawList();
         var rounding = Metrics.Radius.Grouped * scale;
@@ -515,7 +517,12 @@ internal sealed partial class AethergramApp
         var tagRowTapped = DrawComposeLinkRow(tagRow, PhoneIcons.UserPlus, Loc.T(L.PhotoTag.TagPeople),
             composeTags.Count, rounding);
         DrawHairline(drawList, ComposeRowLabelLeft(tagRow, scale), card.Max.X - ComposeCardPad * scale, tagRow.Max.Y);
-        var sensitiveTop = offerCollab ? DrawComposeCollabRow(drawList, card, tagRow.Max.Y, scale) : tagRow.Max.Y;
+        var sensitiveTop = collabRows switch
+        {
+            CollabRows.Compose => DrawComposeCollabRows(drawList, card, tagRow.Max.Y, scale),
+            CollabRows.Edit => DrawEditCollabRows(drawList, card, tagRow.Max.Y, scale, editPost!),
+            _ => tagRow.Max.Y,
+        };
         var sensitiveRow = new Rect(new Vector2(card.Min.X, sensitiveTop), card.Max);
         DrawComposeToggleRow(sensitiveRow, PhoneIcons.EyeOff, Loc.T(L.Moderation.MarkSensitive), ref sensitive);
         return tagRowTapped;
@@ -786,7 +793,7 @@ internal sealed partial class AethergramApp
         var paths = composeSession.SelectedArray();
         store.CreateGram(paths, composeSession.CropsArray(), composeSession.AspectsArray(),
             composeSession.EditsArray(),
-            caption, ComposeTagInputs(), composeSensitive, ComposeCollaboratorId, PostAltTexts.Aligned(paths, composeAltTexts),
+            caption, ComposeTagInputs(), composeSensitive, ComposeCollaboratorIds(), PostAltTexts.Aligned(paths, composeAltTexts),
             ok => composeOutcome = ok ? 1 : 2);
     }
 

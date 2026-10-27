@@ -70,6 +70,14 @@ public sealed class FailureTextTests
     }
 
     [Fact]
+    public void ACollaboratorCapRefusalNamesTheLimit()
+    {
+        var failure = new AepFailure(AepFailureKind.Server, 400, FailureCodes.GramTooManyCollaborators, null, "ref8", "5");
+
+        Assert.Equal(Loc.T(L.Aethergram.CollabTooMany, "5"), FailureText.Resolve(failure));
+    }
+
+    [Fact]
     public void AValuedCodeMissingItsValueDegradesInsteadOfPrintingThePlaceholder()
     {
         var failure = new AepFailure(AepFailureKind.Server, 400, FailureCodes.PostTooLong, null, "ref42", null);
