@@ -99,9 +99,11 @@ internal sealed record CoinQuestDto(
     int Progress,
     int Target,
     long Amount,
-    bool Claimed);
+    bool Claimed,
+    bool AutoClaim = false);
 
-internal sealed record CoinQuestBoardDto(int DayIndex, long ResetsAtUnix, CoinQuestDto[] Quests);
+internal sealed record CoinQuestBoardDto(int DayIndex, long ResetsAtUnix, CoinQuestDto[] Quests,
+    CoinQuestDto[]? Standing = null);
 
 internal sealed record HalloweenTreatsReport(int Found);
 

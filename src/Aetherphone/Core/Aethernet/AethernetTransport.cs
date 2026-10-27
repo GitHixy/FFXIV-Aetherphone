@@ -125,6 +125,12 @@ internal sealed class AethernetTransport
         return http.PutBytesAsync(uri, content, contentType, token, UploadBearerFor(uri), onFailure);
     }
 
+    public Task<bool> PutFileAsync(Uri uri, string path, string contentType, IProgress<float> progress,
+        CancellationToken token, Action<AepFailure>? onFailure = null)
+    {
+        return http.PutFileAsync(uri, path, contentType, progress, token, UploadBearerFor(uri), onFailure);
+    }
+
     public Task<byte[]?> GetBytesAsync(Uri uri, CancellationToken token, Action<AepFailure>? onFailure = null)
     {
         return http.GetBytesAsync(uri, token, onFailure);

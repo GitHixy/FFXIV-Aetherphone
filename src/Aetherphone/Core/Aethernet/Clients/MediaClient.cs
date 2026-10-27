@@ -24,6 +24,12 @@ internal sealed class MediaClient
         return net.PutBytesAsync(new Uri(uploadUrl), bytes, contentType, token, onFailure);
     }
 
+    public Task<bool> UploadFileAsync(string uploadUrl, string path, string contentType, IProgress<float> progress,
+        CancellationToken token, Action<AepFailure>? onFailure = null)
+    {
+        return net.PutFileAsync(new Uri(uploadUrl), path, contentType, progress, token, onFailure);
+    }
+
     public Task<byte[]?> DownloadAsync(Uri uri, CancellationToken token, Action<AepFailure>? onFailure = null)
     {
         return net.GetBytesAsync(uri, token, onFailure);

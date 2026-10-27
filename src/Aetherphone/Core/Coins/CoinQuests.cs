@@ -5,11 +5,20 @@ using Aetherphone.Core.Localization;
 
 namespace Aetherphone.Core.Coins;
 
+internal enum CoinQuestState : byte
+{
+    InProgress,
+    Claimable,
+    AwaitingAutoPay,
+    Paid,
+}
+
 internal static class CoinQuests
 {
     public const string RadioQuestId = "explore.radio";
     public const string PostQuestId = "social.post";
     public const string StoryQuestId = "social.story";
+    public const string ReelQuestId = "standing.reel";
     public const string PausedReason = "paused";
     public const string FrozenReason = "frozen";
     public const string DailyCapReason = "daily_cap";
@@ -32,6 +41,7 @@ internal static class CoinQuests
         [RadioQuestId] = L.Coin.QuestExploreRadio,
         ["explore.poll"] = L.Coin.QuestExplorePoll,
         ["explore.muster"] = L.Coin.QuestExploreMuster,
+        [ReelQuestId] = L.Aethergram.ReelQuestTitle,
     }.ToFrozenDictionary(StringComparer.Ordinal);
 
     private static readonly FrozenDictionary<string, LocString> Hints = new Dictionary<string, LocString>
@@ -48,10 +58,35 @@ internal static class CoinQuests
         [RadioQuestId] = L.Coin.QuestExploreRadioHint,
         ["explore.poll"] = L.Coin.QuestExplorePollHint,
         ["explore.muster"] = L.Coin.QuestExploreMusterHint,
+        [ReelQuestId] = L.Aethergram.ReelQuestHint,
     }.ToFrozenDictionary(StringComparer.Ordinal);
 
     public static bool IsClaimable(CoinQuestDto quest) =>
-        !quest.Claimed && quest.Target > 0 && quest.Progress >= quest.Target;
+        !quest.AutoClaim && !quest.Claimed && quest.Target > 0 && quest.Progress >= quest.Target;
+
+    // A standing quest has no claim call: the server pays it once the work survives review, so a finished one waits
+    // in its own state instead of looking claimable.
+    public static CoinQuestState StateOf(CoinQuestDto quest)
+    {
+        if (quest.Claimed)
+        {
+            return CoinQuestState.Paid;
+        }
+
+        if (!IsComplete(quest))
+        {
+            return CoinQuestState.InProgress;
+        }
+
+        return quest.AutoClaim ? CoinQuestState.AwaitingAutoPay : CoinQuestState.Claimable;
+    }
+
+    public static CoinQuestDto[] Standing(CoinQuestBoardDto board) => board.Standing ?? Array.Empty<CoinQuestDto>();
+
+    public static int RowCount(CoinQuestBoardDto board) => board.Quests.Length + Standing(board).Length;
+
+    public static CoinQuestDto RowAt(CoinQuestBoardDto board, int index) =>
+        index < board.Quests.Length ? board.Quests[index] : Standing(board)[index - board.Quests.Length];
 
     public static bool IsComplete(CoinQuestDto quest) =>
         quest.Claimed || (quest.Target > 0 && quest.Progress >= quest.Target);
@@ -88,6 +123,12 @@ internal static class CoinQuests
         if (string.Equals(quest.Id, StoryQuestId, StringComparison.Ordinal))
         {
             link = new SocialDeepLink(SocialLinkKind.ComposeStory, string.Empty);
+            return true;
+        }
+
+        if (string.Equals(quest.Id, ReelQuestId, StringComparison.Ordinal))
+        {
+            link = new SocialDeepLink(SocialLinkKind.ComposeReel, string.Empty);
             return true;
         }
 

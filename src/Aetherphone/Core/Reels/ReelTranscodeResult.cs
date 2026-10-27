@@ -11,6 +11,7 @@ internal enum ReelTranscodeFailure : byte
     InvalidRange,
     EncodeFailed,
     Cancelled,
+    UnknownDuration,
 }
 
 internal readonly record struct ReelTranscodeRequest(
@@ -38,6 +39,8 @@ internal sealed class ReelTranscodeReport
     internal ReelLayout Layout { get; set; }
     internal ReelCadence Cadence { get; set; }
     internal double TrimSeconds { get; set; }
+    internal long SourceVideoBitsPerSecond { get; set; }
+    internal int VideoBitsPerSecond { get; set; } = ReelFormat.VideoBitsPerSecond;
     internal string VideoEncoders { get; set; } = "not checked";
     internal string AudioEncoders { get; set; } = "not checked";
     internal string WriterAttempts { get; set; } = string.Empty;

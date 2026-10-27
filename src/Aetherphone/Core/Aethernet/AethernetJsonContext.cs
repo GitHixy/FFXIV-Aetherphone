@@ -57,6 +57,7 @@ namespace Aetherphone.Core.Aethernet;
 [JsonSerializable(typeof(UploadUrlRequest))]
 [JsonSerializable(typeof(UploadUrlResponse))]
 [JsonSerializable(typeof(CreateGramRequest))]
+[JsonSerializable(typeof(CreateReelRequest))]
 [JsonSerializable(typeof(InviteCollaboratorRequest))]
 [JsonSerializable(typeof(CreateStoryRequest))]
 [JsonSerializable(typeof(StoryDto))]

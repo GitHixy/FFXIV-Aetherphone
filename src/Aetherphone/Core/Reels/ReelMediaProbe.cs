@@ -17,7 +17,9 @@ internal readonly record struct ReelMediaInfo(
     int FrameRateDenominator,
     string? AudioCodec,
     int AudioSampleRate,
-    int AudioChannels)
+    int AudioChannels,
+    int VideoBitsPerSecond,
+    int AudioBitsPerSecond)
 {
     internal double FrameRate => FrameRateDenominator > 0 ? (double)FrameRateNumerator / FrameRateDenominator : 0d;
 }
@@ -34,6 +36,7 @@ internal static class ReelMediaProbe
                 "Media Foundation only exists on Windows.");
         }
 
+        ReelTranscoder.EnsureReadable(path);
         using (ReelTranscoder.StartMediaFoundation())
         {
             var reader = ReelTranscoder.OpenReader(path, advancedVideoProcessing: false);
@@ -86,7 +89,7 @@ internal static class ReelMediaProbe
         var container = MediaFoundationVideo.ReadMimeType(reader) ?? Path.GetExtension(path);
         var fileBytes = File.Exists(path) ? new FileInfo(path).Length : 0L;
         var duration = MediaFoundationVideo.ReadDurationTicks(reader) / (double)ReelFormat.TicksPerSecond;
-        var info = new ReelMediaInfo(container, fileBytes, duration, "none", 0, 0, 0, 0, 0, 0, 0, null, 0, 0);
+        var info = new ReelMediaInfo(container, fileBytes, duration, "none", 0, 0, 0, 0, 0, 0, 0, null, 0, 0, 0, 0);
         if (video >= 0)
         {
             info = DescribeVideo(reader, video, info);
@@ -112,6 +115,7 @@ internal static class ReelMediaProbe
             _ = MediaFoundationVideo.TryGetUInt64(type, MediaFoundationVideo.FrameRate, out var packedRate);
             var (rateNumerator, rateDenominator) = MediaFoundationVideo.Unpack(packedRate);
             _ = MediaFoundationVideo.TryGetUInt32(type, MediaFoundationVideo.VideoRotation, out var rotation);
+            _ = MediaFoundationVideo.TryGetUInt32(type, MediaFoundationAttributes.MF_MT_AVG_BITRATE, out var bitsPerSecond);
             var visible = MediaFoundationVideo.TryGetAperture(type, out var aperture)
                 ? aperture
                 : new PixelRect(0, 0, codedWidth, codedHeight);
@@ -126,6 +130,7 @@ internal static class ReelMediaProbe
                 RotationAttribute = rotation,
                 FrameRateNumerator = rateNumerator,
                 FrameRateDenominator = rateDenominator,
+                VideoBitsPerSecond = Math.Max(0, bitsPerSecond),
             };
         }
         finally
@@ -143,12 +148,15 @@ internal static class ReelMediaProbe
                 out var sampleRate);
             _ = MediaFoundationVideo.TryGetUInt32(type, MediaFoundationAttributes.MF_MT_AUDIO_NUM_CHANNELS,
                 out var channels);
+            _ = MediaFoundationVideo.TryGetUInt32(type, MediaFoundationAttributes.MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                out var bytesPerSecond);
             return info with
             {
                 AudioCodec = MediaFoundationVideo.CodecName(
                     MediaFoundationVideo.GetGuidOrEmpty(type, MediaFoundationAttributes.MF_MT_SUBTYPE)),
                 AudioSampleRate = sampleRate,
                 AudioChannels = channels,
+                AudioBitsPerSecond = Math.Max(0, bytesPerSecond) * 8,
             };
         }
         finally
