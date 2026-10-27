@@ -40,6 +40,7 @@ internal sealed class SuggestedPeopleRail
     private const float DismissGlyph = 11f;
     private const float BottomGap = 10f;
     private const int DismissedCap = 500;
+    private const string FollowButtonId = "follow";
     private static readonly TextStyle NameStyle = TextStyles.Headline;
     private static readonly TextStyle ReasonStyle = TextStyles.Footnote;
 
@@ -96,7 +97,7 @@ internal sealed class SuggestedPeopleRail
         _ => Loc.T(L.Social.FeedSuggested),
     };
 
-    public SuggestedPeopleResult Draw(string idPrefix, SuggestedUserDto[] people, HashSet<string> dismissed, SocialInk ink,
+    public SuggestedPeopleResult Draw(SuggestedUserDto[] people, HashSet<string> dismissed, SocialInk ink,
         in TextStyle sectionStyle, in SuggestedPeopleLabels labels, string anchorKey, PhoneTheme theme,
         RemoteImageCache images, LodestoneService lodestone)
     {
@@ -138,7 +139,7 @@ internal sealed class SuggestedPeopleRail
             }
 
             var card = new Rect(new Vector2(left, origin.Y), new Vector2(left + cardWidth, origin.Y + cardHeight));
-            var action = DrawCard(drawList, idPrefix, person, card, ink, labels, theme, images, lodestone);
+            var action = DrawCard(drawList, person, card, ink, labels, theme, images, lodestone);
             if (action != SuggestedPeopleAction.None)
             {
                 result = new SuggestedPeopleResult(action, person.User);
@@ -156,7 +157,7 @@ internal sealed class SuggestedPeopleRail
         return result;
     }
 
-    private SuggestedPeopleAction DrawCard(ImDrawListPtr drawList, string idPrefix, SuggestedUserDto person, Rect card,
+    private SuggestedPeopleAction DrawCard(ImDrawListPtr drawList, SuggestedUserDto person, Rect card,
         SocialInk ink, in SuggestedPeopleLabels labels, PhoneTheme theme, RemoteImageCache images,
         LodestoneService lodestone)
     {
@@ -203,8 +204,12 @@ internal sealed class SuggestedPeopleRail
             FollowState.Requested => Loc.T(L.Social.Requested),
             _ => labels.Follow,
         };
-        var followClicked = Button.Draw(drawList, button, label, ink.Control,
-            state == FollowState.None ? ButtonStyle.Prominent : ButtonStyle.Gray, id: idPrefix + user.Id);
+        bool followClicked;
+        using (UiScope.PushId(user.Id))
+        {
+            followClicked = Button.Draw(drawList, button, label, ink.Control,
+                state == FollowState.None ? ButtonStyle.Prominent : ButtonStyle.Gray, id: FollowButtonId);
+        }
         if (rail.Dragging)
         {
             return SuggestedPeopleAction.None;
