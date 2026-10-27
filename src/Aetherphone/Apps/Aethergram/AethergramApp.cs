@@ -48,6 +48,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         Report,
         Block,
         NotInterested,
+        Mute,
     }
 
     private enum PostNotice
@@ -100,7 +101,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
     private const float CardLineGap = 4f;
     private const float CardCaptionScale = 0.95f;
     private const int GridColumns = 3;
-    private const int PostSheetMaxItems = 6;
+    private const int PostSheetMaxItems = 7;
     private const int MaxPinnedPosts = 3;
     private const float CardPinGlyphSize = 12f;
     private const float CardPinGlyphGap = 3f;
@@ -548,6 +549,9 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             case AethergramScreen.BadgeProgress:
                 DrawBadgeProgress(area);
                 break;
+            case AethergramScreen.MutedAccounts:
+                DrawMutedAccounts(area);
+                break;
             default:
                 DrawRoot(area);
                 break;
@@ -754,6 +758,8 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                 AddPostSheetItem(PostSheetAction.NotInterested, Loc.T(L.Social.NotInterested), false);
             }
 
+            AddPostSheetItem(PostSheetAction.Mute,
+                SocialMute.MenuLabel(store.IsMuted(post.AuthorId), post.AuthorDisplayName, post.AuthorHandle), false);
             AddPostSheetItem(PostSheetAction.Report, Loc.T(L.Report.Action), true);
             AddPostSheetItem(PostSheetAction.Block, Loc.T(L.Social.BlockAction), true);
         }
@@ -823,6 +829,9 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                 break;
             case PostSheetAction.NotInterested:
                 store.MarkNotInterested(post.Id);
+                break;
+            case PostSheetAction.Mute:
+                ToggleMute(post.AuthorId, store.IsMuted(post.AuthorId), post.AuthorDisplayName, post.AuthorHandle);
                 break;
         }
     }

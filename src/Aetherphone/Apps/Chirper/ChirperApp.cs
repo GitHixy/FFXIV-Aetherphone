@@ -60,6 +60,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         Save,
         Unsave,
         NotInterested,
+        Mute,
+        MutedAccounts,
     }
 
     private enum ActionGlyph
@@ -81,7 +83,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     private const int MaxPostLength = 300;
     private const int MaxCommentLength = 500;
     private const int FeedBodyMaxLines = 6;
-    private const int PostSheetMaxItems = 7;
+    private const int PostSheetMaxItems = 8;
     private const float TopBarButtonRadius = 18f;
     private const float FeedTabRowHeight = 44f;
     private const float LatestScopeRowHeight = 40f;
@@ -522,6 +524,9 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 break;
             case ChirperScreen.BadgeProgress:
                 DrawBadgeProgress(area);
+                break;
+            case ChirperScreen.MutedAccounts:
+                DrawMutedAccounts(area);
                 break;
             default:
                 DrawHome(area);
@@ -964,6 +969,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 AddSheetItem(PostSheetAction.NotInterested, Loc.T(L.Social.NotInterested), false);
             }
 
+            AddSheetItem(PostSheetAction.Mute,
+                SocialMute.MenuLabel(store.IsMuted(post.AuthorId), post.AuthorDisplayName, post.AuthorHandle), false);
             AddSheetItem(PostSheetAction.Report, Loc.T(L.Chirper.ReportChirp), true);
             AddSheetItem(PostSheetAction.Block,
                 post.AuthorHandle.Length > 0
@@ -1041,6 +1048,9 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 break;
             case PostSheetAction.NotInterested:
                 store.MarkNotInterested(post.Id);
+                break;
+            case PostSheetAction.Mute:
+                ToggleMute(post.AuthorId, store.IsMuted(post.AuthorId), post.AuthorDisplayName, post.AuthorHandle);
                 break;
         }
     }

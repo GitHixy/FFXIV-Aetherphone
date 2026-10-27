@@ -94,7 +94,8 @@ internal sealed record UserDto(
     int PendingPhotoTags = 0,
     bool ShowOnLeaderboards = false,
     bool ShowInHallOfFame = false,
-    GlamBannerDto? BannerGlam = null) : IIdentified;
+    GlamBannerDto? BannerGlam = null,
+    bool IsMuted = false) : IIdentified;
 
 internal sealed record UpdateProfileRequest(string? DisplayName, string? Handle, string? Bio, string? AvatarUrl = null,
     string? BannerUrl = null,

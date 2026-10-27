@@ -691,10 +691,13 @@ internal sealed partial class ChirperApp
         if (user.IsMe)
         {
             AddSheetItem(PostSheetAction.BadgeProgress, Loc.T(L.Social.BadgeProgress), false);
+            AddSheetItem(PostSheetAction.MutedAccounts, Loc.T(L.Social.MutedAccounts), false);
             AddSheetItem(PostSheetAction.Rules, Loc.T(L.Conduct.Eyebrow), false);
         }
         else
         {
+            AddSheetItem(PostSheetAction.Mute, SocialMute.MenuLabel(store.IsMuted(user), user.DisplayName, user.Handle),
+                false);
             AddSheetItem(PostSheetAction.Report, Loc.T(L.Report.UserTitle), true);
             AddSheetItem(PostSheetAction.Block,
                 user.Handle.Length > 0 ? Loc.T(L.Chirper.BlockHandle, user.Handle) : Loc.T(L.Social.BlockAction),
@@ -726,6 +729,12 @@ internal sealed partial class ChirperApp
                 break;
             case PostSheetAction.BadgeProgress:
                 router.Push(ChirperRoute.BadgeProgress);
+                break;
+            case PostSheetAction.MutedAccounts:
+                OpenMutedAccounts();
+                break;
+            case PostSheetAction.Mute:
+                ToggleMute(user.Id, store.IsMuted(user), user.DisplayName, user.Handle);
                 break;
         }
     }
