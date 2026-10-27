@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.WebSockets;
 using System.Text.Json;
 using Aetherphone.Core.Aethernet;
@@ -80,9 +81,16 @@ internal sealed class RealtimeConnection : IDisposable
             var connectedAtUtc = DateTime.MinValue;
             try
             {
+                if (session.Maintenance.Holds)
+                {
+                    await session.Maintenance.WhenLifted.WaitAsync(token).ConfigureAwait(false);
+                    attempt = 0;
+                }
+
                 using var ws = new ClientWebSocket();
                 ws.Options.KeepAliveInterval = TimeSpan.FromSeconds(15);
                 ws.Options.KeepAliveTimeout = TimeSpan.FromSeconds(20);
+                ws.Options.CollectHttpResponseDetails = true;
                 var bearer = session.Token;
                 if (!string.IsNullOrEmpty(bearer))
                 {
@@ -91,7 +99,11 @@ internal sealed class RealtimeConnection : IDisposable
 
                 AethernetClientIdentity.Apply(ws.Options);
 
-                await ws.ConnectAsync(BuildUri(session.BaseUrl), token).ConfigureAwait(false);
+                if (!await TryConnectAsync(ws, token).ConfigureAwait(false))
+                {
+                    continue;
+                }
+
                 lock (gate)
                 {
                     socket = ws;
@@ -154,11 +166,7 @@ internal sealed class RealtimeConnection : IDisposable
                 chunk = await ws.ReceiveAsync(buffer.AsMemory(), token).ConfigureAwait(false);
                 if (chunk.MessageType == WebSocketMessageType.Close)
                 {
-                    if (ws.CloseStatus == WebSocketCloseStatus.EndpointUnavailable)
-                    {
-                        ClosedForRestart?.Invoke();
-                    }
-
+                    OnServerClosed(ws);
                     return;
                 }
 
@@ -181,10 +189,49 @@ internal sealed class RealtimeConnection : IDisposable
         }
     }
 
+    private async Task<bool> TryConnectAsync(ClientWebSocket ws, CancellationToken token)
+    {
+        try
+        {
+            await ws.ConnectAsync(BuildUri(session.BaseUrl), token).ConfigureAwait(false);
+            return true;
+        }
+        catch (WebSocketException) when (ws.HttpStatusCode == HttpStatusCode.ServiceUnavailable
+                                          && MaintenanceWire.TryHeader(ws.HttpResponseHeaders, out var endsHeader))
+        {
+            AepLog.Info("Realtime connection refused for maintenance; waiting for Aethernet to return.");
+            session.Maintenance.EnterFromResponse(MaintenanceWire.EndsAtUnix(endsHeader, null, null,
+                DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
+            return false;
+        }
+    }
+
+    private void OnServerClosed(ClientWebSocket ws)
+    {
+        if (ws.CloseStatus != WebSocketCloseStatus.EndpointUnavailable)
+        {
+            return;
+        }
+
+        if (string.Equals(ws.CloseStatusDescription, MaintenanceWire.CloseReason, StringComparison.Ordinal))
+        {
+            session.Maintenance.EnterFromResponse(0L);
+            return;
+        }
+
+        ClosedForRestart?.Invoke();
+    }
+
     private void DispatchControl(byte[] data, int length)
     {
         try
         {
+            if (MaintenanceWire.IsMaintenanceFrame(new ReadOnlySpan<byte>(data, 0, length)))
+            {
+                DispatchMaintenance(data, length);
+                return;
+            }
+
             var control = JsonSerializer.Deserialize(new ReadOnlySpan<byte>(data, 0, length),
                 TelephonyJsonContext.Default.CallControl);
             if (control is not null)
@@ -196,6 +243,18 @@ internal sealed class RealtimeConnection : IDisposable
         {
             AepLog.Warning(exception, "Realtime control parse failed");
         }
+    }
+
+    private void DispatchMaintenance(byte[] data, int length)
+    {
+        var signal = JsonSerializer.Deserialize(new ReadOnlySpan<byte>(data, 0, length),
+            AethernetJsonContext.Default.MaintenanceSignalDto);
+        if (signal is null)
+        {
+            return;
+        }
+
+        session.Maintenance.EnterFromSignal(signal.EndsAtUnix ?? 0L, signal.Message);
     }
 
     public Task SendControlAsync(CallControl control)

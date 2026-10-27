@@ -1,6 +1,8 @@
+using Aetherphone.Core.Aethernet;
 using Aetherphone.Core.Animation;
 using Aetherphone.Core.Apps;
 using Aetherphone.Core.Localization;
+using Aetherphone.Core.Net;
 using Aetherphone.Core.Shell.Home;
 using Aetherphone.Core.Theme;
 using Aetherphone.Windows.Components;
@@ -16,13 +18,19 @@ internal sealed class ShellScreenPainter
     private readonly ThemeProvider themes;
     private readonly NavigationStack navigation;
     private readonly HomeScreen home;
+    private readonly AethernetMaintenance maintenance;
+    private readonly MaintenancePanel maintenancePanel = new();
 
-    public ShellScreenPainter(ThemeProvider themes, NavigationStack navigation, HomeScreen home)
+    public ShellScreenPainter(ThemeProvider themes, NavigationStack navigation, HomeScreen home,
+        AethernetMaintenance maintenance)
     {
         this.themes = themes;
         this.navigation = navigation;
         this.home = home;
+        this.maintenance = maintenance;
     }
+
+    public bool CoversWithMaintenance(IPhoneApp app) => maintenance.Holds && ServerBackedApps.Contains(app.Id);
 
     public PhoneTheme SurfaceTheme(PhoneTheme wallpaperTheme) =>
         navigation.Current is { } app ? themes.ForApp(app.WantsSystemTheme) : wallpaperTheme;
@@ -94,6 +102,14 @@ internal sealed class ShellScreenPainter
     private void PaintAppSurface(Rect screen, float screenRadius, PhoneTheme theme, IPhoneApp app)
     {
         var content = themes.ForApp(app.WantsSystemTheme);
+        if (CoversWithMaintenance(app))
+        {
+            DeviceChrome.FillScreen(screen, screenRadius, content.AppBackground);
+            WallpaperBackdrop.RecordAppGround(screen, content.AppBackground, content.AppBackground);
+            maintenancePanel.Draw(ContentRect(screen, theme), content, maintenance.View);
+            return;
+        }
+
         if (!app.WantsTransparentScreen)
         {
             DeviceChrome.FillScreen(screen, screenRadius, content.AppBackground);

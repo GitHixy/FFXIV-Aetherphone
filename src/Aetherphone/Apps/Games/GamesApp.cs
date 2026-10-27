@@ -75,6 +75,7 @@ using Aetherphone.Core.Localization;
 using Aetherphone.Core.Lodestone;
 using Aetherphone.Core.Media;
 using Aetherphone.Core.MoogleClicker;
+using Aetherphone.Core.Net;
 using Aetherphone.Core.Onboarding;
 using Aetherphone.Core.Platform;
 using Aetherphone.Core.Theme;
@@ -133,6 +134,7 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
     private readonly LodestoneService lodestone;
     private readonly SettingsLauncher settingsLauncher;
     private readonly HomeLinks homeLinks;
+    private readonly AethernetMaintenance maintenance;
     private readonly OnlineHub onlineHub;
     private readonly OnlineRoomView onlineRoom;
     private readonly IMiniGame[] games;
@@ -179,7 +181,7 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
         Core.Coins.CoinStore coins, Core.Coins.CoinGameSessionTracker coinSessions,
         GameRoomsStore gameRooms, Configuration configuration, LeaderboardStore leaderboard, RemoteImageCache images,
         LodestoneService lodestone, MoogleClickerService moogleClicker, SettingsLauncher settingsLauncher,
-        ConfirmService confirm, HomeLinks homeLinks)
+        ConfirmService confirm, HomeLinks homeLinks, AethernetMaintenance maintenance)
     {
         this.stats = stats;
         this.configuration = configuration;
@@ -191,6 +193,7 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
         this.lodestone = lodestone;
         this.settingsLauncher = settingsLauncher;
         this.homeLinks = homeLinks;
+        this.maintenance = maintenance;
         refreshLeaderboard = RefreshLeaderboardNow;
         session = new GameSession(stats, leaderboard, leaderboard);
         fx = new ScreenFx(backdrop);
@@ -568,6 +571,12 @@ internal sealed partial class GamesApp : IPhoneApp, ITabRouteTarget, INameplateA
                 return;
             case GamesScreen.OnlineRoom:
                 ImGui.GetWindowDrawList().AddRectFilled(area.Min, area.Max, ImGui.GetColorU32(theme.AppBackground));
+                if (maintenance.Holds)
+                {
+                    DrawRoomMaintenance(context);
+                    return;
+                }
+
                 SyncOnlineRoomLandscape();
                 onlineRoom.Draw(context, LeaveOnlineRoom, ui,
                     AppLandscape.Held(Id) && context.Content.IsLandscape(), TabTitle(GamesTab.Together));

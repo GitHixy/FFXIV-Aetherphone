@@ -12097,7 +12097,7 @@ internal static class L
         public static readonly LocString VerdictMismatchHint = new("casino.verdict.mismatchHint", "The revealed seed does not reproduce this round. Copy the details and send them to us through Feedback.");
         public static readonly LocString VerdictUnrevealedTitle = new("casino.verdict.unrevealedTitle", "Still sealed");
         public static readonly LocString VerdictUnrevealedHint = new("casino.verdict.unrevealedHint", "This round has not settled yet, so its seed stays sealed. Check back once it wraps.");
-        public static readonly LocString FairnessIntro = new("casino.fairness.intro", "Every game here is dealt from a sealed seed, and for 7 days you can check settled rounds yourself, right on this phone. Here is how it works.");
+        public static readonly LocString FairnessIntro = new("casino.fairness.intro", "Every game here is dealt from a sealed seed, and for 3 days you can check settled rounds yourself, right on this phone. Here is how it works.");
         public static readonly LocString FairnessLockTitle = new("casino.fairness.lockTitle", "Locked before you play");
         public static readonly LocString FairnessLockBody = new("casino.fairness.lockBody", "Before a stake is accepted, Gamba publishes a fingerprint of the round's secret seed. The outcome is fixed in that seed; nothing after your tap can bend it.");
         public static readonly LocString FairnessRevealTitle = new("casino.fairness.revealTitle", "Revealed when it settles");
@@ -12261,7 +12261,7 @@ internal static class L
         public static readonly LocString RulesHowToPlay = new("casino.rules.howToPlay", "HOW IT PLAYS");
         public static readonly LocString RulesNumbers = new("casino.rules.numbers", "THE NUMBERS");
         public static readonly LocString RulesPlay = new("casino.rules.play", "Play");
-        public static readonly LocString RulesFairness = new("casino.rules.fairness", "Every round is sealed before it is drawn, and you can check settled rounds for 7 days under Fair play.");
+        public static readonly LocString RulesFairness = new("casino.rules.fairness", "Every round is sealed before it is drawn, and you can check settled rounds for 3 days under Fair play.");
         public static readonly LocString PitchGeneric = new("casino.pitch.generic", "A game on the floor");
         public static readonly LocString PitchScratch = new("casino.pitch.scratch", "Buy a card, rub the foil, match three symbols");
         public static readonly LocString PitchWheel = new("casino.pitch.wheel", "One wheel, five spots, everybody on the same spin");
@@ -15068,6 +15068,7 @@ internal static class L
         public static readonly LocString SessionRevoked = new("failure.sessionRevoked", "You were signed out. Sign in again to continue.");
         public static readonly LocString SocialDisabled = new("failure.socialDisabled", "The social apps are temporarily switched off. Try again later.");
         public static readonly LocString AppDisabled = new("failure.appDisabled", "This app is temporarily switched off. Try again later.");
+        public static readonly LocString Maintenance = new("failure.maintenance", "Aethernet is under maintenance. It will be back soon.");
         public static readonly LocString ValidationFailed = new("failure.validationFailed", "That didn't look right. Check what you entered, then try again.");
         public static readonly LocString Conflict = new("failure.conflict", "Someone else changed this first. Reopen it and try again.");
         public static readonly LocString PostNotChirp = new("failure.postNotChirp", "That only works on chirps.");
@@ -15142,6 +15143,14 @@ internal static class L
         public static readonly LocString PrismGlamDailyLimit = new("failure.prismGlamDailyLimit", "You've reached today's glam limit ({0}). You can post again after the daily reset.");
         public static readonly LocString PrismGlamPhotosLocked = new("failure.prismGlamPhotosLocked", "A contest glam keeps the photo that was judged.");
         public static readonly LocString PrismGlamUnderReview = new("failure.prismGlamUnderReview", "This glam is being reviewed, so its photos can't change right now.");
+    }
+
+    internal static class Maintenance
+    {
+        public static readonly LocString Title = new("maintenance.title", "Aethernet is under maintenance");
+        public static readonly LocString ExpectedBackIn = new("maintenance.expectedBackIn", "Expected back in");
+        public static readonly LocString FinishingUp = new("maintenance.finishingUp", "Finishing up, back any minute");
+        public static readonly LocString OfflineApps = new("maintenance.offlineApps", "Apps that don't need Aethernet keep working.");
     }
 
     internal static class Rolladeck

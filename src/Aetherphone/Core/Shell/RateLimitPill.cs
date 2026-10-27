@@ -35,7 +35,7 @@ internal sealed class RateLimitPill
 
     public void Draw(Rect screen, PhoneTheme theme, float delta)
     {
-        var remaining = http.PauseRemaining(ApiHost());
+        var remaining = session.Maintenance.Holds ? TimeSpan.Zero : http.PauseRemaining(ApiHost());
         presence.Step(remaining > TimeSpan.Zero ? 1f : 0f, Motion.Appear, delta);
         var alpha = Math.Clamp(presence.Value, 0f, 1f);
         if (alpha < 0.02f)

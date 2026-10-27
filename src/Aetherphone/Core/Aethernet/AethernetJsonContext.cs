@@ -5,6 +5,8 @@ namespace Aetherphone.Core.Aethernet;
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase, PropertyNameCaseInsensitive = true)]
 [JsonSerializable(typeof(FeatureFlagsDto))]
+[JsonSerializable(typeof(MaintenanceStatusDto))]
+[JsonSerializable(typeof(MaintenanceSignalDto))]
 [JsonSerializable(typeof(PatreonLinkStartResponse))]
 [JsonSerializable(typeof(PatreonLinkStatusResponse))]
 [JsonSerializable(typeof(ChallengeRequest))]
