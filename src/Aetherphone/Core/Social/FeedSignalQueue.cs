@@ -88,6 +88,36 @@ internal sealed class FeedSignalQueue
         Dispatch(now, true);
     }
 
+    public async Task FlushAsync(CancellationToken token)
+    {
+        while (true)
+        {
+            string[] batch;
+            lock (gate)
+            {
+                if (pending.Count == 0)
+                {
+                    return;
+                }
+
+                batch = Take();
+                lastFlush = DateTime.UtcNow;
+            }
+
+            if (await sendSeen(batch, token).ConfigureAwait(false))
+            {
+                continue;
+            }
+
+            lock (gate)
+            {
+                Requeue(batch);
+            }
+
+            return;
+        }
+    }
+
     public void Reset()
     {
         lock (gate)
@@ -122,20 +152,23 @@ internal sealed class FeedSignalQueue
             lock (gate)
             {
                 flushing = false;
-                if (sent)
+                if (!sent)
                 {
-                    return;
-                }
-
-                for (var index = 0; index < batch.Length; index++)
-                {
-                    if (pending.Count < PendingCap)
-                    {
-                        pending.Add(batch[index]);
-                    }
+                    Requeue(batch);
                 }
             }
         });
+    }
+
+    private void Requeue(string[] batch)
+    {
+        for (var index = 0; index < batch.Length; index++)
+        {
+            if (pending.Count < PendingCap)
+            {
+                pending.Add(batch[index]);
+            }
+        }
     }
 
     private string[] Take()
