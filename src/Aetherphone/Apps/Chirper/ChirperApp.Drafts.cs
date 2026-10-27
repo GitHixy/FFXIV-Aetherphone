@@ -4,6 +4,7 @@ using Aetherphone.Core.Animation;
 using Aetherphone.Core.Confirm;
 using Aetherphone.Core.Gifs;
 using Aetherphone.Core.Localization;
+using Aetherphone.Core.Media;
 using Aetherphone.Core.Net;
 using Aetherphone.Core.Onboarding;
 using Aetherphone.Core.Social;
@@ -143,12 +144,15 @@ internal sealed partial class ChirperApp
         composePicking = false;
         composeSensitive = false;
         composePoll.Reset();
+        composeReplyPolicy = ChirperReplyPolicy.Everyone;
+        threadDraft.Clear();
         ResetComposeExtras();
     }
 
     private void ResetComposeExtras()
     {
         composeDraftId = null;
+        composeScheduledId = null;
         composeScheduleAtUnix = 0;
         composePanel = ComposePanel.None;
         draftExitSheet.Close();
@@ -160,6 +164,10 @@ internal sealed partial class ChirperApp
         if (composeScheduleAtUnix > 0)
         {
             toast.Show(Loc.T(L.Social.ScheduledToast, TimeText.FutureMoment(composeScheduleAtUnix)));
+        }
+        else if (composeScheduledId is { } postedNow)
+        {
+            store.DeleteScheduled(postedNow);
         }
 
         if (ComposerDrafts.Remove(configuration.ChirperDrafts, store.AccountId, composeDraftId))
@@ -183,6 +191,7 @@ internal sealed partial class ChirperApp
             Text = draft,
             QuotedPostId = quoteTargetId,
             Sensitive = composeSensitive,
+            ReplyPolicy = composeReplyPolicy,
         };
         if (AttachedComposeGif() is { } gif)
         {
@@ -201,6 +210,10 @@ internal sealed partial class ChirperApp
         else
         {
             saved.PhotoPaths.AddRange(composeAttachments);
+            if (ComposeAltTextInputs(composeAttachments.ToArray()) is { } altTexts)
+            {
+                saved.AltTexts.AddRange(altTexts);
+            }
         }
 
         if (composePoll.Active)
@@ -229,6 +242,9 @@ internal sealed partial class ChirperApp
             AddComposeAttachment(photos[index]);
         }
 
+        RestoreDraftAltTexts(saved);
+        composeReplyPolicy = ChirperReplyPolicy.Clamp(saved.ReplyPolicy);
+
         if (saved.Gif is { } gif && composeAttachments.Count == 0)
         {
             composeGif = new GifPick(new GifItem(gif.Slug, gif.PreviewUrl, gif.PreviewWidth, gif.PreviewHeight,
@@ -238,13 +254,12 @@ internal sealed partial class ChirperApp
 
         if (saved.PollOptions.Count > 0 && composeAttachments.Count == 0 && saved.QuotedPostId is null)
         {
-            RestoreComposePoll(saved);
+            RestoreComposePoll(saved.PollOptions, saved.PollDurationIndex);
         }
 
         if (saved.QuotedPostId is { } quotedId)
         {
-            quoteTargetId = quotedId;
-            store.LoadPost(quotedId, post => Interlocked.Exchange(ref pendingDraftQuote, post));
+            LoadComposeQuote(quotedId);
         }
 
         composeSensitive = saved.Sensitive && composeAttachments.Count > 0;
@@ -252,11 +267,31 @@ internal sealed partial class ChirperApp
         composeFocus = true;
     }
 
-    private void RestoreComposePoll(ComposerDraft saved)
+    private void RestoreDraftAltTexts(ComposerDraft saved)
+    {
+        var count = Math.Min(saved.PhotoPaths.Count, saved.AltTexts.Count);
+        for (var index = 0; index < count; index++)
+        {
+            if (composeAttachments.Contains(saved.PhotoPaths[index]))
+            {
+                PostAltTexts.Set(composeAltTexts, saved.PhotoPaths[index], saved.AltTexts[index]);
+            }
+        }
+    }
+
+    // The preview is fetched again so a quote restored from a draft or a scheduled chirp shows the
+    // quoted chirp as it is now, or nothing if it is gone.
+    private void LoadComposeQuote(string quotedId)
+    {
+        quoteTargetId = quotedId;
+        store.LoadPost(quotedId, post => Interlocked.Exchange(ref pendingDraftQuote, post));
+    }
+
+    private void RestoreComposePoll(IReadOnlyList<string> options, int durationIndex)
     {
         composePoll.Open();
         pollDurationRail.Reset();
-        for (var index = 0; index < saved.PollOptions.Count; index++)
+        for (var index = 0; index < options.Count; index++)
         {
             if (index >= composePoll.OptionCount)
             {
@@ -268,10 +303,10 @@ internal sealed partial class ChirperApp
                 composePoll.AddOption();
             }
 
-            composePoll.Option(index) = saved.PollOptions[index];
+            composePoll.Option(index) = options[index];
         }
 
-        composePoll.SelectDuration(saved.PollDurationIndex);
+        composePoll.SelectDuration(durationIndex);
     }
 
     private void DrawUnsentPanel(Rect area)
@@ -359,11 +394,17 @@ internal sealed partial class ChirperApp
         }
 
         var rows = ScheduledRows(items);
-        ComposerDraftList.Draw(body, ui, ChirperInk.Shared, rows, Loc.T(L.Social.ScheduledDelete), false,
+        var tapped = ComposerDraftList.Draw(body, ui, ChirperInk.Shared, rows, Loc.T(L.Social.ScheduledDelete), true,
             out var deleted);
         if (deleted >= 0)
         {
             AskDeleteScheduled(items[deleted].Id);
+            return;
+        }
+
+        if (tapped >= 0)
+        {
+            OpenScheduledEdit(items[tapped]);
         }
     }
 

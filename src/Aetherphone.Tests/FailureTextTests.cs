@@ -62,6 +62,14 @@ public sealed class FailureTextTests
     }
 
     [Fact]
+    public void ARefusedCollaboratorReadsAsItsOwnMessage()
+    {
+        var failure = new AepFailure(AepFailureKind.Server, 400, FailureCodes.GramInvalidCollaborator, null, "ref7", null);
+
+        Assert.Equal(Loc.T(L.Aethergram.CollabUnavailable), FailureText.Resolve(failure));
+    }
+
+    [Fact]
     public void AValuedCodeMissingItsValueDegradesInsteadOfPrintingThePlaceholder()
     {
         var failure = new AepFailure(AepFailureKind.Server, 400, FailureCodes.PostTooLong, null, "ref42", null);

@@ -21,3 +21,5 @@ internal sealed record StoryHighlightList(StoryHighlightDto[] Items);
 internal sealed record CreateHighlightRequest(string Title, string[] StoryIds, string? CoverStoryId = null);
 
 internal sealed record UpdateHighlightRequest(string? Title = null, string? CoverStoryId = null);
+
+internal sealed record StoryHighlightMembership(string[] HighlightIds);

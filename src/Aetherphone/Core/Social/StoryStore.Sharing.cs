@@ -1,10 +1,11 @@
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Core.Net;
 
 namespace Aetherphone.Core.Social;
 
 internal sealed partial class StoryStore
 {
-    public void ShareGram(string postId, Action<bool> onComplete)
+    public void ShareGram(string postId, string caption, Action<bool, AepFailure> onComplete)
     {
         if (posting)
         {
@@ -12,9 +13,11 @@ internal sealed partial class StoryStore
         }
 
         posting = true;
+        var failure = AepFailure.None;
         work.Run("share gram to story", async token =>
         {
-            var created = await client.ShareGramToStoryAsync(postId, token).ConfigureAwait(false);
+            var created = await client.ShareGramToStoryAsync(postId, caption.Trim(), token,
+                reported => failure = reported).ConfigureAwait(false);
             if (created is null)
             {
                 return false;
@@ -22,7 +25,7 @@ internal sealed partial class StoryStore
 
             RefreshTray();
             return true;
-        }, onComplete, () => posting = false);
+        }, shared => onComplete(shared, failure), () => posting = false);
     }
 
     public void ToggleLike(StoryDto story)

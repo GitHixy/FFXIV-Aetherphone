@@ -110,6 +110,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         SafetyClient safety,
         MediaClient media,
         RealtimeSignalBus signals,
+        SocialMuteLedger mutes,
         string logTag)
     {
         this.session = session;
@@ -118,10 +119,12 @@ internal abstract partial class SocialFeedStore : IDisposable
         this.safety = safety;
         this.media = media;
         this.signals = signals;
+        this.mutes = mutes;
         work = new StoreWork(logTag);
         feedSignals = new FeedSignalQueue(client.ReportSeenAsync, client.ReportSignalAsync, work);
         session.Changed += OnSessionChanged;
         signals.ContentRemoved += OnContentRemoved;
+        mutes.Changed += OnMuteChanged;
     }
 
     private void OnContentRemoved(ContentRemovalSignal removal)
@@ -2059,6 +2062,7 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
         session.Changed -= OnSessionChanged;
         signals.ContentRemoved -= OnContentRemoved;
+        mutes.Changed -= OnMuteChanged;
         work.Dispose();
     }
 }

@@ -59,7 +59,7 @@ internal sealed partial class AethergramApp
         if (editPostOutcome == 1)
         {
             editPostOutcome = 0;
-            translation.Forget(new TranslationKey(TranslationSurface.Post, post.Id));
+            translation.Forget(new TranslationKey(TranslationSurface.Post, post.Id, post.EditedAtUnix ?? 0));
             back();
             return;
         }

@@ -7,6 +7,7 @@ using Aetherphone.Core.Localization;
 using Aetherphone.Core.Translation;
 using Aetherphone.Core.Lodestone;
 using Aetherphone.Core.Media;
+using Aetherphone.Core.Net;
 using Aetherphone.Core.Social;
 using Aetherphone.Core.Theme;
 using Aetherphone.Core.Wallpapers;
@@ -90,7 +91,8 @@ internal sealed class StoryPresenter : IDisposable
         string caption, Action<bool> onComplete, int audience = StoryAudiences.Everyone) =>
         stories.CreateStory(sourcePath, crop, edit, caption, onComplete, audience);
 
-    public void ShareGram(string postId, Action<bool> onComplete) => stories.ShareGram(postId, onComplete);
+    public void ShareGram(string postId, string caption, Action<bool, AepFailure> onComplete) =>
+        stories.ShareGram(postId, caption, onComplete);
 
     public void DrawTray(PhoneTheme theme, string? ownAvatarUrl = null, string ownName = "",
         string? ownFrameId = null) =>
@@ -100,12 +102,13 @@ internal sealed class StoryPresenter : IDisposable
     public void DrawViewer(Rect screen, PhoneTheme theme, bool suspended = false) =>
         viewer.Draw(screen, theme, suspended || confirm.Active is not null);
 
-    public void OpenDetached(StoryDto[] items, string label, string? avatarUrl)
+    public void OpenDetached(StoryDto[] items, string label, string? avatarUrl, bool mine, string ownerName)
     {
         Close();
         detached = true;
         viewerItems = items;
-        viewer.Open(items, label, avatarUrl, IgnoreSeen);
+        viewer.Open(items, label, avatarUrl, mine ? IgnoreSeen : stories.MarkSeen, reply: mine ? null : replyPrompt,
+            replyTo: ownerName);
     }
 
     public void OpenRing(StoryRingDto ring)

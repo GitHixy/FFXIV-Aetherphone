@@ -81,7 +81,7 @@ internal sealed partial class ChirperApp
 
     private void OpenComposeGifSource()
     {
-        if (composePoll.Active)
+        if (FocusedTakesPoll && composePoll.Active)
         {
             toast.Show(ComposeGifRefusal());
             return;
@@ -117,6 +117,14 @@ internal sealed partial class ChirperApp
             return;
         }
 
+        composePicking = false;
+        if (threadDraft.FocusesFollowUp)
+        {
+            threadDraft.AttachGif(threadDraft.FocusedBox - 1, pick);
+            composeStatus = string.Empty;
+            return;
+        }
+
         if (composePoll.Active)
         {
             toast.Show(ComposeGifRefusal());
@@ -126,7 +134,6 @@ internal sealed partial class ChirperApp
         composeAttachments.Clear();
         composeAttachments.Add(pick.Item.Url);
         composeGif = pick;
-        composePicking = false;
         composeStatus = string.Empty;
     }
 
@@ -143,6 +150,11 @@ internal sealed partial class ChirperApp
         if (composeGif is { } gif && string.Equals(path, gif.Item.Url, StringComparison.Ordinal))
         {
             return images.SizedAt(gif.Item.PreviewUrl, drawnPixels, ImGui.GetTime());
+        }
+
+        if (threadDraft.GifFor(path) is { } threadGif)
+        {
+            return images.SizedAt(threadGif.Item.PreviewUrl, drawnPixels, ImGui.GetTime());
         }
 
         return wallpaperImages.Get(path);

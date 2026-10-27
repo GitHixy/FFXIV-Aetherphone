@@ -29,7 +29,7 @@ internal sealed partial class ChirperApp
 
     private void DrawCompose(Rect area)
     {
-        PostAltTexts.Prune(composeAltTexts, composeAttachments);
+        PruneComposeAltTexts();
         if (composeOutcome == 1)
         {
             composeOutcome = 0;
@@ -116,8 +116,7 @@ internal sealed partial class ChirperApp
                 : 0f;
             var stripGap = 8f * scale;
             var stripTile = composeAttachments.Count > 0
-                ? MathF.Min(ComposeTileMax * scale,
-                    (inputWidth - stripGap * (composeAttachments.Count - 1)) / MathF.Max(2f, composeAttachments.Count))
+                ? ComposeTileSize(inputWidth, composeAttachments.Count, stripGap)
                 : 0f;
             var stripHeight = composeAttachments.Count > 0 ? stripTile + 10f * scale : 0f;
             var pollEditorHeight = ComposePollHeight();
@@ -179,8 +178,8 @@ internal sealed partial class ChirperApp
 
             if (composeAttachments.Count > 0)
             {
-                DrawComposeAttachmentStrip(drawList, inputX, inputTop + inputHeight + 10f * scale, stripTile,
-                    stripGap, scale);
+                DrawComposeAttachmentStrip(drawList, composeAttachments, inputX, inputTop + inputHeight + 10f * scale,
+                    stripTile, stripGap, scale);
             }
 
             if (pollEditorHeight > 0f)
@@ -207,7 +206,8 @@ internal sealed partial class ChirperApp
                 }
             }
 
-            DrawThreadFollowUps(drawList, new Vector2(origin.X + padX + avatarRadius, origin.Y + CellPadTop * scale + avatarRadius),
+            DrawThreadFollowUps(area, drawList,
+                new Vector2(origin.X + padX + avatarRadius, origin.Y + CellPadTop * scale + avatarRadius),
                 inputX, inputWidth, inputTop + inputHeight + stripHeight + pollEditorHeight + quotePreviewHeight + statusHeight);
             if (composeEmoji.Open)
             {
@@ -237,8 +237,8 @@ internal sealed partial class ChirperApp
             && draft.Length <= MaxPostLength && !store.Posting && !ComposeScheduleBlocked && ThreadDraftReady();
         var action = HeaderActionRect(area, actionLabel);
         UiAnchors.Report("chirper.compose.post", action);
-        var title = Loc.T(quoteTarget is not null ? L.Chirper.QuoteTitle : L.Chirper.NewChirp);
-        var draftsWidth = DrawComposeDraftsEntry(action);
+        var title = Loc.T(ScheduledComposeTitle(quoteTarget is not null ? L.Chirper.QuoteTitle : L.Chirper.NewChirp));
+        var draftsWidth = EditingScheduled ? 0f : DrawComposeDraftsEntry(action);
         SocialChrome.DrawScreenHeader(area, title, ChirperInk.Shared, CloseCompose, ScreenTitleStyle,
             (action.Width + draftsWidth) / UiScale.Current + HeaderActionGap, ComposeScheduleSubtitle());
         if (Button.Draw(action, actionLabel, ui.Ink, ButtonStyle.Prominent, enabled: canPost,
@@ -269,7 +269,9 @@ internal sealed partial class ChirperApp
         drawList.AddLine(barMin, new Vector2(area.Max.X, barMin.Y), ImGui.GetColorU32(ChirperInk.Hairline), 1f);
         var centerY = barMin.Y + height * 0.5f;
         var iconRadius = 17f * scale;
-        var canAttach = composeAttachments.Count < ChirperStore.MaxImages && !ComposeHasGif() && !composePoll.Active;
+        var focusedAttachments = FocusedAttachments();
+        var canAttach = focusedAttachments.Count < ChirperStore.MaxImages && !HoldsGif(focusedAttachments)
+            && !(FocusedTakesPoll && composePoll.Active);
         var photoInk = canAttach ? ChirperInk.MutedInk : Palette.WithAlpha(ChirperInk.MutedInk, 0.4f);
         var photoCenter = new Vector2(area.Min.X + CellPadX * scale + iconRadius, centerY);
         var photoExtent = new Vector2(iconRadius, iconRadius);
@@ -300,7 +302,7 @@ internal sealed partial class ChirperApp
         var chipHeight = Button.SmallHeight * scale;
         var gifMin = new Vector2(photoCenter.X + iconRadius + 8f * scale, centerY - chipHeight * 0.5f);
         var gifMax = new Vector2(gifMin.X + Button.WidthFor(gifLabel, ButtonSize.Small), centerY + chipHeight * 0.5f);
-        var gifEnabled = composeAttachments.Count == 0 && !composePoll.Active;
+        var gifEnabled = focusedAttachments.Count == 0 && !(FocusedTakesPoll && composePoll.Active);
         var gifClicked = Button.Draw(new Rect(gifMin, gifMax), gifLabel, ui.Ink,
             gifEnabled ? ButtonStyle.Tinted : ButtonStyle.Gray, id: "chirper.compose.gif");
         HoverTooltip.Show(new Rect(gifMin, gifMax), Loc.T(L.Settings.ChirperShowGifs), HoverLabelSide.Above);
@@ -327,7 +329,7 @@ internal sealed partial class ChirperApp
 
         composeEmoji.DrawToggle(ui, emojiCenter, iconRadius, ChirperInk.MineInk, ChirperInk.AccentLink,
             Loc.T(L.Common.Emoji));
-        if (composeAttachments.Count > 0)
+        if (composeAttachments.Count > 0 || threadDraft.HasPhotos())
         {
             var sensitiveRadius = RoundButton.SmallRadius * scale;
             var sensitiveCenter = new Vector2(emojiCenter.X + iconRadius + 8f * scale + sensitiveRadius, centerY);
@@ -386,16 +388,16 @@ internal sealed partial class ChirperApp
         }
     }
 
-    private void DrawComposeAttachmentStrip(ImDrawListPtr drawList, float x, float y, float tile, float gap,
-        float scale)
+    private void DrawComposeAttachmentStrip(ImDrawListPtr drawList, List<string> attachments, float x, float y,
+        float tile, float gap, float scale)
     {
         var rounding = ComposeTileRounding * scale;
         var removeIndex = -1;
-        for (var index = 0; index < composeAttachments.Count; index++)
+        for (var index = 0; index < attachments.Count; index++)
         {
             var min = new Vector2(x + (tile + gap) * index, y);
             var max = min + new Vector2(tile, tile);
-            if (DrawComposeAttachmentThumb(drawList, composeAttachments[index], min, max, rounding, scale))
+            if (DrawComposeAttachmentThumb(drawList, attachments[index], min, max, rounding, scale))
             {
                 removeIndex = index;
             }
@@ -403,7 +405,7 @@ internal sealed partial class ChirperApp
 
         if (removeIndex >= 0)
         {
-            composeAttachments.RemoveAt(removeIndex);
+            attachments.RemoveAt(removeIndex);
         }
     }
 
@@ -582,10 +584,7 @@ internal sealed partial class ChirperApp
         composePickerPaths = gifs;
     }
 
-    private bool ComposeHasGif()
-    {
-        return composeAttachments.Count > 0 && GifMedia.IsGif(composeAttachments[0]);
-    }
+    private bool ComposeHasGif() => HoldsGif(composeAttachments);
 
     private void AddComposeAttachment(string path)
     {
@@ -595,20 +594,21 @@ internal sealed partial class ChirperApp
             return;
         }
 
-        if (composePoll.Active)
+        if (FocusedTakesPoll && composePoll.Active)
         {
             composeStatus = Loc.T(L.Chirper.PollBlocksMedia);
             return;
         }
 
+        var target = FocusedAttachments();
         var addingGif = GifMedia.IsGif(path);
-        if (ComposeHasGif() || (addingGif && composeAttachments.Count > 0))
+        if (HoldsGif(target) || (addingGif && target.Count > 0))
         {
             composeStatus = Loc.T(L.Common.GifRidesAlone);
             return;
         }
 
-        if (composeAttachments.Count >= ChirperStore.MaxImages)
+        if (target.Count >= ChirperStore.MaxImages)
         {
             composeStatus = Loc.T(L.Chirper.MaxPhotos, ChirperStore.MaxImages);
             return;
@@ -620,15 +620,15 @@ internal sealed partial class ChirperApp
             return;
         }
 
-        for (var index = 0; index < composeAttachments.Count; index++)
+        for (var index = 0; index < target.Count; index++)
         {
-            if (string.Equals(composeAttachments[index], path, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(target[index], path, StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
         }
 
         composeStatus = string.Empty;
-        composeAttachments.Add(path);
+        target.Add(path);
     }
 }

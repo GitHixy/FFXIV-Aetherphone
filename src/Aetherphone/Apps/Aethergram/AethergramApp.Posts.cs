@@ -37,6 +37,13 @@ internal sealed partial class AethergramApp
 
             var contentTop = ImGui.GetCursorPosY();
             var jumpY = -1f;
+            var observesImpressions = source == PostSource.Explore;
+            if (observesImpressions)
+            {
+                var viewportTop = ImGui.GetWindowPos().Y;
+                store.BeginImpressions(viewportTop, viewportTop + ImGui.GetWindowSize().Y, ImGui.GetIO().DeltaTime);
+            }
+
             postsVirtualizer.BeginFrame(stepping: configuration);
             for (var index = 0; index < posts.Length; index++)
             {
@@ -57,7 +64,13 @@ internal sealed partial class AethergramApp
                     continue;
                 }
 
+                var rowTop = ImGui.GetCursorScreenPos().Y;
                 DrawGramCard(post, showPinned: source == PostSource.Profile);
+                if (observesImpressions)
+                {
+                    store.ObserveImpression(post.Id, rowTop, ImGui.GetCursorScreenPos().Y);
+                }
+
                 postsVirtualizer.Record(post.Id, revision);
             }
 

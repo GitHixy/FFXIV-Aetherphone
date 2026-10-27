@@ -8,9 +8,6 @@ internal static class ChirperEdits
     public const int MaxEdits = 5;
     public const long WindowSeconds = 3600L;
 
-    private const string WindowClosedCode = "post_edit_window_closed";
-    private const string LimitCode = "post_edit_limit";
-
     public static bool CanEdit(PostDto post, string? viewerId, long nowUnix) =>
         viewerId is not null
         && post.AuthorId == viewerId
@@ -35,21 +32,8 @@ internal static class ChirperEdits
         Mentions = edited.Mentions,
         EditedAtUnix = edited.EditedAtUnix,
         EditCount = edited.EditCount,
+        AltTexts = edited.AltTexts,
     };
 
-    public static string RefusalText(FailureSlot slot)
-    {
-        var code = slot.Failure.Code;
-        if (code == WindowClosedCode)
-        {
-            return Loc.T(L.Chirper.EditWindowClosed);
-        }
-
-        if (code == LimitCode)
-        {
-            return Loc.T(L.Chirper.EditLimitReached);
-        }
-
-        return slot.Failed ? slot.Text() : Loc.T(L.Account.CannotReach);
-    }
+    public static string RefusalText(FailureSlot slot) => slot.Failed ? slot.Text() : Loc.T(L.Account.CannotReach);
 }

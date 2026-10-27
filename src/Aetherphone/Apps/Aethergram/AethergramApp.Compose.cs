@@ -157,7 +157,7 @@ internal sealed partial class AethergramApp
             composeOutcome = 0;
             composeStatus = composeAvatarMode
                 ? Loc.T(AvatarUpload.Message(store.AvatarFailure))
-                : Loc.T(L.Account.CannotReach);
+                : CollabRefusalText() ?? Loc.T(L.Account.CannotReach);
         }
 
         composeSession.ConsumePendingImport();

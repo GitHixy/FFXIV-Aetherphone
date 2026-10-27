@@ -21,8 +21,8 @@ internal sealed partial class ChirperStore : SocialFeedStore
     private volatile bool avatarBusy;
 
     public ChirperStore(AethernetSession session, AccountClient account, SocialClient client, SafetyClient safety,
-        MediaClient media, RealtimeSignalBus signals)
-        : base(session, account, client, safety, media, signals, "Chirper")
+        MediaClient media, RealtimeSignalBus signals, SocialMuteLedger mutes)
+        : base(session, account, client, safety, media, signals, mutes, "Chirper")
     {
     }
 

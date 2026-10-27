@@ -51,6 +51,8 @@ internal abstract partial class SocialFeedStore
         RefreshExplore();
     }
 
+    // A refresh ranks again from the server's seen marks, so the impressions still waiting for the next
+    // timed flush are sent first; otherwise the tiles just scrolled past come straight back.
     public void RefreshExplore()
     {
         if (!session.IsSignedIn || exploreLane.Loading)
@@ -72,6 +74,7 @@ internal abstract partial class SocialFeedStore
         exploreLane.Loading = true;
         work.Run("explore refresh", async token =>
         {
+            await feedSignals.FlushAsync(token).ConfigureAwait(false);
             var reported = AepFailure.None;
             var page = await FetchExploreAsync(null, regions, includeSensitive, token, failure => reported = failure)
                 .ConfigureAwait(false);
@@ -138,10 +141,21 @@ internal abstract partial class SocialFeedStore
         trendingLoading = true;
         work.Run("trending tags", async token =>
         {
-            var result = await client.TrendingTagsAsync(token).ConfigureAwait(false);
-            if (result is not null)
+            var trending = await client.TrendingTagsAsync(token).ConfigureAwait(false);
+            if (trending is not null && trending.Tags.Length >= TrendingTagList.Minimum)
             {
-                trendingTags = result.Tags;
+                trendingTags = trending.Tags;
+                return;
+            }
+
+            var recent = await client.TagSearchAsync(string.Empty, token).ConfigureAwait(false);
+            if (recent is not null)
+            {
+                trendingTags = TrendingTagList.Merge(trending?.Tags ?? Array.Empty<TagSummaryDto>(), recent.Tags);
+            }
+            else if (trending is not null)
+            {
+                trendingTags = trending.Tags;
             }
         }, () => trendingLoading = false);
     }

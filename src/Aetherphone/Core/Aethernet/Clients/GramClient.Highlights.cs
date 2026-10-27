@@ -45,6 +45,13 @@ internal sealed partial class GramClient
             AethernetJsonContext.Default.StoryGroup, token, null, onFailure);
     }
 
+    public Task<StoryHighlightMembership?> HighlightsHoldingAsync(string storyId, CancellationToken token,
+        Action<AepFailure>? onFailure = null)
+    {
+        return net.GetAsync($"/stories/{Uri.EscapeDataString(storyId)}/highlights",
+            AethernetJsonContext.Default.StoryHighlightMembership, token, null, onFailure);
+    }
+
     public Task<StoryHighlightDto?> CreateHighlightAsync(string title, string[] storyIds, string? coverStoryId,
         CancellationToken token, Action<AepFailure>? onFailure = null)
     {

@@ -50,6 +50,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         NotInterested,
         Mute,
         RemoveCollab,
+        AddToStory,
     }
 
     private enum PostNotice
@@ -102,7 +103,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
     private const float CardLineGap = 4f;
     private const float CardCaptionScale = 0.95f;
     private const int GridColumns = 3;
-    private const int PostSheetMaxItems = 8;
+    private const int PostSheetMaxItems = 9;
     private const int MaxPinnedPosts = 3;
     private const float CardPinGlyphSize = 12f;
     private const float CardPinGlyphGap = 3f;
@@ -195,6 +196,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
     private readonly PhotoCarousel carousel = new();
     private readonly DoubleTapLike doubleTapLike = new();
     private readonly DeferredTap pendingPhotoTap = new();
+    private string pendingPhotoAlt = string.Empty;
     private readonly AppSkin ui = new(AppPalettes.Aethergram);
     private readonly TabBar tabBar = new();
     private readonly TabItem[] tabItems = new TabItem[NavTabCount];
@@ -260,11 +262,12 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         PhoneVisibility visibility, RealtimeSignalBus realtimeSignals,
         WallpaperImageCache wallpaperImages, ConfirmService confirm, TranslationService translation,
         ReportService report, ConductGateService conduct,
-        AppInstaller installer, EncryptionHelpService encryptionHelp, GifSearch gifs)
+        AppInstaller installer, EncryptionHelpService encryptionHelp, GifSearch gifs, SocialMuteLedger mutes)
     {
         this.translation = translation;
         this.gifs = gifs;
-        store = new AethergramStore(session, net.Account, net.Social, net.Grams, net.Safety, net.Media, realtimeSignals);
+        store = new AethergramStore(session, net.Account, net.Social, net.Grams, net.Safety, net.Media, realtimeSignals,
+            mutes);
         store.SetFeedRegions(SocialRegion.FilterCsv(configuration.AethergramFeedRegionMask));
         store.SetFeedSensitive(configuration.AethergramShowSensitivePosts, activeScope);
         account = net.Account;
@@ -742,6 +745,11 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             AddPostSheetItem(PostSheetAction.View, Loc.T(L.Aethergram.ViewPost), false);
         }
 
+        if (StorySharePhoto(post) is not null)
+        {
+            AddPostSheetItem(PostSheetAction.AddToStory, Loc.T(L.Story.AddPostToStory), false);
+        }
+
         if (IsOwnPost(post))
         {
             AddPostSheetItem(PostSheetAction.Edit, Loc.T(L.Aethergram.EditPost), false);
@@ -858,6 +866,13 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                 break;
             case PostSheetAction.RemoveCollab:
                 AskRemoveCollab(post);
+                break;
+            case PostSheetAction.AddToStory:
+                if (StorySharePhoto(post) is { } photoUrl)
+                {
+                    OpenStoryShareSheet(post, photoUrl);
+                }
+
                 break;
         }
     }
@@ -1291,7 +1306,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         var mediaHeight = CardMediaHeight(width, post, photos);
         var actionsHeight = CardActionsHeight * scale;
         RichTextLayout? captionLayout = null;
-        var translateKey = new TranslationKey(TranslationSurface.Post, post.Id);
+        var translateKey = new TranslationKey(TranslationSurface.Post, post.Id, post.EditedAtUnix ?? 0);
         var captionView = translation.View(translateKey, post.Text, post.Lang);
         var captionText = captionView.Text;
         var captionLineHeight = 0f;
@@ -1724,6 +1739,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && page < photos.Length)
         {
             pendingPhotoTap.Arm(photos[page]);
+            pendingPhotoAlt = PostAltTexts.At(post, page);
         }
     }
 
@@ -1731,7 +1747,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
     {
         if (pendingPhotoTap.Ready(out var url))
         {
-            photoViewer.Open(this, () => GifMedia.Texture(images, url, ImGui.GetTime()));
+            photoViewer.Open(this, () => GifMedia.Texture(images, url, ImGui.GetTime()), pendingPhotoAlt);
         }
     }
 

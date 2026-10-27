@@ -33,7 +33,9 @@ internal sealed partial class ChirperApp
     private Action ScheduleLaterDay => scheduleLaterDay ??= () =>
         scheduleDayOffset = Math.Min(ScheduleRules.MaximumLeadDays, scheduleDayOffset + 1);
 
-    private LocString ComposeActionLabel => composeScheduleAtUnix > 0 ? L.Social.ScheduleAction : L.Chirper.ChirpAction;
+    private LocString ComposeActionLabel => composeScheduleAtUnix <= 0 ? L.Chirper.ChirpAction
+        : EditingScheduled ? L.Chirper.Save
+        : L.Social.ScheduleAction;
 
     private bool ComposeScheduleBlocked => composeScheduleAtUnix > 0 && ComposeHasPhotos();
 
@@ -228,15 +230,15 @@ internal sealed partial class ChirperApp
             GifUrl: gif?.Item.Url,
             GifSlug: gif?.Item.Slug,
             ReplyPolicy: composeReplyPolicy);
-        store.SchedulePost(request, composeScheduleAtUnix, ok =>
+        SendScheduled(request, ok =>
         {
-            if (ok && gif is not null)
+            if (ok && gif is not null && !ReferenceEquals(gif, restoredScheduledGif))
             {
                 gifSearch.RegisterShare(gif);
             }
 
             composeOutcome = ok ? 1 : 2;
-        }, composeFailure.Set);
+        });
         return true;
     }
 

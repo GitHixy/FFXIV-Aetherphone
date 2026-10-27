@@ -178,6 +178,8 @@ internal static class L
         public static readonly LocString MutedAccounts = new("social.mutedAccounts", "Muted accounts");
         public static readonly LocString MutedEmpty = new("social.mutedEmpty", "No muted accounts");
         public static readonly LocString MutedHint = new("social.mutedHint", "Muted accounts aren't told. Their posts and stories stay out of your Chirper and Aethergram feeds, and you can still visit their profile.");
+        public static readonly LocString MutedQuote = new("social.mutedQuote", "This chirp is from an account you muted.");
+        public static readonly LocString MutedQuoteView = new("social.mutedQuoteView", "View");
         public static readonly LocString BlockConfirmTitle = new("social.blockConfirmTitle", "Block {0}?");
         public static readonly LocString BlockConfirm = new("social.blockConfirm", "You won't see each other's posts, comments, or profiles anymore. Any follows between you will be removed.");
         public static readonly LocString BlockedUsers = new("social.blockedUsers", "Blocked people");
@@ -334,6 +336,10 @@ internal static class L
         public static readonly LocString CloseFriendsEmpty = new("story.closeFriendsEmpty", "No followers to add yet");
         public static readonly LocString CloseFriendsFailed = new("story.closeFriendsFailed", "Couldn't load your list");
         public static readonly LocString CloseFriendsRemove = new("story.closeFriendsRemove", "Remove");
+        public static readonly LocString RemovedFromHighlight = new("story.removedFromHighlight", "Removed from {0}");
+        public static readonly LocString PostCannotBeShared = new("story.postCannotBeShared", "This post can't be added to a story.");
+        public static readonly LocString LikesUnsupported = new("story.likesUnsupported", "Story likes are only available in Aethergram.");
+        public static readonly LocString HighlightTitleLength = new("story.highlightTitleLength", "A highlight name needs 1 to {0} characters.");
         public static readonly LocString ViewersTrimmed = new("story.viewersTrimmed", "Showing the latest {0} of {1}");
         public static readonly LocString DeleteFailed = new("story.deleteFailed", "Couldn't delete the story");
     }
@@ -7580,6 +7586,14 @@ internal static class L
         public static readonly LocString RemoveThreadChirp = new("chirper.removeThreadChirp", "Remove this chirp");
         public static readonly LocString ChirpAll = new("chirper.chirpAll", "Chirp all");
         public static readonly LocString ShowThread = new("chirper.showThread", "Show this thread");
+        public static readonly LocString ThreadSizeFailure = new("chirper.threadSizeFailure", "A thread holds 2 to {0} chirps.");
+        public static readonly LocString ThreadMissingFailure = new("chirper.threadMissingFailure", "That thread is no longer available.");
+        public static readonly LocString ThreadFullFailure = new("chirper.threadFullFailure", "This thread is full: it can hold up to {0} chirps.");
+        public static readonly LocString EditPollFailure = new("chirper.editPollFailure", "A chirp with a poll can't be edited.");
+        public static readonly LocString EditRepostFailure = new("chirper.editRepostFailure", "A rechirp has no words of its own to edit.");
+        public static readonly LocString AltTextTooLongFailure = new("chirper.altTextTooLongFailure", "Alt text can be up to {0} characters per photo.");
+        public static readonly LocString AltTextCountFailure = new("chirper.altTextCountFailure", "There are more descriptions than photos. Each photo takes one.");
+        public static readonly LocString EditScheduledTitle = new("chirper.editScheduledTitle", "Edit scheduled chirp");
         public static readonly LocPlural ReactionsLabel = new("chirper.reactionsLabel", "reaction", "reactions");
         public static readonly LocString OriginalPoster = new("chirper.originalPoster", "OP");
         public static readonly LocString ChirpAction = new("chirper.chirpAction", "Chirp");
@@ -7609,7 +7623,7 @@ internal static class L
         public static readonly LocPlural RepliesCount = new("chirper.repliesCount", "{0} reply", "{0} replies");
         public static readonly LocString Trending = new("chirper.trending", "Trending");
         public static readonly LocPlural ChirpsToday = new("chirper.chirpsToday", "{0} chirp today", "{0} chirps today");
-        public static readonly LocString SearchHint = new("chirper.searchHint", "Search people or #tags");
+        public static readonly LocString SearchHint = new("chirper.searchHint", "Search people, chirps or #tags");
         public static readonly LocString SearchChirpsTab = new("chirper.searchChirpsTab", "Chirps");
         public static readonly LocString SearchChirpsEmpty = new("chirper.searchChirpsEmpty", "No chirps match your search");
         public static readonly LocString SearchChirpsKeepTyping = new("chirper.searchChirpsKeepTyping", "Keep typing to search chirps");
@@ -7707,6 +7721,7 @@ internal static class L
         public static readonly LocString CollabRemovedToast = new("aethergram.collabRemovedToast", "Collaborator removed");
         public static readonly LocString CollabLeftToast = new("aethergram.collabLeftToast", "You left this post");
         public static readonly LocString CollabFailed = new("aethergram.collabFailed", "Couldn't update the collab. Try again.");
+        public static readonly LocString CollabUnavailable = new("aethergram.collabUnavailable", "That person can't be invited to collaborate. Choose someone else or clear the collaborator.");
         public static readonly LocString EditPostFailed = new("aethergram.editPostFailed", "Couldn't save the changes");
         public static readonly LocString EditedStamp = new("aethergram.editedStamp", "{0} · Edited");
         public static readonly LocString DeleteCommentFailed = new("aethergram.deleteCommentFailed", "Couldn't delete the comment");

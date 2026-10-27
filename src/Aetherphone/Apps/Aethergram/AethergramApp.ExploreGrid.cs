@@ -102,6 +102,8 @@ internal sealed partial class AethergramApp
         var gap = GridGap * scale;
         var cellWidth = ExploreCellWidth(width, gap);
         var cellHeight = cellWidth * ExploreGrid.Aspect;
+        var viewportTop = ImGui.GetWindowPos().Y;
+        store.BeginImpressions(viewportTop, viewportTop + ImGui.GetWindowSize().Y, ImGui.GetIO().DeltaTime);
         for (var index = 0; index < posts.Length; index++)
         {
             var tile = ExploreTileRect(origin, ExploreMosaic.Cell(index), cellWidth, cellHeight, gap);
@@ -111,6 +113,7 @@ internal sealed partial class AethergramApp
             }
 
             DrawGridTile(posts[index], tile.Min, tile.Max, ExploreGrid, false);
+            store.ObserveImpression(posts[index].Id, tile.Min.Y, tile.Max.Y);
             if (UiInteract.Click(tile.Min, tile.Max, UiInteract.Hover(tile.Min, tile.Max)))
             {
                 OpenPosts(posts[index].Id, PostSource.Explore);
