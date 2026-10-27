@@ -221,6 +221,8 @@
   "social.mutedAccounts": "Sessize alınan hesaplar",
   "social.mutedEmpty": "Sessize alınan hesap yok",
   "social.mutedHint": "Sessize aldığın hesaplara bildirilmez. Gönderileri ve hikayeleri Chirper ve Aethergram akışlarında görünmez, profillerini yine de ziyaret edebilirsin.",
+  "social.mutedQuote": "Bu chirp sessize aldığın bir hesaba ait.",
+  "social.mutedQuoteView": "Göster",
   "social.blockConfirmTitle": "{0} engellensin mi?",
   "social.blockConfirm": "Birbirinizin gönderilerini, yorumlarını ve profillerini artık görmezsiniz. Aranızdaki takipler kaldırılır.",
   "social.blockedUsers": "Engellenenler",

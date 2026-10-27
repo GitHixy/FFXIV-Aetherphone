@@ -221,6 +221,8 @@
   "social.mutedAccounts": "Muted accounts",
   "social.mutedEmpty": "No muted accounts",
   "social.mutedHint": "Muted accounts aren't told. Their posts and stories stay out of your Chirper and Aethergram feeds, and you can still visit their profile.",
+  "social.mutedQuote": "This chirp is from an account you muted.",
+  "social.mutedQuoteView": "View",
   "social.blockConfirmTitle": "Block {0}?",
   "social.blockConfirm": "You won't see each other's posts, comments, or profiles anymore. Any follows between you will be removed.",
   "social.blockedUsers": "Blocked people",

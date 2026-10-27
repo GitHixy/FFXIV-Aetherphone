@@ -178,6 +178,8 @@ internal static class L
         public static readonly LocString MutedAccounts = new("social.mutedAccounts", "Muted accounts");
         public static readonly LocString MutedEmpty = new("social.mutedEmpty", "No muted accounts");
         public static readonly LocString MutedHint = new("social.mutedHint", "Muted accounts aren't told. Their posts and stories stay out of your Chirper and Aethergram feeds, and you can still visit their profile.");
+        public static readonly LocString MutedQuote = new("social.mutedQuote", "This chirp is from an account you muted.");
+        public static readonly LocString MutedQuoteView = new("social.mutedQuoteView", "View");
         public static readonly LocString BlockConfirmTitle = new("social.blockConfirmTitle", "Block {0}?");
         public static readonly LocString BlockConfirm = new("social.blockConfirm", "You won't see each other's posts, comments, or profiles anymore. Any follows between you will be removed.");
         public static readonly LocString BlockedUsers = new("social.blockedUsers", "Blocked people");

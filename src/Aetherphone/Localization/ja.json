@@ -221,6 +221,8 @@
   "social.mutedAccounts": "ミュート中のアカウント",
   "social.mutedEmpty": "ミュート中のアカウントはありません",
   "social.mutedHint": "ミュートしたことは相手に通知されません。相手の投稿とストーリーはChirperとAethergramのフィードに表示されなくなりますが、プロフィールは引き続き見られます。",
+  "social.mutedQuote": "このチャープはミュート中のアカウントによるものです。",
+  "social.mutedQuoteView": "表示",
   "social.blockConfirmTitle": "{0}をブロックしますか？",
   "social.blockConfirm": "お互いの投稿・コメント・プロフィールが見えなくなり、フォロー関係も解除されます。",
   "social.blockedUsers": "ブロック中のユーザー",

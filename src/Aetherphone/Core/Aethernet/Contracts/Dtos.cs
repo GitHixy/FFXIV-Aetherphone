@@ -272,7 +272,8 @@ internal sealed record PostDto(
     bool CanReply = true,
     string[]? AltTexts = null,
     int EditCount = 0,
-    int ThreadCount = 0) : IIdentified
+    int ThreadCount = 0,
+    bool AuthorMuted = false) : IIdentified
 {
     [JsonIgnore] public string[]? GifMedia { get; } = GifUrl is null ? null : new[] { GifUrl };
 }
