@@ -21,6 +21,7 @@ internal sealed partial class AethergramApp
     private volatile bool messagePolicyLoaded;
     private volatile bool messagePolicyLoading;
     private volatile bool privateAccount;
+    private volatile bool saveStoriesToArchive = true;
 
     private void DrawSettings(Rect area)
     {
@@ -48,13 +49,23 @@ internal sealed partial class AethergramApp
 
             DrawSettingsHint(Loc.T(L.Social.MessagesAudienceHint));
             ImGui.Dummy(new Vector2(0f, 12f * scale));
-            var toggled = DrawSettingsToggleRow(Loc.T(L.Aethergram.PrivateAccount), privateAccount);
+            var toggled = DrawSettingsToggleRow("aethergram.settings.private", Loc.T(L.Aethergram.PrivateAccount),
+                privateAccount);
             if (toggled != privateAccount)
             {
                 SetAccountPrivacy(toggled);
             }
 
             DrawSettingsHint(Loc.T(L.Aethergram.PrivateAccountHint));
+            ImGui.Dummy(new Vector2(0f, 12f * scale));
+            var archiving = DrawSettingsToggleRow("aethergram.settings.storyArchive", Loc.T(L.Story.SaveToArchive),
+                saveStoriesToArchive);
+            if (archiving != saveStoriesToArchive)
+            {
+                SetStoryArchiving(archiving);
+            }
+
+            DrawSettingsHint(Loc.T(L.Story.SaveToArchiveHint));
             ImGui.Dummy(new Vector2(0f, 12f * scale));
             if (DrawSettingsLinkRow(Loc.T(L.Social.MutedAccounts)))
             {
@@ -114,7 +125,7 @@ internal sealed partial class AethergramApp
         return cell.Tapped;
     }
 
-    private bool DrawSettingsToggleRow(string label, bool value)
+    private bool DrawSettingsToggleRow(string toggleId, string label, bool value)
     {
         var scale = UiScale.Current;
         var drawList = ImGui.GetWindowDrawList();
@@ -128,7 +139,7 @@ internal sealed partial class AethergramApp
         var size = Typography.Measure(fitted, SettingsRowStyle);
         Typography.Draw(drawList, new Vector2(left, cell.Bounds.Center.Y - size.Y * 0.5f), fitted, Ink.TitleInk,
             SettingsRowStyle);
-        var result = Toggle.Draw("aethergram.settings.private", new Rect(toggleMin, toggleMax), value, theme);
+        var result = Toggle.Draw(toggleId, new Rect(toggleMin, toggleMax), value, theme);
         FeedCell.End(drawList, cell, Ink.Hairline);
         return result;
     }
@@ -163,6 +174,7 @@ internal sealed partial class AethergramApp
                 {
                     messagePolicy = me.MessagePolicy;
                     privateAccount = me.IsPrivate;
+                    saveStoriesToArchive = me.SaveStoriesToArchive;
                     messagePolicyLoaded = true;
                 }
             }
@@ -217,6 +229,26 @@ internal sealed partial class AethergramApp
             if (!succeeded)
             {
                 privateAccount = previous;
+            }
+        });
+    }
+
+    private void SetStoryArchiving(bool save)
+    {
+        var previous = saveStoriesToArchive;
+        saveStoriesToArchive = save;
+        var token = settingsCancellation.Token;
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var me = await account.UpdateStoryArchivingAsync(save, token).ConfigureAwait(false);
+                saveStoriesToArchive = me?.SaveStoriesToArchive ?? previous;
+            }
+            catch (Exception exception)
+            {
+                saveStoriesToArchive = previous;
+                AepLog.Warning(exception, "Aethergram story archive setting update failed");
             }
         });
     }

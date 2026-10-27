@@ -95,7 +95,8 @@ internal sealed record UserDto(
     bool ShowOnLeaderboards = false,
     bool ShowInHallOfFame = false,
     GlamBannerDto? BannerGlam = null,
-    bool IsMuted = false) : IIdentified;
+    bool IsMuted = false,
+    bool SaveStoriesToArchive = false) : IIdentified;
 
 internal sealed record UpdateProfileRequest(string? DisplayName, string? Handle, string? Bio, string? AvatarUrl = null,
     string? BannerUrl = null,
@@ -177,7 +178,7 @@ internal sealed record UpdateRegionRequest(string? Region);
 
 internal sealed record UpdateChatPrivacyRequest(bool? ShareReadReceipts, bool? SharePresence);
 
-internal sealed record UpdateAccountPrivacyRequest(bool? IsPrivate);
+internal sealed record UpdateAccountPrivacyRequest(bool? IsPrivate, bool? SaveStoriesToArchive = null);
 
 internal sealed record FollowResultDto(bool Following, bool Requested);
 

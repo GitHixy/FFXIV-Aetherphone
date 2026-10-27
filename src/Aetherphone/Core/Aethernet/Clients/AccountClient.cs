@@ -134,6 +134,14 @@ internal sealed class AccountClient
         return net.PostAsync("/me/account-privacy", new UpdateAccountPrivacyRequest(isPrivate), AethernetJsonContext.Default.UpdateAccountPrivacyRequest, AethernetJsonContext.Default.UserDto, token, null, onFailure);
     }
 
+    public Task<UserDto?> UpdateStoryArchivingAsync(bool saveStories, CancellationToken token,
+        Action<AepFailure>? onFailure = null)
+    {
+        return net.PostAsync("/me/account-privacy", new UpdateAccountPrivacyRequest(null, saveStories),
+            AethernetJsonContext.Default.UpdateAccountPrivacyRequest, AethernetJsonContext.Default.UserDto, token, null,
+            onFailure);
+    }
+
     public Task<UserDto?> UpdateTagPrivacyAsync(int? tagPolicy, bool? requireApproval, CancellationToken token,
         Action<AepFailure>? onFailure = null)
     {

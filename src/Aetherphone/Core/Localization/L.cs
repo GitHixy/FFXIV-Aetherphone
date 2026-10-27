@@ -313,7 +313,7 @@ internal static class L
         public static readonly LocString NewHighlight = new("story.newHighlight", "New highlight");
         public static readonly LocString EditHighlight = new("story.editHighlight", "Edit highlight");
         public static readonly LocString DeleteHighlight = new("story.deleteHighlight", "Delete highlight");
-        public static readonly LocString DeleteHighlightMessage = new("story.deleteHighlightMessage", "Delete this highlight? Expired stories that are only in this highlight can't be brought back.");
+        public static readonly LocString DeleteHighlightMessage = new("story.deleteHighlightMessage", "Delete this highlight? Its stories stay in your archive. Expired stories that were not saved there can't be brought back.");
         public static readonly LocString DeleteHighlightFailed = new("story.deleteHighlightFailed", "Couldn't delete the highlight");
         public static readonly LocString HighlightTitleHint = new("story.highlightTitleHint", "Highlight name");
         public static readonly LocString HighlightDefaultTitle = new("story.highlightDefaultTitle", "Highlights");
@@ -340,6 +340,12 @@ internal static class L
         public static readonly LocString PostCannotBeShared = new("story.postCannotBeShared", "This post can't be added to a story.");
         public static readonly LocString LikesUnsupported = new("story.likesUnsupported", "Story likes are only available in Aethergram.");
         public static readonly LocString HighlightTitleLength = new("story.highlightTitleLength", "A highlight name needs 1 to {0} characters.");
+        public static readonly LocString ArchiveStoriesTab = new("story.archiveStoriesTab", "Stories");
+        public static readonly LocString ArchiveEmpty = new("story.archiveEmpty", "No archived stories");
+        public static readonly LocString ArchiveEmptyHint = new("story.archiveEmptyHint", "Your stories are kept here after they disappear. Only you can see your archive.");
+        public static readonly LocString DeleteArchivedMessage = new("story.deleteArchivedMessage", "Delete this story from your archive? It also leaves any highlight it is in.");
+        public static readonly LocString SaveToArchive = new("story.saveToArchive", "Save story to archive");
+        public static readonly LocString SaveToArchiveHint = new("story.saveToArchiveHint", "Keep your stories in a private archive after they disappear, so you can add them to highlights later.");
         public static readonly LocString ViewersTrimmed = new("story.viewersTrimmed", "Showing the latest {0} of {1}");
         public static readonly LocString DeleteFailed = new("story.deleteFailed", "Couldn't delete the story");
     }

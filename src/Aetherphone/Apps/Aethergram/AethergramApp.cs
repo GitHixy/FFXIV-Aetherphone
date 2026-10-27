@@ -284,6 +284,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             new StoryReplyHooks(L.Aethergram.ReplyToStory, dmStore.SendStoryReply, OpenThread), OpenProfile,
             OnHighlightStory, OpenDetailFromLink);
         highlights = new HighlightStore(session, net.Grams);
+        storyArchive = new StoryArchiveStore(session, net.Grams);
         closeFriends = new CloseFriendsStore(net.Grams);
         this.launcher = launcher;
         this.dmLauncher = dmLauncher;
@@ -1911,6 +1912,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         store.Dispose();
         stories.Dispose();
         highlights.Dispose();
+        storyArchive.Dispose();
         closeFriends.Dispose();
     }
 
