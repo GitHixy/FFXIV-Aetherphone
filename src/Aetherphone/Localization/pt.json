@@ -213,7 +213,7 @@
   "social.blockAction": "Bloquear",
   "social.muteNamed": "Silenciar {0}",
   "social.unmuteNamed": "Deixar de silenciar {0}",
-  "social.mutedToast": "Conta {0} silenciada. Você não verá mais as publicações.",
+  "social.mutedToast": "Conta {0} silenciada.",
   "social.unmutedToast": "Você deixou de silenciar {0}.",
   "social.muteFailed": "Não foi possível alterar o silenciamento. Tente novamente.",
   "social.muteAction": "Silenciar",

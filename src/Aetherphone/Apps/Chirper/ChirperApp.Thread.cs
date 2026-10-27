@@ -59,7 +59,7 @@ internal sealed partial class ChirperApp
             var comments = store.DetailComments;
             if (comments.Length == 0)
             {
-                if (!store.DetailLoading)
+                if (!store.DetailLoading && post.CanReply)
                 {
                     Typography.DrawCentered(new Vector2(body.Center.X, ImGui.GetCursorScreenPos().Y + 36f * scale),
                         Loc.T(L.Chirper.NoComments), ChirperInk.MutedInk, MetaStyle);

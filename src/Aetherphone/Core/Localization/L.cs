@@ -170,7 +170,7 @@ internal static class L
         public static readonly LocString BlockAction = new("social.blockAction", "Block");
         public static readonly LocString MuteNamed = new("social.muteNamed", "Mute {0}");
         public static readonly LocString UnmuteNamed = new("social.unmuteNamed", "Unmute {0}");
-        public static readonly LocString MutedToast = new("social.mutedToast", "Muted {0}. You won't see their posts.");
+        public static readonly LocString MutedToast = new("social.mutedToast", "Muted {0}.");
         public static readonly LocString UnmutedToast = new("social.unmutedToast", "Unmuted {0}.");
         public static readonly LocString MuteFailed = new("social.muteFailed", "Couldn't update the mute. Try again.");
         public static readonly LocString MuteAction = new("social.muteAction", "Mute");

@@ -213,7 +213,7 @@
   "social.blockAction": "屏蔽",
   "social.muteNamed": "隐藏 {0}",
   "social.unmuteNamed": "取消隐藏 {0}",
-  "social.mutedToast": "已隐藏 {0}，你将不会再看到 TA 的帖子。",
+  "social.mutedToast": "已隐藏 {0}。",
   "social.unmutedToast": "已取消隐藏 {0}。",
   "social.muteFailed": "无法更新隐藏设置，请重试。",
   "social.muteAction": "隐藏",

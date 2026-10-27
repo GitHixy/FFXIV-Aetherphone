@@ -213,7 +213,7 @@
   "social.blockAction": "ブロック",
   "social.muteNamed": "{0} をミュート",
   "social.unmuteNamed": "{0} のミュートを解除",
-  "social.mutedToast": "{0} をミュートしました。投稿は表示されなくなります。",
+  "social.mutedToast": "{0} をミュートしました。",
   "social.unmutedToast": "{0} のミュートを解除しました。",
   "social.muteFailed": "ミュートを変更できませんでした。もう一度お試しください。",
   "social.muteAction": "ミュート",

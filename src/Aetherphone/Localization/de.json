@@ -213,7 +213,7 @@
   "social.blockAction": "Blockieren",
   "social.muteNamed": "{0} stummschalten",
   "social.unmuteNamed": "Stummschaltung für {0} aufheben",
-  "social.mutedToast": "{0} stummgeschaltet. Du siehst die Beiträge nicht mehr.",
+  "social.mutedToast": "{0} stummgeschaltet.",
   "social.unmutedToast": "Stummschaltung für {0} aufgehoben.",
   "social.muteFailed": "Die Stummschaltung konnte nicht geändert werden. Versuch es noch einmal.",
   "social.muteAction": "Stummschalten",

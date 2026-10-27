@@ -213,7 +213,7 @@
   "social.blockAction": "Заблокировать",
   "social.muteNamed": "Скрыть {0}",
   "social.unmuteNamed": "Не скрывать {0}",
-  "social.mutedToast": "Аккаунт {0} скрыт. Вы не будете видеть его публикации.",
+  "social.mutedToast": "Аккаунт {0} скрыт.",
   "social.unmutedToast": "Аккаунт {0} больше не скрыт.",
   "social.muteFailed": "Не удалось изменить скрытие. Попробуйте ещё раз.",
   "social.muteAction": "Скрыть",

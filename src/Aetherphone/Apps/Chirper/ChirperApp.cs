@@ -1487,22 +1487,28 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             OpenProfileFromPost(post.AuthorId, post.Id);
         }
 
-        var meta = SocialIdentity.FeedMeta(post.AuthorHandle, TimeText.Short(post.CreatedAtUnix));
-        if (ChirperEdits.IsEdited(post))
-        {
-            meta = Loc.T(L.Chirper.EditedStamp, meta);
-        }
+        var handle = post.AuthorHandle.Length > 0 ? $"@{post.AuthorHandle}" : string.Empty;
+        var time = TimeText.Short(post.CreatedAtUnix);
+        var trailing = handle.Length > 0 ? $" · {time}" : time;
 
         if (ContentModeration.IsInReview(post.ScanStatus))
         {
-            meta = $"{meta} · {Loc.T(L.Moderation.InReview)}";
+            trailing = $"{trailing} · {Loc.T(L.Moderation.InReview)}";
+        }
+
+        if (ChirperEdits.IsEdited(post))
+        {
+            trailing = Loc.T(L.Chirper.EditedStamp, trailing);
         }
 
         var metaLeft = nameMax.X + 5f * scale;
-        var metaFitted = Typography.FitText(meta, MathF.Max(1f, headerRight - metaLeft), MetaStyle);
-        var metaSize = Typography.Measure(metaFitted, MetaStyle);
-        Typography.Draw(drawList, new Vector2(metaLeft, headerTop + (nameHeight - metaSize.Y) * 0.5f), metaFitted,
-            ChirperInk.MutedInk, MetaStyle);
+        var trailingWidth = Typography.Measure(trailing, MetaStyle).X;
+        var handleFitted = Typography.FitText(handle, MathF.Max(1f, headerRight - metaLeft - trailingWidth), MetaStyle);
+        var handleSize = Typography.Measure(handleFitted, MetaStyle);
+        var metaTop = headerTop + (nameHeight - Typography.LineHeight(MetaStyle)) * 0.5f;
+        Typography.Draw(drawList, new Vector2(metaLeft, metaTop), handleFitted, ChirperInk.MutedInk, MetaStyle);
+        Typography.Draw(drawList, new Vector2(metaLeft + handleSize.X, metaTop), trailing, ChirperInk.MutedInk,
+            MetaStyle);
 
         var moreExtent = new Vector2(MathF.Max(moreRadius, Metrics.Size.TapTarget * 0.5f * scale));
         var moreHovered = UiInteract.Hover(moreCenter - moreExtent, moreCenter + moreExtent);

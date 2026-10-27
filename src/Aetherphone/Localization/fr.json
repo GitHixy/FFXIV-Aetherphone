@@ -213,7 +213,7 @@
   "social.blockAction": "Bloquer",
   "social.muteNamed": "Masquer {0}",
   "social.unmuteNamed": "Ne plus masquer {0}",
-  "social.mutedToast": "Compte {0} masqué. Vous ne verrez plus ses publications.",
+  "social.mutedToast": "Compte {0} masqué.",
   "social.unmutedToast": "Vous ne masquez plus {0}.",
   "social.muteFailed": "Impossible de modifier le masquage. Réessayez.",
   "social.muteAction": "Masquer",

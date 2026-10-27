@@ -213,7 +213,7 @@
   "social.blockAction": "Engelle",
   "social.muteNamed": "{0} sessize al",
   "social.unmuteNamed": "{0} sesini aç",
-  "social.mutedToast": "{0} sessize alındı. Gönderilerini görmeyeceksin.",
+  "social.mutedToast": "{0} sessize alındı.",
   "social.unmutedToast": "{0} sesi açıldı.",
   "social.muteFailed": "Sessize alma güncellenemedi. Tekrar dene.",
   "social.muteAction": "Sessize al",

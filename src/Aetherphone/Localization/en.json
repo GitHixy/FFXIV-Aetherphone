@@ -213,7 +213,7 @@
   "social.blockAction": "Block",
   "social.muteNamed": "Mute {0}",
   "social.unmuteNamed": "Unmute {0}",
-  "social.mutedToast": "Muted {0}. You won't see their posts.",
+  "social.mutedToast": "Muted {0}.",
   "social.unmutedToast": "Unmuted {0}.",
   "social.muteFailed": "Couldn't update the mute. Try again.",
   "social.muteAction": "Mute",
