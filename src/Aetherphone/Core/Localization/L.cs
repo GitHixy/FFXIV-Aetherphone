@@ -7546,6 +7546,8 @@ internal static class L
         public static readonly LocString Next = new("aethergram.next", "Next");
         public static readonly LocString PeopleSection = new("aethergram.peopleSection", "People");
         public static readonly LocString TagsSection = new("aethergram.tagsSection", "Tags");
+        public static readonly LocString ExploreNothingNew = new("aethergram.exploreNothingNew", "Nothing new to explore right now");
+        public static readonly LocString ExploreNothingNewHint = new("aethergram.exploreNothingNewHint", "Photos from people you don't follow yet show up here");
         public static readonly LocString NoResults = new("aethergram.noResults", "No results found");
         public static readonly LocString SavedEmptyHint = new("aethergram.savedEmptyHint", "Save posts you want to see again");
         public static readonly LocString Use = new("aethergram.use", "Use");

@@ -3188,6 +3188,8 @@
   "aethergram.next": "下一步",
   "aethergram.peopleSection": "用户",
   "aethergram.tagsSection": "标签",
+  "aethergram.exploreNothingNew": "暂时没有新的内容可以探索",
+  "aethergram.exploreNothingNewHint": "你还没有关注的人的照片会显示在这里",
   "aethergram.noResults": "未找到结果",
   "aethergram.savedEmptyHint": "保存你想再次查看的帖子",
   "aethergram.use": "使用",
