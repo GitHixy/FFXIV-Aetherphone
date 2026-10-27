@@ -43,7 +43,7 @@ internal sealed partial class AethergramApp
             return;
         }
 
-        var result = peopleRail.Draw("aethergram.people.", store.SuggestedPeople, configuration.DismissedFollowSuggestions,
+        var result = peopleRail.Draw(store.SuggestedPeople, configuration.DismissedFollowSuggestions,
             Ink, SectionLabelStyle, new SuggestedPeopleLabels(Loc.T(L.Aethergram.Follow), Loc.T(L.Aethergram.Following)),
             PeopleAnchor, theme, images, lodestone);
         feedVirtualizer.Record(PeopleRailRowId);

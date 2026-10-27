@@ -42,7 +42,7 @@ internal sealed partial class ChirperApp
             return;
         }
 
-        var result = peopleRail.Draw("chirper.people.", store.SuggestedPeople, configuration.DismissedFollowSuggestions,
+        var result = peopleRail.Draw(store.SuggestedPeople, configuration.DismissedFollowSuggestions,
             ChirperInk.Shared, SectionLabelStyle, new SuggestedPeopleLabels(Loc.T(L.Chirper.Follow), Loc.T(L.Chirper.Following)),
             PeopleAnchor, theme, images, lodestone);
         feedVirtualizer.Record(PeopleRailRowId);
