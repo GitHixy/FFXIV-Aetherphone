@@ -3,7 +3,7 @@ using Aetherphone.Core.Net;
 
 namespace Aetherphone.Core.Aethernet.Clients;
 
-internal sealed class GramClient
+internal sealed partial class GramClient
 {
     private readonly AethernetTransport net;
 
@@ -131,9 +131,9 @@ internal sealed class GramClient
     }
 
     public Task<StoryDto?> CreateStoryAsync(string caption, string mediaKey, int width, int height, CancellationToken token,
-        Action<AepFailure>? onFailure = null)
+        Action<AepFailure>? onFailure = null, int audience = StoryAudiences.Everyone)
     {
-        return net.PostAsync("/stories", new CreateStoryRequest(caption, mediaKey, width, height), AethernetJsonContext.Default.CreateStoryRequest, AethernetJsonContext.Default.StoryDto, token, null, onFailure);
+        return net.PostAsync("/stories", new CreateStoryRequest(caption, mediaKey, width, height, audience), AethernetJsonContext.Default.CreateStoryRequest, AethernetJsonContext.Default.StoryDto, token, null, onFailure);
     }
 
     public Task<StoryTray?> StoryTrayAsync(CancellationToken token,

@@ -36,6 +36,13 @@ internal sealed class StoryViewerOverlay
     private const float QuickEmojiSide = 30f;
     private const float QuickEmojiRowGap = 12f;
     private const int ReplyMaxLength = 500;
+    private const float ActionSpacing = 32f;
+    private const float BadgeHeight = 20f;
+    private const float BadgePad = 8f;
+    private const float BadgeGlyph = 11f;
+    private const float BadgeGap = 4f;
+
+    private static readonly TextStyle BadgeStyle = TextStyles.Caption1;
 
     private static readonly string[] QuickEmojiFiles =
         { "2764", "1f602", "1f62e", "1f62d", "1f525", "1f44f", "1f60d", "1f44d" };
@@ -65,6 +72,7 @@ internal sealed class StoryViewerOverlay
     private Rect seenPillBounds;
     private Action<StoryDto>? onSeen;
     private Action<StoryDto>? onDelete;
+    private Action<StoryDto>? onHighlight;
     private Action? onExhausted;
     private Func<StoryDto, StoryViewers>? viewersSource;
     private Action? viewersLoadMore;
@@ -95,9 +103,10 @@ internal sealed class StoryViewerOverlay
     public void Open(StoryDto[] items, string label, string? avatarUrl, Action<StoryDto> seen, bool mine = false,
         Action<StoryDto>? delete = null, Func<StoryDto, StoryViewers>? viewers = null, Action? exhausted = null,
         Func<bool>? nextGroup = null, Func<bool>? previousGroup = null, bool startAtEnd = false,
-        StoryReplyPrompt? reply = null, Action? loadMoreViewers = null)
+        StoryReplyPrompt? reply = null, Action? loadMoreViewers = null, Action<StoryDto>? highlight = null)
     {
         stories = items;
+        onHighlight = highlight;
         authorLabel = label;
         authorAvatarUrl = avatarUrl;
         authorFrameId = items.Length > 0 ? items[0].AuthorFrameId : string.Empty;
@@ -176,6 +185,7 @@ internal sealed class StoryViewerOverlay
         stories = Array.Empty<StoryDto>();
         onSeen = null;
         onDelete = null;
+        onHighlight = null;
         onExhausted = null;
         onNextGroup = null;
         onPreviousGroup = null;
@@ -196,6 +206,7 @@ internal sealed class StoryViewerOverlay
                 stories = Array.Empty<StoryDto>();
                 onSeen = null;
                 onDelete = null;
+                onHighlight = null;
                 onExhausted = null;
                 onNextGroup = null;
                 onPreviousGroup = null;
@@ -739,10 +750,12 @@ internal sealed class StoryViewerOverlay
         AvatarView.DrawRemote(ImGui.GetWindowDrawList(), center, radius, theme, authorLabel, string.Empty,
             authorAvatarUrl, images, lodestone, 0.8f, 24, 1f, Frames.Of(authorFrameId));
         var left = center.X + radius + 9f * scale;
-        var closeReserve = 34f * scale;
+        var canHighlight = canDelete && onHighlight is not null;
+        var closeReserve = (34f + ((canDelete ? 1 : 0) + (canHighlight ? 1 : 0)) * ActionSpacing) * scale;
+        var badgeWidth = story.Audience == StoryAudiences.CloseFriends ? CloseFriendsBadgeWidth(scale) : 0f;
         var stamp = TimeText.Short(story.CreatedAtUnix);
         var stampWidth = Typography.Measure(stamp, TextStyles.Footnote).X;
-        var nameMaxWidth = MathF.Max(1f, row.Max.X - closeReserve - stampWidth - 8f * scale - left);
+        var nameMaxWidth = MathF.Max(1f, row.Max.X - closeReserve - badgeWidth - stampWidth - 8f * scale - left);
         var nameSize = Typography.Measure(authorLabel, TextStyles.SubheadlineEmphasized);
         var authorMin = new Vector2(row.Min.X, row.Min.Y);
         var authorMax = new Vector2(left + MathF.Min(nameSize.X, nameMaxWidth), row.Max.Y);
@@ -752,6 +765,11 @@ internal sealed class StoryViewerOverlay
             new Vector4(1f, 1f, 1f, 0.98f), headerHovering, false);
         Typography.Draw(new Vector2(left + nameWidth + 8f * scale, row.Center.Y - nameSize.Y * 0.5f + 1f * scale),
             stamp, new Vector4(1f, 1f, 1f, 0.6f), TextStyles.Footnote);
+        if (badgeWidth > 0f)
+        {
+            DrawCloseFriendsBadge(new Vector2(row.Max.X - closeReserve - badgeWidth, row.Center.Y), badgeWidth, scale);
+        }
+
         if (openProfile is not null && UiInteract.HoverClick(authorMin, authorMax))
         {
             openProfile(story.AuthorId);
@@ -771,12 +789,49 @@ internal sealed class StoryViewerOverlay
             return;
         }
 
-        var deleteCenter = new Vector2(closeCenter.X - 32f * scale, row.Center.Y);
+        var deleteCenter = new Vector2(closeCenter.X - ActionSpacing * scale, row.Center.Y);
         AppSkin.Icon(deleteCenter, IconGlyph.Of(FontAwesomeIcon.Trash), new Vector4(1f, 1f, 1f, 0.82f), 1f);
         if (UiInteract.HoverClick(deleteCenter - hit, deleteCenter + hit))
         {
             onDelete?.Invoke(story);
+            return;
         }
+
+        if (!canHighlight)
+        {
+            return;
+        }
+
+        var highlightCenter = new Vector2(deleteCenter.X - ActionSpacing * scale, row.Center.Y);
+        AppSkin.Icon(highlightCenter, IconGlyph.Of(FontAwesomeIcon.HeartCirclePlus), new Vector4(1f, 1f, 1f, 0.9f),
+            1f);
+        HoverTooltip.Show(new Rect(highlightCenter - hit, highlightCenter + hit), Loc.T(L.Story.Highlight));
+        if (UiInteract.HoverClick(highlightCenter - hit, highlightCenter + hit))
+        {
+            onHighlight?.Invoke(story);
+        }
+    }
+
+    private static float CloseFriendsBadgeWidth(float scale)
+    {
+        var labelWidth = Typography.Measure(Loc.T(L.Story.CloseFriends), BadgeStyle).X;
+        return (BadgePad * 2f + BadgeGlyph + BadgeGap) * scale + labelWidth + 6f * scale;
+    }
+
+    private static void DrawCloseFriendsBadge(Vector2 leftCenter, float reservedWidth, float scale)
+    {
+        var drawList = ImGui.GetWindowDrawList();
+        var height = BadgeHeight * scale;
+        var min = new Vector2(leftCenter.X, leftCenter.Y - height * 0.5f);
+        var max = new Vector2(leftCenter.X + reservedWidth - 6f * scale, leftCenter.Y + height * 0.5f);
+        Squircle.Fill(drawList, min, max, height * 0.5f, ImGui.GetColorU32(StoryRingArt.CloseFriendsGreen));
+        var glyphCenter = new Vector2(min.X + (BadgePad + BadgeGlyph * 0.5f) * scale, leftCenter.Y);
+        PhoneIcon.Draw(drawList, glyphCenter, PhoneIcons.StarFilled, new Vector4(1f, 1f, 1f, 1f), BadgeGlyph * scale);
+        var label = Loc.T(L.Story.CloseFriends);
+        var labelSize = Typography.Measure(label, BadgeStyle);
+        Typography.Draw(drawList,
+            new Vector2(glyphCenter.X + (BadgeGlyph * 0.5f + BadgeGap) * scale, leftCenter.Y - labelSize.Y * 0.5f),
+            label, new Vector4(1f, 1f, 1f, 1f), BadgeStyle);
     }
 
     private static int FirstUnseen(StoryDto[] items)

@@ -312,7 +312,7 @@ internal sealed record CreateGramRequest(
     PhotoTagInput[]? PhotoTags = null,
     bool Sensitive = false);
 
-internal sealed record CreateStoryRequest(string Caption, string MediaKey, int Width, int Height);
+internal sealed record CreateStoryRequest(string Caption, string MediaKey, int Width, int Height, int Audience = 0);
 
 internal sealed record StoryDto(
     string Id,
@@ -329,7 +329,8 @@ internal sealed record StoryDto(
     int AuthorBadges = 0,
     string[]? AuthorBadgeIds = null,
     string AuthorFrameId = "",
-    string? Lang = null) : IIdentified;
+    string? Lang = null,
+    int Audience = 0) : IIdentified;
 
 internal sealed record StoryRingDto(
     string AuthorId,
@@ -340,7 +341,8 @@ internal sealed record StoryRingDto(
     bool HasUnseen,
     int Count,
     long LatestAtUnix,
-    string AuthorFrameId = "");
+    string AuthorFrameId = "",
+    bool HasCloseFriends = false);
 
 internal sealed record StoryTray(StoryRingDto[] Rings);
 

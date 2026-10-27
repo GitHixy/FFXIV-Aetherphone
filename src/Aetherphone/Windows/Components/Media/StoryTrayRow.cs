@@ -162,7 +162,15 @@ internal sealed class StoryTrayRow
     {
         var radius = RingRadius * scale;
         var center = new Vector2(slotCenter.X, slotCenter.Y - AvatarLift * scale);
-        painter(drawList, center, radius, scale, ring.HasUnseen);
+        if (StoryRingArt.ShowsCloseFriends(ring))
+        {
+            StoryRingArt.CloseFriends(drawList, center, radius, scale);
+        }
+        else
+        {
+            painter(drawList, center, radius, scale, ring.HasUnseen);
+        }
+
         var name = SocialIdentity.Name(ring.AuthorDisplayName, ring.AuthorHandle);
         var label = ring.IsMe ? Loc.T(L.Story.YourStory) : ring.AuthorHandle.Length > 0 ? ring.AuthorHandle : name;
         AvatarView.DrawRemote(drawList, center, radius - AvatarInset * scale, theme, name, string.Empty,

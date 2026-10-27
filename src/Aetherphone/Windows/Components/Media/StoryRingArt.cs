@@ -1,3 +1,4 @@
+using Aetherphone.Core.Aethernet.Contracts;
 using Dalamud.Bindings.ImGui;
 
 namespace Aetherphone.Windows.Components;
@@ -5,6 +6,13 @@ namespace Aetherphone.Windows.Components;
 internal static class StoryRingArt
 {
     private const int Segments = 40;
+
+    public static readonly Vector4 CloseFriendsGreen = new(0.188f, 0.820f, 0.345f, 1f);
+
+    public static bool ShowsCloseFriends(StoryRingDto ring) => ring.HasCloseFriends && ring.HasUnseen;
+
+    public static void CloseFriends(ImDrawListPtr drawList, Vector2 center, float radius, float scale) =>
+        drawList.AddCircle(center, radius, ImGui.GetColorU32(CloseFriendsGreen), Segments, 2.4f * scale);
 
     public static void Sweep(ImDrawListPtr drawList, Vector2 center, float radius, float scale, bool unseen,
         Vector4[] stops, Vector4 seenTint)

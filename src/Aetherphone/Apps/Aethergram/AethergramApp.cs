@@ -277,7 +277,10 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         stories = new StoryPresenter(session, net.Grams, net.Media, images, lodestone, AethergramArt.StoryRing,
             AppPalettes.Aethergram, new StoryConfirmLabels(L.Aethergram.DeleteConfirm, L.Aethergram.DeleteCancel,
                 L.Aethergram.Saving), confirm, translation, realtimeSignals, "Aethergram stories", StartStoryCompose,
-            new StoryReplyHooks(L.Aethergram.ReplyToStory, dmStore.SendStoryReply, OpenThread), OpenProfile);
+            new StoryReplyHooks(L.Aethergram.ReplyToStory, dmStore.SendStoryReply, OpenThread), OpenProfile,
+            OnHighlightStory);
+        highlights = new HighlightStore(session, net.Grams);
+        closeFriends = new CloseFriendsStore(net.Grams);
         this.launcher = launcher;
         this.dmLauncher = dmLauncher;
         this.gameData = gameData;
@@ -422,11 +425,13 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         profileActionSheet.Gate();
         inboxRowSheet.Gate();
         threadView.GateMenus();
+        GateHighlightSheets();
         var screen = SceneChrome.ScreenFrom(context.Content, theme, UiScale.Current);
         screenRect = screen;
         ui.Backdrop(screen);
         ConsumeSharedPhoto();
         AdvancePendingPhotoView();
+        ConsumeOpenedHighlight();
         stories.Advance();
         if (photoViewer.Active)
         {
@@ -436,7 +441,8 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
 
         if (stories.Active)
         {
-            stories.DrawViewer(screen, theme);
+            stories.DrawViewer(screen, theme, HighlightPickerCaptures);
+            DrawStoryViewerExtras(screen);
             return;
         }
 
@@ -462,6 +468,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         DrawGifSheet(screen);
         DrawProfileMenu(screen);
         DrawProfileActionSheet(screen);
+        DrawHighlightMenu(screen);
         DrawInboxRowSheet(screen);
         DrawFlights(screen);
         toast.Draw(screen, ScreenToastStyle.From(ui));
@@ -551,6 +558,12 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                 break;
             case AethergramScreen.MutedAccounts:
                 DrawMutedAccounts(area);
+                break;
+            case AethergramScreen.CloseFriends:
+                DrawCloseFriends(area);
+                break;
+            case AethergramScreen.HighlightEditor:
+                DrawHighlightEditor(area, depth == router.Depth);
                 break;
             default:
                 DrawRoot(area);
@@ -1860,6 +1873,8 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         dmStore.Dispose();
         store.Dispose();
         stories.Dispose();
+        highlights.Dispose();
+        closeFriends.Dispose();
     }
 
     private void DrawHomeTopBar(Rect area)

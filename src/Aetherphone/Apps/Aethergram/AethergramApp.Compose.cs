@@ -381,22 +381,17 @@ internal sealed partial class AethergramApp
             PlaceComposeTag(pickedPerson);
         }
 
-        var shareLabel = busy ? Loc.T(L.Aethergram.Sharing) : Loc.T(L.Aethergram.Share);
-        if (DrawAccentPill(shareRect, shareLabel, !busy))
-        {
-            SubmitCompose();
-        }
-    }
-
-    private void SubmitCompose()
-    {
         if (composeStoryMode)
         {
-            CommitStory();
+            DrawStoryShareButtons(shareRect, busy);
             return;
         }
 
-        CommitGram();
+        var shareLabel = busy ? Loc.T(L.Aethergram.Sharing) : Loc.T(L.Aethergram.Share);
+        if (DrawAccentPill(shareRect, shareLabel, !busy))
+        {
+            CommitGram();
+        }
     }
 
     private void DrawCaptionCard(Rect card, Rect screen, float scale, string fieldId, bool paragraphs,
@@ -772,7 +767,7 @@ internal sealed partial class AethergramApp
             caption, ComposeTagInputs(), composeSensitive, ok => composeOutcome = ok ? 1 : 2);
     }
 
-    private void CommitStory()
+    private void CommitStory(int audience)
     {
         if (composeSession.CurrentPath.Length == 0 || stories.Posting)
         {
@@ -781,7 +776,7 @@ internal sealed partial class AethergramApp
 
         composeStatus = string.Empty;
         stories.CreateStory(composeSession.FirstSelected, composeSession.CropAt(0), composeSession.EditAt(0), caption,
-            ok => composeOutcome = ok ? 1 : 2);
+            ok => composeOutcome = ok ? 1 : 2, audience);
     }
 
     private void CommitAvatar()
