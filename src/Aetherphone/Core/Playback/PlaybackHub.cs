@@ -10,6 +10,7 @@ internal sealed class PlaybackHub : IDisposable
     public const int AutoplayBatch = 25;
     private const float RestartThresholdSeconds = 3f;
     private const int AutoplayRetryMilliseconds = 60_000;
+    private const int MaxConsecutiveSkips = 5;
 
     private readonly RadioPlayer radio;
     private readonly SongPlayer songs;
@@ -22,6 +23,8 @@ internal sealed class PlaybackHub : IDisposable
     private int completedSignals;
     private int nearEndSignals;
     private int crossfadeSignals;
+    private int failedSignals;
+    private int consecutiveSkips;
     private volatile Song[]? autoplayResult;
     private string autoplaySeedId = string.Empty;
     private bool autoplayFetching;
@@ -50,6 +53,7 @@ internal sealed class PlaybackHub : IDisposable
         songs.TrackCompleted += OnTrackCompleted;
         songs.TrackNearEnd += OnTrackNearEnd;
         songs.CrossfadePoint += OnCrossfadePoint;
+        songs.TrackFailed += OnTrackFailed;
         if (framework is not null)
         {
             framework.Update += OnFrameworkUpdate;
@@ -63,6 +67,9 @@ internal sealed class PlaybackHub : IDisposable
     public PlayQueue Queue => queue;
     public IPlaybackAuthority? Authority { get; set; }
     public int TrackVersion { get; private set; }
+    public int SkipVersion { get; private set; }
+    public Song LastSkipped { get; private set; }
+    public bool LastSkipUnavailable { get; private set; }
 
     public bool SongActive => songs.State != SongPlaybackState.Stopped;
     public bool RadioActive => radio.State != RadioPlaybackState.Stopped;
@@ -206,6 +213,7 @@ internal sealed class PlaybackHub : IDisposable
             return;
         }
 
+        consecutiveSkips = 0;
         StartCurrent(false);
     }
 
@@ -410,6 +418,7 @@ internal sealed class PlaybackHub : IDisposable
         songs.TrackCompleted -= OnTrackCompleted;
         songs.TrackNearEnd -= OnTrackNearEnd;
         songs.CrossfadePoint -= OnCrossfadePoint;
+        songs.TrackFailed -= OnTrackFailed;
         if (framework is not null)
         {
             framework.Update -= OnFrameworkUpdate;
@@ -430,6 +439,16 @@ internal sealed class PlaybackHub : IDisposable
         if (Interlocked.Exchange(ref completedSignals, 0) > 0)
         {
             HandleCompletion();
+        }
+
+        if (songs.State == SongPlaybackState.Playing)
+        {
+            consecutiveSkips = 0;
+        }
+
+        if (Interlocked.Exchange(ref failedSignals, 0) > 0)
+        {
+            HandleFailure();
         }
 
         if (Interlocked.Exchange(ref nearEndSignals, 0) > 0)
@@ -472,6 +491,7 @@ internal sealed class PlaybackHub : IDisposable
     private void OnTrackCompleted() => Interlocked.Increment(ref completedSignals);
     private void OnTrackNearEnd() => Interlocked.Increment(ref nearEndSignals);
     private void OnCrossfadePoint() => Interlocked.Increment(ref crossfadeSignals);
+    private void OnTrackFailed() => Interlocked.Increment(ref failedSignals);
 
     private bool Delegate(in PlaybackIntent intent)
     {
@@ -503,6 +523,22 @@ internal sealed class PlaybackHub : IDisposable
         }
 
         AdvanceSong(false, false);
+    }
+
+    private void HandleFailure()
+    {
+        var hasNext = queue.QueuedCount > 0 || queue.AutoplayCount > 0 || RepeatMode != SongRepeatMode.Off;
+        if (Authority is not null || songs.State != SongPlaybackState.Failed || !hasNext ||
+            consecutiveSkips >= MaxConsecutiveSkips)
+        {
+            return;
+        }
+
+        consecutiveSkips++;
+        LastSkipped = songs.CurrentSong;
+        LastSkipUnavailable = songs.FailedUnavailable;
+        SkipVersion++;
+        AdvanceSong(false, true);
     }
 
     private void AdvanceSong(bool crossfade, bool userInitiated)
@@ -653,7 +689,7 @@ internal sealed class PlaybackHub : IDisposable
         {
             SongPlaybackState.Resolving => Loc.T(L.Common.Loading),
             SongPlaybackState.Buffering => Loc.T(L.Music.Buffering),
-            SongPlaybackState.Failed => Loc.T(L.Music.PlaybackFailed),
+            SongPlaybackState.Failed => Loc.T(songs.FailedUnavailable ? L.Music.NotOnYouTube : L.Music.PlaybackFailed),
             _ => songs.CurrentAuthor,
         };
     }

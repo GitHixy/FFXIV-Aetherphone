@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
 using Aetherphone.Core.Video;
@@ -41,7 +42,19 @@ internal sealed class SongLinkResolver
     private static readonly HttpClient StreamingClient = new() { Timeout = Timeout.InfiniteTimeSpan };
     private static readonly UTF8Encoding ResolverOutputEncoding = new(encoderShouldEmitUTF8Identifier: false);
 
+    // Error text yt-dlp's YouTube extractor prints when the video itself can never play, as opposed to a bot check
+    private static readonly string[] UnavailableMarkers =
+    [
+        "Video unavailable",
+        "This video is unavailable",
+        "This video is no longer available",
+        "This video has been removed",
+        "Private video",
+        "available in your country",
+    ];
+
     private readonly string stagingDirectory;
+    private readonly ConcurrentDictionary<string, byte> unavailableVideos = new(StringComparer.Ordinal);
     private volatile MediaDependencies? dependencies;
     private long lastUpdateCheckAtTicks = long.MinValue;
 
@@ -56,6 +69,8 @@ internal sealed class SongLinkResolver
 
     private bool HasResolver => dependencies?.LinkResolverPath is not null;
 
+    public bool IsUnavailable(string videoId) => unavailableVideos.ContainsKey(videoId);
+
     public void Attach(MediaDependencies mediaDependencies)
     {
         dependencies = mediaDependencies;
@@ -63,7 +78,8 @@ internal sealed class SongLinkResolver
 
     public SongResolvedAudio? Fetch(string videoId, CancellationToken token)
     {
-        if (!HasResolver || token.IsCancellationRequested || !PlaylistImporter.IsVideoId(videoId))
+        if (!HasResolver || token.IsCancellationRequested || !PlaylistImporter.IsVideoId(videoId) ||
+            IsUnavailable(videoId))
         {
             return null;
         }
@@ -73,7 +89,7 @@ internal sealed class SongLinkResolver
         try
         {
             var outputTemplate = Path.Combine(stagingDirectory, videoId + ".%(ext)s");
-            var output = Run(startInfo =>
+            var output = RunForVideo(videoId, startInfo =>
             {
                 startInfo.ArgumentList.Add("--no-playlist");
                 startInfo.ArgumentList.Add("--force-overwrites");
@@ -117,14 +133,15 @@ internal sealed class SongLinkResolver
 
     public SongResolvedStream? ResolveStreamUrl(string videoId, CancellationToken token)
     {
-        if (!HasResolver || token.IsCancellationRequested || !PlaylistImporter.IsVideoId(videoId))
+        if (!HasResolver || token.IsCancellationRequested || !PlaylistImporter.IsVideoId(videoId) ||
+            IsUnavailable(videoId))
         {
             return null;
         }
 
         try
         {
-            var output = Run(startInfo =>
+            var output = RunForVideo(videoId, startInfo =>
             {
                 startInfo.ArgumentList.Add("--no-playlist");
                 startInfo.ArgumentList.Add("-f");
@@ -336,13 +353,30 @@ internal sealed class SongLinkResolver
 
     private string? Run(Action<ProcessStartInfo> configure, TimeSpan timeout, CancellationToken token)
     {
-        var first = RunResolver(configure, timeout, token);
-        if (first.Output is not null || !first.ExitedWithError || !TryUpdateResolver(token))
+        return RunWithUpdate(configure, timeout, token).Output;
+    }
+
+    private string? RunForVideo(string videoId, Action<ProcessStartInfo> configure, TimeSpan timeout,
+        CancellationToken token)
+    {
+        var run = RunWithUpdate(configure, timeout, token);
+        if (run.Unavailable)
         {
-            return first.Output;
+            unavailableVideos.TryAdd(videoId, 0);
         }
 
-        return RunResolver(configure, timeout, token).Output;
+        return run.Output;
+    }
+
+    private ResolverRun RunWithUpdate(Action<ProcessStartInfo> configure, TimeSpan timeout, CancellationToken token)
+    {
+        var first = RunResolver(configure, timeout, token);
+        if (first.Output is not null || !first.ExitedWithError || first.Unavailable || !TryUpdateResolver(token))
+        {
+            return first;
+        }
+
+        return RunResolver(configure, timeout, token);
     }
 
     private bool TryUpdateResolver(CancellationToken token)
@@ -442,11 +476,24 @@ internal sealed class SongLinkResolver
         var errorText = standardError.GetAwaiter().GetResult();
         if (process.ExitCode == 0)
         {
-            return new ResolverRun(outputText, false);
+            return new ResolverRun(outputText, false, false);
         }
 
         AepLog.Warning($"Song link resolver exited with code {process.ExitCode}: {Excerpt(errorText)}");
-        return new ResolverRun(null, true);
+        return new ResolverRun(null, true, ReportsUnavailable(errorText));
+    }
+
+    internal static bool ReportsUnavailable(string errorText)
+    {
+        for (var index = 0; index < UnavailableMarkers.Length; index++)
+        {
+            if (errorText.Contains(UnavailableMarkers[index], StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static void KillQuietly(Process process)
@@ -507,5 +554,5 @@ internal sealed class SongLinkResolver
         return trimmed.Length <= ErrorExcerptLength ? trimmed : trimmed[..ErrorExcerptLength];
     }
 
-    private readonly record struct ResolverRun(string? Output, bool ExitedWithError);
+    private readonly record struct ResolverRun(string? Output, bool ExitedWithError, bool Unavailable);
 }

@@ -102,8 +102,10 @@ internal sealed class SongPlayer : IDisposable
     public event Action? TrackCompleted;
     public event Action? TrackNearEnd;
     public event Action? CrossfadePoint;
+    public event Action? TrackFailed;
 
     public SongPlaybackState State => state;
+    public bool FailedUnavailable => state == SongPlaybackState.Failed && linkResolver.IsUnavailable(CurrentVideoId);
     public bool IsPaused => paused;
     public Song CurrentSong => currentSong;
     public string CurrentVideoId => currentSong.VideoId ?? string.Empty;
@@ -294,6 +296,21 @@ internal sealed class SongPlayer : IDisposable
         }
     }
 
+    private void Fail(int workerSession)
+    {
+        lock (gate)
+        {
+            if (workerSession != session)
+            {
+                return;
+            }
+
+            state = SongPlaybackState.Failed;
+        }
+
+        TrackFailed?.Invoke();
+    }
+
     private void TrySetState(int workerSession, SongPlaybackState value)
     {
         lock (gate)
@@ -332,7 +349,7 @@ internal sealed class SongPlayer : IDisposable
                 fadeInSeconds = DeclickSeconds;
                 if (attemptsRemaining == 0)
                 {
-                    TrySetState(workerSession, SongPlaybackState.Failed);
+                    Fail(workerSession);
                     return;
                 }
 
@@ -354,7 +371,7 @@ internal sealed class SongPlayer : IDisposable
                 AepLog.Warning(exception, "Song stream refused by the source, fetching through the link resolver");
                 if (!FillCacheThroughResolver(song.VideoId, token))
                 {
-                    TrySetState(workerSession, SongPlaybackState.Failed);
+                    Fail(workerSession);
                     AepLog.Warning("Song playback failed: the link resolver could not fetch the audio");
                     return;
                 }
@@ -366,7 +383,7 @@ internal sealed class SongPlayer : IDisposable
                 resumeSeconds = positionSeconds;
                 if (attemptsRemaining == 0)
                 {
-                    TrySetState(workerSession, SongPlaybackState.Failed);
+                    Fail(workerSession);
                     AepLog.Warning(exception, "Song playback failed");
                     return;
                 }
@@ -393,7 +410,7 @@ internal sealed class SongPlayer : IDisposable
         {
             if (!token.IsCancellationRequested)
             {
-                TrySetState(workerSession, SongPlaybackState.Failed);
+                Fail(workerSession);
             }
 
             return VoiceOutcome.Unavailable;
@@ -690,6 +707,11 @@ internal sealed class SongPlayer : IDisposable
         var bytes = offline?.Bytes ?? cache.Get(OpusCacheKey(videoId), CacheMaxAge);
         var bytesAreOpus = offline?.IsOpus ?? bytes is not null;
         bytes ??= cache.Get(videoId, CacheMaxAge);
+        if (bytes is null && linkResolver.IsUnavailable(videoId))
+        {
+            return null;
+        }
+
         if (bytes is null && linkResolver.IsInstalled && !token.IsCancellationRequested)
         {
             TrySetState(workerSession, SongPlaybackState.Buffering);

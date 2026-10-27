@@ -26,6 +26,7 @@ internal sealed partial class MusicApp
     private MusicTab tab = MusicTab.Home;
     private int pageDepth = 1;
     private float bottomChrome;
+    private int seenSkipVersion;
 
     private ViewRouter<MusicRoute> Router => routers[(int)tab];
 
@@ -83,9 +84,22 @@ internal sealed partial class MusicApp
 
     private void PopPage() => Router.Pop();
 
+    private void TrackSkips()
+    {
+        if (playback.SkipVersion == seenSkipVersion)
+        {
+            return;
+        }
+
+        seenSkipVersion = playback.SkipVersion;
+        var reason = playback.LastSkipUnavailable ? L.Music.SkippedUnavailable : L.Music.SkippedFailed;
+        ShellToast.Show(string.Format(Loc.Culture, Loc.T(reason), playback.LastSkipped.Title));
+    }
+
     private void DrawShell(Rect content, Rect screen, float scale, float delta)
     {
         TickJam();
+        TrackSkips();
         pcSourceMenu.Gate();
         var sheetsCapture = songMenu.CapturesPointer || playlistPicker.CapturesPointer || PcMediaCapturesPointer ||
                             JamCapturesPointer || LibraryOverlaysCapture;

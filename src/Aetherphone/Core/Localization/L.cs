@@ -6459,6 +6459,10 @@ internal static class L
         public static readonly LocString CouldntPlay = new("music.couldntPlay", "Couldn't play this track");
         public static readonly LocString NowPlayingState = new("music.nowPlayingState", "Now playing");
         public static readonly LocString PlaybackFailed = new("music.playbackFailed", "Playback failed");
+        public static readonly LocString NotOnYouTube = new("music.notOnYouTube", "Not available on YouTube");
+        public static readonly LocString SkippedUnavailable = new("music.skippedUnavailable",
+            "Skipped {0}: not available on YouTube");
+        public static readonly LocString SkippedFailed = new("music.skippedFailed", "Skipped {0}: it couldn't be played");
         public static readonly LocString Repeat = new("music.repeat", "Repeat");
         public static readonly LocString Shuffle = new("music.shuffle", "Shuffle");
         public static readonly LocString MadeForYou = new("music.madeForYou", "Made for you");

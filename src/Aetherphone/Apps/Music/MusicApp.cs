@@ -125,6 +125,7 @@ internal sealed partial class MusicApp : IResumableApp
 
     public void OnOpened()
     {
+        seenSkipVersion = playback.SkipVersion;
         ResetTabs();
         ResetNowPlaying();
         pcMediaSheet.CloseImmediately();
@@ -140,6 +141,7 @@ internal sealed partial class MusicApp : IResumableApp
 
     public void OnResumed()
     {
+        seenSkipVersion = playback.SkipVersion;
         ResumeNowPlaying();
         LoadFavoriteRadioStations();
         socialNotifications.MarkSeen(Id);
