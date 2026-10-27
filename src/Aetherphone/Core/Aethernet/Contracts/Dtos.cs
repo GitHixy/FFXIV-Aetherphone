@@ -189,11 +189,13 @@ internal sealed record CreatePostRequest(
     bool Sensitive = false,
     PostPollInput? Poll = null,
     string? GifUrl = null,
-    string? GifSlug = null);
+    string? GifSlug = null,
+    string[]? AltTexts = null);
 
 internal sealed record SetSensitiveRequest(bool Sensitive);
 
-internal sealed record EditGramRequest(string Caption, PhotoTagInput[] PhotoTags, bool Sensitive);
+internal sealed record EditGramRequest(string Caption, PhotoTagInput[] PhotoTags, bool Sensitive,
+    string[]? AltTexts = null);
 
 internal sealed record ReactRequest(int Kind);
 
@@ -260,7 +262,8 @@ internal sealed record PostDto(
     PostPollDto? Poll = null,
     string? GifUrl = null,
     string? GifSlug = null,
-    int? Views = null) : IIdentified
+    int? Views = null,
+    string[]? AltTexts = null) : IIdentified
 {
     [JsonIgnore] public string[]? GifMedia { get; } = GifUrl is null ? null : new[] { GifUrl };
 }
@@ -309,7 +312,8 @@ internal sealed record CreateGramRequest(
     int Height,
     string[]? MediaKeys = null,
     PhotoTagInput[]? PhotoTags = null,
-    bool Sensitive = false);
+    bool Sensitive = false,
+    string[]? AltTexts = null);
 
 internal sealed record CreateStoryRequest(string Caption, string MediaKey, int Width, int Height);
 

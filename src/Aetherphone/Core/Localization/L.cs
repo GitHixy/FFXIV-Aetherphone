@@ -7503,6 +7503,14 @@ internal static class L
         public static readonly LocString Trending = new("chirper.trending", "Trending");
         public static readonly LocPlural ChirpsToday = new("chirper.chirpsToday", "{0} chirp today", "{0} chirps today");
         public static readonly LocString SearchHint = new("chirper.searchHint", "Search people or #tags");
+        public static readonly LocString SearchChirpsTab = new("chirper.searchChirpsTab", "Chirps");
+        public static readonly LocString SearchChirpsEmpty = new("chirper.searchChirpsEmpty", "No chirps match your search");
+        public static readonly LocString SearchChirpsKeepTyping = new("chirper.searchChirpsKeepTyping", "Keep typing to search chirps");
+        public static readonly LocString AltTextTitle = new("chirper.altTextTitle", "Image description");
+        public static readonly LocString AltTextHint = new("chirper.altTextHint", "Describe this photo for people who can't see it");
+        public static readonly LocString AltTextAdd = new("chirper.altTextAdd", "Add alt text");
+        public static readonly LocString AltTextEdit = new("chirper.altTextEdit", "Edit alt text");
+        public static readonly LocString AltTextSave = new("chirper.altTextSave", "Save");
         public static readonly LocString HashtagsTitle = new("chirper.hashtagsTitle", "Hashtags");
         public static readonly LocString Repost = new("chirper.repost", "Rechirp");
         public static readonly LocString Unrepost = new("chirper.unrepost", "Undo rechirp");

@@ -46,10 +46,10 @@ internal sealed partial class SocialClient
             AethernetJsonContext.Default.FeedSignalRequest, token);
     }
 
-    public Task<PostDto?> CreatePostAsync(string text, string[]? mediaKeys, int mediaWidth, int mediaHeight, bool sensitive, CancellationToken token,
-        Action<AepFailure>? onFailure = null)
+    public Task<PostDto?> CreatePostAsync(string text, string[]? mediaKeys, int mediaWidth, int mediaHeight, bool sensitive,
+        string[]? altTexts, CancellationToken token, Action<AepFailure>? onFailure = null)
     {
-        return net.PostAsync("/posts", new CreatePostRequest(text, null, mediaKeys, mediaWidth, mediaHeight, sensitive), AethernetJsonContext.Default.CreatePostRequest, AethernetJsonContext.Default.PostDto, token, null, onFailure);
+        return net.PostAsync("/posts", new CreatePostRequest(text, null, mediaKeys, mediaWidth, mediaHeight, sensitive, AltTexts: altTexts), AethernetJsonContext.Default.CreatePostRequest, AethernetJsonContext.Default.PostDto, token, null, onFailure);
     }
 
     public Task<FeedPage?> UserPostsAsync(string userId, string? cursor, CancellationToken token,
@@ -272,10 +272,10 @@ internal sealed partial class SocialClient
         return net.RequestAsync(HttpMethod.Delete, $"/posts/{postId}/repost", AethernetJsonContext.Default.PostDto, token, null, onFailure);
     }
 
-    public Task<PostDto?> QuotePostAsync(string text, string quotedPostId, string[]? mediaKeys, int mediaWidth, int mediaHeight, CancellationToken token,
-        Action<AepFailure>? onFailure = null)
+    public Task<PostDto?> QuotePostAsync(string text, string quotedPostId, string[]? mediaKeys, int mediaWidth, int mediaHeight,
+        string[]? altTexts, CancellationToken token, Action<AepFailure>? onFailure = null)
     {
-        return net.PostAsync("/posts", new CreatePostRequest(text, quotedPostId, mediaKeys, mediaWidth, mediaHeight), AethernetJsonContext.Default.CreatePostRequest, AethernetJsonContext.Default.PostDto, token, null, onFailure);
+        return net.PostAsync("/posts", new CreatePostRequest(text, quotedPostId, mediaKeys, mediaWidth, mediaHeight, AltTexts: altTexts), AethernetJsonContext.Default.CreatePostRequest, AethernetJsonContext.Default.PostDto, token, null, onFailure);
     }
 
     public Task<PostDto?> CreateGifPostAsync(string text, string? quotedPostId, string gifUrl, string gifSlug,

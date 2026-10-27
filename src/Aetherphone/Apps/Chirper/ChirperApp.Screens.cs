@@ -122,6 +122,16 @@ internal sealed partial class ChirperApp
 
         var top = area.Min.Y + AppHeader.Height * scale + 6f * scale;
         var listRect = new Rect(new Vector2(area.Min.X, top), area.Max);
+        if (SearchesPosts(searchDraft, searchingTags))
+        {
+            listRect = DrawDiscoverTabs(listRect);
+            if (discoverTab == DiscoverTab.Chirps)
+            {
+                DrawPostSearchResults(listRect);
+                return;
+            }
+        }
+
         var results = searchingTags ? Array.Empty<UserDto>() : store.DiscoverResults;
         var tags = store.DiscoverTags;
         using (AppSurface.BeginEdgeToEdge(listRect))
@@ -164,6 +174,7 @@ internal sealed partial class ChirperApp
     {
         searchDirtyAt = -1d;
         trendingRequested = true;
+        SyncPostSearch();
         if (string.IsNullOrWhiteSpace(searchDraft))
         {
             store.SearchTags(string.Empty);
