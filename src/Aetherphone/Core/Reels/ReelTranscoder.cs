@@ -530,7 +530,7 @@ internal static class ReelTranscoder
         private bool TryOpenWriter(bool hardware, bool withAudio, StringBuilder attempts)
         {
             var label = (hardware ? "hardware allowed" : "software only") + (withAudio ? " with audio" : " video only");
-            var attributes = MediaFoundationApi.CreateAttributes(3);
+            var attributes = MediaFoundationApi.CreateAttributes(2);
             IMFSinkWriter? created = null;
             var stage = "create";
             try
@@ -538,7 +538,6 @@ internal static class ReelTranscoder
                 attributes.SetUINT32(MediaFoundationAttributes.MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, hardware ? 1 : 0);
                 attributes.SetGUID(MediaFoundationAttributes.MF_TRANSCODE_CONTAINERTYPE,
                     TranscodeContainerTypes.MFTranscodeContainerType_MPEG4);
-                attributes.SetUINT32(MediaFoundationVideo.MoovBeforeMdat, 1);
                 DeleteQuietly(outputPath);
                 MediaFoundationInterop.MFCreateSinkWriterFromURL(outputPath, null, attributes, out created);
                 stage = "video stream";

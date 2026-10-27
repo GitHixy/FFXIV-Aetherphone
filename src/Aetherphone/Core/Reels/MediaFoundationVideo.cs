@@ -145,7 +145,6 @@ internal static class MediaFoundationVideo
     internal static readonly Guid GeometricAperture = new("66758743-7e5f-400d-980a-aa8596c85696");
     internal static readonly Guid VideoRotation = new("c380465d-2271-428c-9b83-ecea3b4a85c1");
     internal static readonly Guid AdvancedVideoProcessing = new("0f81da2c-b537-4672-a8b2-a681b17307a3");
-    internal static readonly Guid MoovBeforeMdat = new("f672e3ac-e1e6-4f10-b5ec-5f3b30828816");
 
     private const short VariantInt64 = 20;
     private const short VariantUInt64 = 21;
