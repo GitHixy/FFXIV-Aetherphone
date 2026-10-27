@@ -168,40 +168,26 @@ internal sealed class HighlightStore : IDisposable
 
     public void LoadEditor(string? highlightId)
     {
-        var me = session.CurrentUser?.Id;
-        if (me is null)
+        editorStories = Array.Empty<StoryDto>();
+        editorMembers = Array.Empty<string>();
+        if (highlightId is null)
         {
+            editorVersion++;
             return;
         }
 
-        editorStories = Array.Empty<StoryDto>();
-        editorMembers = Array.Empty<string>();
         editorLoading = true;
         work.Run("highlight editor", async token =>
         {
-            var held = highlightId is null
-                ? null
-                : await client.HighlightStoriesAsync(highlightId, token).ConfigureAwait(false);
-            var active = await client.UserStoriesAsync(me, token).ConfigureAwait(false);
+            var held = await client.HighlightStoriesAsync(highlightId, token).ConfigureAwait(false);
             var heldItems = held?.Items ?? Array.Empty<StoryDto>();
-            var activeItems = active?.Items ?? Array.Empty<StoryDto>();
-            var merged = new List<StoryDto>(heldItems.Length + activeItems.Length);
             var memberIds = new string[heldItems.Length];
             for (var index = 0; index < heldItems.Length; index++)
             {
-                merged.Add(heldItems[index]);
                 memberIds[index] = heldItems[index].Id;
             }
 
-            for (var index = 0; index < activeItems.Length; index++)
-            {
-                if (Array.IndexOf(memberIds, activeItems[index].Id) < 0)
-                {
-                    merged.Add(activeItems[index]);
-                }
-            }
-
-            editorStories = merged.ToArray();
+            editorStories = heldItems;
             editorMembers = memberIds;
             editorVersion++;
         }, () => editorLoading = false);

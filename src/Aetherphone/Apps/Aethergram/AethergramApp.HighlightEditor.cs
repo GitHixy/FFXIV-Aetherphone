@@ -30,23 +30,27 @@ internal sealed partial class AethergramApp
     private string editorOriginalTitle = string.Empty;
     private string? editorCoverId;
     private string? editorOriginalCover;
-    private string? editorPreselect;
+    private StoryDto? editorPreselect;
+    private StoryDto[] editorCandidates = Array.Empty<StoryDto>();
+    private StoryDto[]? editorCandidatesHeld;
+    private StoryDto[]? editorCandidatesArchived;
+    private StoryDto? editorCandidatesPreselect;
     private bool editorPickingCover;
     private int editorSyncedVersion;
     private volatile int editorOutcome;
     private int editorCountFor = -1;
     private string editorCountLabel = string.Empty;
 
-    private void StartNewHighlight(string? preselectStoryId) => OpenHighlightEditor(null, preselectStoryId);
+    private void StartNewHighlight(StoryDto? preselect) => OpenHighlightEditor(null, preselect);
 
-    private void OpenHighlightEditor(StoryHighlightDto? highlight, string? preselectStoryId = null)
+    private void OpenHighlightEditor(StoryHighlightDto? highlight, StoryDto? preselect = null)
     {
         editorHighlightId = highlight?.Id;
         editorTitle = highlight?.Title ?? string.Empty;
         editorOriginalTitle = editorTitle;
         editorCoverId = highlight?.CoverStoryId;
         editorOriginalCover = editorCoverId;
-        editorPreselect = preselectStoryId;
+        editorPreselect = preselect;
         editorPickingCover = false;
         editorSelected.Clear();
         editorOriginal = Array.Empty<string>();
@@ -54,6 +58,7 @@ internal sealed partial class AethergramApp
         editorCountFor = -1;
         editorSyncedVersion = highlights.EditorVersion;
         highlights.LoadEditor(highlight?.Id);
+        storyArchive.Refresh();
         router.Push(AethergramRoute.HighlightEditor);
     }
 
@@ -81,7 +86,7 @@ internal sealed partial class AethergramApp
             new Vector2(area.Max.X - margin, area.Max.Y - margin));
         var listRect = new Rect(new Vector2(area.Min.X, area.Min.Y + AppHeader.Height * scale),
             new Vector2(area.Max.X, saveRect.Min.Y - EditorGap * scale));
-        var candidates = highlights.EditorStories;
+        var candidates = EditorCandidates();
         using (AppSurface.BeginEdgeToEdge(listRect))
         {
             DrawEditorHead(candidates);
@@ -111,9 +116,46 @@ internal sealed partial class AethergramApp
             editorSelected.Add(editorOriginal[index]);
         }
 
-        if (editorPreselect is { } preselect && IndexOfStory(highlights.EditorStories, preselect) >= 0)
+        if (editorPreselect is { } preselect)
         {
-            editorSelected.Add(preselect);
+            editorSelected.Add(preselect.Id);
+        }
+    }
+
+    private StoryDto[] EditorCandidates()
+    {
+        var held = highlights.EditorStories;
+        var archived = storyArchive.Items;
+        if (ReferenceEquals(held, editorCandidatesHeld) && ReferenceEquals(archived, editorCandidatesArchived)
+            && ReferenceEquals(editorPreselect, editorCandidatesPreselect))
+        {
+            return editorCandidates;
+        }
+
+        var known = new HashSet<string>(held.Length + archived.Length + 1, StringComparer.Ordinal);
+        var merged = new List<StoryDto>(held.Length + archived.Length + 1);
+        AddEditorCandidates(merged, known, held);
+        if (editorPreselect is { } preselect && known.Add(preselect.Id))
+        {
+            merged.Add(preselect);
+        }
+
+        AddEditorCandidates(merged, known, archived);
+        editorCandidatesHeld = held;
+        editorCandidatesArchived = archived;
+        editorCandidatesPreselect = editorPreselect;
+        editorCandidates = merged.ToArray();
+        return editorCandidates;
+    }
+
+    private static void AddEditorCandidates(List<StoryDto> merged, HashSet<string> known, StoryDto[] source)
+    {
+        for (var index = 0; index < source.Length; index++)
+        {
+            if (known.Add(source[index].Id))
+            {
+                merged.Add(source[index]);
+            }
         }
     }
 
@@ -177,7 +219,8 @@ internal sealed partial class AethergramApp
         var width = ScrollLayout.StableContentWidth();
         if (candidates.Length == 0)
         {
-            var message = highlights.EditorLoading ? Loc.T(L.Common.Loading) : Loc.T(L.Story.NoStoriesToHighlight);
+            var waiting = highlights.EditorLoading || storyArchive.Loading || !storyArchive.Loaded;
+            var message = waiting ? Loc.T(L.Common.Loading) : Loc.T(L.Story.NoStoriesToHighlight);
             Typography.DrawWrappedCentered(ImGui.GetWindowDrawList(), message, TextStyles.Subheadline, Ink.MutedInk,
                 new Vector2(ImGui.GetCursorScreenPos().X + width * 0.5f, ImGui.GetCursorScreenPos().Y + EditorEmptyTop * scale),
                 width - CellPadX * 2f * scale);
@@ -200,8 +243,20 @@ internal sealed partial class AethergramApp
                     ImGui.SameLine();
                 }
 
-                DrawEditorTile(candidates[index], min, max, candidates[index].Id == coverId);
+                if (ImGui.IsRectVisible(min, max))
+                {
+                    DrawEditorTile(candidates[index], min, max, candidates[index].Id == coverId);
+                }
             }
+        }
+
+        if (storyArchive.LoadingMore)
+        {
+            InfiniteScroll.DrawLoadingRow(ImGui.GetCursorScreenPos().X + width * 0.5f, Ink.MutedInk);
+        }
+        else if (storyArchive.HasMore && InfiniteScroll.ReachedBottom())
+        {
+            storyArchive.LoadMore();
         }
 
         ImGui.Dummy(new Vector2(0f, EditorGap * scale));
@@ -360,18 +415,5 @@ internal sealed partial class AethergramApp
         {
             editorOutcome = EditorSaved;
         }
-    }
-
-    private static int IndexOfStory(StoryDto[] stories, string storyId)
-    {
-        for (var index = 0; index < stories.Length; index++)
-        {
-            if (stories[index].Id == storyId)
-            {
-                return index;
-            }
-        }
-
-        return -1;
     }
 }

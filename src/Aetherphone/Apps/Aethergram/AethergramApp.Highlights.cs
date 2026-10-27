@@ -64,6 +64,7 @@ internal sealed partial class AethergramApp
 
     private void DrawStoryViewerExtras(Rect screen)
     {
+        DrainArchivedDeletion();
         DrawHighlightPicker(screen);
         DrainHighlightNotice();
         toast.Draw(screen, ScreenToastStyle.From(ui));
@@ -173,7 +174,7 @@ internal sealed partial class AethergramApp
 
             highlightPicker.Close();
             stories.Close();
-            StartNewHighlight(story.Id);
+            StartNewHighlight(story);
             return;
         }
 
