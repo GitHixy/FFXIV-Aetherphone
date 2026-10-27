@@ -143,6 +143,7 @@ internal sealed class MediaDependencies : IDisposable
     private readonly SemaphoreSlim installGate = new(1, 1);
     private readonly MediaDependency[] songComponents;
     private readonly MediaDependency[] videoComponents;
+    private readonly MediaDependency[] reelComponents;
     private readonly CancellationTokenSource lifetime = new();
     private long lastRoutineResolverAttemptTicks = long.MinValue;
     private long lastUrgentResolverCheckTicks = long.MinValue;
@@ -167,6 +168,7 @@ internal sealed class MediaDependencies : IDisposable
             "deno-x86_64-pc-windows-msvc", ".zip", "deno.exe", MinimumLibraryBytes);
         songComponents = new[] { LinkResolver, JsRuntime };
         videoComponents = new[] { VideoLibrary, LinkResolver, JsRuntime };
+        reelComponents = new[] { VideoLibrary };
 
         SweepReplacedPayloads();
         AdoptLegacyInstalls();
@@ -188,6 +190,8 @@ internal sealed class MediaDependencies : IDisposable
     internal long PendingDownloadBytes => PendingBytesFor(videoComponents);
 
     internal long PendingSongBytes => PendingBytesFor(songComponents);
+
+    internal long PendingReelBytes => PendingBytesFor(reelComponents);
 
     private bool IsReadyFor(MediaDependency[] components)
     {
@@ -344,6 +348,8 @@ internal sealed class MediaDependencies : IDisposable
     internal Task<bool> EnsureSongsReadyAsync(CancellationToken token) =>
         EnsureReadyAsync(songComponents, token);
 
+    internal Task<bool> EnsureReelsReadyAsync(CancellationToken token) => EnsureReadyAsync(reelComponents, token);
+
     private async Task<bool> EnsureReadyAsync(MediaDependency[] components, CancellationToken token)
     {
         if (IsReadyFor(components))
@@ -376,6 +382,8 @@ internal sealed class MediaDependencies : IDisposable
     internal Task CheckSizesAsync(CancellationToken token) => CheckSizesAsync(videoComponents, token);
 
     internal Task CheckSongSizesAsync(CancellationToken token) => CheckSizesAsync(songComponents, token);
+
+    internal Task CheckReelSizesAsync(CancellationToken token) => CheckSizesAsync(reelComponents, token);
 
     private async Task CheckSizesAsync(MediaDependency[] components, CancellationToken token)
     {

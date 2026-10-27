@@ -18,12 +18,14 @@ using Aetherphone.Core.Net;
 using Aetherphone.Core.Notifications;
 using Aetherphone.Core.Onboarding;
 using Aetherphone.Core.Photos;
+using Aetherphone.Core.Reels;
 using Aetherphone.Core.Report;
 using Aetherphone.Core.Runtime;
 using Aetherphone.Core.Sharing;
 using Aetherphone.Core.Social;
 using Aetherphone.Core.Theme;
 using Aetherphone.Core.Translation;
+using Aetherphone.Core.Video;
 using Aetherphone.Core.Wallpapers;
 using Aetherphone.Windows;
 using Aetherphone.Windows.Components;
@@ -75,7 +77,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
     private const int MaxPhotoTags = 20;
     private const int MaxCommentLength = 500;
     private const int FeedCaptionMaxLines = 2;
-    private const int NavTabCount = 4;
+    private const int NavTabCount = 5;
     private const int FilterToggleCount = 3;
     private const float TopBarIconSize = 26f;
     private const float LogoSize = 30f;
@@ -262,7 +264,8 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         PhoneVisibility visibility, RealtimeSignalBus realtimeSignals,
         WallpaperImageCache wallpaperImages, ConfirmService confirm, TranslationService translation,
         ReportService report, ConductGateService conduct,
-        AppInstaller installer, EncryptionHelpService encryptionHelp, GifSearch gifs, SocialMuteLedger mutes)
+        AppInstaller installer, EncryptionHelpService encryptionHelp, GifSearch gifs, SocialMuteLedger mutes,
+        VideoSuite video)
     {
         this.translation = translation;
         this.gifs = gifs;
@@ -323,6 +326,8 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             RemoveCommentConfirmMessage = L.Aethergram.RemoveCommentConfirmMessage,
         }, confirm, report);
         threadView = new ThreadView(this);
+        reelPlayback = new ReelPlayback(video.Screen.Engine.Dependencies, visibility, () => video.Player.Unpaused);
+        reelPlayback.Hidden += OnReelsHidden;
     }
 
     public void OnOpened()
@@ -410,6 +415,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
 
     public void OnClosed()
     {
+        reelPlayback.Suspend();
         store.FlushFeedSignals();
         threadView.OnAppClosed();
         stories.Close();
@@ -442,6 +448,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         ui.Backdrop(screen);
         ConsumeSharedPhoto();
         AdvancePendingPhotoView();
+        AdvancePendingReelTap();
         ConsumeOpenedHighlight();
         stories.Advance();
         if (photoViewer.Active)
@@ -458,7 +465,8 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         }
 
         DrawNight(screen, context.Content.Min.Y);
-        using (InputShield.Engage(avatarLightbox.Expanded || GifSheetCaptures || StoryShareCaptures))
+        using (InputShield.Engage(avatarLightbox.Expanded || GifSheetCaptures || StoryShareCaptures
+                   || ReelCommentsCaptures))
         using (InputShield.Engage(AltTextCapturesPointer))
         using (intro.FadeContent())
         {
@@ -466,6 +474,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
                 ImGui.GetIO().DeltaTime, drawView);
         }
 
+        PresentFeedReel();
         UpdateTourHold();
         if (avatarLightbox.Active)
         {
@@ -479,6 +488,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         DrawFeedExplainer(screen);
         DrawPostViewsSheet(screen);
         DrawAltText(screen);
+        DrawReelComments(screen);
         DrawCommentSheet(screen);
         DrawGifSheet(screen);
         DrawProfileMenu(screen);
@@ -582,6 +592,9 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             case AethergramScreen.HighlightEditor:
                 DrawHighlightEditor(area, depth == router.Depth);
                 break;
+            case AethergramScreen.Reels:
+                DrawReelsRoute(area);
+                break;
             default:
                 DrawRoot(area);
                 break;
@@ -621,6 +634,9 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
             {
                 case AethergramTab.Search:
                     DrawSearchTab(area);
+                    break;
+                case AethergramTab.Reels:
+                    DrawReelsTab(area);
                     break;
                 case AethergramTab.Profile:
                     DrawProfileTab(area);
@@ -695,6 +711,17 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         {
             RefreshActiveFeed();
             return;
+        }
+
+        if (tab == AethergramTab.Reels && activeTab == AethergramTab.Reels)
+        {
+            RestartReelsTab();
+            return;
+        }
+
+        if (activeTab == AethergramTab.Reels)
+        {
+            reelPlayback.Suspend();
         }
 
         activeTab = tab;
@@ -1440,7 +1467,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         }
 
         var imageRect = new Rect(new Vector2(origin.X, imageTop), new Vector2(origin.X + width, imageBottom));
-        var page = DrawGramCarousel(imageRect, post, photos, 0f);
+        var page = post.Video is null ? DrawGramCarousel(imageRect, post, photos, 0f) : DrawFeedReel(imageRect, post);
         var actionCenterY = actionsTop + actionsHeight * 0.5f;
         var liked = post.MyReaction >= 0;
         var actionX = innerX + CardActionInset * scale - CardActionIconSize * scale * 0.5f;
@@ -1811,6 +1838,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         tabItems[(int)AethergramTab.Home] = new TabItem(Loc.T(L.Aethergram.Home), HomeGlyph, HomeActiveGlyph);
         tabItems[(int)AethergramTab.Search] = new TabItem(Loc.T(L.Aethergram.Search), SearchGlyph,
             SearchActiveGlyph);
+        tabItems[(int)AethergramTab.Reels] = new TabItem(Loc.T(L.Aethergram.Reels), ReelsGlyph, ReelsGlyph);
         tabItems[(int)AethergramTab.Messages] = new TabItem(Loc.T(L.Aethergram.InboxTitle), MessagesGlyph,
             MessagesActiveGlyph, dmStore.UnreadCount, "aethergram.inbox");
         tabItems[(int)AethergramTab.Profile] = new TabItem(Loc.T(L.Aethergram.Profile), PhoneIcons.User,
@@ -1925,6 +1953,8 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         highlights.Dispose();
         storyArchive.Dispose();
         closeFriends.Dispose();
+        reelPlayback.Dispose();
+        reelSetupWork.Dispose();
     }
 
     private void DrawHomeTopBar(Rect area)

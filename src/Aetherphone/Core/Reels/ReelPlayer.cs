@@ -97,6 +97,40 @@ internal sealed class ReelPlayer : IDisposable
     internal int CurrentFrameVersion =>
         currentSlot >= 0 && slots[currentSlot].Surface is { } surface ? surface.Renderer.FrameVersion : 0;
 
+    internal ReelFrame FrameOf(string id)
+    {
+        var slotIndex = SlotOf(id);
+        if (slotIndex < 0)
+        {
+            return default;
+        }
+
+        var slot = slots[slotIndex];
+        return slot.Surface is { } surface && slot.FirstFrameTimestamp != 0
+            ? new ReelFrame(surface.Handle, surface.Width, surface.Height)
+            : default;
+    }
+
+    internal string? FailureOf(string id)
+    {
+        var slotIndex = SlotOf(id);
+        return slotIndex < 0 ? null : slots[slotIndex].Failure;
+    }
+
+    private int SlotOf(string id)
+    {
+        for (var slotIndex = 0; slotIndex < Depth; slotIndex++)
+        {
+            var slot = slots[slotIndex];
+            if (slot.Generation > 0 && string.Equals(slot.Source.Id, id, StringComparison.Ordinal))
+            {
+                return slotIndex;
+            }
+        }
+
+        return -1;
+    }
+
     internal ReelSlotStatus SlotStatus(int slotIndex)
     {
         var slot = slots[slotIndex];
@@ -426,7 +460,7 @@ internal sealed class ReelPlayer : IDisposable
         try
         {
             renderer.Initialize(width, height, texture, null, hardwareDecoding, ReelFormat.MaxLongSide, false,
-                volume);
+                volume, resolveLinks: false);
             renderer.SetLooping(true);
             renderer.ObserveProgress();
             renderer.FileEnded += ending => OnFileEnded(slot, ending);

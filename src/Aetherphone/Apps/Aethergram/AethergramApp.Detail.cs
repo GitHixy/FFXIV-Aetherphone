@@ -317,7 +317,7 @@ internal sealed partial class AethergramApp
             return;
         }
 
-        if (commentSheet.IsOpen && router.Current.Screen != AethergramScreen.Detail)
+        if (commentSheet.IsOpen && router.Current.Screen != AethergramScreen.Detail && !reelCommentsSheet.IsOpen)
         {
             commentSheet.Close();
         }

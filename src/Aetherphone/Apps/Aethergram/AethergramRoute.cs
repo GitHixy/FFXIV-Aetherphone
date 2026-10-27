@@ -6,6 +6,7 @@ internal enum AethergramTab
 {
     Home,
     Search,
+    Reels,
     Messages,
     Profile,
 }
@@ -20,6 +21,7 @@ internal enum PostSource
     Explore,
     Archive,
     PendingTags,
+    Reels,
 }
 
 internal enum AethergramScreen
@@ -52,6 +54,7 @@ internal enum AethergramScreen
     MutedAccounts,
     CloseFriends,
     HighlightEditor,
+    Reels,
 }
 
 internal readonly record struct AethergramRoute(
@@ -90,6 +93,7 @@ internal readonly record struct AethergramRoute(
     public static AethergramRoute Reactions(string messageId) => new(AethergramScreen.Reactions, messageId);
     public static AethergramRoute Share(string postId) => new(AethergramScreen.Share, postId);
     public static AethergramRoute Hashtag(string tag) => new(AethergramScreen.Hashtag, tag);
+    public static AethergramRoute Reels(string postId) => new(AethergramScreen.Reels, postId);
 
     public static AethergramRoute UserList(string sourceId, UserListKind kind) =>
         new(AethergramScreen.UserList, sourceId, kind);

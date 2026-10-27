@@ -9,7 +9,7 @@ using Dalamud.Bindings.ImGui;
 
 namespace Aetherphone.Apps.Aethergram;
 
-internal readonly record struct PostGridStyle(float Aspect, bool ShowLikes);
+internal readonly record struct PostGridStyle(float Aspect, bool ShowLikes, bool ShowViews = false);
 
 internal sealed partial class AethergramApp
 {
@@ -144,7 +144,7 @@ internal sealed partial class AethergramApp
 
                     if (UiInteract.Click(min, max, UiInteract.Hover(min, max)))
                     {
-                        OpenPosts(posts[index].Id, source);
+                        OpenGridPost(posts, index, source);
                     }
                 }
 
@@ -201,6 +201,11 @@ internal sealed partial class AethergramApp
         if (pinned)
         {
             PhoneIcon.Draw(drawList, badgeCenter, PhoneIcons.PinFilled, Ink.White, GridBadgeSize * scale);
+        }
+
+        if (post.Video is not null)
+        {
+            DrawReelTileBadges(drawList, min, max, post, style.ShowViews, pinned);
         }
 
         if (style.ShowLikes)
