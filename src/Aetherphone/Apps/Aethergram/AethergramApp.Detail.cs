@@ -62,6 +62,7 @@ internal sealed partial class AethergramApp
         var body = new Rect(new Vector2(area.Min.X, top), new Vector2(area.Max.X, area.Max.Y - composerHeight));
         using (AppSurface.BeginEdgeToEdge(body))
         {
+            DrawCollabInvitePrompt(post);
             DrawGramCard(post, true);
             DrawComments();
             ImGui.Dummy(new Vector2(0f, 16f * scale));

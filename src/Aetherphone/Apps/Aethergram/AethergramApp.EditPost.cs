@@ -41,6 +41,7 @@ internal sealed partial class AethergramApp
             }
         }
 
+        BeginEditPostAltTexts(post, PostMedia.Photos(post.MediaUrls, post.MediaUrl).Length);
         editPostMentions.Close();
         captionEmoji.Close();
         personPicker.Close();
@@ -109,6 +110,7 @@ internal sealed partial class AethergramApp
             composeTagMode = true;
         }
 
+        DrawEditPostAltChip(preview, photos, page);
         DrawEditPostDots(preview, photos.Length, page, dotsBlock);
         DrawCaptionCard(captionCard, area, scale, "##aethergramEditCaption", true, ref editPostCaption,
             editPostMentions);
@@ -224,9 +226,11 @@ internal sealed partial class AethergramApp
 
         var trimmed = editPostCaption.Trim();
         var tags = ComposeTagInputs() ?? Array.Empty<PhotoTagInput>();
+        var altTexts = EditPostAltTextChanges(post);
         if (string.Equals(trimmed, post.Text, StringComparison.Ordinal)
             && editPostSensitive == post.Sensitive
-            && PhotoTagEdits.Unchanged(post.PhotoTags, tags))
+            && PhotoTagEdits.Unchanged(post.PhotoTags, tags)
+            && altTexts is null)
         {
             back();
             return;
@@ -234,7 +238,7 @@ internal sealed partial class AethergramApp
 
         editPostBusy = true;
         editPostStatus = string.Empty;
-        store.EditPost(post.Id, trimmed, tags, editPostSensitive, ok =>
+        store.EditPost(post.Id, trimmed, tags, editPostSensitive, altTexts, ok =>
         {
             editPostBusy = false;
             editPostOutcome = ok ? 1 : 2;

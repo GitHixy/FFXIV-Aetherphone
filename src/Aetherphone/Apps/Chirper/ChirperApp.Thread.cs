@@ -55,10 +55,11 @@ internal sealed partial class ChirperApp
         {
             ImGui.Dummy(new Vector2(0f, 6f * scale));
             DrawThreadHead(post);
+            DrawThreadChain(post);
             var comments = store.DetailComments;
             if (comments.Length == 0)
             {
-                if (!store.DetailLoading)
+                if (!store.DetailLoading && post.CanReply)
                 {
                     Typography.DrawCentered(new Vector2(body.Center.X, ImGui.GetCursorScreenPos().Y + 36f * scale),
                         Loc.T(L.Chirper.NoComments), ChirperInk.MutedInk, MetaStyle);
@@ -92,7 +93,14 @@ internal sealed partial class ChirperApp
             ImGui.Dummy(new Vector2(0f, 24f * scale));
         }
 
-        DrawCommentComposer(new Rect(new Vector2(area.Min.X, area.Max.Y - composerHeight), area.Max), area, postId);
+        var composerBar = new Rect(new Vector2(area.Min.X, area.Max.Y - composerHeight), area.Max);
+        if (!post.CanReply)
+        {
+            DrawReplyLimit(composerBar, post);
+            return;
+        }
+
+        DrawCommentComposer(composerBar, area, postId);
     }
 
     private void DrawThreadHead(PostDto post)
@@ -225,6 +233,8 @@ internal sealed partial class ChirperApp
             Typography.Draw(drawList, new Vector2(left, cursorY), stamp, ChirperInk.MutedInk, HeadHandleStyle);
             cursorY += Typography.LineHeight(HeadHandleStyle);
         }
+
+        cursorY = DrawLastEditedLine(drawList, post, left, contentWidth, cursorY);
 
         cursorY += 12f * scale;
         DrawHairline(drawList, left, right, cursorY);
@@ -746,15 +756,13 @@ internal sealed partial class ChirperApp
 
         var style = new CommentComposerStyle(AppSkin.Transparent, ChirperInk.FieldFill, ChirperInk.TitleInk,
             ChirperInk.Accent, AppSkin.Transparent, ChirperInk.White, true, 11f, 56f, 1f, 19f);
-        var focusPending = replyFocusPending;
-        replyFocusPending = false;
         var canSend = !string.IsNullOrWhiteSpace(commentDraft) || commentAttachment.HasAttachment;
         var delta = MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
         replySendReveal.Step(canSend ? 1f : 0f, Motion.Appear, delta);
         var fieldBar = new Rect(new Vector2(fieldLeft, bar.Min.Y), bar.Max);
         if (CommentComposerBar.Draw(fieldBar, screen, ui, theme, style, "##chirperComment", Loc.T(L.Chirper.AddComment),
                 ref commentDraft, MaxCommentLength, commentMentions, mentionPopup, images, lodestone, store.Commenting,
-                ref focusPending, commentEmoji, commentAttachment, library, wallpaperImages, replySendReveal.Value))
+                ref replyFocusPending, commentEmoji, commentAttachment, library, wallpaperImages, replySendReveal.Value))
         {
             var text = commentDraft;
             var attachmentPath = commentAttachment.Path;

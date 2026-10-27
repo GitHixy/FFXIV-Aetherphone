@@ -110,18 +110,26 @@ internal sealed partial class AethergramApp
 
     private void StartCompose(bool avatarMode, bool storyMode = false)
     {
+        PrepareCompose(avatarMode, storyMode);
+        router.Push(AethergramRoute.Compose);
+    }
+
+    private void PrepareCompose(bool avatarMode, bool storyMode)
+    {
         composeAvatarMode = avatarMode;
         composeStoryMode = storyMode;
         caption = string.Empty;
         composeStatus = string.Empty;
         composeSensitive = false;
         composeTags.Clear();
+        composeAltTexts.Clear();
         composeTagMode = false;
         captionEmoji.Close();
         personPicker.Close();
+        ResetComposeCollab();
         composeSession.Open(avatarMode || storyMode, !avatarMode && !storyMode);
         composeIntake.Discard();
-        router.Push(AethergramRoute.Compose);
+        ResetComposeDraft();
     }
 
     private void DrawCompose(Rect area)
@@ -139,6 +147,7 @@ internal sealed partial class AethergramApp
                 feedScrollTopPending = true;
             }
 
+            ForgetComposeDraft();
             router.Pop();
             return;
         }
@@ -155,6 +164,12 @@ internal sealed partial class AethergramApp
         while (composeIntake.TryTake(out var taken))
         {
             composeSession.TakeImported(taken);
+        }
+
+        if (composeDraftsOpen)
+        {
+            DrawComposeDraftsPanel(area);
+            return;
         }
 
         switch (composeSession.Stage)
@@ -233,7 +248,7 @@ internal sealed partial class AethergramApp
         var actionLabel = composeAvatarMode
             ? (store.Posting ? Loc.T(L.Aethergram.Saving) : Loc.T(L.Aethergram.Use))
             : Loc.T(L.Aethergram.Next);
-        if (DrawComposeHeader(area, ComposeTitle, true, back, actionLabel,
+        if (DrawComposeHeader(area, ComposeTitle, true, CloseCompose, actionLabel,
                 composeSession.HasSelection && !store.Posting))
         {
             PickAdvance();
@@ -259,6 +274,7 @@ internal sealed partial class AethergramApp
             gridTop += ComposeNoticeHeight * scale;
         }
 
+        gridTop = DrawComposeDraftsEntry(area, gridTop);
         var gridRect = new Rect(new Vector2(area.Min.X, gridTop), area.Max);
         UiAnchors.Report("aethergram.compose.grid", gridRect);
         using (AppSurface.BeginEdgeToEdge(gridRect))
@@ -303,6 +319,7 @@ internal sealed partial class AethergramApp
     private void DrawComposeCaption(Rect area)
     {
         personPicker.Gate();
+        GateComposeCollabPicker();
         var scale = UiScale.Current;
         if (composeTagMode && !composeStoryMode)
         {
@@ -324,7 +341,7 @@ internal sealed partial class AethergramApp
             : 0f;
         var cardsBottom = shareRect.Min.Y - ComposeCardGap * scale - statusHeight;
         var showOptions = !composeStoryMode;
-        var optionsHeight = showOptions ? ComposeRowHeight * 2f * scale : 0f;
+        var optionsHeight = showOptions ? ComposeRowHeight * 3f * scale : 0f;
         var optionsCard = new Rect(new Vector2(left, cardsBottom - optionsHeight), new Vector2(right, cardsBottom));
         var captionBottom = showOptions ? optionsCard.Min.Y - ComposeCardGap * scale : cardsBottom;
         var captionHeight = (ComposeCardPad * 2f + ComposeCaptionFieldHeight + ComposeMetaGap + ComposeMetaRowHeight)
@@ -342,6 +359,8 @@ internal sealed partial class AethergramApp
             return;
         }
 
+        DrawComposeAltChip(preview);
+
         if (stripHeight > 0f)
         {
             var stripTop = preview.Max.Y + ComposeStripGap * scale;
@@ -356,7 +375,7 @@ internal sealed partial class AethergramApp
 
         DrawCaptionCard(captionCard, area, scale, composeStoryMode ? "##gramStoryCaption" : "##gramCaption",
             !composeStoryMode, ref caption, composeMentions);
-        if (showOptions && DrawComposeOptionsCard(optionsCard, scale, ref composeSensitive))
+        if (showOptions && DrawComposeOptionsCard(optionsCard, scale, ref composeSensitive, true))
         {
             composeTagMode = true;
         }
@@ -381,22 +400,18 @@ internal sealed partial class AethergramApp
             PlaceComposeTag(pickedPerson);
         }
 
-        var shareLabel = busy ? Loc.T(L.Aethergram.Sharing) : Loc.T(L.Aethergram.Share);
-        if (DrawAccentPill(shareRect, shareLabel, !busy))
-        {
-            SubmitCompose();
-        }
-    }
-
-    private void SubmitCompose()
-    {
+        DrawComposeCollabPicker(area);
         if (composeStoryMode)
         {
-            CommitStory();
+            DrawStoryShareButtons(shareRect, busy);
             return;
         }
 
-        CommitGram();
+        var shareLabel = busy ? Loc.T(L.Aethergram.Sharing) : Loc.T(L.Aethergram.Share);
+        if (DrawAccentPill(shareRect, shareLabel, !busy))
+        {
+            CommitGram();
+        }
     }
 
     private void DrawCaptionCard(Rect card, Rect screen, float scale, string fieldId, bool paragraphs,
@@ -491,7 +506,7 @@ internal sealed partial class AethergramApp
             MaxCaptionLength.ToString(Loc.Culture));
     }
 
-    private bool DrawComposeOptionsCard(Rect card, float scale, ref bool sensitive)
+    private bool DrawComposeOptionsCard(Rect card, float scale, ref bool sensitive, bool offerCollab = false)
     {
         var drawList = ImGui.GetWindowDrawList();
         var rounding = Metrics.Radius.Grouped * scale;
@@ -500,7 +515,8 @@ internal sealed partial class AethergramApp
         var tagRowTapped = DrawComposeLinkRow(tagRow, PhoneIcons.UserPlus, Loc.T(L.PhotoTag.TagPeople),
             composeTags.Count, rounding);
         DrawHairline(drawList, ComposeRowLabelLeft(tagRow, scale), card.Max.X - ComposeCardPad * scale, tagRow.Max.Y);
-        var sensitiveRow = new Rect(new Vector2(card.Min.X, tagRow.Max.Y), card.Max);
+        var sensitiveTop = offerCollab ? DrawComposeCollabRow(drawList, card, tagRow.Max.Y, scale) : tagRow.Max.Y;
+        var sensitiveRow = new Rect(new Vector2(card.Min.X, sensitiveTop), card.Max);
         DrawComposeToggleRow(sensitiveRow, PhoneIcons.EyeOff, Loc.T(L.Moderation.MarkSensitive), ref sensitive);
         return tagRowTapped;
     }
@@ -767,12 +783,14 @@ internal sealed partial class AethergramApp
         }
 
         composeStatus = string.Empty;
-        store.CreateGram(composeSession.SelectedArray(), composeSession.CropsArray(), composeSession.AspectsArray(),
+        var paths = composeSession.SelectedArray();
+        store.CreateGram(paths, composeSession.CropsArray(), composeSession.AspectsArray(),
             composeSession.EditsArray(),
-            caption, ComposeTagInputs(), composeSensitive, ok => composeOutcome = ok ? 1 : 2);
+            caption, ComposeTagInputs(), composeSensitive, ComposeCollaboratorId, PostAltTexts.Aligned(paths, composeAltTexts),
+            ok => composeOutcome = ok ? 1 : 2);
     }
 
-    private void CommitStory()
+    private void CommitStory(int audience)
     {
         if (composeSession.CurrentPath.Length == 0 || stories.Posting)
         {
@@ -781,7 +799,7 @@ internal sealed partial class AethergramApp
 
         composeStatus = string.Empty;
         stories.CreateStory(composeSession.FirstSelected, composeSession.CropAt(0), composeSession.EditAt(0), caption,
-            ok => composeOutcome = ok ? 1 : 2);
+            ok => composeOutcome = ok ? 1 : 2, audience);
     }
 
     private void CommitAvatar()

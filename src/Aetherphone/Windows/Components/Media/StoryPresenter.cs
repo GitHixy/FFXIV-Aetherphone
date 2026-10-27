@@ -22,6 +22,8 @@ internal readonly record struct StoryReplyHooks(
 
 internal sealed class StoryPresenter : IDisposable
 {
+    private static readonly Action<StoryDto> IgnoreSeen = static _ => { };
+
     private readonly StoryStore stories;
     private readonly StoryTrayRow tray;
     private readonly StoryViewerOverlay viewer;
@@ -37,6 +39,10 @@ internal sealed class StoryPresenter : IDisposable
     private readonly StoryReplyHooks? replyHooks;
     private readonly StoryReplyPrompt? replyPrompt;
     private readonly Action<string>? openProfile;
+    private readonly Action<StoryDto>? highlightStory;
+    private bool detached;
+    private readonly Action<string>? openPost;
+    private readonly Action<StoryDto> toggleLike;
     private StoryRingDto? pendingRing;
     private bool pendingOpenAtEnd;
     private bool pendingFromViewer;
@@ -45,13 +51,17 @@ internal sealed class StoryPresenter : IDisposable
     public StoryPresenter(AethernetSession session, GramClient client, MediaClient media, RemoteImageCache images,
         LodestoneService lodestone, StoryRingPainter painter, AppPalette palette, StoryConfirmLabels labels,
         ConfirmService confirm, TranslationService translation, RealtimeSignalBus signals, string logTag, Action onCompose,
-        StoryReplyHooks? reply = null, Action<string>? openProfile = null)
+        StoryReplyHooks? reply = null, Action<string>? openProfile = null, Action<StoryDto>? highlight = null,
+        Action<string>? openPost = null)
     {
+        highlightStory = highlight;
         stories = new StoryStore(session, client, media, signals, logTag);
         tray = new StoryTrayRow(images, lodestone);
         this.openProfile = openProfile;
+        this.openPost = openPost;
+        toggleLike = stories.ToggleLike;
         viewer = new StoryViewerOverlay(images, lodestone, translation, confirm,
-            openProfile is null ? null : OpenAuthorProfile);
+            openProfile is null ? null : OpenAuthorProfile, openPost is null ? null : OpenSharedPost);
         this.painter = painter;
         this.palette = palette;
         this.labels = labels;
@@ -77,16 +87,26 @@ internal sealed class StoryPresenter : IDisposable
     public bool TryRing(string authorId, out StoryRingDto ring) => stories.TryRing(authorId, out ring);
 
     public void CreateStory(string sourcePath, WallpaperCrop crop, Aetherphone.Core.Media.PhotoEdit edit,
-        string caption, Action<bool> onComplete) =>
-        stories.CreateStory(sourcePath, crop, edit, caption, onComplete);
+        string caption, Action<bool> onComplete, int audience = StoryAudiences.Everyone) =>
+        stories.CreateStory(sourcePath, crop, edit, caption, onComplete, audience);
+
+    public void ShareGram(string postId, Action<bool> onComplete) => stories.ShareGram(postId, onComplete);
 
     public void DrawTray(PhoneTheme theme, string? ownAvatarUrl = null, string ownName = "",
         string? ownFrameId = null) =>
         tray.Draw(theme, palette, stories.Rings, stories.HasOwnRing, painter, onCompose, OpenRing, ownAvatarUrl,
             ownName, ownFrameId);
 
-    public void DrawViewer(Rect screen, PhoneTheme theme) =>
-        viewer.Draw(screen, theme, confirm.Active is not null);
+    public void DrawViewer(Rect screen, PhoneTheme theme, bool suspended = false) =>
+        viewer.Draw(screen, theme, suspended || confirm.Active is not null);
+
+    public void OpenDetached(StoryDto[] items, string label, string? avatarUrl)
+    {
+        Close();
+        detached = true;
+        viewerItems = items;
+        viewer.Open(items, label, avatarUrl, IgnoreSeen);
+    }
 
     public void OpenRing(StoryRingDto ring)
     {
@@ -105,10 +125,17 @@ internal sealed class StoryPresenter : IDisposable
         pendingOpenAtEnd = false;
         pendingFromViewer = false;
         viewerItems = null;
+        detached = false;
     }
 
     public void Advance()
     {
+        if (detached && !viewer.Active)
+        {
+            detached = false;
+            viewerItems = null;
+        }
+
         if (!viewer.Active && stories.OpenAuthorId is not null && (pendingRing is null || pendingFromViewer))
         {
             stories.CloseAuthor();
@@ -148,7 +175,8 @@ internal sealed class StoryPresenter : IDisposable
             ? Loc.T(L.Story.YourStory)
             : SocialIdentity.Name(ring.AuthorDisplayName, ring.AuthorHandle);
         viewer.Open(items, label, ring.AuthorAvatarUrl, stories.MarkSeen, ring.IsMe, AskDelete, viewersSource,
-            null, nextGroup, previousGroup, openAtEnd, ring.IsMe ? null : replyPrompt, stories.LoadMoreViewers);
+            null, nextGroup, previousGroup, openAtEnd, ring.IsMe ? null : replyPrompt, stories.LoadMoreViewers,
+            ring.IsMe ? highlightStory : null, ring.IsMe || replyPrompt is null ? null : toggleLike);
     }
 
     private bool TryAdvanceGroup() => TryOpenAdjacentRing(1);
@@ -193,6 +221,12 @@ internal sealed class StoryPresenter : IDisposable
         openProfile?.Invoke(authorId);
     }
 
+    private void OpenSharedPost(string postId)
+    {
+        Close();
+        openPost?.Invoke(postId);
+    }
+
     private void SendReply(StoryDto story, string text)
     {
         if (replyHooks is not { } hooks)
@@ -215,7 +249,7 @@ internal sealed class StoryPresenter : IDisposable
 
     private void SyncViewerItems()
     {
-        if (!viewer.Active)
+        if (!viewer.Active || detached)
         {
             return;
         }

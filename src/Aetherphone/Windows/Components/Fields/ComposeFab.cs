@@ -11,6 +11,7 @@ namespace Aetherphone.Windows.Components;
 internal static class ComposeFab
 {
     private const float DefaultRadius = 26f;
+    private const float Margin = 18f;
     private const float HoverTopLift = 0.18f;
     private const float HoverBottomLift = 0.10f;
     private const float HoverRimAlpha = 0.30f;
@@ -85,12 +86,19 @@ internal static class ComposeFab
     internal static Rect ComputeBoxRect(Rect area, float radiusUnscaled, float scale, float glowPad,
         float scrollbarInset)
     {
-        var radius = radiusUnscaled * scale;
-        var margin = 18f * scale;
-        var boxSize = radius * 2f + margin + glowPad;
+        var boxSize = BoxSize(radiusUnscaled, scale, glowPad);
         var boxMin = new Vector2(area.Max.X - boxSize - scrollbarInset, area.Max.Y - boxSize);
         return new Rect(boxMin, boxMin + new Vector2(boxSize, boxSize));
     }
+
+    public static float Clearance(float radiusUnscaled, bool glossy)
+    {
+        var scale = UiScale.Current;
+        return BoxSize(radiusUnscaled, scale, glossy ? AccentGloss.GlowReach * scale : 0f);
+    }
+
+    private static float BoxSize(float radiusUnscaled, float scale, float glowPad) =>
+        (radiusUnscaled * 2f + Margin) * scale + glowPad;
 
     private static float HoverEase(string id, bool hovered)
     {

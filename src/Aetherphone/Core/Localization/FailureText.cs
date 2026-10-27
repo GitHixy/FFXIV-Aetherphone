@@ -1,4 +1,5 @@
 using Aetherphone.Core.Net;
+using Aetherphone.Core.Social;
 
 namespace Aetherphone.Core.Localization;
 
@@ -50,6 +51,7 @@ internal static class FailureCodes
     public const string ChatRecipientUnavailable = "chat_recipient_unavailable";
     public const string ChatMessageExpired = "chat_message_expired";
     public const string CommentLength = "comment_length";
+    public const string ReplyRestricted = "reply_restricted";
     public const string AdLimitReached = "ad_limit_reached";
     public const string AdCooldown = "ad_cooldown";
     public const string AdNotLive = "ad_not_live";
@@ -91,6 +93,9 @@ internal static class FailureCodes
     public const string PollAlreadyVoted = "poll_already_voted";
     public const string PostPollInvalid = "post_poll_invalid";
     public const string PostPollWithMedia = "post_poll_with_media";
+    public const string PostScheduleTime = "post_schedule_time";
+    public const string PostScheduleMedia = "post_schedule_media";
+    public const string PostScheduleLimit = "post_schedule_limit";
     public const string PhotoTagRejected = "photo_tag_rejected";
     public const string VelvetRequestsClosed = "velvet_requests_closed";
     public const string VelvetRequestsMutualsOnly = "velvet_requests_mutuals_only";
@@ -261,6 +266,8 @@ internal static class FailureText
                 return Loc.T(L.Failure.ChatMessageExpired);
             case FailureCodes.CommentLength:
                 return Valued(L.Failure.CommentLength, failure);
+            case FailureCodes.ReplyRestricted:
+                return Loc.T(L.Chirper.ReplyRestricted);
             case FailureCodes.AdLimitReached:
                 return Loc.T(L.Failure.AdLimitReached);
             case FailureCodes.AdCooldown:
@@ -343,6 +350,12 @@ internal static class FailureText
                 return Loc.T(L.Failure.PostPollInvalid);
             case FailureCodes.PostPollWithMedia:
                 return Loc.T(L.Failure.PostPollWithMedia);
+            case FailureCodes.PostScheduleTime:
+                return Loc.T(L.Social.ScheduleWindow, ScheduleRules.MinimumLeadMinutes, ScheduleRules.MaximumLeadDays);
+            case FailureCodes.PostScheduleMedia:
+                return Loc.T(L.Social.ScheduleNoPhotos);
+            case FailureCodes.PostScheduleLimit:
+                return Valued(L.Social.ScheduleLimit, failure);
             case FailureCodes.PhotoTagRejected:
                 return Loc.T(L.Failure.PhotoTagRejected);
             case FailureCodes.VelvetRequestsClosed:

@@ -158,6 +158,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         meGate.Reset();
         forYouLane.Clear();
         latestLane.Clear();
+        ResetExploreState();
         followingLane.Clear();
         forYouNotes = NoNotes;
         caughtUpAfterId = null;
@@ -195,8 +196,10 @@ internal abstract partial class SocialFeedStore : IDisposable
         feedSignals.Reset();
         ClearTagged();
         ClearHashtag();
+        ClearPostSearch();
         ResetSuggestedPeople();
         ResetNotInterested();
+        ResetMutes();
         OnAccountReset();
     }
 
@@ -1366,10 +1369,12 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
         forYouLane.Items = MapSaved(forYouLane.Items, postId, saved);
         latestLane.Items = MapSaved(latestLane.Items, postId, saved);
+        exploreLane.Items = MapSaved(exploreLane.Items, postId, saved);
         followingLane.Items = MapSaved(followingLane.Items, postId, saved);
         profileLane.Items = MapSaved(profileLane.Items, postId, saved);
         taggedLane.Items = MapSaved(taggedLane.Items, postId, saved);
         hashtagLane.Items = MapSaved(hashtagLane.Items, postId, saved);
+        postSearchLane.Items = MapSaved(postSearchLane.Items, postId, saved);
         likedLane.Items = MapSaved(likedLane.Items, postId, saved);
         savedLane.Items = saved
             ? MapSaved(savedLane.Items, postId, true)
@@ -1426,10 +1431,12 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
         forYouLane.Items = BlockedContent.Purge(forYouLane.Items, userId);
         latestLane.Items = BlockedContent.Purge(latestLane.Items, userId);
+        exploreLane.Items = BlockedContent.Purge(exploreLane.Items, userId);
         followingLane.Items = BlockedContent.Purge(followingLane.Items, userId);
         profileLane.Items = BlockedContent.Purge(profileLane.Items, userId);
         taggedLane.Items = BlockedContent.Purge(taggedLane.Items, userId);
         likedLane.Items = BlockedContent.Purge(likedLane.Items, userId);
+        postSearchLane.Items = BlockedContent.Purge(postSearchLane.Items, userId);
         detailComments = CopyOnWrite.RemoveWhere(detailComments, comment => comment.AuthorId == userId);
         discoverResults = CopyOnWrite.RemoveWhere(discoverResults, user => user.Id == userId);
         if (detailPost is not { } current)
@@ -1906,11 +1913,13 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
         forYouLane.Items = CopyOnWrite.MapById(forYouLane.Items, postId, transform);
         latestLane.Items = CopyOnWrite.MapById(latestLane.Items, postId, transform);
+        exploreLane.Items = CopyOnWrite.MapById(exploreLane.Items, postId, transform);
         followingLane.Items = CopyOnWrite.MapById(followingLane.Items, postId, transform);
         profileLane.Items = CopyOnWrite.MapById(profileLane.Items, postId, transform);
         savedLane.Items = CopyOnWrite.MapById(savedLane.Items, postId, transform);
         taggedLane.Items = CopyOnWrite.MapById(taggedLane.Items, postId, transform);
         hashtagLane.Items = CopyOnWrite.MapById(hashtagLane.Items, postId, transform);
+        postSearchLane.Items = CopyOnWrite.MapById(postSearchLane.Items, postId, transform);
         likedLane.Items = CopyOnWrite.MapById(likedLane.Items, postId, transform);
         if (detailPost is { } current && current.Id == postId)
         {
@@ -1929,6 +1938,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         savedLane.Items = CopyOnWrite.Map(savedLane.Items, Match, Nest);
         taggedLane.Items = CopyOnWrite.Map(taggedLane.Items, Match, Nest);
         hashtagLane.Items = CopyOnWrite.Map(hashtagLane.Items, Match, Nest);
+        postSearchLane.Items = CopyOnWrite.Map(postSearchLane.Items, Match, Nest);
         likedLane.Items = CopyOnWrite.Map(likedLane.Items, Match, Nest);
         if (detailPost is { } current && Match(current))
         {
@@ -1940,11 +1950,13 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
         forYouLane.Items = CopyOnWrite.Replace(forYouLane.Items, updated);
         latestLane.Items = CopyOnWrite.Replace(latestLane.Items, updated);
+        exploreLane.Items = CopyOnWrite.Replace(exploreLane.Items, updated);
         followingLane.Items = CopyOnWrite.Replace(followingLane.Items, updated);
         profileLane.Items = CopyOnWrite.Replace(profileLane.Items, updated);
         savedLane.Items = CopyOnWrite.Replace(savedLane.Items, updated);
         taggedLane.Items = CopyOnWrite.Replace(taggedLane.Items, updated);
         hashtagLane.Items = CopyOnWrite.Replace(hashtagLane.Items, updated);
+        postSearchLane.Items = CopyOnWrite.Replace(postSearchLane.Items, updated);
         likedLane.Items = CopyOnWrite.Replace(likedLane.Items, updated);
         if (detailPost is { } current && current.Id == updated.Id)
         {
@@ -1956,11 +1968,13 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
         forYouLane.Items = CopyOnWrite.RemoveById(forYouLane.Items, postId);
         latestLane.Items = CopyOnWrite.RemoveById(latestLane.Items, postId);
+        exploreLane.Items = CopyOnWrite.RemoveById(exploreLane.Items, postId);
         followingLane.Items = CopyOnWrite.RemoveById(followingLane.Items, postId);
         profileLane.Items = CopyOnWrite.RemoveById(profileLane.Items, postId);
         savedLane.Items = CopyOnWrite.RemoveById(savedLane.Items, postId);
         taggedLane.Items = CopyOnWrite.RemoveById(taggedLane.Items, postId);
         hashtagLane.Items = CopyOnWrite.RemoveById(hashtagLane.Items, postId);
+        postSearchLane.Items = CopyOnWrite.RemoveById(postSearchLane.Items, postId);
         likedLane.Items = CopyOnWrite.RemoveById(likedLane.Items, postId);
         if (detailPost is { } current && current.Id == postId)
         {
@@ -1975,11 +1989,13 @@ internal abstract partial class SocialFeedStore : IDisposable
     {
         forYouLane.Items = MapCommentCount(forYouLane.Items, postId, delta);
         latestLane.Items = MapCommentCount(latestLane.Items, postId, delta);
+        exploreLane.Items = MapCommentCount(exploreLane.Items, postId, delta);
         followingLane.Items = MapCommentCount(followingLane.Items, postId, delta);
         profileLane.Items = MapCommentCount(profileLane.Items, postId, delta);
         savedLane.Items = MapCommentCount(savedLane.Items, postId, delta);
         taggedLane.Items = MapCommentCount(taggedLane.Items, postId, delta);
         hashtagLane.Items = MapCommentCount(hashtagLane.Items, postId, delta);
+        postSearchLane.Items = MapCommentCount(postSearchLane.Items, postId, delta);
         likedLane.Items = MapCommentCount(likedLane.Items, postId, delta);
         if (detailPost is { } current && current.Id == postId)
         {
@@ -1995,6 +2011,7 @@ internal abstract partial class SocialFeedStore : IDisposable
         MapSuggestedFollow(userId, following, requested);
         forYouLane.Items = MapFollowByAuthor(forYouLane.Items, userId, following);
         latestLane.Items = MapFollowByAuthor(latestLane.Items, userId, following);
+        exploreLane.Items = MapFollowByAuthor(exploreLane.Items, userId, following);
         followingLane.Items = MapFollowByAuthor(followingLane.Items, userId, following);
         profileLane.Items = MapFollowByAuthor(profileLane.Items, userId, following);
         taggedLane.Items = MapFollowByAuthor(taggedLane.Items, userId, following);

@@ -10,7 +10,7 @@ using Aetherphone.Core.Wallpapers;
 
 namespace Aetherphone.Apps.Aethergram;
 
-internal sealed class AethergramStore : SocialFeedStore
+internal sealed partial class AethergramStore : SocialFeedStore
 {
     private const int LoveKind = 1;
     private const int GramSize = 1080;
@@ -61,12 +61,17 @@ internal sealed class AethergramStore : SocialFeedStore
     protected override Task<FeedPage?> FetchHashtagPostsAsync(string tag, string? cursor, CancellationToken token) =>
         grams.TagPostsAsync(tag, cursor, token);
 
+    protected override Task<FeedPage?> FetchExploreAsync(string? cursor, string? regions, bool includeSensitive,
+        CancellationToken token, Action<AepFailure>? onFailure) =>
+        client.ExploreGramsAsync(cursor, regions, includeSensitive, token, onFailure);
+
     // aspects holds one choice per photo. The post's MediaWidth/MediaHeight is the first photo's
     // real baked size (GIFs already send theirs), so the feed frame matches that photo's shape;
     // the other carousel photos are baked to their own boxes and cover-fit into the frame at
     // draw time.
     public void CreateGram(string[] sourcePaths, WallpaperCrop[] crops, PostAspect[] aspects, PhotoEdit[] edits,
-        string caption, PhotoTagInput[]? photoTags, bool sensitive, Action<bool> onComplete)
+        string caption, PhotoTagInput[]? photoTags, bool sensitive, string? collaboratorId, string[]? altTexts,
+        Action<bool> onComplete)
     {
         if (posting || sourcePaths.Length == 0)
         {
@@ -130,7 +135,7 @@ internal sealed class AethergramStore : SocialFeedStore
             }
 
             var created = await grams.CreateAsync(caption.Trim(), keys, containerWidth, containerHeight, photoTags,
-                sensitive, token).ConfigureAwait(false);
+                sensitive, collaboratorId, altTexts, token).ConfigureAwait(false);
             if (created is null)
             {
                 return false;
@@ -153,12 +158,13 @@ internal sealed class AethergramStore : SocialFeedStore
             () => posting = false);
     }
 
-    public void EditPost(string postId, string caption, PhotoTagInput[] photoTags, bool sensitive,
+    public void EditPost(string postId, string caption, PhotoTagInput[] photoTags, bool sensitive, string[]? altTexts,
         Action<bool> onComplete)
     {
         work.Run("edit post", async token =>
         {
-            var result = await grams.EditAsync(postId, caption, photoTags, sensitive, token).ConfigureAwait(false);
+            var result = await grams.EditAsync(postId, caption, photoTags, sensitive, altTexts, token)
+                .ConfigureAwait(false);
             if (result is null)
             {
                 return false;

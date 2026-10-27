@@ -17,15 +17,21 @@ internal sealed class PersonPicker
     private const float DebounceSeconds = 0.20f;
 
     private readonly MentionSuggestions suggestions;
+    private readonly LocString title;
     private string query = string.Empty;
     private string applied = string.Empty;
     private float debounce;
     private Spring revealSpring;
     private int openedFrame = -1;
 
-    public PersonPicker(MentionSuggestions suggestions)
+    public PersonPicker(MentionSuggestions suggestions) : this(suggestions, L.PhotoTag.PickPerson)
+    {
+    }
+
+    public PersonPicker(MentionSuggestions suggestions, LocString title)
     {
         this.suggestions = suggestions;
+        this.title = title;
     }
 
     public bool IsOpen { get; private set; }
@@ -81,7 +87,7 @@ internal sealed class PersonPicker
             ImGui.GetColorU32(Palette.WithAlpha(theme.GroupedCard, MathF.Min(0.99f, theme.GroupedCard.W + 0.4f))));
 
         var pad = 14f * scale;
-        Typography.Draw(drawList, new Vector2(min.X + pad, min.Y + pad), Loc.T(L.PhotoTag.PickPerson),
+        Typography.Draw(drawList, new Vector2(min.X + pad, min.Y + pad), Loc.T(title),
             theme.TextStrong, TextStyles.Headline);
 
         var fieldTop = min.Y + pad + 26f * scale;

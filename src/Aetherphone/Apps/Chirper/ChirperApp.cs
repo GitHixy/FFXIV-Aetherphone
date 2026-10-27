@@ -60,6 +60,10 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         Save,
         Unsave,
         NotInterested,
+        Mute,
+        MutedAccounts,
+        ReplyPolicy,
+        Edit,
     }
 
     private enum ActionGlyph
@@ -81,7 +85,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     private const int MaxPostLength = 300;
     private const int MaxCommentLength = 500;
     private const int FeedBodyMaxLines = 6;
-    private const int PostSheetMaxItems = 7;
+    private const int PostSheetMaxItems = 8;
     private const float TopBarButtonRadius = 18f;
     private const float FeedTabRowHeight = 44f;
     private const float LatestScopeRowHeight = 40f;
@@ -362,12 +366,15 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     {
         router.Reset();
         avatarLightbox.Reset();
+        CloseAltText();
         draft = string.Empty;
         actions.Reset();
         ResetReactionsExpansion();
         sheet.Close();
         filterSheet.Close();
+        replyPolicySheet.Close();
         CloseGifSheets();
+        chirpEditHistorySheet.CloseImmediately();
         homeTab = HomeTab.Feed;
         sheetKind = SheetKind.None;
         sheetPost = null;
@@ -377,6 +384,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         composePicking = false;
         composeSensitive = false;
         composePoll.Reset();
+        composeReplyPolicy = ChirperReplyPolicy.Everyone;
+        ResetComposeExtras();
         store.ClearDiscover();
         trendingRequested = false;
         feedScrollY = 0f;
@@ -417,6 +426,10 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             {
                 OpenThreadFromLink(link.Id);
             }
+            else if (link.Kind == SocialLinkKind.Compose)
+            {
+                BeginCompose();
+            }
         }
     }
 
@@ -435,7 +448,10 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         SyncSeason();
         sheet.Gate();
         filterSheet.Gate();
+        replyPolicySheet.Gate();
         feedExplainer.Gate();
+        GateAltText();
+        draftExitSheet.Gate();
         actions.Tick(MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds));
         TickReactionsExpansion();
         if (actions.IsOpen)
@@ -456,7 +472,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         DrawNight(screen, context.Content.Min.Y);
         var appArea = new Rect(new Vector2(screen.Min.X, context.Content.Min.Y),
             new Vector2(screen.Max.X, context.Content.Max.Y));
-        using (InputShield.Engage(avatarLightbox.Expanded || GifSheetsCapture))
+        using (InputShield.Engage(avatarLightbox.Expanded || GifSheetsCapture || ChirpEditHistoryCaptures))
+        using (InputShield.Engage(AltTextCapturesPointer))
         using (intro.FadeContent())
         {
             router.Draw(appArea, AppSkin.Transparent, ImGui.GetIO().DeltaTime, drawView);
@@ -469,9 +486,13 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         }
 
         DrawSheet(screen);
+        DrawReplyPolicySheet(screen);
+        DrawChirpEditHistory(screen);
         DrawGifSheets(screen);
         DrawFilterSheet(screen);
         DrawFeedExplainer(screen);
+        DrawAltText(screen);
+        DrawDraftExitSheet(screen);
         DrawClaw(screen);
         toast.Draw(screen, ToastStyle);
     }
@@ -518,6 +539,12 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 break;
             case ChirperScreen.BadgeProgress:
                 DrawBadgeProgress(area);
+                break;
+            case ChirperScreen.MutedAccounts:
+                DrawMutedAccounts(area);
+                break;
+            case ChirperScreen.EditChirp:
+                DrawChirpEdit(area, route.PostId!);
                 break;
             default:
                 DrawHome(area);
@@ -935,6 +962,11 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                     Loc.T(post.Sensitive ? L.Moderation.SensitiveOn : L.Moderation.MarkSensitive), false);
             }
 
+            if (CanEditChirp(post))
+            {
+                AddSheetItem(PostSheetAction.Edit, Loc.T(L.Chirper.EditChirp), false);
+            }
+
             if (post.PinnedAtUnix is null)
             {
                 AddSheetItem(PostSheetAction.Pin, Loc.T(L.Social.PinToProfile), false);
@@ -944,6 +976,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 AddSheetItem(PostSheetAction.Unpin, Loc.T(L.Social.UnpinFromProfile), false);
             }
 
+            AddSheetItem(PostSheetAction.ReplyPolicy, Loc.T(L.Chirper.ChangeWhoCanReply), false);
             AddSheetItem(PostSheetAction.Delete, Loc.T(L.Chirper.DeleteChirp), true);
         }
         else
@@ -960,6 +993,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 AddSheetItem(PostSheetAction.NotInterested, Loc.T(L.Social.NotInterested), false);
             }
 
+            AddSheetItem(PostSheetAction.Mute,
+                SocialMute.MenuLabel(store.IsMuted(post.AuthorId), post.AuthorDisplayName, post.AuthorHandle), false);
             AddSheetItem(PostSheetAction.Report, Loc.T(L.Chirper.ReportChirp), true);
             AddSheetItem(PostSheetAction.Block,
                 post.AuthorHandle.Length > 0
@@ -1035,8 +1070,17 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             case PostSheetAction.Unsave:
                 store.SetSaved(post.Id, false);
                 break;
+            case PostSheetAction.ReplyPolicy:
+                OpenReplyPolicyPicker(post.Id, post.ReplyPolicy);
+                break;
             case PostSheetAction.NotInterested:
                 store.MarkNotInterested(post.Id);
+                break;
+            case PostSheetAction.Mute:
+                ToggleMute(post.AuthorId, store.IsMuted(post.AuthorId), post.AuthorDisplayName, post.AuthorHandle);
+                break;
+            case PostSheetAction.Edit:
+                BeginChirpEdit(post);
                 break;
         }
     }
@@ -1250,12 +1294,12 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 }
 
                 var caughtUpAfterId = ranked ? store.CaughtUpAfterId : null;
-                var peopleSlot = PeopleRailSlot(scope, snapshot.Length);
+                var showsPeopleRail = ShowsPeopleRail(scope);
                 drawingForYou = scope == SocialFeedScope.ForYou;
                 feedActionsAnchorPending = UiAnchors.Recording;
                 for (var index = 0; index < snapshot.Length; index++)
                 {
-                    if (index == peopleSlot)
+                    if (index == 0 && showsPeopleRail)
                     {
                         DrawPeopleRailRow();
                     }
@@ -1306,11 +1350,6 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                     {
                         DrawCaughtUpLine();
                     }
-                }
-
-                if (peopleSlot == snapshot.Length)
-                {
-                    DrawPeopleRailRow();
                 }
 
                 drawingForYou = false;
@@ -1399,7 +1438,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         var quoteHeight = hasQuote ? QuotedCardHeight(post.ReferencedPost, contentWidth) : 0f;
         var quoteTop = mediaTop + mediaHeight + (hasQuote ? 9f * scale : 0f);
         var pollHeight = PollBlockHeight(post, isThreadHead);
-        var contentBody = quoteTop + quoteHeight + pollHeight;
+        var threadLinkHeight = ThreadLinkHeight(post, isThreadHead);
+        var contentBody = quoteTop + quoteHeight + pollHeight + threadLinkHeight;
         var hasReactions = post.TotalReactions > 0;
         var reactionsTop = contentBody + (hasReactions ? (isThreadHead ? 12f : 9f) * scale : 0f);
         var expandProgress = isThreadHead ? 1f : ReactionsExpandProgress(post);
@@ -1447,17 +1487,28 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             OpenProfileFromPost(post.AuthorId, post.Id);
         }
 
-        var meta = SocialIdentity.FeedMeta(post.AuthorHandle, TimeText.Short(post.CreatedAtUnix));
+        var handle = post.AuthorHandle.Length > 0 ? $"@{post.AuthorHandle}" : string.Empty;
+        var time = TimeText.Short(post.CreatedAtUnix);
+        var trailing = handle.Length > 0 ? $" · {time}" : time;
+
         if (ContentModeration.IsInReview(post.ScanStatus))
         {
-            meta = $"{meta} · {Loc.T(L.Moderation.InReview)}";
+            trailing = $"{trailing} · {Loc.T(L.Moderation.InReview)}";
+        }
+
+        if (ChirperEdits.IsEdited(post))
+        {
+            trailing = Loc.T(L.Chirper.EditedStamp, trailing);
         }
 
         var metaLeft = nameMax.X + 5f * scale;
-        var metaFitted = Typography.FitText(meta, MathF.Max(1f, headerRight - metaLeft), MetaStyle);
-        var metaSize = Typography.Measure(metaFitted, MetaStyle);
-        Typography.Draw(drawList, new Vector2(metaLeft, headerTop + (nameHeight - metaSize.Y) * 0.5f), metaFitted,
-            ChirperInk.MutedInk, MetaStyle);
+        var trailingWidth = Typography.Measure(trailing, MetaStyle).X;
+        var handleFitted = Typography.FitText(handle, MathF.Max(1f, headerRight - metaLeft - trailingWidth), MetaStyle);
+        var handleSize = Typography.Measure(handleFitted, MetaStyle);
+        var metaTop = headerTop + (nameHeight - Typography.LineHeight(MetaStyle)) * 0.5f;
+        Typography.Draw(drawList, new Vector2(metaLeft, metaTop), handleFitted, ChirperInk.MutedInk, MetaStyle);
+        Typography.Draw(drawList, new Vector2(metaLeft + handleSize.X, metaTop), trailing, ChirperInk.MutedInk,
+            MetaStyle);
 
         var moreExtent = new Vector2(MathF.Max(moreRadius, Metrics.Size.TapTarget * 0.5f * scale));
         var moreHovered = UiInteract.Hover(moreCenter - moreExtent, moreCenter + moreExtent);
@@ -1537,6 +1588,11 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         if (pollHeight > 0f)
         {
             DrawPollBlock(drawList, post, contentLeft, quoteTop + quoteHeight, contentWidth, isThreadHead);
+        }
+
+        if (threadLinkHeight > 0f)
+        {
+            DrawThreadLink(drawList, post, contentLeft, quoteTop + quoteHeight + pollHeight, contentWidth);
         }
 
         if (hasReactions)
@@ -1670,7 +1726,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             }
             else
             {
-                OpenThread(post);
+                OpenThreadForReply(post);
             }
         }
 
@@ -2584,6 +2640,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         if (photos.Length == 1)
         {
             DrawMediaTile(drawList, photos[0], rect, rounding, ImDrawFlags.RoundCornersAll, post.ScanStatus);
+            DrawPostAltBadge(drawList, post, 0, rect);
         }
         else
         {
@@ -2605,6 +2662,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                     lastRow && rightEdge);
                 DrawMediaTile(drawList, photos[index], new Rect(tileMin, tileMax), rounding, corners,
                     post.ScanStatus);
+                DrawPostAltBadge(drawList, post, index, new Rect(tileMin, tileMax));
             }
         }
 
@@ -2661,6 +2719,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         composePicking = false;
         composeSensitive = false;
         composePoll.Reset();
+        composeReplyPolicy = ChirperReplyPolicy.Everyone;
         composeFocus = true;
         router.Push(ChirperRoute.Compose);
     }
@@ -2710,6 +2769,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     {
         actions.Reset();
         commentDraft = string.Empty;
+        replyFocusPending = false;
         store.ReportFeedSignal(post.Id, FeedSignalKinds.DetailOpen);
         store.OpenDetail(post);
         router.Push(ChirperRoute.Thread(post.Id));
@@ -2719,6 +2779,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     {
         actions.Reset();
         commentDraft = string.Empty;
+        replyFocusPending = false;
         store.OpenDetailById(postId);
         router.Push(ChirperRoute.Thread(postId));
     }
@@ -2756,6 +2817,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         composePicking = false;
         composeSensitive = false;
         composePoll.Reset();
+        composeReplyPolicy = ChirperReplyPolicy.Everyone;
         AddComposeAttachment(path);
         composeFocus = true;
         router.Push(ChirperRoute.Compose);

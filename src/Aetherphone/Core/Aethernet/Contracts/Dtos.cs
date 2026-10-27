@@ -94,7 +94,8 @@ internal sealed record UserDto(
     int PendingPhotoTags = 0,
     bool ShowOnLeaderboards = false,
     bool ShowInHallOfFame = false,
-    GlamBannerDto? BannerGlam = null) : IIdentified;
+    GlamBannerDto? BannerGlam = null,
+    bool IsMuted = false) : IIdentified;
 
 internal sealed record UpdateProfileRequest(string? DisplayName, string? Handle, string? Bio, string? AvatarUrl = null,
     string? BannerUrl = null,
@@ -189,11 +190,14 @@ internal sealed record CreatePostRequest(
     bool Sensitive = false,
     PostPollInput? Poll = null,
     string? GifUrl = null,
-    string? GifSlug = null);
+    string? GifSlug = null,
+    int ReplyPolicy = 0,
+    string[]? AltTexts = null);
 
 internal sealed record SetSensitiveRequest(bool Sensitive);
 
-internal sealed record EditGramRequest(string Caption, PhotoTagInput[] PhotoTags, bool Sensitive);
+internal sealed record EditGramRequest(string Caption, PhotoTagInput[] PhotoTags, bool Sensitive,
+    string[]? AltTexts = null);
 
 internal sealed record ReactRequest(int Kind);
 
@@ -218,6 +222,8 @@ internal sealed record PhotoTagDto(
     float X,
     float Y,
     int State);
+
+internal sealed record CollaboratorDto(string UserId, string Handle, string DisplayName, string? AvatarUrl, int State);
 
 internal sealed record PostDto(
     string Id,
@@ -260,7 +266,13 @@ internal sealed record PostDto(
     PostPollDto? Poll = null,
     string? GifUrl = null,
     string? GifSlug = null,
-    int? Views = null) : IIdentified
+    int? Views = null,
+    CollaboratorDto? Collaborator = null,
+    int ReplyPolicy = 0,
+    bool CanReply = true,
+    string[]? AltTexts = null,
+    int EditCount = 0,
+    int ThreadCount = 0) : IIdentified
 {
     [JsonIgnore] public string[]? GifMedia { get; } = GifUrl is null ? null : new[] { GifUrl };
 }
@@ -309,9 +321,12 @@ internal sealed record CreateGramRequest(
     int Height,
     string[]? MediaKeys = null,
     PhotoTagInput[]? PhotoTags = null,
-    bool Sensitive = false);
+    bool Sensitive = false,
+    string? CollaboratorId = null,
+    string[]? AltTexts = null);
 
-internal sealed record CreateStoryRequest(string Caption, string MediaKey, int Width, int Height);
+internal sealed record CreateStoryRequest(string Caption, string MediaKey, int Width, int Height, int Audience = 0,
+    string? SharedPostId = null);
 
 internal sealed record StoryDto(
     string Id,
@@ -328,7 +343,11 @@ internal sealed record StoryDto(
     int AuthorBadges = 0,
     string[]? AuthorBadgeIds = null,
     string AuthorFrameId = "",
-    string? Lang = null) : IIdentified;
+    string? Lang = null,
+    int Audience = 0,
+    StorySharedPostDto? SharedPost = null,
+    bool Liked = false,
+    int LikeCount = 0) : IIdentified;
 
 internal sealed record StoryRingDto(
     string AuthorId,
@@ -339,7 +358,8 @@ internal sealed record StoryRingDto(
     bool HasUnseen,
     int Count,
     long LatestAtUnix,
-    string AuthorFrameId = "");
+    string AuthorFrameId = "",
+    bool HasCloseFriends = false);
 
 internal sealed record StoryTray(StoryRingDto[] Rings);
 
@@ -353,7 +373,8 @@ internal sealed record StoryViewerDto(
     long ViewedAtUnix,
     int Badges = 0,
     string[]? BadgeIds = null,
-    string FrameId = "");
+    string FrameId = "",
+    bool Liked = false);
 
 internal sealed record StoryViewersPage(StoryViewerDto[] Items, int Total, string? NextCursor = null);
 

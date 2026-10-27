@@ -6,7 +6,7 @@ using Aetherphone.Core.Wallpapers;
 
 namespace Aetherphone.Core.Social;
 
-internal sealed class StoryStore : IDisposable
+internal sealed partial class StoryStore : IDisposable
 {
     public const int StoryWidth = 1080;
     public const int StoryHeight = 1920;
@@ -293,7 +293,7 @@ internal sealed class StoryStore : IDisposable
     }
 
     public void CreateStory(string sourcePath, WallpaperCrop crop, PhotoEdit edit, string caption,
-        Action<bool> onComplete)
+        Action<bool> onComplete, int audience = StoryAudiences.Everyone)
     {
         if (posting)
         {
@@ -317,7 +317,8 @@ internal sealed class StoryStore : IDisposable
                 return false;
             }
 
-            var created = await client.CreateStoryAsync(caption.Trim(), upload.Key, baked.Width, baked.Height, token)
+            var created = await client.CreateStoryAsync(caption.Trim(), upload.Key, baked.Width, baked.Height, token,
+                    audience: audience)
                 .ConfigureAwait(false);
             if (created is null)
             {

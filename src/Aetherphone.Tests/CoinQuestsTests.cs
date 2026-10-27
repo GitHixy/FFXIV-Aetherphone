@@ -1,4 +1,5 @@
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Core.Apps;
 using Aetherphone.Core.Coins;
 using Aetherphone.Core.Localization;
 using Xunit;
@@ -130,5 +131,17 @@ public sealed class CoinQuestsTests
         Assert.Equal(L.Coin.RuleQuest.Key, CoinRuleLabels.For("quest.daily").Key);
         Assert.True(CoinRuleLabels.TryHint("quest.daily", out var hint));
         Assert.Equal(L.Coin.RuleQuestHint.Key, hint.Key);
+    }
+
+    [Fact]
+    public void PostAndStoryQuestsLaunchTheirComposerUntilDone()
+    {
+        Assert.True(CoinQuests.TryLaunchFor(Quest("social.post", 0, 1), out var post));
+        Assert.Equal(SocialLinkKind.Compose, post.Kind);
+        Assert.True(CoinQuests.TryLaunchFor(Quest("social.story", 0, 1), out var story));
+        Assert.Equal(SocialLinkKind.ComposeStory, story.Kind);
+        Assert.False(CoinQuests.TryLaunchFor(Quest("social.post", 1, 1), out _));
+        Assert.False(CoinQuests.TryLaunchFor(Quest("social.story", 0, 1, true), out _));
+        Assert.False(CoinQuests.TryLaunchFor(Quest("social.comment", 0, 2), out _));
     }
 }

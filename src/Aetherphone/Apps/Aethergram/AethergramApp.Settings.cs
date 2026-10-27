@@ -56,6 +56,16 @@ internal sealed partial class AethergramApp
 
             DrawSettingsHint(Loc.T(L.Aethergram.PrivateAccountHint));
             ImGui.Dummy(new Vector2(0f, 12f * scale));
+            if (DrawSettingsLinkRow(Loc.T(L.Social.MutedAccounts)))
+            {
+                OpenMutedAccounts();
+            }
+
+            if (DrawSettingsLinkRow(Loc.T(L.Story.CloseFriends)))
+            {
+                OpenCloseFriends();
+            }
+
             if (DrawSettingsLinkRow(Loc.T(L.Social.FeedHowItWorks)))
             {
                 feedExplainer.Open();

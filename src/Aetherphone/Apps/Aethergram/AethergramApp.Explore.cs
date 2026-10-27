@@ -1,7 +1,6 @@
 using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Localization;
-using Aetherphone.Core.Social;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
@@ -13,7 +12,6 @@ internal sealed partial class AethergramApp
     private const float ExploreSearchInset = 14f;
     private const float ExploreDebounceSeconds = 0.35f;
     private const int ExploreSearchMaxLength = 64;
-    private const int ExploreSkeletonRows = 4;
     private const float TagRowHeight = 60f;
     private const float TagGlyphSize = 38f;
     private const float TagGlyphRounding = 12f;
@@ -28,10 +26,8 @@ internal sealed partial class AethergramApp
     private static readonly TextStyle TagHeroTitleStyle = TextStyles.Title3;
     private static readonly TextStyle SectionLabelStyle = TextStyles.SubheadlineEmphasized;
 
-    private readonly PullToRefresh explorePull = new();
     private string exploreDraft = string.Empty;
     private double exploreDirtyAt = -1d;
-    private Action? refreshExplore;
 
     private void OpenSaved()
     {
@@ -128,66 +124,6 @@ internal sealed partial class AethergramApp
         {
             store.Search(exploreDraft);
         }
-    }
-
-    private void DrawExploreGrid(Rect listRect)
-    {
-        var scale = UiScale.Current;
-        const SocialFeedScope scope = SocialFeedScope.Latest;
-        profile.EnsureLoaded(scope);
-        refreshExplore ??= RefreshExploreFeed;
-        var posts = store.Feed(scope);
-        using (var surface = AppSurface.BeginEdgeToEdge(listRect))
-        {
-            explorePull.Draw(listRect, surface.Pull, surface.Dragging, store.IsLoading(scope), Ink.MutedInk,
-                refreshExplore);
-            if (posts.Length > 0)
-            {
-                ImGui.Dummy(new Vector2(0f, 2f * scale));
-                DrawPostGrid(posts, L.Aethergram.ExploreEmpty, store.HasMoreFeed(scope), store.LoadingMore(scope),
-                    ExploreGrid, PostSource.Explore);
-                return;
-            }
-
-            if (store.IsLoading(scope))
-            {
-                DrawExploreSkeleton(listRect);
-                return;
-            }
-
-            if (store.FeedFailed(scope))
-            {
-                feedFailure.Set(store.FeedFailure(scope));
-                DrawEmptyState(listRect, feedFailure.Text(), Loc.T(L.Failure.PullToRetry));
-                return;
-            }
-
-            DrawEmptyState(listRect, Loc.T(L.Aethergram.ExploreEmpty), string.Empty);
-        }
-    }
-
-    private void RefreshExploreFeed() => RefreshFeed(SocialFeedScope.Latest);
-
-    private static void DrawExploreSkeleton(Rect listRect)
-    {
-        var scale = UiScale.Current;
-        var drawList = ImGui.GetWindowDrawList();
-        var width = ScrollLayout.StableContentWidth();
-        var gap = GridGap * scale;
-        var cellWidth = (width - gap * (GridColumns - 1)) / GridColumns;
-        var cellHeight = cellWidth * ExploreGrid.Aspect;
-        var origin = ImGui.GetCursorScreenPos();
-        var fill = ImGui.GetColorU32(Ink.ThumbFill);
-        for (var row = 0; row < ExploreSkeletonRows; row++)
-        {
-            for (var column = 0; column < GridColumns; column++)
-            {
-                var min = new Vector2(origin.X + column * (cellWidth + gap), origin.Y + row * (cellHeight + gap));
-                drawList.AddRectFilled(min, min + new Vector2(cellWidth, cellHeight), fill);
-            }
-        }
-
-        ImGui.Dummy(new Vector2(width, ExploreSkeletonRows * (cellHeight + gap)));
     }
 
     private void DrawExploreResults(Rect listRect)

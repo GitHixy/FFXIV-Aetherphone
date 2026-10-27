@@ -145,7 +145,8 @@ internal static class AppRegistry
         apps.Add(new CalendarApp(services.Configuration, calendarEvents, services.Confirm));
         apps.Add(new Aetherphone.Apps.Coin.CoinApp(services.AethernetSession, services.Coins, services.CoinCatalog,
             services.Confirm, services.Conduct, services.BadgeCatalog, services.RemoteImages, services.Casino,
-            services.FrameCatalog, services.Loadout, services.Lodestone, services.Configuration, services.CoinQuests));
+            services.FrameCatalog, services.Loadout, services.Lodestone, services.Configuration, services.CoinQuests,
+            services.SocialLauncher));
         apps.Add(new CasinoApp(services.AethernetSession, services.Coins, services.Casino, services.CasinoPlay,
             services.CasinoHistory, services.CasinoRooms, services.CasinoTables, services.CasinoSpin,
             services.CasinoTurns, services.CasinoLauncher, services.GameStats, services.Confirm,

@@ -25,6 +25,7 @@ internal sealed partial class AethergramApp
         BadgeProgress,
         Report,
         Block,
+        Mute,
     }
 
     private const float ProfileAvatarRadius = 44f;
@@ -179,6 +180,7 @@ internal sealed partial class AethergramApp
                 return;
             }
 
+            DrawProfileHighlights(user);
             DrawProfileTabs();
             if (profileTab == 0)
             {
@@ -289,7 +291,11 @@ internal sealed partial class AethergramApp
     {
         var scale = UiScale.Current;
         var hasRing = stories.TryRing(user.Id, out var ring);
-        if (hasRing)
+        if (hasRing && StoryRingArt.ShowsCloseFriends(ring))
+        {
+            StoryRingArt.CloseFriends(drawList, center, radius + ProfileRingGap * scale, scale);
+        }
+        else if (hasRing)
         {
             AethergramArt.StoryRing(drawList, center, radius + ProfileRingGap * scale, scale, ring.HasUnseen);
         }
@@ -683,6 +689,8 @@ internal sealed partial class AethergramApp
     {
         profileSheetUser = user;
         profileMenuCount = 0;
+        AddProfileMenuItem(SocialMute.MenuLabel(store.IsMuted(user), user.DisplayName, user.Handle),
+            ProfileMenuAction.Mute);
         AddProfileMenuItem(Loc.T(L.Report.Action), ProfileMenuAction.Report);
         AddProfileMenuItem(Loc.T(L.Social.BlockAction), ProfileMenuAction.Block, true);
         profileActionSheet.Open();
@@ -709,6 +717,9 @@ internal sealed partial class AethergramApp
                 break;
             case ProfileMenuAction.Block:
                 profile.AskBlock(user.DisplayName, user.Handle, user.Id);
+                break;
+            case ProfileMenuAction.Mute:
+                ToggleMute(user.Id, store.IsMuted(user), user.DisplayName, user.Handle);
                 break;
         }
     }

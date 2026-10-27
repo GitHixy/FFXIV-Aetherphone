@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 using Aetherphone.Core.Aethernet.Contracts;
+using Aetherphone.Core.Apps;
 using Aetherphone.Core.Localization;
 
 namespace Aetherphone.Core.Coins;
@@ -7,6 +8,8 @@ namespace Aetherphone.Core.Coins;
 internal static class CoinQuests
 {
     public const string RadioQuestId = "explore.radio";
+    public const string PostQuestId = "social.post";
+    public const string StoryQuestId = "social.story";
     public const string PausedReason = "paused";
     public const string FrozenReason = "frozen";
     public const string DailyCapReason = "daily_cap";
@@ -23,8 +26,8 @@ internal static class CoinQuests
         ["play.match"] = L.Coin.QuestPlayMatch,
         ["social.chat"] = L.Coin.QuestSocialChat,
         ["social.comment"] = L.Coin.QuestSocialComment,
-        ["social.post"] = L.Coin.QuestSocialPost,
-        ["social.story"] = L.Coin.QuestSocialStory,
+        [PostQuestId] = L.Coin.QuestSocialPost,
+        [StoryQuestId] = L.Coin.QuestSocialStory,
         ["social.call"] = L.Coin.QuestSocialCall,
         [RadioQuestId] = L.Coin.QuestExploreRadio,
         ["explore.poll"] = L.Coin.QuestExplorePoll,
@@ -39,8 +42,8 @@ internal static class CoinQuests
         ["play.match"] = L.Coin.QuestPlayMatchHint,
         ["social.chat"] = L.Coin.QuestSocialChatHint,
         ["social.comment"] = L.Coin.QuestSocialCommentHint,
-        ["social.post"] = L.Coin.QuestSocialPostHint,
-        ["social.story"] = L.Coin.QuestSocialStoryHint,
+        [PostQuestId] = L.Coin.QuestSocialPostHint,
+        [StoryQuestId] = L.Coin.QuestSocialStoryHint,
         ["social.call"] = L.Coin.QuestSocialCallHint,
         [RadioQuestId] = L.Coin.QuestExploreRadioHint,
         ["explore.poll"] = L.Coin.QuestExplorePollHint,
@@ -66,6 +69,29 @@ internal static class CoinQuests
         }
 
         return Math.Clamp(quest.Progress / (float)quest.Target, 0f, 1f);
+    }
+
+    public static bool TryLaunchFor(CoinQuestDto quest, out SocialDeepLink link)
+    {
+        link = default;
+        if (IsComplete(quest))
+        {
+            return false;
+        }
+
+        if (string.Equals(quest.Id, PostQuestId, StringComparison.Ordinal))
+        {
+            link = new SocialDeepLink(SocialLinkKind.Compose, string.Empty);
+            return true;
+        }
+
+        if (string.Equals(quest.Id, StoryQuestId, StringComparison.Ordinal))
+        {
+            link = new SocialDeepLink(SocialLinkKind.ComposeStory, string.Empty);
+            return true;
+        }
+
+        return false;
     }
 
     public static bool CountsMinutes(string questId) => string.Equals(questId, RadioQuestId, StringComparison.Ordinal);

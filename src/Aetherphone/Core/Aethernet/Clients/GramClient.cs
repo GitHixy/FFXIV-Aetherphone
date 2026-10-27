@@ -3,7 +3,7 @@ using Aetherphone.Core.Net;
 
 namespace Aetherphone.Core.Aethernet.Clients;
 
-internal sealed class GramClient
+internal sealed partial class GramClient
 {
     private readonly AethernetTransport net;
 
@@ -12,17 +12,17 @@ internal sealed class GramClient
         this.net = net;
     }
 
-    public Task<PostDto?> CreateAsync(string caption, string[] mediaKeys, int width, int height, PhotoTagInput[]? photoTags, bool sensitive, CancellationToken token,
-        Action<AepFailure>? onFailure = null)
+    public Task<PostDto?> CreateAsync(string caption, string[] mediaKeys, int width, int height, PhotoTagInput[]? photoTags, bool sensitive,
+        string? collaboratorId, string[]? altTexts, CancellationToken token, Action<AepFailure>? onFailure = null)
     {
-        return net.PostAsync("/grams", new CreateGramRequest(caption, mediaKeys[0], width, height, mediaKeys, photoTags, sensitive), AethernetJsonContext.Default.CreateGramRequest, AethernetJsonContext.Default.PostDto, token, null, onFailure);
+        return net.PostAsync("/grams", new CreateGramRequest(caption, mediaKeys[0], width, height, mediaKeys, photoTags, sensitive, CollaboratorId: collaboratorId, AltTexts: altTexts), AethernetJsonContext.Default.CreateGramRequest, AethernetJsonContext.Default.PostDto, token, null, onFailure);
     }
 
     public Task<PostDto?> EditAsync(string postId, string caption, PhotoTagInput[] photoTags, bool sensitive,
-        CancellationToken token, Action<AepFailure>? onFailure = null)
+        string[]? altTexts, CancellationToken token, Action<AepFailure>? onFailure = null)
     {
         return net.SendJsonAsync(HttpMethod.Put, $"/posts/{Uri.EscapeDataString(postId)}",
-            new EditGramRequest(caption, photoTags, sensitive), AethernetJsonContext.Default.EditGramRequest,
+            new EditGramRequest(caption, photoTags, sensitive, altTexts), AethernetJsonContext.Default.EditGramRequest,
             AethernetJsonContext.Default.PostDto, token, null, onFailure);
     }
 
@@ -131,9 +131,9 @@ internal sealed class GramClient
     }
 
     public Task<StoryDto?> CreateStoryAsync(string caption, string mediaKey, int width, int height, CancellationToken token,
-        Action<AepFailure>? onFailure = null)
+        Action<AepFailure>? onFailure = null, int audience = StoryAudiences.Everyone)
     {
-        return net.PostAsync("/stories", new CreateStoryRequest(caption, mediaKey, width, height), AethernetJsonContext.Default.CreateStoryRequest, AethernetJsonContext.Default.StoryDto, token, null, onFailure);
+        return net.PostAsync("/stories", new CreateStoryRequest(caption, mediaKey, width, height, audience), AethernetJsonContext.Default.CreateStoryRequest, AethernetJsonContext.Default.StoryDto, token, null, onFailure);
     }
 
     public Task<StoryTray?> StoryTrayAsync(CancellationToken token,
@@ -170,5 +170,20 @@ internal sealed class GramClient
         Action<AepFailure>? onFailure = null)
     {
         return net.SendAsync(HttpMethod.Delete, $"/stories/{Uri.EscapeDataString(storyId)}", token, null, onFailure);
+    }
+
+    public Task<StoryDto?> ShareGramToStoryAsync(string postId, CancellationToken token,
+        Action<AepFailure>? onFailure = null)
+    {
+        return net.PostAsync("/stories", new CreateStoryRequest(string.Empty, string.Empty, 0, 0, SharedPostId: postId),
+            AethernetJsonContext.Default.CreateStoryRequest, AethernetJsonContext.Default.StoryDto, token, null,
+            onFailure);
+    }
+
+    public Task<bool> SetStoryLikeAsync(string storyId, bool liked, CancellationToken token,
+        Action<AepFailure>? onFailure = null)
+    {
+        return net.SendAsync(liked ? HttpMethod.Put : HttpMethod.Delete,
+            $"/stories/{Uri.EscapeDataString(storyId)}/like", token, null, onFailure);
     }
 }

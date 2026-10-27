@@ -5,6 +5,8 @@ internal enum SocialLinkKind
     Profile,
     Post,
     Requests,
+    Compose,
+    ComposeStory,
 }
 
 internal readonly record struct SocialDeepLink(SocialLinkKind Kind, string Id);
