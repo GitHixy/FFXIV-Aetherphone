@@ -59,12 +59,14 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         Unpin,
         Save,
         Unsave,
+        NotInterested,
     }
 
     private enum ActionGlyph
     {
         Reply,
         Rechirp,
+        Views,
         Share,
     }
 
@@ -79,7 +81,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     private const int MaxPostLength = 300;
     private const int MaxCommentLength = 500;
     private const int FeedBodyMaxLines = 6;
-    private const int PostSheetMaxItems = 6;
+    private const int PostSheetMaxItems = 7;
     private const float TopBarButtonRadius = 18f;
     private const float FeedTabRowHeight = 44f;
     private const float LatestScopeRowHeight = 40f;
@@ -903,7 +905,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         configuration.Save();
     }
 
-    private void OpenPostSheet(PostDto post)
+    private void OpenPostSheet(PostDto post, bool offerNotInterested = false)
     {
         actions.Reset();
         sheetPost = post;
@@ -951,6 +953,11 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             if (translation.Peek(key).State != TranslationState.Idle || translation.ShouldOffer(post.Lang))
             {
                 AddSheetItem(PostSheetAction.Translate, Loc.T(L.Chirper.TranslateChirp), false);
+            }
+
+            if (offerNotInterested)
+            {
+                AddSheetItem(PostSheetAction.NotInterested, Loc.T(L.Social.NotInterested), false);
             }
 
             AddSheetItem(PostSheetAction.Report, Loc.T(L.Chirper.ReportChirp), true);
@@ -1027,6 +1034,9 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 break;
             case PostSheetAction.Unsave:
                 store.SetSaved(post.Id, false);
+                break;
+            case PostSheetAction.NotInterested:
+                store.MarkNotInterested(post.Id);
                 break;
         }
     }
@@ -1241,6 +1251,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
 
                 var caughtUpAfterId = ranked ? store.CaughtUpAfterId : null;
                 var peopleSlot = PeopleRailSlot(scope, snapshot.Length);
+                drawingForYou = scope == SocialFeedScope.ForYou;
                 feedActionsAnchorPending = UiAnchors.Recording;
                 for (var index = 0; index < snapshot.Length; index++)
                 {
@@ -1262,7 +1273,10 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
 
                     var closesRankedBlock = caughtUpAfterId is not null
                         && string.Equals(post.Id, caughtUpAfterId, StringComparison.Ordinal);
-                    if (feedVirtualizer.Skip(post.Id))
+                    var underlyingId = post.RepostOfId ?? post.Id;
+                    var collapsed = drawingForYou && store.IsNotInterested(underlyingId);
+                    var revision = collapsed ? 1 : 0;
+                    if (feedVirtualizer.Skip(post.Id, revision))
                     {
                         if (closesRankedBlock)
                         {
@@ -1272,14 +1286,22 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                         continue;
                     }
 
-                    var suggestion = ranked && (!post.IsFollowing || followedFromFeed.Contains(post.AuthorId))
-                        && store.TryGetFeedNote(post.Id, out var note)
-                        ? FeedNotes.SuggestionLabel(note)
-                        : null;
-                    var rowTop = ImGui.GetCursorScreenPos().Y;
-                    DrawPost(post, suggestion: suggestion);
-                    store.ObserveImpression(post.RepostOfId ?? post.Id, rowTop, ImGui.GetCursorScreenPos().Y);
-                    feedVirtualizer.Record(post.Id);
+                    if (collapsed)
+                    {
+                        DrawNotInterestedCell(underlyingId);
+                    }
+                    else
+                    {
+                        var suggestion = ranked && (!post.IsFollowing || followedFromFeed.Contains(post.AuthorId))
+                            && store.TryGetFeedNote(post.Id, out var note)
+                            ? FeedNotes.SuggestionLabel(note)
+                            : null;
+                        var rowTop = ImGui.GetCursorScreenPos().Y;
+                        DrawPost(post, suggestion: suggestion);
+                        store.ObserveImpression(underlyingId, rowTop, ImGui.GetCursorScreenPos().Y);
+                    }
+
+                    feedVirtualizer.Record(post.Id, revision);
                     if (closesRankedBlock)
                     {
                         DrawCaughtUpLine();
@@ -1291,6 +1313,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                     DrawPeopleRailRow();
                 }
 
+                drawingForYou = false;
                 feedActionsAnchorPending = false;
                 if (store.LoadingMore(scope))
                 {
@@ -1450,7 +1473,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             HoverLabelSide.Above);
         if (UiInteract.Click(moreCenter - moreExtent, moreCenter + moreExtent, moreHovered))
         {
-            OpenPostSheet(post);
+            OpenPostSheet(post, drawingForYou);
         }
 
         if (bodyText.Length > 0 && bodyLayout is null && !fold.Folded)
@@ -1622,11 +1645,14 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         var rowWidth = MathF.Min(ActionRowMaxWidth * scale, width + 8f * scale);
         var replyCount = post.CommentCount > 0 ? post.CommentCount.ToString(Loc.Culture) : string.Empty;
         var repostCount = post.RepostCount > 0 ? post.RepostCount.ToString(Loc.Culture) : string.Empty;
+        var viewsCount = post.Views is { } views ? ViewsText(post.Id, views) : string.Empty;
+        var showsViews = post.Views is not null;
         var replyWidth = ActionTargetWidth(replyCount);
         var repostWidth = ActionTargetWidth(repostCount);
+        var viewsWidth = showsViews ? ActionTargetWidth(viewsCount) : 0f;
         var plainWidth = ActionTargetWidth(string.Empty);
-        var free = MathF.Max(0f, rowWidth - (replyWidth + repostWidth + plainWidth * 2f));
-        var gap = free / 3f;
+        var free = MathF.Max(0f, rowWidth - (replyWidth + repostWidth + viewsWidth + plainWidth * 2f));
+        var gap = free / (showsViews ? 4f : 3f);
         var cursorX = rowLeft;
         if (feedActionsAnchorPending)
         {
@@ -1666,6 +1692,13 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         }
 
         cursorX += plainWidth + gap;
+        if (showsViews)
+        {
+            DrawActionTarget(cursorX, centerY, viewsWidth, ActionGlyph.Views, viewsCount, ChirperInk.MutedInk,
+                ChirperInk.MutedInk, Loc.T(L.Social.Views), TapGlow.Key(post.Id, TapGlow.Views));
+            cursorX += viewsWidth + gap;
+        }
+
         var shareKey = TapGlow.Key(post.Id, TapGlow.Share);
         if (DrawActionTarget(cursorX, centerY, plainWidth, ActionGlyph.Share, string.Empty,
                 ChirperInk.MutedInk, ChirperInk.Accent, Loc.T(L.Chirper.CopyChirp), shareKey))
@@ -1732,6 +1765,9 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 break;
             case ActionGlyph.Rechirp:
                 PhoneIcon.Draw(drawList, iconCenter, PhoneIcons.Repeat, packed, iconSize);
+                break;
+            case ActionGlyph.Views:
+                PhoneIcon.Draw(drawList, iconCenter, PhoneIcons.Eye, packed, iconSize);
                 break;
             default:
                 PhoneIcon.Draw(drawList, iconCenter, PhoneIcons.Share, packed, iconSize);
@@ -2279,6 +2315,37 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         var size = Typography.Measure(fitted, PopoverRowStyle);
         Typography.Draw(drawList, new Vector2(textLeft, centerY - size.Y * 0.5f), fitted, faded, PopoverRowStyle);
         return hovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left);
+    }
+
+    private void DrawNotInterestedCell(string postId)
+    {
+        var scale = UiScale.Current;
+        var drawList = ImGui.GetWindowDrawList();
+        var cell = FeedCell.Begin(drawList, CollapsedCellHeight * scale, ChirperInk.HoverTint, false);
+        var padX = CellPadX * scale;
+        var undo = Loc.T(L.Social.Undo);
+        var undoSize = Typography.Measure(undo, BannerStyle);
+        var centerY = cell.Bounds.Min.Y + cell.Bounds.Height * 0.5f;
+        var undoMin = new Vector2(cell.Bounds.Max.X - padX - undoSize.X, centerY - undoSize.Y * 0.5f);
+        var undoMax = undoMin + undoSize;
+        var text = Typography.FitText(Loc.T(L.Social.NotInterestedDone),
+            MathF.Max(1f, undoMin.X - BannerFollowGap * scale - cell.Bounds.Min.X - padX), MetaStyle);
+        var size = Typography.Measure(text, MetaStyle);
+        Typography.Draw(drawList, new Vector2(cell.Bounds.Min.X + padX, centerY - size.Y * 0.5f), text,
+            ChirperInk.MutedInk, MetaStyle);
+        var hovered = UiInteract.Hover(undoMin, undoMax);
+        if (hovered)
+        {
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+        }
+
+        Typography.Draw(drawList, undoMin, undo, hovered ? ChirperInk.TitleInk : ChirperInk.AccentLink, BannerStyle);
+        if (UiInteract.Click(undoMin, undoMax, hovered))
+        {
+            store.UndoNotInterested(postId);
+        }
+
+        FeedCell.End(drawList, cell, ChirperInk.Hairline);
     }
 
     private void DrawUnavailableCell()

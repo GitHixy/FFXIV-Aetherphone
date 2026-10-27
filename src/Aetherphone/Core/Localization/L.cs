@@ -107,6 +107,17 @@ internal static class L
         public static readonly LocString LikedChirp = new("social.likedChirp", "liked your chirp");
         public static readonly LocString LikedPhoto = new("social.likedPhoto", "liked your photo");
         public static readonly LocString LikedComment = new("social.likedComment", "liked your comment");
+        public static readonly LocString LikedChirpWith = new("social.likedChirpWith", "and {0} liked your chirp");
+        public static readonly LocString LikedPhotoWith = new("social.likedPhotoWith", "and {0} liked your photo");
+        public static readonly LocString LikedCommentWith = new("social.likedCommentWith", "and {0} liked your comment");
+        public static readonly LocPlural LikedChirpOthers = new("social.likedChirpOthers", "and {0} other liked your chirp", "and {0} others liked your chirp");
+        public static readonly LocPlural LikedPhotoOthers = new("social.likedPhotoOthers", "and {0} other liked your photo", "and {0} others liked your photo");
+        public static readonly LocPlural LikedCommentOthers = new("social.likedCommentOthers", "and {0} other liked your comment", "and {0} others liked your comment");
+        public static readonly LocString NotInterested = new("social.notInterested", "Not interested");
+        public static readonly LocString NotInterestedDone = new("social.notInterestedDone", "Got it. You'll see fewer posts like this.");
+        public static readonly LocString Undo = new("social.undo", "Undo");
+        public static readonly LocString Views = new("social.views", "Views");
+        public static readonly LocPlural ViewsCount = new("social.viewsCount", "{0} view", "{0} views");
         public static readonly LocString CommentedChirp = new("social.commentedChirp", "commented on your chirp");
         public static readonly LocString CommentedPhoto = new("social.commentedPhoto", "commented on your photo");
         public static readonly LocString MentionedChirp = new("social.mentionedChirp", "mentioned you in a chirp");

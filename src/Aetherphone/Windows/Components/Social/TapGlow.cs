@@ -12,6 +12,7 @@ internal static class TapGlow
     public const int Save = 3;
     public const int Repost = 4;
     public const int React = 5;
+    public const int Views = 6;
 
     private const int SlotCount = 8;
     private const int GlowCells = 8;

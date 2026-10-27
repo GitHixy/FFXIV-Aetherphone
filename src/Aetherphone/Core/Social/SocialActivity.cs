@@ -54,6 +54,16 @@ internal static class SocialActivity
         return string.IsNullOrEmpty(item.ActorHandle) ? item.ActorName : item.ActorHandle;
     }
 
+    private static string GroupedLike(NotificationDto item, LocString withOne, LocPlural withOthers)
+    {
+        if (item.ActorCount == 2 && !string.IsNullOrEmpty(item.OtherActorDisplayName))
+        {
+            return Loc.T(withOne, item.OtherActorDisplayName);
+        }
+
+        return Loc.Plural(withOthers, item.ActorCount - 1);
+    }
+
     public static string Body(NotificationDto item)
     {
         var isPhoto = item.App != ChirperApp;
@@ -61,6 +71,9 @@ internal static class SocialActivity
         {
             case TypeLike when item.App == PrismApp:
                 return Loc.T(L.Prism.ActivityLiked);
+            case TypeLike when item.ActorCount > 1:
+                return GroupedLike(item, isPhoto ? L.Social.LikedPhotoWith : L.Social.LikedChirpWith,
+                    isPhoto ? L.Social.LikedPhotoOthers : L.Social.LikedChirpOthers);
             case TypeLike:
                 return Loc.T(isPhoto ? L.Social.LikedPhoto : L.Social.LikedChirp);
             case TypePlacing:
@@ -69,7 +82,9 @@ internal static class SocialActivity
                 var action = Loc.T(isPhoto ? L.Social.CommentedPhoto : L.Social.CommentedChirp);
                 return string.IsNullOrEmpty(item.Preview) ? action : $"{action}: “{item.Preview}”";
             case TypeCommentLike:
-                var likedAction = Loc.T(L.Social.LikedComment);
+                var likedAction = item.ActorCount > 1
+                    ? GroupedLike(item, L.Social.LikedCommentWith, L.Social.LikedCommentOthers)
+                    : Loc.T(L.Social.LikedComment);
                 return string.IsNullOrEmpty(item.Preview) ? likedAction : $"{likedAction}: “{item.Preview}”";
             case TypeMention:
                 var mentionAction = Loc.T(isPhoto ? L.Social.MentionedPhoto : L.Social.MentionedChirp);
