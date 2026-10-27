@@ -9,7 +9,8 @@ internal sealed partial class ChirperStore
 
     public bool EditingChirp => editingChirp;
 
-    public void EditChirp(string postId, string text, Action<bool> onComplete, Action<AepFailure>? onFailure = null)
+    public void EditChirp(string postId, string text, string[]? altTexts, Action<bool> onComplete,
+        Action<AepFailure>? onFailure = null)
     {
         if (editingChirp)
         {
@@ -20,7 +21,8 @@ internal sealed partial class ChirperStore
         var trimmed = text.Trim();
         work.Run("edit chirp", async token =>
         {
-            var edited = await client.EditChirpTextAsync(postId, trimmed, token, onFailure).ConfigureAwait(false);
+            var edited = await client.EditChirpTextAsync(postId, trimmed, altTexts, token, onFailure)
+                .ConfigureAwait(false);
             if (edited is null)
             {
                 return false;

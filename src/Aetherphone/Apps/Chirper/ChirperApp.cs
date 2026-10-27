@@ -982,7 +982,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         else
         {
             AddSheetItem(PostSheetAction.Follow, HandleLabel(post.IsFollowing, post.AuthorHandle), false);
-            var key = new TranslationKey(TranslationSurface.Post, post.Id);
+            var key = ChirpTranslationKey(post);
             if (translation.Peek(key).State != TranslationState.Idle || translation.ShouldOffer(post.Lang))
             {
                 AddSheetItem(PostSheetAction.Translate, Loc.T(L.Chirper.TranslateChirp), false);
@@ -1040,7 +1040,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 store.SetFollow(post.AuthorId, !post.IsFollowing);
                 break;
             case PostSheetAction.Translate:
-                var key = new TranslationKey(TranslationSurface.Post, post.Id);
+                var key = ChirpTranslationKey(post);
                 TranslateLink.Activate(translation, confirm, key, post.Text, translation.Peek(key));
                 break;
             case PostSheetAction.Report:
@@ -1407,7 +1407,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         var bodyStyle = isThreadHead ? HeadBodyStyle : BodyStyle;
         var textTop = headerTop + nameHeight + 3f * scale;
         RichTextLayout? bodyLayout = null;
-        var translateKey = new TranslationKey(TranslationSurface.Post, post.Id);
+        var translateKey = ChirpTranslationKey(post);
         var bodyView = translation.View(translateKey, post.Text, post.Lang);
         var bodyText = bodyView.Text;
         var bodyLineHeight = 0f;
@@ -2541,6 +2541,11 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
             {
                 MultiPhotoBadge.Draw(drawList, new Vector2(thumbMax.X - 4f * scale, thumbMin.Y + 4f * scale), scale);
             }
+
+            if (!quoteVeiled)
+            {
+                DrawQuotedAltBadge(drawList, quoted, new Rect(thumbMin, thumbMax));
+            }
         }
 
         if (tappable && UiInteract.HoverClick(min, max))
@@ -2639,7 +2644,8 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
 
         if (photos.Length == 1)
         {
-            DrawMediaTile(drawList, photos[0], rect, rounding, ImDrawFlags.RoundCornersAll, post.ScanStatus);
+            DrawMediaTile(drawList, photos[0], rect, rounding, ImDrawFlags.RoundCornersAll, post.ScanStatus,
+                PostAltTexts.At(post, 0));
             DrawPostAltBadge(drawList, post, 0, rect);
         }
         else
@@ -2661,7 +2667,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
                 var corners = CornerFlags(row == 0 && column == 0, row == 0 && rightEdge, lastRow && column == 0,
                     lastRow && rightEdge);
                 DrawMediaTile(drawList, photos[index], new Rect(tileMin, tileMax), rounding, corners,
-                    post.ScanStatus);
+                    post.ScanStatus, PostAltTexts.At(post, index));
                 DrawPostAltBadge(drawList, post, index, new Rect(tileMin, tileMax));
             }
         }
@@ -2671,7 +2677,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
     }
 
     private void DrawMediaTile(ImDrawListPtr drawList, string url, Rect rect, float rounding, ImDrawFlags corners,
-        string? scanStatus)
+        string? scanStatus, string altText)
     {
         if (DrawHeldGifTile(drawList, url, rect, rounding, corners))
         {
@@ -2699,7 +2705,7 @@ internal sealed partial class ChirperApp : IResumableApp, ITabIconDrawer, INamep
         ModerationOverlay.Draw(drawList, rect.Min, rect.Max, rounding, scanStatus);
         if (UiInteract.HoverClick(rect.Min, rect.Max))
         {
-            photoViewer.Open(this, () => MediaTexture(url));
+            photoViewer.Open(this, () => MediaTexture(url), altText);
         }
     }
 

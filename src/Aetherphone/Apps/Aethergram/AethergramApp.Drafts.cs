@@ -2,8 +2,10 @@ using Aetherphone.Core;
 using Aetherphone.Core.Aethernet.Contracts;
 using Aetherphone.Core.Confirm;
 using Aetherphone.Core.Localization;
+using Aetherphone.Core.Media;
 using Aetherphone.Core.Onboarding;
 using Aetherphone.Core.Social;
+using Aetherphone.Core.Wallpapers;
 using Aetherphone.Windows.Components;
 using Dalamud.Bindings.ImGui;
 
@@ -98,8 +100,21 @@ internal sealed partial class AethergramApp
             Id = composeDraftId ?? ComposerDrafts.NewId(),
             Text = caption,
             Sensitive = composeSensitive,
+            Aspect = (int)composeSession.Aspect,
         };
-        saved.PhotoPaths.AddRange(composeSession.SelectedArray());
+        var paths = composeSession.SelectedArray();
+        saved.PhotoPaths.AddRange(paths);
+        SaveDraftFrames(saved, paths);
+        if (composeCollaborator is { } collaborator)
+        {
+            saved.Collaborator = new ComposerDraftPerson
+            {
+                UserId = collaborator.UserId,
+                Handle = collaborator.Handle,
+                DisplayName = collaborator.DisplayName,
+                AvatarUrl = collaborator.AvatarUrl ?? string.Empty,
+            };
+        }
         for (var index = 0; index < composeTags.Count; index++)
         {
             var tag = composeTags[index];
@@ -124,6 +139,7 @@ internal sealed partial class AethergramApp
         PrepareCompose(false, false);
         composeDraftId = saved.Id;
         caption = saved.Text;
+        composeSession.Aspect = DraftAspect(saved.Aspect);
         var photoSlots = new int[saved.PhotoPaths.Count];
         var missing = 0;
         for (var index = 0; index < saved.PhotoPaths.Count; index++)
@@ -139,6 +155,7 @@ internal sealed partial class AethergramApp
             var before = composeSession.SelectedCount;
             composeSession.TakeImported(path);
             photoSlots[index] = composeSession.SelectedCount > before ? before : -1;
+            RestoreDraftPhoto(saved, index, photoSlots[index]);
         }
 
         for (var index = 0; index < saved.PhotoTags.Count; index++)
@@ -154,11 +171,77 @@ internal sealed partial class AethergramApp
         }
 
         composeSensitive = saved.Sensitive;
+        if (saved.Collaborator is { UserId.Length: > 0 } person)
+        {
+            composeCollaborator = new MentionSuggestDto(person.UserId, person.Handle, person.DisplayName,
+                person.AvatarUrl.Length > 0 ? person.AvatarUrl : null);
+        }
+
         if (missing > 0)
         {
             toast.Show(Loc.Plural(L.Social.DraftPhotosMissing, missing));
         }
     }
+
+    private void SaveDraftFrames(ComposerDraft saved, string[] paths)
+    {
+        var crops = composeSession.CropsArray();
+        var edits = composeSession.EditsArray();
+        for (var index = 0; index < paths.Length; index++)
+        {
+            saved.AltTexts.Add(PostAltTexts.For(composeAltTexts, paths[index]));
+            var crop = index < crops.Length ? crops[index] : WallpaperCrop.Cover;
+            var edit = index < edits.Length ? edits[index] : PhotoEdit.None;
+            saved.Frames.Add(new ComposerDraftFrame
+            {
+                Zoom = crop.Zoom,
+                CenterX = crop.CenterX,
+                CenterY = crop.CenterY,
+                QuarterTurns = edit.QuarterTurns,
+                Mirrored = edit.Mirrored,
+                Straighten = edit.Straighten,
+                Brightness = edit.Brightness,
+                Contrast = edit.Contrast,
+                Saturation = edit.Saturation,
+                Warmth = edit.Warmth,
+                Vignette = edit.Vignette,
+                Look = (int)edit.Look,
+                LookStrength = edit.LookStrength,
+            });
+        }
+    }
+
+    private void RestoreDraftPhoto(ComposerDraft saved, int savedIndex, int slot)
+    {
+        if (slot < 0)
+        {
+            return;
+        }
+
+        var path = saved.PhotoPaths[savedIndex];
+        if (savedIndex < saved.AltTexts.Count)
+        {
+            PostAltTexts.Set(composeAltTexts, path, saved.AltTexts[savedIndex]);
+        }
+
+        if (savedIndex >= saved.Frames.Count || composeSession.GifSelected)
+        {
+            return;
+        }
+
+        var frame = saved.Frames[savedIndex];
+        var look = frame.Look is >= (int)PhotoLook.None and <= (int)PhotoLook.Noir
+            ? (PhotoLook)frame.Look
+            : PhotoLook.None;
+        var edit = new PhotoEdit(frame.QuarterTurns, frame.Mirrored, frame.Straighten, frame.Brightness, frame.Contrast,
+            frame.Saturation, frame.Warmth, frame.Vignette, look, frame.LookStrength);
+        var crop = new WallpaperCrop(Math.Clamp(frame.Zoom, 0.01f, WallpaperCrop.MaxZoom),
+            Math.Clamp(frame.CenterX, 0f, 1f), Math.Clamp(frame.CenterY, 0f, 1f));
+        composeSession.RestoreFraming(slot, crop, edit, PostAspects.Ratio(composeSession.Aspect));
+    }
+
+    private static PostAspect DraftAspect(int saved) =>
+        saved >= 0 && saved < PostAspects.All.Length ? PostAspects.All[saved] : PostAspect.Square;
 
     private float DrawComposeDraftsEntry(Rect area, float top)
     {

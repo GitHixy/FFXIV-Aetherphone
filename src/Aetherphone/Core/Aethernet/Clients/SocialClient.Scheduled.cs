@@ -13,6 +13,14 @@ internal sealed partial class SocialClient
             token, null, onFailure);
     }
 
+    public Task<ScheduledPostDto?> UpdateScheduledPostAsync(string scheduledId, CreatePostRequest post,
+        long publishAtUnix, CancellationToken token, Action<AepFailure>? onFailure = null)
+    {
+        return net.SendJsonAsync(HttpMethod.Put, $"/posts/scheduled/{Uri.EscapeDataString(scheduledId)}",
+            new CreateScheduledPostRequest(post, publishAtUnix), AethernetJsonContext.Default.CreateScheduledPostRequest,
+            AethernetJsonContext.Default.ScheduledPostDto, token, null, onFailure);
+    }
+
     public Task<ScheduledPostPage?> ScheduledPostsAsync(CancellationToken token, Action<AepFailure>? onFailure = null)
     {
         return net.GetAsync("/posts/scheduled", AethernetJsonContext.Default.ScheduledPostPage, token, null, onFailure);

@@ -266,6 +266,27 @@ internal sealed class PhotoComposeSession : IDisposable
         Append(path);
     }
 
+    // A restored draft frames its photo as it was saved. The photo is marked as framed for the ratio
+    // it was saved at, so the first draw does not re-frame it over the restored crop.
+    public void RestoreFraming(int index, WallpaperCrop crop, PhotoEdit edit, float framedRatio)
+    {
+        if (index < 0 || index >= selected.Count)
+        {
+            return;
+        }
+
+        crops[index] = crop;
+        edits[index] = edit;
+        framedForRatio[index] = framedRatio;
+        if (index != CurrentIndex)
+        {
+            return;
+        }
+
+        LoadCrop(crop);
+        editControls.Load(edit);
+    }
+
     public void BeginEdit()
     {
         if (selected.Count == 0)

@@ -195,6 +195,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
     private readonly PhotoCarousel carousel = new();
     private readonly DoubleTapLike doubleTapLike = new();
     private readonly DeferredTap pendingPhotoTap = new();
+    private string pendingPhotoAlt = string.Empty;
     private readonly AppSkin ui = new(AppPalettes.Aethergram);
     private readonly TabBar tabBar = new();
     private readonly TabItem[] tabItems = new TabItem[NavTabCount];
@@ -1724,6 +1725,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
         if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && page < photos.Length)
         {
             pendingPhotoTap.Arm(photos[page]);
+            pendingPhotoAlt = PostAltTexts.At(post, page);
         }
     }
 
@@ -1731,7 +1733,7 @@ internal sealed partial class AethergramApp : IResumableApp, ITabIconDrawer, INa
     {
         if (pendingPhotoTap.Ready(out var url))
         {
-            photoViewer.Open(this, () => GifMedia.Texture(images, url, ImGui.GetTime()));
+            photoViewer.Open(this, () => GifMedia.Texture(images, url, ImGui.GetTime()), pendingPhotoAlt);
         }
     }
 

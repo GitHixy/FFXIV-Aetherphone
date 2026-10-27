@@ -499,16 +499,18 @@ internal sealed partial class ChirperApp
 
     private string ComposeMediaRefusal()
     {
-        if (composePoll.Active)
+        if (FocusedTakesPoll && composePoll.Active)
         {
             return Loc.T(L.Chirper.PollBlocksMedia);
         }
 
-        return ComposeHasGif() ? Loc.T(L.Common.GifRidesAlone) : Loc.T(L.Chirper.MaxPhotos, ChirperStore.MaxImages);
+        return HoldsGif(FocusedAttachments())
+            ? Loc.T(L.Common.GifRidesAlone)
+            : Loc.T(L.Chirper.MaxPhotos, ChirperStore.MaxImages);
     }
 
     private string ComposeGifRefusal() =>
-        composePoll.Active ? Loc.T(L.Chirper.PollBlocksMedia) : Loc.T(L.Common.GifRidesAlone);
+        FocusedTakesPoll && composePoll.Active ? Loc.T(L.Chirper.PollBlocksMedia) : Loc.T(L.Common.GifRidesAlone);
 
     private bool SubmitComposePoll()
     {
