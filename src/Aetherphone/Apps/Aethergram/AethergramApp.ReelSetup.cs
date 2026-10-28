@@ -29,8 +29,7 @@ internal sealed partial class AethergramApp
         if (!reelSetupChecked)
         {
             reelSetupChecked = true;
-            reelSetupWork.Run("check reel components",
-                async token => await dependencies.CheckReelSizesAsync(token).ConfigureAwait(false));
+            reelSetupWork.Run("check reel components", CheckReelSizesAsync);
         }
 
         var margin = Metrics.Space.Xl * scale;
@@ -106,6 +105,9 @@ internal sealed partial class AethergramApp
 
         return reelInstallLabel;
     }
+
+    private async Task CheckReelSizesAsync(CancellationToken token) =>
+        await reelPlayback.Dependencies.CheckReelSizesAsync(token).ConfigureAwait(false);
 
     private void InstallReelPlayer()
     {

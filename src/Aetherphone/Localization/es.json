@@ -3307,6 +3307,7 @@
   "aethergram.reelsEmptyHint": "Aquí aparecen los videos cortos que comparte la gente",
   "aethergram.reelsLoadFailed": "No se pudieron cargar los reels",
   "aethergram.reelsCaughtUp": "Ya lo has visto todo",
+  "aethergram.reelsCaughtUpHint": "Los reels nuevos aparecen aquí cuando la gente los publica",
   "aethergram.reelPlayFailed": "No se pudo reproducir este reel",
   "aethergram.reelComments": "Comentarios",
   "aethergram.reelSetupTitle": "Mira Reels en el juego",

@@ -42,6 +42,13 @@ internal sealed partial class AethergramStore
             return;
         }
 
+        FetchReels(deck, fetchGeneration, session, cursor);
+    }
+
+    // Kept apart from LoadReels, which runs every frame: a lambda's captured locals are allocated where their scope
+    // begins, even on the frames that return before reaching it.
+    private void FetchReels(ReelDeck deck, int fetchGeneration, string? session, string? cursor)
+    {
         var regions = FeedRegions;
         var includeSensitive = FeedIncludesSensitive;
         var settled = false;
@@ -87,6 +94,11 @@ internal sealed partial class AethergramStore
         userReelsUserId = userId;
         userReelsLane.Clear();
         userReelsLane.Loading = true;
+        FetchUserReels(userId);
+    }
+
+    private void FetchUserReels(string userId)
+    {
         work.Run("user reels", async token =>
         {
             var page = await grams.UserReelsAsync(userId, null, token).ConfigureAwait(false);
@@ -112,6 +124,11 @@ internal sealed partial class AethergramStore
         }
 
         userReelsLane.LoadingMore = true;
+        FetchMoreUserReels(userId, cursor);
+    }
+
+    private void FetchMoreUserReels(string userId, string cursor)
+    {
         work.Run("user reels more", async token =>
         {
             var page = await grams.UserReelsAsync(userId, cursor, token).ConfigureAwait(false);

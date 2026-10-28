@@ -3307,6 +3307,7 @@
   "aethergram.reelsEmptyHint": "みんながシェアした短い動画がここに表示されます",
   "aethergram.reelsLoadFailed": "リールを読み込めませんでした",
   "aethergram.reelsCaughtUp": "すべて見ました",
+  "aethergram.reelsCaughtUpHint": "新しいリールが投稿されるとここに表示されます",
   "aethergram.reelPlayFailed": "このリールを再生できませんでした",
   "aethergram.reelComments": "コメント",
   "aethergram.reelSetupTitle": "ゲーム内でリールを見よう",

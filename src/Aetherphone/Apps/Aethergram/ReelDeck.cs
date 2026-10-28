@@ -24,6 +24,8 @@ internal sealed class ReelDeck
 
     internal string? CurrentId;
 
+    internal bool AtEnd;
+
     internal PostDto[] Items => Lane.Items;
 
     internal bool Loading
@@ -115,6 +117,7 @@ internal sealed class ReelDeck
             Lane.ClearFailure();
             Position = 0;
             CurrentId = null;
+            AtEnd = false;
             Play = default;
             Watches.Clear();
         }
@@ -131,6 +134,7 @@ internal sealed class ReelDeck
             Lane.Items = reels;
             Position = 0;
             CurrentId = reels.Length > 0 ? reels[0].Id : null;
+            AtEnd = false;
         }
     }
 

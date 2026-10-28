@@ -3307,6 +3307,7 @@
   "aethergram.reelsEmptyHint": "Short videos people share show up here",
   "aethergram.reelsLoadFailed": "Couldn't load reels",
   "aethergram.reelsCaughtUp": "You're all caught up",
+  "aethergram.reelsCaughtUpHint": "New reels show up here as people post them",
   "aethergram.reelPlayFailed": "This reel couldn't play",
   "aethergram.reelComments": "Comments",
   "aethergram.reelSetupTitle": "Watch Reels in game",

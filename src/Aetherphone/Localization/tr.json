@@ -3307,6 +3307,7 @@
   "aethergram.reelsEmptyHint": "Oyuncuların paylaştığı kısa videolar burada görünür",
   "aethergram.reelsLoadFailed": "Reels yüklenemedi",
   "aethergram.reelsCaughtUp": "Hepsini gördün",
+  "aethergram.reelsCaughtUpHint": "Yeni reels paylaşıldıkça burada görünür",
   "aethergram.reelPlayFailed": "Bu reel oynatılamadı",
   "aethergram.reelComments": "Yorumlar",
   "aethergram.reelSetupTitle": "Reels'i oyunda izle",

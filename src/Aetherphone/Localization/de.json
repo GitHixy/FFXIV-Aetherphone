@@ -3307,6 +3307,7 @@
   "aethergram.reelsEmptyHint": "Kurze Videos, die andere teilen, erscheinen hier",
   "aethergram.reelsLoadFailed": "Reels konnten nicht geladen werden",
   "aethergram.reelsCaughtUp": "Du bist auf dem neuesten Stand",
+  "aethergram.reelsCaughtUpHint": "Neue Reels erscheinen hier, sobald andere sie posten",
   "aethergram.reelPlayFailed": "Dieses Reel konnte nicht abgespielt werden",
   "aethergram.reelComments": "Kommentare",
   "aethergram.reelSetupTitle": "Reels im Spiel ansehen",

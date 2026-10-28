@@ -3307,6 +3307,7 @@
   "aethergram.reelsEmptyHint": "大家分享的短视频会显示在这里",
   "aethergram.reelsLoadFailed": "无法加载短视频",
   "aethergram.reelsCaughtUp": "你已经看完了",
+  "aethergram.reelsCaughtUpHint": "有人发布新的短视频时会显示在这里",
   "aethergram.reelPlayFailed": "此短视频无法播放",
   "aethergram.reelComments": "评论",
   "aethergram.reelSetupTitle": "在游戏中观看短视频",
