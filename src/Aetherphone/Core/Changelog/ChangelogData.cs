@@ -8,11 +8,15 @@ internal static class ChangelogData
     {
         new ChangelogEntry("1.4.2.0", "2026-10-27", new ChangelogSection[]
         {
-            new(L.Apps.Collections, L.Changelog.Release1410Collections),
-            new(L.Apps.Velvet, L.Changelog.Release1410Velvet),
-            new(L.Apps.Feedback, L.Changelog.Release1410Feedback),
-            new(L.Changelog.SectionMessaging, L.Changelog.Release1410Messaging),
-            new(L.Apps.Music, L.Changelog.Release1410Music),
+            new(L.Changelog.SectionSocial, L.Changelog.Release1420Social),
+            new(L.Apps.Aethergram, L.Changelog.Release1420Aethergram),
+            new(L.Apps.Chirper, L.Changelog.Release1420Chirper),
+            new(L.Apps.Coin, L.Changelog.Release1420Coin),
+            new(L.Apps.Collections, L.Changelog.Release1420Collections),
+            new(L.Apps.Velvet, L.Changelog.Release1420Velvet),
+            new(L.Apps.Feedback, L.Changelog.Release1420Feedback),
+            new(L.Changelog.SectionMessaging, L.Changelog.Release1420Messaging),
+            new(L.Apps.Music, L.Changelog.Release1420Music),
         }),
         new ChangelogEntry("1.4.1.0", "2026-10-27", new ChangelogSection[]
         {
