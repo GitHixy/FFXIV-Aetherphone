@@ -15,7 +15,9 @@ public sealed class EmojiShortcodeTests
             {"file":"1f60a","short":["smiling_face"],"group":0,"label":"blushing face","tags":"","tones":[]},
             {"file":"1f6e9","short":["small_airplane"],"group":0,"label":"small airplane","tags":"","tones":[]},
             {"file":"1f44b","short":["wave","waving_hand"],"group":0,"label":"waving hand","tags":"",
-             "tones":[{"tone":1,"file":"1f44b-1f3fb"}]}
+             "tones":[{"tone":1,"file":"1f44b-1f3fb"}]},
+            {"file":"1f44d","short":["+1","thumbsup"],"group":0,"label":"thumbs up","tags":"","tones":[]},
+            {"file":"1f44e","short":["-1","thumbsdown"],"group":0,"label":"thumbs down","tags":"","tones":[]}
           ]
         }
         """;
@@ -67,6 +69,27 @@ public sealed class EmojiShortcodeTests
         Assert.Equal(15, spans[1].Start);
         Assert.Equal(6, spans[1].Length);
         Assert.Equal("1f44b", spans[1].File);
+    }
+
+    [Fact]
+    public void ThumbsUpAndDownResolveFromTheirSignedShortcodes()
+    {
+        EmojiShortcodes.Collect("ok :+1: and :-1:", spans);
+        Assert.Equal(2, spans.Count);
+        Assert.Equal(3, spans[0].Start);
+        Assert.Equal(4, spans[0].Length);
+        Assert.Equal("1f44d", spans[0].File);
+        Assert.Equal(12, spans[1].Start);
+        Assert.Equal("1f44e", spans[1].File);
+    }
+
+    [Theory]
+    [InlineData("2+2:+")]
+    [InlineData("score 1:+1 for us")]
+    public void APlusOutsideAClosedShortcodeStaysText(string line)
+    {
+        EmojiShortcodes.Collect(line, spans);
+        Assert.Empty(spans);
     }
 
     [Theory]

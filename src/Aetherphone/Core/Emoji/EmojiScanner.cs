@@ -50,5 +50,5 @@ internal static class EmojiScanner
     }
 
     public static bool IsShortcodeChar(char value) =>
-        value is (>= 'a' and <= 'z') or (>= 'A' and <= 'Z') or (>= '0' and <= '9') or '_' or '-';
+        value is (>= 'a' and <= 'z') or (>= 'A' and <= 'Z') or (>= '0' and <= '9') or '_' or '-' or '+';
 }
