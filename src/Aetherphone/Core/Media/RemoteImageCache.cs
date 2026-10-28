@@ -137,8 +137,13 @@ internal sealed class RemoteImageCache : IDisposable
             return;
         }
 
-        Start(key, token => FetchThroughDiskAsync(key, resolved, token));
+        StartFetch(key, resolved);
     }
+
+    // Apart from Request, which a draw calls every frame an image is missing, so the lambda's captures are only
+    // allocated when a fetch really starts.
+    private void StartFetch(LedgerKey key, string resolved) =>
+        Start(key, token => FetchThroughDiskAsync(key, resolved, token));
 
     private bool TryClaim(LedgerKey key)
     {

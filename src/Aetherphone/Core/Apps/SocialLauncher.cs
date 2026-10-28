@@ -7,6 +7,7 @@ internal enum SocialLinkKind
     Requests,
     Compose,
     ComposeStory,
+    ComposeReel,
 }
 
 internal readonly record struct SocialDeepLink(SocialLinkKind Kind, string Id);

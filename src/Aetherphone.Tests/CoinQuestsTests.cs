@@ -144,4 +144,60 @@ public sealed class CoinQuestsTests
         Assert.False(CoinQuests.TryLaunchFor(Quest("social.story", 0, 1, true), out _));
         Assert.False(CoinQuests.TryLaunchFor(Quest("social.comment", 0, 2), out _));
     }
+
+    private static CoinQuestDto Standing(int progress, bool claimed) =>
+        new(CoinQuests.ReelQuestId, "standing", "aethergram", progress, 1, 35, claimed, true);
+
+    [Fact]
+    public void TheReelQuestMovesFromOpenToAwaitingPayToPaid()
+    {
+        Assert.Equal(CoinQuestState.InProgress, CoinQuests.StateOf(Standing(0, false)));
+        Assert.Equal(CoinQuestState.AwaitingAutoPay, CoinQuests.StateOf(Standing(1, false)));
+        Assert.Equal(CoinQuestState.Paid, CoinQuests.StateOf(Standing(1, true)));
+    }
+
+    [Fact]
+    public void ADailyQuestWithoutAutoPayIsClaimableWhenDone()
+    {
+        Assert.Equal(CoinQuestState.InProgress, CoinQuests.StateOf(Quest("play.three", 2, 3)));
+        Assert.Equal(CoinQuestState.Claimable, CoinQuests.StateOf(Quest("play.three", 3, 3)));
+        Assert.Equal(CoinQuestState.Paid, CoinQuests.StateOf(Quest("play.three", 3, 3, true)));
+    }
+
+    [Fact]
+    public void AnAutoPaidQuestIsNeverClaimedByTheClient()
+    {
+        Assert.False(CoinQuests.IsClaimable(Standing(1, false)));
+    }
+
+    [Fact]
+    public void StandingQuestsFollowTheDailyThree()
+    {
+        var board = new CoinQuestBoardDto(10, 1000,
+            new[] { Quest("play.three", 0, 3), Quest("social.chat", 0, 2), Quest("explore.poll", 0, 1) },
+            new[] { Standing(0, false) });
+
+        Assert.Equal(4, CoinQuests.RowCount(board));
+        Assert.Equal("play.three", CoinQuests.RowAt(board, 0).Id);
+        Assert.Equal(CoinQuests.ReelQuestId, CoinQuests.RowAt(board, 3).Id);
+    }
+
+    [Fact]
+    public void ABoardFromAnOlderServerHasNoStandingRows()
+    {
+        var board = new CoinQuestBoardDto(10, 1000, new[] { Quest("play.three", 0, 3) });
+
+        Assert.Equal(1, CoinQuests.RowCount(board));
+        Assert.Empty(CoinQuests.Standing(board));
+    }
+
+    [Fact]
+    public void TheReelQuestHasItsTitleHintAndOpensTheReelComposer()
+    {
+        Assert.Equal("Post a reel", CoinQuests.Title(Standing(0, false)));
+        Assert.True(CoinQuests.TryHintFor(CoinQuests.ReelQuestId, out _));
+        Assert.True(CoinQuests.TryLaunchFor(Standing(0, false), out var link));
+        Assert.Equal(SocialLinkKind.ComposeReel, link.Kind);
+        Assert.False(CoinQuests.TryLaunchFor(Standing(1, false), out _));
+    }
 }

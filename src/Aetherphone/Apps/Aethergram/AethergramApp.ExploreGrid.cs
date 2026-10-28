@@ -116,7 +116,7 @@ internal sealed partial class AethergramApp
             store.ObserveImpression(posts[index].Id, tile.Min.Y, tile.Max.Y);
             if (UiInteract.Click(tile.Min, tile.Max, UiInteract.Hover(tile.Min, tile.Max)))
             {
-                OpenPosts(posts[index].Id, PostSource.Explore);
+                OpenGridPost(posts, index, PostSource.Explore);
             }
         }
 

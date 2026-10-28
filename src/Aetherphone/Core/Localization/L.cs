@@ -7707,6 +7707,27 @@ internal static class L
         public static readonly LocString TagsSection = new("aethergram.tagsSection", "Tags");
         public static readonly LocString ExploreNothingNew = new("aethergram.exploreNothingNew", "Nothing new to explore right now");
         public static readonly LocString ExploreNothingNewHint = new("aethergram.exploreNothingNewHint", "Photos from people you don't follow yet show up here");
+        public static readonly LocString Reels = new("aethergram.reels", "Reels");
+        public static readonly LocString ReelsEmpty = new("aethergram.reelsEmpty", "No reels yet");
+        public static readonly LocString ReelsEmptyHint = new("aethergram.reelsEmptyHint",
+            "Short videos people share show up here");
+        public static readonly LocString ReelsLoadFailed = new("aethergram.reelsLoadFailed", "Couldn't load reels");
+        public static readonly LocString ReelsCaughtUp = new("aethergram.reelsCaughtUp", "You're all caught up");
+        public static readonly LocString ReelsCaughtUpHint = new("aethergram.reelsCaughtUpHint",
+            "New reels show up here as people post them");
+        public static readonly LocString ReelPlayFailed = new("aethergram.reelPlayFailed", "This reel couldn't play");
+        public static readonly LocString ReelComments = new("aethergram.reelComments", "Comments");
+        public static readonly LocString ReelSetupTitle = new("aethergram.reelSetupTitle", "Watch Reels in game");
+        public static readonly LocString ReelSetupBody = new("aethergram.reelSetupBody",
+            "Reels play with MogCast's video engine. It downloads once and stays on your machine.");
+        public static readonly LocString ReelInstallPlayer = new("aethergram.reelInstallPlayer",
+            "Install the video engine to play reels");
+        public static readonly LocString ReelInstallingPlayer = new("aethergram.reelInstallingPlayer",
+            "Installing the video engine…");
+        public static readonly LocString ReelVideoUnavailable = new("aethergram.reelVideoUnavailable",
+            "Video can't play on this device");
+        public static readonly LocString ReelPausedForMogCast = new("aethergram.reelPausedForMogCast",
+            "Paused while MogCast plays");
         public static readonly LocString NoResults = new("aethergram.noResults", "No results found");
         public static readonly LocString SavedEmptyHint = new("aethergram.savedEmptyHint", "Save posts you want to see again");
         public static readonly LocString Use = new("aethergram.use", "Use");
@@ -7769,6 +7790,57 @@ internal static class L
         public static readonly LocString CollabRemoveOneMessage = new("aethergram.collabRemoveOneMessage", "They will be taken off this post.");
         public static readonly LocString CollabInviteSent = new("aethergram.collabInviteSent", "Invite sent");
         public static readonly LocString CollabTooMany = new("aethergram.collabTooMany", "A post can have up to {0} collaborators.");
+        public static readonly LocString ComposeModePost = new("aethergram.composeModePost", "Post");
+        public static readonly LocString ComposeModeStory = new("aethergram.composeModeStory", "Story");
+        public static readonly LocString ComposeModeReel = new("aethergram.composeModeReel", "Reel");
+        public static readonly LocString NewReel = new("aethergram.newReel", "New Reel");
+        public static readonly LocString ReelChooseTitle = new("aethergram.reelChooseTitle", "Choose a video");
+        public static readonly LocPlural ReelChooseHint = new("aethergram.reelChooseHint", "Pick a clip from your PC. A reel keeps up to {0} second of it.", "Pick a clip from your PC. A reel keeps up to {0} seconds of it.");
+        public static readonly LocString ReelChooseDialog = new("aethergram.reelChooseDialog", "Choose a video for your reel");
+        public static readonly LocString ReelChecking = new("aethergram.reelChecking", "Checking the video…");
+        public static readonly LocString ReelEditTitle = new("aethergram.reelEditTitle", "Edit Reel");
+        public static readonly LocString ReelFramingOriginal = new("aethergram.reelFramingOriginal", "Original");
+        public static readonly LocString ReelFramingFill = new("aethergram.reelFramingFill", "Fill 9:16");
+        public static readonly LocString ReelLength = new("aethergram.reelLength", "Length {0}");
+        public static readonly LocString ReelRange = new("aethergram.reelRange", "{0} to {1}");
+        public static readonly LocPlural ReelTrimHint = new("aethergram.reelTrimHint", "Drag the ends to keep up to {0} second", "Drag the ends to keep up to {0} seconds");
+        public static readonly LocString ReelCover = new("aethergram.reelCover", "Cover");
+        public static readonly LocString ReelCoverHint = new("aethergram.reelCoverHint", "Slide to pick the cover frame");
+        public static readonly LocString ReelCropHint = new("aethergram.reelCropHint", "Drag the frame to choose what stays in view");
+        public static readonly LocPlural ReelBonusHint = new("aethergram.reelBonusHint", "First reel bonus: {0} coin", "First reel bonus: {0} coins");
+        public static readonly LocString ReelBusy = new("aethergram.reelBusy", "Your last reel is still being shared. Try again when it's done.");
+        public static readonly LocString ReelConverting = new("aethergram.reelConverting", "Converting {0}%");
+        public static readonly LocString ReelUploading = new("aethergram.reelUploading", "Uploading {0}%");
+        public static readonly LocString ReelPosting = new("aethergram.reelPosting", "Sharing your reel…");
+        public static readonly LocString ReelShared = new("aethergram.reelShared", "Reel shared");
+        public static readonly LocString ReelErrorUnreadable = new("aethergram.reelErrorUnreadable", "That file can't be opened. Choose another video.");
+        public static readonly LocString ReelErrorNoVideo = new("aethergram.reelErrorNoVideo", "That file has no video in it.");
+        public static readonly LocString ReelErrorNoDuration = new("aethergram.reelErrorNoDuration", "Windows can't tell how long that video is. Choose another file.");
+        public static readonly LocString ReelErrorNoMediaFoundation = new("aethergram.reelErrorNoMediaFoundation", "Reels need Windows Media Foundation, which this PC doesn't have.");
+        public static readonly LocString ReelErrorDecoder = new("aethergram.reelErrorDecoder", "Windows can't play this video's format. Try an MP4 file.");
+        public static readonly LocString ReelErrorEncoder = new("aethergram.reelErrorEncoder", "This PC has no H.264 video encoder, so the reel can't be made.");
+        public static readonly LocString ReelErrorRange = new("aethergram.reelErrorRange", "The part you kept is empty. Adjust the trim.");
+        public static readonly LocString ReelErrorConvert = new("aethergram.reelErrorConvert", "Converting the video failed.");
+        public static readonly LocString ReelErrorCover = new("aethergram.reelErrorCover", "Making the cover image failed.");
+        public static readonly LocString ReelErrorUpload = new("aethergram.reelErrorUpload", "Uploading failed. {0}");
+        public static readonly LocString ReelErrorMissingVideo = new("aethergram.reelErrorMissingVideo", "The upload went missing on the way. Try again.");
+        public static readonly LocString ReelErrorTooBig = new("aethergram.reelErrorTooBig", "The converted video is larger than {0} MB.");
+        public static readonly LocString ReelErrorNotMp4 = new("aethergram.reelErrorNotMp4", "The server couldn't read the video as an MP4.");
+        public static readonly LocString ReelErrorNotFaststart = new("aethergram.reelErrorNotFaststart", "The video wasn't prepared for streaming.");
+        public static readonly LocString ReelErrorHeader = new("aethergram.reelErrorHeader", "The video's header is too large.");
+        public static readonly LocString ReelErrorFragmented = new("aethergram.reelErrorFragmented", "Fragmented MP4 videos can't be shared as reels.");
+        public static readonly LocString ReelErrorNoVideoTrack = new("aethergram.reelErrorNoVideoTrack", "The server found no video track in the upload.");
+        public static readonly LocString ReelErrorVideoCodec = new("aethergram.reelErrorVideoCodec", "Reels need H.264 video.");
+        public static readonly LocString ReelErrorAudioCodec = new("aethergram.reelErrorAudioCodec", "Reels need AAC audio.");
+        public static readonly LocPlural ReelErrorTooLong = new("aethergram.reelErrorTooLong", "A reel can be at most {0} second long.", "A reel can be at most {0} seconds long.");
+        public static readonly LocString ReelErrorServerDuration = new("aethergram.reelErrorServerDuration", "The server couldn't read how long the video is.");
+        public static readonly LocString ReelErrorResolution = new("aethergram.reelErrorResolution", "The video is larger than reels allow.");
+        public static readonly LocString ReelErrorAspect = new("aethergram.reelErrorAspect", "The video's shape is outside what reels allow.");
+        public static readonly LocString ReelErrorInUse = new("aethergram.reelErrorInUse", "That upload already belongs to a reel.");
+        public static readonly LocString ReelErrorPoster = new("aethergram.reelErrorPoster", "The cover image wasn't accepted.");
+        public static readonly LocString ReelQuestTitle = new("aethergram.reelQuestTitle", "Post a reel");
+        public static readonly LocString ReelQuestHint = new("aethergram.reelQuestHint", "Pays once a day, an hour after your reel goes up");
+        public static readonly LocString ReelQuestPaidAutomatically = new("aethergram.reelQuestPaidAutomatically", "Paid automatically");
         public static readonly LocString EditPostFailed = new("aethergram.editPostFailed", "Couldn't save the changes");
         public static readonly LocString EditedStamp = new("aethergram.editedStamp", "{0} · Edited");
         public static readonly LocString DeleteCommentFailed = new("aethergram.deleteCommentFailed", "Couldn't delete the comment");

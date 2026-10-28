@@ -277,7 +277,8 @@ internal sealed record PostDto(
     int EditCount = 0,
     int ThreadCount = 0,
     bool AuthorMuted = false,
-    CollaboratorDto[]? Collaborators = null) : IIdentified
+    CollaboratorDto[]? Collaborators = null,
+    VideoDto? Video = null) : IIdentified
 {
     [JsonIgnore] public string[]? GifMedia { get; } = GifUrl is null ? null : new[] { GifUrl };
 }

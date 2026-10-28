@@ -31,6 +31,10 @@ internal sealed class MpvRenderer : IDisposable
     private const int EventEndFile = 7;
     private const int EventFileLoaded = 8;
     private const int EventPlaybackRestart = 21;
+    private const int EventPropertyChange = 22;
+
+    private const ulong PositionObserver = 1;
+    private const ulong DurationObserver = 2;
 
     private const int ParamInvalid = 0;
     private const int ParamApiType = 1;
@@ -157,6 +161,10 @@ internal sealed class MpvRenderer : IDisposable
         [MarshalAs(UnmanagedType.LPUTF8Str)] string name, int format, out long data);
 
     [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int mpv_observe_property(IntPtr ctx, ulong replyUserdata,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string name, int format);
+
+    [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
     private static extern IntPtr mpv_get_property_string(IntPtr ctx,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
 
@@ -175,6 +183,7 @@ internal sealed class MpvRenderer : IDisposable
 
     internal delegate void MpvRenderUpdateFn(IntPtr callbackContext);
 
+    private readonly string renderKey;
     private readonly Lock commandLock = new();
     private readonly Lock snapshotLock = new();
     private readonly ManualResetEventSlim frameReady = new(false);
@@ -212,6 +221,13 @@ internal sealed class MpvRenderer : IDisposable
     private int httpForbiddenHits;
     private int streamErrorHits;
     private int detectedFailure;
+    private double observedPosition;
+    private double observedDuration;
+
+    internal MpvRenderer(string renderKey)
+    {
+        this.renderKey = renderKey;
+    }
 
     internal event Action? FileLoaded;
     internal event Action<PlaybackEnding>? FileEnded;
@@ -229,7 +245,8 @@ internal sealed class MpvRenderer : IDisposable
     internal string? LinkResolverPath { get; private set; }
 
     internal void Initialize(int frameWidth, int frameHeight, Texture2D? texture, string? linkResolverPath,
-        bool hardwareDecoding, int maxQualityHeight, bool allowInsecureDirectUrls, int initialVolume)
+        bool hardwareDecoding, int maxQualityHeight, bool allowInsecureDirectUrls, int initialVolume,
+        bool resolveLinks = true)
     {
         width = frameWidth;
         height = frameHeight;
@@ -249,7 +266,7 @@ internal sealed class MpvRenderer : IDisposable
         SetOption("vo", "libmpv");
         SetOption("hwdec", hardwareDecoding ? "auto-safe" : "no");
         SetOption("profile", "sw-fast");
-        SetOption("ytdl", "yes");
+        SetOption("ytdl", resolveLinks ? "yes" : "no");
         LinkResolverPath = linkResolverPath;
         if (linkResolverPath is { Length: > 0 })
         {
@@ -439,6 +456,33 @@ internal sealed class MpvRenderer : IDisposable
     }
 
     internal void Pause(bool paused) => SetProperty("pause", paused ? "yes" : "no");
+
+    internal void SetMuted(bool muted) => SetProperty("mute", muted ? "yes" : "no");
+
+    internal void SetLooping(bool looping) => SetProperty("loop-file", looping ? "inf" : "no");
+
+    internal double ObservedPositionSeconds => Volatile.Read(ref observedPosition);
+
+    internal double ObservedDurationSeconds => Volatile.Read(ref observedDuration);
+
+    internal void ObserveProgress()
+    {
+        if (!IsRunning)
+        {
+            return;
+        }
+
+        lock (commandLock)
+        {
+            if (mpvContext == IntPtr.Zero)
+            {
+                return;
+            }
+
+            _ = mpv_observe_property(mpvContext, PositionObserver, "time-pos", FormatDouble);
+            _ = mpv_observe_property(mpvContext, DurationObserver, "duration", FormatDouble);
+        }
+    }
 
     internal void SetVolume(int volume) =>
         SetProperty("volume", Math.Clamp(volume, 0, 100).ToString(CultureInfo.InvariantCulture));
@@ -694,7 +738,7 @@ internal sealed class MpvRenderer : IDisposable
             Interlocked.Exchange(ref consecutiveRenderFailures, 0);
 
             var rowPitch = width * 4;
-            DxHandler.RunOnRenderThread(RenderKey, () =>
+            DxHandler.RunOnRenderThread(renderKey, () =>
             {
                 DxHandler.Device?.ImmediateContext.UpdateSubresource(texture, 0, null, snapshot, rowPitch, 0);
             });
@@ -745,6 +789,9 @@ internal sealed class MpvRenderer : IDisposable
                         break;
                     case EventEndFile:
                         HandleEndFile(handle);
+                        break;
+                    case EventPropertyChange:
+                        HandlePropertyChange(handle);
                         break;
                     default:
                         break;
@@ -803,6 +850,30 @@ internal sealed class MpvRenderer : IDisposable
         }
 
         AepLog.Verbose($"[MPV/{prefix}/{level}] {text}");
+    }
+
+    private void HandlePropertyChange(IntPtr handle)
+    {
+        var data = Marshal.ReadIntPtr(handle + 16);
+        if (data == IntPtr.Zero)
+        {
+            return;
+        }
+
+        var observer = (ulong)Marshal.ReadInt64(handle + 8);
+        var format = Marshal.ReadInt32(data + 8);
+        var pointer = Marshal.ReadIntPtr(data + 16);
+        var value = format == FormatDouble && pointer != IntPtr.Zero
+            ? BitConverter.Int64BitsToDouble(Marshal.ReadInt64(pointer))
+            : 0d;
+        if (observer == PositionObserver)
+        {
+            Volatile.Write(ref observedPosition, value);
+        }
+        else if (observer == DurationObserver)
+        {
+            Volatile.Write(ref observedDuration, value);
+        }
     }
 
     private static bool IsHttpForbiddenText(string text) =>
@@ -960,7 +1031,7 @@ internal sealed class MpvRenderer : IDisposable
         renderThread?.Join(2000);
         eventThread?.Join(2000);
 
-        DxHandler.CancelRenderThreadWork(RenderKey);
+        DxHandler.CancelRenderThreadWork(renderKey);
 
         lock (snapshotLock)
         {

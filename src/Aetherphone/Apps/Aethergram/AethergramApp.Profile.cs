@@ -46,7 +46,9 @@ internal sealed partial class AethergramApp
     private const float ProfileCreateWidth = 132f;
     private const float PrivateLockRadius = 26f;
     private const int ProfileMenuMaxItems = 8;
-    private const int ProfileTabCount = 2;
+    private const int ProfileTabCount = 3;
+    private const int ProfilePostsTab = 0;
+    private const int ProfileReelsTab = 1;
 
     private static readonly TextStyle OwnProfileTitleStyle = TextStyles.Title3;
     private static readonly TextStyle ProfileNameStyle = TextStyles.Title2;
@@ -182,9 +184,15 @@ internal sealed partial class AethergramApp
 
             DrawProfileHighlights(user);
             DrawProfileTabs();
-            if (profileTab == 0)
+            if (profileTab == ProfilePostsTab)
             {
                 DrawProfilePosts(user);
+                return;
+            }
+
+            if (profileTab == ProfileReelsTab)
+            {
+                DrawProfileReels(user);
                 return;
             }
 
@@ -482,17 +490,17 @@ internal sealed partial class AethergramApp
             var hovered = UiInteract.Hover(cellMin, cellMax);
             var glyphInk = index == profileTab ? Ink.TitleInk : hovered ? Ink.BodyInk : Ink.MutedInk;
             var center = new Vector2((cellMin.X + cellMax.X) * 0.5f, row.Center.Y);
-            if (index == 0)
+            if (index == ProfilePostsTab)
             {
                 DrawGridGlyph(drawList, center, glyphInk);
             }
             else
             {
-                PhoneIcon.Draw(drawList, center, PhoneIcons.UserSquareRounded, glyphInk, IconTabIconSize * scale);
+                PhoneIcon.Draw(drawList, center, index == ProfileReelsTab ? ReelsGlyph : PhoneIcons.UserSquareRounded,
+                    glyphInk, IconTabIconSize * scale);
             }
 
-            HoverTooltip.Show(new Rect(cellMin, cellMax),
-                Loc.T(index == 0 ? L.PhotoTag.PostsTab : L.PhotoTag.TaggedTab), HoverLabelSide.Below);
+            HoverTooltip.Show(new Rect(cellMin, cellMax), Loc.T(ProfileTabLabel(index)), HoverLabelSide.Below);
             if (hovered)
             {
                 ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
@@ -500,6 +508,11 @@ internal sealed partial class AethergramApp
 
             if (UiInteract.Click(cellMin, cellMax, hovered))
             {
+                if (index == ProfileReelsTab && profileTab != ProfileReelsTab)
+                {
+                    store.ForgetUserReels();
+                }
+
                 profileTab = index;
             }
         }
@@ -513,6 +526,13 @@ internal sealed partial class AethergramApp
         ImGui.SetCursorScreenPos(origin);
         ImGui.Dummy(new Vector2(width, row.Height + GridGap * scale));
     }
+
+    private static LocString ProfileTabLabel(int index) => index switch
+    {
+        ProfilePostsTab => L.PhotoTag.PostsTab,
+        ProfileReelsTab => L.Aethergram.Reels,
+        _ => L.PhotoTag.TaggedTab,
+    };
 
     private static void DrawGridGlyph(ImDrawListPtr drawList, Vector2 center, Vector4 ink)
     {

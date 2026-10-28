@@ -10,13 +10,14 @@ internal sealed partial class AethergramApp
 {
     private readonly PostViewsSheet postViewsSheet = new();
     private string? storyOpenedPostId;
+    private bool postViewsReel;
 
     private static bool ViewSourceFor(PostSource source, out PostViewSource viewSource)
     {
         viewSource = source switch
         {
             PostSource.Explore => PostViewSource.Explore,
-            PostSource.Profile or PostSource.Tagged => PostViewSource.Profile,
+            PostSource.Profile or PostSource.Tagged or PostSource.Reels => PostViewSource.Profile,
             PostSource.Hashtag => PostViewSource.Hashtag,
             _ => PostViewSource.Other,
         };
@@ -47,6 +48,7 @@ internal sealed partial class AethergramApp
     private void OpenPostViews(PostDto post)
     {
         store.LoadPostViews(post.Id);
+        postViewsReel = post.Video is not null;
         postViewsSheet.Open();
     }
 
@@ -57,6 +59,6 @@ internal sealed partial class AethergramApp
             return;
         }
 
-        postViewsSheet.Draw(screen, Ink, store.PostViews, store.PostViewsLoading);
+        postViewsSheet.Draw(screen, Ink, store.PostViews, store.PostViewsLoading, postViewsReel);
     }
 }

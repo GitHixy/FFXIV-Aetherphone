@@ -29,6 +29,10 @@ internal sealed class PhoneCommands
     private readonly IChatGui chat;
     private int sampleCounter;
 
+#if DEBUG
+    internal ReelSpikeWindow? ReelSpike { get; set; }
+#endif
+
     public PhoneCommands(PhoneServices services, PhoneWindow phoneWindow, IReadOnlyList<IPhoneApp> apps,
         VideoDebugWindow videoDebugWindow, IChatGui chat)
     {
@@ -113,6 +117,11 @@ internal sealed class PhoneCommands
                 services.Configuration.Save();
                 break;
 
+#if DEBUG
+            case "reelspike" when ReelSpike is not null:
+                ReelSpike.Run(rest);
+                break;
+#endif
             case "treat" when AepConstants.IsPrerelease:
                 Treats.SummonNow();
                 break;

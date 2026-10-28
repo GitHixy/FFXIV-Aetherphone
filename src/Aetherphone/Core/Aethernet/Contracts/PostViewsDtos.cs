@@ -10,4 +10,5 @@ internal sealed record PostViewsDto(
     int HashtagsAndSearch,
     int Stories,
     int Other,
-    int Earlier);
+    int Earlier,
+    int Reels = 0);
