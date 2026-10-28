@@ -45,6 +45,20 @@ internal sealed partial class AethergramApp
             reelCommentsSheet.Close();
         }
 
+        if (reelCommentsSheet.IsOpen)
+        {
+            if (UiInteract.WindowFocused)
+            {
+                ImGui.SetNextFrameWantCaptureKeyboard(true);
+            }
+
+            // The first Escape leaves a focused composer, as ImGui does; the next one closes the sheet.
+            if (ImGui.IsKeyPressed(ImGuiKey.Escape) && !ImGui.IsAnyItemActive())
+            {
+                reelCommentsSheet.Close();
+            }
+        }
+
         ImGui.SetCursorScreenPos(screen.Min);
         using (ImRaii.Child("##aethergramReelComments", screen.Size, false, ReelCommentsFlags))
         {
@@ -76,9 +90,11 @@ internal sealed partial class AethergramApp
         }
 
         var composerHeight = DetailComposerHeight * scale;
+        var composerBottom = frame.Panel.Max.Y - Metrics.Size.HomeIndicatorInset * scale;
         var listRect = new Rect(new Vector2(content.Min.X, content.Min.Y + titleHeight),
-            new Vector2(content.Max.X, content.Max.Y - composerHeight));
-        var composerRect = new Rect(new Vector2(content.Min.X, content.Max.Y - composerHeight), content.Max);
+            new Vector2(content.Max.X, composerBottom - composerHeight));
+        var composerRect = new Rect(new Vector2(content.Min.X, composerBottom - composerHeight),
+            new Vector2(content.Max.X, composerBottom));
         if (ImGui.IsMouseClicked(ImGuiMouseButton.Left)
             && (UiInteract.HoverWindowOnly(listRect.Min, listRect.Max)
                 || UiInteract.HoverWindowOnly(composerRect.Min, composerRect.Max)))

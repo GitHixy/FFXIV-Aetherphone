@@ -7713,6 +7713,8 @@ internal static class L
             "Short videos people share show up here");
         public static readonly LocString ReelsLoadFailed = new("aethergram.reelsLoadFailed", "Couldn't load reels");
         public static readonly LocString ReelsCaughtUp = new("aethergram.reelsCaughtUp", "You're all caught up");
+        public static readonly LocString ReelsCaughtUpHint = new("aethergram.reelsCaughtUpHint",
+            "New reels show up here as people post them");
         public static readonly LocString ReelPlayFailed = new("aethergram.reelPlayFailed", "This reel couldn't play");
         public static readonly LocString ReelComments = new("aethergram.reelComments", "Comments");
         public static readonly LocString ReelSetupTitle = new("aethergram.reelSetupTitle", "Watch Reels in game");

@@ -94,7 +94,11 @@ internal sealed partial class AethergramApp
     // Tapping Reels again starts a fresh session from the top, as on Instagram.
     private void RestartReelsTab()
     {
-        var deck = store.ReelTab;
+        RefreshReelDeck(store.ReelTab);
+    }
+
+    private void RefreshReelDeck(ReelDeck deck)
+    {
         EndReelPlay(deck, false);
         deck.Reset();
         reelSnap.SnapTo(0f);
@@ -173,15 +177,20 @@ internal sealed partial class AethergramApp
         var items = deck.Items;
         var now = ImGui.GetTime();
         var delta = MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
-        var pressAllowed = !ReelControlsHovered(overlay, tabMode, post);
-        var step = reelSwipe.Update(area, !ReelCommentsCaptures, pressAllowed, deck.Position < items.Length - 1,
-            deck.Position > 0, now, delta, out var touch);
+        var onLast = deck.Position == items.Length - 1;
+        if (deck.AtEnd && (!onLast || !deck.Exhausted))
+        {
+            deck.AtEnd = false;
+        }
+
+        var pressAllowed = deck.AtEnd || !ReelControlsHovered(overlay, tabMode, post);
+        var step = reelSwipe.Update(area, !ReelCommentsCaptures, pressAllowed,
+            !deck.AtEnd && (!onLast || deck.Exhausted), deck.AtEnd || deck.Position > 0, now, delta, out var touch);
         if (reelSwipe.Released)
         {
             if (step != 0)
             {
-                EndReelPlay(deck, true);
-                deck.MoveTo(deck.Position + step);
+                StepReelDeck(deck, step);
                 post = deck.Resolve()!;
                 items = deck.Items;
                 expandedReelCaptionId = null;
@@ -190,10 +199,18 @@ internal sealed partial class AethergramApp
             reelSnap.SnapTo(reelSnap.Value + reelSwipe.ReleasedDrag + step * area.Height);
         }
 
-        BeginReelPlay(deck, post);
         var offset = reelSwipe.Dragging
             ? reelSnap.Value + reelSwipe.Drag
             : reelSnap.Step(0f, ReelSnapSeconds, delta);
+        if (deck.AtEnd)
+        {
+            reelPlayback.Present(ReadOnlySpan<ReelSource>.Empty, false, reelMuted);
+            reelPresentedFrame = ImGui.GetFrameCount();
+            DrawReelEndCard(drawList, area, overlay, post, deck, offset, tabMode);
+            return;
+        }
+
+        BeginReelPlay(deck, post);
         var veiled = SensitiveReveals.ShouldVeil(post.Sensitive, post.Id, configuration.ShowSensitiveContent);
         HandleReelTouch(touch, post, veiled);
         var held = reelSwipe.Holding;
@@ -221,7 +238,7 @@ internal sealed partial class AethergramApp
             var shift = new Vector2(0f, offset);
             var shifted = new Rect(overlay.Min + shift, overlay.Max + shift);
             DrawReelChrome(drawList, shifted, post, progress, tabMode);
-            DrawReelStatus(drawList, shifted, post, current, veiled, deck);
+            DrawReelStatus(drawList, shifted, post, current, veiled);
         }
 
         doubleTapLike.DrawBurst(drawList, area, post.Id);
@@ -717,21 +734,29 @@ internal sealed partial class AethergramApp
 
         var translateKey = new TranslationKey(TranslationSurface.Post, post.Id, post.EditedAtUnix ?? 0);
         var captionView = translation.View(translateKey, post.Text, post.Lang);
+        var expanded = string.Equals(expandedReelCaptionId, post.Id, StringComparison.Ordinal);
         using (Plugin.Fonts.Push(CardCaptionScale))
         {
-            if (reelCaptionLayouts.LayoutFor(captionView.LayoutKey, captionView.Text, post.Mentions, width) is not
-                { } layout)
+            // A caption with no tag, mention, link or emoji has no rich layout; it draws as plain wrapped lines.
+            var layout = reelCaptionLayouts.LayoutFor(captionView.LayoutKey, captionView.Text, post.Mentions, width);
+            var lineHeight = layout?.LineHeight ?? ImGui.GetTextLineHeight();
+            var fullHeight = layout?.Size.Y ?? Typography.WrapCurrent(captionView.Text, width).Length * lineHeight;
+            var fold = TextFold.Measure(fullHeight, lineHeight, ReelCaptionLines, expanded);
+            var cappedLines = Math.Max(1, (int)(overlay.Height * ReelExpandedCaptionShare / lineHeight));
+            var visibleLines = Math.Min(fold.VisibleLines, cappedLines);
+            var visibleHeight = MathF.Min(fold.VisibleHeight, visibleLines * lineHeight);
+            var height = fold.Folded ? fold.Height : visibleHeight;
+            var origin = new Vector2(left, bottom - height);
+            if (layout is null)
             {
-                return 0f;
+                Typography.DrawWrappedLines(drawList, origin, captionView.Text, Ink.BodyInk, width, lineHeight,
+                    visibleLines);
+            }
+            else
+            {
+                DrawRichBody(drawList, layout, origin, visibleHeight);
             }
 
-            var expanded = string.Equals(expandedReelCaptionId, post.Id, StringComparison.Ordinal);
-            var fold = TextFold.Measure(layout.Size.Y, layout.LineHeight, ReelCaptionLines, expanded);
-            var height = MathF.Min(fold.Height, overlay.Height * ReelExpandedCaptionShare);
-            var origin = new Vector2(left, bottom - height);
-            drawList.PushClipRect(origin, new Vector2(left + width, bottom), true);
-            DrawRichBody(drawList, layout, origin, MathF.Min(fold.VisibleHeight, height));
-            drawList.PopClipRect();
             if (fold.DrawReadMore(drawList, origin, Ink.MutedInk, Ink.White))
             {
                 expandedReelCaptionId = post.Id;
@@ -772,8 +797,7 @@ internal sealed partial class AethergramApp
         }
     }
 
-    private void DrawReelStatus(ImDrawListPtr drawList, Rect overlay, PostDto post, ReelFrame current, bool veiled,
-        ReelDeck deck)
+    private void DrawReelStatus(ImDrawListPtr drawList, Rect overlay, PostDto post, ReelFrame current, bool veiled)
     {
         var scale = UiScale.Current;
         var center = overlay.Center;
@@ -798,12 +822,6 @@ internal sealed partial class AethergramApp
         {
             DrawReelChip(drawList, new Vector2(center.X, overlay.Min.Y + overlay.Height * 0.3f),
                 Loc.T(L.Aethergram.ReelPausedForMogCast));
-        }
-
-        if (deck.Exhausted && deck.Position == deck.Items.Length - 1)
-        {
-            DrawReelChip(drawList, new Vector2(center.X, overlay.Min.Y + overlay.Height * 0.2f),
-                Loc.T(L.Aethergram.ReelsCaughtUp));
         }
 
         DrawReelMuteFlash(drawList, center);
@@ -852,6 +870,45 @@ internal sealed partial class AethergramApp
         drawList.AddRectFilled(min, max, ImGui.GetColorU32(ReelChipFill), height * 0.5f);
         Typography.DrawCentered(drawList, center, text, Ink.White, ReelChipStyle);
         return new Rect(min, max);
+    }
+
+    // Past the last reel of a feed that ran dry sits its own end card, so a swipe up ends there and a swipe down
+    // returns to the last reel.
+    private void StepReelDeck(ReelDeck deck, int step)
+    {
+        if (deck.AtEnd)
+        {
+            deck.AtEnd = false;
+            return;
+        }
+
+        EndReelPlay(deck, true);
+        if (step > 0 && deck.Position == deck.Items.Length - 1)
+        {
+            deck.AtEnd = true;
+            return;
+        }
+
+        deck.MoveTo(deck.Position + step);
+    }
+
+    private void DrawReelEndCard(ImDrawListPtr drawList, Rect area, Rect overlay, PostDto lastReel, ReelDeck deck,
+        float offset, bool tabMode)
+    {
+        drawList.PushClipRect(area.Min, area.Max, true);
+        if (offset > 0.5f)
+        {
+            DrawReelFace(drawList, ShiftRect(area, offset - area.Height), lastReel);
+        }
+
+        if (EmptyState.Draw(ShiftRect(overlay, offset), ui, FontAwesomeIcon.Film, Loc.T(L.Aethergram.ReelsCaughtUp),
+                Loc.T(L.Aethergram.ReelsCaughtUpHint), Loc.T(L.Common.Refresh)))
+        {
+            RefreshReelDeck(deck);
+        }
+
+        drawList.PopClipRect();
+        DrawReelTopBar(drawList, overlay, tabMode);
     }
 
     private void DrawReelEmpty(Rect overlay, ReelDeck deck)

@@ -83,7 +83,8 @@ internal static class CommentComposerBar
         }
         ImGui.SetCursorScreenPos(new Vector2(textLeft,
             (pillMin.Y + pillMax.Y) * 0.5f - ImGui.GetFrameHeight() * 0.5f));
-        ImGui.SetNextItemWidth(pillMax.X - textLeft - 10f * scale);
+        var fieldWidth = pillMax.X - textLeft - 10f * scale;
+        ImGui.SetNextItemWidth(fieldWidth);
         if ((focusPending || RefocusRequests.Contains(inputId)) && !InputShield.Active)
         {
             ImGui.SetKeyboardFocusHere();
@@ -96,7 +97,8 @@ internal static class CommentComposerBar
         using (UiScope.PushColor(ImGuiCol.FrameBg, new Vector4(0f, 0f, 0f, 0f)))
         using (UiScope.PushColor(ImGuiCol.Text, style.TextInk))
         {
-            submitted = MentionField.SingleLineWithHint(inputId, hint, ref draft, maxLength, mentions)
+            var shownHint = Typography.FitInCurrentFont(hint, fieldWidth - ImGui.GetStyle().FramePadding.X * 2f);
+            submitted = MentionField.SingleLineWithHint(inputId, shownHint, ref draft, maxLength, mentions)
                         && !emoji.Suggesting;
         }
 

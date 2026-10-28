@@ -3307,6 +3307,7 @@
   "aethergram.reelsEmptyHint": "Здесь появляются короткие видео, которыми делятся игроки",
   "aethergram.reelsLoadFailed": "Не удалось загрузить reels",
   "aethergram.reelsCaughtUp": "Вы всё посмотрели",
+  "aethergram.reelsCaughtUpHint": "Новые reels появятся здесь, когда их опубликуют",
   "aethergram.reelPlayFailed": "Не удалось воспроизвести этот reel",
   "aethergram.reelComments": "Комментарии",
   "aethergram.reelSetupTitle": "Смотрите Reels в игре",
