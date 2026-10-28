@@ -51,7 +51,7 @@ function Get-SourceTexts {
     return $texts
 }
 
-$entry = [regex]::Match($changelogData, 'new ChangelogEntry\(\s*"' + [regex]::Escape($Version) + '"\s*,\s*"[^"]*"\s*,\s*(?:L\.Changelog\.(\w+)\)|new ChangelogSection\[\]\s*\{(.*?)\}\))', 'Singleline')
+$entry = [regex]::Match($changelogData, 'new ChangelogEntry\(\s*"' + [regex]::Escape($Version) + '"\s*,\s*"[^"]*"\s*,\s*(?:new ChangelogSpotlight\[\]\s*\{.*?\}\s*,\s*)?(?:L\.Changelog\.(\w+)\)|new ChangelogSection\[\]\s*\{(.*?)\}\))', 'Singleline')
 if (-not $entry.Success) {
     return @()
 }

@@ -2475,34 +2475,150 @@ internal static class L
         public static readonly LocString SectionTours = new("changelog.sectionTours", "Setup and tours");
         public static readonly LocString SectionSounds = new("changelog.sectionSounds", "Sounds");
         public static readonly LocString SectionHalloween = new("changelog.sectionHalloween", "Halloween");
+        public static readonly LocString WhatsNewContinue = new("changelog.whatsNewContinue", "Continue");
+        public static readonly LocString WhatsNewSeeAll = new("changelog.whatsNewSeeAll", "See all changes");
+        public static readonly LocString VersionTitle = new("changelog.versionTitle", "Version {0}");
+        public static readonly LocPlural AllChanges = new("changelog.allChanges", "{0} change", "All {0} changes");
+        public static readonly LocString PreviousVersions = new("changelog.previousVersions", "Previous versions");
+        public static readonly LocString OlderVersions = new("changelog.olderVersions", "{0} and earlier");
+        public static readonly LocPlural CountNew = new("changelog.countNew", "{0} new", "{0} new");
+        public static readonly LocPlural CountImproved = new("changelog.countImproved", "{0} improved", "{0} improved");
+        public static readonly LocPlural CountFixed = new("changelog.countFixed", "{0} fixed", "{0} fixed");
+        public static readonly LocString FilterAll = new("changelog.filterAll", "All");
+        public static readonly LocString FilterNew = new("changelog.filterNew", "New");
+        public static readonly LocString FilterImproved = new("changelog.filterImproved", "Improved");
+        public static readonly LocString FilterFixed = new("changelog.filterFixed", "Fixed");
 
-        public static readonly LocString[] Release1410Collections =
+        public static readonly LocString Spotlight1420Reels = new("changelog.s1420.reels", "Reels");
+        public static readonly LocString Spotlight1420ReelsBody = new("changelog.s1420.reelsBody", "Short videos, full screen, with sound");
+        public static readonly LocString Spotlight1420Explore = new("changelog.s1420.explore", "Explore");
+        public static readonly LocString Spotlight1420ExploreBody = new("changelog.s1420.exploreBody", "Trending tags and posts picked for you");
+        public static readonly LocString Spotlight1420Threads = new("changelog.s1420.threads", "Threads and edits");
+        public static readonly LocString Spotlight1420ThreadsBody = new("changelog.s1420.threadsBody", "Chain chirps together and fix a typo for an hour");
+        public static readonly LocString Spotlight1420Highlights = new("changelog.s1420.highlights", "Story highlights");
+        public static readonly LocString Spotlight1420HighlightsBody = new("changelog.s1420.highlightsBody", "Keep your best stories on your profile");
+        public static readonly LocString Spotlight1420ReelRewards = new("changelog.s1420.reelRewards", "Reel rewards");
+        public static readonly LocString Spotlight1420ReelRewardsBody = new("changelog.s1420.reelRewardsBody", "35 coins a day for a reel, 500 for your first");
+
+        public static readonly LocString[] Release1420Phone =
         {
-            new("changelog.r1410.0",
+            new("changelog.r1420.39",
+                "Added What's New: after an update, a sheet shows the new version's highlights once, and tapping one opens its app"),
+            new("changelog.r1420.40",
+                "Overhauled the Changelog: the newest version leads with its highlights, every earlier version is one row with a count of its changes, and a version's page groups its changes by app with New, Improved and Fixed filters"),
+        };
+
+        public static readonly LocString[] Release1420Social =
+        {
+            new("changelog.r1420.5",
+                "Added People to follow: while you follow fewer than five accounts, For You shows a row of players you may want to follow, an empty Following feed lists them too, and suggested posts carry a Follow link"),
+            new("changelog.r1420.6",
+                "Added a boost for new players: someone's first three posts get an early spot in For You until people start answering them, marked One of their first posts"),
+            new("changelog.r1420.7",
+                "Added Not interested to the menu of posts in For You: the post folds away with Undo, and you see less from that account for 30 days"),
+            new("changelog.r1420.8",
+                "Added Mute to post and profile menus: you stop seeing that account's posts and replies in Chirper and Aethergram, quotes of their chirps fold away, and Muted accounts lists everyone you muted"),
+            new("changelog.r1420.9",
+                "Added grouped likes: likes on the same post or comment share one row in Activity that names the latest two people and counts the rest"),
+            new("changelog.r1420.10",
+                "Added view counts: every chirp shows how many people saw it, and your own Aethergram posts show theirs next to the time"),
+            new("changelog.r1420.11",
+                "Added a Views sheet: tap the view count on your own post to see how many viewers follow you and where the views came from, such as Home, Explore, Profile, Hashtags and search, Stories and Reels"),
+            new("changelog.r1420.12",
+                "Added photo descriptions: tap ALT on a photo while posting to describe it or change it later, and tap the ALT badge on a photo to read its description"),
+            new("changelog.r1420.13",
+                "Added drafts: closing the composer with something in it offers to save a draft, and Drafts brings it back later, up to 20 per app"),
+            new("changelog.r1420.14",
+                "Changed For You to start showing brand new posts that still need their first readers at the third card instead of the tenth"),
+            new("changelog.r1420.15",
+                "Fixed posts whose language could not be detected being shown to fewer players in For You"),
+        };
+
+        public static readonly LocString[] Release1420Aethergram =
+        {
+            new("changelog.r1420.16",
+                "Added Reels: a new Reels tab plays short videos full screen with sound. Swipe for the next one, tap to mute, hold to pause, double tap to like, and open comments while the reel keeps playing"),
+            new("changelog.r1420.17",
+                "Added posting reels: choose Reel in the composer, pick a video from your PC, trim it to 90 seconds or less, keep it Original or crop it with Fill 9:16, and pick a cover"),
+            new("changelog.r1420.18",
+                "Added a Reels feed that learns as you watch: reels you finish bring more like them, reels you skip in the first seconds bring fewer, and new reels get a chance to find viewers"),
+            new("changelog.r1420.19",
+                "Added reels around Aethergram: they play muted in your home feed, Explore and profile grids mark them, and profiles have a Reels tab"),
+            new("changelog.r1420.20",
+                "Added the video engine for Reels: reels play with MogCast's video engine, and the Reels tab offers to install it once"),
+            new("changelog.r1420.21",
+                "Added Explore: open Search without typing to see trending tags and a grid of posts picked for you from people you don't follow yet"),
+            new("changelog.r1420.22",
+                "Added collabs: invite up to five people to co-author a post. Once they accept, it shows on their profiles with every author's name, and Edit post lets you invite more or remove someone"),
+            new("changelog.r1420.23",
+                "Added Close friends: share a story with only the people on your Close friends list, marked with a green ring"),
+            new("changelog.r1420.24",
+                "Added highlights: keep your stories in circles on your profile after they end, and add or remove stories whenever you like"),
+            new("changelog.r1420.25",
+                "Added the story archive: your stories are kept privately in Archive after they end, so you can add them to highlights later. Turn off Save story to archive in Aethergram settings to stop it"),
+            new("changelog.r1420.26",
+                "Added story likes: tap the heart next to the reply field, and see who liked your story in its viewer list"),
+            new("changelog.r1420.27",
+                "Added Add post to your story: share a post to your story with an optional caption from the send sheet or the post's menu"),
+            new("changelog.r1420.28",
+                "Fixed Translate showing the old caption after a post was edited"),
+        };
+
+        public static readonly LocString[] Release1420Chirper =
+        {
+            new("changelog.r1420.29",
+                "Added threads: tap Add another chirp to write up to 25 connected chirps, each with its own photos or GIF, and readers open them with Show this thread"),
+            new("changelog.r1420.30",
+                "Added editing: Edit chirp in your chirp's menu works for an hour after posting, up to five times, and Edited next to the time opens the edit history"),
+            new("changelog.r1420.31",
+                "Added who can reply: choose everyone, people you follow or only people you mention when you post, and change it later with Change who can reply"),
+            new("changelog.r1420.32",
+                "Added scheduled chirps: tap the clock in the composer to pick a date and time, and Unsent chirps lists what is waiting so you can edit or delete it"),
+            new("changelog.r1420.33",
+                "Added a Chirps tab to search, next to People, to find chirps by their words"),
+            new("changelog.r1420.34",
+                "Added sharing chirps: Share chirp sends a chirp to a chat, adds it to your Aethergram story, or copies a link that shows as a chirp card in chats"),
+            new("changelog.r1420.35",
+                "Changed Reply on a chirp in a feed to open the chirp with the reply box ready to type"),
+        };
+
+        public static readonly LocString[] Release1420Coin =
+        {
+            new("changelog.r1420.36",
+                "Added the Post a reel quest: post a reel once a day for 35 coins on top of today's quests, paid an hour after the reel goes up"),
+            new("changelog.r1420.37",
+                "Added a one-time 500 coin bonus for your first reel, paid an hour after it goes up"),
+            new("changelog.r1420.38",
+                "Added shortcuts to the post and story quests: tap one to open the Chirper composer or the story camera"),
+        };
+
+        public static readonly LocString[] Release1420Collections =
+        {
+            new("changelog.r1420.0",
                 "Added the Game order sort to Mounts, Minions, Emotes, Orchestrions and Triple Triad in Collections: each list follows the in-game order, contributed by jambalong"),
         };
 
-        public static readonly LocString[] Release1410Velvet =
+        public static readonly LocString[] Release1420Velvet =
         {
-            new("changelog.r1410.1",
+            new("changelog.r1420.1",
                 "Added a list of your connections: tap Connections on your profile to see and search everyone you are connected to, contributed by hellovvn"),
         };
 
-        public static readonly LocString[] Release1410Feedback =
+        public static readonly LocString[] Release1420Feedback =
         {
-            new("changelog.r1410.4",
+            new("changelog.r1420.4",
                 "Added pasting and dragging screenshots into a report: press Ctrl+V, tap Paste image in Add photos, or drag a file in from File Explorer, contributed by hellovvn"),
         };
 
-        public static readonly LocString[] Release1410Messaging =
+        public static readonly LocString[] Release1420Messaging =
         {
-            new("changelog.r1410.2",
+            new("changelog.r1420.2",
                 "Fixed a new tell popping up while you typed in a Linkpearl pop-out sending your next keys to the game: it now opens without taking focus and you keep typing where you were, contributed by hellovvn"),
         };
 
-        public static readonly LocString[] Release1410Music =
+        public static readonly LocString[] Release1420Music =
         {
-            new("changelog.r1410.3",
+            new("changelog.r1420.3",
                 "Fixed accented letters in playlist, song and channel names turning into garbled characters: re-import a playlist to fix names it already saved, contributed by GitHixy"),
         };
 

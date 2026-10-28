@@ -194,6 +194,8 @@ Changelog bullets (the `L.Changelog` arrays, keyed `changelog.r<version digits>.
 - A follow-up to a feature that is new in the same unreleased version folds into that feature's Added bullet; Changed and Fixed describe only what shipped before.
 - Credit an outside contributor with a trailing clause: ", contributed by" and their GitHub name.
 
+Spotlight items (the What's New sheet, keyed `changelog.s<version digits>.<name>`) are not bullets: the title is two to four words with no verb, and the line under it says what the player gets in about 50 English characters, with no closing period.
+
 Where entries live and how versions map to keys is in [Testing and release](testing-and-release.md).
 
 ## Names that never change

@@ -6,13 +6,25 @@ internal static class ChangelogData
 {
     public static readonly IReadOnlyList<ChangelogEntry> Entries = new[]
     {
-        new ChangelogEntry("1.4.2.0", "2026-10-27", new ChangelogSection[]
+        new ChangelogEntry("1.4.2.0", "2026-10-27", new ChangelogSpotlight[]
         {
-            new(L.Apps.Collections, L.Changelog.Release1410Collections),
-            new(L.Apps.Velvet, L.Changelog.Release1410Velvet),
-            new(L.Apps.Feedback, L.Changelog.Release1410Feedback),
-            new(L.Changelog.SectionMessaging, L.Changelog.Release1410Messaging),
-            new(L.Apps.Music, L.Changelog.Release1410Music),
+            new("aethergram", L.Changelog.Spotlight1420Reels, L.Changelog.Spotlight1420ReelsBody),
+            new("aethergram", L.Changelog.Spotlight1420Explore, L.Changelog.Spotlight1420ExploreBody),
+            new("chirper", L.Changelog.Spotlight1420Threads, L.Changelog.Spotlight1420ThreadsBody),
+            new("aethergram", L.Changelog.Spotlight1420Highlights, L.Changelog.Spotlight1420HighlightsBody),
+            new("coin", L.Changelog.Spotlight1420ReelRewards, L.Changelog.Spotlight1420ReelRewardsBody),
+        }, new ChangelogSection[]
+        {
+            new(L.Changelog.SectionSocial, L.Changelog.Release1420Social),
+            new(L.Apps.Aethergram, L.Changelog.Release1420Aethergram),
+            new(L.Apps.Chirper, L.Changelog.Release1420Chirper),
+            new(L.Apps.Coin, L.Changelog.Release1420Coin),
+            new(L.Apps.Collections, L.Changelog.Release1420Collections),
+            new(L.Apps.Velvet, L.Changelog.Release1420Velvet),
+            new(L.Apps.Feedback, L.Changelog.Release1420Feedback),
+            new(L.Changelog.SectionMessaging, L.Changelog.Release1420Messaging),
+            new(L.Apps.Music, L.Changelog.Release1420Music),
+            new(L.Changelog.SectionPhone, L.Changelog.Release1420Phone),
         }),
         new ChangelogEntry("1.4.1.0", "2026-10-27", new ChangelogSection[]
         {

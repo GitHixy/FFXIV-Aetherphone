@@ -15,6 +15,8 @@ internal sealed class PopoutNavigator : INavigator
 
     public bool IsAvailable(string appId) => false;
 
+    public bool CanOpen(string appId) => false;
+
     public void OpenApp(IPhoneApp app)
     {
     }
