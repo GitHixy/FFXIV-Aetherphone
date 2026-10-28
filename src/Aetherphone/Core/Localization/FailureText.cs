@@ -28,6 +28,7 @@ internal static class FailureCodes
     public const string SessionRevoked = "session_revoked";
     public const string SocialDisabled = "social_disabled";
     public const string AppDisabled = "app_disabled";
+    public const string Maintenance = MaintenanceWire.Code;
     public const string ValidationFailed = "validation_failed";
     public const string Conflict = "conflict";
     public const string PostNotChirp = "post_not_chirp";
@@ -185,6 +186,8 @@ internal static class FailureText
                 return string.Empty;
             case AepFailureKind.BadResponse:
                 return Loc.T(L.Failure.BadResponse);
+            case AepFailureKind.Maintenance:
+                return Loc.T(L.Failure.Maintenance);
             default:
                 return FromServer(failure);
         }
@@ -238,6 +241,8 @@ internal static class FailureText
                 return Loc.T(L.Failure.SocialDisabled);
             case FailureCodes.AppDisabled:
                 return Loc.T(L.Failure.AppDisabled);
+            case FailureCodes.Maintenance:
+                return Loc.T(L.Failure.Maintenance);
             case FailureCodes.ValidationFailed:
                 return Loc.T(L.Failure.ValidationFailed);
             case FailureCodes.Conflict:

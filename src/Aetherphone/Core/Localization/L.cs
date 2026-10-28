@@ -2506,6 +2506,12 @@ internal static class L
                 "Fixed accented letters in playlist, song and channel names turning into garbled characters: re-import a playlist to fix names it already saved, contributed by GitHixy"),
         };
 
+        public static readonly LocString[] Release1410Maintenance =
+        {
+            new("changelog.r1410.maintenance",
+                "Added a maintenance screen: while Aethernet is down for planned maintenance, online apps show a countdown to when it should be back, and apps that don't need Aethernet keep working"),
+        };
+
         public static readonly LocString[] Release1400Prism =
         {
             new("changelog.r1400.0",
@@ -15299,6 +15305,7 @@ internal static class L
         public static readonly LocString SessionRevoked = new("failure.sessionRevoked", "You were signed out. Sign in again to continue.");
         public static readonly LocString SocialDisabled = new("failure.socialDisabled", "The social apps are temporarily switched off. Try again later.");
         public static readonly LocString AppDisabled = new("failure.appDisabled", "This app is temporarily switched off. Try again later.");
+        public static readonly LocString Maintenance = new("failure.maintenance", "Aethernet is under maintenance. It will be back soon.");
         public static readonly LocString ValidationFailed = new("failure.validationFailed", "That didn't look right. Check what you entered, then try again.");
         public static readonly LocString Conflict = new("failure.conflict", "Someone else changed this first. Reopen it and try again.");
         public static readonly LocString PostNotChirp = new("failure.postNotChirp", "That only works on chirps.");
@@ -15373,6 +15380,14 @@ internal static class L
         public static readonly LocString PrismGlamDailyLimit = new("failure.prismGlamDailyLimit", "You've reached today's glam limit ({0}). You can post again after the daily reset.");
         public static readonly LocString PrismGlamPhotosLocked = new("failure.prismGlamPhotosLocked", "A contest glam keeps the photo that was judged.");
         public static readonly LocString PrismGlamUnderReview = new("failure.prismGlamUnderReview", "This glam is being reviewed, so its photos can't change right now.");
+    }
+
+    internal static class Maintenance
+    {
+        public static readonly LocString Title = new("maintenance.title", "Aethernet is under maintenance");
+        public static readonly LocString ExpectedBackIn = new("maintenance.expectedBackIn", "Expected back in");
+        public static readonly LocString FinishingUp = new("maintenance.finishingUp", "Finishing up, back any minute");
+        public static readonly LocString OfflineApps = new("maintenance.offlineApps", "Apps that don't need Aethernet keep working.");
     }
 
     internal static class Rolladeck

@@ -124,6 +124,22 @@ internal sealed class NavigationStack : INavigator
         BeginPresent(app, under);
     }
 
+    public void RefreshCurrent()
+    {
+        if (current is not { } app || motion != ShellMotion.None)
+        {
+            return;
+        }
+
+        if (app is IResumableApp resumable)
+        {
+            resumable.OnResumed();
+            return;
+        }
+
+        app.OnOpened();
+    }
+
     private void NotifyOpened(IPhoneApp app)
     {
         forgetOnClose.Remove(app.Id);

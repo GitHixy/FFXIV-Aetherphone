@@ -23,6 +23,7 @@ internal sealed partial class MusicApp
     private readonly Action popPage;
     private readonly TabBar tabBar = new();
     private readonly TabItem[] tabItems = new TabItem[TabCount];
+    private readonly MaintenancePanel maintenancePanel = new();
     private MusicTab tab = MusicTab.Home;
     private int pageDepth = 1;
     private float bottomChrome;
@@ -205,8 +206,14 @@ internal sealed partial class MusicApp
             case MusicScreen.StationFilter:
                 DrawStationFilter(context, route);
                 break;
+            case MusicScreen.CommunityStation when session.Maintenance.Holds:
+                DrawMaintenancePage(context, Loc.T(L.Music.CommunityRadio));
+                break;
             case MusicScreen.CommunityStation:
                 DrawCommunityStation(context, route);
+                break;
+            case MusicScreen.MyStation when session.Maintenance.Holds:
+                DrawMaintenancePage(context, Loc.T(L.Music.MyStation));
                 break;
             case MusicScreen.MyStation:
                 DrawMyStation(context);
@@ -223,6 +230,9 @@ internal sealed partial class MusicApp
             case MusicScreen.VenueDetail:
                 DrawVenueDetail(context);
                 break;
+            case MusicScreen.JamLobby when session.Maintenance.Holds:
+                DrawMaintenancePage(context, Loc.T(L.Music.Jam.Title));
+                break;
             case MusicScreen.JamLobby:
                 DrawJamLobby(context);
                 break;
@@ -236,6 +246,13 @@ internal sealed partial class MusicApp
     }
 
     private NavBarFrame BeginPage(in PhoneContext context) => AppHeader.BeginLargeTitle(context, pageDepth > 1);
+
+    private void DrawMaintenancePage(in PhoneContext context, string title)
+    {
+        var frame = BeginPage(context);
+        maintenancePanel.Draw(frame.Body, theme, session.Maintenance.View);
+        EndPage(in frame, context, title);
+    }
 
     private int EndPage(in NavBarFrame frame, in PhoneContext context, string title) =>
         EndPage(in frame, context, title, ReadOnlySpan<NavBarButton>.Empty);
