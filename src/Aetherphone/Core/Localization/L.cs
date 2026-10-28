@@ -2475,6 +2475,38 @@ internal static class L
         public static readonly LocString SectionTours = new("changelog.sectionTours", "Setup and tours");
         public static readonly LocString SectionSounds = new("changelog.sectionSounds", "Sounds");
         public static readonly LocString SectionHalloween = new("changelog.sectionHalloween", "Halloween");
+        public static readonly LocString WhatsNewContinue = new("changelog.whatsNewContinue", "Continue");
+        public static readonly LocString WhatsNewSeeAll = new("changelog.whatsNewSeeAll", "See all changes");
+        public static readonly LocString VersionTitle = new("changelog.versionTitle", "Version {0}");
+        public static readonly LocPlural AllChanges = new("changelog.allChanges", "{0} change", "All {0} changes");
+        public static readonly LocString PreviousVersions = new("changelog.previousVersions", "Previous versions");
+        public static readonly LocString OlderVersions = new("changelog.olderVersions", "{0} and earlier");
+        public static readonly LocPlural CountNew = new("changelog.countNew", "{0} new", "{0} new");
+        public static readonly LocPlural CountImproved = new("changelog.countImproved", "{0} improved", "{0} improved");
+        public static readonly LocPlural CountFixed = new("changelog.countFixed", "{0} fixed", "{0} fixed");
+        public static readonly LocString FilterAll = new("changelog.filterAll", "All");
+        public static readonly LocString FilterNew = new("changelog.filterNew", "New");
+        public static readonly LocString FilterImproved = new("changelog.filterImproved", "Improved");
+        public static readonly LocString FilterFixed = new("changelog.filterFixed", "Fixed");
+
+        public static readonly LocString Spotlight1420Reels = new("changelog.s1420.reels", "Reels");
+        public static readonly LocString Spotlight1420ReelsBody = new("changelog.s1420.reelsBody", "Short videos, full screen, with sound");
+        public static readonly LocString Spotlight1420Explore = new("changelog.s1420.explore", "Explore");
+        public static readonly LocString Spotlight1420ExploreBody = new("changelog.s1420.exploreBody", "Trending tags and posts picked for you");
+        public static readonly LocString Spotlight1420Threads = new("changelog.s1420.threads", "Threads and edits");
+        public static readonly LocString Spotlight1420ThreadsBody = new("changelog.s1420.threadsBody", "Chain chirps together and fix a typo for an hour");
+        public static readonly LocString Spotlight1420Highlights = new("changelog.s1420.highlights", "Story highlights");
+        public static readonly LocString Spotlight1420HighlightsBody = new("changelog.s1420.highlightsBody", "Keep your best stories on your profile");
+        public static readonly LocString Spotlight1420ReelRewards = new("changelog.s1420.reelRewards", "Reel rewards");
+        public static readonly LocString Spotlight1420ReelRewardsBody = new("changelog.s1420.reelRewardsBody", "35 coins a day for a reel, 500 for your first");
+
+        public static readonly LocString[] Release1420Phone =
+        {
+            new("changelog.r1420.39",
+                "Added What's New: after an update, a sheet shows the new version's highlights once, and tapping one opens its app"),
+            new("changelog.r1420.40",
+                "Overhauled the Changelog: the newest version leads with its highlights, every earlier version is one row with a count of its changes, and a version's page groups its changes by app with New, Improved and Fixed filters"),
+        };
 
         public static readonly LocString[] Release1420Social =
         {

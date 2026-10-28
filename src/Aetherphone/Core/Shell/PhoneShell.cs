@@ -1,6 +1,7 @@
 using Aetherphone.Core.Aethernet;
 using Aetherphone.Core.Animation;
 using Aetherphone.Core.Apps;
+using Aetherphone.Core.Changelog;
 using Aetherphone.Core.Confirm;
 using Aetherphone.Core.Home;
 using Aetherphone.Core.Localization;
@@ -135,6 +136,8 @@ internal sealed class PhoneShell : IDisposable
         var shareSheet = new ShareSheet(services.Share);
         var conductOverlay = new ConductGateOverlay(services.Conduct);
         var encryptionHelpOverlay = new EncryptionHelpOverlay(services.EncryptionHelp);
+        var whatsNewOverlay = new WhatsNewOverlay(new WhatsNewService(configuration), navigation,
+            services.SettingsLauncher);
         setup = new SetupOverlay(services.AethernetSession, services.Aethernet, services.GameData,
             services.RemoteImages, services.Lodestone, bundle.Photos, services.WallpaperImages, navigation,
             configuration, services.Confirm, themes);
@@ -145,7 +148,8 @@ internal sealed class PhoneShell : IDisposable
         morph = new MinimizeMorphView(themes, minimize, minimizedPhone, painter);
         overlays = new ShellOverlayCoordinator(configuration, loading, navigation, controlCenter, appSwitcher, banner,
             island, rateLimitPill, shortcutPill, coinPill, coinFloats, incomingOverlay, alarmOverlay, banOverlay,
-            confirmOverlay, reportOverlay, shareSheet, conductOverlay, encryptionHelpOverlay, director, setup);
+            confirmOverlay, reportOverlay, shareSheet, conductOverlay, encryptionHelpOverlay, whatsNewOverlay, director,
+            setup);
     }
 
     public void OnOpened()

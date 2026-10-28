@@ -312,6 +312,8 @@ internal sealed class NavigationStack : INavigator
         }
     }
 
+    public bool CanOpen(string appId) => installer.IsInstalled(appId) && IsAvailable(appId);
+
     public void Open(string appId)
     {
         if (!installer.IsInstalled(appId))

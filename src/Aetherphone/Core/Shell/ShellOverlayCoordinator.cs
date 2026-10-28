@@ -1,3 +1,4 @@
+using Aetherphone.Core.Animation;
 using Aetherphone.Core.Apps;
 using Aetherphone.Core.Onboarding;
 using Aetherphone.Core.Theme;
@@ -26,6 +27,7 @@ internal readonly struct ShellOverlayState
 
 internal sealed class ShellOverlayCoordinator
 {
+    private const float WhatsNewSettleSeconds = 0.45f;
     private readonly Configuration configuration;
     private readonly LoadingScreen loading;
     private readonly NavigationStack navigation;
@@ -45,9 +47,11 @@ internal sealed class ShellOverlayCoordinator
     private readonly ShareSheet shareSheet;
     private readonly ConductGateOverlay conductOverlay;
     private readonly EncryptionHelpOverlay encryptionHelpOverlay;
+    private readonly WhatsNewOverlay whatsNewOverlay;
     private readonly OnboardingDirector director;
     private readonly SetupOverlay setup;
     private bool bannerWasVisible;
+    private float whatsNewSettle;
 
     public ShellOverlayCoordinator(Configuration configuration, LoadingScreen loading, NavigationStack navigation,
         ControlCenter controlCenter, AppSwitcher appSwitcher, NotificationBanner banner, DynamicIsland island,
@@ -55,7 +59,7 @@ internal sealed class ShellOverlayCoordinator
         IncomingCallOverlay incomingOverlay, AlarmOverlay alarmOverlay, BanOverlay banOverlay,
         ConfirmOverlay confirmOverlay, ReportOverlay reportOverlay, ShareSheet shareSheet,
         ConductGateOverlay conductOverlay, EncryptionHelpOverlay encryptionHelpOverlay,
-        OnboardingDirector director, SetupOverlay setup)
+        WhatsNewOverlay whatsNewOverlay, OnboardingDirector director, SetupOverlay setup)
     {
         this.coinPill = coinPill;
         this.coinFloats = coinFloats;
@@ -76,6 +80,7 @@ internal sealed class ShellOverlayCoordinator
         this.shareSheet = shareSheet;
         this.conductOverlay = conductOverlay;
         this.encryptionHelpOverlay = encryptionHelpOverlay;
+        this.whatsNewOverlay = whatsNewOverlay;
         this.director = director;
         this.setup = setup;
     }
@@ -93,17 +98,41 @@ internal sealed class ShellOverlayCoordinator
         var switcherCaptures = !loading.IsActive && appSwitcher.CapturesPointer;
         var overlaysCapture = (controlCenterCaptures && !director.WantsControlCenter) || switcherCaptures;
         var ringing = !loading.IsActive && (incomingOverlay.IsRinging || alarmOverlay.IsRinging);
+        var calm = !loading.IsActive && !setupActive && !banNotice && !conductActive && !helpActive && !confirming &&
+                   !ringing && !controlCenter.IsActive && !appSwitcher.IsActive && !director.IsRunning &&
+                   navigation.AtHome && !navigation.IsTransitioning;
+        PresentWhatsNewWhenSettled(calm);
+        var whatsNewActive = !loading.IsActive && whatsNewOverlay.Captures;
         var islandCaptures = !loading.IsActive && !controlCenterCaptures && !switcherCaptures && !ringing &&
-                             !confirming && !setupActive && !conductActive && !helpActive && !banNotice &&
+                             !confirming && !setupActive && !conductActive && !helpActive && !whatsNewActive &&
+                             !banNotice &&
                              !DragScrollHost.AnyDragging &&
                              (island.CapturesPointer() ||
                               (!director.CapturesPointer &&
                                (banner.CapturesPointer(screen) || shortcutPill.CapturesPointer())));
         var busy = loading.IsActive || overlaysCapture || ringing || confirming || navigation.IsTransitioning ||
-                   setupActive || banNotice || conductActive || helpActive;
+                   setupActive || banNotice || conductActive || helpActive || whatsNewActive;
         var shieldBase = loading.IsActive || islandCaptures || controlCenterCaptures || switcherCaptures || ringing ||
-                         confirming || setupActive || banNotice || conductActive || helpActive;
+                         confirming || setupActive || banNotice || conductActive || helpActive || whatsNewActive;
         return new ShellOverlayState(setupActive, confirming, islandCaptures, busy, shieldBase);
+    }
+
+    private void PresentWhatsNewWhenSettled(bool calm)
+    {
+        if (!calm || !whatsNewOverlay.Due)
+        {
+            whatsNewSettle = 0f;
+            return;
+        }
+
+        whatsNewSettle += MathF.Min(ImGui.GetIO().DeltaTime, TransitionTiming.MaxFrameSeconds);
+        if (whatsNewSettle < WhatsNewSettleSeconds)
+        {
+            return;
+        }
+
+        whatsNewSettle = 0f;
+        whatsNewOverlay.Present();
     }
 
     private void HandleEscape()
@@ -114,7 +143,8 @@ internal sealed class ShellOverlayCoordinator
         }
 
         var helpActive = encryptionHelpOverlay.Captures;
-        if (!helpActive && !confirmOverlay.CapturesPointer && !reportOverlay.CapturesPointer &&
+        var whatsNewActive = whatsNewOverlay.Captures;
+        if (!helpActive && !whatsNewActive && !confirmOverlay.CapturesPointer && !reportOverlay.CapturesPointer &&
             !shareSheet.CapturesPointer && !controlCenter.IsActive && !appSwitcher.IsActive)
         {
             return;
@@ -151,6 +181,12 @@ internal sealed class ShellOverlayCoordinator
         if (helpActive)
         {
             encryptionHelpOverlay.Dismiss();
+            return;
+        }
+
+        if (whatsNewActive)
+        {
+            whatsNewOverlay.Dismiss();
             return;
         }
 
@@ -235,9 +271,11 @@ internal sealed class ShellOverlayCoordinator
 
         HandleEscape();
 
-        appSwitcher.DrawOverlay(screen, theme, delta, !director.CapturesPointer && !state.Confirming);
+        var whatsNewActive = whatsNewOverlay.Captures;
+        appSwitcher.DrawOverlay(screen, theme, delta,
+            !director.CapturesPointer && !state.Confirming && !whatsNewActive);
         controlCenter.Draw(screen, theme, delta,
-            !navigation.IsTransitioning && !director.CapturesPointer && !state.IslandCaptures &&
+            !navigation.IsTransitioning && !director.CapturesPointer && !state.IslandCaptures && !whatsNewActive &&
             !banOverlay.IsActive && navigation.Current?.Id != "camera" && !landscapeHeld &&
             !appSwitcher.IsActive && !homeEditing,
             !director.CapturesPointer);
@@ -247,6 +285,7 @@ internal sealed class ShellOverlayCoordinator
         reportOverlay.Draw(screen, theme);
         confirmOverlay.Draw(screen, theme);
         director.Draw(screen, theme);
+        whatsNewOverlay.Draw(screen, theme);
         conductOverlay.Draw(screen, theme);
         encryptionHelpOverlay.Draw(screen, theme);
         banOverlay.Draw(screen, theme);

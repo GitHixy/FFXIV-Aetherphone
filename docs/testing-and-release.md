@@ -162,6 +162,20 @@ public static readonly LocString[] Release1310Jobs =
 };
 ```
 
+A release with something worth a look also gets a spotlight: three to five `ChangelogSpotlight` items, each an app id, a title of two to four words and one line about what it does for the player, passed before the sections. After the update the phone shows them once, in the full screen What's New sheet, the first time it reaches Home; the top card of the Changelog page keeps them, and tapping one opens its app. A release without a spotlight, such as a patch of fixes, never opens the sheet, and the dot on Settings announces it instead. Spotlight strings are keyed `changelog.s<digits>.<name>` and `changelog.s<digits>.<name>Body` and go into all nine catalogs like bullets.
+
+```csharp
+new ChangelogEntry("1.4.2.0", "2026-10-27", new ChangelogSpotlight[]
+{
+    new("aethergram", L.Changelog.Spotlight1420Reels, L.Changelog.Spotlight1420ReelsBody),
+}, new ChangelogSection[]
+{
+    new(L.Apps.Aethergram, L.Changelog.Release1420Aethergram),
+}),
+```
+
+The Changelog page files every bullet under New, Improved or Fixed by its English source verb: Added is New, Fixed is Fixed, and every other verb is Improved. That works in all nine languages, and it is one more reason every bullet opens with its verb.
+
 Section titles must be two-part names like `L.Apps.Jobs`, the only shape Get-ChangelogNotes.ps1 resolves for the Discord post. The changelog runs ahead of the version on purpose: bullets for the next release land on dev as work merges, and the release commit finalizes them. Do not add a check that the two versions match.
 
 ## Public automation

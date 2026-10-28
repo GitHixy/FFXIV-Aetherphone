@@ -38,6 +38,7 @@ internal sealed class OnboardingDirector
         this.navigation = navigation;
     }
 
+    public bool IsRunning => active.HasValue;
     public bool CapturesPointer => active is { } sequence && !suppressed && !sequence.Steps[stepIndex].IsAction;
     public bool ShieldsPointer => active.HasValue && !suppressed && (CapturesPointer || coachmark.BlocksPointer());
     public bool WantsAnchors => active.HasValue && !suppressed;
