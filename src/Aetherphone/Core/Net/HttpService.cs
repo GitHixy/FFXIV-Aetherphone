@@ -23,12 +23,14 @@ internal sealed class HttpService : IDisposable
     private const int RetryDelayMaxMilliseconds = 2000;
     private readonly HttpClient client;
     private readonly AethernetClientIdentity? identity;
+    private readonly AethernetMaintenance? maintenance;
     private readonly EtagCache etagCache = new();
     private readonly ConcurrentDictionary<string, long> pausedHostsUntilTicks = new(StringComparer.OrdinalIgnoreCase);
 
-    public HttpService(AethernetClientIdentity? identity = null)
+    public HttpService(AethernetClientIdentity? identity = null, AethernetMaintenance? maintenance = null)
     {
         this.identity = identity;
+        this.maintenance = maintenance;
         HttpMessageHandler handler = new SocketsHttpHandler
         {
             PooledConnectionLifetime = TimeSpan.FromMinutes(10),
@@ -67,7 +69,14 @@ internal sealed class HttpService : IDisposable
         return string.Empty;
     }
 
-    private static async Task<AepFailure> DescribeAsync(HttpResponseMessage response, CancellationToken token)
+    private async Task<AepFailure> DescribeAsync(HttpResponseMessage response, CancellationToken token)
+    {
+        var failure = await ParseFailureAsync(response, token).ConfigureAwait(false);
+        NoteMaintenance(response, in failure);
+        return failure;
+    }
+
+    private static async Task<AepFailure> ParseFailureAsync(HttpResponseMessage response, CancellationToken token)
     {
         var status = (int)response.StatusCode;
         var requestId = ResponseRequestId(response);
@@ -110,6 +119,11 @@ internal sealed class HttpService : IDisposable
     public async Task<byte[]?> GetBytesAsync(Uri uri, CancellationToken token,
         Action<AepFailure>? onFailure = null, bool expectNotFound = false)
     {
+        if (HeldForMaintenance(HttpMethod.Get, uri, null, onFailure))
+        {
+            return null;
+        }
+
         if (IsPaused(uri))
         {
             AepLog.Debug($"HTTP GET {LogUrl.Of(uri)} skipped; {uri.Host} is rate limit paused");
@@ -229,6 +243,11 @@ internal sealed class HttpService : IDisposable
     {
         using var request = new HttpRequestMessage(HttpMethod.Put, uri) { Content = new ByteArrayContent(content), };
         request.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        if (HeldForMaintenance(HttpMethod.Put, uri, null, onFailure))
+        {
+            return false;
+        }
+
         ApplyHeaders(request, bearer, null);
         try
         {
@@ -300,6 +319,11 @@ internal sealed class HttpService : IDisposable
         string? appScope = null, Action<AepFailure>? onFailure = null)
     {
         using var request = new HttpRequestMessage(method, url);
+        if (HeldForMaintenance(method, request.RequestUri, onStatus, onFailure))
+        {
+            return false;
+        }
+
         if (IsPollingPaused(request))
         {
             AepLog.Debug($"HTTP {method} {LogUrl.Of(url)} skipped; host is rate limit paused");
@@ -341,6 +365,11 @@ internal sealed class HttpService : IDisposable
         Action<int>? onStatus = null, string? appScope = null, Action<AepFailure>? onFailure = null)
     {
         using var request = new HttpRequestMessage(method, url);
+        if (HeldForMaintenance(method, request.RequestUri, onStatus, onFailure))
+        {
+            return false;
+        }
+
         if (IsPollingPaused(request))
         {
             AepLog.Debug($"HTTP {method} {LogUrl.Of(url)} skipped; host is rate limit paused");
@@ -395,6 +424,11 @@ internal sealed class HttpService : IDisposable
         Action<int>? onStatus, string? appScope, CancellationToken token, Action<AepFailure>? onFailure = null,
         bool rawAuthorization = false, bool retried = false)
     {
+        if (HeldForMaintenance(request.Method, request.RequestUri, onStatus, onFailure))
+        {
+            return default;
+        }
+
         if (IsPollingPaused(request))
         {
             AepLog.Debug($"HTTP {request.Method} {LogUrl.Of(request.RequestUri)} skipped; host is rate limit paused");
@@ -573,6 +607,61 @@ internal sealed class HttpService : IDisposable
         return request.Method == HttpMethod.Get && IsPaused(request.RequestUri);
     }
 
+    private bool HeldForMaintenance(HttpMethod method, Uri? uri, Action<int>? onStatus, Action<AepFailure>? onFailure)
+    {
+        if (maintenance is not { Holds: true } || identity is null || !identity.Matches(uri))
+        {
+            return false;
+        }
+
+        AepLog.Verbose($"HTTP {method} {LogUrl.Of(uri)} held; Aethernet is under maintenance");
+        onStatus?.Invoke(MaintenanceWire.Status);
+        Report(onFailure, AepFailure.Transport(AepFailureKind.Maintenance));
+        return true;
+    }
+
+    private void NoteMaintenance(HttpResponseMessage response, in AepFailure failure)
+    {
+        if (maintenance is null || identity is null || !MaintenanceWire.IsMaintenance(in failure)
+            || !identity.Matches(response.RequestMessage?.RequestUri))
+        {
+            return;
+        }
+
+        var endsAtUnix = MaintenanceWire.EndsAtUnix(MaintenanceWire.Header(response.Headers), failure.Value,
+            response.Headers.RetryAfter?.Delta, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        maintenance.EnterFromResponse(endsAtUnix);
+    }
+
+    public async Task<JsonProbe<T>> ProbeJsonAsync<T>(string url, JsonTypeInfo<T> typeInfo, CancellationToken token)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        ApplyHeaders(request, null, null);
+        try
+        {
+            using var scope = TimeoutScope(token, RequestTimeout);
+            using var response = await client.SendAsync(request, scope.Token).ConfigureAwait(false);
+            var status = (int)response.StatusCode;
+            if (!response.IsSuccessStatusCode)
+            {
+                return new JsonProbe<T>(status, default);
+            }
+
+            await using var stream = await response.Content.ReadAsStreamAsync(scope.Token).ConfigureAwait(false);
+            var body = await JsonSerializer.DeserializeAsync(stream, typeInfo, scope.Token).ConfigureAwait(false);
+            return new JsonProbe<T>(status, body);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            AepLog.Debug(exception, $"HTTP GET probe failed for {LogUrl.Of(url)}");
+            return new JsonProbe<T>(0, default);
+        }
+    }
+
     private void PauseIfPolling(HttpRequestMessage request, HttpResponseMessage response)
     {
         if (request.Method != HttpMethod.Get)
@@ -584,7 +673,7 @@ internal sealed class HttpService : IDisposable
         PauseHost(request.RequestUri, response);
     }
 
-    private static async Task<bool> SucceededOrReportedAsync(HttpRequestMessage request, HttpResponseMessage response,
+    private async Task<bool> SucceededOrReportedAsync(HttpRequestMessage request, HttpResponseMessage response,
         Action<AepFailure>? onFailure, CancellationToken token)
     {
         if (response.IsSuccessStatusCode)
@@ -682,3 +771,5 @@ internal sealed class HttpService : IDisposable
 
     public void Dispose() => client.Dispose();
 }
+
+internal readonly record struct JsonProbe<T>(int Status, T? Body);

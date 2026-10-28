@@ -81,6 +81,7 @@ internal sealed class PhoneServices : IDisposable
 
     public required AccountStateService AccountState { get; init; }
     public required NetworkStatusNotices NetworkStatus { get; init; }
+    public required MaintenanceWatch MaintenanceWatch { get; init; }
     public required ModerationNoticePresenter ModerationPresenter { get; init; }
     public required ModerationNoticeArchive ModerationArchive { get; init; }
     public required SafetyLauncher SafetyLauncher { get; init; }
@@ -303,7 +304,8 @@ internal sealed class PhoneServices : IDisposable
         cacheRoot.Create();
         var mediaRoot = new DirectoryInfo(Path.Combine(cacheRoot.FullName, "media"));
         var aethernetSession = new AethernetSession(configuration, framework);
-        var http = new HttpService(new AethernetClientIdentity(() => aethernetSession.BaseUrl, aethernetSession.ReportSourceStatus));
+        var http = new HttpService(new AethernetClientIdentity(() => aethernetSession.BaseUrl, aethernetSession.ReportSourceStatus),
+            aethernetSession.Maintenance);
         var disk = new DiskCache(mediaRoot, 64L * 1024 * 1024, protect: true);
         var media = new MediaCache(textures, disk);
         var imageRoot = new DirectoryInfo(Path.Combine(cacheRoot.FullName, "images"));
@@ -429,6 +431,7 @@ internal sealed class PhoneServices : IDisposable
             realtimeSignals);
         var networkStatus = new NetworkStatusNotices(aethernetSession, realtimeSignals, framework, clientState,
             chatGui, configuration);
+        var maintenanceWatch = new MaintenanceWatch(aethernetSession, http, framework, clientState);
         var moderationPresenter = new ModerationNoticePresenter(moderationNotices, confirm, notifications,
             accountState, coins, framework);
         var moderationArchive = new ModerationNoticeArchive(aethernetSession, aethernet.Account);
@@ -523,6 +526,7 @@ internal sealed class PhoneServices : IDisposable
             ModerationNotices = moderationNotices,
             AccountState = accountState,
             NetworkStatus = networkStatus,
+            MaintenanceWatch = maintenanceWatch,
             ModerationPresenter = moderationPresenter,
             ModerationArchive = moderationArchive,
             SafetyLauncher = safetyLauncher,
@@ -688,6 +692,7 @@ internal sealed class PhoneServices : IDisposable
         ModerationPresenter.Dispose();
         ModerationNotices.Dispose();
         NetworkStatus.Dispose();
+        MaintenanceWatch.Dispose();
         AccountState.Dispose();
         ChatHistory.Dispose();
         DeviceLinks.Dispose();
